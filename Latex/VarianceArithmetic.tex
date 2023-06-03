@@ -1,0 +1,2005 @@
+\documentclass[twoside]{article}
+%-------------------------------------------------------
+% Do not change anything between these "------"
+% However, please contact the managing editor if you need
+% any of the packages referenced here.
+
+\pagestyle{myheadings}
+\setlength{\oddsidemargin}{44pt}
+\setlength{\evensidemargin}{44pt}
+\setcounter{page}{1}
+
+\usepackage{url,intmacros,graphicx}
+\usepackage{amssymb,amsmath}
+\usepackage{capt-of}
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\numberwithin{equation}{section}
+
+\newcommand{\email}[1]{\\ \small{\url{#1}} \\}
+\newcommand{\institution}[1]{\\ \parbox{3.0in}{\small{#1}}}
+\newcommand{\keywords}[1]{\small\textbf{Keywords: }#1}
+\newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
+\newcommand\whenaccepted{Submitted: May 20, 2006;
+                         Revised: November 10, 2010; July 18, 2011; September 1, 2012; Match 27, 2014; }
+\newcommand{\tilt}{\!\!\sim\!\!}
+\newcommand{\eqspace}{\;\;\;}
+
+
+%-------------------------------------------------------
+
+
+%  You may add additional packages here.  However, if they
+%  are not available with the usual LaTeX distribution,
+%  they must be supplied with the final, accepted LaTeX.
+
+% Fill in your title here. (Retain the footnote.)
+\title{Variance Arithmetic\footnote{\whenaccepted}}
+
+% Delete the "\and" or add more as needed
+\author{Chengpu Wang
+\institution{40 Grossman Street, Melville, NY 11747, USA}
+\email{Chengpu@gmail.com}}
+
+% Put a short running title within the first argument to
+% this command.  Do not alter the second argument
+\markboth{CP Wang, \textit{Variance Arithmetic}}
+         {\textit{arXiv.org, 2014}}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+A new deterministic uncertainty-bearing floating-point arithmetic called \emph{variance arithmetic} is developed to track the uncertainty for arithmetic calculations statistically.  
+It uses a novel rounding scheme to avoid the excessive rounding error propagation in conventional floating-point arithmetic. 
+Unlike interval arithmetic, its uncertainty tracking is based on statistics and the central limit theorem, with a much tighter bounding range based on a truncated Gaussian distribution. 
+The variance arithmetic is found to be superior to interval arithmetic in both uncertainty-tracking and uncertainty-bounding for normal usages.
+
+Let $\delta x$ be the uncertainty distribution deviation for a value $x$.
+Define define $\delta x /|x|$ as precision, which represents the information content of the value with uncertainty.
+The variance arithmetic has precision requirements on the inputs.
+When the precision requirements are satisfied:
+\begin{itemize}
+\item The output values are identical to the result if there were no uncertainties in the inputs.
+
+\item The precision is preserved for unitary operations such as inversion, square and square-root.
+
+\item The variance arithmetic provides ideal approach when the analytic solution is available, to avoid the dependency problem completely.
+
+\item For a round-trip calculation without the dependency problem such as after forward and backward FFT, the original input uncertainties can be recovered.
+\end{itemize}
+When the precision requirements are not satisfied, the bias of the outputs can be expressed in terms of input precisions.
+
+\end{abstract}
+% Put keywords appropriate to your paper here, as shown
+\keywords{computer arithmetic, error analysis, interval arithmetic, uncertainty, numerical algorithms.}
+
+% Put your AMS subject classifications into the argument of
+% the following command.
+\AMSsubj{65-00}
+
+
+
+\clearpage
+\section{Introduction}
+\label{sec: introduction}
+
+\subsection{Measurement Precision}
+
+Except for the simplest counting, scientific and engineering measurements never give completely precise results \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+The precision of measured values ranges from an order-of-magnitude estimation of astronomical measurements to $10^{-2}$ to $10^{-4}$ of common measurements to $10^{-14}$ of state-of-art measurements of basic physics constants \cite{Basic_Constants_Measurements}.  
+
+In scientific and engineering measurements, the uncertainty of a measurement $x$ usually is characterized by either the sample deviation $\delta x$ or the uncertainty range $\Delta x$ \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics}.  
+$P \equiv \delta x / |x|$ is defined as the \emph{statistical precision} (or simply precision in this paper) of the measurement, in which $x$ is the value, and $\delta x$ is the uncertainty deviation.
+\begin{itemize}
+\item If the deviation is 0, the value is a \emph{precise value}.
+
+\item Otherwise, it is an \emph{imprecise value}.
+\end{itemize}
+The variance represents the reliable information content of a measurement statistically, with finer variance means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+ 
+
+
+\subsection{Problem of Conventional Floating-Point Arithmetic}
+
+The \emph{conventional floating-point arithmetic} \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} assumes a constant and best-possible precision for each value all the time, and constantly generates artificial information during the calculation \cite{Arithmetic_Digital_Computers}.  
+For example, the following calculation is carried out precisely in integer format:
+\begin{multline}
+\label{eqn: int num calc}
+64919121 \times 205117922 - 159018721 \times 83739041=\\
+13316075197586562 - 13316075197586561 = 1;
+\end{multline}
+
+If Formula \eqref{eqn: int num calc} is carried out using conventional floating-point arithmetic: 
+\begin{multline}
+\label{eqn: float num calc}
+64919121 \times 205117922 - 159018721 \times 83739041 =\\ 
+64919121.000000000 \times 205117922.000000000 - 159018721.000000000 \times 83739041.000000000 =\\
+13316075197586562. - 13316075197586560. = 2. = 2.0000000000000000;
+\end{multline}
+\begin{enumerate}
+\item  The multiplication results exceed the maximal significance of the 64-bit IEEE floating-point representation; so they are rounded off, generating rounding errors;
+\item  The normalization of the subtraction result amplifies the rounding error to most significant bit (MSB) by padding zeros.
+\end{enumerate}
+
+\noindent Formula \eqref{eqn: float num calc} is a showcase for the problem of conventional floating-point arithmetic.  
+Because normalization happens after each arithmetic operation \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard}, such generation of rounding errors happens very frequently for addition and multiplication, and such amplification of rounding errors happens very frequently for subtraction and division.  
+The accumulation of rounding errors is an intrinsic problem of conventional floating-point arithmetic \cite{Numerical_Recipes}, and in the majority of cases such accumulation is almost uncontrollable \cite{Arithmetic_Digital_Computers}.  
+For example, because a rounding error from lower digits quickly propagates to higher digits, the $10^{-7}$ precision of the 32-bit IEEE floating-point format \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} is usually not fine enough for calculations involving input data of $10^{-2}$ to $10^{-4}$ precision.
+
+Self-censored rules are developed to avoid such rounding error propagation \cite{Numerical_Recipes}\cite{Precise_Numerical_Methods}, such as avoiding subtracting results of large multiplication, as in Formula \eqref{eqn: float num calc}.  
+However, these rules are not enforceable, and in many cases are difficult to follow, e.g., even a most carefully crafted algorithm can result in numerical instability after extensive usage.  
+Because the propagation speed of a rounding error depends on the nature of a calculation itself, e.g., generally faster in nonlinear algorithms than linear algorithms\footnote{A classic example is the contrast of the uncertainty propagation in the solutions for the 2nd-order linear differential equation vs. in those of Duffing equation (which has a $x^3$ term in addition to the $x$ term in a corresponding 2nd-order linear differential equation).} \cite{Chaotic_Dynamics}, propagation of rounding error in conventional floating-point arithmetic is very difficult to quantify generically \cite{Stochastic_Arithmetic}.  
+Thus, it is difficult to tell if a calculation is improper or becomes excessive for a required result precision.  
+In common practice, reasoning on an individual theoretical base is used to estimate the error and validity of calculation results, such as from the estimated transfer functions of the algorithms used in the calculation \cite{Numerical_Recipes}\cite{Error_Analysi_Digital_Filters}\cite{Floating-point_Digital_Filters}.  
+However, such analysis is both rare and generally very difficult to carry out in practice.  
+
+Today most experimental data are collected by an ADC (Analog-to-Digital Converter) \cite{Electronics}.  
+The result obtained from an ADC is an integer with fixed uncertainty; thus, a smaller signal value has a coarser precision.  
+When a waveform containing raw digitalized signals from ADC is converted into conventional floating-point representation, the information content of the digitalized waveform is distorted to favour small signals since all converted data now have the same and best possible precision.  
+However, the effects of such distortion in signal processing are generally not clear.
+
+What is needed is a floating-point arithmetic that tracks precision automatically.  When the calculation is improper or becomes excessive, the results become insignificant.  
+All existing uncertainty-bearing arithmetics are reviewed below. 
+
+
+\subsection{Interval Arithmetic}
+
+\emph{Interval arithmetic} \cite{Precise_Numerical_Methods}\cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is currently a standard method to track calculation uncertainty.  
+It ensures that the value x is absolutely bounded within its \emph{bounding range} $[x] \equiv [\underbar{x}, \bar{x}]$, in which $\underbar{x}$ and $\bar{x}$ are lower and upper bounds for $x$, respectively. 
+In this paper, interval arithmetic is simplified and tested as the following arithmetic formulas\footnote{For the mathematical definition of interval arithmetic, please see \cite{Interval_Analysis_Notations}.} \cite{Interval_Analysis_Theory_Applications}:
+\begin{align}
+\label{eqn: interval +} & 
+\left[x\right] + \left[y\right] = \left[\underbar{x} + \underbar{y}, \bar{x} + \bar{y}\right]; \\
+\label{eqn: interval -} & 
+\left[x\right] - \left[y\right] = \left[\underbar{x} - \bar{y}, \bar{x} - \underbar{y}\right]; \\
+\label{eqn: interval *} &
+\left[x\right] \times \left[y\right] = \left[\min(\underbar{x}  \underbar{y}, \underbar{x}  \bar{y}, \bar{x}  \underbar{y}, \bar{x}  \bar{y}), \max(\underbar{x}  \underbar{y}, \underbar{x}  \bar{y}, \bar{x}  \underbar{y}, \bar{x}  \bar{y})\right]; \\
+\label{eqn: interval /} & 0 \notin \left[y\right]: \;
+\left[x\right] / \left[y\right] = \left[x\right] \times \left[1/\bar{y}, 1/\underbar{y}\right];
+\end{align}
+
+If interval arithmetic is implemented using a floating-point representation with limited resolution, its resulting bounding range is widened further \cite{Worst_Case_Error_Bounds}.
+
+A basic problem is that the bounding range used by interval arithmetic is not compatible with usual scientific and engineering measurements, which instead use the statistical mean and deviations to characterize uncertainty \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+Most measured values are well approximated by a Gaussian distribution \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics}, which has no limited bounding range.  
+Let \emph{bounding leakage} be defined as the possibility of the true value to be outside a bounding range.  
+If a bounding range is defined using a statistical rule on bounding leakage, such as the $6\sigma-10^{-9}$ rule for Gaussian distribution \cite{Probability_Statistics} (which says that the bounding leakage is about $10^{-9}$ for a bounding range of mean $\pm$ 6-fold of standard deviations), there is no guarantee that the calculation result will also obey the $6\sigma-10^{-9}$ rule using interval arithmetic, since interval arithmetic has no statistical foundation
+\footnote{
+There is some attempt \cite{Statistics_For_Interval_Arithmetic} to connect intervals in interval arithmetic to confidence interval or the equivalent so called p-box in statistics. 
+Because this attempt seems to rely heavily on 1) specific properties of the uncertainty distribution within the interval and/or 2) specific properties of the functions upon which the interval arithmetic is used, this attempt does not seem to be generic. 
+Anyway, this attempt seems to be outside the main course of interval arithmetic, which has no statistics in mind.
+}.  
+
+Another problem is that interval arithmetic only provides the worst case of uncertainty propagation, so that it tends to over-estimate uncertainty in reality.  
+For instance, in addition and subtraction, it gives the result when the two operands are +1 and -1 correlated respectively \cite{Affine_Arithmetic}.  
+However, if the two operands are -1 and +1 correlated respectively instead, the actual bounding range after addition and subtraction reduces, which is called the best case in random interval arithmetic \cite{Random_Interval_Arithmetic}.  
+The vast overestimation of bounding ranges in these two worst cases prompts the development of affine arithmetic \cite{Affine_Arithmetic}\cite{Affine_Arithmetic_book}, which traces error sources using a first-order model.  
+Being expensive in execution and depending on approximate modeling even for such basic operations as multiplication and division, affine arithmetic has not been widely used.  
+In another approach, random interval arithmetic \cite{Random_Interval_Arithmetic} reduces the uncertainty over-estimation of standard interval arithmetic by randomly choosing between the best-case and the worst-case intervals.  
+
+A third problem is that the results of interval arithmetic may depend strongly on the actual expression of an analytic function $f(x)$.  
+For example, Formula \eqref{eqn: interval depend 1}, Formula \eqref{eqn: interval depend 2} and Formula \eqref{eqn: interval depend 3} are different expressions of the same $f(x)$; however, the correct result is obtained only through Formula \eqref{eqn: interval depend 1}, and uncertainty may be exaggerated in the other two forms, e.g., by 67-fold and 33-fold at input range [0.49, 0.51] using Formula \eqref{eqn: interval depend 2} and Formula \eqref{eqn: interval depend 3}, respectively.  
+This is called the dependence problem of interval arithmetic \cite{Interval_Arithmetic}.  
+\begin{align}
+\label{eqn: interval depend 1} & 
+f(x) = (x - 1/2)^{2} - 1/4; \\
+\label{eqn: interval depend 2} & 
+f(x) = x^{2} - x; \\
+\label{eqn: interval depend 3} & 
+f(x) = (x - 1) x;
+\end{align}
+
+Interval arithmetic has very coarse and algorithm-specific precision but constant zero bounding leakage.  
+It represents the other extreme from conventional floating-point arithmetic.  
+To meet practical needs, a better uncertainty-bearing arithmetic should be based on statistical propagation of the rounding error, while also allowing reasonable bounding leakage for normal usages, which is achieved in the variance arithmetic, as show later in this paper.
+
+In this paper, an interval is presented as $x \pm \Delta x$, in which $x$ is the middle of the range, and $\Delta x$ is the half range.
+
+
+\subsection{Statistical Propagation of Uncertainty}
+
+If each operand is regarded as a random variable, and the statistical correlation between the two operands is known, the resulting uncertainty is given by the \emph{statistical propagation of uncertainty} \cite{Statistical_Arithmetic}\cite{Statistical_Analysis}, with the following arithmetic equations, in which $\sigma$ is the deviation of a measured value $x$, $P$ is its precision, and $\gamma$ is the correlation between the two imprecise values:
+
+\begin{align}
+\label{eqn: stat +} 
+(x \pm \delta x) + (y \pm \delta y) & = (x + y) & \pm \sqrt{\delta x^{2} + \delta y^{2} + 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat -} 
+(x \pm \delta x) - (y \pm \delta y) & = (x - y) & \pm \sqrt{\delta x^{2} + \delta y^{2} - 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat *} 
+(x \pm \delta x) \times (y \pm \delta y) & = (x \times y) & \pm |x \times y| \sqrt{{P_x}^2 + {P(y)}^2 + 2 P_x P(y) \gamma}; \\
+\label{eqn: stat /} 
+(x \pm \delta x) / (y \pm \delta y) & = (x/y) & \pm |x / y| \sqrt{{P_x}^2 + {P(y)}^2 - 2 P_x P(y) \gamma};
+\end{align}
+
+Tracking uncertainty propagation statistically seems a better solution.  
+However, in practice, the correlation between two operands is generally not precisely known, so the direct use of statistical propagation of uncertainty is very limited.  
+As show later in this paper, the variance arithmetic is based on a statistical assumption much more lenient than knowing the correlation between imprecise values.
+
+In this paper, as a proxy for statistical propagation of uncertainty, an \emph{independence arithmetic} always assumes that no correlation exists between any two operands, whose arithmetic equations are Formula \eqref{eqn: stat +}, Formula \eqref{eqn: stat -}, Formula \eqref{eqn: stat *} and Formula \eqref{eqn: stat /}, where $\gamma=0$.  
+Independence arithmetic is actually de facto arithmetic in engineering data processing, such as in the common belief that uncertainty after averaging reduces by the square root of number of measurements \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, or the ubiquitous Monte Carlo method\footnote{Most but not all applications of Monte Carlo methods assume independence between any two random variables.  
+In a minority of applications, a Monte Carlo method can be used to construct specified correlation between two random variables \cite{Monte_Carlo_Statistics}.} \cite{Monte_Carlo_Method}\cite{Monte_Carlo_Statistics}, or calculating the mean and variance of a Taylor expansion \cite{Taylor_Expansion_Uncertainty}.  
+Perhaps, it is reasonable to assume the uncertainties of experimental measurements to be independent of each other, while is it not reasonable to assume the uncertainties of calculations to be independent, which is essentially the approach of variance arithmetic.
+
+
+\subsection{Significance Arithmetic}
+
+\emph{Significance arithmetic} \cite{Significance_Arithmetic} tries to track reliable bits in an imprecise value during the calculation.  
+In the two early attempts \cite{Digital_Significance_Arithmetic}\cite{Unnormalized_Arithmetic}, the implementations of significance arithmetic are based on simple operating rules upon reliable bit counts, rather than on formal statistical approaches.  
+They both treat the reliable bit counts as integers when applying their rules, while in reality a reliable bit count could be a fractional number \cite{Mathematica_Significance_Arithmetic}, so they both can cause artificial quantum reduction of significance.  
+The significance arithmetic marketed by Mathematica \cite{Mathematica_Significance_Arithmetic} uses a linear error model that is consistent with a first-order approximation of interval arithmetic \cite{Precise_Numerical_Methods}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}, and further provides an arbitrary precision representation which is in the framework of  conventional floating-point arithmetic. 
+It is definitely not a statistical approach. 
+
+Stochastic arithmetic \cite{Stochastic_Arithmetic}\cite{CADNA_library}, which can also be categorized as significance arithmetic, randomizes the least significant bits (LSB) of each of input floating-point values, repeats the same calculation multiple times, and then uses statistics to seek invariant digits among the calculation results as significant digits.  
+This approach may require too much calculation since the number of necessary repeats for each input is specific to each algorithm, especially when the algorithm contains branches.  
+Its sampling approach may be more time-consuming and less accurate than direct statistical characterization \cite{Probability_Statistics}, such as directly calculating the mean and deviation of the underlying distribution.  
+It is based on modeling rounding errors in conventional floating-point arithmetic, which is quite complicated.  
+A better approach may be to define arithmetic rules that make error tracking by probability easier.
+
+As the mathematical foundation to significance arithmetic, when a uncertainty-bearing value is multiplied by a constant, the significance or relative precision still holds, while the absolute precision \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements} scales with the constant.  
+In this respect, fixed-point arithmetic \cite{Fixed_Point_Arithmetic}, which assumes a fixed absolute precision, does not have a sounding mathematical foundation.
+
+As show later in this paper, the variance arithmetic achieved significance arithmetic, allowing the significance bit count to be real numbers.
+
+
+
+\subsection{Previous Version of Variance Arithmetic}
+
+\subsection{ An Overview of This Paper}
+
+In this paper, a new floating-point arithmetic called \emph{variance arithmetic} \cite{Prev_Precision_Arithmetic} is developed to track uncertainty during floating-point calculations, as described in Section \ref{sec: variance arithmetic}.  Generic standards and systematic methods for validating uncertainty-bearing arithmetics are discussed in Section \ref{sec: validation}.  Variance arithmetic is compared with other uncertainty-bearing arithmetics in Section \ref{sec: FFT} to Section \ref{sec: integration}.  A brief discussion is provided in Section \ref{sec: conclusion and discussion}.
+
+
+\clearpage
+\section{The Variance Arithmetic}
+\label{sec: Variance arithmetic}
+
+
+\subsection{Foundation for Variance Arithmetic}
+
+The goal of variance arithmetic is to calculate the uncertainty variance around each output value.
+
+For an imprecise value $x$ with statistical deviation $\delta x$ of its uncertainty, variance arithmetic regards the \emph{statistical precision} $P(x) = \delta x/|x|$ of as the information content of the measurement $x \pm \delta x$.
+Variance arithmetic is based on the \emph{precision scaling principle}: When a imprecise is multiplied by a precise value, the result precision equals the precision of the imprecise value.
+
+The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
+The correlated parts common to different measurements are regarded as signals, which can either be designed or unwanted.
+As shown later in this paper, this assumption can be turned into a realistic and simple statistical requirement or test between two inputs, e.g, even if the two inputs are highly correlated to each other, if they have fine enough precision, their uncertainty can be regarded as uncorrelated of each other.
+The uncorrelated uncertainty assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
+When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
+
+
+
+\subsection{The Uncorrelated Uncertainty Assumption}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Signal_and_Noise.png}
+\captionof{figure}{
+Effect of noise on bit values of a measured value.  The triangular wave signal and the added white noise are shown at top using the thin black line and the grey area, respectively.  The values are measured by a theoretical 4-bit Digital-to-Analog Converter in ideal condition, assuming LSB is the 0th bit.  The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
+}
+\label{fig: Signal_and_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Independent_Uncertainty_Assumption.png} 
+\captionof{figure}{
+Allowed maximal correlation between two values vs. input precisions and independence standard (as shown in legend) for the independence uncertainty assumption of variance arithmetic to be true.
+}
+\label{fig: Independent_Uncertainty_Assumption}
+\end{figure}
+
+When there is a good estimation of the sources of uncertainty, the uncorrelated uncertainty assumption can be judged directly, e.g., if noise \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements} is the major source of uncertainty, the uncorrelated uncertainty assumption is probably true.  
+This criterion is necessary to ascertain repeated measurements of the same signal.   
+Otherwise, the uncorrelated uncertainty assumption can be judged by the correlation and the respectively precision of two measurements.  
+
+Let $X$, $Y$, and $Z$ denote three mutually independent random variables \cite{Probability_Statistics} with variance $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
+Let $\alpha$ denote a constant.  
+Let $Cov()$ denote the covariance function.  
+Let $\gamma$ denote the correlation between $(X + Y)$ and $(\alpha X + Z)$. And let:
+\begin{align}
+& \eta _{1} ^{2} \equiv \frac{V(Y)}{V(X)}; \eqspace
+ \eta _{2} ^{2} \equiv \frac{V(Z)}{V(\alpha X)} =\frac{V(Z)}{\alpha ^{2} V(X)}; \\
+\label{eqn: correlation}
+& \gamma =\frac{Cov(X+Y,\alpha X+Z)}{\sqrt{V(X+Y)} \sqrt{V(\alpha X+Z)}}  =\frac{\alpha /|\alpha |}{\sqrt{1+\eta _{1} ^{2} } \sqrt{1+\eta _{2} ^{2}}} \equiv \frac{\alpha /|\alpha |}{1+\eta ^{2}};
+\end{align}
+
+Formula \eqref{eqn: correlation} gives the correlation $\gamma$ between two random variables, each of which contains a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.  
+Formula \eqref{eqn: correlation} can also be interpreted reversely: if two random variables are correlated by $\gamma$, each of them can be viewed as containing a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.
+
+One special application of Formula \eqref{eqn: correlation} is the correlation between a measured signal and its true signal, in which noise is the uncorrelated part between the two.  
+Figure \ref{fig: Signal_and_Noise} shows the effect of noise on the most significant two bits of a 4-bit measured signal when $\eta=1/4$.  
+Its top chart shows a triangular waveform between 0 and 16 as a black line, and a white noise between -2 and +2, using the grey area.  
+The measured signal is the sum of the triangle waveform and the noise.  
+The middle chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 3rd digit of the true signal as a black line, and the mean values of the 3rd bit of the measurement as a grey line.  
+The 3rd bit is affected by the noise during its transition between 0 and 1.  
+For example, when the signal is slightly below 8, only a small positive noise can turn the 3rd digit from 0 to 1.  
+The bottom chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 2nd digit of the signal and the measurement as a black line and a grey line, respectively.  
+Figure \ref{fig: Signal_and_Noise} clearly shows that the correlation between the measurement and the true signal is less at the 2nd digit than at the 3rd digit.  
+Quantitatively, according to Formula \eqref{eqn: correlation}:
+
+\begin{enumerate}
+\item  The overall measurement is 99.2\% correlated to the signal with $\eta=1/8$;
+\item  The 3rd digit of the measurement is 97.0\% correlated to the signal with $\eta=1/4$;
+\item  The 2nd digit of the measurement is 89.4\% correlated to the signal with $\eta=1/2$;
+\item  The 1st digit of the measurement is 70.7\% correlated to the signal with $\eta=1$;
+\item  The 0th digit of the measurement is 44.7\% correlated to the signal with $\eta=2$.
+\end{enumerate}
+The above conclusion agrees with the common experiences that, below the noise level of measured signals, noises rather than true signals dominate each digit.  
+
+Similarly, while the correlated portion between two values has exactly the same value at each bit of the two values, the ratio of the uncorrelated portion to the correlated portion increases by 2-fold for each bit down from MSB of the two values, regardless of the nature of the uncorrelated portion.  
+Quantitatively, let $P$ denote the larger precision (which means coarser precision) of the two values, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at level of uncertainty; then $\eta_{P}$ increases with decreased $P$ according to Formula \eqref{eqn: uncertainty level}. 
+According to Formula \eqref{eqn: correlation}, if two significant values are overall correlated with $\gamma$, at the level of uncertainty the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: uncertainty correlation}.
+\begin{align}
+\label{eqn: uncertainty level}
+& \eta_{P} = \frac{\eta}{P}, \eqspace P < 1; \\
+\label{eqn: uncertainty correlation}
+& \frac{1}{\gamma_{P}} - 1 = \left(\frac{1}{\gamma} -1\right) \frac{1}{P^2}, \eqspace P < 1;
+\end{align}
+
+Figure \ref{fig: Independent_Uncertainty_Assumption} plots the relation of $\gamma$ vs. $P$ for each given $\gamma_{P}$ in Formula \eqref{eqn: uncertainty correlation}.  
+When $\gamma_{P}$ is less than a predefined maximal threshold (e.g., 2\%, 5\% or 10\%), the two values can be deemed virtually uncorrelated of each other at the level of uncertainty.  
+If the two values are independent of each other at their uncertainty levels, their uncertainties are uncorrelated of each other.  
+Thus for each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of variance arithmetic holds.  
+The maximal allowed correlation is a function of the larger precision of the two values according to Formula \eqref{eqn: uncertainty correlation}.  
+Figure \ref{fig: Independent_Uncertainty_Assumption} shows that for two precisely measured values, their correlation $\gamma$ is allowed to be quite high.  
+To be acceptable in variance arithmetic, each of the low-resolution values should contain enough noise in its uncertainty, so that they do not have much correction through the systematic error \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+Thus, the uncertainty assumption uncertainty assumption has much weaker statistical requirement than the assumption for independence arithmetic, which requires the two values to be independent of each other.
+
+It is tempting to add noise to otherwise unqualified values to make their uncertainties uncertainty assumption of each other.  
+As an extreme case of this approach, if two values are constructed by adding noise to the same signal, they are 50\% correlated at the uncertainty level so that they will not satisfy the uncorrelated uncertainty assumption\footnote{The 50\% curve in Figure \ref{fig: Independent_Uncertainty_Assumption} thus defines the maximal possible correlations between any two measured signals. 
+This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sense because the measurable correlation between two measurements should be limited by the precision of their measurements.}.
+
+One fundamental difference between variance arithmetic and statistical propagation of uncertainty is that variance arithmetic tracks the correlation between uncertainties, while statistical propagation of uncertainty tracks the the correlation between the two values. 
+According to \eqref{eqn: uncertainty level} and \eqref{eqn: correlation}, the correlation at the level of uncertainty is much less than the correlation between the two values overall.
+
+It is already a common practice to assume that the uncertainties from different measurements are uncorrelated of each other \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.  
+For these measurements with fine enough precisions, variance arithmetic provides a good statistical tracking of the result precisions or uncertainty deviations for calculations.
+
+
+
+\subsection{The Round Up Rule}
+
+To avoid the rounding error accumulation in the conventional floating-point representation, the variance arithmetic designs calculation starting from the bit level.
+Let the content of a floating-point number be denoted as $S\; 2^E$, in which $S$ is the significand \footnote{While ``significand'' is the official word \cite{Floating_Point_Standard} to describe ``The component of a binary floating-point number that consists of an explicit or implicit leading bit to the left of its implied binary point and a fraction field to the right'', ``mantissa'' is often unofficially used instead.} and $E$ is the exponent of 2 of the floating-point number.  
+In addition, the variance representation contains a \emph{carry sign} $\sim$  to indicate the sign of its rounding error.
+When $E$ needs to be increased, $S$ is \emph{round up} is needed, which proceeds according to the following round up rule:
+\begin{itemize}
+\item A value of $(2S) \sim 2^E$ is rounded up to $S \sim 2^{E+1}$.  
+
+\item A value of $(2S+1)\!+\!2^E$ is rounded up to $(S+1)\!-\!2^{E+1}$.
+  
+\item A value of $(2S+1)\!-\!2^E$ is rounded up to $S\!+\!2^{E+1}$.
+
+\item If $\sim$ is unknown, it is initiated as $-$, so that 1 is rounded up to 0.
+\end{itemize}
+
+If $S$ is even, the rounding error is reduce by half after rounding up; Otherwise the new half bit rounding error is canceled by the existing rounding error.
+Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process. 
+Thus, the rounding error is limited to $(-1/2, +1/2)$ of the LSB of $S$.
+
+
+\subsection{Probability Distribution of Rounding Errors}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_Rnd_ErrDist.png}
+\captionof{figure}{
+Measured probability distribution of rounding errors of precision round-up rule for the minimal significand thresholds 0, 1, 2, 4, and 8 respectively.  
+}
+\label{fig: Prec_Rnd_Err_Dist}
+\end{figure}
+
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Standard}\cite{Precise_Numerical_Methods}\cite{Stochastic_Arithmetic}.  
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.  
+
+To estimate the rounding error distribution within its bounding range (-1/2, +1/2), a large number of positive random integers are converted into precision values and then rounded up once at a step time until each of them has a significand smaller than a predefined minimal significand threshold.  
+The precision value at each step is compared with the original value for the rounding error.  
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows the result histogram of rounding errors for the minimal significand thresholds 0, 1, 4, 8, 16, respectively. 
+For example, when the sigificand threshold is 0 or 1, the last steps of rounding are fixed, as $ ... \rightarrow 1+ \rightarrow 1- \rightarrow 0+$, while $1+$ can be reached in two ways, either $3- \rightarrow 1+$ or $2+ \rightarrow 1+$, so that the rounding errors deviate from the uniformly distributed when the sigificand threshold is small.
+Thus, the logic LSB of the significand to store value should be at the $\chi$-th bit from the true LSB of the significand, to increase the minimal significand to $2^{\chi}$.
+$\chi$ is the \emph{bits calculated inside uncertainty}.
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$. 
+
+
+
+\subsection{Result Uncertainty For Addition and Subtraction}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_Add_ErrDist.png} 
+\captionof{figure}{
+The probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
+The legend shows $n$.
+$P_{2}(x)$ is already close to the corresponding Gaussian distribution with the same mean and deviation, which is plotted in dash line of the same color.
+}
+\label{fig: Prec_Add_Err_Dist}
+\end{figure}
+
+The variance arithmetic also tracks the rounding error bounding range $R$ together with the significand $S$. 
+
+The results of addition and subtraction are:
+\begin{equation}
+\label{eqn: rounding error +-}
+S_1 \tilt_1 R_1 \pm S_1 \tilt_2 R_2 = (S_{1} \pm S_{2}) \tilt (R_1 + R_2);
+\end{equation}
+Let $P_R(x)$ be the bounding distribution density function.
+The uncorrelated uncertainty assumption suggests that the result bounding distribution density function of addition or subtraction is the convolution of the input density functions \cite{Probability_Statistics}.  
+Starting from rounding error distribution:
+\begin{align}
+\label{eqn: rounding error 1/2 distribution}
+& P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2;  \\
+\label{eqn:rounding error n/2 distribution}
+& P_{\frac{n}{2}}(x) \equiv \int _{-\infty}^{+\infty}P_{\frac{1}{2}}(y)P_{\frac{n-1}{2}}(x-y)dy=\int _{-1/2}^{+1/2}P_{\frac{n-1}{2}}(x-y) dy,\eqspace n=2,3,4\dots;
+\end{align}
+
+Figure \ref{fig: Prec_Add_Err_Dist} shows the probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
+$P_{2}(x)$ is already close to the corresponding Gaussian distribution with the same mean and deviation, which is plotted in dash line of the same color.
+
+The Lyapunov form of the central limit theorem \cite{Probability_Statistics} states that if $X_i$ is a random variable with mean $\mu_i$ and variance $V_i$ for each $i$ among a series of $n$ mutually independent random variables, then with increased $n$, the sum $\sum\limits_{i}^{n} X_i$ converges in distribution to the Gaussian distribution with mean $\sum\limits_{i}^{n} \mu_i$ and variance $\sum\limits_{i}^{n} V_i$. Applying the central limit theorem to the addition and subtraction: 
+\begin{equation}
+\label{eqn: rounding error range vs deviation}
+V = n/12 = R/6;
+\end{equation}
+\begin{itemize}
+\item $P_{n/2}(x)$ converges in distribution to a Gaussian distribution of mean $0$ and variance $V$ as in Formula \eqref{eqn: rounding error range vs deviation}.
+
+\item Figure \ref{fig: Prec_Add_Err_Dist} shows that such convergence to Gaussian distribution is very quick. 
+
+\item The stable rounding error distribution is \emph{independent} of any initial rounding error distribution. 
+\end{itemize} 
+
+Also due to the center-limit theorem, uncertainty in general is expected to be Gaussian distributed \cite{Statistical_Methods} \cite{Probability_Statistics}. 
+The rounding error distribution is extended to describe uncertainty distribution in general.
+
+
+
+\subsection{Variance Representation}
+
+\begin{figure}%[p]
+\centering
+\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
+\captionof{figure}{
+The result uncertainty distribution density function $P_8/2$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+}
+\label{fig: Prec_RndByDev_Dist}
+\end{figure}
+
+Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
+To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
+According to the precision scaling principle:
+\begin{itemize}
+\item During each round up, $V$ is reduced to 1/4-fold. 
+
+\item During each round down, $V$ is increased to 4-fold.
+\end{itemize}
+
+However, such round-up of $V$ conflicts with the accuracy of $R$ which requires $V$ be reduced to only 1/2-fold during round up according to Formula \eqref{eqn: rounding error range vs deviation}.
+When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
+The round-up rule of $V$ allows the uncertainty to be outside the bounding range with a small probability which is called \emph{bounding leakage}. 
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+Because $R$ is no longer ideal, the bounding leakage outside the range of $(-R, +R)$ is $\xi(R/\sqrt{V}/\sqrt{2})$, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}, and $R/\sqrt{V}$ is defined as as the \emph{range ratio}.
+To minimize the bounding leakage, $V$ has to be maximized in its bit confinement, which is the \emph{normalization} process for the variance representation.
+
+Thus, $S\;V@E$ represents $x \pm \delta x$ as:
+\begin{align}
+\label{eqn: accurate value}
+x =&\; S \; 2^{E};\\
+\label{eqn: uncertainty variance}
+(\delta x)^2 =&\; V \; 2^{2E};
+\end{align}
+
+To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, the bit counts for $S$ and $V$ are 53, while  the bit count for $E$ is 11.
+In addition, the representation needs 1 bit for sign, and 1 bit for the carry error sign, making the total bit count to be 94.
+
+In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
+\begin{enumerate}
+\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
+
+\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
+\end{enumerate}
+\begin{itemize}
+\item When $p \le 26$, which is approximately $P \ge 1.5\;10^{-8}$, the significance bit count is $p + 26$, which means maximally 26-bit calculated inside uncertainty.
+
+\item When $38 < p \leq 52$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $p$.
+When $p=51$, which is $P = 0.5\;10^{-15}$ the bounding leakage is $10^{-6}$.  When $p=52$, the bounding leakage is $1.4\%$.
+
+\item When $53 \leq p$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value $S@E$.
+\end{itemize}
+
+Variance arithmetic assumes that the LSB of a conventional floating-point value is unreliable, so that $V = 1$ by default.
+The result of Formula \eqref{eqn: float num calc} calculated by variance arithmetic is $2 \pm 2\sqrt{5}$.
+It is $2 \pm 7$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
+
+
+\subsection{Addition and Subtraction}
+
+
+For simplicity, define $\delta^2 f(x) \equiv (\delta f(x))^2$. 
+Formula \eqref{eqn: addition and subtraction} give the result variance of addition and subtraction surrounding $x \pm y$ when the uncorrelated uncertainty assumption is satisfied:
+\begin{equation}
+\label{eqn: addition and subtraction}
+\delta^2 (x \pm y) = \delta^2 x + \delta^2 y;
+\end{equation}
+
+According to the central limit theorem, addition and subtraction make $x \pm \delta x$ Gaussian distributed, with Formula \eqref{eqn: central limit theorem} as the probability density function, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}. 
+\begin{equation}
+\label{eqn: central limit theorem}
+\rho(\tilde{x}, x, \delta x) \equiv \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x});
+\end{equation}
+
+
+
+\subsection{Comparison}
+
+\iffalse
+
+Statistically the less relation between two imprecise values $x \pm \delta x$ and $y \pm (\delta y)^2$ is calculated by Formula \ref{eqn: x < y}:
+\begin{align}
+& z \equiv \frac{\tilde{y} - y}{\delta y}; \eqspace \tilde{y} = \delta y z + y; \\
+& x - \Delta x < z \delta y + y < x + \Delta x; \\ & x - \Delta x - y < z \delta y < x + \Delta x - y \\
+& - \Delta y < z \delta y < \Delta y; \\
+p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) & = 
+  \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+    \int_{x - \Delta x}^{\tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x} \;d \tilde{y}; \\
+& = \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+  \int_{-\frac{\Delta x}{\delta x}}^{\frac{\tilde{y} - x}{\delta x}} N(z) d z \;d \tilde{y}; \\
+& = \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+      \frac{1}{2}(\frac{\tilde{y} - x}{\sqrt{2} \delta x}) - \zeta(\frac{-\Delta x}{\sqrt{2} \delta x})) \;d \tilde{y}; \\
+& = \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) & =     
+   \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x})\right) N(z) d z;
+\end{align}
+Formula \eqref{eqn: x < y} seems correct because it predicts $p(x \le y) = p(y \ge x)$:
+\begin{align}
+& \frac{d}{d \tilde{y}} \int_{-\infty}^{\tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x} = \rho(\tilde{y}, x, \delta x); \\
+p(x< y) & = \int_{-\infty}^{+\infty} \rho(\tilde{y}, y, \delta y) \rho(\tilde{y}, x, \delta x) d \tilde{x} d \tilde{y} \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{y}, y, \delta y) \;d \rho(\tilde{y}, x, \delta x) \\
+& = 0 - \int_{-\infty}^{+\infty} \rho(\tilde{y}, x, \delta x) \;d \rho(\tilde{y}, y, \delta y) \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{y}, x, \delta x) 
+\int_{\tilde{y}}^{+\infty} \rho(\tilde{x}, y, \delta y) 
+d \tilde{x} \;d \tilde{y} \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{x}, x, \delta x) 
+\int_{\tilde{x}}^{+\infty} \rho(\tilde{y}, y, \delta y) 
+d \tilde{y} \;d \tilde{x}
+\end{align}
+
+Two imprecise values can be compared directly for less or greater relation when their ranges $(x - \Delta x, x + \Delta x)$ and $(y - \Delta y, y + \Delta y)$ do not overlap. 
+Otherwise, statistically, Formula \eqref{eqn: x < y} and \eqref{eqn: x > y} gives the probability for less or greater relation between $x \pm (\delta x)^2 \le y \pm (\delta y)^2$, in which $\min()$ and $\max()$ are minimal and maximal functions, respectively.
+Formula \eqref{eqn: no =} shows that two imprecise variable can not be equal statistically.
+Let $x = y$, $\delta x = \delta y$ and $\Delta x = \Delta y$, Formula \eqref{eqn: x < y} and \eqref{eqn: x > y} shows that two conceptually equal imprecise values has $1/2$ chance to be one less than the other, and $1/2$ chance to be one more than the other.
+Thus,
+\begin{align}
+\label{eqn: x < y}
+& p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) = 
+  \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+\label{eqn: x > y}
+& p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) =     
+  \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+\label{eqn: no =}
+& p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) + p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) = 1;
+\end{align}
+
+\fi
+
+Two imprecise values can be compared statistically using their difference \cite{Statistical_Methods}.
+For example, the difference between $1.001 \pm 0.001$ and $1.000 \pm 0.002$ is $0.001 \pm 0.00224$, so that the probability for them to be equal is $\xi(-\frac{0.001}{0.00224}, +\frac{0.001}{0.00224}) = 94.6\%$, in which $\xi()$ is the Gaussian error function.
+If the threshold probability of equality is 95\%, $1.000 \pm 0.002 < 1.001 \pm 0.001$.
+
+
+
+
+
+\subsection{Multiplication}
+
+\iffalse
+\begin{align*}
+0 \leq |x| - \Delta x, 0 \leq |y| - \Delta y: &\eqspace 
+	(|x||y| - |x| \Delta y - |y| \Delta x + \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |x| \Delta y + |y| \Delta x; \\
+|x| - \Delta x \leq 0 \leq |y| - \Delta y: &\eqspace 
+    (|x||y| + |x| \Delta y - |y| \Delta x - \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |y| \Delta x + \Delta x \Delta y; \\
+|x| - \Delta x \leq 0, \; |y| - \Delta y \leq 0: &\eqspace
+	(|x||y| + |x| \Delta y - |y| \Delta x - \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |y| \Delta x + \Delta x \Delta y;
+\end{align*}
+But the range needs to be centered at $|x||y|$.
+\fi
+
+To obey the precision scaling principle, the he result of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$.
+The result of multiplying $0 \pm \delta x$ by $0 \pm \delta y$ is a normal production distribution \cite{Probability_Statistics}, which is centered at 0 with variance $(\delta x)^2 (\delta y)^2$.
+The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication} and \eqref{eqn: multiplication precision} for the result variance and precision surrounding the result $xy$, respectively.
+\begin{align}
+\label{eqn: multiplication decomposed}
+& (x \pm \delta x) \times (y \pm \delta y) = (x + (0 \pm \delta x)) \times (y + (0 \pm \delta y)); \\
+\label{eqn: multiplication}
+\delta^2 (x y) &= x^2 (\delta^2 y) + y^2 (\delta^2 x) + (\delta^2 x)(\delta^2 y); \\
+\label{eqn: multiplication precision}
+xy \neq 0: P(x y)^2 &= P(x)^2 + P(y)^2 + P(x)^2 P(y)^2;
+\end{align}
+
+Formula \eqref{eqn: multiplication precision} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
+
+Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for the interval arithmetic multiplication.  
+In addition, while Formula \eqref{eqn: multiplication} is the same regardless of the signs of $x$ and $y$, the result range in Formula \eqref{eqn: interval *} for interval arithmetic changes with the signs of $x$ and $y$. 
+Thus, variance arithmetic is more stable than interval arithmetic.
+
+
+\subsection{Uncertainty Distribution}
+
+\iffalse
+
+To solve for mode:
+\begin{align*}
+\tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}:& \eqspace 
+ \tilde{y} = f(x + \tilde{z} \delta x); \eqspace
+ \frac{d \tilde{y}}{d \tilde{z}} = f_x^{(1)} (\delta x); \\
+& \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
+ = \frac{1}{\delta x} \frac{N(\tilde{z})}{f_x^{(1)}};  \\
+0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}}: & \eqspace
+ \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} = (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z}; \eqspace
+ \tilde{z} = - \frac{d}{d \tilde{y}} \frac{d \tilde{y}}{d \tilde{z}}
+  = - f_x^{(2)} (\delta x)^2 \frac{d \tilde{z}}{d \tilde{y}}; \\
+& \tilde{z} \frac{d \tilde{y}}{d \tilde{z}} = \tilde{z} f_x^{(1)} (\delta x) = - f_x^{(2)} (\delta x)^2; \\
+& \frac{1}{f_x^{(1)}} \frac{d f_x^{(1)}}{dx} = - \frac{\tilde{z}}{\delta x}; \eqspace 
+ f_x^{(1)} = A e^{- \frac{\tilde{z} x}{\delta x}}; \\
+0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}}:& \eqspace \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}
+   = \frac{d \tilde{z}}{d \tilde{y}} \frac{d}{d \tilde{y}} \frac{\tilde{z}^2}{2}; \eqspace
+ \frac{d \tilde{z}}{d \tilde{y}} = B e^{\frac{\tilde{z}^2}{2}}; \eqspace
+ f_x^{(1)} = \frac{B}{\delta x} e^{-\frac{\tilde{z}^2}{2}};
+\end{align*}
+None of $f_x^{(1)}$ is in the format of $g(x + \tilde{z} \delta x)$ so both seems wrong.
+
+The exponential function:
+\begin{align*}
+f(x) = e^x:& \eqspace 
+\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \eqspace \\
+\frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
+&= e^{-\log(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2}{2 \delta^2 x}}
+ = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2 + 2 \log(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
+& = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
+ = N(\frac{\log(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
+& 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \eqspace
+ \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
+\end{align*}
+
+The log function $f(x) = \ln(x)$:
+\begin{align*}
+& \tilde{z} = \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} e^{\tilde{y}} = \frac{1}{\delta x} (x + \tilde{z} \delta x)
+ = \frac{1}{\frac{d}{d \tilde{z}} \ln(x + \tilde{z} \delta x)}; \\
+& \frac{1}{\delta x} e^{\tilde{y}} = (\frac{1}{\delta x} e^{\tilde{y}})^2 \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+(e^{\tilde{y}})^2 - x e^{\tilde{y}} - \delta^2 x = 0; \\
+e^{\tilde{y}_m} &= \frac{x + \sqrt{x^2 + 4 \delta^2 x}}{2}; \\
+& \eqspace 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} - (\delta x); \\
+& \tilde{z} = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 + 4 (\delta x)^2}}{2} - x);
+\end{align*}
+
+The power mode $f(x) = x^{\frac{1}{p}}$:
+\begin{align*}
+& \tilde{z} = \frac{\tilde{y}^p - x}{\delta x}; \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} p \tilde{y}^{p-1}; \\
+& \frac{1}{\delta x} p (p - 1) \tilde{y}^{p-2} = (\frac{1}{\delta x} p \tilde{y}^{p-1})^2 \frac{\tilde{y}^p - x}{\delta x}; \\
+& \tilde{y}^{2p} - x \tilde{y}^{p} - \frac{p - 1}{p} \delta^2 x = 0; \\
+\tilde{y}_m^p &= \frac{1}{2} (x + \sqrt{x^2 + 4 \frac{p - 1}{p} \delta^2 x}); \\
+& 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} + (c - 1) (\delta x); \\
+& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \eqspace 
+f^{-1}(\tilde{y}_m) = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2}; \\
+p = 2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 2 \tilde{y}; \eqspace 
+  \tilde{y}_m^{\frac{1}{2}} = \frac{1}{2} \left( x + \sqrt{x^2 + 2 \delta^2 x} \right); \\
+p = 3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 3 \tilde{y}^2; \eqspace  
+  \tilde{y}_m^{\frac{1}{3}} = \frac{1}{2} \left( x \pm \sqrt{x^2 + \frac{8}{3} \delta^2 x} \right); \\
+p = 1/2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{2} \tilde{y}^{-\frac{1}{2}}; \eqspace 
+  \tilde{y}_m^2 = \frac{1}{2} \left( x + \sqrt{x^2 - 4 \delta^2 x} \right); \\
+p = 1/3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{3} \tilde{y}^{-\frac{2}{3}}; \eqspace
+  \tilde{y}_m^2 = \frac{1}{2} \left( x \pm \sqrt{x^2 - 8 \delta^2 x} \right); \\
+p = -1:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = - \frac{1}{\delta x} \tilde{y}^{-2}; \eqspace 
+  \tilde{y}_m^{-1} = \frac{1}{2} \left( x + \sqrt{x^2 + 8 \delta^2 x} \right); 
+\end{align*}
+
+
+The distribution difference:
+\begin{align*}
+&\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}: \eqspace 
+ N(\frac{f^{-1}(\tilde{y}) - f^{-1}(\tilde{y}_m)}{\delta x} )
+ = N(\tilde{z} + \nu) = N(\tilde{z}) e^{-\tilde{z} \nu} e^{-\frac{1}{2} \nu^2}; \\
+\eta &\equiv \int |\varrho(\tilde{y}, y, \delta y) - \rho(\tilde{y}, y, \delta y)| d \tilde{y}
+ =  \int |\rho(f^{-1}(\tilde{y}), f^{-1}(\tilde{y_m}), \delta x) - \rho(f^{-1}(\tilde{y}), x, \delta x)| d f^{-1}(\tilde{y}) \\
+&= \int |N(\tilde{z} + \nu) - N(\tilde{z})| d \tilde{z} 
+ = \int |e^{-\frac{1}{2} \nu^2} e^{-\tilde{z} \nu} - 1| N(\tilde{z}) d \tilde{z}; \\
+&= | \int |\sum_{m=0}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=0}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n - 1| 
+   N(\tilde{z}) d \tilde{z} | \\
+&= | \int \left(\sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n
+  - \frac{1}{2} \nu^2 - \nu \tilde{z} \right) N(\tilde{z}) d \tilde{z} | \\
+&= \frac{1}{2} \nu^2 - \sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{\nu^{2n}}{2^n n!}
+ = \frac{1}{2} \nu^2 - \sum_{m=2}^{\infty} \sum_{n=1}^{m-1} \frac{(-1)^m}{2^m (m - n)! n!} \nu^{2m} \\
+&\simeq \frac{1}{2} \nu^2 - \frac{1}{4} \nu^4 + \frac{1}{8} \nu^6 - \frac{7}{192} \nu^8;
+\end{align*}
+When $f(x)=x^c$:
+\begin{align*}
+\nu &= \frac{x - \frac{1}{2} (x + \sqrt{x^2 + (1 - c) 4 \delta^2 x})}{\delta x} = \frac{1 - \sqrt{1 + (1 - c) 4 P(x)^2}}{2 P(x)} \\
+&= - \sum_{m=1} \frac{(1 - c)^m (2P(x))^{2m - 1}}{m!} \prod_{n=1}^{m} \frac{\frac{3}{2} -n}{n} \\
+&\simeq -(1 - c) P(x) + \frac{1}{4} (1 - c)^2 P(x)^3 - \frac{1}{4} (1 - c)^3 P(x)^5; \\
+\eta &= \frac{1}{2} (1-c)^2 P(x)^2 - \frac{1}{4} (1-c)^3 (2-c) P(x)^4 + 1/8 (1-c)^4 (c^2-4c+7) P(x)^6
+\end{align*}
+
+\fi
+
+\begin{figure}%[p]
+\centering
+\includegraphics[height=2.5in]{Square_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\sqrt{\tilde{y}}$ so the distribution is not Gaussian.
+}
+\label{fig: Square_Distribution}
+\end{figure}
+
+
+Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
+In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$.
+Formula \eqref{eqn: function distribution} can also be deducted using standard probability method \cite{Probability_Statistics}.
+If $\rho(\tilde{x}, x, \delta x)$ is given by Formula \eqref{eqn: central limit theorem}, Formula \eqref{eqn: function distribution} can be simplified as Formula \eqref{eqn: Gaussian function distribution}, in which $N(\tilde{z})$ is the probability density function for normal distribution \cite{Probability_Statistics}.
+\begin{align}
+\label{eqn: function distribution}
+\rho(\tilde{x}, x, \delta x) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
+= \rho(\tilde{y}, y, \delta y) d\tilde{y}; \\
+\label{eqn: Gaussian function distribution}
+\tilde{z} \equiv \frac{f^{-1}(\tilde{y}) - x}{\delta x}:&\eqspace 
+ \tilde{y} = f(x + \tilde{z} \delta x); \eqspace 
+ \rho(\tilde{y}, y, \delta y) d \tilde{y} = N(\tilde{z}) d \tilde{z};
+\end{align}
+For example, Formula \eqref{eqn: exp distribution}, \eqref{eqn: log distribution}, and \eqref{eqn: power distribution} give the $\rho(\tilde{y}, y, \delta y)$ for $e^x$, $\ln(x)$, and $x^c$, respectively:
+\begin{align}
+\label{eqn: exp distribution}
+y = e^x: &\; \rho(\tilde{y}, y, \delta y) = \frac{1}{\tilde{y}} \frac{1}{\delta x} N(\frac{\log(\tilde{y}) - x}{\delta x}); \\
+\label{eqn: log distribution}
+y = \ln(x): &\; \rho(\tilde{y}, y, \delta y) = e^{\tilde{y}} \frac{1}{\delta x} N(\frac{e^{\tilde{y}} - x}{\delta x}); \\
+\label{eqn: power distribution}
+y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\delta x} N(\frac{\tilde{y}^\frac{1}{c} - x}{\delta x}); 
+\end{align}
+Figure \ref{fig: Square_Distribution} shows $\rho(\tilde{y}, y, \delta y)$ for $(x \pm 1)^2$.
+The $y$-axis is scaled as $\sqrt{\tilde{y}}$ so the distribution is not Gaussian, even $(5 \pm 1)^2$ looks like Gaussian.
+When $x = 0$, $\rho(\tilde{y}, y, \delta y)$ is a $\chi^2$ distribution \cite{Probability_Statistics}.
+
+Formula \eqref{eqn: function distribution} can be used trace the uncertainty distribution during calculation.
+However, normal scientific and engineering calculations usually do not care about result distribution, but just some statistics of the result.
+
+
+\subsection{Analytic Functions}
+
+\iffalse
+
+\begin{align*}
+& \tilde{y} = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
+\overline{f(x)} &\equiv \int \tilde{y} \rho(\tilde{y}, y, \delta y) d \tilde{y}
+ = \int \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n N(\tilde{z}) d \tilde{z}
+ = \sum_{n=0}^{\infty} \frac{f^{(2n)}_x}{2n!} (2n - 1)!! (\delta x)^{2n}; \\
+\widehat{f(x)} &\equiv \overline{f(x)} - f(x) = \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} M(x,n); \\
+\delta^2 f(x) &\equiv \int \tilde{y}^2 \rho(\tilde{y}, y, \delta y) d \tilde{y} - \overline{f(x)}^2
+ = \int (\sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n)^2 \rho(\tilde{y}, y, \delta y) d \tilde{y} - \overline{f(x)}^2 \\
+&= \sum_{n=0}^{\infty} \sum_{j=0}^{2n} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} (2n - 1)!! (\delta x)^{2n}
+ - \sum_{n=0}^{\infty} \sum_{j=0}^{n} \frac{f^{(2j)}_x}{2j!} \frac{f^{(2n-2j)}_x}{(2n-2j)!} (2j-1)!! (2n - 2j - 1)!! (\delta x)^{2n} \\
+&= \sum_{n=1}^{\infty} \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} (2n - 1)!! (\delta x)^{2n}
+ - \sum_{n=1}^{\infty} \sum_{j=1}^{n-1} \frac{f^{(2j)}_x}{2j!} \frac{f^{(2n-2j)}_x}{(2n-2j)!} (2j-1)!! (2n - 2j - 1)!! (\delta x)^{2n} \\
+&\;\; + \sum_{n=1}^{\infty} 2 f_x \frac{f^{(2n)}_x}{(2n)!} (2n - 1)!! (\delta x)^{2n} 
+ - \sum_{n=1}^{\infty} 2 f_x \frac{f^{(2n)}_x}{(2n)!} (2n - 1)!! (\delta x)^{2n} \\
+&= \sum_{n=1}^{\infty} \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} (2n - 1)!! (\delta x)^{2n} - \widehat{f(x)}^2;
+\end{align*}
+
+\begin{align*}
+& e^{x + \tilde{x}} - e^x = e^x \sum_{j=1}^{\infty} \frac{\tilde{x}^j}{j!}: \\
+\widehat{e^x} / e^x &\simeq \frac{1}{2} \delta^2 x + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3 + \frac{1}{384} (\delta^2 x)^4; \\
+P(e^x)^2 &\simeq \delta^2 x + \frac{7-1}{4} (\delta^2 x)^2 + \frac{31-3}{24} (\delta^2 x)^3 + \frac{127-7}{192} (\delta^2 x)^4; 
+\end{align*}
+
+\begin{align*}
+& \ln(x + \tilde{x}) - \ln(x) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}: \\
+\widehat{\ln(x)} &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{15}{6} P(x)^6 - \frac{105}{8} P(x)^8; \\
+\delta^2 \ln(x) &\simeq P(x)^2 + \frac{11-1}{4} P(x)^4 + \frac{137-9}{12} P(x)^6 + \frac{1089-49}{16} P(x)^8;
+\end{align*}
+
+\begin{align*}
+& (x + \tilde{x})^c - x^c = x^c ((1 + \frac{\tilde{x}}{x})^c - 1) = x^c \sum_{j=1}^{\infty} (\frac{\tilde{x}}{x})^j \prod_{k=1}^{j} \frac{c + 1 - k}{k}; \\
+\widehat{x^c} &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
+P(x^c)^2 &\simeq c^2 P(x)^2 + c^2(c-1)\frac{(7c-11) - (c-1)}{4} P(x)^4 + c^2 (c-1) (c-2) \frac{(31c^2-132c + 137) - (c^2-4c+3)}{24} P(x)^6;
+\end{align*}
+
+\fi
+
+If $f(x)$ can be Taylor expanded as Formula \eqref{eqn: Taylor 1d}, the mean $\overline{f(x)}$ and variance $\delta^2 f(x)$ of the result distribution are calculated by Formula \eqref{eqn: function mean} and \eqref{eqn: function variance}, respectively.  
+The mean $\overline{f(x)}$ can be decomposed as:
+\begin{itemize}
+\item the \emph{accurate result} $f(x)$: the result as if there were no input uncertainty, 
+\item the \emph{variance bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
+\end{itemize} 
+\begin{align}
+\label{eqn: Taylor 1d} 
+\tilde{y} &= f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
+\label{eqn: nth variance}
+& M(x, n) \equiv \int (\tilde{x} - x)^{n} \rho(\tilde{x}, x, \delta x) d\tilde{x}; \\
+\label{eqn: function mean}
+\overline{f(x)} &= f(x) + \widehat{f(x)}; \eqspace 
+\widehat{f(x)} \equiv \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} M(x, n); \\
+\label{eqn: function variance}
+\delta^2 f(x) &= \sum_{n=1}^{\infty} \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} M(x, n) - \widehat{f(x)}^2; 
+\end{align}
+
+Formula \eqref{eqn: function mean} and \eqref{eqn: function variance} both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: nth variance}.
+The integration range of Formula \eqref{eqn: nth variance} is limited by $\tilde{x}$, such as in $\sqrt{x}$ or $1/x$, which affect the convergence of Formula \eqref{eqn: function mean} and \eqref{eqn: function variance}.
+If the input uncertainty is given by Formula \eqref{eqn: central limit theorem}, and if $\tilde{x} = 0$ is the lower integration range bound, Formula \eqref{eqn: nth variance} can be simplified as Formula \eqref{eqn: Gaussian nth variance}.
+\begin{align}
+\label{eqn: Gaussian nth variance}
+& \varsigma(x, n) = \sum_{j=1}^{n/2} \frac{x^{2j-1}}{(2j-1)!!} N(x); \nonumber \\
+M(x, n) &= (\delta x)^n \int_{0}^{\infty} \tilde{z}^n N(\tilde{z}) d \tilde{z} = (\delta x)^n 
+\begin{cases}
+(\frac{1 + \xi(\frac{x}{\sqrt{2}})}{2} - \varsigma(x, n)) (n-1)!!, &\text{if $n$ is even} \\
+\varsigma(x, n), &\text{if $n$ is odd}
+\end{cases}; 
+\end{align}
+
+In Formula \eqref{eqn: function variance}, $\widehat{f(x)}^2$ has a very small contribution to $\delta^2 f(x)$.
+In the \emph{accurate output approximation} of variance arithmetic, $\widehat{f(x)}^2$ is ignored, so that the variance of the function becomes Formula \eqref{eqn: Taylor 1d variance}, in which the variance is no longer calculated against the mean $\overline{f(x)}$, but against the accurate result $f(x)$.
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
+\begin{align}
+\label{eqn: Taylor 1d variance}
+\delta^2 f(x) &= \int (f(x + \tilde{x}) - f(x))^2 \rho(\tilde{x}, x, \delta x) d \tilde{x}; \\
+\label{eqn: Taylor 2d bias}
+\widehat{f(x,y)} &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y)) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n)  \frac{f^{(m,n)}_{(x,y)}}{m! n!} - f(x,y); \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2 \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n) 
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}\;f^{(m-i,n-j)}_{(x,y)}}{i!(m-i)!\;j!(n-j)!} - f(x,y)^2;
+\end{align}
+
+When $\rho(\tilde{x}, x, \delta x)$ is Formula \eqref{eqn: central limit theorem}, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result variance bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
+\begin{align}
+\label{eqn: exp bias}
+\frac{\widehat{e^x}}{e^x} &\simeq \frac{1}{2} (\delta^2 x) + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3; \\
+\label{eqn: exp precision}
+P(e^x)^2 &\simeq (\delta^2 x) + \frac{7}{4} (\delta^2 x)^2 + \frac{31}{24} (\delta^2 x)^3; \\
+\label{eqn: log bias}
+\widehat{\ln(x)} &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6; \\
+\label{eqn: log precision}
+\delta^2 \ln(x) &\simeq P(x)^2 + \frac{11}{4} P(x)^4 + \frac{137}{12} P(x)^6; \\
+\label{eqn: power bias}
+\frac{\widehat{x^c}}{x^c} &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 \nonumber \\
+&\;\; + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
+\label{eqn: power precision}
+P(x^c)^2 &\simeq c^2 P(x)^2 + c^2(c-1)\frac{7c-11}{4} P(x)^4 \nonumber \\
+&\;\; + c^2 (c-1) (c-2) \frac{31c^2-132c+137}{24} P(x)^6;
+\end{align}
+Some special cases for Formula \eqref{eqn: power precision} are:
+\begin{align}
+\label{eqn: square precision}
+P(x^2)^2 &= 4 P(x)^2 + 3 P(x)^4; \\
+\label{eqn: square root precision}
+P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4 + \frac{315}{512} P(x)^6; \\
+\label{eqn: inversion precision}
+P(1/x)^2 &\simeq P(x)^2 + 9 P(x)^4 + 75 P(x)^6;
+\end{align}
+Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \eqref{eqn: inversion precision} shows that for different power $c$, Formula \eqref{eqn: power precision} has different convergence condition for $P(x)$.
+
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
+If two functions contain the same imprecise value, the uncorrelated uncertainty may no longer holds between them.
+Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions can still be used to calculate the arithmetic calculations of the two functions, such as sum and product in Formula \eqref{eqn: sum dependency}, and \eqref{eqn: product dependency}, respectively.
+\begin{align}
+\label{eqn: sum dependency}
+&\delta^2 (f(x)+g(x)) = \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=0}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!} \\
+&\eqspace \simeq \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 
+  \left( \frac{1}{3} f^{(1)}_x g^{(3)}_x + \frac{3}{2} f^{(2)}_x g^{(2)}_x + \frac{1}{3} f^{(3)}_x g^{(1)}_x \right) (\delta^2 x)^2; \nonumber \\
+\label{eqn: product dependency}
+&\delta^2 (fg) = \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
+
+
+
+
+
+
+
+
+\subsection{Calculation Cost}
+
+The sum of all the $n > 1$ terms in Formula \eqref{eqn: Taylor 1d variance} is defined as the \emph{calculation cost} in variance arithmetic.
+If only the first term in Formula \eqref{eqn: Taylor 1d variance} existed, after the $f^{-1}(f(x))$ calculation, the original imprecise value $x \pm \delta x$ can be recovered completely.
+\begin{itemize}
+\item The calculation cost increases with $P(x)^4$.
+
+\item Formula \eqref{eqn: log precision} and \eqref{eqn: exp precision} shows that the calculation cost is larger in $e^x$ than in $\ln(x)$.
+
+\item Formula \eqref{eqn: square root precision}, \eqref{eqn: square precision}, and \eqref{eqn: inversion precision} shows that the calculation cost is larger in $x^2$ than in $\sqrt{x}$, but they are both smaller than the calculation cost of $1/x$.
+
+\item Formula \eqref{eqn: power precision} shows that the calculation cost increases with $c^4$ for $x^c$.
+\end{itemize}
+
+The calculation cost also extends to Formula \eqref{eqn: Taylor 2d variance} for the sum beyond $\delta^2 x$ and $\delta^2 y$, which also prevents the uncertainty to recover completely when calculating $f^{-1}(f)$.
+\begin{itemize}
+\item Formula \eqref{eqn: addition and subtraction} shows that addition and subtraction has no calculation cost.
+It suggests that the result precision for addition and subtraction generally degrades except during averaging.
+
+\item Formula \eqref{eqn: multiplication precision} shows that the cross term is the calculation cost for multiplication.
+It suggests that the result precision for multiplication is worse than either input precision.
+\end{itemize}
+
+Generally, the calculation is a process to incorporate all input precision, and to accumulate calculation costs.
+
+To contrast variance arithmetic on the calculation cost, an \emph{independence arithmetic} implements the variance arithmetic but ignoring all calculation cost.
+It is equivalent to Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, \eqref{eqn: stat /} by assuming $\gamma = 0$.
+
+
+
+\subsection{Dependency Problem}
+
+\iffalse
+
+\begin{align*}
+P((\sqrt{x})^2) &\simeq \frac{1}{4} (4 P(x)^2 + 3 P(x)^4) + \frac{15}{64} (4 P(x)^2)^2 = P(x)^2 + \frac{9}{2} P(x)^4; \\
+P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4) + 3 (\frac{1}{4} P(x)^2)^2 = P(x)^2 + \frac{9}{8} P(x)^4;
+\end{align*}
+
+\begin{align*}
+(y \pm \delta y) &= a (x \pm \delta x):  \delta y = a \delta x \\
+\delta^2 (x + y) &= \delta^2 (a x + x) = (a + 1)^2 \delta^2 x = \delta^2 a x + 2 (\delta ax) (\delta x) + \delta^2 x
+ = (\delta y + \delta x)^2; \\
+\delta^2 x y &= a^2 \delta^2 x = 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2
+ \neq a^2 x^2 \delta^2 x + x^2 \delta^2 ax + \delta^2 x \delta^2 ax
+\end{align*}
+
+\fi
+
+When a variance calculations deviates from Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions, the result depends on the actual steps of calculation, which is called the \emph{dependency problem}.
+The dependency problem can be attributed to two major reasons:
+\begin{itemize}
+\item Due to the calculation cost of extra calculations.
+For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is greater by more than 4-fold than that of $\sqrt{x^2}$.
+\begin{align}
+\label{eqn: square root}
+P(\sqrt{x}^2)^2 &\simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
+\label{eqn: root square}
+P(\sqrt{x^2})^2 &\simeq P(x)^2 + \frac{9}{8} P(x)^4;
+\end{align}
+
+\item Due to applying the uncorrelated uncertainty assumption improperly.
+For example, when $(y \pm \delta y) = a (x \pm \delta x)$, Formula \eqref{eqn: addition and subtraction} is wrong for Formula \eqref{eqn: identical add and subtraction}, while Formula \eqref{eqn: multiplication} underestimates Formula \eqref{eqn: identical multiplication} by more than 2-fold.
+\begin{align}
+\label{eqn: identical add and subtraction} 
+\delta^2 (x \pm y) &= ((\delta x) + (\delta y))^2; \\
+\label{eqn: identical multiplication} 
+\delta^2 x y &= 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2;
+\end{align}
+
+\end{itemize} 
+In variance arithmetic, the calculation cost of extra calculations overestimates the result variance, while applying the uncorrelated uncertainty assumption improperly generally underestimates the result variance.
+
+
+
+
+\subsection{Types of Uncertainties Included in Precision Arithmetic}
+
+There are four sources of result uncertainty after a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
+\begin{itemize}
+\item input uncertainties
+\item rounding errors
+\item truncation errors
+\item modelling errors
+\end{itemize}
+
+As described previously, both input uncertainties and rounding errors are included in the uncertainty specification of variance arithmetic.
+
+In many cases, because a numerical algorithm approaches its analytic counterpart only after infinitive execution, a good numerical algorithm should have an estimator of the \emph{truncation error} toward its analytic counterpart, such as the Cauchy reminder estimator for Taylor expansion \cite{Numerical_Recipes}, or the residual error for numerical integration \cite{Numerical_Recipes}.  Using conventional floating-point arithmetic, a subjective upper limit is chosen for the truncation error, to stop the numerical algorithm at limited execution \cite{Numerical_Recipes}. However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually give a falsely small result precision. Because variance arithmetic tracks rounding errors of a calculation efficiently, it can be used to search for the optimal execution termination point for the numerical algorithm when the truncation error is no longer significant, which is named as the \emph{truncation rule} in this paper. In other words, using variance arithmetic, the result precision of a calculation is determined by the inputs and the calculation itself.  Section \ref{sec: taylor expansion} and \ref{sec: integration} will provide such cases of applying truncation rule to Taylor expansion and numerical integration, respectively.
+
+Modelling errors arise when an approximate analytic solution is used, or when a real problem is simplified to obtain the solution.  For example, Section \ref{sec: FFT} demonstrates that the discrete Fourier transformation is only an approximation for the mathematically defined Fourier transformation.  Conceptually, modelling errors originate from mathematics, so they are outside the domain for variance arithmetic.
+
+
+
+
+\clearpage
+\section{Standards and Methods for Comparing Arithmetic}
+\label{sec: validation}
+
+
+\subsection{Comparing Standards}
+
+Algorithms each with a known analytic result are used to characterize a uncertainty-bearing arithmetic. 
+The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
+The statistics of the value errors defines the \emph{tracking ratio}:
+\begin{itemize}
+\item For variance arithmetic and independence arithmetic, it is the ratio of the standard deviation of the value error to the output deviation.
+
+\item For interval arithmetic, it is the ratio of the range of the value error to the output range.
+\end{itemize}
+An ideal tracking ratio should be close to 1, regardless of input uncertainty precision, amount of calculation, and the nature of the calculation.
+
+
+
+
+\subsection{Comparing Algorithms for Tests}
+
+Algorithms of completely different nature with each representative for its category are needed to test the generic applicability of uncertainty-bearing arithmetic.  
+
+An algorithm can be categorized by comparing the amount of its input and output data:
+\begin{itemize}
+\item \emph{Transforming}: 
+A transforming algorithm has about equal amounts of input and output data.  
+The information contained in the data remains about the same after transforming.  
+The Discrete Fourier Transformation is a typical transforming algorithm, which contains exactly the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
+Matrix inversion is another such reversible algorithm.  
+For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after forward and reverse transformation, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
+A test of uncertainty-bearing arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}, and a test of matrix inversion is provided in Section \ref{sec: matrix}.
+
+\item \emph{Generating}:  
+A generating algorithm has much more output data than input data.  
+Solving differential equations numerically and generating a numerical table of a specific function are two typical generating algorithms.  
+The generating algorithm codes mathematical knowledge into data, so there is an increase of information in the output data.  
+From the perspective of encoding information into data, Taylor expansion is also a generating algorithm. 
+In generating algorithms, input uncertainty should also be considered when deciding if the result is good enough so that the calculation can stop.  
+Some generating algorithms are theoretical calculations which involve no imprecise input so that all result uncertainty is due to rounding errors.  
+Section \ref{sec: recursion} demonstrates such an algorithm, which calculates a table of the sine function using trigonometric relations and two precise input data, $sin(0)=0$ and $sin(\pi/2)=1$.  
+In some other generating algorithms, the accumulation of rounding errors and input uncertainty should stop the algorithm at an optimal termination point using the truncation rule, which is demonstrated in Section \ref{sec: taylor expansion}.
+
+\item \emph{Reducing}:  
+A reducing algorithm has much less output data than input data such as numerical integration and statistical characterization of a data set.  
+Some information of the data is lost while other information is extracted during reducing.  
+Conventional wisdom is that a reducing algorithm generally benefits from a larger input data set \cite{Probability_Statistics}.  
+Such a notion needs to be re-evaluated when uncertainty accumulates during calculation.  
+A test of uncertainty-bearing arithmetic using numerical integration is provided in Section \ref{sec: integration}.
+
+\end{itemize}
+
+Other relations between the input and output can also be used to categorize an algorithm.  
+\begin{itemize}
+\item  In an \emph{expressive} algorithm, each output is implemented as an analytic mathematical expression of inputs.  
+Formula \eqref{eqn: Taylor 1d variance} and Formula \eqref{eqn: Taylor 2d variance} of variance arithmetic are powerful tools to solve expressive algorithms using variance arithmetic.  
+
+\item  In a \emph{progressive} algorithm, each output is based on partial inputs and previously generated outputs.  
+If an output depends on the state which is defined by previous inputs and outputs, the algorithm is also progressive.  
+Most practical algorithms are progressive.  
+Even if there may be an expected analytic mathematical expression between its input and output, an algorithm may not be expressive due to its progressive implementation.  
+The dependence problem usually exists in a progressive algorithm.  
+Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} discusses the behaviors of all the three arithmetic for a progressive algorithm.
+\end{itemize}
+
+
+\subsection{Input Data to Use}
+
+Gaussian noise are added to simulate input data of specified uncertainty deviation.
+
+
+
+\clearpage
+\section{ Comparison Using FFT}
+\label{sec: FFT}
+
+
+\subsection{Frequency Response of Discrete Fourier Transformation}
+
+\begin{figure}%[p]
+\includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 
+\captionof{figure}{Unfaithful representations of perfect sine signals in the Discrete Fourier Transformation.  
+The calculation is done on 1024 samples using FFT on a series of perfect sine signals having amplitude of 1 and slightly different frequencies as shown in legends.  
+In the drawing, x axis shows frequency, y axis shows either intensity or phase (inlet).  
+A faithful representation is also included for comparison, whose phase is $\pi /2$ at the index frequency, and undetermined at other frequencies.}
+\label{fig: FFT_Unfaithful}
+\end{figure}
+
+Each testing algorithm needs to come under careful scrutiny.  
+One important issue here is whether the digital implementation of the algorithm is faithful for the original analytic algorithm.  
+For example, the discrete Fourier transformation is only faithful for Fourier transformation at certain frequencies, and it has a different degree of faithfulness for other frequencies.  
+This is called the frequency response of the discrete Fourier transformation in this paper.
+
+For each signal sequence $h[k], k = 0, 1 \dots  N-1$, in which $N$ is a positive integer, the discrete Fourier transformation $H[n], n = 0, 1 \dots  N-1$ and its reverse transformation is given by Formula \eqref{eqn: Fourier} \cite{Numerical_Recipes}, in which $k$ is the \emph{index frequency} for the discrete Fourier transformation:
+\begin{align}
+\label{eqn: Fourier}
+& H[n]=\sum_{k=0}^{N-1}h[k] \; e^{i 2\pi \frac{k}{N} n};
+& h[k]=\frac{1}{N} \sum_{n=0}^{N-1}H[n] \; e^{-i 2\pi \frac{n}{N} k};
+\end{align}
+
+The $H[n]$ of a pure sine signal $h[k] = \sin \left(2\pi f k/N \right)$ is calculated by Formula \eqref{eqn: sin Fourier}, in which $f$ is the frequency of the sine wave.  
+The solution for Formula \eqref{eqn: sin Fourier} is Formula \eqref{eqn: sin Fourier solution}, which transform the sine signal to a delta-like function with $\pi/2$ as phase only when $f$ is an integer between $0$ and $N/2$.
+In other cases, how much the result of discrete Fourier transformation deviates from continuous Fourier transformation on how much $f$ deviates from an integer, e.g., when $f$ is exactly between two integers, the phase of the transformation is that of cosine instead of sine according to Formula \eqref{eqn: sin Fourier solution}.
+Examples of unfaithful representations of fractional frequency by the discrete Fourier transformation are shown in Figure \ref{fig: FFT_Unfaithful}. 
+\begin{align}
+\centering
+\label{eqn: sin Fourier}
+H[n] &= \frac{1}{2 i}\left( \sum_{k=0}^{N-1}e^{i 2\pi (n+f)\frac{k}{N}}  - \sum_{k=0}^{N-1} e^{i 2\pi (n-f)\frac{k}{N}} \right) \\
+\label{eqn: sin Fourier solution}
+&= \begin{cases}
+  i N/2, & f \text{ is integer} \\
+  N/\pi, & f \text{ is integer} + 1/2 \\
+  \frac{1}{2} \frac{\sin(2\pi f - 2\pi \frac{f}{N}) + \sin(2\pi \frac{f}{N})-\sin(2\pi f) e^{-i 2\pi \frac{n}{N}}}{\cos(2\pi \frac{n}{N})-\cos(2\pi \frac{f}{N})} & \text{otherwise}
+\end{cases}
+\end{align}
+
+Due to its width, a frequency component in an unfaithful transformation may interact with other frequency components of the Discrete Fourier spectrum, thus sabotaging the whole idea of using the Fourier Transformation to decompose a signal into independent frequency components.  
+Because the reverse discrete Fourier transformation mathematically restores the original $\{h[k]\}$ for any $\{H[n]\}$, it exaggerates and narrows all unfaithful signal components correspondingly.  
+This means that the common method of signal processing in the Fourier space \cite{Numerical_Recipes}\cite{Stochastic_Arithmetic}\cite{Floating-point_Digital_Filters} may generate artifacts due to its uniform treatment of faithful and unfaithful signal components, which probably coexist in reality.  
+Unlike aliasing \cite{Electronics}\cite{Numerical_Recipes}\cite{Floating-point_Digital_Filters}, unfaithful representation of the discrete Fourier transformation has an equal presence in the whole frequency range so that it cannot be avoided by sampling the original signal differently.
+
+An unfaithful representation arises from the implied assumption of the discrete Fourier transformation.  
+The continuous Fourier transformation has an infinitive signal range so that:
+\begin{equation}
+\label{eqn: Fourier continuous shift}
+h(t) \Leftrightarrow H(s): \eqspace h(t - \tau) \Leftrightarrow H(s) e^{i 2\pi s \tau};
+\end{equation}
+As an analog, the discrete Fourier transformation $G[n]$ of the signal $h[k], k = 1 \dots N$ can be calculated mathematically from the discrete Fourier transformation $H[n]$ of $h[k], k = 0\dots N-1$:
+\begin{equation}
+\label{eqn: Fourier discrete shift}
+G[n] = (H[n] + h[N] - h[0]) e^{i 2\pi n/N};
+\end{equation}
+Applying Formula \eqref{eqn: Fourier continuous shift} to Formula \eqref{eqn: Fourier discrete shift} results in Formula \eqref{eqn: Fourier discrete assumption}.
+\begin{equation}
+\label{eqn: Fourier discrete assumption}
+h[N] = h[0];
+\end{equation}
+Thus, the discrete Fourier transformation has an implied assumption that the signal $h[k]$ repeats itself outside the region of $[0, N-1]$ \cite{Numerical_DFT}.  
+For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to signal periodicity, resulting in larger peak width, lower peak height, and the wrong phase.  
+
+The most convenient signals to test uncertainty-bearing arithmetic are sine or cosine signals with frequencies as an integer-fold of $2\pi/N$.  
+ 
+
+\subsection{FFT (Fast Fourier Transformation)}
+
+When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}, in which $m = L, L-1,\dots 1,0$ indicates progress of the transformation, and $j$ is the bit-reverse of $n$:
+\begin{align}
+m=L: \eqspace & H[n,\frac{k}{2^{m}}] = h[j],  k,n = 0,1\dots N-1; \\
+\label{eqn: Danielson-Lanczos}
+m=L-1 \dots 0: \eqspace & H[n,\frac{k}{2^{m}}] = H[n,\frac{k}{2^{m+1}}] + H[n,\frac{k}{2^{m+1}}]\; \exp{(+i 2\pi \frac{n}{2^{L-m}})}; \\
+m=0: \eqspace & H[n] = H[n,\frac{k}{2^{m}}];
+\end{align}
+Thus, each output value is obtained after applying Formula \eqref{eqn: Danielson-Lanczos} $L$ times.  
+$L$ is called the FFT order in this paper.  
+
+The calculation of the term $\exp{(i 2\pi \frac{n}{2^{L-m}})}$ in Formula \eqref{eqn: Danielson-Lanczos} can be simplified.  
+Let $\ll$ denote a bit left-shift operation and let \& denote a bitwise AND operation:
+\begin{align}
+\label{eqn: FFT phase array}
+\varphi [n] \equiv \exp{(i 2\pi \frac{n}{2^{L}})}: \eqspace & \exp{(i 2\pi \frac{n}{2^{L-m}})} = \varphi [(n \ll m)\& ((1 \ll L)-1)];
+\end{align}
+Formula \eqref{eqn: Danielson-Lanczos} always sums up two mutually independent operands, so there is no dependency problem in FFT.  
+
+
+
+
+\subsection{Evaluating Calculation Inside Uncertainty}
+
+Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1} shows the output deviations and value errors for a noisy sine signal after forward FFT.  It shows that the output deviations using variance arithmetic are slightly larger than the output deviations using independence arithmetic, but much less than those using interval arithmetic.  For a fixed input deviation, the output deviation using independence arithmetic is a constant for each FFT.  Because the value and uncertainty interact with each other through normalization in variance arithmetic, output deviations of Formula \eqref{eqn: Danielson-Lanczos} are no longer a constant.  One interesting consequence is that only in variance arithmetic the output deviations for a noisy input signal are larger than those for a corresponding clean input signal.
+
+Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1} shows that the value errors calculated using variance arithmetic are comparable to those using conventional floating-point arithmetic, and they are both comparable to the output deviations using either variance arithmetic or independence arithmetic.  In other words, the result of calculating 2-bit or 53-bit into uncertainty are quite comparable so that the limited calculation inside uncertainty is reasonable.  
+
+Figure \ref{fig: Precx_FFT_Sin_Profile_Freq1} compares the output value errors of variance arithmetic calculating different bits inside uncertainty.  With no calculation inside uncertainty, the output value errors exist only on four levels.  Such quantum distribution is reduced noticeably by the 2-bit calculation inside uncertainty, and is further reduced by the 4-bit calculation inside uncertainty.  Compared with Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1}, Figure \ref{fig: Precx_FFT_Sin_Profile_Freq1} shows that the result using variance arithmetic with the 4-bit calculation inside uncertainty approaches that using independence arithmetic so that the 4-bit calculation inside uncertainty seems sufficient.  variance arithmetic with the 4-bit calculation inside uncertainty is used for further tests.
+
+
+\subsection{Evaluating Uncertainty Distribution}
+
+Each output value error is normalized with the corresponding output uncertainty deviation before it is counted for histogram. If output value errors are Gaussian-distributed with the deviation given precisely by the corresponding output uncertainty deviation, then the normalized histogram should be normal-distributed.  Figure \ref{fig: Indp_Sin_NormDist} and Figure \ref{fig: Prec4_Sin_NormDist} show that such histograms using wither independence arithmetic or variance arithmetic with 4-bit calculated inside uncertainty are both best fit by Gaussian distribution with the deviation of 0.98 and the mean of 0.06.  Due to limited bits calculated inside uncertainty and normalization, the population at where the value errors are zero is expected to be larger for the variance arithmetic, e.g., during normalization, all values which is less than 4-fold of resolution becomes 0. This phenomenon is confirmed by Figure \ref{fig: Prec4_Sin_NormDist}.
+
+variance arithmetic tracks all increases of rounding errors, but it cannot track decreases of the rounding error due to mutual cancellations during arithmetic operations.  Hence the uncertainty distribution provided by variance arithmetic serves as the bounding distribution for value errors, and the actual distribution could be narrower than the bounding distribution.  FFT provides a good test for such probability bounding.  Its forward and reverse algorithms are identical except for a constant so that they result in exactly the same bounding probability distributions.  On the other hand, the forward FFT condenses a sine signal into only two non-zero imaginary values by mutual cancellation of signal components, while the reverse FFT spreads only two non-zero imaginary values to construct a sine signal.  Thus, the forward FFT is more sensitive to calculation errors than the reverse FFT, and should have a broader actual uncertainty distribution.  Indeed in Figure \ref{fig: Prec4_Sin_NormDist}, the histogram for the reverse algorithm for a sine signal with added noise is narrow than that of the forward algorithm, with that for the round-trip algorithm in the middle of the two.
+
+
+
+\subsection{Evaluating Uncertainty-Tracking}
+
+Figure \ref{fig: All_For_AvgDev_vs_FFTOrder} shows that for the same input deviation, the output deviations of the forward FFT increase exponentially with the FFT order using all three arithmetics.  Figure \ref{fig: All_For_AvgDev_vs_InDev} shows that for the same FFT order, the output deviations of the forward FFT increase linearly with the input deviation using all three arithmetics.  The output deviation does not change with input frequency so that all data of the same input deviation and the same FFT order but with different input frequencies can be pooled together during analysis.  The trends in Figure \ref{fig: All_For_AvgDev_vs_FFTOrder} and Figure \ref{fig: All_For_AvgDev_vs_InDev} are modeled by Formula \eqref{eqn: fitting error}, in which $L$ is the FFT order, $\delta x$ is the input deviation, $\delta$y is the average output deviation, and $\alpha$ and $\beta$ are empirical fitting constants: 
+\begin{equation}
+\label{eqn: fitting error}
+\delta y = \alpha \beta ^{L} \delta x;
+\end{equation}
+$\beta$ measures the propagation speed of the deviation with an increased amount of calculation in Formula \eqref{eqn: fitting error}.  It is called \emph{propagation base rate}.  Unless $\beta$ is close to 1, $\beta$ dominates $\alpha$ in fitting, thus determining characteristics of Formula \eqref{eqn: fitting error}.  
+
+It turns out that Formula \eqref{eqn: fitting error} is a very good fit for both average output deviations and value errors for all three arithmetics, such as demonstrated in Figure \ref{fig: Prec4_For_AvgErr_vs_FFTOrder_InDev}.  Because uncertainty-tracking is a competition between error propagation and uncertainty propagation, the average output tracking ratio for the forward FFT is expected to fit Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting significand coefficient}, in which $z$ is the average output tracking ratio, $L$ is the FFT order, $(\alpha _{dev}, \beta _{dev})$ and $(\alpha _{err}, \beta _{err})$ are fitting parameters of Formula \eqref{eqn: fitting error} for average output deviations and value errors, respectively:
+\begin{equation}
+\label{eqn: fitting significand} 
+z = \alpha \beta ^{L};
+\end{equation}
+\begin{equation}
+\label{eqn: fitting significand coefficient} 
+\alpha = \alpha _{err} / \alpha _{dev}; \eqspace \beta = \beta _{err} / \beta_{dev};
+\end{equation}
+
+
+The estimated average output tracking ratio can then be compared with the measured ones to evaluate the predictability of the uncertainty-tracking mechanism.  One example of measured average output tracking ratios is shown in Figure \ref{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}, which shows that the average output tracking ratios using variance arithmetic are a constant despite that both average output uncertainty deviations and value errors increase linearly with the input deviation and exponentially with the FFT order.  Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting significand} are found empirically to be a good fit for any FFT algorithm with any input signal using any arithmetic.
+
+The Reverse FFT algorithm is identical to the Forward FFT algorithm, except when:
+
+\begin{itemize}
+\item  The Reverse FFT algorithm uses constant (-i) instead of (+i) in Formula \eqref{eqn: Danielson-Lanczos}.
+
+\item  The Reverse FFT algorithm divides the result further by $2^{L}$.  
+\end{itemize}
+Thus, the average output deviations and value errors of the reverse FFT algorithm are expected to obey Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting reverse coefficient} , in which $(\alpha_{for}$, $\beta_{for})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting error} for the forward FFT, while the average output tracking ratios are expected to obey Formula \eqref{eqn: fitting significand coefficient} with the same $\alpha$ and $\beta$ as those of the forward FFT.  
+\begin{equation}
+\label{eqn: fitting reverse coefficient} 
+\alpha = \alpha _{for}; \eqspace  \beta = \beta _{for}/2;
+\end{equation}
+
+The Round-trip FFT is the forward FFT followed by the reverse FFT, with the output of the forward FFT as input to the reverse FFT.  Thus, both its average output deviations and value errors are expected to fit Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting round-trip coefficient}, in which $(\alpha _{for}, \beta _{for})$ and $(\alpha _{rev}, \beta _{rev})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting error} for the forward FFT and the reverse FFT, respectively.  Its tracking ratios are expected to fit Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting round-trip coefficient}, in which $(\alpha _{for}, \beta _{for})$ and $(\alpha _{rev}, \beta _{rev})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting significand} for the forward FFT and the reverse FFT, respectively.
+\begin{equation}
+\label{eqn: fitting round-trip coefficient} 
+\alpha = \alpha _{for} \alpha _{rev}; \eqspace \beta = \beta _{for} \beta _{rev};
+\end{equation}
+
+Figure \ref{fig: Indp_PropBase_AvgSig}, Figure \ref{fig: Prec4_PropBase_AvgSig} and Figure \ref{fig: Intv_PropBase_AvgSig} show the fitting of $\beta$ for independent, precision and interval arithmetic for all the three algorithms, respectively.  These three figures show that all measured $\beta$ make no distinction between input signals for any algorithms using any arithmetic, e.g., there is no difference between the real part and the imaginary part for a sine signal.  The estimated $\beta$ for average tracking ratios is obtained from Formula \eqref{eqn: fitting significand coefficient}.  The estimated $\beta$ for average uncertainty deviations and value errors for the reverse FFT and the roundtrip FFT are obtained from Formula \eqref{eqn: fitting reverse coefficient} and Formula \eqref{eqn: fitting round-trip coefficient}, respectively.  The estimated $\beta$ for average uncertainty deviations for the forward FFT is $\sqrt{2}$, which will be demonstrated later.  The measured $\beta$ and the estimated $\beta$ agree well with each other in all cases.  This confirms that uncertainty-tracking is a simple competition between the error propagation and uncertainty propagation:
+\begin{itemize}
+\item  Figure \ref{fig: Indp_PropBase_AvgSig} confirms that independence arithmetic is ideal for uncertainty-tracking for FFT algorithms: 1) $\beta$ for tracking ratios is a constant 1; and 2) $\beta$ for both the average output deviations and value errors is both 1 for the round-trip FFT because the result signal after the round-trip FFT should be restored as the original signal.  Thus, theoretical $\beta$ for the forward FFT and the reverse FFT are $\sqrt{2}$ and $1/\sqrt{2}$, respectively.
+
+\item  variance arithmetic has $\beta$ for average output deviations slightly larger than those of value errors, resulting in $\beta$ for average output tracking ratios to be a constant slightly less than 1.  Its $\beta$ for average output deviations is slightly larger than the corresponding $\beta$ of independence arithmetic, so its average output deviations propagate slightly faster with an increased FFT order than those of independent arithmetic.  Such slightly faster increase with the amount calculation is anticipated by the difference between Formula \eqref{eqn: uncertainty *} and Formula \eqref{eqn: stat *}  with $\gamma=0$.
+
+\item  The $\beta$ for average output deviations using interval arithmetic is always much larger than $\beta$ for average output value errors, resulting in $\beta$ for average output tracking ratios of about $0.62$ for the forward and reverse FFT, and about $0.39  \cong {0.62}^{2}$ for the roundtrip FFT.  Consequently, using interval arithmetic, the average output deviations propagate much faster with the amount of calculations than the value error does.  Such fast propagation of uncertainty ranges is intrinsic to interval arithmetic due to its worst-case assumption.  
+\end{itemize}
+
+Figure \ref{fig: All_For_AvgSig_vs_FFTOrder} shows that for the forward FFT, the measured average output tracking ratios using either variance arithmetic or independence arithmetic are approximately constant of 0.8 in both cases, regardless of the FFT order.  In contrast, Figure \ref{fig: All_For_AvgSig_vs_FFTOrder} shows that using interval arithmetic the measured average output tracking ratios decrease exponentially with the FFT order L.  Such trends of average tracking ratios hold for all three FFT algorithms and all input signals.  Thus, in this case, the direct uncertainty tracking provided by variance arithmetic is better than the indirect uncertainty tracking provided by interval arithmetic.   
+
+Figure \ref{fig: Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec} shows that using variance arithmetic, each average output uncertainty deviation equals the corresponding input uncertainty deviation for all FFT orders after a round-trip operation.  Thus, after each round-trip operation, variance arithmetic restores the original signal and the corresponding uncertainty for FFT.  Such behavior seems ideal for a reversible algorithm.  In contrast, Figure \ref{fig: Intv_Rnd_AvgErr_vs_FFTOrder_InPrec} shows that using interval arithmetic, the average output uncertainty deviations increase exponentially with FFT orders, which means the undesirable broadening of uncertainty in the restored signal after a round-trip operation.
+
+
+\subsection{Evaluating Uncertainty-Bounding }
+
+While uncertainty tracking is the result of the propagation competition between average output deviations and average values errors with increased amount of calculations, uncertainty bounding is the result of the propagation competition between output bounding ranges and maximal value errors, both of which still fit Formula \eqref{eqn: fitting error} well using any arithmetic experimentally.  Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting significand coefficient}  can be used to estimate the maximal bounding ratio as well.  For example, Figure \ref{fig: All_For_MaxBnd_vs_FFTOrder} shows that the maximal output bounding ratios using variance arithmetic fit Formula \eqref{eqn: fitting significand} well.  Unlike average output tracking ratios in Figure \ref{fig: All_For_AvgSig_vs_FFTOrder}, the maximal output bounding ratios increase slowly with the FFT order using either variance arithmetic or independent arithmetic.  In contrast, interval arithmetic has its maximal bounding ratios decreasing exponentially with the increased FFT order for all algorithms while keeping its bounding leakages at constant 0.  Detailed analysis shows that in interval arithmetic, $\beta$ for the maximal uncertainty bounding ranges exceeds $\beta$ for the maximal value error, suggesting the source of over-estimating uncertainty range with the increased amount of calculations.  Defining empirical \emph{deviation leakage} as the frequency of the value errors to be outside the range of mean $\pm$ deviation, Figure \ref{fig: Prec4_DevLeak_vs_FFTOrder_InPrec} shows that the deviation leakages is roughly a constant using variance arithmetic, suggesting the statistical nature of uncertainty bounding using variance arithmetic.  Whether variance arithmetic is better than interval arithmetic in uncertainty bounding depends on the statistical requirements for the uncertainty bounding:
+\begin{itemize}
+\item  In the situation when absolute bounding is required, interval arithmetic is the only choice.
+
+\item  In the range estimation \cite{Statistical_Methods} involving low-resolution measurements whose sources of uncertainty are unclear, interval arithmetic is a better choice because the independence uncertainty assumption of variance arithmetic may not be satisfied. 
+
+\item  Otherwise, variance arithmetic should be more suitable for normal usages.  
+\end{itemize}
+
+
+\clearpage
+\section{Comparison Using Matrix Inversion}
+\label{sec: matrix}
+
+
+\subsection{Uncertainty Propagation in Matrix Determinant}
+
+Let vector $[p_{1}, p_{2} \dots p_{n}]_{n}$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  Let $\$[p_{1}, p_{2} \dots p_{n}]_{n}$ denote the permutation sign of $[p_{1}, p_{2} \dots p_{n}]_{n}$ \cite{Linear_Algebra}.  For a $n$-by-$n$ square matrix M with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Numerical_Recipes} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}:
+\begin{align}
+\label{eqn: determinant}
+|M| \equiv 
+\sum_{[p_{1}\dots p_{n}]_{n}} \$ [p_{1}\dots p_{n}]_{n} 
+    \prod _{k} x_{k,p_{k}}; \\
+\label{eqn: sub-determinant}
+|M|_{i,j} \equiv 
+\sum_{[p_{1}\dots p_{n}]_{n}}^{p_{i} = j} \$ [p_{1}\dots p_{n}]_{n} 
+    \prod _{k}^{k \ne i} x_{k,p_{k}};
+\end{align}
+$(-1)^{i+j} |M_{(i,j)}|$ is the determinant of the $(n-1)$-by-$(n-1)$ matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Numerical_Recipes}.  Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Numerical_Recipes}:
+\begin{equation}
+\label{eqn: determinant sum 1}
+|M| =\sum_{j=1}^{n} |M_{i,j}| x_{i,j} = \sum_{i=1}^{n} |M_{i,j}| x_{i,j};
+\end{equation}
+
+Assuming $p_{1}, p_{2} \in \{1,2...n\}$, let $[p_{1}, p_{2}]_{n}$ denote the length-2 unordered permutation which satisfies $p_{1} \neq p_{2}$, and let $<p_{1},p_{2}>_{n}$ denote the length-2 ordered permutation which satisfies $p_{1} < p_{2}$.  Letting ${<i_1,i_2>}_n$ be an arbitrary ordered permutation, Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
+\begin{equation}
+|M_{<i_{1} ,i_{2}>_{n}[j_{1} ,j_{2}]_{n}}| \equiv \sum_{[p_{1} \dots p_{n}]_{n}}^{p_{i_{1}}=j_{1}, p_{i_{2}}=j_{2}} \$ [p_{1}\dots p_{n}]_{n} \prod _{k}^{k \ne i_{1}, k\ne i_{2}} x_{k,p_{k}};
+\end{equation}
+\begin{equation}
+\label{eqn: determinant sum 2}
+|M| = \sum_{j_{1}} x_{i_{1}, j_{1}} |M_{i_{1}, j_{1}}| = 
+\sum_{j_{1}} \sum_{j_{2}}^{i_{2} \ne i_{1} , j_{2} \ne j_{1}} x_{i_{1}, j_{1}} x_{i_{2}, j_{2}} |M _{<i_{1}, i_{2}>_{n} [j_{1}, j_{2}]_{n}}|;
+\end{equation}
+Because $|M_{<i_{1} ,i_{2}>_{n}[j_{1} ,j_{2}]_{n}}|$ relates to the determinant of the $(n-2)$-by-$(n-2)$ matrix that results from deleting the row $i_{1}$ and $i_{2}$, and the column $j_{1}$ and $j_{2}$ of M.  This leads to Formula \eqref{eqn: sub-determinant equivalence}.
+\begin{equation}
+\label{eqn: sub-determinant equivalence}
+||M_{{<i_{1},i_{2}>}_{n} {[j_{1},j_{2}]}_{n}}|| = ||M|_{{<i_{1},i_{2}>}_{n} {[j_{2},j_{1}]}_{n}}||  ;
+\end{equation}
+The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m \in \{1,2...n\}$.  Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $m \in \{1,2...n\}$ and $<i_{1} \dots i_{m}>_{n}$ is an arbitrary ordered permutation. Formula  \eqref{eqn: determinant sum} can be viewed as the extension for both Formula \eqref{eqn: determinant sum 1} and Formula \eqref{eqn: determinant}.
+\begin{equation} 
+\label{eqn: sub-determinant generic}
+|M_{<i_{1} \dots i_{m}>_{n}[j_{1} \dots j_{m}]_{n}}| \equiv \sum_{[p_{1} \dots p_{n}]_{n}}^{p_{i_{k}}=j_{k}, k \in \{1 \dots m \}} \$ [p_{1}\dots p_{n}]_{n} \prod _{k \in \{1 \dots n \}}^{k \not\in \{i_{1} \dots i_{m}\}} x_{k,p_{k}};
+\end{equation}
+\begin{equation}\label{eqn: determinant sum}
+|M| = \sum_{{[j_{1} \dots j_{m}]}_{n}}  
+    |M _{<i_{1} \dots i_{m}>_{n} {[j_{1} \dots j_{m}]}_{n}}| 
+    \prod _{k=1}^{m} x_{i_{k}, j_{k}};
+\end{equation}
+
+According to the basic assumption of variance arithmetic, the uncertainty of each element $x_{i,j}$ is independently and symmetrically distributed.  Let $ \widetilde{y}_{i,j}$ denote a random variable at the index $(i, j)$ symmetrically distributed with the deviation $\delta x_{i,j}$.  Let $\widetilde{|M|}$ denote the determinant of the matrix $\widetilde{M}$ whose element is $(x_{i,j} +  \widetilde{y}_{i,j})$.  Applying Taylor expansion to Formula \eqref{eqn: determinant sum} results in Formula \eqref{eqn: determinant Taylor expansion}, which results in Formula \eqref{eqn: determinant uncertainty expansion} after applying Formula \eqref{eqn: uncertainty variance}:
+\begin{align}
+\label{eqn: determinant Taylor expansion}
+|\widetilde{M}| - |M| = &
+\sum_{m=1}^{n} \sum_{<i_{1} \dots i_{m}>_{n}} \sum_{[j_{1} \dots j_{m}]_{n}}
+  |M _{<i_{1} \dots i_{m}>_{n}{[j_{1} \dots j_{m}]}_{n}}| 
+    \prod _{k=1}^{m}  \widetilde{y}_{i_{k}, j_{k}}; \\
+\label{eqn: determinant uncertainty expansion}
+{\delta |M|}^{2} = &
+\sum_{m=1}^{n} \sum_{<i_{1} \dots i_{m}>_{n}} \sum_{[j_{1} \dots j_{m}]_{n}}
+  |M _{<i_{1} \dots i_{m}>_{n}{[j_{1} \dots j_{m}]}_{n}}|^{2} 
+    \prod _{k=1}^{m} \delta x_{i_{k}, j_{k}}^{2};
+\end{align}
+Defining $|M_{<>_{n} <>_{n}}| \equiv |M|$, Formula \eqref{eqn: determinant uncertainty recursion} is an recursive form of Formula \eqref{eqn: determinant uncertainty expansion}:
+\begin{multline}
+\label{eqn: determinant uncertainty recursion}
+\delta |M_{<p_{1} \dots p_{k} >_{n} <q_{1} \dots q_{k} >_{n}}|^{2} = 
+\sum_{p_{i}} \sum_{q_{j}} \delta x_{p_{i} ,q_{j}}^{2} \\ 
+  (|M_{<p_{1} \dots p_{i} \dots p_{k}>_{n} <q_{1} \dots q_{j} \dots q_{k} >_{n}}|^{2} +  
+   \delta |M_{<p_{1} \dots p_{i} \dots p_{k}>_{n} <q_{1} \dots q_{j} \dots q_{k} >_{n}}|^{2});
+\end{multline}
+When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
+\begin{itemize}
+\item The input uncertainty can not be accounted for.
+\item One path is chosen out of many possible paths, such as selecting a different sub-determinant to start with. 
+\item Because of the rounding error, each path may result in a different result even if all elements of the determinant are precise, and the spread of all results is expected to be inversely proportional to the stability of the matrix \cite{Condition_Number}.  
+\end{itemize}
+In another word, using conventional floating-point arithmetic, the calculation of determinant is one leap of faith. Instead, Formula \eqref{eqn: determinant uncertainty recursion} shows that the result uncertainty is the aggregation of uncertainties from all possible path of Formula \eqref{eqn: determinant sum 1}.  To accounts for all such uncertainties, Formula \eqref{eqn: determinant uncertainty recursion} starts from all 1x1 sub-determinants, and constructs all sub-determinants whose size is 1 larger, until reaches the determinant itself.  Thus, uncertainty-bearing calculation should be order-of-magnitude more complex and time-consuming than the correspond calculation using conventional floating-point arithmetic.
+
+The element $z_{i,j}$ at the index $(i,j)$ of the inverted matrix $M^{-1}$ is calculated as \cite{Linear_Algebra}:
+\begin{equation}
+\label{eqn: invert matrix}
+z_{i,j} = \frac{|M_{j,i}|}{|M|};
+\end{equation}
+Formula \eqref{eqn: invert matrix} shows that the uncertainty of the matrix determinant $|M|$  propagates to every element of the inverted matrix $M^{-1}$.  Instead, the matrix which consists of the element $|M_{j,i}|$ at the index $(i, j)$ is defined as the adjugate matrix $M^{A}$ \cite{Linear_Algebra}, whose elements are not directly affected by $M^{-1}$.  $M^{A}$ is recommended to replace $M^{-1}$ whenever the application allows \cite{Numerical_Recipes}. 
+
+\subsection{Matrix Testing Algorithm}
+
+A matrix $\widehat{M}$ is constructed using random integers between [-16384, + 16384].  Its adjugate matrix $\widehat{M}^{A}$ and its determinant $|\widehat{M}|$ are calculated precisely using integer arithmetic.  $\widehat{M}$, $|\widehat{M}|$ and $\widehat{M}^{A}$ are all scaled proportionally as \textbf{$M$}, \textbf{$|M|$} and \textbf{$M^{A}$} so that the elements of \textbf{$M$} are 2's fractional numbers randomly distributed between [-1, +1].  The scaled matrix \textbf{$M$} is called a clean testing matrix.  \textbf{$M^{-1}$} is calculated from \textbf{$|M|$} and \textbf{$M^{A}$} using Formula \eqref{eqn: invert matrix}.  Floating-point arithmetic is used to calculate $M^{A}$ and $M^{-1}$ from M, and the results are compared with the corresponding precise results for value errors.  Gaussian noises corresponding to different deviations between $10^{-17}$ and $10^{-1}$ may be added to each clean testing matrix, to result in noisy testing matrix.  Each combination of matrix size and input deviation is tested by 32 different noisy matrices.  
+
+
+\subsection{Testing Matrix Stability}
+
+Each matrix has a different stability \cite{Condition_Number}, which means how stable the inverted matrix is in regard to small value changes of the original matrix elements.  It is well known that more mutual cancellations in Formula \eqref{eqn: determinant} mean less stability of the matrix \cite{Arithmetic_Digital_Computers}\cite{Numerical_Recipes}, with the Hilbert matrix \cite{Hilbert_Matrix} being the most famous unstable matrix.  The condition number has been defined to quantify the stability of a matrix \cite{Condition_Number}.  Even though the definition of the condition number excludes the effects of rounding errors, in reality most calculations are done numerically using conventional floating-point arithmetic so that the combination effect of rounding errors and matrix instability cannot be avoided in practice.  When a matrix is unstable, the result is more error prone due to rounding errors of conventional floating-point arithmetic \cite{Arithmetic_Digital_Computers}.  Consequently, there are no general means to avoid the mysterious and nasty ``numerical instability'' in numerical applications due to rounding errors \cite{Arithmetic_Digital_Computers}.  For example, the numerical value of the calculated condition number of a matrix may have already been a victim of ``numerical instability'', and there is no sure way to judge this suspicion, so this value may not be very useful in judging the stability of the matrix in practice.  On the other hand, the rounding errors of conventional floating-point arithmetic can be used to test the stability of a matrix.  Rounding errors effectively change the item values of a matrix, so they produce a larger effect on a less stable matrix.  If the inverted matrix and the adjugate matrix are calculated using conventional floating-point arithmetic, larger value errors indicate that the matrix is less stable.
+
+variance arithmetic accounts for all rounding error with stable characterization of result uncertainties.  More mutual cancellations in Formula \eqref{eqn: determinant} will result in a smaller absolute value related to the uncertainty deviation of the determinant.  Thus, the precision of the determinant $|M|$ of a matrix $M$ calculated using variance arithmetic measures the amount of mutual cancellations, and it may measure the stability of a matrix.  Particularly, if $|M|$ is of coarser precision, then each element of $M^{-1}$ should tend to have a larger value error, according to Formula \eqref{eqn: invert matrix}.  This hypothesis is confirmed by Figure \ref{fig: Prec4_Inv_AvgErr_vs_DetSig_MatSize}, which shows a good linear relation between the precision of $|M|$ and the average value error of its inverted matrix $M^{-1}$, regardless of the matrix size.  The maximal output values errors are related to the precision of $|M|$ in the same fashion.  In contrast, Figure \ref{fig: Prec4_Adj_AvgErr_vs_DetSig_MatSize} shows that the value errors of the adjugate matrix $M^{A}$ do not depend noticeably on the precision of $|M|$.  Thus, the precision of the denominator in Formula \eqref{eqn: invert matrix} determines the overall stability in matrix inversion, confirming the validity of common advice to avoid matrix inversion operations in general \cite{Numerical_Recipes}.
+
+Such a linear relation between the precision and the value error also extends to the calculation of the adjugate matrix.  Let the relative value error be defined as the ratio of the value error divided by the expected value.  The relative error is expected to correspond to the result precision linearly.  Figure \ref{fig: Prec4_Adj_RelErr_vs_DetSig_MatSize} compares each precision of the sub-matrix determinant $|M_{j,i}|$ with the corresponding relative error of the element at the index $(i, j)$ of the adjugate matrix $M^{A}$ of the clean matrix of different sizes.  It shows that larger relative errors of adjugate matrix elements indeed correspond to coarser precisions of the sub-matrix determinant.   
+
+While each condition number \cite{Condition_Number} only gives the result sensitivity to one matrix element, Formula \eqref{eqn: determinant uncertainty expansion} contains the result sensitivity to any matrix element, any combination of matrix elements, as well as the aggregated result uncertainty deviation.  Therefore, Formula \eqref{eqn: determinant uncertainty expansion} and Formula \eqref{eqn: determinant uncertainty recursion} may be better than the condition numbers for describing matrix stability. 
+
+
+\subsection{Testing Uncertainty Propagation in Adjugate Matrix}
+
+When the adjugate matrix is calculated using variance arithmetic, Figure \ref{fig: Prec4_AvgErr_vs_MatSize_InPrec} shows that the average output deviations for the adjugate matrix increase linearly with the input deviation, which is in good agreement with Formula \eqref{eqn: fitting error}.  Such relation is also true for maximal and average output values errors.  Formula \eqref{eqn: fitting error} is expected to describe the general value error propagation for linear algorithms in which $L$ is the amount of calculations \cite{Chaotic_Dynamics}.  The question is what value $L$ should be when calculating the adjugate matrix of a square matrix of size $N$.  Figure \ref{fig: Prec4_AvgErr_vs_MatSize_InPrec} suggests that $L$ increases with $N^{2}$ for the average output precision and average output error\footnote{The amount of calculation $L$ does not mean the calculation complexity using the Big O notation \cite{Big_O_Notation}.  It is just a measurement of how output uncertainty increases with a dimension of calculation according to \eqref{eqn: fitting error} \cite{Chaotic_Dynamics}. For example, any sorting algorithm will not change the uncertainty distribution, so that $L$ is always 0 regardless the calculation complexity for the sorting algorithm. The measured calculation time suggests calculation complexity of $O(2^N)$ for using Formula \eqref{eqn: determinant uncertainty recursion} to calculate the matrix determinant.}. 
+
+Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} shows that the average output tracking ratio of the adjugate matrix using variance arithmetic is approximately a constant of 0.8.  Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} is very similar to Figure \ref{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}.  Similar to the maximal output bounding ratios of FFT algorithms, the maximal output bounding ratios for the adjugate matrix using precision also obey Formula \eqref{eqn: fitting significand} well, with $\beta$ of 1.005, meaning a slow increase with the matrix size.  Added to the similarity is the normalized uncertainty distribution shown in Figure \ref{fig: Prec4_Matrix9_NormDist}, which is very similar to Figure \ref{fig: Prec4_Sin_NormDist}.  Even though FFT and the calculating adjugate matrix are two very different sets of linear transformational algorithms, their uncertainty propagation characteristics are remarkably similar even in quantitative details.  This similarity indicates that variance arithmetic is a generic arithmetic for linear algorithms.
+
+
+\subsection{Calibration}
+\label{sec: calibration}
+
+Because \textbf{$|M_{j,i}|$} and \textbf{$|M|$} are not independent of each other, \textbf{$M^{-1}$} calculated by Formula \eqref{eqn: invert matrix} contains the dependency problem. Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the tracking ratios for the adjugate matrix and the inverted matrix are both standard distributed, while they are exponentially distributed when the inverted matrix is inverted again.  Because the inverted matrix has the same tracking ratio distribution as that of the adjugated matrix, which has no dependency problem, the inverted matrix contains hardly any dependency problem.  In contrast, Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the double inverted matrix is severely affected by the dependency problem, such that its tracking ratio increases with matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.  Figure \ref{fig: Prec4_Matrix_Rnd_NormDist} shows that average tracking ratios for different matrix sizes follows a same exponential distribution, but with different extend, e.g., the distribution for matrix size 4 has yet reaches stable distribution beyond 2.5, which causes the increase of the average tracking ratio with the matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.
+
+Applying the same algorithms twice results in so much differences, which shows that the dependency problem has been embedded in the data, and which shows the importance of calibration.
+
+
+
+\clearpage
+\section{Comparison Using Recursive Calculation of Sine Values}
+\label{sec: recursion}
+
+Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the phase array $\varphi[n]$ in Formula \eqref{eqn: FFT phase array}.  
+\begin{align}
+\label{eqn: phase boundary}
+& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+\label{eqn: phase sin}
+& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
+\label{eqn: phase cos}
+& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
+\end{align}
+
+This algorithm is very different from both FFT and matrix inversion in nature because Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} are no longer linear, and the test presents a pure theoretical calculation without input uncertainty.  The recursion iteration count $L$ is a good measurement for the amount of calculations.  Each repeated use of Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} accumulates calculation errors to the next usage so that both value errors and uncertainty are expected to increase with $L$.  Each recursion iteration $L$ corresponds to $2^{L-2}$ outputs, which enables statistical analysis for large $L$.  
+
+Figure \ref{fig: AvgValErr_vs_Regression} shows that both average output value errors and the corresponding average output deviation increase exponentially with the recursion count for all three arithmetics, and Figure \ref{fig: AvgErrSig_MaxBndRat_vs_Regression} shows that in response to the increased amount of calculations:
+\begin{itemize}
+\item The average tracking ratio for variance arithmetic is a constant about 0.25;
+
+\item The maximal output bounding ratio for variance arithmetic increases slowly; 
+
+\item The average tracking ratio for interval arithmetic decreases exponentially; and 
+
+\item The maximal output bounding ratio for interval arithmetic remains roughly a constant.
+\end{itemize}
+Unlike FFT algorithms, the initial precise sine values participate in every stage of the recursion, which results in few small output deviations at each recursion.  Detailed inspection shows that the maximal output bounding ratios for interval arithmetic are all obtained from small output deviations, and bounding ratios using interval arithmetic in general decrease exponentially with the amount of calculations.  Thus, the result uncertainty propagation characteristics of the regressive calculation of sine values are very similar to those of both FFT and the calculating adjugate matrix; even though all these algorithms are quite different in nature.  This may indicate again that the stability of variance arithmetic is generic, regardless of the algorithms used.
+
+
+
+\clearpage
+\section{Validation Using Taylor Expansion}
+\label{sec: taylor expansion}
+
+When a Taylor expansion is implemented using conventional floating-point arithmetic, the rounding errors are ignored, so that the result of a higher order of expansion is assumed to be more precise, because the Cauchy estimator of the expansion, which gives an upper bound for the remainder of the expansion, decreases with the order of the expansion for analytic expressions.  A subjective upper limit is chosen for the Cauchy estimator, to stop the expansion at limited order \cite{Numerical_Recipes}.  However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually gives a false expansion precision.   
+
+Using variance arithmetic, the rounding errors as well as the input uncertainties are all accounted for, so that the maximal expansion order when applying a Taylor expansion of Formula \eqref{eqn: Taylor 1d} or Formula \eqref{eqn: Taylor 2d}  is no longer subjective.  Formula \eqref{eqn: polynomial uncertainty} is decomposed into the contribution of each successive term for Tylor expansion, as Formula \eqref{eqn: polynomial uncertainty for Taylor expansion}:
+\begin{multline}
+\label{eqn: polynomial uncertainty for Taylor expansion}
+(\delta \sum_{j=0}^{J+1} a_j x^j)^2 
+= \int (\sum_{j=0}^{J} a_j (x + \widetilde{y})^j - \sum_{j=0}^{J} a_j x^j + a_{J+1} (x + \widetilde{y})^{J+1} - a_{J+1} x^{J+1})^2 \rho(\widetilde{y}) d \widetilde{y} \\
+= \int (\sum_{j=0}^{J} a_j (x + \widetilde{y})^j - \sum_{j=0}^{J} a_j x^j)^2 \rho(\widetilde{y}) d \widetilde{y} +
+    a_{J+1}^2 \int (\sum_{k=1}^{J+1} C_{J+1}^{k} \widetilde{y}^k x^{J+1-k})^2 \rho(\widetilde{y}) d \widetilde{y} \\
++2 \int (\sum_{j=0}^{J} a_j \sum_{k=1}^{j} 
+   C_{j}^{k} \widetilde{y}^k x^{j-k})(a_{J+1} \sum_{k=1}^{J+1} C_{J+1}^{k} \widetilde{y}^k x^{J+1-k})
+   \rho(\widetilde{y}) d \widetilde{y} \\
+(\delta \sum_{j=0}^{J+1} a_j x^j)^2 - (\delta \sum_{j=0}^{J} a_j x^j)^2 = 
+\sum_{k_1=1}^{J+1} \sum_{k_2=1}^{J+1} a_{J+1}^2 C_{J+1}^{k_1} C_{J+1}^{k_2} M(k_1+k_2) (\delta x)^{k_1+k_2} x^{2J+2-k_1-k_2} \\
++ 2 \sum_{k_1=1}^{J+1} \sum_{j=0}^{J} \sum_{k_2=1}^{j} a_j a_{J+1} C_{J+1}^{k_1} C_{j}^{k_2} 
+   M(k_1+k_2) (\delta x)^{k_1+k_2} x^{J+1+j - k_1 -k_2};
+\end{multline} 
+Applying Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} to Taylor expansion:
+\begin{enumerate}
+\item Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} provides the deviation at $n$-th expansion order, which becomes stabilized when the \emph{delta deviation} at $n$-th expansion order (which is the contribution of the $n$-th expansion order to the deviation) is much less than the deviation at $n$-th expansion order. 
+
+\item The \emph{resolution} of variance arithmetic is the deviation divided by $2^\chi$, in which $\chi$ is the constant bits calculated inside uncertainty.
+
+\item The maximal expansion order of a Taylor expansion is reached when the Cauchy estimator is less than the resolution of variance arithmetic, after which the changes in Cauchy estimator is no longer detectable.  Ideally, the Taylor expansion reminder should also become zero when the expansion order is larger than the maximal expansion order.
+\end{enumerate}
+
+Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} also shows that the deviation of Taylor expansion may decrease at certain expansion order.  For example, at $x = 1 \pm \delta x$, $1 - 2x + x^2$ is equivalent to $y^2$ at $y = 0 \pm \delta x$, thus it has smaller result variance than $1 - 2x$ at $x = 1 \pm \delta x$.  
+
+Formula \eqref{eqn: Taylor expansion test} provides an example test in Taylor expansion, in which $n$ is a positive integer.  
+\begin{equation}
+\begin{split}
+\label{eqn: Taylor expansion test}
+f_n(x) = \sum_{j=0}^{n} (-x)^j; & \eqspace \lim _{n \to \infty} f_n(x) = 1/(1+x);
+\end{split}
+\end{equation}
+In Formula \eqref{eqn: Taylor expansion test}, the absolute value of $(n+1)$th term in the expansion is the Cauchy remainder estimator of the $n$th order expansion.  Formula \eqref{eqn: Taylor expansion test} is analytic when $|x|$ is less than 1, and a smaller value $|x|$ means faster convergence to the correct value $1/(1 + x)$. 
+
+Using Formula \eqref{eqn: Taylor expansion test} as a test case, Figure \ref{fig: Prec0_Taylor_1E-3} confirms the above Taylor expansion process using variance arithmetic with 0-bit calculated inside uncertainty and with input uncertainty at $10^{-3}$.  For smaller $|x|$, in addition to faster decrease of both reminder and Cauchy estimator, delta deviation also decreases faster, thus deviation reaches its stable values faster.  Once the maximal expansion order is reached, the reminder also becomes to zero.  Figure \ref{fig: Prec0_Taylor_1E-3} repeats the above process with 4-bit calculated inside uncertainty, which only differs from Figure \ref{fig: Prec0_Taylor_1E-3} by having resolution smaller than deviation and larger maximal expansion order.
+
+When input has larger uncertainty, deviation reaches to its stable value much slower, which is show in Figure \ref{fig: Prec0_Taylor_1E-2} for 0-bit calculated inside uncertainty: 
+\begin{itemize} 
+\item When $x=0.75$, deviation barely reaches its stable value when the Cauchy estimator reaches resolution.
+\item When $x=0.875$, deviation has not reaches its stable value when the Cauchy estimator reaches resolution, and reminder does not become zero at the maximal expansion order but a few orders beyond.
+\item When $x=0.9375$, deviation has no stable value and becomes imaginative eventually. Nevertheless, reminder becomes zero beyond the maximal expansion order.
+\end{itemize}
+In contrast, with 4-bit calculated inside uncertainty as shown in Figure \ref{fig: Prec4_Taylor_1E-2}:
+\begin{itemize} 
+\item When $x=0.75$, the maximal expansion order is reached later when the resolution is stabilized.
+\item When $x=0.875$, the maximal expansion order is reached later when the resolution is stabilized, however reminder still does not become zero at the maximal expansion order but a few orders beyond.
+\item When $x=0.9375$, resolution has no stable value and becomes negative eventually, after which the variance representation becomes undefined.  Because Cauchy estimator never reaches resolution, the maximal expansion order is not defined either.
+\end{itemize}
+Judged from the above simple cases of Taylor expansion, calculating inside uncertainty brings no clear-cut benefit.
+
+
+\clearpage
+\section{Validation of Precision Arithmetic Using Numerical Integration}
+\label{sec: integration}
+
+In numerical integration over the variable $x$ using conventional floating-point arithmetic, a finer sampling of the function to be integrated $f(x)$ is associated with a better result \cite{Numerical_Recipes}, and it is assumed that $f(x)$ can be sampled at infinitive fine intervals of $x$.  In reality, floating-point arithmetic has limited significant bits, so that rounding errors will increase with finer sampling of $f(x)$.  However, such limitation of numerical integration due to rounding errors is seldom studied seriously. In this paper:
+\begin{enumerate}
+\item The function to be integrated is treated as a black-box function.
+\item The numerical integration is carried out using the rectangular rule \cite{Numerical_Recipes}.
+\item The residual error is estimated locally as the difference between using the rectangular rule and using the trapezoidal rule \cite{Numerical_Recipes}.
+\item The sampling is localized using simplest depth-first binary-tree search algorithm.
+\item The sampling stops when the residual error is no longer significant.
+\end{enumerate}
+
+Specifically, for each integration interval $[x_{start}, x_{end}]$, define:
+\begin{align}
+& x_{mid} \equiv (x_{start} + x_{end})/2; \\
+& f_{err} \equiv (f(x_{start}) + f(x_{end}))/2 - f(x_{mid}); \\
+\label{eqn: integration delta}
+& f_{\Delta} \equiv f(x_{mid}) (x_{end} - x_{start});
+\end{align}
+If $f_{err}$ becomes insignificant, the interval $[x_{start}, x_{end}]$ is considered to be fine enough, and $f_{\Delta}$ is added to the total integration.  Otherwise, the search continues on the intervals $[x_{start}, x_{mid}]$ and $[x_{mid}, x_{end}]$, which is the next depth for searching.  This searching algorithm is very adaptive, with the local search depth depending only on how $f(x)$ changes locally.  However, such adaptation to the local change of $f(x)$ brings one weakness to this searching algorithm: when $f(0)=f'(0)=0$, the algorithm spends the majority of the execution time around $x=0$, searching in tiny intervals of great depth, and adding tiny significant values to the result each time.  This weakness is called zero trap here.  It cannot be removed by simply offsetting $f(x)$ by a constant because doing so will change the precision of each sampling of $f(x)$, and increase the output uncertainty deviation.  For a proof-of-principle demonstration, zero trap is avoided in this paper.
+
+Formula \eqref{eqn: integration of power} provides an example test for the above simple algorithm, in which $n$ is a positive integer.  
+\begin{equation}
+\label{eqn: integration of power}
+\frac{4^{n+1} - 10^{-6(n+1)}}{n+1} = \int _{10^{-6}}^{4} x^{n} dx;
+\end{equation}
+Table \ref{tab: numerical integration} shows that the result of numerical integration is very comparable to the expected value.  It shows that the above integration algorithm introduces no broadening of result uncertainty, so the above algorithm always selects optimal integration intervals when calculating the best possible result for a numerical integration.  Tests of integration using different polynomials with different integration ranges all confirm the above result.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|} 
+\hline 
+Power n & Search Depth & $\delta \left( \int _{10^{-6} }^{4}x^{n} dx \right) $ & $\int _{10^{-6} }^{4}x^{n} dx -\frac{4^{n+1} -10^{-6(n+1)} }{n+1} $ \\ 
+\hline 
+2 & [25, 47] & 1.32x10${}^{-14}$ & -0.705x10${}^{-14}$ \\ 
+\hline 
+3 & [25, 47] & 2.52x10${}^{-14}$  & -1.42x10${}^{-14}$ \\ 
+\hline 
+4 & [26, 47] & 1.16x10${}^{-13}$ & -1.13x10${}^{-13}$ \\ 
+\hline 
+5 & [26, 48] & 5.08x10${}^{-13}$ & -6.82x10${}^{-13}$ \\ 
+\hline 
+6 & [26, 48] & 1.92x10${}^{-12}$ & -2.72x10${}^{-12}$ \\ 
+\hline 
+\end{tabular}
+\captionof{table}{Uncertainty deviation and value error of numerical integration vs. expected results using variance arithmetic for different power function.  The search range is deepest near $10^{-6}$.}
+\label{tab: numerical integration}
+\end{table}
+
+One thing worth noticing in Table \ref{tab: numerical integration} is that even though Formula \eqref{eqn: integration delta} consistently underestimates integration for each integration interval $[x_{start}, x_{end}]$, the final underestimation is quite small and comparable to the uncertainty deviation.  This example shows that the bias inside the uncertainty range has insignificant contribution to the final result using variance arithmetic.
+
+
+
+\clearpage
+\section{Comparison Using Progressive Moving-Window Linear Regression}
+\label{sec: Comparison Using Progressive Moving-Window Linear Regression}
+
+\subsection{Progressive Moving-Window Linear Regression Algorithm}
+
+Formula \eqref{eqn: linear regression} gives the result of the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, in which $j$ is an integer index to identify $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
+
+\begin{equation}
+\begin{split}
+\label{eqn: linear regression}
+& \alpha = \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
+& \beta = \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
+    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
+\end{split}
+\end{equation}
+
+In many applications data set ${Y_j}$ is an input data stream collected with fixed rate in time, such as a data stream collected by an ADC (Analogue-to-Digital Converter) \cite{Electronics}.  ${Y_j}$ is called a time-series input, in which $j$ indicates time.  A moving window algorithm \cite{Numerical_Recipes} is performed in a small time-window around each $j$.  For each window of calculation, ${X_j}$ can be chosen to be integers in the range of $[-H, +H]$ in which $H$ is an integer constant specifying window’s half width so that $\sum_{j} X_{j} = 0$, to reduce \eqref{eqn: linear regression} into \eqref{eqn: time-series linear regression}:
+
+\begin{equation}
+\begin{split}
+\label{eqn: time-series linear regression}
+& \alpha _{j} = \alpha \; 2 H = \sum_{X=-H+1}^{H} Y_{j-H+X}; \\
+& \beta _{j} = \beta \; \frac{H (H+1)(2H+1)}{3} = \sum_{X=-H}^{H} X Y_{j-H+X}; \\
+\end{split}
+\end{equation}
+
+According to Figure \ref{fig: Moving_Window_Linear_Fit}, in which $H$ takes an example value of 4, the calculation of $(\alpha _{j}, \beta _{j})$ can be obtained from the previous values of $(\alpha _{j-1}, \beta _{j-1})$, to reduce the calculation of \eqref{eqn: time-series linear regression} into a progressive moving-window calculation of \eqref{eqn: moving-window linear regression}:
+
+\begin{equation}
+\begin{split}
+\label{eqn: moving-window linear regression}
+& \beta _{j} = \beta _{j-1} - \alpha _{j-1} + H(Y_{j-2H-1} + Y_{j}); \\
+& \alpha _{j} = \alpha _{j-1} - Y_{j-2H-1} + Y_{j};
+\end{split}
+\end{equation}
+
+
+\subsection{Dependency Problem in a Progressive Algorithm} 
+
+\eqref{eqn: moving-window linear regression} uses each input multiple times, so it will have dependency problem for all the three uncertainty-bearing arithmetic.  The question is how the overestimation of uncertainty evolves with time. 
+
+The moving-window linear regression is done on a straight line with a constant slope of exactly $1/1024$ for each advance of time, with a full window width of 9 data points, or $H=4$.  Both average output value errors and deviations of all three arithmetic increases linearly with input deviations, and increase monotonically with time.  Thus both the average output tracking ratio and the maximal output bounding ratio are largely independent of input precisions, e.g., Figure \ref{fig: Simple_Prec4_AvgErrSig_vs_InDev_Time} shows such trend for the average output tracking ratio using variance arithmetic.  Such independence to input precision is expected for linear algorithms in general \cite{Numerical_Recipes}.  Therefore, only results with the input deviation of $10^{-3}$ are shown for the remaining discussions unless otherwise specified.  Figure \ref{fig: Simple_Err_Dev_vs_Time} shows the output deviation and the value errors vs. time while Figure \ref{fig: Simple_AvgErrSig_MaxBndRat_vs_Time} shows the output average tracking ratios and the maximal bounding ratios vs. time for all three arithmetics.  
+
+For interval arithmetic and independence arithmetic, the output value errors remain on a constant level, while the output deviations increase with time, so that both output average tracking ratios and maximal bounding ratios decrease with time.  The stable linear increase of output deviation with time using either interval arithmetic or independence arithmetic in Figure \ref{fig: Simple_Err_Dev_vs_Time} suggests that the progressive linear regression calculation has accumulated every input uncertainty, which results in the monotonic decrease of both the maximal bounding ratios and the average output tracking ratios with time using both arithmetics in Figure \ref{fig: Simple_AvgErrSig_MaxBndRat_vs_Time}.
+
+In contrast, while variance arithmetic has slightly larger output deviations than those of independence arithmetic, its output value errors follows its output deviations, so that both its tracking ratios and bounding ratios remain between 0.1 and 0.9.  The reason for such increase of output value errors with time is due to the fact that variance arithmetic calculates only limited bits inside uncertainty, and uses larger granularity of values in calculation for larger uncertainty deviation. Such granularity of calculation is evident when comparing 2-bit or 4-bit calculation inside uncertainty using variance arithmetic in Figure \ref{fig: Simple_Err_Dev_vs_Time}.  This mechanism of error tracking in variance arithmetic is also demonstrated in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} and Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2}.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} shows that for fewer bits calculated inside uncertainty, the output value errors follow the output deviation closer in time, but such usage of larger granularity of values in calculation causes the result to become insignificant sooner, while for more bits calculated inside uncertainty, the average tracking ratios initially follow the result using independence arithmetic longer, and then follow the output deviation for longer duration.  The similarity in patterns of the average tracking ratios for different bits calculated inside uncertainty using variance arithmetic in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} suggests that they are all driven by a same mechanism but on different time scale, which is expected when smaller granularity of error needs more time to accumulate to a same level.  From the definition of tracking ratio, the granularity of error is actually measured in term of granularity of precision, e.g., Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} shows that for same bits calculated inside uncertainty, smaller input uncertainty deviations results in longer tracking of the output value errors to the output deviations.  The similar pattern of average tracking ratios is repeated on slower time scale for smaller input uncertainty deviations in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2}, revealing similar underline error-tracking mechanism in both cases.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} also shows that for the same bits calculated inside uncertainty, the average tracking ratios deviate from independence at exactly the same time.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} and Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} thus demonstrate a uniform and granular error tracking mechanism of the variance arithmetic for different bits calculated inside uncertainty.  
+
+Is such increase of the value errors with the increase of uncertainty deviation using variance arithmetic desired?  First, in real calculations the correct answer is not known, and the reliability of a result depends statistically on the uncertainty of the result, so that there is no reason to assume that calculating more bits inside uncertainty is any better.  Conceptually, when the uncertainty of a calculation increases, the value error of the calculation is also expected to increase, which agrees with the trend shown by variance arithmetic.  Second, the stability of the average output tracking ratios and the maximal bounding ratios of variance arithmetic is quite valuable in interpretation results.  For example, even the output deviation may have unexpectedly changed, as in this case if dependency problem were not known and expected, such stability still gives a good estimation of the value errors in the result using variance arithmetic.  Third, such stability ensures that the result of algorithm at each window does not depend strongly on the usage history of the algorithm, which makes variance arithmetic the only practically usable uncertainty-bearing arithmetic for this progressive algorithm.  To test the effect of usage history on each uncertainty-bearing arithmetic, noise is increased by 10-fold at the middle 1/3 duration of the straight line, to result in additional two test cases:
+\begin{itemize}
+\item \emph{Changed}: In Figure \ref{fig: Changed_Err_Dev_vs_Time} and \ref{fig: Changed_AvgErrSig_MaxBndRat_vs_Time}, the input deviation is also increased by 10-fold to simulate an increase in measured uncertainty.
+\item \emph{Defective}: In Figure \ref{fig: Noiser_Err_Dev_vs_Time} and \ref{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}, the input deviation remains the same to simulate the defect in obtaining the uncertainty deviations.  
+\end{itemize}  
+Accordingly, the original case of linear regression on a line with fixed slope is named as \emph{Simple}.
+
+The question is how each uncertainty-bearing arithmetic responses to this change of data in the last 1/3 duration of calculation.  Using either independence or interval arithmetic, both the average output tracking ratios and the maximal output bounding ratios are decrease by about 10-fold in Figure \ref{fig: Changed_AvgErrSig_MaxBndRat_vs_Time} while they are not affected at all in Figure \ref{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}.  They show extreme sensitivity to the usage history.  Because the real input data are neither controllable nor predictable, the result uncertainty for this progressive algorithm using either interval arithmetic or independence arithmetic may no longer be interpretable.  In contrast, using variance arithmetic, both the average output tracking ratios and the maximal output bounding ratios are relatively stable, while the output deviations and value errors are sensitivity to usage history, so that the result using variance arithmetic is still interpretable.
+
+
+\subsection{ Choosing a Better Algorithm for Imprecise Inputs }
+
+Formula \eqref{eqn: moving-window linear regression} has much less calculations than Formula \eqref{eqn: time-series linear regression}, and it seems a highly efficient and optimized algorithm according to conventional criterion \cite{Numerical_Recipes}.  However, from the perspective of uncertainty-bearing arithmetic, Formula \eqref{eqn: moving-window linear regression} is progressive while Formula \eqref{eqn: time-series linear regression} is expressive, so that Formula \eqref{eqn: time-series linear regression} should be better.  Figure \ref{fig: Changed_Err_Dev_vs_Time} and Figure \ref{fig: ChangedDirect_Err_Dev_vs_Time} respectively show the output deviations and the value errors vs. time for using either Formula \eqref{eqn: moving-window linear regression} or Formula \eqref{eqn: time-series linear regression} of a straight line with 10-fold increase of input uncertainty in the middle 1/3 duration.  They show that while the progressive algorithm carries all the historical calculation uncertainty into future, the expressive algorithm is clean from any previous results.  For example, at the last 1/3 duration when the moving window is already out of the area for the larger input uncertainty, the progressive algorithm still gives large result uncertainty, while the expressive algorithm gives output result only relevant to the input uncertainty within the moving window.  So instead of Formula \eqref{eqn: moving-window linear regression}, Formula \eqref{eqn: time-series linear regression} is confirmed to be a better solution for this linear regression problem.  
+
+\subsection{ Modelling Dependency Problem }
+
+However, the majority algorithms used today are progressive.  Most practical problems are not even mathematical and analytical in nature, so that they may have no expressive solutions.  Expressive algorithms are simply just not always avoidable in practice.  With known expressive counterpart, the progressive moving-window linear regression algorithm can serve as a model for studying progressive algorithms.  For example:
+\begin{itemize}
+\item The progressive moving-window linear regression shows that the dependency problem of independence and interval arithmetic can manifest as dependency on the usage history of an algorithm.  Because of its stability, variance arithmetic should be used generally in progressive algorithms.  
+\item Figure \ref{fig: Prec4_LineFit_NormDist} shows that the result tracking ratios of the progressive linear regression is exponentially distributed, while Figure \ref{fig: Prec4_LineFitDirect_NormDist} shows that the result tracking ratios of the expressive linear regression is Gaussian distributed only when the uncertainty deviation is characterized correctly, e.g., the result is Gaussian distributed for the "Changed" case but not for the "noisier" case.  Thus, the exponentially distributed tracking ratios does not necessarily imply dependency problem.
+\end{itemize}
+  
+
+\clearpage
+\section{Conclusion and Discussion}
+\label{sec: conclusion and discussion}
+
+\subsection{Summary}
+
+The starting point of variance arithmetic is the uncorrelated uncertainty assumption, which requires input data to have decent precision for each or small overall correlation among them, as shown in Figure \ref{fig: Independent_Uncertainty_Assumption}, which quantifies the statistical requirements for input data to variance arithmetic.  In addition, it requires that the systematic errors is not the major source of uncertainty, and all of its input data do not have confused identities.    
+
+Due to the uncorrelated uncertainty assumption and central limit theorem, the rounding errors of variance arithmetic are shown to be bounded by a Gaussian distribution with a truncated range.  The rounding error distribution is extended to describe the uncertainty distribution in general, with the uncertainty deviation of a single precision value given by Formula \eqref{eqn: uncertainty distribution}, and the result uncertainty deviation of a function given by Formula \eqref{eqn: Taylor 1d variance} and its multi-dimension extensions such as Formula \eqref{eqn: Taylor 2d uncertainty}.  
+
+Formula \eqref{eqn: fitting error} is shown to describe the general uncertainty deviation propagation in variance arithmetic.  The average tracking ratios and the maximal bounding ratio using variance arithmetic are shown to be independent of input precision, and stable for the amount of calculations for a few very different applications.  In contrast, both average tracking ratios and the maximal bounding ratio using interval arithmetic are shown to decrease exponentially with the amount of calculations in all tests.  Such stability is the major reason why variance arithmetic is better than interval arithmetic in all tests done so far.  
+
+The statistical nature of variance arithmetic provides not only quantitative explanation for the dependency problem, but also solutions to the dependency problem, which is in form of either Taylor expansion or calibration.  The treatment of dependency problem is another major advantage of variance arithmetic over interval arithmetic.
+
+variance has a central role in variance arithmetic:
+\begin{itemize}
+\item Precision is regarded as information content of a uncertainty-bearing value, which is in par with information entropy in information theory.  Because of this, precision needs to be preserved when the uncertainty-bearing value is multiplied or divided by a constant, which results in the scaling principle.   
+\item variance arithmetic itself can be deduced from the scaling principle and the uncorrelated uncertainty assumption.
+\item The convergence property of the result deviation using Taylor expansion method is determined by input precisions, such as for inversions and square roots.
+\end{itemize}
+
+\subsection{Efficiency of Precision Arithmetic}
+
+variance arithmetic tries to solve a different mathematical problem from conventional floating-point arithmetic. For example, to calculate the determinant of a matrix:
+\begin{itemize}
+\item Conventional floating-point arithmetic may use a Laplace method \cite{Numerical_Recipes}, namely, to randomly choose a row or a column, and then to sum up the products of each element within the chosen row or the column with the corresponding sub-determinant of the element. Each sub-determinant is calculated in the same fashion.  Depending on the choices of the row or the column in each stage, there are many paths to calculate the determinant of a matrix.  Because conventional floating-point arithmetic has unbounded rounding errors, each path may give a different result, and the spread of all the results depends on the stability of the matrix and each sub-matrix \cite{Condition_Number}.  In this perspective, by taking a random path and assuming to get the only correct result, conventional floating-point arithmetic can be viewed as a leap-of-faith approach.
+
+\item In contrast, variance arithmetic also needs to calculate the spread of the result due to rounding error or input uncertainties, so it effectively has to cover all paths of the calculation.  For example, using Formula \eqref{eqn: determinant uncertainty recursion}, variance arithmetic starts from each elements of the matrix, and treat it as a 1x1 sub-determinant, then grow it to all possible 2x2 sub-determinants containing it, etc, until reach the determinant of the matrix.  Thus, variance arithmetic takes order-of-magnitude more time than a single leap-of-faith calculation.  
+\end{itemize}   
+
+However, it is wrong to conclude that variance arithmetic is less efficient than conventional floating-point arithmetic, because in most cases rounding errors and input uncertainty can not be ignored.  Because conventional floating-point arithmetic can not contain uncertainty in its value, it has to use another value to specify uncertainty, such as an interval of $[min, max]$ or a common statistical pair $value \pm deviation$, which may brings the following drawbacks:
+\begin{itemize}
+\item The most common way to calculate result spread using conventional floating-point arithmetic is sampling \cite{Stochastic_Arithmetic} \cite{Numerical_Recipes}.  Assuming the matrix size is $N \times N$, and a minimal 3-point sampling is performed on each matrix element, then the spread calculation of matrix determinant requires $N^6$ leap-of-faith calculations, which is still a lot.  In contrast, using Formula \eqref{eqn: determinant uncertainty recursion}, variance arithmetic only need one calculation.  Thus, conventional floating-point arithmetic may be less efficient than variance arithmetic in this context. 
+
+\item During to unbounded rounding errors, a conventional floating-point value losses its precision gradually and silently, so that a interval or a statistical pair itself can become unknowingly invalid.  At least, it is not clear at what precision the interval or the statistical pair specifies.
+\end{itemize}
+
+
+\subsection{Choose a better algorithm}
+
+Because variance arithmetic tries to solve a different problem than conventional floating-point arithmetic, it has completely different criterion when choosing algorithms or implementations of algorithms.  For example, for matrix inversion, because conventional floating-point arithmetic has unbounded rounding errors, it will choose certain flavour of LU-decomposition over Gaussian elimination and determinant division \cite{Numerical_Recipes}. The result difference of LU-decomposition, Gaussian elimination and determinant division shows that conventional floating-point arithmetic has strong dependency problem, which has been a way of life when using conventional floating-point arithmetic, e.g., different algorithms or different implementation of the same algorithm are expected to give different results, of which a best algorithm or implementation is always chosen for each usage context \cite{Numerical_Recipes}, even though they may be mathematically equivalent. In contrast, rounding errors are bounded in both variance arithmetic and interval arithmetic \cite{Worst_Case_Error_Bounds}, so they are no longer needed to be considered.  When interval arithmetic reformat a numerical question as "Given each input to be an interval, what the output would be?", it effectively states that the results for most numerical questions to be solved should be \emph{unique} to be either one or a few intervals that tightest bounds the results, \emph{regardless} of the algorithm to be used, \emph{unless} dependency problem is introduced in the implementation of an algorithm.  Same concept is true for variance arithmetic, which converges all input uncertainty distribution to \emph{ubiquitously Gaussian} at the outputs, and which further \emph{quantifies} the source of the dependency problem.  Using variance arithmetic instead of conventional floating-point arithmetic, the focus has shifted from minimizing rounding errors to minimizing dependency problem.  Of the three algorithms for matrix inversion, both LU-decomposition and Gaussian elimination are progressive, which means that each input may appear multiple times in different branch at different time, whose dependency problem is difficult to quantified.  On the other hand, a determinant of a $N \times N$ matrix can be treated as a $N$-order polynomial with $N^2$ variables, to be readily for the Taylor expansion, which results in Formula \eqref{eqn: determinant uncertainty recursion}, so that the determinant division method is chosen in this paper for matrix inversion.  For the same reason, in the moving-window linear regression, the worse method in conventional floating-point arithmetic, Formula \eqref{eqn: time-series linear regression}, becomes the better method in variance arithmetic, and vice versa.  
+
+Due to the requirement of minimizing dependence problem, variance arithmetic has much less operational freedom than conventional arithmetic and may require extensive symbolic calculations, following practices in affine arithmetic \cite{Symbolic_Affine_Arithmetic}.  Also, the comparison relation in conventional arithmetic needs to be re-evaluated in variance arithmetic, which brings about another reason for different algorithm selection.
+
+
+\subsection{Improving Precision Arithmetic}
+
+Figure \ref{fig: Independent_Uncertainty_Assumption} uses a cut-off for the test of the uncorrelated uncertainty assumption among two uncertainty-bearing values.  A better approach is to associate the amount of the dependence problem with the amount of correlation between the uncertainties of the two values.  
+
+There are actually three different ways to round up $(2S+1)?4R\; 2^E$:
+\begin{enumerate}
+\item always round up $(2S+1)?4R\; 2^E$ to $(S+1)-R\; 2^{E+1}$;
+\item always round up $(2S+1)?4R\; 2^E$ to $S+R\; 2^{E+1}$;
+\item randomly round up $(2S+1)?4R\; 2^E$ to either $(S+1)-R\; 2^{E+1}$ or $S+R\; 2^{E+1}$.
+\end{enumerate}
+The first method results in slightly slower loss of significand than the second method, while the third method changes variance arithmetic from deterministic to stochastic.  Because no empirical difference has been detected among these three different rounding up methods, the first method is chosen in this paper. Further study is required to distinguish the different rounding up methods.
+
+The objectives of variance arithmetic need to be studied further.  For example, Formula \eqref{eqn: uncertainty variance} has rejected the effect of uncertainty on the expected value by incorporating the value shift due to uncertainty as increase of variance, such as in the case of calculating $f(x) = x^{2}$.  The effect of such asymmetrical broadening is unclear.  
+
+The number of bits to be calculated inside uncertainty also needs to be studied further.  For example, when limited bits are calculated inside uncertainty, adding insignificant higher order term of a Taylor expansion may decrease the value error while increasing the uncertainty deviation, which may call for an optimal bits to be calculated inside uncertainty for the truncation rule.  
+
+Because variance arithmetic is based on generic concepts, it is targeted to be a generic arithmetic for both uncertainty-tracking and uncertainty-bounding.  However, it seems a worthwhile alternative to interval arithmetic and the de facto independence arithmetic.  Before applying it generally, variance arithmetic still needs more groundwork and testing.  It should be tested further in other problems such as improper integrations, solutions to linear equations, and solutions to differential equations.    
+
+
+\subsection{Acknowledgements}
+
+As an independent researcher, the author of this paper feels indebted to encouragements and valuable discussions with Dr. Zhong Zhong from Brookhaven National Laboratory, Prof. Hui Cao from Yale University, Dr. Anthony Begley from \emph{Physics Reviews B}, the organizers of \emph{AMCS 2005}, with Prof. Hamid R. Arabnia from University of Georgia in particular, and the organizers of \emph{NKS Mathematica Forum 2007}, with Dr. Stephen Wolfram in particular. Finally, the author of this paper is very grateful for the editors and reviewers of \emph{Reliable Computing} for their tremendous help in shaping this unusual paper from unusual source, with managing editor, Prof. Rolph Baker Kearfott in particular.
+
+
+
+\bibliographystyle{unsrt}
+\bibliography{PrecisionArithmetic}
+
+
+
+
+\section{Figures}
+
+
+
+\clearpage
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=4.5in,height=2.4in]{Prec4_FFT_Sin_Profile_Freq1.png} 
+\captionof{figure}{The output deviations and value errors of the forward FFT on a noisy sine signal of FFT order 4, index frequency 1 and input deviation $10^{-2}$.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Dev'' means output uncertainty deviations, ``Error'' means output value errors, ``Real'' means real part, and ``Imag'' means imaginary part.  Because both interval arithmetic and independence arithmetic using conventional floating arithmetic for underlying calculations, they have the same value errors.}
+\label{fig: Prec4_FFT_Sin_Profile_Freq1}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=4.5in,height=2.4in]{Precx_FFT_Sin_Profile_Freq1.png} 
+\captionof{figure}{The output value errors of the forward FFT on a noisy sine signal of index frequency 1 and input deviation $10^{-2}$ using variance arithmetic with different bit inside uncertainty.  In the legend, ``Prec0'' means variance arithmetic with 0-bit calculated inside uncertainty, ``Prec2'' means variance arithmetic with 2-bit calculated inside uncertainty, and "Prec4'' means variance arithmetic with 4-bit calculated inside uncertainty.}
+\label{fig: Precx_FFT_Sin_Profile_Freq1}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Indp_Sin_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions using independence arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.98.}
+\label{fig: Indp_Sin_NormDist}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Sin_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.97. }
+\label{fig: Prec4_Sin_NormDist}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{All_For_AvgDev_vs_FFTOrder.png} 
+\captionof{figure}{ For the same input deviation of $10^{-3}$, the empirical average output deviations of the forward FFT increase exponentially with the FFT order for all uncertainty-bearing arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: All_For_AvgDev_vs_FFTOrder}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{All_For_AvgDev_vs_InDev.png} 
+\captionof{figure}{ For the same order of the FFT calculation of 15, the empirical average output deviations of the forward FFT increases linearly with the input deviation for all uncertainty-bearing arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: All_For_AvgDev_vs_InDev}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec4_For_AvgErr_vs_FFTOrder_InDev.png} 
+\captionof{figure}{ The empirical average output value errors using variance arithmetic increase exponentially with the FFT order and linearly with the input deviation, respectively.}
+\label{fig: Prec4_For_AvgErr_vs_FFTOrder_InDev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec4_For_AvgSig_vs_FFTOrder_InDev.png} 
+\captionof{figure}{ The empirical average output tracking ratios using variance arithmetic is a constant when the input deviation is larger than $10^{-14}$ and the FFT order is more than 5 for forward FFT algorithms.  Because the precision of conventional floating-point representation is at $10^{-16}$, adding Gaussian noises with the deviation of $10^{-17}$ should have little effect on the input data.  For the same reason, the output tracking ratios are stable only when the input deviation is more than $10^{-14}$.  When the FFT order is $2$, a FFT calculation actually involves no arithmetic calculation between input data.  For the same reason, when the FFT order is less than 5, there is not enough arithmetic calculation for the result tracking ratios to reach equilibrium.}
+\label{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Indp_PropBase_AvgSig.png} 
+\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using independence arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: Indp_PropBase_AvgSig}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_PropBase_AvgSig.png} 
+\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using variance arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: Prec4_PropBase_AvgSig}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Intv_PropBase_AvgSig.png} 
+\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using interval arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: Intv_PropBase_AvgSig}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{All_For_AvgSig_vs_FFTOrder.png} 
+\captionof{figure}{ The empirical output average tracking ratios vs. the FFT order of the forward FFT for all three arithmetics when the input uncertainty deviation is $10^{-3}$.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: All_For_AvgSig_vs_FFTOrder}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[height=3.00in]{Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec.png} 
+\captionof{figure}{The empirical average output deviations vs. the FFT order and input deviations using variance arithmetic for the round-trip FFT algorithm.}
+\label{fig: Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=3.00in]{Intv_Rnd_AvgErr_vs_FFTOrder_InPrec.png} 
+\captionof{figure}{ The empirical average output deviations vs. the FFT order and input deviations using interval arithmetic for the round-trip FFT algorithm.}
+\label{fig: Intv_Rnd_AvgErr_vs_FFTOrder_InPrec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{All_For_MaxBnd_vs_FFTOrder.png} 
+\captionof{figure}{ The empirical maximal output bounding ratios vs. the FFT order of the forward FFT for all three arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
+\label{fig: All_For_MaxBnd_vs_FFTOrder}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=3.0in]{Prec4_DevLeak_vs_FFTOrder_InPrec.png} 
+\captionof{figure}{ The empirical deviation leakages vs. the FFT order and input deviations using variance arithmetic for the forward FFT algorithm.}
+\label{fig: Prec4_DevLeak_vs_FFTOrder_InPrec}
+\end{figure}
+
+\clearpage
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Inv_AvgErr_vs_DetSig_MatSize.png} 
+\captionof{figure}{ The empirical average value errors of the inverted matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
+\label{fig: Prec4_Inv_AvgErr_vs_DetSig_MatSize}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Adj_AvgErr_vs_DetSig_MatSize.png} 
+\captionof{figure}{ The empirical average value errors of the adjugate matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
+\label{fig: Prec4_Adj_AvgErr_vs_DetSig_MatSize}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Adj_RelErr_vs_DetSig_MatSize.png} 
+\captionof{figure}{ Empirical relative value errors of the adjugate matrix using conventional floating-point arithmetic vs. corresponding sub-matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
+\label{fig: Prec4_Adj_RelErr_vs_DetSig_MatSize}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=3.0in]{Prec4_AvgErr_vs_MatSize_InPrec.png} 
+\captionof{figure}{Using variance arithmetic, the average output deviations of the adjugate
+matrix vs. input precision and the matrix size.}
+\label{fig: Prec4_AvgErr_vs_MatSize_InPrec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=3.0in]{Prec4_Inv_AvgSig_vs_MatSize_InPrec.png} 
+\captionof{figure}{ Using variance arithmetic, the average output tracking ratios of the adjugate matrix vs. input precision and the matrix size.}
+\label{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Matrix9_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
+\label{fig: Prec4_Matrix9_NormDist}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=3.0in]{Prec4_Rnd_AvgSig_vs_MatSize_InPrec.png} 
+\captionof{figure}{ Using variance arithmetic, the average output tracking ratios of the double inverted matrix vs. input precision and the matrix size.}
+\label{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.75in]{Prec4_Matrix_Rnd_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
+\label{fig: Prec4_Matrix_Rnd_NormDist}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{AvgValErr_vs_Regression.png} 
+\captionof{figure}{ The empirical output average value errors and corresponding average output deviations vs. the recursion iteration count of the regressive calculation of sine values using interval arithmetic, variance arithmetic and independent arithmetic.  The x-axis indicates the recursion iteration count L, while the y-axis indicates either the average value errors or average uncertainty deviations.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, and "Prec'' means variance arithmetic.}
+\label{fig: AvgValErr_vs_Regression}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{AvgErrSig_MaxBndRat_vs_Regression.png} 
+\captionof{figure}{ The empirical output maximal bounding ratios and average tracking ratios vs. the recursion iteration count of the regressive calculation of sine values using interval and variance arithmetic.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, and "Prec'' means variance arithmetic.}
+\label{fig: AvgErrSig_MaxBndRat_vs_Regression}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{Prec0_Taylor_1E-3.png} 
+\captionof{figure}{ The delta deviation, deviations, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-3}$ input uncertainty using variance arithmetic with 0-bit calculated inside uncertainty. Different inputs are displayed using different color. }
+\label{fig: Prec0_Taylor_1E-3}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{Prec4_Taylor_1E-3.png} 
+\captionof{figure}{ The deviations, resolutions, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-3}$ input uncertainty using variance arithmetic with 4-bit calculated inside uncertainty. Different inputs are displayed using different color. }
+\label{fig: Prec4_Taylor_1E-3}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{Prec0_Taylor_1E-2.png} 
+\captionof{figure}{ The delta deviation, deviations, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-2}$ input uncertainty using variance arithmetic with 0-bit calculated inside uncertainty. Different inputs are displayed using different color. }
+\label{fig: Prec0_Taylor_1E-2}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in,height=2.5in]{Prec4_Taylor_1E-2.png} 
+\captionof{figure}{ The deviations, resolutions, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-2}$ input uncertainty using variance arithmetic with 4-bit calculated inside uncertainty. Different inputs are displayed using different color. }
+\label{fig: Prec4_Taylor_1E-2}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Moving_Window_Linear_Fit.png} 
+\captionof{figure}{ Coefficients of X in \eqref{eqn: time-series linear regression} at current and next position in a time series of the least square linear regression. Except the two end points at $X=-H$ and $X=H+1$, respectively, the coefficient difference between the current and then next position in a time series are all by 1 in the overlapping region from $X=-H+1$ to $X=H$, which results in \eqref{eqn: moving-window linear regression}. }
+\label{fig: Moving_Window_Linear_Fit}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Simple_Prec4_AvgErrSig_vs_InDev_Time.png} 
+\captionof{figure}{ The average tracking ratio vs. time and the input uncertainty deviations for the progressive moving-window linear regression of a straight line using variance arithmetic with 4-bit calculated inside uncertainty.  }
+\label{fig: Simple_Prec4_AvgErrSig_vs_InDev_Time}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Simple_Err_Dev_vs_Time.png} 
+\captionof{figure}{ The output uncertainty deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line.  In the legend,  "Indp" means independent arithmetic, "Intv" means interval arithmetic, "Prec4" and "Prec2" means the variance arithmetic with 4-bit and 2-bit calculated inside uncertainty, respectively. }
+\label{fig: Simple_Err_Dev_vs_Time}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Simple_AvgErrSig_MaxBndRat_vs_Time.png} 
+\captionof{figure}{ The average tracking ratios and the max bounding ratios vs. time for the progressive moving-window linear regression of a straight line.  In the legend, "Indp" means independence arithmetic, "Intv" means interval arithmetic, "Prec4" and "Prec2" means the variance arithmetic with 4-bit and 2-bit calculated inside uncertainty, respectively.  "Max Bnd Ratio" is the abbreviation for the maximal bounding ratio, and "Avg Trk Ratio" is the abbreviation for the average tracking ratios. }
+\label{fig: Simple_AvgErrSig_MaxBndRat_vs_Time}
+\end{figure}
+
+
+\clearpage
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Simple_ErrSig_vs_Time_Prec.png} 
+\captionof{figure}{ The average tracking ratios vs. time and the bits calculated inside uncertainty using variance arithmetic for the progressive moving-window linear regression of a straight line.  In the legend, "Indp" means independence arithmetic, "PrecX" means the variance arithmetic with X-bit calculated inside uncertainty. }
+\label{fig: Simple_ErrSig_vs_Time_Prec}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Simple_ErrSig_vs_Time_Prec2.png} 
+\captionof{figure}{ The average tracking ratios vs. time and the input precision using variance arithmetic with 2-bit calculated inside uncertainty for the progressive moving-window linear regression of a straight line for different input uncertainty deviations.  }
+\label{fig: Simple_ErrSig_vs_Time_Prec2}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Changed_Err_Dev_vs_Time.png} 
+\captionof{figure}{ The output deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle. }
+\label{fig: Changed_Err_Dev_vs_Time}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Noiser_Err_Dev_vs_Time.png} 
+\captionof{figure}{ The output deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line with only 10-fold increase of both input noise in the middle. }
+\label{fig: Noiser_Err_Dev_vs_Time}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Changed_AvgErrSig_MaxBndRat_vs_Time.png} 
+\captionof{figure}{ The average tracking ratios and the max bounding ratio vs. time for the progressive moving-window linear regression of a straight line with 10-fold larger input noise and deviation in the middle, to simulate larger noise following the straight line.  }
+\label{fig: Changed_AvgErrSig_MaxBndRat_vs_Time}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Noiser_AvgErrSig_MaxBndRat_vs_Time.png} 
+\captionof{figure}{ The average tracking ratios and the max bounding ratio vs. time for the progressive moving-window linear regression of a straight line with 10-fold larger input noise but same input deviation in middle, to simulate defects in obtaining the corresponding uncertainty deviations. }
+\label{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{ChangedDirect_Err_Dev_vs_Time.png} 
+\captionof{figure}{ The output deviations and the value errors vs. time for the expressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle using variance arithmetic with 4-bit calculated inside uncertainty. }
+\label{fig: ChangedDirect_Err_Dev_vs_Time}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{ChangedDirect_Prec4_AvgErrSig_vs_InDev_Time.png} 
+\captionof{figure}{ The average tracking ratio vs. time and the input uncertainty deviations for the expressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle using variance arithmetic with 4-bit calculated inside uncertainty.  }
+\label{fig: ChangeDirect_Prec4_AvgErrSig_vs_InDev_Time}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Prec4_LineFit_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions of the progressive moving-window linear regression for different cases (as shown in legend) using variance arithmetic with 4-bit calculated inside uncertainty.  The case of "Changed" is best fitted by a exponential distribution with the mean of 0 and deviation of 0.25. }
+\label{fig: Prec4_LineFit_NormDist}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Prec4_LineFitDirect_NormDist.png} 
+\captionof{figure}{ The measured tracking ratio distributions of the expressive moving-window linear regression using Formula \eqref{eqn: moving-window linear regression} for different cases (as shown in legend) using variance arithmetic with 4-bit calculated inside uncertainty.  The cases of "Simple" and "Changed" are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.97.  }
+\label{fig: Prec4_LineFitDirect_NormDist}
+\end{figure}
+
+
+\end{document}
