@@ -1,26 +1,90 @@
 package Type;
 
-public class IntvDbl implements IReal{
+import Stats.Stat;
 
-    public IntvDbl( double value, double range ) throws ValueException, UncertaintyException {
-        init( value, range );
-    }
-    public IntvDbl( double value ) throws ValueException, UncertaintyException {
-        init( value, Double.NaN );
-    }
+/*
+ * A type that implement interval arithmetic for finite double.
+ * During construction or operation, IntvDbl throws:
+ *  *) ValueException if value is not finite
+ *  *) UncertaintyException if range is not finite. 
+ *  
+ * During construction, if range is NaN, the range is set on the LSB of the value without throwing UncertaintyException.
+ */
+public class IntvDbl implements IReal{
+    private double value;
+    private double range;
+
     public IntvDbl() {
-        try {
-            init( 0, 0 );
-        } catch (ValueException | UncertaintyException e) {
-        }
+        value = 0;
+        range = 0;
     }
 
     public IntvDbl(IntvDbl intvDbl) {
-        try {
-            init( intvDbl.value, intvDbl.range );
-        } catch (ValueException | UncertaintyException e) {
+        value = intvDbl.value;
+        range = intvDbl.range;
+    }
+
+    private void init( double value, double range ) throws ValueException, UncertaintyException {
+        if (!Double.isFinite(value)) {
+            throw new IReal.ValueException(String.format("value %.3e for IntvDbl()", value));
+        }
+        if (Double.isFinite(range)) {
+            range = Math.abs(range);
+        } else if (Double.isNaN(range)) {
+            range = IReal.getLSB(value);
+        } else {
+            throw new IReal.UncertaintyException(String.format("range %.3e for IntvDbl()", range));
+        }      
+        this.value = value;
+        this.range = range;
+        if (!IReal.isFinite(this)) {
+            throw new IReal.UncertaintyException(String.format("%s: %s", toString(), typeName()));
         }
     }
+
+    public IntvDbl( double value, double range ) throws ValueException, UncertaintyException {
+        init(value, range);
+    }
+
+    public IntvDbl( double value ) throws ValueException {
+        try {
+            init(value, 0);
+        } catch (UncertaintyException e) {
+            // should never happens
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public IntvDbl clone() {
+        return new IntvDbl(this);
+    }
+
+    @Override
+    public String toString() {
+        return IReal.toString(this, "@");
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof IntvDbl) {
+            IntvDbl intv = (IntvDbl) other;
+            return (Double.compare(this.value, intv.value) == 0) &&
+                   (Double.compare(this.range, intv.range) == 0);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Double.hashCode(value);
+    }
+
 
     @Override
     public String typeName() {
@@ -28,162 +92,181 @@ public class IntvDbl implements IReal{
     }
 
     @Override
-    public double value() throws ValueException {
+    public double value() {
         return value;
     }
 
     @Override
-    public double uncertainty() throws UncertaintyException {
+    public double uncertainty() {
         return range;
     }
 
     @Override
-    public String toString() {
-        return IRealTool.toString(this);
+    public IntvDbl negate() {
+        value = -value;
+        return this;
     }
 
     @Override
-    public IReal negate() {
-        try {
-            return new IntvDbl( -value, range );
-        } catch (ValueException | UncertaintyException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public IReal shift(int bits) throws ValueException, UncertaintyException {
-        final Dbl val = new Dbl(value());
-        final Dbl unc = new Dbl(uncertainty());
+    public IntvDbl shift(int bits) throws ValueException, UncertaintyException {
+        Dbl val = new Dbl(value);
+        final Dbl unc = new Dbl(range);
         val.exp += bits;
         unc.exp += bits;
-        final double value = val.toDouble(), uncertainty;
+        final double value, range;
         try {
-            uncertainty = unc.toDouble();
+            value = val.toDouble();
         } catch (ValueException e) {
-            throw new IReal.UncertaintyException();
+            throw new ValueException(String.format("%s: %s << %d", toString(), typeName(), bits));
         }
-        return new IntvDbl( value, uncertainty );
+        try {
+            range = unc.toDouble();
+        } catch (ValueException e) {
+            throw new UncertaintyException(String.format("%s: %s << %d", toString(), typeName(), bits));
+        }
+        this.value = value;
+        this.range = range;
+        return this;
     }
 
     @Override
-    public IReal scale(double fold) throws ValueException, UncertaintyException {
-        final double value = value() * fold;
-        final double range = uncertainty() * fold;
+    public IntvDbl add(double offset) throws ValueException {
+        final double value = this.value + offset;
         if (!Double.isFinite(value)) {
-            throw new IReal.ValueException();
+            throw new ValueException( String.format("%s: %s << %.3e", toString(), typeName(), offset) );
+        }
+        this.value = value;
+        return this;
+    }
+
+    @Override
+    public IntvDbl multiply(double scale) throws ValueException, UncertaintyException {
+        final double value = this.value * scale;
+        final double range = this.range * Math.abs(scale);
+        if (!Double.isFinite(value)) {
+            throw new ValueException( String.format("%s: %s * %.3e", toString(), typeName(), scale) );
         }
         if (!Double.isFinite(range)) {
-            throw new IReal.UncertaintyException();
+            throw new UncertaintyException( String.format("%s: %s * %.3e", toString(), typeName(), scale) );
         }
-        return new IntvDbl(value, range);
+        this.value = value;
+        this.range = range;
+        return this;
     }
 
     @Override
-    public IReal power(double exponent) throws ValueException, UncertaintyException {
+    public IntvDbl power(double exponent) throws ValueException, UncertaintyException {
+        if (!Double.isFinite(exponent) || !IReal.isFinite(this)) {
+            throw new ValueException(String.format("pow([%.3e, %.3e]: %s, %.3e)", 
+                        value - range, value + range, typeName(), exponent));
+        }
         if (exponent == 0) {
-            return new IntvDbl(1, 0);
+            value = 1;
+            range = 0;
+            return this;
         }
         if (exponent == 1) {
-            return new IntvDbl(this);
+            return this;
         }
-        if ((exponent < 0) && ((value - range) <= 0) && ((value + range) >= 0)) {
-            throw new UncertaintyException();
+        if ((Math.floor(exponent) != Math.ceil(exponent)) && ((value - range) < 0)) {
+            throw new UncertaintyException(String.format("pow([%.3e, %.3e]: %s, %.3e)", 
+                        value - range, value + range, typeName(), exponent));
         }
-        if ((value - range) >= 0) {
-            final double min = (exponent > 0)? Math.pow(value - range, exponent) : Math.pow(value + range, exponent);
-            final double max = (exponent > 0)? Math.pow(value + range, exponent) : Math.pow(value - range, exponent);
-            return new IntvDbl( (max + min) * 0.5, (max - min) * 0.5);
+        if ((exponent < 0) && ((value - range) <= 0) && (0 <= (value + range))) {
+            throw new UncertaintyException(String.format("pow([%.3e, %.3e]: %s, %.3e)", 
+                        value - range, value + range, typeName(), exponent));
         }
-        final double min_, max_;
-        try {
-            min_ = Math.pow((value - range), exponent);
-            max_ = Math.pow((value + range), exponent);
-        } catch (Throwable e) {
-            throw new ValueException();
+        Stat mm = new Stat();
+        double d;
+
+        d = Math.pow((value - range), exponent);
+        if (!Double.isFinite(d)) {
+            throw new ValueException(String.format("pow(%.3e - %.3e: %s, %.3e)", 
+                        value, range, typeName(), exponent));
         }
-        if (Double.isNaN(min_) || Double.isNaN(max_)) {
-            throw new ValueException();
+        mm.accum(d);
+
+        d = Math.pow((value + range), exponent);
+        if (!Double.isFinite(d)) {
+            throw new ValueException(String.format("pow(%.3e + %.3e: %s, %.3e)",
+                        value, range, typeName(), exponent));
         }
-        final double max = Math.max(min_, max_);
-        double min = Math.min(min_, max_);
-        if ((min > 0) && ((value - range) <= 0) && ((value + range) >= 0)) {
-            min = 0;
+        mm.accum(d);
+ 
+        if ((0 < range) && ((value - range) <= 0) && (0 <= (value + range))) {
+            d = Math.pow(0, exponent);
+            if (!Double.isFinite(d)) {
+                throw new ValueException(String.format("pow([%.3e, %.3e]: %s, %.3e)", 
+                            value - range, value + range, typeName(), exponent));
+            }
+            mm.accum(d);
         }
-        return new IntvDbl( (max + min) * 0.5, (max - min) * 0.5);
+        value = (mm.max() + mm.min()) * 0.5;
+        range = (mm.max() - mm.min()) * 0.5;
+        return this;
     }
 
     @Override
-    public IReal add(IReal other) throws TypeException, ValueException, UncertaintyException {
+    public IntvDbl add(IReal other) throws TypeException, ValueException, UncertaintyException {
+        if (other == null) {
+            throw new TypeException(String.format("%s: %s + null", toString(), typeName()));
+        }
         if (!(other instanceof IntvDbl)) {
-            throw new TypeException();
+            throw new TypeException(String.format("%s: %s + %s: %s", 
+                        toString(), typeName(), other.toString(), other.typeName()));
         }
         final double value = value() + other.value();
         final double range = uncertainty() + other.uncertainty();
         if (!Double.isFinite(value)) {
-            throw new IReal.ValueException();
+            throw new ValueException(String.format("%s + %s: %s", toString(), other.toString(), typeName()));
         }
         if (!Double.isFinite(range)) {
-            throw new IReal.UncertaintyException();
-        }
-        return new IntvDbl(value, range);
-    }
-
-    @Override
-    public IReal multiply(IReal other) throws TypeException, ValueException, UncertaintyException {
-        final double value = other.value();
-        final double range = other.uncertainty();
-        final double[] sLimt = new double[] {
-            (this.value - this.range)*(value - range),
-            (this.value + this.range)*(value - range),
-            (this.value + this.range)*(value - range),
-            (this.value + this.range)*(value + range),
-        };
-        double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-        for (double v : sLimt) {
-            if (min > v) {
-                min = v;
-            }
-            if (max < v) {
-                max = v;
-            }
-        }
-        if (!Double.isFinite(max) && !Double.isFinite(min)) {
-            throw new IReal.ValueException();
-        }
-        if (!Double.isFinite(max) || !Double.isFinite(min)) {
-            throw new IReal.UncertaintyException();
-        }
-        return new IntvDbl((max + min)/2.0, (max - min)/2.0);
-    }
-
-    private void init( double value, double range ) throws ValueException, UncertaintyException {
-        if (!Double.isFinite(value)) {
-            throw new IReal.ValueException();
-        }
-        if (Double.isFinite(range)) {
-            range = Math.abs(range);
-        } else if (Double.isNaN(range)) {
-            final Dbl d = new Dbl(value);
-            d.val = 1;
-            d.neg = false;
-            range = d.toDouble();
-        } else {
-            throw new IReal.UncertaintyException();
-        }
-        
-        if (!Double.isFinite(value + range)){
-            throw new IReal.UncertaintyException();
-        }
-        if (!Double.isFinite(value - range)){
-            throw new IReal.UncertaintyException();
+            throw new UncertaintyException(String.format("%s + %s: %s", toString(), other.toString(), typeName()));
         }
         this.value = value;
         this.range = range;
+        return this;
     }
 
-
-    private double value;
-    private double range;
-    
+    @Override
+    public IntvDbl multiply(IReal other) throws TypeException, ValueException, UncertaintyException {
+        if (other == null) {
+            throw new TypeException(String.format("%s: %s * null", toString(), typeName()));
+        }
+        if (!(other instanceof IntvDbl)) {
+            throw new TypeException(String.format("%s: %s * %s: %s", 
+                        toString(), typeName(), other.toString(), other.typeName()));
+        }
+        final double value = other.value();
+        final double range = other.uncertainty();
+        Stat mm = new Stat();
+        double d;
+        d = (this.value - this.range)*(value - range);
+        if (!Double.isFinite(d)) {
+            throw new UncertaintyException(String.format("(%.3e - %.3e)*(%.3e - %.3e): %s)", 
+                        this.value, this.range, value, range, typeName()));
+        }
+        mm.accum(d);
+        d = (this.value - this.range)*(value + range);
+        if (!Double.isFinite(d)) {
+            throw new UncertaintyException(String.format("(%.3e - %.3e)*(%.3e + %.3e): %s)", 
+                        this.value, this.range, value, range, typeName()));
+        }
+        mm.accum(d);
+        d = (this.value + this.range)*(value - range);
+        if (!Double.isFinite(d)) {
+            throw new UncertaintyException(String.format("(%.3e + %.3e)*(%.3e - %.3e): %s)", 
+                        this.value, this.range, value, range, typeName()));
+        }
+        mm.accum(d);
+        d = (this.value + this.range)*(value + range);
+        if (!Double.isFinite(d)) {
+            throw new UncertaintyException(String.format("(%.3e + %.3e)*(%.3e + %.3e): %s)", 
+                        this.value, this.range, value, range, typeName()));
+        }
+        mm.accum(d);
+        this.value = (mm.max() + mm.min()) * 0.5;
+        this.range = (mm.max() - mm.min()) * 0.5;
+        return this;
+    }
 }

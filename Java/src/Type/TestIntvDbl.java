@@ -1,175 +1,384 @@
 package Type;
 
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
+import java.util.HashMap;
+import java.util.Map;
 
 import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
 
+
 public class TestIntvDbl {
     IntvDbl intv;
-    final double TOLERANCE = 5E-16;
-    
-    private void testNegate() {
-        IntvDbl neg = (IntvDbl) intv.negate();
+    IntvDbl intv2;
+    IntvDbl res;
+    final double TOLERANCE = 2E-16;
+    final double TOLERANCE_DIV = 5E-16;
+
+    @Test 
+    public void testSimple() {
         try {
-            assertEquals(-intv.value(), neg.value(), TOLERANCE);
-            assertEquals(intv.uncertainty(), neg.uncertainty(), TOLERANCE);
-        } catch (ValueException | UncertaintyException e) {
+            final double in = Math.sqrt(Double.MIN_NORMAL);
+            multiply(in, 0, in, 0, false);
+            testMultiply(in, in, false);
+        } catch (ValueException | UncertaintyException | TypeException e) {
             fail();
         }
     }
+
+    private void testClone() {
+        res = intv.clone();
+        assertTrue(intv.equals(res));
+        assertTrue(res.equals(intv));
+        assertTrue(intv != res);
+        assertFalse(intv == res);
+
+        IntvDbl clone = res.clone();
+        assertTrue(intv.equals(clone));
+        assertTrue(clone.equals(intv));
+    }
     
+    private void testNegate() {
+        res = intv.clone();
+        res.negate();
+        assertEquals(-intv.value(), res.value(), TOLERANCE);
+        assertEquals(intv.uncertainty(), res.uncertainty(), TOLERANCE);
+    }
+    
+    private void testShift( int bits ) {
+        try {
+            res = intv.clone();
+            res.shift(bits);
+            if (bits >= 0) {
+                assertEquals(intv.value() * (1L << bits), res.value(), TOLERANCE);
+                assertEquals(intv.uncertainty() * (1L << bits), res.uncertainty(), TOLERANCE);
+            } else {
+                assertEquals(intv.value() / (1L << -bits), res.value(), TOLERANCE);
+                assertEquals(intv.uncertainty() / (1L << -bits), res.uncertainty(), TOLERANCE);
+            }
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
     private void testShift() {
         testShift(0);
         testShift(10);
         testShift(-10);
     }
-    private void testShift( int bits ) {
-        IntvDbl sh;
+
+    private void testOffset( double offset ) {
         try {
-            sh = (IntvDbl) intv.shift(bits);
-            if (bits >= 0) {
-                assertEquals(intv.value() * (1L << bits), sh.value(), TOLERANCE);
-                assertEquals(intv.uncertainty() * (1L << bits), sh.uncertainty(), TOLERANCE);
-            } else {
-                assertEquals(intv.value() / (1L << -bits), sh.value(), TOLERANCE);
-                assertEquals(intv.uncertainty() / (1L << -bits), sh.uncertainty(), TOLERANCE);
-            }
-        } catch (ValueException | UncertaintyException e) {
-            fail();
+            res = intv.clone();
+            res.add(offset);
+            assertEquals(intv.value() + offset, res.value(), TOLERANCE);
+            assertEquals(intv.uncertainty(), res.uncertainty(), TOLERANCE);
+        } catch (ValueException e) {
+            fail(e.getMessage());
         }
     }
+    private void testOffset() {
+        testOffset(0);
+        testOffset(10);
+        testOffset(-10);
+        testOffset(0.1);
+        testOffset(-0.1);
+        testOffset(1000);
+        testOffset(-1000);
+        testOffset(0.001);
+        testOffset(-0.001);
+    }
 
+    private void testScale( double fold ) {
+        try {
+            res = intv.clone();
+            res.multiply(fold);
+            assertEquals(intv.value() * fold, res.value(), TOLERANCE);
+            assertEquals(intv.uncertainty() * Math.abs(fold), res.uncertainty(), TOLERANCE);
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
     private void testScale() {
         testScale(0);
+        testScale(10);
+        testScale(-10);
+        testScale(0.1);
+        testScale(-0.1);
         testScale(1000);
         testScale(-1000);
         testScale(0.001);
         testScale(-0.001);
     }
-    private void testScale( double fold ) {
-        IntvDbl sh;
+
+    private void testPowerAllRange( double exponent ) {
         try {
-            sh = (IntvDbl) intv.scale(fold);
-            assertEquals(intv.value() * fold, sh.value(), TOLERANCE);
-            assertEquals(intv.uncertainty() * Math.abs(fold), sh.uncertainty(), TOLERANCE);
+            res = intv.clone();
+            res.power(exponent);
+            final double div = intv.uncertainty() / 8;
+            final double tolerance = (0 <= exponent)? TOLERANCE : TOLERANCE_DIV;
+            if (div == 0) {
+                assertEquals(Math.pow(intv.value(), exponent), res.value(), tolerance);
+            } else {
+                if (((intv.value() - intv.uncertainty()) <= 0) && 
+                    (0 <= (intv.value() - intv.uncertainty()))) {
+                    assertTrue((res.value() - res.uncertainty()) <= 0);
+                    assertTrue(0 <= (res.value() + res.uncertainty()));
+                }
+                for (int i = -8; i <= 8; ++i) {
+                    final double d = Math.pow(intv.value() + i*div, exponent);
+                    if ((d + tolerance) < (res.value() - res.uncertainty()))
+                        fail(String.format("(%e in %s)^%e: value %e < %s by %e", intv.value() + i*div, intv.toString(), exponent, 
+                             d, res.toString(), (res.value() - res.uncertainty()) - d));
+                    if ((res.value() + res.uncertainty()) < (d - tolerance)) {
+                        fail(String.format("(%e in %s)^%e: value %e > %s by %e", intv.value() + i*div, intv.toString(), exponent, 
+                             d, res.toString(), d - (res.value() + res.uncertainty())));
+                    }
+                }
+            }
+        } catch (ValueException e) {
+            fail(e.getMessage());
+        } catch (UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
+    private void testPowerValueException( double exponent ) {
+        try {
+            res = intv.clone();
+            res.power(exponent);
+            fail();
+        } catch (ValueException e) {
+        } catch (UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
+    private void testPowerUncertaintyException( double exponent ) {
+        try {
+            res = intv.clone();
+            res.power(exponent);
+            fail();
+        } catch (ValueException e) {
+            fail(e.getMessage());
+        } catch (UncertaintyException e) {
+        }
+    }
+    private void testPower( double exponent, boolean raiseValueException ) {
+        if ((Math.floor(exponent) != Math.ceil(exponent)) && 
+            ((intv.value() - intv.uncertainty()) < 0)) {
+            testPowerUncertaintyException( exponent );
+            return;
+        }
+        if ((exponent < 0) && 
+            ((intv.value() - intv.uncertainty()) <= 0) && 
+            (0 <= (intv.value() + intv.uncertainty()))) {
+            testPowerUncertaintyException( exponent );
+            return;
+        }
+        if (exponent == 0) {
+            try {
+                res = intv.clone();
+                res.power(exponent);
+                assertEquals(1, res.value(), 0);
+                assertEquals(0, res.uncertainty(), 0);
+            } catch (ValueException | UncertaintyException e) {
+                fail(e.getMessage());
+            }
+            return;
+        } 
+        if (raiseValueException) {
+            testPowerValueException(exponent);
+        } else {
+            testPowerAllRange( exponent );
+        }
+    }
+    private void testPower(final double[] sFiniteExponent, final double[] sValueExceptionExponent) {
+        if (sFiniteExponent != null) {
+            for (double exp: sFiniteExponent) {
+                testPower( exp, false );
+            }
+        }
+
+        if (sValueExceptionExponent != null) {
+            for (double exp: sValueExceptionExponent) {
+                testPower( exp, true );
+            }
+        }
+    }
+    private void testPower(double value, double range, double exponent, boolean raiseValueException) {
+        try {
+            intv = new IntvDbl(value, range);
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+        testPower(exponent, raiseValueException);
+    }
+
+    private void testSingle(double value, double range, 
+                            final double[] sFiniteExponent, final double[] sValueExceptionExponent) {
+        try {
+            intv = new IntvDbl(value, range);
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+        assertEquals(value, intv.value(), TOLERANCE);
+        assertEquals(range, intv.uncertainty(), TOLERANCE);
+        testClone();
+        testNegate();
+        testShift();
+        testOffset();
+        testScale();
+        testPower(sFiniteExponent, sValueExceptionExponent);
+    }
+    private void testSingle(double value, double range) {
+        testSingle(value, range, new double[]{0, 1, -1, 2, -2, 0.5, -0.5}, null);
+    }
+
+    @Test
+    public void testHash() {
+        final Map<IntvDbl, Integer> sMap = new HashMap<IntvDbl, Integer>();
+        IntvDbl three;
+        try {
+            three = new IntvDbl(0, 1);
+            final IntvDbl one = new IntvDbl(1, 0);
+            final IntvDbl two = new IntvDbl(1, 2);
+            sMap.put(one, 1);
+            sMap.put(two, 2);
+            sMap.put(three, 3);
+            assertEquals((Integer) 1, sMap.get(one));
+            assertEquals((Integer) 2, sMap.get(two));
+            assertEquals((Integer) 3, sMap.get(three));
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void testToString(String str, double value, double range) {
+        try {
+            intv = new IntvDbl(value, range);
+            assertEquals(str, intv.toString());
         } catch (ValueException | UncertaintyException e) {
             fail();
         }
     }
 
     @Test
-    public void testInit() {
-        try {
-            intv = new IntvDbl();
-            assertEquals(0, intv.value(), TOLERANCE);
-            assertEquals(0, intv.uncertainty(), TOLERANCE);
-            testNegate();
-            testShift();
-            testScale();
+    public void testToString() {
+        testToString("0", 0, 0);
+        testToString("-1@100", -1, 100);
+        testToString("-1@1.0e+03", -1, 1000);    
+        testToString("1.000e-03@1.0e-03", 0.001, 0.001);
+        testToString("-8.988e+307@9.0e+307", -Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
+        testToString("2.225e-308@4.9e-324", Double.MIN_NORMAL, Double.MIN_VALUE);
+        testToString("2.225e-308@1.8e+308", Double.MIN_NORMAL, Double.MAX_VALUE);        
+    }
 
-            intv = new IntvDbl(1);
-            assertEquals(1, intv.value(), TOLERANCE);
-            assertEquals(0, intv.uncertainty(), TOLERANCE);
-            testNegate();
-            testShift();
-            testScale();
 
-            intv = new IntvDbl(Double.MAX_VALUE / 2);
-            assertEquals(Double.MAX_VALUE / 2, intv.value(), TOLERANCE);
-            assertEquals(1, intv.uncertainty() / Double.MAX_VALUE * (1L << 54), TOLERANCE);
-            testNegate();
+    @Test
+    public void test0() {
+        testSingle(0, 0);
+        testSingle(0, 1);
+        testSingle(0, 10);
+        testSingle(0, 0.1);
+        testSingle(0, 1000);
+        testSingle(0, 0.001);
+        testSingle( 0, Double.MIN_VALUE);
+        testSingle( 0, Double.MIN_NORMAL);
+        testSingle( 0, Math.sqrt(Double.MAX_VALUE));
 
-            intv = new IntvDbl(0, 1);
-            assertEquals(0, intv.value(), TOLERANCE);
-            assertEquals(1, intv.uncertainty(), TOLERANCE);
-            testNegate();
-            testShift();
-            testScale();
-
-            intv = new IntvDbl(1, -1);
-            assertEquals(1, intv.value(), TOLERANCE);
-            assertEquals(1, intv.uncertainty(), TOLERANCE);
-            testNegate();
-            testShift();
-            testScale();
-
-            intv = new IntvDbl(Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
-            assertEquals(Double.MAX_VALUE / 2, intv.value(), TOLERANCE);
-            assertEquals(Double.MAX_VALUE / 2, intv.uncertainty(), TOLERANCE);
-            testNegate();
-
-            intv = new IntvDbl(-Double.MAX_VALUE / 2, -Double.MAX_VALUE / 2);
-            assertEquals(-Double.MAX_VALUE / 2, intv.value(), TOLERANCE);
-            assertEquals(Double.MAX_VALUE / 2, intv.uncertainty(), TOLERANCE);
-            testNegate();
-
-        } catch (ValueException | UncertaintyException e) {
-            fail();
-        }
+        testPower(0, Double.MAX_VALUE, 0.5, false);
+        testPower(0, Double.MAX_VALUE, -0.5, false);
+        testPower(0, Double.MAX_VALUE, 2, true);
+        testPower(0, Double.MAX_VALUE, -2, true);
     }
 
     @Test
-    public void testInitFail() {
-        try {
-            intv = new IntvDbl(Double.NaN);
-            fail();
-        } catch (ValueException e) {
-        } catch (UncertaintyException e) {
-            fail();
-        }
+    public void test1() {
+        testSingle(1, 0);
+        testSingle(-1, 0);
+        testSingle(1, 1);
+        testSingle(-1, 1);
+        testSingle(1, 10);
+        testSingle(-1, 10);
+        testSingle(1, 0.1);
+        testSingle(-1, 0.1);
+        testSingle(1, 1000);
+        testSingle(-1, 1000);
+        testSingle(1, 0.001);
+        testSingle(-1, 0.001);
+    }
 
-        try {
-            intv = new IntvDbl(Double.MAX_VALUE);
-            fail();
-        } catch (ValueException e) {
-            fail();
-        } catch (UncertaintyException e) {
-        }
+    @Test
+    public void test4() {
+        testSingle(4, 0);
+        testSingle(-4, 0);
+        testSingle(4, 1);
+        testSingle(-4, 1);
+        testSingle(4, 10);
+        testSingle(-4, 10);
+        testSingle(4, 0.1);
+        testSingle(-4, 0.1);
+        testSingle(4, 1000);
+        testSingle(-4, 1000);
+        testSingle(4, 0.001);
+        testSingle(-4, 0.001);
+    }
 
-        try {
-            intv = new IntvDbl(Double.NEGATIVE_INFINITY);
-            fail();
-        } catch (ValueException e) {
-        } catch (UncertaintyException e) {
-            fail();
-        }
+    @Test
+    public void test4th() {
+        testSingle(0.25, 0);
+        testSingle(-0.25, 0);
+        testSingle(0.25, 1);
+        testSingle(-0.25, 1);
+        testSingle(0.25, 10);
+        testSingle(-0.25, 10);
+        testSingle(0.25, 0.1);
+        testSingle(-0.25, 0.1);
+        testSingle(0.25, 1000);
+        testSingle(-0.25, 1000);
+        testSingle(0.25, 0.001);
+        testSingle(-0.25, 0.001);
+    }
 
-        try {
-            intv = new IntvDbl(1, Double.POSITIVE_INFINITY);
-            fail();
-        } catch (ValueException e) {
-            fail();
-        } catch (UncertaintyException e) {
-        }
+    @Test
+    public void testMinNormal() {
+        final double[] sFiniteExponent = new double[] {0,1,-1,2,0.5,-0,5};
+        final double[] sValueExceptionExponent = new double[]{-2};
+        testSingle( Double.MIN_NORMAL, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_NORMAL, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle( Double.MIN_NORMAL, Double.MIN_VALUE, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_NORMAL, Double.MIN_VALUE, sFiniteExponent, sValueExceptionExponent);
+        testSingle( Double.MIN_NORMAL, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_NORMAL, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
+    }
 
-        try {
-            intv = new IntvDbl(1, Double.NEGATIVE_INFINITY);
-            fail();
-        } catch (ValueException e) {
-            fail();
-        } catch (UncertaintyException e) {
-        }
+    @Test
+    public void testMinValue() {
+        final double[] sFiniteExponent = new double[] {0,1,2,0.5,-0,5};
+        final double[] sValueExceptionExponent = new double[]{-1, -2};
+        testSingle( Double.MIN_VALUE, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_VALUE, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle( Double.MIN_VALUE, Double.MIN_VALUE, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_VALUE, Double.MIN_VALUE, sFiniteExponent, sValueExceptionExponent);
+        testSingle( Double.MIN_VALUE, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-Double.MIN_VALUE, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
+    }
 
-        try {
-            intv = new IntvDbl(Double.MAX_VALUE / 2, Double.MAX_VALUE);
-            fail();
-        } catch (ValueException e) {
-            fail();
-        } catch (UncertaintyException e) {
-        }
-
-        try {
-            intv = new IntvDbl(-Double.MAX_VALUE / 2, Double.MAX_VALUE);
-            fail();
-        } catch (ValueException e) {
-            fail();
-        } catch (UncertaintyException e) {
-        }
+    @Test
+    public void testMaxValue() {
+        final double maxValue = Double.MAX_VALUE / 1024;
+        final double[] sFiniteExponent = new double[] {0,1,-1,-2,0.5,-0.5};
+        final double[] sValueExceptionExponent = new double[]{2};
+        testSingle( maxValue, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-maxValue, 0, sFiniteExponent, sValueExceptionExponent);
+        testSingle( maxValue, maxValue, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-maxValue, maxValue, sFiniteExponent, sValueExceptionExponent);
+        testSingle( maxValue, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
+        testSingle(-maxValue, Double.MIN_NORMAL, sFiniteExponent, sValueExceptionExponent);
     }
 
     @Test
@@ -188,10 +397,78 @@ public class TestIntvDbl {
             assertEquals(1, intv.uncertainty() / Double.MIN_VALUE, TOLERANCE);
 
         } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
         }
-
     }
 
+    private void testInitFail(double value) {
+        try {
+            intv = new IntvDbl(value);
+            fail();
+        } catch (ValueException e) {
+        }
+
+        try {
+            intv = new IntvDbl(value, 0);
+            fail();
+        } catch (ValueException e) {
+        } catch (UncertaintyException e) {
+            fail(e.getMessage());
+        }
+
+        try {
+            intv = new IntvDbl(0, value);
+            fail();
+        } catch (ValueException e) {
+            fail(e.getMessage());
+        } catch (UncertaintyException e) {
+        }
+    }
+
+    @Test
+    public void testInitFail() {
+        testInitFail(Double.POSITIVE_INFINITY);
+        testInitFail(Double.NEGATIVE_INFINITY);
+
+        try {
+            intv = new IntvDbl(Double.NaN);
+        } catch (ValueException e) {
+        }
+
+        final double lsbMax = Double.MAX_VALUE * 1E-16;
+
+        try {
+            intv = new IntvDbl(Double.MAX_VALUE, 0);
+        } catch (ValueException e) {
+            fail();
+        } catch (UncertaintyException e) {
+            fail();
+        }
+
+        try {
+            intv = new IntvDbl(Double.MAX_VALUE, lsbMax);
+            fail();
+        } catch (ValueException e) {
+            fail();
+        } catch (UncertaintyException e) {
+        }
+
+        try {
+            intv = new IntvDbl(0, Double.MAX_VALUE);
+        } catch (ValueException e) {
+            fail();
+        } catch (UncertaintyException e) {
+            fail();
+        }
+
+        try {
+            intv = new IntvDbl(-lsbMax, Double.MAX_VALUE);
+            fail();
+        } catch (ValueException e) {
+            fail();
+        } catch (UncertaintyException e) {
+        }
+    }
 
     @Test
     public void testShiftFail() {
@@ -218,7 +495,7 @@ public class TestIntvDbl {
     public void testScaleFail() {
         try {
             intv = new IntvDbl(Double.MAX_VALUE * 0.999);
-            intv.scale(1.002);
+            intv.multiply(1.002);
             fail();
         } catch (ValueException e) {
         } catch (UncertaintyException e) {
@@ -227,7 +504,7 @@ public class TestIntvDbl {
 
         try {
             intv = new IntvDbl(Double.MAX_VALUE / 4, Double.MAX_VALUE / 2);
-            intv.scale(2.001);
+            intv.multiply(2.001);
             fail();
         } catch (ValueException e) {
             fail();
@@ -235,182 +512,219 @@ public class TestIntvDbl {
         }
     }
 
+    private void testAdd( double value1, double range1, double value2, double range2, boolean isAdd) {
+        try {
+            intv = new IntvDbl(value1, range1);
+            res = intv.clone();
+            intv2 = new IntvDbl(isAdd? value2 : -value2, range2);
+            res.add(intv2);
+            final double value = isAdd? value1 + value2 : value1 - value2;
+            if (value == 0) {
+                assertEquals(0, res.value(), TOLERANCE);
+            } else {
+                assertEquals(String.format("%s + %s: value %e != %e", intv.toString(), intv2.toString(), value, res.value()), 
+                    1, res.value() / value, TOLERANCE);
+            }
+            if (Double.isNaN(range1)) {
+                range1 = IReal.getLSB(value1);
+            }
+            if (Double.isNaN(range2)) {
+                range2 = IReal.getLSB(value2);
+            }
+            final double range = range1 + range2;
+            assertEquals(String.format("%s + %s: range %e != %e", intv.toString(), intv2.toString(), range, res.uncertainty()), 
+                         range, res.uncertainty(), TOLERANCE);
+        } catch (TypeException | ValueException | UncertaintyException e) {
+            fail();
+        }
+    }
+    private void testAdd(final double[] sValue, final double[] sRange) {
+        for (double value1: sValue) {
+            for (double value2: sValue) {
+                for (double range1: sRange) {
+                    for (double range2: sRange) {
+                        testAdd( value1, range1, value2, range2, true);
+                        testAdd( value1, range1, value2, range2, false);
+                    }
+                }
+            }
+        }
+    }
 
     @Test
     public void testAdd() {
-        try {
-            final IntvDbl op1 = new IntvDbl(1);
-            final IntvDbl op2 = new IntvDbl(2);;
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(3, intv.value(), TOLERANCE);
-            assertEquals(2.0 / (1L << 52), intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
+        testAdd(new double[]{0, Double.MIN_NORMAL, 1, -1, 2, -2}, 
+                new double[]{0, 0.1, 10, 1E-3, 1E+3, 1E-6, 1E+6, 1E-9, 1E+9, 1E-12, 1E+12, 1E-15, 1E+15, Double.NaN, Double.MAX_VALUE / 2});
+        testAdd(new double[]{0, Double.MIN_VALUE, -Double.MIN_VALUE, Double.MIN_NORMAL, -Double.MIN_NORMAL}, 
+                new double[]{0, Double.MIN_VALUE, Double.MIN_NORMAL});
+        testAdd(new double[]{0, Double.MIN_VALUE / 2, -Double.MIN_VALUE / 2}, 
+                new double[]{0, Double.MIN_VALUE / 2});
 
         try {
-            final IntvDbl op1 = new IntvDbl(1);
-            final IntvDbl op2 = new IntvDbl(-2, 0.01);
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(-1, intv.value(), TOLERANCE);
-            assertEquals(0.01, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(1, 0.001);
-            final IntvDbl op2 = new IntvDbl(1, 0.001);;
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(2, intv.value(), TOLERANCE);
-            assertEquals(0.002, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(1, 0.001);
-            final IntvDbl op2 = new IntvDbl(-1, 0.001);;
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(0, intv.value(), TOLERANCE);
-            assertEquals(0.002, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(1, 0.001);
-            final IntvDbl op2 = new IntvDbl(1, 0.01);;
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(2, intv.value(), TOLERANCE);
-            assertEquals(0.011, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(Double.MIN_VALUE, Double.MAX_VALUE / 2);
-            final IntvDbl op2 = new IntvDbl(-Double.MIN_NORMAL, Double.MAX_VALUE / 2);;
-            intv = (IntvDbl) op1.add(op2);
-            assertEquals(-Double.MIN_NORMAL + Double.MIN_VALUE, intv.value(), TOLERANCE);
-            assertEquals(Double.MAX_VALUE, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(Double.MIN_VALUE, Double.MAX_VALUE / 2);
-            final IntvDbl op2 = new IntvDbl(-Double.MIN_NORMAL, Double.MAX_VALUE);;
-            intv = (IntvDbl) op1.add(op2);
-            fail();
-        } catch (UncertaintyException e) {
-        } catch (TypeException | ValueException e) {
-            fail();
-        }
-
-        try {
-            final IntvDbl op1 = new IntvDbl(Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
-            final IntvDbl op2 = new IntvDbl(Double.MAX_VALUE * 3 / 4, Double.MAX_VALUE / 4);;
-            intv = (IntvDbl) op1.add(op2);
+            intv = new IntvDbl(Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
+            res = intv.clone();
+            intv2 = new IntvDbl(Double.MAX_VALUE, 0);
+            res.add(intv2);
             fail();
         } catch (ValueException e) {
         } catch (TypeException | UncertaintyException e) {
-            fail();
+            fail(e.getMessage());
         }
+
+        try {
+            intv = new IntvDbl(0, Double.MAX_VALUE / 2);
+            res = intv.clone();
+            res.add(new IntvDbl(0, Double.MAX_VALUE));
+            fail();
+        } catch (UncertaintyException e) {
+        } catch (TypeException | ValueException e) {
+            fail(e.getMessage());
+        }
+
+        try {
+            intv = new IntvDbl();
+            res = intv.clone();
+            res.add(null);
+            fail();
+        } catch (TypeException e) {
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+
     }
 
+
+    private void testMultiply(double d1, double d2, boolean isMultiply) {
+        final double d = d1 * d2;
+        final double tolerance = (isMultiply? TOLERANCE : TOLERANCE_DIV) * Math.abs(d);
+        try {
+            if ((d + tolerance) < (res.value() - res.uncertainty())) {
+                fail(String.format("(%.3e in %s) %s (%.3e in %s): value %.3e < %s by %.3e", 
+                    d1, intv.toString(), isMultiply? "*" : "/",  d2, 
+                    isMultiply? intv2.toString() : intv2.power(-1).toString(), 
+                    d, res.toString(), d - (res.value() - res.uncertainty())));
+            }
+            if ((res.value() + res.uncertainty()) < (d - tolerance)) {
+                fail(String.format("(%.3e in %s) %s (%.3e in %s): value %.3e > %s by %.3e", 
+                    d1, intv.toString(), isMultiply? "*" : "/",  d2, 
+                    isMultiply? intv2.toString() : intv2.power(-1).toString(), 
+                    d, res.toString(), d - (res.value() + res.uncertainty())));
+            }
+        } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
+    private void testMultiply(boolean isMultiply, int samples) {
+        final double div = intv.uncertainty() / samples;
+        final double div2 = intv2.uncertainty() / samples;
+        if (div > 0) {
+            if (((intv.value() - intv.uncertainty()) <= 0) && 
+                (0 <= (intv.value() - intv.uncertainty()))) {
+                    assertTrue((res.value() - res.uncertainty()) <= 0);
+                    assertTrue(0 <= (res.value() + res.uncertainty()));
+            }
+            for (int i = -samples; i <= samples; ++i) {
+                final double d1 = intv.value() + i*div;
+                if (div2 > 0) {
+                    for (int j = -samples; j <= samples; ++j) {
+                        final double d2 = intv2.value() + j*div2;
+                        testMultiply(d1, d2, isMultiply);
+                    }
+                } else {
+                    testMultiply(d1, intv2.value(), isMultiply);
+                }
+            }
+        } else if (div2 > 0) {
+            for (int j = -samples; j <= samples; ++j) {
+                final double d2 = intv2.value() + j*div2;
+                testMultiply(intv.value(), d2, isMultiply);
+            }
+        }
+    }
+    private void multiply( double value1, double range1, double value2, double range2, boolean isMultiply) throws ValueException, UncertaintyException, TypeException {
+        intv = new IntvDbl(value1, range1);
+        res = intv.clone();
+        intv2 = isMultiply? new IntvDbl(value2, range2) : new IntvDbl(value2, range2).power(-1);
+        res.multiply(intv2);
+    }
+    private void testMultiply( double value1, double range1, double value2, double range2, boolean isMultiply) {
+        try {
+            multiply( value1, range1, value2, range2, isMultiply);
+            testMultiply(value1, isMultiply? value2 : 1.0 / value2, isMultiply);
+            testMultiply(isMultiply, 8);
+        } catch (TypeException | ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+    }
+    private void testMultiply(final double[] sValue, final double[] sRange) {
+        for (double value1: sValue) {
+            for (double value2: sValue) {
+                for (double range1: sRange) {
+                    for (double range2: sRange) {
+                        testMultiply( value1, range1, value2, range2, true);
+                        if (range2 < Math.abs(value2)) {
+                            testMultiply( value1, range1, value2, range2, false);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Test
-    public void testMultiple() {
+    public void testMultiply() {
+        final double maxValue = Math.sqrt(Double.MAX_VALUE);
+        final double minValue = Math.sqrt(Double.MIN_VALUE);
+        final double minNormal = Math.sqrt(Double.MIN_NORMAL);
+
+        testMultiply(new double[]{0, 1, -1, 2, -2}, 
+                new double[]{0, 0.1, 10, 1E-3, 1E+3, 1E-6, 1E+6, 1E-9, 1E+9, 1E-12, 1E+12, 1E-15, 1E+15, Double.NaN, maxValue});
+        testMultiply(new double[]{0, minValue, -minValue, minNormal, -minNormal}, 
+                new double[]{0, minValue, minNormal});
+
         try {
-            final IntvDbl op1 = new IntvDbl(1);
-            final IntvDbl op2 = new IntvDbl(-2);
-            intv = (IntvDbl) op1.multiply(op2);
-            assertEquals(-2, intv.value(), TOLERANCE);
-            assertEquals(2.0 / (1L << 52), intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
+            intv = new IntvDbl(2E-17, 1);
+            res = intv.clone();
+            intv2 = new IntvDbl(2E-17, 1);
+            res.multiply(intv2);
+            assertEquals(0, res.value(), 0);
+            assertEquals(1, res.uncertainty(), 0);
+        } catch (ValueException e) {
+        } catch (TypeException | UncertaintyException e) {
+            fail(e.getMessage());
         }
 
         try {
-            final IntvDbl op1 = new IntvDbl(1, 0.1);
-            final IntvDbl op2 = new IntvDbl(2, 0.1);
-            intv = (IntvDbl) op1.multiply(op2);
-            assertEquals(2.01, intv.value(), TOLERANCE*2);
-            assertEquals(0.3, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
+            intv = new IntvDbl(maxValue, maxValue);
+            res = intv.clone();
+            intv2 = new IntvDbl(maxValue, 0);
+            res.multiply(intv2);
             fail();
+        } catch (UncertaintyException e) {
+        } catch (TypeException | ValueException e) {
+            fail(e.getMessage());
         }
-        
-        try {
-            final IntvDbl op1 = new IntvDbl(1, 0.1);
-            final IntvDbl op2 = new IntvDbl(0, 0.1);
-            intv = (IntvDbl) op1.multiply(op2);
-            assertEquals(0, intv.value(), TOLERANCE);
-            assertEquals(0.11, intv.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
-            fail();
-        }
-    }
 
-    private void testPower( double value1, double range1, double exponent, 
-                            double value, double range, double tolerance ) {
         try {
-            final IntvDbl op1 = new IntvDbl(value1, range1);
-            intv = (IntvDbl) op1.power(exponent);
-            assertEquals(value, intv.value(), tolerance);
-            assertEquals(range, intv.uncertainty(), tolerance);
+            intv = new IntvDbl(0, maxValue);
+            res = intv.clone();
+            intv2 = new IntvDbl(0, Double.MAX_VALUE);
+            res.multiply(intv2);
+            fail();
+        } catch (UncertaintyException e) {
+        } catch (TypeException | ValueException e) {
+            fail(e.getMessage());
+        }
+
+        try {
+            intv = new IntvDbl();
+            res = intv.clone();
+            res.multiply(null);
+            fail();
+        } catch (TypeException e) {
         } catch (ValueException | UncertaintyException e) {
-            fail();
+            fail(e.getMessage());
         }
     }
-
-    private void testPower( double value1, double range1, double exponent) {
-
-        try {
-            final IntvDbl op1 = new IntvDbl(value1, range1);
-            op1.power(exponent);
-            fail();
-        } catch (ValueException | UncertaintyException e) {
-        }
-    }
-        
-    @Test
-    public void testPower() {
-        testPower(0, 0.1, 0, 1, 0, TOLERANCE);
-        testPower(1, 0.1, 0, 1, 0, TOLERANCE);
-        testPower(2, 0.1, 0, 1, 0, TOLERANCE);
-        testPower(-1, 0.1, 0, 1, 0, TOLERANCE);
-        testPower(1, 1, 0, 1, 0, TOLERANCE);
-        testPower(1, Double.NaN, 0, 1, 0, TOLERANCE);
-
-        testPower(0, 0.1, 1, 0, 0.1, TOLERANCE);
-        testPower(1, 0.1, 1, 1, 0.1, TOLERANCE);
-        testPower(2, 0.1, 1, 2, 0.1, TOLERANCE);
-        testPower(-1, 0.1, 1, -1, 0.1, TOLERANCE);
-        testPower(1, 1, 1, 1, 1, TOLERANCE);
-        testPower(1, Double.NaN, 0, 1, 1.0/(1L << Dbl.DOUBLE_EXP_SHIFT), TOLERANCE);
-
-        testPower(0, 0.1, 2, 0.005, 0.005, TOLERANCE);
-        testPower(1, 0.1, 2, 1.01, 0.2, TOLERANCE);
-        testPower(2, 0.1, 2, 4.01, 0.4, TOLERANCE);
-        testPower(-1, 0.1, 2, 1.01, 0.2, TOLERANCE);
-        testPower(1, 1, 2, 2, 2, TOLERANCE);
-        testPower(1, Double.NaN, 0, 1, 2.0/(1L << Dbl.DOUBLE_EXP_SHIFT), TOLERANCE);
-
-        testPower(0, 0.1, 0.5);
-        testPower(1, 0.1, 0.5, 0.99874607311033267, 0.05006277505981887, TOLERANCE);
-        testPower(2, 0.1, 0.5, 1.41377127491398302, 0.03536639970496084, TOLERANCE);
-        testPower(-1, 0.1, 0.5);
-        testPower(1, 1, 0.5, 0.7071067811865475, 0.7071067811865475, TOLERANCE);
-        testPower(1, Double.NaN, 0.5, 1, 0.5/(1L << Dbl.DOUBLE_EXP_SHIFT), TOLERANCE);
-
-        testPower(0, 0.1, -1);
-        testPower(1, 0.1, -1, 1.0101010101010101, 0.10101010101010101, TOLERANCE);
-        testPower(2, 0.1, -1, 0.5012531328320802, 0.02506265664160401, TOLERANCE);
-        testPower(-1, 0.1, -1, -1.0101010101010101, 0.10101010101010101, TOLERANCE);
-        testPower(1, 1, -1);
-        testPower(1, Double.NaN, 0, 1, 1.0/(1L << Dbl.DOUBLE_EXP_SHIFT), TOLERANCE);
-    }
-    
 }
+

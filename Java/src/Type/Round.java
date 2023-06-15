@@ -2,7 +2,17 @@ package Type;
 
 
 /*
- * A tool class to round up or down
+ * A tool class to round up or down with minimal rouding errors for the val.
+ *  upOnce(): val >>= 1.  return true if the LSB is 1 so that the rounding error is changed
+ *  upBy(shift):
+ *      When 0 <= shift >=0, upBy(shift) is eqivalent to shift * upOnce().
+ *          The range of positive shift is capped at Long.SIZE
+ *      When shift < 0, upBy(shift) is eqivalent to val <<= shift.
+ *          The range of negative shift is not checked, presumptively it does not generate 64-bit overflow.  
+ *          If not, the result may not be expected.
+ *           *) 1L << 64 == 1L
+ *           *) 1L << 65 == 2L
+ *      Return true if any rounding error is generated
  */
 class Round {
     long val;
@@ -16,9 +26,6 @@ class Round {
         this(val, false);
     }
 
-    /*
-     * shift down once, which corresponds to round up significand once.
-     */
     boolean upOnce() {
         if ((val & 1) != 0) {
             if (rndErr) {
@@ -35,14 +42,6 @@ class Round {
         }
     }
 
-    /*
-     * upBy() is eqivalent to shift * upOnce()
-     * The range of negative shift is not checked, presumptively it is in the range.  If not, the result may not be expected.
-     *  *) 1L << 64 == 1
-     *  *) 1L << 65 == 2
-     * The range of positive shift is capped at Long.SIZE
-     * return true if any rounding error is generated
-     */
     boolean upBy(int shift) {
         if (shift <= 0) {
             val <<= -shift;

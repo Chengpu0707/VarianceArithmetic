@@ -4,7 +4,7 @@ public class Stat {
 	private int d_count;
 	private double d_sum;
 	private double d_sum2;
-	private double d_min = Double.MAX_VALUE;
+	private double d_min = +Double.MAX_VALUE;
 	private double d_max = -Double.MAX_VALUE;
 
 	public void clear() {
