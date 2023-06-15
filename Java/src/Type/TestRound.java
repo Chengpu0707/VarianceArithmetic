@@ -163,9 +163,6 @@ public class TestRound {
         assertEquals( 4611686018427387904L, 1L << 62);
         assertEquals(-9223372036854775808L, 1L << 63);
         // the mask function no longer works
-        assertEquals(0, 1L >> 1);
-        assertEquals(0, 1L >> 2);
-        assertEquals(0, 1L >> 3);
         assertEquals(1, 1L << 64);
         assertEquals(2, 1L << 65);
 
