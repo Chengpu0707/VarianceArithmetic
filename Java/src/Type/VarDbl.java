@@ -1,14 +1,18 @@
 package Type;
 
-import java.lang.Math;
-import java.util.HashMap;
-import java.util.Map;
-
 /*
- * A 128-bit varrance representation which is consistent with a double when the variance is zero
+ * A base class for storage type for variance arithmetic.
+ * It add a taylor() method for the general Taylor expansion using the following approximation:
+ *  *) M(x, 2n) = (dx)^(2n) (2n-1)!!
+ *  *) M(x, 2n+1) = 0
+ * It implements IReal.power() using the VarDbl.taylor().
+ * 
+ * This class contains the following data management private methods
+ *      protected void init(final double value, final double variance, final boolean rnd);
+ *      private void pack(int exp, boolean neg, long val, boolean rnd, long var);
+ *      
  */
 public class VarDbl implements IReal {
-
     public VarDbl(final double value, final double variance, boolean rnd) throws ValueException, UncertaintyException {
         init(value, variance, rnd);
     }
@@ -17,7 +21,11 @@ public class VarDbl implements IReal {
     }
     public VarDbl(final double value) throws ValueException {
         try {
-            init(value, Double.NaN, false);
+            final Dbl dVal = new Dbl(value);
+            final Dbl dVar = new Dbl(value);
+            dVar.val = 1;
+            dVar.exp *= 2;
+            normalize(dVal, dVar, false);
         } catch (UncertaintyException e) {
         }
     }
@@ -39,6 +47,35 @@ public class VarDbl implements IReal {
 
 
     @Override
+    public VarDbl clone() {
+        return new VarDbl(this);
+    }
+
+    @Override
+    public String toString() {
+        return IReal.toString(this, "~");
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof VarDbl) {
+            VarDbl varDbl = (VarDbl) other;
+            return (this.val == varDbl.val) && (this.var == varDbl.var);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) this.val;
+    }
+
+
+    @Override
     public String typeName() {
          return "VarDbl";
     }
@@ -49,41 +86,21 @@ public class VarDbl implements IReal {
         return dbl.toDouble();
     }
 
-    @Override
-    public double uncertainty() throws UncertaintyException {
-        final long var = var();
-        if (var == 0) {
-            return 0;
-        }
-        try {
-            final double variance = variance();
-            if (variance > 0) {
-                return Math.sqrt(variance);
-            }
-        } catch (UncertaintyException e) {
-        }
-        final Dbl dbl = new Dbl(exp(), false, var);
-         try {
-            return Math.sqrt(var) * dbl.toDouble();
-        } catch (ValueException e) {
-            throw new UncertaintyException();
-        }
-    }
-
     public double variance() throws UncertaintyException {
         if (var() == 0) {
             return 0;
         }
-        final Dbl dbl = new Dbl(exp() * 2, false, var());
         try {
+            final Dbl dbl = new Dbl(exp() * 2, false, var());
             return dbl.toDouble();
         } catch (ValueException e) {
-            throw new IReal.UncertaintyException();
+            throw new UncertaintyException(e.getMessage());
         }
     }
 
-    public double bias() {
-        return bias;
+    @Override
+    public double uncertainty() throws UncertaintyException {
+        return Math.sqrt(variance());
     }
 
     public double precSq() throws ValueException, UncertaintyException {
@@ -92,23 +109,22 @@ public class VarDbl implements IReal {
     }
 
     @Override
-    public String toString() {
-        return IRealTool.toString(this);
+    public VarDbl negate() {
+        boolean neg = !neg();
+        pack(exp(), neg, val(), rnd(), var());
+        return this;
     }
 
     @Override
-    public IReal negate() {
-        return new VarDbl(exp(), !neg(), val(), rnd(), var());
-    }
-
-    @Override
-    public IReal shift(int bits) throws ValueException, UncertaintyException {
+    public VarDbl shift(int bits) throws ValueException, UncertaintyException {
         int exp = exp() + bits;
-        if ((exp <= Dbl.DOUBLE_EXP_MAX) && (exp >= Dbl.DOUBLE_EXP_MIN)) {
-            return new VarDbl(exp, neg(), val(), rnd(), var());
+        if ((Dbl.DOUBLE_EXP_MIN <= exp) && (exp <= Dbl.DOUBLE_EXP_MAX)) {
+            pack(exp, neg(), val(), rnd(), var());
+            return this;
         }
         if (exp > Dbl.DOUBLE_EXP_MAX) {
-            throw new ValueException();
+            throw new ValueException(String.format("$s: shift %d overflow exp=%d val=%d var=%d", 
+                        typeName(), bits, val(), var()));
         }
         final Round rVal = new Round(val());
         final Round rVar = new Round(var());
@@ -126,89 +142,24 @@ public class VarDbl implements IReal {
             }
             exp = Dbl.DOUBLE_EXP_MIN;
         }
-        if (rVar.val == 0) {
-            if (rVal.val == 0) {
-                return new VarDbl();
-            }
-            final Dbl dbl = new Dbl(exp, neg(), rVal.val);
-            return new VarDbl(dbl.toDouble(), 0);
-        }
-        return new VarDbl(exp, neg(), rVal.val, rVal.rndErr, rVar.val);
+        pack(exp, neg(), rVal.val, rVal.rndErr, rVar.val);
+        return this;
     }
 
     @Override
-    public IReal scale(double value) throws ValueException, UncertaintyException {
-        VarDbl varDbl = new VarDbl();
-        varDbl.init(value() * value, variance() * value * value, rnd());
-        return varDbl;
-    }
-
-    protected static final int powerMaxOrder = 64;
-    protected static final Map<Double, double[]> ssPowerCoeff = new HashMap<Double, double[]>();
-
-    protected double[] powerTaylor(double exponent) {
-        final double[] sTaylor = new double[ powerMaxOrder ];
-        sTaylor[0] = 0;
-        sTaylor[1] = exponent;
-        --exponent;
-        for (int i = 2; (i < powerMaxOrder) && (sTaylor[i - 1] != 0); ++i, --exponent) {
-            sTaylor[i] = sTaylor[i - 1] * exponent / i;
-        }
-        return sTaylor;
-    }
-
-    protected double[] getPowerCoeff(double exponent) {
-        if ((exponent == 0)) {
-            return null;
-        }
-        if (ssPowerCoeff.containsKey(exponent)) {
-            return ssPowerCoeff.get(exponent);
-        }
-        final double[] sTaylor = powerTaylor(exponent);
-        final double[] sCoeff = new double[ powerMaxOrder ];
-        for (int i = 1; i < powerMaxOrder; ++i) {
-            for (int j = 1; j < i; ++j) {
-                sCoeff[i] += sTaylor[j] * sTaylor[i - j];
-            }
-        }
-        ssPowerCoeff.put(exponent, sCoeff);
-        return sCoeff;
-    }
-
-    /*
-     * Assume the input to be Gaussian at (value +/- dev)^exponent, calculate momentum of order 
-     */
-    protected double powerMomentum(double value, double variance, double exponent, int order) {
-        if ((variance <= 0) || (exponent == 0)) {
-            return Double.NaN;
-        }
-        if ((exponent == 1) || (order <= 0)) {
-            return 0;
-        }
-        final double dev = Math.sqrt( variance );
-        final double divid = dev / 8;
-        double momentum = 0;
-        double sum = 0;
-        for (double x = -6*dev; x <= +6*dev; x += divid) {
-            final double y = Math.pow(x, 1 / exponent);
-            if (!Double.isFinite(y)) {
-                continue;
-            }
-            final double z = (y - x) / dev;
-            final double den = Math.pow(y, 1 / exponent - 1) / exponent * 
-                               Math.exp(-0.5 * z * z) / dev;
-            final double mmt = Math.pow(y, order) + den;
-            if (!Double.isFinite(mmt)) {
-                continue;
-            }
-            sum += den;
-            momentum += mmt;
-        }
-        return momentum / sum;
+    public VarDbl add(double offset) throws ValueException, UncertaintyException {
+        init(value() + offset, variance(), rnd());
+        return this;
     }
 
     @Override
-    public IReal power( double exponent ) throws ValueException, UncertaintyException {
+    public VarDbl multiply(double fold) throws ValueException, UncertaintyException {
+        init(value() * fold, variance() * fold * fold, rnd());
+        return this;
+    }
+
+    @Override
+    public VarDbl power(double exponent) throws ValueException, UncertaintyException {
         if (exponent == 0) {
             return new VarDbl(1, 0);
         }
@@ -216,92 +167,46 @@ public class VarDbl implements IReal {
             return new VarDbl(this);
         }
         final double value = Math.pow(value(), exponent);
-        if (!Double.isFinite(value)) {
-            throw new ValueException();
-        }
-        double[] sCoeff = getPowerCoeff(exponent);
-        double variance = 0;
-        for (int i = 1; i < powerMaxOrder; ++i) {
-            variance += sCoeff[i] * powerMomentum(value(), variance(), exponent, i);
-        }
+        final double variance = variance() * value * value * exponent * exponent;
         return new VarDbl(value, variance);
     }
 
     @Override
-    public IReal add(final IReal other) throws TypeException, ValueException, UncertaintyException {
+    public VarDbl add(final IReal other) throws TypeException, ValueException, UncertaintyException {
+        if (other == null) {
+            throw new TypeException(String.format("%s: %s + null", toString(), typeName()));
+        }
         if (!(other instanceof VarDbl)) {
-            throw new TypeException();
+            throw new TypeException(String.format("%s: %s + %s: %s", 
+                        toString(), typeName(), other.toString(), other.typeName()));
         }
-        final VarDbl sum = new VarDbl();
-        return add((VarDbl) other, sum);
-    }
-
-    protected IReal add(final VarDbl other, final VarDbl sum) throws TypeException, ValueException, UncertaintyException {
-        // customized rounding to make sure that the value is accurate to the last digit
-        // see TestVarDblAdd.testAddRoundingError()
-        final double variance = variance() + other.variance();
-        final Dbl dThis = new Dbl(exp(), neg(), val());
-        final Dbl dOther = new Dbl(other.exp(), other.neg(), other.val());
-        boolean rThis = rnd(), rOther = other.rnd();
-        if (dThis.exp > dOther.exp) {
-            final int shift = dThis.exp - dOther.exp;
-            if (shift >= EXP_SHIFT) {
-                dOther.val = 0;
-                rOther = (other.val() != 0);
-            } else {
-                final Round rnd = new Round(other.val(), other.rnd());
-                rnd.upBy(shift);
-                dOther.val = rnd.val;
-                rOther = rnd.rndErr;
-            }
-            dOther.exp = dThis.exp;
-        } else if (dThis.exp < dOther.exp) {
-            final int shift = dOther.exp - dThis.exp;
-            if (shift >= EXP_SHIFT) {
-                dThis.val = 0;
-                rThis = (val() != 0);
-            } else {
-                final Round rnd = new Round(val(), rnd());
-                rnd.upBy(shift);
-                dThis.val = rnd.val;
-                rThis = rnd.rndErr;
-            }
-            dThis.exp = dOther.exp;
-        }
-        
-        if (dThis.neg == dOther.neg) {
-            if (rThis == rOther) {
-                sum.init(value() + other.value(), variance, rThis);
-            } else {
-                dThis.val += dOther.val;
-                sum.init(dThis.toDouble(), variance, false);                    
-            }
-        } else if (rThis != rOther) {
-            sum.init(value() + other.value(), variance, rThis);
-        } else if (dThis.val >= dOther.val) {
-            dThis.val -= dOther.val;
-            sum.init(dThis.toDouble(), variance, false); 
-        } else {
-            dOther.val -= dThis.val;
-            sum.init(dOther.toDouble(), variance, false);
-        }
-        return sum;
+        VarDbl v = (VarDbl) other;
+        boolean rndErr = (neg() == v.neg())
+            ? ((rnd() == v.rnd())? rnd() : false) 
+            : ((rnd() != v.rnd())? rnd() : false);
+        init(value() + v.value(), variance() + v.variance(), rndErr);
+        return this;
     }
 
     @Override
-    public IReal multiply(final IReal other) throws TypeException, ValueException, UncertaintyException {
-        if (!(other instanceof VarDbl)) {
-            throw new TypeException();
+    public VarDbl multiply(final IReal other) throws TypeException, ValueException, UncertaintyException {
+        if (other == null) {
+            throw new TypeException(String.format("%s: %s * null", toString(), typeName()));
         }
-        final VarDbl prod = new VarDbl(), ot = (VarDbl) other;
-        final double variance = ot.variance();
-        prod.init(value() * other.value(), 
-                  variance() * other.value() * other.value() + variance * value() * value() + variance() * variance,
-                  (rnd() == ot.rnd())? rnd() : false);
-        return prod;
+        if (!(other instanceof VarDbl)) {
+            throw new TypeException(String.format("%s: %s * %s: %s", 
+                        toString(), typeName(), other.toString(), other.typeName()));
+        }
+        VarDbl o = (VarDbl) other;
+        final double value = value(), var = variance(), oValue = o.value(), oVar = o.variance();
+        init(value * oValue, 
+             var * oValue * oValue + oVar * value * value + var * oVar,
+             (rnd() == o.rnd())? rnd() : false);
+        return this;
     }
     
 
+    
     static final int EXP_SHIFT = 53;
     static final long VAL_MASK = (1L << EXP_SHIFT) - 1;
 
@@ -313,7 +218,6 @@ public class VarDbl implements IReal {
  
     private long val;
     private long var;
-    private double bias;
 
     protected int exp()     { return (int) ((val >>> EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET); }
     protected boolean neg() { return (var & SIGN_MASK) != 0; }
@@ -376,30 +280,25 @@ public class VarDbl implements IReal {
         dVal.exp = dVar.exp * 2;
         try {
             if (!Double.isFinite(dVal.toDouble())) {
-                throw new IReal.UncertaintyException();
+                throw new UncertaintyException(String.format("Fail to normalize val=%d^%d var=%d^%d: %s", 
+                            dVal.val, dVal.exp, dVar.val, dVar.exp, typeName()));
             }
         } catch (ValueException e) {
-            throw new IReal.UncertaintyException();
+            throw new UncertaintyException(String.format("Fail to normalize val=%d^%d var=%d^%d: %s", 
+                            dVal.val, dVal.exp, dVar.val, dVar.exp, typeName()));
         }
         pack(dVar.exp, dVal.neg, rVal.val, rVal.rndErr, rVar.val);
     }
 
     protected void init(final double value, final double variance, final boolean rnd) throws ValueException, UncertaintyException {
         if (!Double.isFinite(value)) {
-            throw new IReal.ValueException();
+            throw new ValueException(String.format("Init %.3e~%.3e: %s", value, variance, typeName()));
         }
-        if (Double.isFinite(variance) && Double.isNaN(variance)) {
-            throw new IReal.UncertaintyException();
+        if (!Double.isFinite(variance)) {
+            throw new UncertaintyException(String.format("Init %.3e~%.3e: %s", value, variance, typeName()));
         }
         final Dbl dVal = new Dbl(value);
-        final Dbl dVar;
-        if (Double.isNaN(variance)) {
-            dVar = new Dbl(value);
-            dVar.val = 1;
-            dVar.exp *= 2;
-        } else {
-            dVar = new Dbl(variance);
-        }
+        final Dbl dVar = new Dbl(variance);
         normalize(dVal, dVar, rnd);
     }
 }

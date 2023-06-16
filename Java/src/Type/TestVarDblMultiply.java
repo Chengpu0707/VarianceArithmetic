@@ -38,9 +38,11 @@ public class TestVarDblMultiply {
         try {
             final VarDbl op1 = new VarDbl(value1, dev1*dev1);
             final VarDbl op2 = new VarDbl(value2, dev2*dev2);
-            final VarDbl prod1 = (VarDbl) op1.multiply(op2);
+            final VarDbl prod1 = op1.clone();
+            prod1.multiply(op2);
             test(prod1, value, dev, tolerance, eTest);
-            final VarDbl prod2 = (VarDbl) op2.multiply(op1);
+            final VarDbl prod2 = op2.clone();
+            prod2.multiply(op1);
             test(prod2, value, dev, tolerance, eTest);
             return prod2;
         } catch (TypeException | ValueException | UncertaintyException e) {
@@ -122,15 +124,18 @@ public class TestVarDblMultiply {
         try {
             final VarDbl op1 = new VarDbl(64919121L), op2 = new VarDbl(205117922L);
             final VarDbl op3 = new VarDbl(-159018721L), op4 = new VarDbl(83739041L);
-            final VarDbl re12 = (VarDbl) op1.multiply(op2);
+            final VarDbl re12 = op1.clone();
+            re12.multiply(op2);
             assertEquals(6658037598793281L, re12.val());
             assertEquals(1, re12.exp());
             assertEquals(2, re12.var());
-            final VarDbl re34 = (VarDbl) op3.multiply(op4);
+            final VarDbl re34 = op3.clone();
+            re34.multiply(op4);
             assertEquals(6658037598793280L, re34.val());
             assertEquals(1, re34.exp());
             assertEquals(3, re34.var());
-            final VarDbl re = (VarDbl) re12.add(re34);
+            final VarDbl re = re12.clone();
+            re.add(re34);
             assertEquals(2L << 24, re.val());
             assertEquals(-24, re.exp());
             assertEquals(5L << 50, re.var());

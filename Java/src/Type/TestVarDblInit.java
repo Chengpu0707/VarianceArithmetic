@@ -56,19 +56,19 @@ public class TestVarDblInit extends VarDbl {
     @Test
     public void test0() {
         test(0, 0);
-        assertEquals("0.000e+00", toString());
+        assertEquals("0", toString());
     }
 
     @Test
     public void test1() {
         test(1, 0);
-        assertEquals("1.000e+00", toString());
+        assertEquals("1", toString());
     }
 
     @Test
     public void testNeg1() {
         test(-1, 0);
-        assertEquals("-1.000e+00", toString());
+        assertEquals("-1", toString());
     }
 
     @Test
@@ -77,13 +77,13 @@ public class TestVarDblInit extends VarDbl {
         assertEquals(-26, exp());
         assertEquals(1L << 36, val());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, var());
-        assertEquals("1.024e+03~1.0e+00", toString());
+        assertEquals("1.024e+03~1", toString());
 
         test(1, 1.0 / 1024);
         assertEquals(-36, exp());
         assertEquals(1L << 36, val());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, var());
-        assertEquals("1.000e+00~9.8e-04", toString());
+        assertEquals("1~9.8e-04", toString());
     }
 
     @Test
@@ -92,19 +92,19 @@ public class TestVarDblInit extends VarDbl {
         assertEquals(-12, exp());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, val());
         assertEquals(1 << 24, var());
-        assertEquals("1.100e+12~1.0e+00", toString());
+        assertEquals("1.100e+12~1", toString());
 
         test(1L << 50, 1);
         assertEquals(-2, exp());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, val());
         assertEquals(1 << 4, var());
-        assertEquals("1.126e+15~1.0e+00", toString());
+        assertEquals("1.126e+15~1", toString());
 
         test(1L << 52, 1);
         assertEquals(0, exp());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, val());
         assertEquals(1, var());
-        assertEquals("4.504e+15~1.0e+00", toString());
+        assertEquals("4.504e+15~1", toString());
 
         test(1L << 53, 1, -2);
         assertEquals(1, exp());
@@ -125,25 +125,25 @@ public class TestVarDblInit extends VarDbl {
         assertEquals(-6, exp());
         assertEquals(1L << 6, val());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, var());
-        assertEquals("1.000e+00~1.0e+06", toString());
+        assertEquals("1~1.0e+06", toString());
 
         test(1, 1 << 26);
         assertEquals(0, exp());
         assertEquals(1, val());
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, var());
-        assertEquals("1.000e+00~6.7e+07", toString());
+        assertEquals("1~6.7e+07", toString());
         
         test(1, 1 << 27, -1);
         assertEquals(1, exp());
         assertEquals(0, val());     // rounding off
         assertEquals(Dbl.DOUBLE_VAL_EXTRA, var());
-        assertEquals("0.000e+00~1.3e+08", toString());
+        assertEquals("0~1.3e+08", toString());
 
         test(Double.MIN_NORMAL / 2, Math.sqrt(Double.MIN_VALUE), -1);
         assertEquals(Dbl.DOUBLE_EXP_MIN / 2, exp());
         assertEquals(0, val());
         assertEquals(1, var());
-        assertEquals("0.000e+00~2.2e-162", toString());
+        assertEquals("0~2.2e-162", toString());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class TestVarDblInit extends VarDbl {
         } catch (ValueException e) {
             fail();
         } catch (UncertaintyException e) {
-            assertEquals("0.000e+00", toString());
+            assertEquals("0", toString());
         }
     }
 
