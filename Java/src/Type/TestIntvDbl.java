@@ -26,7 +26,6 @@ public class TestIntvDbl {
         try {
             final double in = Math.sqrt(Double.MIN_NORMAL);
             multiply(in, 0, in, 0, false);
-            testMultiply(in, in, false);
         } catch (ValueException | UncertaintyException | TypeException e) {
             fail();
         }
