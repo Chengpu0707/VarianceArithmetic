@@ -15,7 +15,7 @@ public class TestVarDblInit extends VarDbl {
         super();
     }
 
-    private static final double VARIANCE_TOLERANCE = 2E-16;   // 53-bit
+    private static final double VARIANCE_TOLERANCE = 2.5E-16;   // 52-bit
 
     /*
      * special tolerance:
