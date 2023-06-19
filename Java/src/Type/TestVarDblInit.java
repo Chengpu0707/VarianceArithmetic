@@ -15,7 +15,7 @@ public class TestVarDblInit extends VarDbl {
         super();
     }
 
-    private static final double VARIANCE_TOLERANCE = 3E-16;   // 53-bit
+    private static final double VARIANCE_TOLERANCE = 2E-16;   // 53-bit
 
     /*
      * special tolerance:
@@ -24,7 +24,7 @@ public class TestVarDblInit extends VarDbl {
      */
     private void test(final double value, final double dev, final double tolerance) {
         try {
-            init(value, dev*dev, false);
+            init(value, dev*dev, false, false, BOUND_MAX);
 
             if ((tolerance == -1) ||  (value == 0)) {
                 assertTrue(0 == value()); 
@@ -172,7 +172,7 @@ public class TestVarDblInit extends VarDbl {
     @Test
     public void testExpOverMax() {
         try {
-            init(Math.sqrt(Double.MAX_VALUE), Double.POSITIVE_INFINITY, false);
+            init(Math.sqrt(Double.MAX_VALUE), Double.POSITIVE_INFINITY, false, false, BOUND_MAX);
             fail();
         } catch (ValueException e) {
             fail();
@@ -207,7 +207,7 @@ public class TestVarDblInit extends VarDbl {
 
             var = new VarDbl(Double.MIN_NORMAL, Double.NaN);
             assertEquals(1, var.value() / Double.MIN_NORMAL, VARIANCE_TOLERANCE);
-            assertEquals(1, var.uncertainty() / Double.MIN_VALUE, VARIANCE_TOLERANCE);
+            assertEquals(0, var.uncertainty(), VARIANCE_TOLERANCE);
 
         } catch (ValueException | UncertaintyException e) {
         }
