@@ -64,6 +64,7 @@ public class TestIntvDbl {
         testToString("-1@100", -1, 100);
         testToString("-1@1.0e+03", -1, 1000);    
         testToString("1.000e-03@1.0e-03", 0.001, 0.001);
+        testToString("1.000e-03@2.2e-19", 0.001,Double.NaN);
         testToString("-8.988e+307@9.0e+307", -Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
         testToString("2.225e-308@4.9e-324", Double.MIN_NORMAL, Double.MIN_VALUE);
         testToString("2.225e-308@1.8e+308", Double.MIN_NORMAL, Double.MAX_VALUE);        
