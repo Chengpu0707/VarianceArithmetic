@@ -100,7 +100,7 @@ $P \equiv \delta x / |x|$ is defined as the \emph{statistical precision} (or sim
 
 \item Otherwise, it is an \emph{imprecise value}.
 \end{itemize}
-The variance represents the reliable information content of a measurement statistically, with finer variance means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+The statistical precision represents the reliable information content of a measurement statistically, with finer statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
  
 
 
@@ -261,15 +261,27 @@ In this paper, a new floating-point arithmetic called \emph{variance arithmetic}
 
 \subsection{Foundation for Variance Arithmetic}
 
-The goal of variance arithmetic is to calculate the uncertainty variance around each output value.
+The variance arithmetic calculates the uncertainty variance around each output value.
+It is based on:
+\begin{itemize}
+\item the round up rule,
+
+\item the precision scaling principle, and
+
+\item the uncorrelated uncertainty assumption.
+\end{itemize}  
+
+The variance arithmetic uses \emph{the round up rule} to avoid the rounding error accumulation in the conventional floating-point representation.
 
 For an imprecise value $x$ with statistical deviation $\delta x$ of its uncertainty, variance arithmetic regards the \emph{statistical precision} $P(x) = \delta x/|x|$ of as the information content of the measurement $x \pm \delta x$.
 Variance arithmetic is based on the \emph{precision scaling principle}: When a imprecise is multiplied by a precise value, the result precision equals the precision of the imprecise value.
 
 The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
-The correlated parts common to different measurements are regarded as signals, which can either be designed or unwanted.
+The correlated parts common to different measurements are regarded as signals, which can either be desired or unwanted.
 As shown later in this paper, this assumption can be turned into a realistic and simple statistical requirement or test between two inputs, e.g, even if the two inputs are highly correlated to each other, if they have fine enough precision, their uncertainty can be regarded as uncorrelated of each other.
-The uncorrelated uncertainty assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
+The uncorrelated uncertainty assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
+
+The uncorrelated uncertainty assumption only applies to imprecise inputs.
 When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
 
 
@@ -358,14 +370,12 @@ This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sens
 One fundamental difference between variance arithmetic and statistical propagation of uncertainty is that variance arithmetic tracks the correlation between uncertainties, while statistical propagation of uncertainty tracks the the correlation between the two values. 
 According to \eqref{eqn: uncertainty level} and \eqref{eqn: correlation}, the correlation at the level of uncertainty is much less than the correlation between the two values overall.
 
-It is already a common practice to assume that the uncertainties from different measurements are uncorrelated of each other \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.  
-For these measurements with fine enough precisions, variance arithmetic provides a good statistical tracking of the result precisions or uncertainty deviations for calculations.
 
 
 
 \subsection{The Round Up Rule}
 
-To avoid the rounding error accumulation in the conventional floating-point representation, the variance arithmetic designs calculation starting from the bit level.
+The variance arithmetic uses \emph{the round up rule} to avoid the rounding error accumulation in the conventional floating-point representation.
 Let the content of a floating-point number be denoted as $S\; 2^E$, in which $S$ is the significand \footnote{While ``significand'' is the official word \cite{Floating_Point_Standard} to describe ``The component of a binary floating-point number that consists of an explicit or implicit leading bit to the left of its implied binary point and a fraction field to the right'', ``mantissa'' is often unofficially used instead.} and $E$ is the exponent of 2 of the floating-point number.  
 In addition, the variance representation contains a \emph{carry sign} $\sim$  to indicate the sign of its rounding error.
 When $E$ needs to be increased, $S$ is \emph{round up} is needed, which proceeds according to the following round up rule:
@@ -459,7 +469,7 @@ The rounding error distribution is extended to describe uncertainty distribution
 
 
 
-\subsection{Variance Representation}
+\subsection{The Precision Scaling Principle}
 
 \begin{figure}%[p]
 \centering
@@ -479,15 +489,7 @@ According to the precision scaling principle:
 
 \item During each round down, $V$ is increased to 4-fold.
 \end{itemize}
-
-However, such round-up of $V$ conflicts with the accuracy of $R$ which requires $V$ be reduced to only 1/2-fold during round up according to Formula \eqref{eqn: rounding error range vs deviation}.
-When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
-The round-up rule of $V$ allows the uncertainty to be outside the bounding range with a small probability which is called \emph{bounding leakage}. 
-When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
-Because $R$ is no longer ideal, the bounding leakage outside the range of $(-R, +R)$ is $\xi(R/\sqrt{V}/\sqrt{2})$, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}, and $R/\sqrt{V}$ is defined as as the \emph{range ratio}.
-To minimize the bounding leakage, $V$ has to be maximized in its bit confinement, which is the \emph{normalization} process for the variance representation.
-
-Thus, $S\;V@E$ represents $x \pm \delta x$ as:
+Using the precision scaling principle, the variance representation represents $x \pm \delta x$ as:
 \begin{align}
 \label{eqn: accurate value}
 x =&\; S \; 2^{E};\\
@@ -495,29 +497,13 @@ x =&\; S \; 2^{E};\\
 (\delta x)^2 =&\; V \; 2^{2E};
 \end{align}
 
-To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, the bit counts for $S$ and $V$ are 53, while  the bit count for $E$ is 11.
-In addition, the representation needs 1 bit for sign, and 1 bit for the carry error sign, making the total bit count to be 94.
+However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
+When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
+The precision scaling principle chooses to scarify $R$ in favor of $V$, thus introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, e.g., which is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
+When $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation, such probability is virtually 0 according formula \eqref{eqn: rounding error range vs deviation}.
 
-In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
-\begin{enumerate}
-\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
 
-\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
 
-\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
-\end{enumerate}
-\begin{itemize}
-\item When $p \le 26$, which is approximately $P \ge 1.5\;10^{-8}$, the significance bit count is $p + 26$, which means maximally 26-bit calculated inside uncertainty.
-
-\item When $38 < p \leq 52$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $p$.
-When $p=51$, which is $P = 0.5\;10^{-15}$ the bounding leakage is $10^{-6}$.  When $p=52$, the bounding leakage is $1.4\%$.
-
-\item When $53 \leq p$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value $S@E$.
-\end{itemize}
-
-Variance arithmetic assumes that the LSB of a conventional floating-point value is unreliable, so that $V = 1$ by default.
-The result of Formula \eqref{eqn: float num calc} calculated by variance arithmetic is $2 \pm 2\sqrt{5}$.
-It is $2 \pm 7$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
 
 
 \subsection{Addition and Subtraction}
@@ -530,7 +516,7 @@ Formula \eqref{eqn: addition and subtraction} give the result variance of additi
 \delta^2 (x \pm y) = \delta^2 x + \delta^2 y;
 \end{equation}
 
-According to the central limit theorem, addition and subtraction make $x \pm \delta x$ Gaussian distributed, with Formula \eqref{eqn: central limit theorem} as the probability density function, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}. 
+According to the central limit theorem \cite{Probability_Statistics}, addition and subtraction make $x \pm \delta x$ Gaussian distributed, with Formula \eqref{eqn: central limit theorem} as the probability density function, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}. 
 \begin{equation}
 \label{eqn: central limit theorem}
 \rho(\tilde{x}, x, \delta x) \equiv \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x});
@@ -595,7 +581,7 @@ Thus,
 \fi
 
 Two imprecise values can be compared statistically using their difference \cite{Statistical_Methods}.
-For example, the difference between $1.001 \pm 0.001$ and $1.000 \pm 0.002$ is $0.001 \pm 0.00224$, so that the probability for them to be equal is $\xi(-\frac{0.001}{0.00224}, +\frac{0.001}{0.00224}) = 94.6\%$, in which $\xi()$ is the Gaussian error function.
+For example, the difference between $1.001 \pm 0.001$ and $1.000 \pm 0.002$ is $0.001 \pm 0.00224$, so that the probability for them to be equal is $2\; \xi(\frac{0.001}{0.00224}) - 1 = 94.6\%$, in which $\xi()$ is the Gaussian error function (which is the cumulative density function of $N()$) \cite{Probability_Statistics}.
 If the threshold probability of equality is 95\%, $1.000 \pm 0.002 < 1.001 \pm 0.001$.
 
 
@@ -636,6 +622,10 @@ Formula \eqref{eqn: multiplication precision} is identical to Formula \eqref{eqn
 Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for the interval arithmetic multiplication.  
 In addition, while Formula \eqref{eqn: multiplication} is the same regardless of the signs of $x$ and $y$, the result range in Formula \eqref{eqn: interval *} for interval arithmetic changes with the signs of $x$ and $y$. 
 Thus, variance arithmetic is more stable than interval arithmetic.
+
+The result of Formula \eqref{eqn: float num calc} calculated by variance arithmetic is $2 \pm 2\sqrt{5}$.
+It is $2 \pm 7$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
+
 
 
 \subsection{Uncertainty Distribution}
@@ -782,6 +772,37 @@ Formula \eqref{eqn: function distribution} can be used trace the uncertainty dis
 However, normal scientific and engineering calculations usually do not care about result distribution, but just some statistics of the result.
 
 
+\subsection{Bounding Factor and Bounding Leakage}
+
+Many functions $f(x)$ are not defined for either $x = 0$ or $x < 0$ or both.
+For these functions, the statistical nature of variance arithmetic means that there is some probability for $\tilde{x} \leq 0$ so that the result is not defined.
+Such probability is defined as the \emph{bounding leakage}, which relates to the \emph{bounding factor} $\sigma \equiv x / \delta x$ by Formula \eqref{eqn: bounding leakage}, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+The bounding factor is the inverse of precision of $x \pm \delta x$ for $f(x)$.
+Table \ref{tab: bounding leakage} shows the order of magnitude of $\epsilon$ vs $\sigma$.
+
+\begin{equation}
+\label{eqn: bounding leakage}
+\epsilon = 1 -\xi(\frac{\sigma}{\sqrt{2}});\eqspace \lim_{\sigma \rightarrow \infty} \epsilon = 0;
+\end{equation}
+
+\begin{table}[h]
+\label{tab: bounding leakage}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|} 
+\hline 
+$\sigma$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & $\frac{255}{32} \simeq 8$ \\ 
+\hline 
+$\epsilon$ & $10^{-1}$ & $10^{-2}$ & $10^{-3}$ & $10^{-5}$ & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-16}$ \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The bounding leakage $\epsilon$ as a function of bound factor $\sigma$.}
+\end{table}
+
+Each imprecise value in the variance representation carries its binding factor, to indicate its bounding leakage.
+If a calculation involves more than one imprecise values, the bound factor of the result imprecise value is simply the smallest of all input imprecise values.
+
+
+
 \subsection{Analytic Functions}
 
 \iffalse
@@ -806,189 +827,225 @@ However, normal scientific and engineering calculations usually do not care abou
 \begin{align*}
 & e^{x + \tilde{x}} - e^x = e^x \sum_{j=1}^{\infty} \frac{\tilde{x}^j}{j!}: \\
 \widehat{e^x} / e^x &\simeq \frac{1}{2} \delta^2 x + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3 + \frac{1}{384} (\delta^2 x)^4; \\
-P(e^x)^2 &\simeq \delta^2 x + \frac{7-1}{4} (\delta^2 x)^2 + \frac{31-3}{24} (\delta^2 x)^3 + \frac{127-7}{192} (\delta^2 x)^4; 
+P(e^x)^2 &\simeq \delta^2 x + (\frac{7}{4} - \frac{1}{4}) (\delta^2 x)^2 + (\frac{31}{24} - \frac{1}{8}) (\delta^2 x)^3 + 
+         (\frac{127}{192} - \frac{1}{64} - \frac{1}{48}) (\delta^2 x)^4 \\
+         &= (\delta^2 x) + \frac{3}{2} (\delta^2 x)^2 + \frac{7}{6} (\delta^2 x)^3 + \frac{5}{8} (\delta^2 x)^3; 
 \end{align*}
 
 \begin{align*}
 & \ln(x + \tilde{x}) - \ln(x) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}: \\
 \widehat{\ln(x)} &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{15}{6} P(x)^6 - \frac{105}{8} P(x)^8; \\
-\delta^2 \ln(x) &\simeq P(x)^2 + \frac{11-1}{4} P(x)^4 + \frac{137-9}{12} P(x)^6 + \frac{1089-49}{16} P(x)^8;
+\delta^2 \ln(x) &\simeq P(x)^2 + (\frac{11}{4} - \frac{1}{4}) P(x)^4 + (\frac{65}{12} - \frac{3}{4}) P(x)^6 +
+   (\frac{105}{16} - \frac{9}{16} - \frac{5}{2}) P(x)^8 \\
+ &= P(x)^2 + \frac{5}{2} P(x)^4 + \frac{14}{3} P(x)^6 + \frac{7}{2} P(x)^8;
 \end{align*}
 
 \begin{align*}
-& (x + \tilde{x})^c - x^c = x^c ((1 + \frac{\tilde{x}}{x})^c - 1) = x^c \sum_{j=1}^{\infty} (\frac{\tilde{x}}{x})^j \prod_{k=1}^{j} \frac{c + 1 - k}{k}; \\
-\widehat{x^c} &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
-P(x^c)^2 &\simeq c^2 P(x)^2 + c^2(c-1)\frac{(7c-11) - (c-1)}{4} P(x)^4 + c^2 (c-1) (c-2) \frac{(31c^2-132c + 137) - (c^2-4c+3)}{24} P(x)^6;
+\frac{(x + \tilde{x})^c}{x^c} - 1 &= \sum_{j=1}^{\infty} P(x)^j \prod_{k=1}^{j} \frac{c + 1 - k}{k} \\
+ &\simeq c P + \frac{c(c-1)}{2} P^2 + \frac{c(c-1)(c-2)}{6} P^3 + \frac{c(c-1)(c-2)(c-3)}{24} P^4 + \frac{c(c-1)(c-2)(c-3)(c-4)}{120} P^5; \\
+\frac{\widehat{x^c}}{x^c} &\simeq \frac{1}{2} c(c-1) P^2 + \frac{1}{8} c(c-1)(c-2)(c-3) P^4 + \frac{1}{48} c(c-1)(c-2)(c-3)(c-4)(c-5) P(x)^6; \\
+P(x^c)^2 &\simeq c^2 P^2 + \left(\frac{3 c^2(c-1)^2}{4} + c^2(c-1)(c-2) - \frac{c^2(c-1)^2}{4} \right) P^4 \\
+ &\eqspace + \left(\frac{5 c^2(c-1)^2(c-2)^2}{12} + \frac{5 c^2(c-1)^2(c-2)(c-3)}{8} + \frac{c^2(c-1)(c-2)(c-3)(c-4)}{4} - \frac{1}{8} c^2(c-1)^2(c-2)(c-3) \right) P^6 \\
+ & = c^2 P^2 + \frac{3}{2} c^2(c-1)(c-\frac{5}{3}) P^4 + \frac{7}{6} c^2(c-1)(c-2)^2(c-\frac{8}{3}) P^6;
 \end{align*}
 
 \fi
 
-If $f(x)$ can be Taylor expanded as Formula \eqref{eqn: Taylor 1d}, the mean $\overline{f(x)}$ and variance $\delta^2 f(x)$ of the result distribution are calculated by Formula \eqref{eqn: function mean} and \eqref{eqn: function variance}, respectively.  
-The mean $\overline{f(x)}$ can be decomposed as:
+The mean $\overline{f(x)}$ of $f(x + \tilde{x})$ can be decomposed as the sum of:
 \begin{itemize}
-\item the \emph{accurate result} $f(x)$: the result as if there were no input uncertainty, 
-\item the \emph{variance bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
+\item The \emph{accurate result} $f(x)$: the result as if there were no input uncertainty; 
+
+\item The \emph{calculation bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
 \end{itemize} 
+If $f(x)$ can be Taylor expanded as Formula \eqref{eqn: Taylor 1d}, using Formula \eqref{eqn: Gaussian function distribution}, the calculation bias $\widehat{f(x)}$ and variance $\delta^2 f(x)$ of the result distribution are calculated by Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}, respectively.  
+$\delta^2 f(x) + \widehat{f(x)}^2$ is defined as defined as the \emph{calculation variance}.
+As shown in Formula \eqref{eqn: Taylor 1d variance}, like the calculation bias, the calculation variance is centered around $f(x)$ instead of $\overline{f(x)}$.
+Usually $\widehat{f(x)}^2 \ll \delta^2 f(x)$, so a calculation variance is a good approximation for the corresponding statistical variance.
+The calculation bias in $x$ is transfer to $f(x)$ according to Formula \eqref{eqn: accum calc bias}.
 \begin{align}
 \label{eqn: Taylor 1d} 
 \tilde{y} &= f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
-\label{eqn: nth variance}
-& M(x, n) \equiv \int (\tilde{x} - x)^{n} \rho(\tilde{x}, x, \delta x) d\tilde{x}; \\
-\label{eqn: function mean}
-\overline{f(x)} &= f(x) + \widehat{f(x)}; \eqspace 
-\widehat{f(x)} \equiv \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} M(x, n); \\
-\label{eqn: function variance}
-\delta^2 f(x) &= \sum_{n=1}^{\infty} \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} M(x, n) - \widehat{f(x)}^2; 
-\end{align}
-
-Formula \eqref{eqn: function mean} and \eqref{eqn: function variance} both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: nth variance}.
-The integration range of Formula \eqref{eqn: nth variance} is limited by $\tilde{x}$, such as in $\sqrt{x}$ or $1/x$, which affect the convergence of Formula \eqref{eqn: function mean} and \eqref{eqn: function variance}.
-If the input uncertainty is given by Formula \eqref{eqn: central limit theorem}, and if $\tilde{x} = 0$ is the lower integration range bound, Formula \eqref{eqn: nth variance} can be simplified as Formula \eqref{eqn: Gaussian nth variance}.
-\begin{align}
-\label{eqn: Gaussian nth variance}
-& \varsigma(x, n) = \sum_{j=1}^{n/2} \frac{x^{2j-1}}{(2j-1)!!} N(x); \nonumber \\
-M(x, n) &= (\delta x)^n \int_{0}^{\infty} \tilde{z}^n N(\tilde{z}) d \tilde{z} = (\delta x)^n 
-\begin{cases}
-(\frac{1 + \xi(\frac{x}{\sqrt{2}})}{2} - \varsigma(x, n)) (n-1)!!, &\text{if $n$ is even} \\
-\varsigma(x, n), &\text{if $n$ is odd}
-\end{cases}; 
-\end{align}
-
-In Formula \eqref{eqn: function variance}, $\widehat{f(x)}^2$ has a very small contribution to $\delta^2 f(x)$.
-In the \emph{accurate output approximation} of variance arithmetic, $\widehat{f(x)}^2$ is ignored, so that the variance of the function becomes Formula \eqref{eqn: Taylor 1d variance}, in which the variance is no longer calculated against the mean $\overline{f(x)}$, but against the accurate result $f(x)$.
-Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
-\begin{align}
+\label{eqn: variance momentum}
+& M(x, n) \equiv (\delta x)^n \int \tilde{z}^n N(\tilde{z}) d \tilde{z}; \\
+\label{eqn: calc bias}
+\widehat{f(x)} &\equiv \overline{f(x)} - f(x) =  \int (f(x + \tilde{x}) - f(x)) \rho(\tilde{x}, x, \delta x) d \tilde{x}
+ = \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!}; \\
 \label{eqn: Taylor 1d variance}
-\delta^2 f(x) &= \int (f(x + \tilde{x}) - f(x))^2 \rho(\tilde{x}, x, \delta x) d \tilde{x}; \\
-\label{eqn: Taylor 2d bias}
-\widehat{f(x,y)} &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y)) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n)  \frac{f^{(m,n)}_{(x,y)}}{m! n!} - f(x,y); \\
-\label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2 \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n) 
-  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}\;f^{(m-i,n-j)}_{(x,y)}}{i!(m-i)!\;j!(n-j)!} - f(x,y)^2;
+\delta^2 f(x) & + \widehat{f(x)}^2 = \int (f(x + \tilde{x}) - f(x))^2 \rho(\tilde{x}, x, \delta x) d \tilde{x} 
+= \sum_{n=1}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!}; \\
+\label{eqn: accum calc bias}
+\widehat{f(\widehat{x})} &= f(x + \widehat{x}) - f(x) + \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!};
 \end{align}
 
-When $\rho(\tilde{x}, x, \delta x)$ is Formula \eqref{eqn: central limit theorem}, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result variance bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
+Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: variance momentum}.
+The integration range of Formula \eqref{eqn: variance momentum} is limited by $f(x)$, such as $0 \le x + \tilde{x}$ in $\sqrt{x}$.  
+$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\xi()$ is the Gaussian error function, $\sigma \equiv x /\delta x$ is the bounding factor, and $\epsilon$ is the corresponding bounding leakage for $\sigma$ according to Formula \eqref{eqn: bounding leakage}:
+\begin{align}
+\label{eqn: nth variance momentum}
+& \varsigma(\sigma, n) \equiv N(\sigma)\; \sum_{j=0}^{n/2} \frac{\sigma^{2j+1}}{(2j+1)!!};
+	 \eqspace \lim_{\sigma \rightarrow \infty} \varsigma(\sigma, n) = 0;	 \nonumber \\
+M(x, n) &= (\delta x)^n 
+\begin{cases}
+-\infty < \tilde{z} < +\infty:   
+&\begin{cases}
+\text{$n$ is even}:  &(n-1)!! \\
+\text{$n$ is odd}:   &0
+\end{cases} \\
+-\sigma < \tilde{z} < +\infty:  
+&\begin{cases}
+\text{$n$ is even}: &(1 - \epsilon(\sigma) - \varsigma(\sigma, n)) (n-1)!! \\
+\text{$n$ is odd}:  &\varsigma(\sigma, n) (n-1)!! 
+\end{cases} 
+\end{cases};
+\end{align}
+
+When $\delta x \ll x$, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result calculation bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
 \begin{align}
 \label{eqn: exp bias}
 \frac{\widehat{e^x}}{e^x} &\simeq \frac{1}{2} (\delta^2 x) + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3; \\
 \label{eqn: exp precision}
-P(e^x)^2 &\simeq (\delta^2 x) + \frac{7}{4} (\delta^2 x)^2 + \frac{31}{24} (\delta^2 x)^3; \\
+P(e^x)^2 &\simeq (\delta^2 x) + \frac{3}{2} (\delta^2 x)^2 + \frac{7}{6} (\delta^2 x)^3 + \frac{5}{8} (\delta^2 x)^3;; \\
 \label{eqn: log bias}
 \widehat{\ln(x)} &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6; \\
 \label{eqn: log precision}
-\delta^2 \ln(x) &\simeq P(x)^2 + \frac{11}{4} P(x)^4 + \frac{137}{12} P(x)^6; \\
+\delta^2 \ln(x) &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{14}{3} P(x)^6 + \frac{7}{2} P(x)^8;
+\end{align}
+\begin{align}
 \label{eqn: power bias}
-\frac{\widehat{x^c}}{x^c} &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 \nonumber \\
-&\;\; + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
+\frac{\widehat{x^c}}{x^c} &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \nonumber \\
+ &\eqspace\eqspace \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
 \label{eqn: power precision}
-P(x^c)^2 &\simeq c^2 P(x)^2 + c^2(c-1)\frac{7c-11}{4} P(x)^4 \nonumber \\
-&\;\; + c^2 (c-1) (c-2) \frac{31c^2-132c+137}{24} P(x)^6;
+P(x^c)^2 &\simeq c^2 P(x)^2 + \frac{3}{2} c^2(c-1)(c-\frac{5}{3}) P(x)^4 + \nonumber \\
+ &\eqspace\eqspace \frac{7}{6} c^2(c-1)(c-2)^2(c-\frac{8}{3}) P(x)^6;
 \end{align}
 Some special cases for Formula \eqref{eqn: power precision} are:
 \begin{align}
 \label{eqn: square precision}
-P(x^2)^2 &= 4 P(x)^2 + 3 P(x)^4; \\
+P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
 \label{eqn: square root precision}
-P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4 + \frac{315}{512} P(x)^6; \\
+P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{91}{128} P(x)^6; \\
 \label{eqn: inversion precision}
-P(1/x)^2 &\simeq P(x)^2 + 9 P(x)^4 + 75 P(x)^6;
+P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 77 P(x)^6;
 \end{align}
-Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \eqref{eqn: inversion precision} shows that for different power $c$, Formula \eqref{eqn: power precision} has different convergence condition for $P(x)$.
 
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
+\begin{align}
+\label{eqn: Taylor 2d bias}
+\widehat{f(x,y)} &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y)) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n)  \frac{f^{(m,n)}_{(x,y)}}{m! n!} - f(x,y); \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &+ \widehat{f(x, y)}^2 = \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2 
+    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n) 
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} - f(x,y)^2; 
+\end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
-If two functions contain the same imprecise value, the uncorrelated uncertainty may no longer holds between them.
-Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions can still be used to calculate the arithmetic calculations of the two functions, such as sum and product in Formula \eqref{eqn: sum dependency}, and \eqref{eqn: product dependency}, respectively.
-\begin{align}
-\label{eqn: sum dependency}
-&\delta^2 (f(x)+g(x)) = \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=0}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!} \\
-&\eqspace \simeq \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 
-  \left( \frac{1}{3} f^{(1)}_x g^{(3)}_x + \frac{3}{2} f^{(2)}_x g^{(2)}_x + \frac{1}{3} f^{(3)}_x g^{(1)}_x \right) (\delta^2 x)^2; \nonumber \\
-\label{eqn: product dependency}
-&\delta^2 (fg) = \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
-\end{align}
+The variance formula using Taylor expansion shows the nature of the calculation, such as the different nature of variance increases of $e^x$ vs $\ln x$, as show in Formula \eqref{eqn: exp precision} vs \eqref{eqn: log precision}, or the difference speed of variance increases of $x^c$ depending on different $c$, as shown in Formula \eqref{eqn: power precision}.
+Formula \eqref{eqn: power precision} also shows that the exponent $c$ determines the convergence range of $P(x)$, as shown in the difference among Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \eqref{eqn: inversion precision}.
 
 
-
-
-
-
-
-
-\subsection{Calculation Cost}
-
-The sum of all the $n > 1$ terms in Formula \eqref{eqn: Taylor 1d variance} is defined as the \emph{calculation cost} in variance arithmetic.
-If only the first term in Formula \eqref{eqn: Taylor 1d variance} existed, after the $f^{-1}(f(x))$ calculation, the original imprecise value $x \pm \delta x$ can be recovered completely.
-\begin{itemize}
-\item The calculation cost increases with $P(x)^4$.
-
-\item Formula \eqref{eqn: log precision} and \eqref{eqn: exp precision} shows that the calculation cost is larger in $e^x$ than in $\ln(x)$.
-
-\item Formula \eqref{eqn: square root precision}, \eqref{eqn: square precision}, and \eqref{eqn: inversion precision} shows that the calculation cost is larger in $x^2$ than in $\sqrt{x}$, but they are both smaller than the calculation cost of $1/x$.
-
-\item Formula \eqref{eqn: power precision} shows that the calculation cost increases with $c^4$ for $x^c$.
-\end{itemize}
-
-The calculation cost also extends to Formula \eqref{eqn: Taylor 2d variance} for the sum beyond $\delta^2 x$ and $\delta^2 y$, which also prevents the uncertainty to recover completely when calculating $f^{-1}(f)$.
-\begin{itemize}
-\item Formula \eqref{eqn: addition and subtraction} shows that addition and subtraction has no calculation cost.
-It suggests that the result precision for addition and subtraction generally degrades except during averaging.
-
-\item Formula \eqref{eqn: multiplication precision} shows that the cross term is the calculation cost for multiplication.
-It suggests that the result precision for multiplication is worse than either input precision.
-\end{itemize}
-
-Generally, the calculation is a process to incorporate all input precision, and to accumulate calculation costs.
-
-To contrast variance arithmetic on the calculation cost, an \emph{independence arithmetic} implements the variance arithmetic but ignoring all calculation cost.
-It is equivalent to Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, \eqref{eqn: stat /} by assuming $\gamma = 0$.
-
-
-
-\subsection{Dependency Problem}
+\subsection{Linear Deviation and Calculation Cost}
 
 \iffalse
 
 \begin{align*}
-P((\sqrt{x})^2) &\simeq \frac{1}{4} (4 P(x)^2 + 3 P(x)^4) + \frac{15}{64} (4 P(x)^2)^2 = P(x)^2 + \frac{9}{2} P(x)^4; \\
-P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4) + 3 (\frac{1}{4} P(x)^2)^2 = P(x)^2 + \frac{9}{8} P(x)^4;
+P((\sqrt{x})^2) &\simeq \frac{1}{4} (4 P(x)^2 + 2 P(x)^4) + \frac{7}{32} (4 P(x)^2)^2 = P(x)^2 + 4 P(x)^4; \\
+P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4) + 2 (\frac{1}{4} P(x)^2)^2 = P(x)^2 + P(x)^4;
 \end{align*}
 
 \begin{align*}
-(y \pm \delta y) &= a (x \pm \delta x):  \delta y = a \delta x \\
-\delta^2 (x + y) &= \delta^2 (a x + x) = (a + 1)^2 \delta^2 x = \delta^2 a x + 2 (\delta ax) (\delta x) + \delta^2 x
- = (\delta y + \delta x)^2; \\
-\delta^2 x y &= a^2 \delta^2 x = 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2
- \neq a^2 x^2 \delta^2 x + x^2 \delta^2 ax + \delta^2 x \delta^2 ax
+&\delta^2 (f(x)+g(x)) = \sum_{n=1}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x + g^{(j)}_x}{j!} \frac{f^{(n-j)}_x + g^{(n-j)}_x}{(n-j)!} \\
+&= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 2 \sum_{n=2}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!};
+\end{align*}
+
+\begin{align*}
+&\delta^2 (f(x, y) + g(x, y)) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n) 
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)} + g^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i,n-j)}_{(x,y)} + g^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} - f(x,y)^2 - g(x,y)^2 \\
+& = \delta^2 f(x, y) + \delta^2 g(x, y) + 2 \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n)
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \\
+&= \delta^2 f(x, y) + \delta^2 g(x, y) + 2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} \delta^2 x + 2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \delta^2 y + ...;
 \end{align*}
 
 \fi
 
-When a variance calculations deviates from Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions, the result depends on the actual steps of calculation, which is called the \emph{dependency problem}.
-The dependency problem can be attributed to two major reasons:
+
+The statistical variance can be decomposed as the sum of:
 \begin{itemize}
-\item Due to the calculation cost of extra calculations.
-For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is greater by more than 4-fold than that of $\sqrt{x^2}$.
+\item The \emph{linear Deviation}, which is the square root of the $(\delta x)^2$ term in Formula \eqref{eqn: Taylor 1d variance}. 
+
+\item The \emph{calculation cost}, which is the total deviation minus the linear deviation.
+\end{itemize}
+The separation of a calculation variance into a linear variance and a calculation cost can only be done for analytic calculations. 
+
+
+The linear deviation is wrong if the independent uncertainty assumption is applied wrongly.
+For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear deviation is only $\frac{1}{\sqrt{2}}$-fold according to Formula \eqref{eqn: square precision} and \eqref{eqn: multiplication precision}.
+
+When the inputs obeys the uncorrelated uncertainty assumption, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
+For example, derived from Formula \eqref{eqn: Taylor 1d variance}, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions.
+For $f(x) - f(x)$, the linear deviation is $0$ according to Formula \eqref{eqn: sum dependency}.
+Formula \eqref{eqn: sum dependency} can be extended to multiple variables, such as to $\delta^2 (f(x, y) + g(x, y))$.
+Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependency}  calculate the product of any two functions.
+\begin{align}
+\label{eqn: sum dependency}
+\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x)
+     + 2 \sum_{n=2}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
+\label{eqn: product dependency}
+\delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
+The linear deviation becomes $0$ when the calculation results in a constant.
+
+After the $f^{-1}(f(x))$ calculation, the linear deviation can be recovered completely, while the calculation cost always increases.
+The increase of the calculation cost depends on the actual steps of calculation, which is called the \emph{dependency problem}.
+For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ on the $P(x)^4$ term is greater by 2-fold than that of $\sqrt{x^2}$.
 \begin{align}
 \label{eqn: square root}
-P(\sqrt{x}^2)^2 &\simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
+P(\sqrt{x}^2)^2 &\simeq P(x)^2 + 4 P(x)^4; \\
 \label{eqn: root square}
-P(\sqrt{x^2})^2 &\simeq P(x)^2 + \frac{9}{8} P(x)^4;
+P(\sqrt{x^2})^2 &\simeq P(x)^2 + P(x)^4;
 \end{align}
 
-\item Due to applying the uncorrelated uncertainty assumption improperly.
-For example, when $(y \pm \delta y) = a (x \pm \delta x)$, Formula \eqref{eqn: addition and subtraction} is wrong for Formula \eqref{eqn: identical add and subtraction}, while Formula \eqref{eqn: multiplication} underestimates Formula \eqref{eqn: identical multiplication} by more than 2-fold.
-\begin{align}
-\label{eqn: identical add and subtraction} 
-\delta^2 (x \pm y) &= ((\delta x) + (\delta y))^2; \\
-\label{eqn: identical multiplication} 
-\delta^2 x y &= 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2;
-\end{align}
+The calculation costs is the unwanted part of the calculation which should be minimized by optimizing the calculation steps.
 
-\end{itemize} 
-In variance arithmetic, the calculation cost of extra calculations overestimates the result variance, while applying the uncorrelated uncertainty assumption improperly generally underestimates the result variance.
+
+
+\subsection{A Variance Representation}
+
+To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, a variance representation has the following bit assignment for Formula \eqref{eqn: accurate value} and \eqref{eqn: uncertainty variance}:
+\begin{itemize}
+\item The bit count for $E$ is 11.
+
+\item The bit counts for $S$ and $V$ are 53 respectively.
+
+\item The representation needs 1 bit for sign, and 2 bit for the carry error sign for $S$ and $V$ respectively.
+
+\item The bounding factor $\sigma$ is stored as as a 8-bit fix-point none-negative value with $\frac{255}{32} \simeq 8$ as the maximum.
+
+\item An optional linear variance is stored using conventional 64-bit floating-point representation.
+
+\item An optional calculation bias is stored using conventional 64-bit floating-point representation.
+\end{itemize}
+The total bit count of each value in the variance representation is either 128 or 256.
+
+In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
+\begin{enumerate}
+\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
+
+\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
+\end{enumerate}
+Thus, the effective bit counts for $S$ and $V$ depend on the statistical precision $P \equiv \delta x / |x|$ of an imprecise value $x$:
+\begin{itemize}
+\item When $P \geq 2^{-26} \simeq 1.5\;10^{-8}$, the significance bit count is $26 - \log_{2} P$, which means maximally 26-bit calculated inside uncertainty.
+
+\item When $2^{-26} > P > 2^{-53} \simeq 1.1\;10^{-16}$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $P$.
+
+\item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
+\end{itemize}
+
+
 
 
 

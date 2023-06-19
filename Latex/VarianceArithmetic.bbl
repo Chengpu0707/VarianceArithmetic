@@ -211,6 +211,11 @@ Double factorial.
 \newblock \url{http://mathworld.wolfram.com/DoubleFactorial.html}, 2014.
 \newblock Wolfram MathWorld.
 
+\bibitem{Gaussian_Integals}
+Jagdish K. Patel; Campbell B Read
+\newblock Handbook of the normal distribution (2nd ed.).
+\newblock CRC Press. ISBN 0-8247-9342-0.
+
 \bibitem{Symbolic_Affine_Arithmetic}
 C.~Pennachin, M.~Looks, and João~A. de~Vasconcelos.
 \newblock Robust symbolic regression with affine arithmetic.
