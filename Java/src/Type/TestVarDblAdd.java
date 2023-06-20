@@ -92,8 +92,8 @@ public class TestVarDblAdd {
             assertEquals(-1.4552E-11, op1.value() + op2.value() - 1.0, 1E-16);
             assertEquals(-2.91038E-11, 1.0 * (op1.val() /2 + op2.val()) /(1L << 35) - 1.0, 1E-16);
             // Whe the rounding error is accounted for
-            assertEquals(true, op1.rnd());
-            assertEquals(true, op2.rnd());
+            assertEquals(true, op1.rndv());
+            assertEquals(true, op2.rndv());
             assertEquals(0, 1.0 * (1 + op1.val() /2 + op2.val()) /(1L << 35) - 1.0, 1E-16);
             test(1.0/3, 0.001, 2.0/3, 0.002, 1, Math.sqrt(5) * 0.001, 1E-16);
 
