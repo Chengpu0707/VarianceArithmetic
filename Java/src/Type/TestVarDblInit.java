@@ -10,6 +10,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+/*
+ * Can not test linear or bias
+ */
 public class TestVarDblInit extends VarDbl {
 	public TestVarDblInit() {
         super();
@@ -24,7 +27,7 @@ public class TestVarDblInit extends VarDbl {
      */
     private void test(final double value, final double dev, final double tolerance) {
         try {
-            init(value, dev*dev, false, false, BOUND_MAX);
+            pack(value, dev*dev, false, false, BOUND_MAX);
 
             if ((tolerance == -1) ||  (value == 0)) {
                 assertTrue(0 == value()); 
@@ -172,7 +175,7 @@ public class TestVarDblInit extends VarDbl {
     @Test
     public void testExpOverMax() {
         try {
-            init(Math.sqrt(Double.MAX_VALUE), Double.POSITIVE_INFINITY, false, false, BOUND_MAX);
+            pack(Math.sqrt(Double.MAX_VALUE), Double.POSITIVE_INFINITY, false, false, BOUND_MAX);
             fail();
         } catch (ValueException e) {
             fail();

@@ -8,7 +8,7 @@ package Type;
  * It implements IReal.power() using the VarDbl.taylor().
  * 
  * This class contains the following data management private methods
- *      protected void init(final double value, final double variance, final boolean rnd, final boolean rndr, final bound);
+ *      protected void pack(final double value, final double variance, final boolean rnd, final boolean rndr, final bound);
  *      private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long bound);
  * The constructor assume:
  *      bias = 0
@@ -17,13 +17,13 @@ package Type;
  */
 public class VarDbl implements IReal {
     public VarDbl(final double value, final double variance) throws ValueException, UncertaintyException {
-        init(value, variance, false, false, BOUND_MAX);
+        pack(value, variance, false, false, BOUND_MAX);
         bias = 0;
         linear = variance;
     }
     public VarDbl(final double value) throws ValueException {
         try {
-            init(value, Double.NaN, false, false, BOUND_MAX);
+            pack(value, Double.NaN, false, false, BOUND_MAX);
             bias = 0;
             linear = variance();
         } catch (UncertaintyException e) {
@@ -31,7 +31,7 @@ public class VarDbl implements IReal {
     }
     public VarDbl() {
         try {
-            init(0, 0, false, false, BOUND_MAX);
+            pack(0, 0, false, false, BOUND_MAX);
             bias = 0;
             linear = 0;
         } catch (ValueException | UncertaintyException e) {
@@ -195,13 +195,13 @@ public class VarDbl implements IReal {
 
     @Override
     public VarDbl add(double offset) throws ValueException, UncertaintyException {
-        init(value() + offset, variance(), rnd(), rndr(), bound());
+        pack(value() + offset, variance(), rnd(), rndr(), bound());
         return this;
     }
 
     @Override
     public VarDbl multiply(double fold) throws ValueException, UncertaintyException {
-        init(value() * fold, variance() * fold * fold, rnd(), rndr(), bound());
+        pack(value() * fold, variance() * fold * fold, rnd(), rndr(), bound());
         bias *= fold;
         linear *= fold * fold;
         return this;
@@ -254,7 +254,7 @@ public class VarDbl implements IReal {
             throw new ValueException(String.format("%s + %s = %e: %s", 
                         IReal.format(this.linear, 3), IReal.format(v.linear, 3), linear, typeName()));
         }
-        init(value, variance, rndErr, (rndr() == v.rndr())? rndr() : false, bound);
+        pack(value, variance, rndErr, (rndr() == v.rndr())? rndr() : false, bound);
         this.bias = bias;
         this.linear = linear;
         return this;
@@ -292,7 +292,7 @@ public class VarDbl implements IReal {
             throw new ValueException(String.format("%s * %s = %e: %s", 
                         IReal.format(this.linear, 3), IReal.format(o.linear, 3), linear, typeName()));
         }
-        init(value, variance, 
+        pack(value, variance, 
             (rnd() == o.rnd())? rnd() : false, (rndr() == o.rndr())? rndr() : false, 
             bound);
         this.linear = linear;
@@ -396,7 +396,7 @@ public class VarDbl implements IReal {
         pack(dVar.exp, dVal.neg, rVal.val, rVal.rndErr, rVar.val, rVar.rndErr, bound);
     }
 
-    protected void init(double value, double variance, boolean rnd, boolean rndr, long bound) throws ValueException, UncertaintyException {
+    protected void pack(double value, double variance, boolean rnd, boolean rndr, long bound) throws ValueException, UncertaintyException {
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%.3e~%.3e: %s()", value, Math.sqrt(variance), typeName()));
         }
