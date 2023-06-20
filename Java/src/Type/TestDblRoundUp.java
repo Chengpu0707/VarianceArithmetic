@@ -20,7 +20,7 @@ import Type.IReal.ValueException;
  *      4- < 4+
  *      5+ = 5-
  */
-public class TestDblRound {
+public class TestDblRoundUp {
     Dbl dbl;
 
     private void alloc(long val, boolean rndErr) {
