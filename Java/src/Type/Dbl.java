@@ -9,15 +9,18 @@ import Type.IReal.ValueException;
  *    Dbl(double): to decompose a double into (exp, val, neg), with true value as (neg? -1 : +1) * val * 2^exp
  *    toDouble(): to compose a double from (exp, val, neg)
  * Dbl is expected to hold finite value only, so both Dbl(double) and toDouble() may through Type.IReal.ValueException.
+ *  *) exp is stored as a signed value (with offset of Dbl.DOUBLE_EXP_OFFSET already subtracted)
+ *  *) The significand has an extra bit Dbl.DOUBLE_VAL_EXTRA when the stored exp is not (Dbl.DOUBLE_EXP_MIN - 1).
  * 
- * exp is stored as a signed value with an offset of Dbl.DOUBLE_EXP_OFFSET
- * 
- * The significand has an extra bit Dbl.DOUBLE_VAL_EXTRA when the stored exp is not (Dbl.DOUBLE_EXP_MIN - 1).
+ * Dbl also has a member rndErr, to minimize rounding error, with the following functions:
+ *      upOnce()
+ *      toExp(exp)
  */
 public class Dbl {
-    int exp;   // exponent, in signed offset format
-    long val;    // significand
-    boolean neg; // sign
+    int exp;        // exponent
+    long val;       // significand
+    boolean neg;    // sign
+    boolean rndErr; // round error for val
 
     static final long DOUBLE_SIGN_MASK = 1L << (Double.SIZE - 1);
     static final int  DOUBLE_EXP_SHIFT = 52;
@@ -29,18 +32,20 @@ public class Dbl {
     static final long DOUBLE_VAL_MASK = Dbl.DOUBLE_VAL_EXTRA - 1;
     static final long DOUBLE_VAL_MAX = Dbl.DOUBLE_VAL_EXTRA + Dbl.DOUBLE_VAL_MASK;
 
-    public Dbl( final int exp, final boolean neg, final long val ) throws ValueException {
+    public Dbl( final int exp, final boolean neg, final long val, final boolean rndErr ) throws ValueException {
         if (val < 0) {
             throw new IReal.ValueException(String.format("Init Dbl with negative val %d", val));
         }
         this.neg = neg;
         this.exp = exp;
         this.val = val;
+        this.rndErr = rndErr;
     }
-    public Dbl( final Dbl dbl ) {
-        this.neg = dbl.neg;
-        this.exp = dbl.exp;
-        this.val = dbl.val;
+    public Dbl( final Dbl other ) {
+        this.neg = other.neg;
+        this.exp = other.exp;
+        this.val = other.val;
+        this.rndErr = other.rndErr;
     }
 
     public Dbl(final double value) throws ValueException {
@@ -94,5 +99,43 @@ public class Dbl {
         return Double.longBitsToDouble( (neg? Dbl.DOUBLE_SIGN_MASK : 0L) | 
             ((exp + Dbl.DOUBLE_EXP_OFFSET) << DOUBLE_EXP_SHIFT) | 
             (val & Dbl.DOUBLE_VAL_MASK));
+    }
+
+    /*
+     * round up once
+     */
+    void upOnce() {
+        if ((val & 1) != 0) {
+            if (rndErr) {
+                val += 1;
+                rndErr = false;
+            } else {
+                rndErr = true;
+            }
+        }
+        val >>= 1;
+        ++exp;
+    }
+
+    /*
+     * Round up or dwon from this.exp to exp.
+     */
+    void toExp(int exp) {
+        final int shift = exp - this.exp;
+        this.exp = exp;
+        if (shift <= 0) {
+            val <<= -shift;
+            return;
+        }
+        final long msb = 1L << shift;
+        final long remain = val & (msb - 1);
+        final long half = msb >> 1;
+        val >>>= shift;
+        if ((remain > half) || ((remain == half) && rndErr)) {
+            val += 1;
+            rndErr = false;
+        } else if (remain > 0) {
+            rndErr = true;
+        }
     }
 }
