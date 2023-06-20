@@ -82,7 +82,7 @@ public class VarDbl implements IReal {
 
     @Override
     public double value() throws ValueException {
-        final Dbl dbl = new Dbl(exp(), neg(), val());
+        final Dbl dbl = new Dbl(exp(), neg(), val(), rndv());
         return dbl.toDouble();
     }
 
@@ -96,7 +96,7 @@ public class VarDbl implements IReal {
             return 0;
         }
         try {
-            final Dbl dbl = new Dbl(exp() * 2, false, var());
+            final Dbl dbl = new Dbl(exp() * 2, false, var(), rndr());
             return dbl.toDouble();
         } catch (ValueException e) {
             throw new UncertaintyException(e.getMessage());
@@ -119,7 +119,7 @@ public class VarDbl implements IReal {
     @Override
     public VarDbl negate() {
         boolean neg = !neg();
-        pack(exp(), neg, val(), rnd(), var(), rndr(), bound());
+        pack(exp(), neg, val(), rndv(), var(), rndr(), bound());
         return this;
     }
 
@@ -164,7 +164,7 @@ public class VarDbl implements IReal {
 
         int exp = exp() + bits;
         if ((Dbl.DOUBLE_EXP_MIN <= exp) && (exp <= Dbl.DOUBLE_EXP_MAX)) {
-            pack(exp, neg(), val(), rnd(), var(), rndr(), bound());
+            pack(exp, neg(), val(), rndv(), var(), rndr(), bound());
             return this;
         }
         if (exp > Dbl.DOUBLE_EXP_MAX) {
@@ -195,13 +195,13 @@ public class VarDbl implements IReal {
 
     @Override
     public VarDbl add(double offset) throws ValueException, UncertaintyException {
-        pack(value() + offset, variance(), rnd(), rndr(), bound());
+        pack(value() + offset, variance(), rndv(), rndr(), bound());
         return this;
     }
 
     @Override
     public VarDbl multiply(double fold) throws ValueException, UncertaintyException {
-        pack(value() * fold, variance() * fold * fold, rnd(), rndr(), bound());
+        pack(value() * fold, variance() * fold * fold, rndv(), rndr(), bound());
         bias *= fold;
         linear *= fold * fold;
         return this;
@@ -235,8 +235,8 @@ public class VarDbl implements IReal {
         final double bias = this.bias + v.bias;
         final double linear = this.linear + v.linear;
         boolean rndErr = (neg() == v.neg())
-            ? ((rnd() == v.rnd())? rnd() : false) 
-            : ((rnd() != v.rnd())? rnd() : false);
+            ? ((rndv() == v.rndv())? rndv() : false) 
+            : ((rndv() != v.rndv())? rndv() : false);
         final long bound = Math.min(this.bound() >> BOUND_SHIFT, v.bound() >> BOUND_SHIFT);
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%s + %s = %e: %s", 
@@ -293,7 +293,7 @@ public class VarDbl implements IReal {
                         IReal.format(this.linear, 3), IReal.format(o.linear, 3), linear, typeName()));
         }
         pack(value, variance, 
-            (rnd() == o.rnd())? rnd() : false, (rndr() == o.rndr())? rndr() : false, 
+            (rndv() == o.rndv())? rndv() : false, (rndr() == o.rndr())? rndr() : false, 
             bound);
         this.linear = linear;
         this.bias = bias;
@@ -325,7 +325,7 @@ public class VarDbl implements IReal {
     protected int exp()     { return (int) ((val >>> EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET); }
     protected boolean neg() { return (var & SIGN_MASK) != 0; }
     protected long val()    { return val & VAL_MASK; }
-    protected boolean rnd() { return (var & VAL_RND_MASK) != 0; }
+    protected boolean rndv() { return (var & VAL_RND_MASK) != 0; }
     protected long var()    { return var & VAR_MASK; }
     protected boolean rndr() { return (var & VAR_RND_MASK) != 0; }
     protected long bound()  { return var >> BOUND_SHIFT; }
