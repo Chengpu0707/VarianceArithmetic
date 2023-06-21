@@ -80,16 +80,17 @@ public class Dbl {
 }
 
     public double toDouble() throws ValueException {
-        normalize();
-        if (val == 0) {
+        Dbl clone = new Dbl(this);
+        clone.normalize();
+        if (clone.val == 0) {
             return 0;
         }
-        if (exp > Dbl.DOUBLE_EXP_MAX) {
+        if (clone.exp > Dbl.DOUBLE_EXP_MAX) {
             throw new ValueException(String.format("val * 2^(%d) is not finite for Dbl", this.val, this.exp));
         }
         return Double.longBitsToDouble( (neg? Dbl.DOUBLE_SIGN_MASK : 0L) | 
-            ((exp + Dbl.DOUBLE_EXP_OFFSET) << DOUBLE_EXP_SHIFT) | 
-            (val & Dbl.DOUBLE_VAL_MASK));
+            ((clone.exp + Dbl.DOUBLE_EXP_OFFSET) << DOUBLE_EXP_SHIFT) | 
+            (clone.val & Dbl.DOUBLE_VAL_MASK));
     }
 
     static final long[] BYTES = new long[7];    // for finding approx bit count quick comparison
