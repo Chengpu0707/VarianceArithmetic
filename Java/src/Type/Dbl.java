@@ -101,6 +101,16 @@ public class Dbl {
             (val & Dbl.DOUBLE_VAL_MASK));
     }
 
+    static final long VAL_BITS = 62;
+    static final long VAL_MAX =  (1L << VAL_BITS) - 1;
+    static final long VAL_EXTRA = 1L << (VAL_BITS - 1);
+    static final long[] BYTES = new long[7];
+    static {
+        for (int i = 0; i < 7; ++i) {
+            BYTES[i] = 1L << (8 * i);
+        }
+    }
+
     /*
      * round up once
      */
@@ -118,15 +128,45 @@ public class Dbl {
     }
 
     /*
-     * Round up or dwon from this.exp to exp.
+     * Round up from this.exp to larger exp.  There is no limitation.
+     * 
+     * Round down from this.exp to smaller exp.  The exp is limited to keep val < VAL_MAX.
+     * 
+     * Return ture if exp is reached.
      */
-    void toExp(int exp) {
-        final int shift = exp - this.exp;
-        this.exp = exp;
+    boolean toExp(int exp) {
+        int shift = exp - this.exp;
         if (shift <= 0) {
-            val <<= -shift;
-            return;
+            if (val == 0) {
+                this.exp = exp;
+                return true;
+            }
+            if (val >= VAL_EXTRA) {
+                return false;
+            }
+            shift = -shift;
+            int i = 1;
+            for (; (i < 7) && (val > BYTES[i]); ++i) {
+                continue;
+            }
+            if (i < 7) {
+                if (shift < (VAL_BITS - 8 * i)) {
+                    val <<= shift;
+                    this.exp = exp;
+                    return true;
+                }
+                shift -= (VAL_BITS - 8 * i);
+                val <<= (VAL_BITS - 8 * i);
+                this.exp -= (VAL_BITS - 8 * i);
+            }
+            for (; (shift > 0) && (val < VAL_EXTRA); --shift) {
+                val <<= 1;
+                --this.exp;
+            }
+            return (this.exp == exp);
         }
+
+        this.exp = exp;
         final long msb = 1L << shift;
         final long remain = val & (msb - 1);
         final long half = msb >> 1;
@@ -137,5 +177,6 @@ public class Dbl {
         } else if (remain > 0) {
             rndErr = true;
         }
+        return true;
     }
 }
