@@ -44,7 +44,7 @@ public class TestDblRoundUp {
         verify(0, false, 1);
 
         alloc(0, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(0, false, 1);
     }
 
@@ -55,7 +55,7 @@ public class TestDblRoundUp {
         verify(0, true, 1);
 
         alloc(0, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(0, true, 1);
     }
 
@@ -66,7 +66,7 @@ public class TestDblRoundUp {
         verify(0, true, 1);
 
         alloc(1, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(0, true, 1);
     }
 
@@ -79,11 +79,11 @@ public class TestDblRoundUp {
         verify(0, true, 2);
 
         alloc(1, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(1, false, 1);
 
         alloc(1, true);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(0, true, 2);
     }
 
@@ -96,11 +96,11 @@ public class TestDblRoundUp {
         verify(0, true, 2);
 
         alloc(2, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(1, false, 1);
 
         alloc(2, false);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(0, true, 2);
     }
 
@@ -115,15 +115,15 @@ public class TestDblRoundUp {
         verify(0, true, 3);
 
         alloc(2, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(1, true, 1);
 
         alloc(2, true);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, false, 2);
 
         alloc(2, true);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(0, true, 3);
     }
 
@@ -138,15 +138,15 @@ public class TestDblRoundUp {
         verify(0, true, 3);
 
         alloc(3, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(1, true, 1);
 
         alloc(3, false);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, false, 2);
 
         alloc(3, false);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(0, true, 3);
     }
 
@@ -161,15 +161,15 @@ public class TestDblRoundUp {
         verify(0, true, 3);
 
         alloc(3, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(2, false, 1);
 
         alloc(3, true);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, false, 2);
 
         alloc(3, true);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(0, true, 3);
     }
 
@@ -184,15 +184,15 @@ public class TestDblRoundUp {
         verify(0, true, 3);
 
         alloc(4, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(2, false, 1);
 
         alloc(4, false);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, false, 2);
 
         alloc(4, false);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(0, true, 3);
     }
 
@@ -209,19 +209,19 @@ public class TestDblRoundUp {
         verify(0, true, 4);
 
         alloc(4, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(2, true, 1);
 
         alloc(4, true);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, true, 2);
 
         alloc(4, true);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(1, false, 3);
 
         alloc(4, true);
-        dbl.toExp(4);
+        dbl.upBy(4);
         verify(0, true, 4);
     }
 
@@ -238,19 +238,19 @@ public class TestDblRoundUp {
         verify(0, true, 4);
 
         alloc(5, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(2, true, 1);
 
         alloc(5, false);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, true, 2);
 
         alloc(5, false);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(1, false, 3);
 
         alloc(5, false);
-        dbl.toExp(4);
+        dbl.upBy(4);
         verify(0, true, 4);
     }
 
@@ -267,19 +267,19 @@ public class TestDblRoundUp {
         verify(0, true, 4);
 
         alloc(5, true);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(3, false, 1);
 
         alloc(5, true);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, true, 2);
 
         alloc(5, true);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(1, false, 3);
 
         alloc(5, true);
-        dbl.toExp(4);
+        dbl.upBy(4);
         verify(0, true, 4);
     }
 
@@ -297,19 +297,19 @@ public class TestDblRoundUp {
         verify(0, true, 4);
 
         alloc(6, false);
-        dbl.toExp(1);
+        dbl.upBy(1);
         verify(3, false, 1);
 
         alloc(6, false);
-        dbl.toExp(2);
+        dbl.upBy(2);
         verify(1, true, 2);
 
         alloc(6, false);
-        dbl.toExp(3);
+        dbl.upBy(3);
         verify(1, false, 3);
 
         alloc(6, false);
-        dbl.toExp(4);
+        dbl.upBy(4);
         verify(0, true, 4);
     }
 }
