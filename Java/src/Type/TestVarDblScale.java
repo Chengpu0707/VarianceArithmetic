@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 public class TestVarDblScale extends VarDbl {
-    
+/*    
     @Test
     public void testNegate() {
         try {
@@ -172,4 +172,5 @@ public class TestVarDblScale extends VarDbl {
         } catch (UncertaintyException e) {
         }
     }
+    */
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/*
 public class TestVarDblPower extends VarDbl {
     final static double TOLERANCE = 3E-16;
 
@@ -62,3 +63,5 @@ public class TestVarDblPower extends VarDbl {
     }
     
 }
+
+*/

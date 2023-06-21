@@ -7,7 +7,8 @@ import Type.IReal.ValueException;
 /*
  * A tool class to decompose double into different components:
  *    Dbl(double): to decompose a double into (exp, val, neg), with true value as (neg? -1 : +1) * val * 2^exp
- *    toDouble(): to compose a double from (exp, val, neg)
+ *    normalize(): to fit (exp, val, neg) into a double format.
+ *    toDouble(): to compose a double from (exp, val, neg).  It also normalizes the object
  * Dbl is expected to hold finite value only, so both Dbl(double) and toDouble() may through Type.IReal.ValueException.
  *  *) exp is stored as a signed value (with offset of Dbl.DOUBLE_EXP_OFFSET already subtracted)
  *  *) The significand has an extra bit Dbl.DOUBLE_VAL_EXTRA when the stored exp is not (Dbl.DOUBLE_EXP_MIN - 1).
@@ -63,36 +64,30 @@ public class Dbl {
         }
     }
 
-    public double toDouble() throws ValueException {
-        int exp = this.exp;
-        long val = this.val;
+    public void normalize() {
         if (exp < Dbl.DOUBLE_EXP_MIN) {
-            final Round rnd = new Round(val);
-            while ((rnd.val > 0) && (exp < Dbl.DOUBLE_EXP_MIN)) {
-                rnd.upOnce();
-                ++exp;
-            }
-            val = rnd.val;
+            toExp(Dbl.DOUBLE_EXP_MIN);
         }
         if (val == 0) {
-            return 0;
+            return;
         } 
         if (val > Dbl.DOUBLE_VAL_MAX) {
-            final Round rnd = new Round(val);
-            while (rnd.val > Dbl.DOUBLE_VAL_MAX) {
-                rnd.upOnce();
-                ++exp;
+            while (val > Dbl.DOUBLE_VAL_MAX) {
+                upOnce();
             }
-            val = rnd.val;
         } else {
             while ((val < DOUBLE_VAL_EXTRA) && (exp > (Dbl.DOUBLE_EXP_MIN))) {
                 val <<= 1;
                 --exp;
             }
-            if (val < DOUBLE_VAL_EXTRA) {
+            if (val < Dbl.DOUBLE_VAL_EXTRA) {
                 --exp;
             }
         }
+    }
+
+    public double toDouble() throws ValueException {
+        normalize();
         if (exp > Dbl.DOUBLE_EXP_MAX) {
             throw new ValueException(String.format("val * 2^(%d) is not finite for Dbl", this.val, this.exp));
         }
@@ -101,10 +96,10 @@ public class Dbl {
             (val & Dbl.DOUBLE_VAL_MASK));
     }
 
-    static final long VAL_BITS = 62;
+    static final long VAL_BITS = 62;    // when two Dbl adds, the val will not become negative
     static final long VAL_MAX =  (1L << VAL_BITS) - 1;
     static final long VAL_EXTRA = 1L << (VAL_BITS - 1);
-    static final long[] BYTES = new long[7];
+    static final long[] BYTES = new long[7];    // for quick comparison
     static {
         for (int i = 0; i < 7; ++i) {
             BYTES[i] = 1L << (8 * i);

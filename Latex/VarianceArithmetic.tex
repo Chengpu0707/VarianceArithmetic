@@ -775,7 +775,7 @@ However, normal scientific and engineering calculations usually do not care abou
 \subsection{Bounding Factor and Bounding Leakage}
 
 Many functions $f(x)$ are not defined for either $x = 0$ or $x < 0$ or both.
-For these functions, the statistical nature of variance arithmetic means that there is some probability for $\tilde{x} \leq 0$ so that the result is not defined.
+For these functions, the statistical nature of variance arithmetic means that there is non-zero probability for $\tilde{x} \leq 0$ so that the result is not defined.
 Such probability is defined as the \emph{bounding leakage}, which relates to the \emph{bounding factor} $\sigma \equiv x / \delta x$ by Formula \eqref{eqn: bounding leakage}, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
 The bounding factor is the inverse of precision of $x \pm \delta x$ for $f(x)$.
 Table \ref{tab: bounding leakage} shows the order of magnitude of $\epsilon$ vs $\sigma$.
