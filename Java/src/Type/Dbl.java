@@ -9,6 +9,7 @@ import Type.IReal.ValueException;
  *    Dbl(double): to decompose a double into (exp, val, neg), with true value as (neg? -1 : +1) * val * 2^exp
  *    normalize(): to fit (exp, val, neg) into a double format.
  *    toDouble(): to compose a double from (exp, val, neg).  It also normalizes the object
+ * 
  * Dbl is expected to hold finite value only, so both Dbl(double) and toDouble() may through Type.IReal.ValueException.
  *  *) exp is stored as a signed value (with offset of Dbl.DOUBLE_EXP_OFFSET already subtracted)
  *  *) The significand has an extra bit Dbl.DOUBLE_VAL_EXTRA when the stored exp is not (Dbl.DOUBLE_EXP_MIN - 1).
@@ -88,6 +89,9 @@ public class Dbl {
 
     public double toDouble() throws ValueException {
         normalize();
+        if (val == 0) {
+            return 0;
+        }
         if (exp > Dbl.DOUBLE_EXP_MAX) {
             throw new ValueException(String.format("val * 2^(%d) is not finite for Dbl", this.val, this.exp));
         }
@@ -96,14 +100,37 @@ public class Dbl {
             (val & Dbl.DOUBLE_VAL_MASK));
     }
 
-    static final long VAL_BITS = 62;    // when two Dbl adds, the val will not become negative
-    static final long VAL_MAX =  (1L << VAL_BITS) - 1;
-    static final long VAL_EXTRA = 1L << (VAL_BITS - 1);
-    static final long[] BYTES = new long[7];    // for quick comparison
+    static final long[] BYTES = new long[7];    // for finding approx bit count quick comparison
     static {
         for (int i = 0; i < 7; ++i) {
             BYTES[i] = 1L << (8 * i);
         }
+    }
+    /*
+     * Find effective bit count for val
+     */
+    static int bits(long val) {
+        if (val == 0) {
+            return 0;
+        }
+        if (val < 0) {
+            return 63;
+        }
+        int i = 1;
+        for (; i < 7; ++i) {
+            if (val < BYTES[i]) {
+                --i;
+                break;
+            }
+        }
+        int bits = i * 8 + 1; 
+        long cmp = 1L << bits;
+        for (; bits < 63; ++bits, cmp <<= 1) {
+            if (val < cmp) {
+                break;
+            }
+        }
+        return bits;
     }
 
     /*
@@ -123,20 +150,33 @@ public class Dbl {
     }
 
     /*
-     * Round up from this.exp to larger exp.  There is no limitation.
-     * 
-     * Round down from this.exp to smaller exp.  The exp is limited to keep val < VAL_MAX.
-     * 
+     * Round so that this.exp += shift
+     *  *) When shift > 0: There is no limitation.
+     *  *) When shift < 0: The val bit should be less than maxValBits (with 62 as max to allow adding two + val)
      * Return ture if exp is reached.
      */
-    boolean toExp(int exp) {
-        int shift = exp - this.exp;
-        if (shift <= 0) {
-            if (val == 0) {
-                this.exp = exp;
-                return true;
+    boolean upBy(int shift, int maxValBits) {
+        if (val == 0) {
+            this.exp += shift;
+            return true;
+        } else if (shift == 0) {
+            return true;
+        } else if (shift > 0) {
+            this.exp += shift;
+            final long msb = 1L << shift;
+            final long remain = val & (msb - 1);
+            final long half = msb >> 1;
+            val >>>= shift;
+            if ((remain > half) || ((remain == half) && rndErr)) {
+                val += 1;
+                rndErr = false;
+            } else if (remain > 0) {
+                rndErr = true;
             }
-            if (val >= VAL_EXTRA) {
+            return true;
+        } else {
+            final long valExtra = 1L << (maxValBits - 1);
+            if (val >= valExtra) {
                 return false;
             }
             shift = -shift;
@@ -145,33 +185,28 @@ public class Dbl {
                 continue;
             }
             if (i < 7) {
-                if (shift < (VAL_BITS - 8 * i)) {
+                if (shift < (maxValBits - 8 * i)) {
                     val <<= shift;
-                    this.exp = exp;
+                    this.exp -= shift;
                     return true;
                 }
-                shift -= (VAL_BITS - 8 * i);
-                val <<= (VAL_BITS - 8 * i);
-                this.exp -= (VAL_BITS - 8 * i);
+                shift -= (maxValBits - 8 * i);
+                val <<= (maxValBits - 8 * i);
+                this.exp -= (maxValBits - 8 * i);
             }
-            for (; (shift > 0) && (val < VAL_EXTRA); --shift) {
+            for (; (shift > 0) && (val < valExtra); --shift) {
                 val <<= 1;
                 --this.exp;
             }
-            return (this.exp == exp);
+            return (shift == 0);
         }
+    }
 
-        this.exp = exp;
-        final long msb = 1L << shift;
-        final long remain = val & (msb - 1);
-        final long half = msb >> 1;
-        val >>>= shift;
-        if ((remain > half) || ((remain == half) && rndErr)) {
-            val += 1;
-            rndErr = false;
-        } else if (remain > 0) {
-            rndErr = true;
-        }
-        return true;
+    boolean upBy(int shift) {
+        return upBy(shift, 62);
+    }
+
+    boolean toExp(int exp) {
+        return upBy(exp - this.exp);
     }
 }

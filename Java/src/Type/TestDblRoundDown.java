@@ -24,32 +24,32 @@ public class TestDblRoundDown {
     @Test
     public void test0() {
         alloc(0);
-        assertTrue(dbl.toExp(-10));
+        assertTrue(dbl.upBy(-10));
         assertEquals(-10, dbl.exp);
     }
 
     @Test
     public void testMaxLimit() {
         alloc(Long.MAX_VALUE / 2);
-        assertFalse(dbl.toExp(-1));
+        assertFalse(dbl.upBy(-1, 62));
         assertEquals(0, dbl.exp);
         assertEquals(Long.MAX_VALUE / 2, dbl.val);
 
-        alloc(Dbl.VAL_EXTRA);
-        assertFalse(dbl.toExp(-1));
+        alloc(1L << 62);
+        assertFalse(dbl.upBy(-1, 62));
         assertEquals(0, dbl.exp);
-        assertEquals(Dbl.VAL_EXTRA, dbl.val);
+        assertEquals(1L << 62, dbl.val);
     }
     
     @Test
     public void testDirect() {
         alloc(1);
-        assertTrue(dbl.toExp(-10));
+        assertTrue(dbl.upBy(-10));
         assertEquals(-10, dbl.exp);
         assertEquals(1L << 10, dbl.val);
 
         alloc(8);
-        assertTrue(dbl.toExp(-10));
+        assertTrue(dbl.upBy(-10));
         assertEquals(-10, dbl.exp);
         assertEquals(8L << 10, dbl.val);
     }
@@ -57,12 +57,12 @@ public class TestDblRoundDown {
     @Test
     public void testIndirect() {
         alloc(Long.MAX_VALUE / 4);
-        assertTrue(dbl.toExp(-1));
+        assertTrue(dbl.upBy(-1));
         assertEquals(-1, dbl.exp);
         assertEquals((Long.MAX_VALUE / 4) * 2, dbl.val);
 
         alloc(1L << 31);
-        assertTrue(dbl.toExp(-30));
+        assertTrue(dbl.upBy(-30));
         assertEquals(-30, dbl.exp);
         assertEquals(1L << 61, dbl.val);
     }
@@ -70,13 +70,28 @@ public class TestDblRoundDown {
     @Test
     public void testLimited() {
         alloc(Long.MAX_VALUE / 4);
-        assertFalse(dbl.toExp(-2));
+        assertFalse(dbl.upBy(-2));
         assertEquals(-1, dbl.exp);
         assertEquals((Long.MAX_VALUE / 4) * 2, dbl.val);
 
         alloc(1L << 31);
-        assertFalse(dbl.toExp(-31));
+        assertFalse(dbl.upBy(-31));
         assertEquals(-30, dbl.exp);
         assertEquals(1L << 61, dbl.val);
+    }
+
+    @Test
+    public void testBits() {
+        assertEquals(63, Dbl.bits(-1));
+        assertEquals(0, Dbl.bits(0));
+        assertEquals(1, Dbl.bits(1));
+        assertEquals(2, Dbl.bits(2));
+        assertEquals(2, Dbl.bits(3));
+        assertEquals(3, Dbl.bits(4));
+        assertEquals(3, Dbl.bits(5));
+        assertEquals(11, Dbl.bits(1L << 10));
+        assertEquals(58, Dbl.bits(1L << 57));
+        assertEquals(58, Dbl.bits((1L << 57) + (1L << 10)));
+        assertEquals(63, Dbl.bits(Long.MAX_VALUE));
     }
 }
