@@ -81,17 +81,19 @@ public class TestDblRoundDown {
     }
 
     @Test
-    public void testBits() {
-        assertEquals(63, Dbl.bits(-1));
-        assertEquals(0, Dbl.bits(0));
-        assertEquals(1, Dbl.bits(1));
-        assertEquals(2, Dbl.bits(2));
-        assertEquals(2, Dbl.bits(3));
-        assertEquals(3, Dbl.bits(4));
-        assertEquals(3, Dbl.bits(5));
-        assertEquals(11, Dbl.bits(1L << 10));
-        assertEquals(58, Dbl.bits(1L << 57));
-        assertEquals(58, Dbl.bits((1L << 57) + (1L << 10)));
-        assertEquals(63, Dbl.bits(Long.MAX_VALUE));
+    public void testMSB() {
+        assertEquals(63, Dbl.msb(-1));
+        assertEquals(0, Dbl.msb(0));
+        assertEquals(0, Dbl.msb(1));
+        assertEquals(1, Dbl.msb(2));
+        assertEquals(1, Dbl.msb(3));
+        assertEquals(2, Dbl.msb(4));
+        assertEquals(2, Dbl.msb(5));
+        assertEquals(10, Dbl.msb(1L << 10));
+        assertEquals(Dbl.DOUBLE_EXP_SHIFT, Dbl.msb(Dbl.DOUBLE_VAL_EXTRA));
+        assertEquals(Dbl.DOUBLE_EXP_SHIFT, Dbl.msb(Dbl.DOUBLE_VAL_MAX));
+        assertEquals(57, Dbl.msb(1L << 57));
+        assertEquals(57, Dbl.msb((1L << 57) + (1L << 10)));
+        assertEquals(63, Dbl.msb(Long.MAX_VALUE));
     }
 }

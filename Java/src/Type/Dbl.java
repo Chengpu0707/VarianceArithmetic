@@ -54,10 +54,10 @@ public class Dbl {
         if (!Double.isFinite(value)) {
             throw new IReal.ValueException("Init Dbl with NaN");
         }
-        final long bits = Double.doubleToLongBits(value);
-        neg = (bits & Dbl.DOUBLE_SIGN_MASK) == Dbl.DOUBLE_SIGN_MASK;
-        exp = (short) (((bits & Dbl.DOUBLE_EXP_MASK) >>> Dbl.DOUBLE_EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET);
-        val = bits & Dbl.DOUBLE_VAL_MASK;
+        final long msb = Double.doubleToLongBits(value);
+        neg = (msb & Dbl.DOUBLE_SIGN_MASK) == Dbl.DOUBLE_SIGN_MASK;
+        exp = (short) (((msb & Dbl.DOUBLE_EXP_MASK) >>> Dbl.DOUBLE_EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET);
+        val = msb & Dbl.DOUBLE_VAL_MASK;
         if (exp == Dbl.DOUBLE_EXP_MIN - 1) {
             ++exp;
         } else {
@@ -72,20 +72,12 @@ public class Dbl {
         if (val == 0) {
             return;
         } 
-        if (val > Dbl.DOUBLE_VAL_MAX) {
-            while (val > Dbl.DOUBLE_VAL_MAX) {
-                upOnce();
-            }
-        } else {
-            while ((val < DOUBLE_VAL_EXTRA) && (exp > (Dbl.DOUBLE_EXP_MIN))) {
-                val <<= 1;
-                --exp;
-            }
-            if (val < Dbl.DOUBLE_VAL_EXTRA) {
-                --exp;
-            }
+        final int msb = msb(val);
+        upBy(Math.max(msb - Dbl.DOUBLE_EXP_SHIFT, Dbl.DOUBLE_EXP_MIN - exp));
+        if (val < Dbl.DOUBLE_VAL_EXTRA) {
+            --exp;
         }
-    }
+}
 
     public double toDouble() throws ValueException {
         normalize();
@@ -103,34 +95,33 @@ public class Dbl {
     static final long[] BYTES = new long[7];    // for finding approx bit count quick comparison
     static {
         for (int i = 0; i < 7; ++i) {
-            BYTES[i] = 1L << (8 * i);
+            BYTES[i] = 1L << (8 * (i + 1));
         }
     }
     /*
-     * Find effective bit count for val
+     * Find the msb of (val), with lsb as 0.
      */
-    static int bits(long val) {
+    static int msb(long val) {
         if (val == 0) {
             return 0;
         }
         if (val < 0) {
             return 63;
         }
-        int i = 1;
+        int i = 0;
         for (; i < 7; ++i) {
             if (val < BYTES[i]) {
-                --i;
                 break;
             }
         }
-        int bits = i * 8 + 1; 
-        long cmp = 1L << bits;
-        for (; bits < 63; ++bits, cmp <<= 1) {
+        int msb = i * 8; 
+        long cmp = 1L << (msb + 1);
+        for (; msb < 63; ++msb, cmp <<= 1) {
             if (val < cmp) {
                 break;
             }
         }
-        return bits;
+        return msb;
     }
 
     /*
