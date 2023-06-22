@@ -357,20 +357,6 @@ public class VarDbl implements IReal {
             exp = dVal.exp;
         }
 
-        // When variance > Double.MAX_EXTRA, after rouding, it become 2^53 * 2^971
-        // When value = Double.MAX_EXTRA, it can never be forced to round
-        /*
-        dVal.exp = dVar.exp * 2;
-        try {
-            if (!Double.isFinite(dVal.toDouble())) {
-                throw new UncertaintyException(String.format("Fail to normalize val=%d^%d var=%d^%d: %s", 
-                            dVal.val, dVal.exp, dVar.val, dVar.exp, typeName()));
-            }
-        } catch (ValueException e) {
-            throw new UncertaintyException(String.format("Fail to normalize val=%d^%d var=%d^%d: %s", 
-                            dVal.val, dVal.exp, dVar.val, dVar.exp, typeName()));
-        }
-        */
         pack(exp, dVal.neg, dVal.val, dVal.rndErr, dVar.val, dVar.rndErr, bound);
     }
 
