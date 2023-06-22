@@ -312,4 +312,11 @@ public class TestDblRoundUp {
         dbl.upBy(4);
         verify(0, true, 4);
     }
+
+    @Test
+    public void testLarge() {
+        alloc(1, false);
+        dbl.upBy(100);
+        verify(0, true, 100);
+    }
 }

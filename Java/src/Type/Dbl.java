@@ -154,6 +154,12 @@ public class Dbl {
         } else if (shift == 0) {
             return true;
         } else if (shift > 0) {
+            if (msb(val) + 1 < shift) {
+                val = 0;
+                this.exp += shift;
+                this.rndErr = true;
+                return true;
+            }
             this.exp += shift;
             final long msb = 1L << shift;
             final long remain = val & (msb - 1);

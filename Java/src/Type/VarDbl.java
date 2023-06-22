@@ -313,14 +313,14 @@ public class VarDbl implements IReal {
     static final int BOUND_SHIFT = 56;
     static final int VAR_RND_SHIFT = 55;
     static final int VAL_RND_SHIFT = 54;
-    static final int SIGN_SHIFT = 53;
-    static final int BOUND_DENOM = 32;
-    static final long BOUND_MAX = (1L << (Long.SIZE - BOUND_SHIFT)) - 1;
-    static final long BOUND_MASK = BOUND_MAX << BOUND_SHIFT;
+    static final int SIGN_SHIFT = EXP_SHIFT;
+    static final long VAR_MASK = VAL_MASK;
+    static final long SIGN_MASK = 1L << SIGN_SHIFT;
     static final long VAR_RND_MASK = 1L << VAR_RND_SHIFT;
     static final long VAL_RND_MASK = 1L << VAL_RND_SHIFT;
-    static final long SIGN_MASK = 1L << SIGN_SHIFT;
-    static final long VAR_MASK = SIGN_MASK - 1;
+    static final long BOUND_MAX = (1L << (Long.SIZE - BOUND_SHIFT)) - 1;
+    static final long BOUND_MASK = BOUND_MAX << BOUND_SHIFT;
+    static final int BOUND_DENOM = 32;
  
     protected int exp()     { return (int) ((val >>> EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET); }
     protected boolean neg() { return (var & SIGN_MASK) != 0; }
@@ -335,54 +335,31 @@ public class VarDbl implements IReal {
         this.var = (bound << BOUND_SHIFT) | (rndr? VAR_RND_MASK : 0) | (rnd? VAL_RND_MASK : 0) | (neg? SIGN_MASK : 0) | (var & VAR_MASK);
     }
 
-    private void normalize(final Dbl dVal, final Dbl dVar, final boolean rnd, boolean rndr, long bound) throws UncertaintyException {
+    private void normalize(final Dbl dVal, final Dbl dVar, long bound) throws UncertaintyException {
         if (dVar.val == 0) {
-            while((dVal.val < Dbl.DOUBLE_SIGN_MASK) && (dVal.exp > Dbl.DOUBLE_EXP_MIN)) {
-                dVal.val <<= 1;
-                --dVal.exp;
-            }
-            pack(dVal.exp, dVal.neg, dVal.val, false, 0L, false, BOUND_MAX);
+            dVal.normalize();
+            pack(dVal.exp, dVal.neg, dVal.val, dVal.rndErr, 0L, false, BOUND_MAX);
             return;
         }
-        final Round rVal = new Round(dVal.val);
-        rVal.rndErr = rnd;
-        final Round rVar = new Round(dVar.val);
-        rVar.rndErr = rndr();
-        if ((dVar.val & Dbl.DOUBLE_VAL_EXTRA) != 0) {
-            final int shift = Dbl.DOUBLE_EXP_SHIFT - SIGN_SHIFT + 1;
-            rVar.upBy(shift);
-            dVar.exp += shift;
+        int shift = Math.max(0, Dbl.msb(dVar.val) - (SIGN_SHIFT - 1));
+        if ((dVar.exp % 2) != (shift % 2)) {
+            ++shift;
         }
-        if ((dVar.exp % 2) != 0) {
-            rVar.upOnce();
-            dVar.exp += 1;
-        }
-        dVar.exp /= 2;
-        while (rVar.val > VAR_MASK) {
-            rVar.upBy(2);
-            ++dVar.exp;
-        }
+        dVar.upBy(shift);
 
-        int shift = dVar.exp - dVal.exp;
+        shift = (dVar.exp / 2) - dVal.exp;
+        final int exp;
         if (shift > 0) {
-            if (shift > Dbl.DOUBLE_EXP_SHIFT) {
-                rVal.val = 0;
-            } else {
-                rVal.upBy(shift);
-            }
-        } else if (shift < 0) {
-            shift = -shift;
-            if (shift * 2 > SIGN_SHIFT) {
-                rVar.val = 0;
-            } else {
-                rVar.upBy(shift * 2);
-            }
-            dVar.exp += shift;
+            dVal.upBy(shift);
+            exp = (dVar.exp / 2);
+        } else {
+            dVar.upBy(-shift * 2);
+            exp = dVal.exp;
         }
 
         // When variance > Double.MAX_EXTRA, after rouding, it become 2^53 * 2^971
         // When value = Double.MAX_EXTRA, it can never be forced to round
-        dVal.val = rVar.val;
+        /*
         dVal.exp = dVar.exp * 2;
         try {
             if (!Double.isFinite(dVal.toDouble())) {
@@ -393,10 +370,11 @@ public class VarDbl implements IReal {
             throw new UncertaintyException(String.format("Fail to normalize val=%d^%d var=%d^%d: %s", 
                             dVal.val, dVal.exp, dVar.val, dVar.exp, typeName()));
         }
-        pack(dVar.exp, dVal.neg, rVal.val, rVal.rndErr, rVar.val, rVar.rndErr, bound);
+        */
+        pack(exp, dVal.neg, dVal.val, dVal.rndErr, dVar.val, dVar.rndErr, bound);
     }
 
-    protected void pack(double value, double variance, boolean rnd, boolean rndr, long bound) throws ValueException, UncertaintyException {
+    protected void pack(double value, double variance, boolean rndv, boolean rndr, long bound) throws ValueException, UncertaintyException {
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%.3e~%.3e: %s()", value, Math.sqrt(variance), typeName()));
         }
@@ -412,7 +390,9 @@ public class VarDbl implements IReal {
             throw new UncertaintyException(String.format("%.3e~%.3e: %s()", value, Math.sqrt(variance), typeName()));
         }
         final Dbl dVal = new Dbl(value);
+        dVal.rndErr = rndv;
         final Dbl dVar = new Dbl(variance);
-        normalize(dVal, dVar, rnd, rndr, bound);
+        dVar.rndErr = rndr;
+        normalize(dVal, dVar, bound);
     }
 }
