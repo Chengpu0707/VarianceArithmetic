@@ -150,12 +150,11 @@ public class Dbl {
         val >>= 1;
         ++exp;
     }
-
     /*
      * Round so that this.exp += shift
-     *  *) When shift > 0: There is no limitation.
+     *  *) When shift > 0: There is no limitation.  It is equivalent to call upOnce() shift number of times.
      *  *) When shift < 0: The val bit should be less than maxValBits (with 62 as max to allow adding two + val)
-     * Return ture if exp is reached.
+     * Return true if exp is reached.
      */
     boolean upBy(int shift, int maxValBits) {
         if (val == 0) {
@@ -196,11 +195,9 @@ public class Dbl {
             }
         }
     }
-
     boolean upBy(int shift) {
         return upBy(shift, 62);
     }
-
     boolean toExp(int exp) {
         return upBy(exp - this.exp);
     }
