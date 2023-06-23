@@ -111,8 +111,8 @@ public class IntvDbl implements IReal{
     public IntvDbl shift(int bits) throws ValueException, UncertaintyException {
         Dbl val = new Dbl(value);
         final Dbl unc = new Dbl(range);
-        val.exp += bits;
-        unc.exp += bits;
+        val.shift(bits);
+        unc.shift(bits);
         final double value, range;
         try {
             value = val.toDouble();

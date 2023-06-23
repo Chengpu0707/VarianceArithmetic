@@ -131,7 +131,7 @@ public class VarDbl implements IReal {
         }
 
         final Dbl dLnr = new Dbl(linear);
-        dLnr.exp += 2*bits;
+        dLnr.shift(2*bits);
         final double linear;
         try {
             linear = dLnr.toDouble();
@@ -147,7 +147,7 @@ public class VarDbl implements IReal {
         }
 
         final Dbl dBias = new Dbl(bias);
-        dBias.exp += bits;
+        dBias.shift(bits);
         final double bias;
         try {
             bias = dBias.toDouble();
@@ -335,29 +335,29 @@ public class VarDbl implements IReal {
         this.var = (bound << BOUND_SHIFT) | (rndr? VAR_RND_MASK : 0) | (rnd? VAL_RND_MASK : 0) | (neg? SIGN_MASK : 0) | (var & VAR_MASK);
     }
 
-    private void normalize(final Dbl dVal, final Dbl dVar, long bound) throws UncertaintyException {
-        if (dVar.val == 0) {
+    private void pack(final Dbl dVal, final Dbl dVar, long bound) throws UncertaintyException {
+        if (dVar.val() == 0) {
             dVal.normalize();
-            pack(dVal.exp, dVal.neg, dVal.val, dVal.rndErr, 0L, false, BOUND_MAX);
+            pack(dVal.exp(), dVal.neg(), dVal.val(), dVal.rndErr(), 0L, dVar.rndErr(), BOUND_MAX);
             return;
         }
-        int shift = Math.max(0, Dbl.msb(dVar.val) - (SIGN_SHIFT - 1));
-        if ((dVar.exp % 2) != (shift % 2)) {
+        int shift = Math.max(0, Dbl.msb(dVar.val()) - (SIGN_SHIFT - 1));
+        if ((dVar.exp() % 2) != (shift % 2)) {
             ++shift;
         }
         dVar.upBy(shift);
 
-        shift = (dVar.exp / 2) - dVal.exp;
+        shift = (dVar.exp() / 2) - dVal.exp();
         final int exp;
         if (shift > 0) {
             dVal.upBy(shift);
-            exp = (dVar.exp / 2);
+            exp = (dVar.exp() / 2);
         } else {
             dVar.upBy(-shift * 2);
-            exp = dVal.exp;
+            exp = dVal.exp();
         }
 
-        pack(exp, dVal.neg, dVal.val, dVal.rndErr, dVar.val, dVar.rndErr, bound);
+        pack(exp, dVal.neg(), dVal.val(), dVal.rndErr(), dVar.val(), dVar.rndErr(), bound);
     }
 
     protected void pack(double value, double variance, boolean rndv, boolean rndr, long bound) throws ValueException, UncertaintyException {
@@ -375,10 +375,8 @@ public class VarDbl implements IReal {
         } else {
             throw new UncertaintyException(String.format("%.3e~%.3e: %s()", value, Math.sqrt(variance), typeName()));
         }
-        final Dbl dVal = new Dbl(value);
-        dVal.rndErr = rndv;
-        final Dbl dVar = new Dbl(variance);
-        dVar.rndErr = rndr;
-        normalize(dVal, dVar, bound);
+        final Dbl dVal = new Dbl(value, rndv);
+        final Dbl dVar = new Dbl(variance, rndr);
+        pack(dVal, dVar, bound);
     }
 }

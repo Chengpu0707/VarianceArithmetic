@@ -19,10 +19,16 @@ import Type.IReal.ValueException;
  *      toExp(exp)
  */
 public class Dbl {
-    int exp;        // exponent
-    long val;       // significand
-    boolean neg;    // sign
-    boolean rndErr; // round error for val
+    private int exp;        // exponent
+    private boolean neg;    // sign
+    private long val;       // significand
+    private boolean rndErr; // round error for val
+
+    public int exp() { return exp; }
+    public boolean neg() { return neg; }
+    public long val() { return val; }
+    public boolean rndErr() { return rndErr; }
+
 
     static final long DOUBLE_SIGN_MASK = 1L << (Double.SIZE - 1);
     static final int  DOUBLE_EXP_SHIFT = 52;
@@ -50,9 +56,9 @@ public class Dbl {
         this.rndErr = other.rndErr;
     }
 
-    public Dbl(final double value) throws ValueException {
+    public Dbl(final double value, boolean rndErr) throws ValueException {
         if (!Double.isFinite(value)) {
-            throw new IReal.ValueException("Init Dbl with NaN");
+            throw new IReal.ValueException(String.format("Init Dbl with %e", value));
         }
         final long msb = Double.doubleToLongBits(value);
         neg = (msb & Dbl.DOUBLE_SIGN_MASK) == Dbl.DOUBLE_SIGN_MASK;
@@ -63,6 +69,10 @@ public class Dbl {
         } else {
             val |= Dbl.DOUBLE_VAL_EXTRA;
         }
+        this.rndErr = rndErr;
+    }
+    public Dbl(final double value) throws ValueException {
+        this(value, false);
     }
 
     public void normalize() {
@@ -117,7 +127,7 @@ public class Dbl {
         }
         int msb = i * 8; 
         long cmp = 1L << (msb + 1);
-        for (; msb < 63; ++msb, cmp <<= 1) {
+        for (; msb < 62; ++msb, cmp <<= 1) {
             if (val < cmp) {
                 break;
             }
@@ -173,30 +183,17 @@ public class Dbl {
             }
             return true;
         } else {
-            final long valExtra = 1L << (maxValBits - 1);
-            if (val >= valExtra) {
+            final int msb = msb(val);
+            if ((msb - shift) <= (maxValBits - 1)) {
+                val <<= -shift;
+                exp += shift;
+                return true;
+            } else {
+                shift = Math.min(0, msb - maxValBits + 1);
+                val <<= -shift;
+                exp += shift;
                 return false;
             }
-            shift = -shift;
-            int i = 1;
-            for (; (i < 7) && (val > BYTES[i]); ++i) {
-                continue;
-            }
-            if (i < 7) {
-                if (shift < (maxValBits - 8 * i)) {
-                    val <<= shift;
-                    this.exp -= shift;
-                    return true;
-                }
-                shift -= (maxValBits - 8 * i);
-                val <<= (maxValBits - 8 * i);
-                this.exp -= (maxValBits - 8 * i);
-            }
-            for (; (shift > 0) && (val < valExtra); --shift) {
-                val <<= 1;
-                --this.exp;
-            }
-            return (shift == 0);
         }
     }
 
@@ -206,5 +203,33 @@ public class Dbl {
 
     boolean toExp(int exp) {
         return upBy(exp - this.exp);
+    }
+
+    /*
+     * return true when exp += bits
+     * return false when the limit is reached
+     */
+    boolean shift(int bits) {
+        if (bits == 0) {
+            return true;
+        } else if (bits > 0) {
+            final int exp = this.exp + bits;
+            if (exp < this.exp) {
+                this.exp = Integer.MAX_VALUE;
+                return false;
+            } else {
+                this.exp = exp;
+                return true;
+            }
+        } else {
+            final int exp = this.exp + bits;
+            if (exp > this.exp) {
+                this.exp = Integer.MIN_VALUE;
+                return false;
+            } else {
+                this.exp = exp;
+                return true;
+            }
+        }
     }
 }

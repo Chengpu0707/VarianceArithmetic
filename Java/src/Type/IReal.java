@@ -153,9 +153,8 @@ public interface IReal {
 		}
 		try {
 			final Dbl d = new Dbl(value);
-			d.val = 1;
-			d.neg = false;
-			return d.toDouble();
+			final Dbl lsb = new Dbl( d.exp(), false, 1, d.rndErr());
+			return lsb.toDouble();
 		} catch (ValueException e) {
 			return 0;
 		}

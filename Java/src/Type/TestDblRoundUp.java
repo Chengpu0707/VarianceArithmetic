@@ -32,9 +32,9 @@ public class TestDblRoundUp {
     }
 
     private void verify( long val, boolean rndErr, int exp) {
-        assertEquals(val, dbl.val);
-        assertEquals(rndErr, dbl.rndErr);
-        assertEquals(exp, dbl.exp);
+        assertEquals(val, dbl.val());
+        assertEquals(rndErr, dbl.rndErr());
+        assertEquals(exp, dbl.exp());
     }
 
     @Test

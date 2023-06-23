@@ -24,9 +24,9 @@ public class TestIntvDbl {
     @Test 
     public void testSimple() {
         try {
-            final double in = Math.sqrt(Double.MIN_NORMAL);
-            multiply(in, 0, in, 0, false);
-        } catch (ValueException | UncertaintyException | TypeException e) {
+            op = new IntvDbl(0, 1);
+            testShift();;
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
     }

@@ -17,8 +17,8 @@ public class TestDblDouble {
         Dbl dbl;
         try {
             dbl = new Dbl(d);
-            assertEquals(val, dbl.val);
-            assertEquals(exp, dbl.exp);
+            assertEquals(val, dbl.val());
+            assertEquals(exp, dbl.exp());
             assertEquals(d, dbl.toDouble(), TOLERANCE);
         } catch (ValueException e) {
             fail();
