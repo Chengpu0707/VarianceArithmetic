@@ -10,9 +10,12 @@ package Type;
  * This class contains the following data management private methods
  *      protected void pack(final double value, final double variance, final boolean rnd, final boolean rndr, final bound);
  *      private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long bound);
+ *      private void pack(final Dbl dVal, final Dbl dVar, long bound)
+ * 
  * The constructor assume:
  *      bias = 0
  *      linear = variance
+ * The above two member are accumulated during calculation
  *      
  */
 public class VarDbl implements IReal {
