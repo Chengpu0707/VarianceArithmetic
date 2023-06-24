@@ -131,6 +131,8 @@ public class TestDblDouble {
         test(0, false, 1, 1);
         test(0, true, Dbl.DOUBLE_VAL_EXTRA << 1, -(1L << 53));
         test(0, false, Dbl.DOUBLE_VAL_EXTRA << 1, (1L << 53));
+        test(Double.MIN_NORMAL * 0.1, 450359962737050L, -1074);
+        test(-1074, false, 450359962737050L, Double.MIN_NORMAL * 0.1);
     }
 
     @Test

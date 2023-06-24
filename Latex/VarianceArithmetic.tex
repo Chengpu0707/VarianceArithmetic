@@ -855,13 +855,13 @@ The mean $\overline{f(x)}$ of $f(x + \tilde{x})$ can be decomposed as the sum of
 \begin{itemize}
 \item The \emph{accurate result} $f(x)$: the result as if there were no input uncertainty; 
 
-\item The \emph{calculation bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
+\item The \emph{variance bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
 \end{itemize} 
-If $f(x)$ can be Taylor expanded as Formula \eqref{eqn: Taylor 1d}, using Formula \eqref{eqn: Gaussian function distribution}, the calculation bias $\widehat{f(x)}$ and variance $\delta^2 f(x)$ of the result distribution are calculated by Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}, respectively.  
+If $f(x)$ can be Taylor expanded as Formula \eqref{eqn: Taylor 1d}, using Formula \eqref{eqn: Gaussian function distribution}, the variance bias $\widehat{f(x)}$ and variance $\delta^2 f(x)$ of the result distribution are calculated by Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}, respectively.  
 $\delta^2 f(x) + \widehat{f(x)}^2$ is defined as defined as the \emph{calculation variance}.
-As shown in Formula \eqref{eqn: Taylor 1d variance}, like the calculation bias, the calculation variance is centered around $f(x)$ instead of $\overline{f(x)}$.
+As shown in Formula \eqref{eqn: Taylor 1d variance}, like the variance bias, the calculation variance is centered around $f(x)$ instead of $\overline{f(x)}$.
 Usually $\widehat{f(x)}^2 \ll \delta^2 f(x)$, so a calculation variance is a good approximation for the corresponding statistical variance.
-The calculation bias in $x$ is transfer to $f(x)$ according to Formula \eqref{eqn: accum calc bias}.
+The variance bias in $x$ is transfer to $f(x)$ according to Formula \eqref{eqn: accum calc bias}.
 \begin{align}
 \label{eqn: Taylor 1d} 
 \tilde{y} &= f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
@@ -899,7 +899,7 @@ M(x, n) &= (\delta x)^n
 \end{cases};
 \end{align}
 
-When $\delta x \ll x$, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result calculation bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
+When $\delta x \ll x$, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result variance bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
 \begin{align}
 \label{eqn: exp bias}
 \frac{\widehat{e^x}}{e^x} &\simeq \frac{1}{2} (\delta^2 x) + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3; \\
@@ -955,6 +955,7 @@ P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4) + 2 (\frac{1}
 \end{align*}
 
 \begin{align*}
+&\widehat{f(x) + g(x)} = \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x + g^{(n)}_x}{n!} = \widehat{f(x)} + \widehat{g(x)}; \\
 &\delta^2 (f(x)+g(x)) = \sum_{n=1}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x + g^{(j)}_x}{j!} \frac{f^{(n-j)}_x + g^{(n-j)}_x}{(n-j)!} \\
 &= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 2 \sum_{n=2}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!};
 \end{align*}
@@ -1024,7 +1025,7 @@ To be compatible with the conventional 64-bit floating-point standard \cite{Floa
 
 \item An optional linear variance is stored using conventional 64-bit floating-point representation.
 
-\item An optional calculation bias is stored using conventional 64-bit floating-point representation.
+\item An optional variance bias is stored using conventional 64-bit floating-point representation.
 \end{itemize}
 The total bit count of each value in the variance representation is either 128 or 256.
 

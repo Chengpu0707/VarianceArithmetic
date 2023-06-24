@@ -84,14 +84,14 @@ public class Dbl {
         } 
         final int msb = msb(val);
         upBy(Math.max(msb - Dbl.DOUBLE_EXP_SHIFT, Dbl.DOUBLE_EXP_MIN - exp));
-        if (val < Dbl.DOUBLE_VAL_EXTRA) {
-            --exp;
-        }
-}
+    }
 
     public double toDouble() throws ValueException {
         Dbl clone = new Dbl(this);
         clone.normalize();
+        if (clone.val < Dbl.DOUBLE_VAL_EXTRA) {
+            --clone.exp;
+        }
         if (clone.val == 0) {
             return 0;
         }

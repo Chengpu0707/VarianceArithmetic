@@ -171,8 +171,8 @@ public class VarDbl implements IReal {
             return this;
         }
         if (exp > Dbl.DOUBLE_EXP_MAX) {
-            throw new ValueException(String.format("$s: shift %d overflow exp=%d val=%d var=%d", 
-                        typeName(), bits, val(), var()));
+            throw new ValueException(String.format("%s: shift %d overflow exp=%d val=%d var=%d", 
+                        typeName(), bits, exp(), val(), var()));
         }
         final Round rVal = new Round(val());
         final Round rVar = new Round(var());
