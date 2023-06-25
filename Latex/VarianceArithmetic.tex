@@ -868,18 +868,21 @@ The variance bias in $x$ is transfer to $f(x)$ according to Formula \eqref{eqn: 
  = \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!}; \\
 \label{eqn: Taylor 1d variance}
 \delta^2 f(x) & + \widehat{f(x)}^2 = \int (f(x + \tilde{x}) - f(x))^2 \rho(\tilde{x}, x, \delta x) d \tilde{x} 
-= \sum_{n=1}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!}; \\
+= \sum_{n=2}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!}; \\
 \label{eqn: accum calc bias}
 \widehat{f(\widehat{x})} &= f(x + \widehat{x}) - f(x) + \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!};
 \end{align}
 
 Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: variance momentum}.
 The integration range of Formula \eqref{eqn: variance momentum} is limited by $f(x)$, such as $0 \le x + \tilde{x}$ in $\sqrt{x}$.  
-$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\xi()$ is the Gaussian error function, $\sigma \equiv x /\delta x$ is the bounding factor, and $\epsilon$ is the corresponding bounding leakage for $\sigma$ according to Formula \eqref{eqn: bounding leakage}:
+$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\varsigma(\sigma, n)$ is defined as the momentum residual, $\xi()$ is the Gaussian error function, $\sigma \equiv x /\delta x$ is the bounding factor, and $\epsilon$ is the corresponding bounding leakage for $\sigma$ according to Formula \eqref{eqn: bounding leakage}:
 \begin{align}
 \label{eqn: nth variance momentum}
-& \varsigma(\sigma, n) \equiv N(\sigma)\; \sum_{j=0}^{n/2} \frac{\sigma^{2j+1}}{(2j+1)!!};
-	 \eqspace \lim_{\sigma \rightarrow \infty} \varsigma(\sigma, n) = 0;	 \nonumber \\
+& \varsigma(\sigma, n) \equiv  
+\begin{cases}
+\text{$n$ is even}: &N(\sigma)\; \sum_{j=0}^{n/2} \frac{\sigma^{2j}}{(2j)!!}; \\
+\text{$n$ is odd}: &N(\sigma)\; \sum_{j=0}^{n/2 - 1} \frac{\sigma^{2j + 1}}{(2j + 1)!!}; 
+\end{cases}  \eqspace \lim_{\sigma \rightarrow \infty} \varsigma(\sigma, n) = 0;	 \nonumber \\
 M(x, n) &= (\delta x)^n 
 \begin{cases}
 -\infty < \tilde{z} < +\infty:   
@@ -889,22 +892,31 @@ M(x, n) &= (\delta x)^n
 \end{cases} \\
 -\sigma < \tilde{z} < +\infty:  
 &\begin{cases}
-\text{$n$ is even}: &(1 - \epsilon(\sigma) - \varsigma(\sigma, n)) (n-1)!! \\
+\text{$n$ is even}: &(\epsilon(\sigma) - \varsigma(\sigma, n)) (n-1)!! \\
 \text{$n$ is odd}:  &\varsigma(\sigma, n) (n-1)!! 
 \end{cases} 
 \end{cases};
 \end{align}
+Figure \ref{fig: Momentum_Residual} shows the momentum residual function $\varsigma(\sigma, n)$ vs the bounding factor $\sigma$, for different $n$.  
+\begin{figure}%[p]
+\centering
+\includegraphics[height=2.5in]{Momentum_Residual.png} 
+\captionof{figure}{
+The momentum residual function $\varsigma(\sigma, n)$ vs the bounding factor $\sigma$, for different $n$ as shown in the legend. 
+}
+\label{fig: Momentum_Residual}
+\end{figure}
 
 When $\delta x \ll x$, Formula \eqref{eqn: exp bias}, \eqref{eqn: exp precision}, \eqref{eqn: log bias}, \eqref{eqn: log precision}, \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result variance bias and precision for $e^x$, $\ln(x)$, and $x^c$, respectively.
 \begin{align}
 \label{eqn: exp bias}
 \frac{\widehat{e^x}}{e^x} &\simeq \frac{1}{2} (\delta^2 x) + \frac{1}{8} (\delta^2 x)^2 + \frac{1}{48} (\delta^2 x)^3; \\
 \label{eqn: exp precision}
-P(e^x)^2 &\simeq (\delta^2 x) + \frac{3}{2} (\delta^2 x)^2 + \frac{7}{6} (\delta^2 x)^3 + \frac{5}{8} (\delta^2 x)^3;; \\
+P(e^x)^2 &\simeq (\delta^2 x) + \frac{3}{2} (\delta^2 x)^2 + \frac{7}{6} (\delta^2 x)^3 + \frac{5}{8} (\delta^2 x)^3; \\
 \label{eqn: log bias}
 \widehat{\ln(x)} &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6; \\
 \label{eqn: log precision}
-\delta^2 \ln(x) &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{14}{3} P(x)^6 + \frac{7}{2} P(x)^8;
+\delta^2 \ln(x) &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{14}{3} P(x)^6;
 \end{align}
 \begin{align}
 \label{eqn: power bias}
@@ -932,8 +944,8 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 \label{eqn: Taylor 2d variance}
 \delta^2 f(x, y) &+ \widehat{f(x, y)}^2 = \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2 
     \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n) 
-  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} - f(x,y)^2; 
+&= \sum_{m=0...\infty, \;n=0...\infty}^{(m,n) \not \in \{(0,0), (0,1), (1,0)\}} M(x, m) M(y, n) 
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!}; 
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
