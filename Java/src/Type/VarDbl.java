@@ -22,7 +22,7 @@ public class VarDbl implements IReal {
     public VarDbl(final double value, final double variance) throws ValueException, UncertaintyException {
         pack(value, variance, false, false, BOUND_MAX);
         bias = 0;
-        linear = variance;
+        linear = variance();
     }
     public VarDbl(final double value) throws ValueException {
         try {
