@@ -581,8 +581,9 @@ Thus,
 \fi
 
 Two imprecise values can be compared statistically using their difference \cite{Statistical_Methods}.
-For example, the difference between $1.001 \pm 0.001$ and $1.000 \pm 0.002$ is $0.001 \pm 0.00224$, so that the probability for them to be equal is $2\; \xi(\frac{0.001}{0.00224}) - 1 = 94.6\%$, in which $\xi()$ is the Gaussian error function (which is the cumulative density function of $N()$) \cite{Probability_Statistics}.
-If the threshold probability of equality is 95\%, $1.000 \pm 0.002 < 1.001 \pm 0.001$.
+For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the probability for them to be not equal is $\xi(\frac{0.002}{0.00224}) = 81.4\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
+If the threshold probability of not equality is $80\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
+Using this method, even if the value difference is zero, the two imprecise values still have $50\%$ probability of not equal to each other, so that only the threshold probability of not equality can be set.
 
 
 
@@ -772,13 +773,13 @@ However, normal scientific and engineering calculations usually do not care abou
 
 Many functions $f(x)$ are not defined for either $x = 0$ or $x < 0$ or both.
 For these functions, the statistical nature of variance arithmetic means that there is non-zero probability for $\tilde{x} \leq 0$ so that the result is not defined.
-Such probability is defined as the \emph{bounding leakage}, which relates to the \emph{bounding factor} $\sigma \equiv x / \delta x$ by Formula \eqref{eqn: bounding leakage}, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+Such probability is defined as the \emph{bounding leakage}, which relates to the \emph{bounding factor} $\sigma \equiv x / \delta x$ by Formula \eqref{eqn: bounding leakage}, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 The bounding factor is the inverse of precision of $x \pm \delta x$ for $f(x)$.
 Table \ref{tab: bounding leakage} shows the order of magnitude of $\epsilon$ vs $\sigma$.
 
 \begin{equation}
 \label{eqn: bounding leakage}
-\epsilon = 1 -\xi(\frac{\sigma}{\sqrt{2}});\eqspace \lim_{\sigma \rightarrow \infty} \epsilon = 0;
+\epsilon = 1 -\xi(\sigma);\eqspace \lim_{\sigma \rightarrow \infty} \epsilon = 0;
 \end{equation}
 
 \begin{table}[h]
@@ -875,7 +876,7 @@ The variance bias in $x$ is transfer to $f(x)$ according to Formula \eqref{eqn: 
 
 Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: variance momentum}.
 The integration range of Formula \eqref{eqn: variance momentum} is limited by $f(x)$, such as $0 \le x + \tilde{x}$ in $\sqrt{x}$.  
-$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\varsigma(\sigma, n)$ is defined as the momentum residual, $\xi()$ is the Gaussian error function, $\sigma \equiv x /\delta x$ is the bounding factor, and $\epsilon$ is the corresponding bounding leakage for $\sigma$ according to Formula \eqref{eqn: bounding leakage}:
+$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\varsigma(\sigma, n)$ is defined as the momentum residual, $\xi(\sigma)$ is the cumulative probability density function for normal distribution, and $\sigma \equiv x /\delta x$ is the bounding factor:
 \begin{align}
 \label{eqn: nth variance momentum}
 & \varsigma(\sigma, n) \equiv  
@@ -892,7 +893,7 @@ M(x, n) &= (\delta x)^n
 \end{cases} \\
 -\sigma < \tilde{z} < +\infty:  
 &\begin{cases}
-\text{$n$ is even}: &(\epsilon(\sigma) - \varsigma(\sigma, n)) (n-1)!! \\
+\text{$n$ is even}: &(\xi(\sigma) - \varsigma(\sigma, n)) (n-1)!! \\
 \text{$n$ is odd}:  &\varsigma(\sigma, n) (n-1)!! 
 \end{cases} 
 \end{cases};

@@ -37,7 +37,7 @@ public class Momentum {
         else              return inverseCDF(y, delta, mid, hi);
     }
 
-    private static final int maxFactorial = 171;
+    public static final int maxFactorial = 171;
     private static final double[] sDoubleFactorial = new double[maxFactorial];
     static {
         sDoubleFactorial[0] = 1;
@@ -56,10 +56,10 @@ public class Momentum {
         return sDoubleFactorial[n];
     }
 
-    private static int maxX = 256;
-    private static int dividX = 16;
-    private static int maxN = 100;
-    private static double ssResidual[][] = new double[maxX][maxN];
+    public static final int maxX = 512;
+    public static final int dividX = 16;
+    public static final int maxN = 100;    // maxFactorial = 171
+    private static final double ssResidual[][] = new double[maxX][maxN];
     static {
         final double factorX = 1.0 / dividX;
         for (int ix = 0; ix < maxX; ++ix) {
@@ -76,15 +76,27 @@ public class Momentum {
             }
         }
     }
-    public static double residual(int n, double x) {
-        if ((n <= 0) || (maxN < n) || (x < 0)) {
+    public static double residual(int n, double z) {
+        if ((n <= 0) || (maxN < n) || (z < 0)) {
             return Double.NaN;
         }
-        if ((x * dividX) > maxX) {
+        if ((z * dividX) >= maxX) {
             return 0;
         }
-        final int lower = (int) Math.floor(x * dividX);
-        final int upper = (int) Math.ceil(x * dividX);
-        return ssResidual[lower][n - 1] + (ssResidual[upper][n - 1] - ssResidual[lower][n - 1]) * (x * dividX - lower);
+        final int lower = (int) Math.floor(z * dividX);
+        final int upper = (int) Math.ceil(z * dividX);
+        if (upper < maxX) {
+            return ssResidual[lower][n - 1] + (ssResidual[upper][n - 1] - ssResidual[lower][n - 1]) * (z * dividX - lower);
+        } else {
+            return ssResidual[lower][n - 1];
+        }
+    }
+
+    public static double factor(int n, double z) {
+        if (Double.isFinite(z)) {
+            return ((n % 2) == 1)? residual(n, z) : cdf(z) - residual(n, z);
+        } else {
+            return ((n % 2) == 1)? 0 : 1;
+        }
     }
 }

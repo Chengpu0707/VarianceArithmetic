@@ -1,5 +1,7 @@
 package Type;
 
+import java.util.Arrays;
+
 /*
  * A base class for storage type for variance arithmetic.
  * It add a taylor() method for the general Taylor expansion using the following approximation:
@@ -302,6 +304,31 @@ public class VarDbl implements IReal {
         this.bias = bias;
         return this;
     }
+
+    /*
+     * 1d Taylor expance, with f(x) as s1dTaylor[0]
+     *  s1dTaylor[n] should already contains /n!
+     *  bias = f(x+bias) - f(x)
+     */
+    VarDbl taylor(double bounding, double bias, double[] s1dTaylor) throws ValueException, UncertaintyException {
+        if (s1dTaylor.length < 2) {
+            throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
+        }
+        final double value = s1dTaylor[0];
+        final double linear = s1dTaylor[1] * s1dTaylor[1] * variance();
+        double variace = 0;
+        for (int n = 2; n <= Momentum.maxN; ++n) {
+            if (Double.isFinite(bounding) && ((n % 2) == 1)) {
+            }
+            for (int j = 1; j < n; ++j) {
+                
+            }
+        }
+        
+
+        return this;
+    }
+
     
 
     private long val;
