@@ -69,138 +69,51 @@ public class TestMomentum {
     }
 
     @Test
-    public void TestResidual24() {
-        double x = 3;
-        int n = 24;
-        final boolean odd = ((n % 2) == 1);
-        double term = odd?  1 : x;
-        term *= Momentum.pdf(x);
-        double sum = term;
-        assertEquals(0.0044318484119380075, Momentum.pdf(x), 2E-16);
-        assertEquals(0.013295545235814023, term, 2E-16);
-         /*
-        for (int j = odd? 2 : 3; j < n; j += 2) {
-            term *= x * x / j;
-            sum += term;
+    public void TestFactor() {
+        final double s = 1.75;
+        final int n = 2;
+        assertEquals(0.201767, Momentum.factor(n, s), 1E-6);
+        final double pdf = 2 * Momentum.pdf(s);
+        assertEquals(0.172555, pdf, 1E-6);
+
+        double term = pdf * s / (n + 1);
+        double sum = 0;
+        double next = term;
+        for (int j = n + 3; sum < next; j += 2) {
+            sum = next;
+            term *= s * s / j;
+            next = sum + term;
         }
-         */
-        int j = 3;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.03988663570744207, term, 2E-16);
-        j = 5;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.07179594427339572, term, 2E-16);
-        j = 7;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.09230907120865164, term, 2E-16);
-        j = 9;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.09230907120865164, term, 2E-16);
-        assertEquals(0.3095962676339551, sum, 2E-16);
-        double sum2 = 0;
-        for (j = 11; j < n; j += 2) {
-            term *= x * x / j;
-            sum2 += term;
-        }
-        assertEquals(0.1883519332126673, sum2, 2E-16);
-        assertEquals(0.4979482008466224, sum + sum2, 2E-16);
+        assertEquals(sum, Momentum.factor(n, s), 1E-6);
+        assertEquals(sum, pdf*s/(n+1) + s*s/(n+1) * Momentum.factor(n+2, s), 1E-6);
 
-        assertEquals(0.4979482008466224, Momentum.residual(n, x), 2E-16);
-    }
-
-    @Test
-    public void TestResidual25() {
-        double x = 3;
-        int n = 25;
-        final boolean odd = ((n % 2) == 1);
-        double term = odd?  1 : x;
-        term *= Momentum.pdf(x);
-        double sum = term;
-        assertEquals(0.0044318484119380075, Momentum.pdf(x), 2E-16);
-        assertEquals(0.0044318484119380075, term, 2E-16);
-         /*
-        for (int j = odd? 2 : 3; j < n; j += 2) {
-            term *= x * x / j;
-            sum += term;
-        }
-         */
-        int j = 2;
-        term *= x * x / j;
+        sum = 0;
+        term = pdf * s / (2 + n - 1);
         sum += term;
-        assertEquals(0.019943317853721033, term, 2E-16);
-        j = 4;
-        term *= x * x / j;
+        assertEquals(0.100657, term, 1E-6);
+        term = pdf * s * s * s / (2 + n - 1) / (4 + 2*n - 1);
+        assertEquals(0.044037, term, 1E-6);
         sum += term;
-        assertEquals(0.044872465170872324, term, 2E-16);
-        j = 6;
-        term *= x * x / j;
+        term = pdf * s * s * s * s * s / (2 + n - 1) / (4 + 2*n - 1) / (6 + 2*n - 1);
+        assertEquals(0.014985, term, 1E-6);
         sum += term;
-        assertEquals(0.06730869775630849, term, 2E-16);
-        j = 8;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.07572228497584704, term, 2E-16);
-        j = 10;
-        term *= x * x / j;
-        sum += term;
-        assertEquals(0.06815005647826235, term, 2E-16);
-        assertEquals(0.28042867064694926, sum, 2E-16);
-        double sum2 = 0;
-        for (j = 12; j < n; j += 2) {
-            term *= x * x / j;
-            sum2 += term;
-        }
-        assertEquals(0.1181924062124705, sum2, 2E-16);
-        assertEquals(0.3986210768594198, sum + sum2, 2E-16);
-
-        assertEquals(0.3986210768594198, Momentum.residual(n, x), 2E-16);
-    }
-
-    @Test
-    public void TestResidualDump() {
-        assertTrue(Momentum.residual(Momentum.maxN, (double) Momentum.maxX / Momentum.dividX) < 1E-3);
-
-        System.out.println(System.getProperty("user.dir"));
-        try (
-            final FileWriter fw = new FileWriter("C:/Users/Cheng/Documents/Proj/VarianceArithemtic/Java/Output/MomentumResidual.txt")) {
-            fw.write("x\t");
-            for (double x = 0; x <= 16; x += 0.1) {
-                fw.write(String.format("%f\t", x));
-            }
-            fw.write("\n");
-            for (int i = 1; i <= 1000; ++i) {
-                fw.write(String.format("%d\t", i));
-                for (double x = 0; x < 16; x += 0.1) {
-                    fw.write(String.format("%e\t", Momentum.residual(i, x)));
-                }
-                fw.write("\n");
-            }
-            fw.close();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        } 
+        assertTrue(pdf * sum < Momentum.factor(n, s));
     }
 
     @Test
     public void TestFactorDump() {
-        assertTrue(Momentum.residual(Momentum.maxN, (double) Momentum.maxX / Momentum.dividX) < 1E-3);
-
         System.out.println(System.getProperty("user.dir"));
         try (
             final FileWriter fw = new FileWriter("C:/Users/Cheng/Documents/Proj/VarianceArithemtic/Java/Output/MomentumFactor.txt")) {
-            fw.write("x\t");
-            for (double x = 0; x <= 16; x += 0.1) {
-                fw.write(String.format("%f\t", x));
+            fw.write("s\t");
+            for (double s = 0; s <= 8; s += 0.1) {
+                fw.write(String.format("%f\t", s));
             }
             fw.write("\n");
-            for (int i = 1; i <= 100; ++i) {
+            for (int i = 2; i <= Momentum.maxN; i += 2) {
                 fw.write(String.format("%d\t", i));
-                for (double x = 0; x < 16; x += 0.1) {
-                    fw.write(String.format("%e\t", Momentum.factor(i, x)));
+                for (double s = 0; s < 16; s += 0.1) {
+                    fw.write(String.format("%e\t", Momentum.factor(i*2, s)));
                 }
                 fw.write("\n");
             }

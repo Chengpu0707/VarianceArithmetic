@@ -56,47 +56,51 @@ public class Momentum {
         return sDoubleFactorial[n];
     }
 
-    public static final int maxX = 512;
-    public static final int dividX = 16;
-    public static final int maxN = 100;    // maxFactorial = 171
-    private static final double ssResidual[][] = new double[maxX][maxN];
+    /*
+     * Calculate momentum factor
+     */
+    public static final int maxS = 512;
+    public static final int dividS = 16;
+    public static final int maxN = 200;    // maxFactorial = 171
+    private static final double ssFactor[][] = new double[maxS][maxN];
     static {
-        final double factorX = 1.0 / dividX;
-        for (int ix = 0; ix < maxX; ++ix) {
-            double x = ix * factorX;
+        final double factorS = 1.0 / dividS;
+        for (int is = 0; is < maxS; ++is) {
+            final double s = is * factorS;
+            final double pdf = 2 * pdf(s);
+            double power = 1;
             for (int n = 1; n <= maxN; ++n) {
-                final boolean odd = ((n % 2) == 1);
-                double term = odd?  1 : x;
-                double sum = term;
-                for (int j = odd? 2 : 3; j < n; j += 2) {
-                    term *= x * x / j;
-                    sum += term;
+                power *= s * s;
+                double term = pdf * power * s / (2*n + 1);
+                double sum = 0;
+                double next = term;
+                for (int j = 2*n + 3; sum < next; j += 2) {
+                    sum = next;
+                    term *= s * s / j;
+                    next = sum + term;
                 }
-                ssResidual[ix][n - 1] = sum * pdf(x);
+                ssFactor[is][n - 1] = sum;
             }
         }
     }
-    public static double residual(int n, double z) {
-        if ((n <= 0) || (maxN < n) || (z < 0)) {
+    public static double factor(int n, double s) {
+        if ((n <= 0) || (maxN < n) || (s < 0)) {
             return Double.NaN;
         }
-        if ((z * dividX) >= maxX) {
+        if ((n % 2) == 1) {
+            return 0; 
+        }
+        if ((s * dividS) >= maxS) {
             return 0;
         }
-        final int lower = (int) Math.floor(z * dividX);
-        final int upper = (int) Math.ceil(z * dividX);
-        if (upper < maxX) {
-            return ssResidual[lower][n - 1] + (ssResidual[upper][n - 1] - ssResidual[lower][n - 1]) * (z * dividX - lower);
+        final int lower = (int) Math.floor(s * dividS);
+        final int upper = (int) Math.ceil(s * dividS);
+        if (lower == upper) {
+            return ssFactor[lower][n/2 - 1];
+        } else if (upper < maxS) {
+            return ssFactor[lower][n/2 - 1] + (ssFactor[upper][n/2 - 1] - ssFactor[lower][n/2 - 1]) * (s * dividS - lower);
         } else {
-            return ssResidual[lower][n - 1];
-        }
-    }
-
-    public static double factor(int n, double z) {
-        if (Double.isFinite(z)) {
-            return ((n % 2) == 1)? residual(n, z) : cdf(z) - residual(n, z);
-        } else {
-            return ((n % 2) == 1)? 0 : 1;
+            return ssFactor[lower][n/2 - 1];
         }
     }
 }

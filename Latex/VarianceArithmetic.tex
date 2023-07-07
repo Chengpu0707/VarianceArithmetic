@@ -751,54 +751,6 @@ y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}
 \end{align}
 
 
-\subsection{Uncertainty Statistics and Bounding Leakage}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
-\captionof{figure}{
-The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\tilde{y}^2$.
-}
-\label{fig: Square_Root_Distribution}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Distribution.png} 
-\captionof{figure}{
-The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
-}
-\label{fig: Square_Distribution}
-\end{figure}
-
-Formula \eqref{eqn: function distribution} can be used trace the uncertainty distribution during calculation.
-However, normal scientific and engineering calculations usually do not care about result distribution, but just some simple statistics of the result, such as the result deviation.
-For this purpose, the distribution should be close enough to Gaussian in one of its representation. 
-\begin{itemize}
-
-\item Many functions $f(x)$ are not defined for either $x = 0$ or $x < 0$ or both, such as $\sqrt{x}$.
-For these functions, the statistical nature of variance arithmetic means that there is a probability for $f(x + \tilde{x})$ to be not defined when $\tilde{x} < -x$.
-Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$.
-$\sqrt{3 \pm 1}$ looks quite Gaussian, while $\sqrt{0 \pm 1}$ deviates from Gaussian significantly.
-The result resembles Gaussian more when less data is cut off by $\tilde{x} < -x$.
-
-\item Even when functions $f(x)$ are defined for all $x$, the distribution of $f(x \pm \delta x)$ deviates significantly from Gaussian near $x=0$. 
-Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$.
-$(5 \pm 1)^2$ looks quite Gaussian, while $(0 \pm 1)^2$ deviates from Gaussian significantly.
-In fact, $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics} which is not symmetric.
-The peak near $(x+\tilde{x})^2 = 0$ is caused by $\tilde{x} < -x$.
-
-\end{itemize}
-For $f(x + \tilde{x})$ to be defined, or close to Gaussian-distributed, it is necessary to cut the range of $\tilde{x}$ to $-x < \tilde{x}$.
-Such cut introduce a \emph{bounding leakage} $\epsilon = 1 - \xi(\frac{1}{2} + \frac{1}{P(x)})$, in which $\xi(\tilde{z})$ is the cumulative density function of $N(\tilde{z})$ \cite{Probability_Statistics}.
-Different $f(x)$ requires different upper bound for $P(x)$, e.g., $(x \pm \delta x)^2$ with $P(x)=1/5$ and $\sqrt{x \pm \delta x}$ with $P(x)=1/3$ has very similar resemblance to the corresponding Gaussian distribution of the same deviation.
-
-
-
-
-
 \subsection{Analytic Functions}
 
 \iffalse
@@ -841,89 +793,66 @@ N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!}
  &= \frac{1}{2} (2n+1)!! - N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
 \int_{-\infty}^{-\sigma} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} &= \int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z}; \\
 \int_{-\sigma}^{+\sigma} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
-\int_{-\sigma}^{+\sigma} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n-1)!!}{(2j + 2n-1)!!};
+\int_{-\sigma}^{+\sigma} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n-1)!!}{(2j + 2n-1)!!}; \\
+\zeta(2n) &= 2 N(\sigma) \frac{\sigma^{2n+1}}{2n + 1} + 2 N(\sigma) \frac{\sigma^{2n+2}}{2n + 1} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n+2 - 1)!!}{(2j+2n+2-1)!!} \\
+ &= 2 N(\sigma) \frac{\sigma^{2n + 1}}{2n + 1} + \frac{\zeta(\sigma, 2n + 2)}{2n + 1}; \\
+\zeta(\sigma, 2n + 2) &= (2n + 1) \zeta(\sigma, 2n) - 2 N(\sigma) \sigma^{2n + 1};
 \end{align*}
 
 \begin{align*}
-& 0 \le x + \title{x} = x + \title{z} \delta x \Rightarrow - \frac{x}{\delta x} = \sigma < \tilde{z} \\
-\int_{-\sigma}^{+\infty} \tilde{z}^{2n+1} N(\tilde{z}) d \tilde{z} 
- &= (2n)!! \;N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j}}{(2j)!!} \equiv (2n)!! \varsigma(\sigma, 2n+1); \\
-\int_{-\sigma}^{+\infty} \tilde{z}^{2n+2} N(\tilde{z}) d \tilde{z} 
- &= (2n+1)!! \left(\xi(\sigma) - N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!} \right) \equiv (2n+1)!! \varsigma(\sigma, 2n+2); \\
-\varsigma(\sigma, 2n+1) 
- &= N(\sigma) \left( e^{\frac{x^2}{2}} - \sum_{j=n+1}^{\infty} \frac{\sigma^{2j}}{(2j)!!} \right) 
- = \frac{1}{\sqrt{2 \pi}} - N(\sigma) \sum_{j=n+1}^{\infty} \frac{\sigma^{2j}}{(2j)!!}; \\
-\varsigma(\sigma, 2n+2) 
- &= \xi(\sigma) - N(\sigma)\left(\sqrt{\frac{\pi}{2}} e^{\frac{\sigma^2}{2}} (2 \xi(\sigma) - 1) - \sum_{j=n+1}^{\infty} \frac{\sigma^{2j+1}}{(2j+1)!!} \right)
- = \frac{1}{2} + N(\sigma) \sum_{j=n+1}^{\infty} \frac{\sigma^{2j+1}}{(2j+1)!!}; \\
-3 < \sigma < \sqrt{n}:& \eqspace \varsigma(\sigma, 2n+1) = \frac{1}{\sqrt{2 \pi}}; \eqspace \varsigma(\sigma, 2n+2) = \frac{1}{2}; \\
-n \rightarrow +\infty:& \eqspace (2n)! \varsigma(\sigma, 2n+1) = (2n + 1)!! \varsigma(\sigma, 2n+2)
-  = \sqrt{\frac{n}{2}} \left(\frac{n}{e}\right)^{\frac{n}{2}};
-\end{align*}
-
-\begin{align*} 
-\int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} 
- &= (2n+1)!! - (2n+1)!! \left(\xi(\sigma) - N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j + 1}}{(2j + 1)!!} \right) \\
- &= (2n+1)!! - \frac{1}{2} (2n+1)!! - (2n+1)!! N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j + 1}}{(2j + 1)!!}; \\
-\int_{-\sigma}^{+\infty} \tilde{z}^{2n+2} N(\tilde{z}) d \tilde{z} 
- &= \frac{1}{2} (2n+1)!! + (2n+1)!! N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j + 1}}{(2j + 1)!!}; \\
-\int_{-\sigma}^{+\sigma} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} 
- &= \int_{-\sigma}^{+\infty} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} - \int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} \\
- &=  2 N(\sigma) \sum_{j=n+1}^{\infty} \sigma^{2j+1} \frac{(2n + 1)!!}{(2j+1)!!}
- = 2 N(\sigma) \sigma^{2(n+1)} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n + 1)!!}{(2j+2n+1)!!}; \\
-M(x, 2n) &= x^{2n} 2 N(\sigma) \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2j+2n-1)!!} \equiv x^{2n} \zeta(2n); \\
-\zeta(2n) &= 2 N(\sigma) \frac{\sigma}{2n + 1} + 2 N(\sigma) \frac{\sigma^2}{2n + 1} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n+2 - 1)!!}{(2j+2n+2-1)!!} \\
- &=2 N(\sigma) \frac{\sigma}{2n + 1} + \frac{\sigma^2}{2n + 1} \varsigma(\sigma, 2n + 2);
+&\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}
+ \simeq \tilde{x} + \frac{1}{2} \tilde{x}^2 + \frac{1}{6} \tilde{x}^3 + \frac{1}{24} \tilde{x}^4 + \frac{1}{120} \tilde{x}^5 + \frac{1}{720} \tilde{x}^6; \\
+\frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} 
+ \simeq \frac{1}{2} (\delta x)^2 + \frac{1}{8} (\delta x)^4 + \frac{1}{48} (\delta x)^6 + \frac{1}{384} (\delta x)^8; \\
+P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(2n - 1)!!}{j!\;(2n - j)!}
+ - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
+ &\simeq (\delta x)^2 + (\frac{7}{12} 3!! - \frac{1}{4}) (\delta x)^4 
+  + (\frac{31}{360} 5!! - 2 \frac{1}{2} \frac{1}{8}) (\delta x)^6
+  + (\frac{127}{20160} 7!! - 2 \frac{1}{2} \frac{1}{48} - (\frac{1}{8})^2) (\delta x)^8 \\
+ &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8
 \end{align*}
 
 \begin{align*}
-\frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} \\
- &\simeq \frac{1}{2} (\delta x)^2 + \frac{1}{24} \zeta(4) (\delta x)^4 + \frac{1}{720} \zeta(6) (\delta x)^6; \\
-P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(2n - 1)!!}{j!\;(2n - j)!} - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
- &\simeq (\delta x)^2 + (\frac{7}{12} \zeta(4) - \frac{1}{4}) (\delta x)^4 
-  + (\frac{31}{360} \zeta(6) - \frac{1}{24} \zeta(4)) (\delta x)^6
-  + (\frac{127}{20160} \widehat{\varsigma(\sigma, 8)} - \frac{1}{720} \zeta(6) - \frac{1}{24^2}) \zeta(4)^2) (\delta x)^8;
-\end{align*}
-
-\begin{align*}
-\widehat{\ln(x)} &= -\sum_{n=1}^{+\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{2n} 
- \simeq - \frac{1}{2} (\delta x)^2 - \frac{1}{4} \zeta(4) (\delta x)^4 - \frac{1}{6} \zeta(6) (\delta x)^6; \\
+& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
+\widehat{\ln(x)} &= -\sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n} 
+ \simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6 - \frac{105}{8} P(x)^8; \\
 &\sum_{j=1}^{2n-1} \frac{1}{j} \frac{1}{2n - j} = \frac{1}{2n} \sum_{j=1}^{2n-1} \frac{1}{j} +  \frac{1}{2n - j} = \frac{2}{2n} \sum_{j=1}^{2n-1} \frac{1}{j}
  = \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}; \\
-\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j} - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
- &\simeq (\delta x)^2 + (\frac{1}{2} \frac{11}{12} \zeta(4) - \frac{1}{4}) (\delta x)^4 
-  + (\frac{1}{3} \frac{137}{60} \zeta(6) - \frac{1}{4} \zeta(4)) (\delta x)^6 \\
- &\simeq (\delta x)^2 + (\frac{11}{24} \zeta(4) - \frac{1}{4}) (\delta x)^4 
-  + (\frac{137}{180} \zeta(6) - \frac{1}{4} \zeta(4)) (\delta x)^6;
+\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j} - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
+ &\simeq P(x)^2 + (\frac{1}{2} \frac{11}{6} 3!! - \frac{1}{4}) P(x)^4 
+  + (\frac{1}{3} \frac{137}{60} 5!! - 2 \frac{1}{2} \frac{3}{4}) P(x)^6
+  + (\frac{1}{4} \frac{363}{140} 7!!- 2 \frac{1}{2} \frac{5}{2} - (\frac{3}{4})^2 ) \\
+ &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8;
 \end{align*}
 
 \begin{align*}
 (1 + p)^2 - 1 &= 2p + 1p^2; \\
 \frac{\widehat{x^2}}{x^2} &= P(x)^2; \\
-P(x^2)^2 &= 4 P(x)^2 + (\zeta(4) - 1) P(x)^4; \\
-\sqrt{1 + p} - 1 &\simeq \frac{1}{2} p - \frac{1}{8} p^2 + \frac{1}{16} p^3 - \frac{5}{128} p^4 + \frac{7}{256} p^5 - \frac{21}{1024} p^6; \\
-\frac{\widehat{\sqrt{x}}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{5}{128} \zeta(4) P(x)^4
- - \frac{21}{1024} \zeta(6) P(x)^6; \\
-P(\sqrt{x})^2 &\simeq \frac{1}{4} \widehat{\delta x}^2 P(x)^2
-  + ((\frac{1}{16} + \frac{1}{64}) \zeta(4) - \frac{1}{64}) P(x)^4 +
-  ((\frac{7}{256} + \frac{5}{512} + \frac{1}{256}) \zeta(6) - \frac{5}{512} \zeta(4)) P(x)^6 \\
- &= \frac{1}{4} \widehat{\delta x}^2 P(x)^2 
-  + \frac{1}{64} (\zeta(4) - 1) P(x)^4
-  + \frac{1}{512} (21 \zeta(6) - 5 \zeta(4)) P(x)^6; \\
-\frac{1}{1 + p} - 1 &\simeq -p + p^2 - p^3 + p^4 - p^5 + p^6; \\
-\frac{\widehat{1/x}}{1/x} &\simeq P(x)^2 + \zeta(4) P(x)^4 + \zeta(6) P(x)^6; \\
-P(1/x)^2 &\simeq P(x)^2 + (3 \zeta(4) - 1) P(x)^4 + (5 \zeta(6) - 2 \zeta(4)) P(x)^6; 
+P(x^2)^2 &= 4 P(x)^2 + (3 - 1) P(x)^4; \\
+\sqrt{1 + p} - 1 & = \sum_{n-1} \frac{(2n-3)!!}{2^n n!}
+ \simeq \frac{1}{2} p - \frac{1}{8} p^2 + \frac{1}{16} p^3 - \frac{5}{128} p^4 + \frac{7}{256} p^5 - \frac{21}{1024} p^6 + \frac{33}{2048} p^7 - \frac{429}{32768} P(x)^8; \\
+\frac{\widehat{\sqrt{x}}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 - \frac{45045}{32768} P(x)^8; \\
+P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2
+  + ((\frac{1}{16} + \frac{1}{64}) 3 - \frac{1}{64}) P(x)^4
+  + ((\frac{7}{256} + \frac{5}{512} + \frac{1}{256}) 5!! - \frac{15}{512}) P(x)^6 \\
+ &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + \frac{180034033932044865}{72057594037927936} P(x)^8; \\
+\frac{1}{1 + p} - 1 &\simeq -p + p^2 - p^3 + p^4 - p^5 + p^6 - p^7 + p^8; \\
+\frac{\widehat{1/x}}{1/x} &\simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
+P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 105 - 2 * 15 - 3^2) P(x)^8 
+ = P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
 \end{align*}
 
 \fi
 
-
+Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
+However, normal scientific and engineering calculations usually do not care about result distribution, but just some simple statistics of the result, such as the result deviation.
+Using Taylor expansion is one way to get the simple statistics.
 
 An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
-If $\tilde{z}$ in Formula \eqref{eqn: Taylor 1d} is normal-distributed according to Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is the \emph{bounding factor} that determines the $\tilde{x}$ range to be $(-\sigma \delta x, +\sigma \delta x)$.
+Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is the \emph{bounding factor} that determines the $\tilde{x}$ range to be $(-\sigma \delta x, +\sigma \delta x)$.
 \begin{align}
 \label{eqn: Taylor 1d} 
-\tilde{y} &= f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
+\tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
 \label{eqn: variance momentum}
 & M(x, n) \equiv (\delta x)^n \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace M(x, 2n+1) = 0; \\
 \label{eqn: calc bias}
@@ -954,28 +883,26 @@ In Formula \eqref{eqn: Taylor 1d variance}, the variance $\delta^2 f(x)$ is deco
 
 The choice of the bounding factor $\sigma$ needs careful scrutiny.
 If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} to diverge in most cases.
-For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern, so that $\sigma$ is limited.
-When $\sigma$ is limited, Formula \eqref{eqn: momentum even} for $M(x, 2n)$ contains a \emph{variance momentum factor} $\zeta(2n)$ which is defined in Formula \eqref{eqn: momentum factor}.
+For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern, so that $\sigma$ should be limited, and $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
 \begin{align}
 \label{eqn: momentum factor} 
-\zeta(2n) &\equiv2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
+\zeta(2n) &\equiv2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!} \\
 \label{eqn: momentum even} 
 M(x, 2n) &= (\delta x)^{2n} \zeta(2n); 
 \end{align}
-
-Figure \ref{fig: Momentum_Factor_Bounding} shows that the variance momentum factor $\zeta(2n)$ approaches $(2n-1)!!$ with increasing Taylor expansion order $2n$, but for a larger $2n$, $\zeta(2n)$ reaches $(2n-1)!!$ at a larger bounding factor $\sigma$. 
+Figure \ref{fig: Momentum_Factor_Bounding} shows that the variance momentum factor $\zeta(2n)$ approaches $(2n-1)!!$ with increasing Taylor expansion order $2n$, but for a larger $2n$, $\zeta(2n)$ reaches $(2n-1)!!$ at a larger $\sigma$. 
 When $\sigma^2 \gg 2n$, $\zeta(2n)$ increases with $2n$ as $(2n-1)!!$ which is faster than $\sigma^{2n}$.
 When $\sigma^2 \ll 2n$, before $\zeta(2n)$ reaches $(2n-1)!!$, $\zeta(2n)$ increases with $2n$ as $\sigma^{2n} /2n$ which is slower than $\sigma^{2n}$.
-Thus it is possible to choose $\sigma$ so that $\zeta(2n) \sim \sigma^{2n}$.
+Thus it is possible to choose $\sigma$ so that $\zeta(2n) \sim \sigma^{2n}$ for $2n < 200$ which is the practical range for Taylor expansion.
 
-Figure \ref{fig: Momentum_Factor_Expansion} shows that when $3 \leq \sigma \leq 6$, $\zeta(2n) \sim \lambda^{2n}$ by exponential fitting of $\zeta(2n)$.
-Table 1 contains the $\lambda$ and $\zeta(2)$ for different $\sigma$, in which the fitted value $\lambda$ is always slightly smaller than $\sigma$, which is expected.
+Figure \ref{fig: Momentum_Factor_Expansion} shows that when $3 \leq \sigma \leq 6$, $\zeta(2n) \sim \lambda^{2n}$ in which $\lambda$ is a fitting parameter.
+Table 1 contains the $\lambda$ for different $\sigma$, in which $\lambda$ is always slightly smaller than $\sigma$, as expected.
 
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{Momentum_Factor_Bounding.png} 
 \captionof{figure}{
-The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the Taylor expansion order $2n$ according to Formula \eqref{eqn: momentum factor}, for different $\sigma$ as shown in the legend. 
+The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the bounding factor $\sigma$ according to Formula \eqref{eqn: momentum factor}, for different Taylor expansion order $2n$ as shown in the legend. 
 }
 \label{fig: Momentum_Factor_Bounding}
 \end{figure}
@@ -984,8 +911,9 @@ The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the Tay
 \centering
 \includegraphics[height=2.5in]{Momentum_Factor_Expansion.png} 
 \captionof{figure}{
-The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the bounding factor $\sigma$ according to Formula \eqref{eqn: momentum factor}, for different Taylor expansion order $2n$ as shown in the legend. 
+The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the Taylor expansion order $2n$ according to Formula \eqref{eqn: momentum factor}, for different $\sigma$ as shown in the legend. 
 Also shown is the $(2n - 1)!!$ vs $2n$.
+The smaller diagram shows the starting portion of $\zeta(2n)$ vs $2n$ for different $\sigma$.
 }
 \label{fig: Momentum_Factor_Expansion}
 \end{figure}
@@ -993,6 +921,8 @@ Also shown is the $(2n - 1)!!$ vs $2n$.
 The limited range of $\tilde{x}$ cause the bounding leakage $\epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma)$.
 Table 1 shows $\epsilon$ vs $\sigma$.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
+
+Thus, $\sigma \leq 5$ for variance arithmetic.
 
 \begin{table}[h]
 \label{tab: bounding leakage}
@@ -1014,28 +944,28 @@ $\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \
 \end{table}
 
 
-Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$:
+Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$, which always converge:
 \begin{align}
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp bias}
 \frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!} \\
- &\simeq \frac{1}{2} (\delta x)^2 + \frac{1}{8} (\delta x)^4 + \frac{1}{48} (\delta x)^; \\
+ &\simeq \frac{1}{2} (\delta x)^2 + \frac{1}{8} (\delta x)^4 + \frac{1}{48} (\delta x)^6 + \frac{1}{384} (\delta x)^8; \\
 \label{eqn: exp precision}
 P(e^x)^2 &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!} - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
- &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6;
+ &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
 \end{align}
 
 Formula \eqref{eqn: log bias} and \eqref{eqn: log precision} give the result for $\ln(x)$:
 \begin{align}
 \label{eqn: log Taylor}
-& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}: \\
+& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
 \label{eqn: log bias}
-\widehat{\ln(x)} &= -\sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n} \\
- &\simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6; \\
+\widehat{\ln(x)} &= -\sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n}; \\
+ & P(x) \leq 1/5:\eqspace \widehat{\ln(x)} \simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6 - \frac{105}{8} P(x)^8; \\
 \label{eqn: log precision}
 \delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j} - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
- &\simeq P(x)^2 + \frac{9}{8} P(x)^4 + \frac{32}{3} P(x)^6; 
+ & P(x) \leq 1/5:\eqspace \delta^2 \ln(x) \simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8; 
 \end{align}
 
 Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result for $x^c$.
@@ -1048,7 +978,7 @@ Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result
 P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \left(\frac{\widehat{x^c}}{x^c}\right)^2;
 \end{align}
-As the special cases for Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}, Formula \eqref{eqn: square bias} and \eqref{eqn: square precision} give the result for $x^2$, Formula \eqref{eqn: square root bias} and \eqref{eqn: square root precision} give the result for $\sqrt{x}$, and Formula \eqref{eqn: inversion bias} and \eqref{eqn: inversion precision} give the result for $1/x$: 
+As the special cases for Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}, when $P(x) \leq 1/5$, Formula \eqref{eqn: square bias} and \eqref{eqn: square precision} give the result for $x^2$, Formula \eqref{eqn: square root bias} and \eqref{eqn: square root precision} give the result for $\sqrt{x}$, and Formula \eqref{eqn: inversion bias} and \eqref{eqn: inversion precision} give the result for $1/x$: 
 \begin{align}
 \label{eqn: square bias}
 \frac{\widehat{x^2}}{x^2} &= P(x)^2; \\
@@ -1059,29 +989,85 @@ P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
 \label{eqn: square root precision}
 P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6; \\
 \label{eqn: inversion bias}
-\frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix}; \\
+\frac{\widehat{x^c}}{x^c} &\simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
 \label{eqn: inversion precision}
-P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; 
+P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
 \end{align}
 
-The variance formula using Taylor expansion shows the nature of the calculation, such as the different nature of variance increases of $e^x$ vs $\ln x$ vs $x^c$, or the difference speed of variance increases of $x^c$ depending on different $c$.
-The result for $e^x$ always converges.
-For other cases, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} are expressed in $P(x)$ instead of $\delta x$.
-When $P(x) < 1/\sigma$, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge.
-The $\sigma$ is a default constant in variance arithmetic.
+The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$. or the difference speed of variance increases of $x^c$ depending on different $c$.
+
+If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.
+$\upsilon(2n)$ depends on $f(x)$, and so does $\lambda$.
+From Formula \eqref{eqn: square root precision} and \eqref{eqn: inversion precision}, $\lambda$ is larger for $1/x$ than for $\sqrt{x}$.
+For each function, the maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} to be applicable is defined as \emph{applicable precision threshold}, which could be smaller than $1/\sigma$ because according to Table 1, $\zeta(2n)$ increases with $2n$ slightly slower than $\sigma^{2n}$.
+When the applicable precision threshold is larger than $1/\sigma$, the integration range in Formula \eqref{eqn: variance momentum} needs to be reduced to $1/P(x)$. 
+Generally, $1/\sigma$ provides a rough estimation for the applicable precision threshold.
+
+Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
+
 
 Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
 \begin{align}
 \label{eqn: Taylor 2d bias}
 \widehat{f(x,y)} &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y)) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} M(x, m) M(y, n)  \frac{f^{(m,n)}_{(x,y)}}{m! n!} - f(x,y); \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!} - f(x,y); \\
 \label{eqn: Taylor 2d variance}
 \delta^2 f(x, y) &+ \widehat{f(x, y)}^2 = \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2 
     \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0...\infty, \;n=0...\infty}^{(m,n) \not \in \{(0,0), (0,1), (1,0)\}} M(x, m) M(y, n) 
-  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!}; 
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
+  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} - f(x,y); 
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
+
+
+\subsection{The Boundary Condition at Zero}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+}
+\label{fig: Square_Distribution}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
+\captionof{figure}{
+The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\tilde{y}^2$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+}
+\label{fig: Square_Root_Distribution}
+\end{figure}
+
+
+When Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} has $P(x)$ as the input, such as for $\ln(x)$ or $x^c$, both break down at $0 \pm \delta x$, even the function may be defined across 0, such as $x^2$ or $x^3$.
+Above the applicable threshold, the result uncertainty distribution starts to deviate from Gaussian.
+
+Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}:
+\begin{itemize}
+
+\item $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics}.
+
+\item Visually, $(1 \pm 1)^2$ and $(2 \pm 1)^2$ deviates from Gaussian significantly.
+
+\item Visually, $(3 \pm 1)^2$ starts to look close to Gaussian, but still has a significant peak at $x + \tilde{x} = 0$.
+
+\item $(5 \pm 1)^2$ looks definitely Gaussian.
+
+\end{itemize}
+
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}^2$ according to Formula \eqref{eqn: power distribution}.  
+It shows that $\sqrt{3 \pm 1}^2$ is as close to Gaussian as $(5 \pm 1)^2$.
+Even though $x^2$ is defined across 0, the uncertainty distribution of $(x + \delta x)^2$ deviates from Gaussian more than that of $\sqrt{x + \delta x}$ when $x \rightarrow 0$.
+
 
 
 
@@ -1114,39 +1100,40 @@ P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4) + 2 (\frac{1}
 
 The statistical variance can be decomposed as the sum of:
 \begin{itemize}
-\item The \emph{linear Deviation}, which is the square root of the $(\delta x)^2$ term in Formula \eqref{eqn: Taylor 1d variance}. 
+\item The \emph{linear variance}, which is the $(\delta x)^2$ term in Formula \eqref{eqn: Taylor 1d variance}. 
 
-\item The \emph{calculation cost}, which is the total deviation minus the linear deviation.  
+\item The \emph{calculation cost}, which is the total variance minus the linear variance.  
 \end{itemize}
-The separation of a calculation variance into a linear variance and a calculation cost can only be done for analytic calculations. 
-
 
 The linear deviation is wrong if the independent uncertainty assumption is applied wrongly.
-For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear deviation is only $\frac{1}{\sqrt{2}}$-fold according to the result precision for $x^2$ Table 1 and \eqref{eqn: multiplication precision}.
+For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear deviation is only $1/2$-fold according to Formula \eqref{eqn: square precision} and \eqref{eqn: multiplication precision}.
 
 When the inputs obeys the uncorrelated uncertainty assumption, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
-For example, derived from Formula \eqref{eqn: Taylor 1d variance}, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions.
-For $f(x) - f(x)$, the linear deviation is $0$ according to Formula \eqref{eqn: sum dependency}.
+For example, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions, which is derived from Formula \eqref{eqn: Taylor 1d variance}.
 Formula \eqref{eqn: sum dependency} can be extended to multiple variables, such as to $\delta^2 (f(x, y) + g(x, y))$.
-Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependency}  calculate the product of any two functions.
+Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependency}  calculate the product of two positive functions.
 \begin{align}
 \label{eqn: sum dependency}
-\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x)
-     + 2 \sum_{n=2}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
+\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 
+  + 2 \sum_{n=1}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
 \label{eqn: product dependency}
 \delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
 \end{align}
+
+For $f(x) - f(x)$, the linear deviation is $0$ according to Formula \eqref{eqn: sum dependency}.
 The linear deviation becomes $0$ when the calculation results in a constant.
 
 After the $f^{-1}(f(x))$ calculation, the linear deviation can be recovered completely, while the calculation cost always increases.
-The increase of the calculation cost depends on the actual steps of calculation, which is called the \emph{dependency problem}.
-For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is greater by 4-fold than that of $\sqrt{x^2}$.
+
+The increase of the calculation cost depends on the actual steps of calculation, which is the \emph{dependency problem} of variance arithmetic.
+For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is more than double of the calculation cost of $\sqrt{x^2}$.
 \begin{align}
 \label{eqn: square root}
-P(\sqrt{x}^2)^2 &\simeq P(x)^2 + 4 P(x)^4; \\
+P(\sqrt{x}^2)^2 &\simeq P(x)^2 + 4 P(x)^4 + 41 P(x)^6; \\
 \label{eqn: root square}
-P(\sqrt{x^2})^2 &\simeq P(x)^2 + P(x)^4;
+P(\sqrt{x^2})^2 &\simeq P(x)^2 + P(x)^4 + \frac{41}{16} P(x)^6;
 \end{align}
+The dependency problem also exists in interval arithmetic, and to a much larger extend, because variance arithmetic has no dependency problem due to different analytic expression.
 
 The calculation costs is the unwanted part of the calculation which should be minimized by optimizing the calculation steps.
 
@@ -1188,7 +1175,6 @@ Thus, the effective bit counts for $S$ and $V$ depend on the statistical precisi
 \item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
 \end{itemize}
 
-The variance bounding factor $\sigma$ is default to 5.
 
 
 

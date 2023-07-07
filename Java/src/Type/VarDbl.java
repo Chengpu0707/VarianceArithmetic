@@ -256,7 +256,7 @@ public class VarDbl implements IReal {
                         IReal.format(this.bias, 3), IReal.format(v.bias, 3), bias, typeName()));
         }
         if (!Double.isFinite(linear)) {
-            throw new ValueException(String.format("%s + %s = %e: %s", 
+            throw new UncertaintyException(String.format("%s + %s = %e: %s", 
                         IReal.format(this.linear, 3), IReal.format(v.linear, 3), linear, typeName()));
         }
         pack(value, variance, rndErr, (rndr() == v.rndr())? rndr() : false, bound);
@@ -306,26 +306,44 @@ public class VarDbl implements IReal {
     }
 
     /*
-     * 1d Taylor expance, with f(x) as s1dTaylor[0]
-     *  s1dTaylor[n] should already contains /n!
-     *  bias = f(x+bias) - f(x)
+     * 1d Taylor expansion.
+     * 
+     * @param name:         the name of the Taylor expansion, for exception logging.
+     * @param bounding:     the bounding factor.  it is infinitive if it is NaN. 
+     * @param bias:         f(x + bias) - f(x)
+     * @param s1dTaylor:    the Taylor expansion coefficent, with f(x) as s1dTaylor[0].  It should already contains /n!.
+     * @param byPrec:       if to expand by precision
      */
-    VarDbl taylor(double bounding, double bias, double[] s1dTaylor) throws ValueException, UncertaintyException {
-        if (s1dTaylor.length < 2) {
+    VarDbl taylor(final String name, double bounding, double bias, double[] s1dTaylor, boolean byPrec) throws ValueException, UncertaintyException {
+        final int maxN = s1dTaylor.length;
+        if (maxN < 2) {
             throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
         }
         final double value = s1dTaylor[0];
-        final double linear = s1dTaylor[1] * s1dTaylor[1] * variance();
-        double variace = 0;
-        for (int n = 2; n <= Momentum.maxN; ++n) {
-            if (Double.isFinite(bounding) && ((n % 2) == 1)) {
-            }
+        final double linear = s1dTaylor[1] * s1dTaylor[1] * this.linear;
+        double variance = 0;
+        for (int n = 1; n <= Momentum.maxN; ++n) {
+            bias += s1dTaylor[2*n] * Momentum.factor(2*n, bounding);
             for (int j = 1; j < n; ++j) {
-                
+                variance += s1dTaylor[2*j] * s1dTaylor[2*n - 2*j] * Momentum.factor(2*n, bounding);
             }
         }
-        
-
+        if (!Double.isFinite(value)) {
+            throw new ValueException(String.format("%s(%s) = value %e: %s", name, toString(), value, typeName()));
+        }
+        if (!Double.isFinite(variance)) {
+            throw new UncertaintyException(String.format("%s(%s) = variance %e: %s", name, toString(), variance, typeName()));
+        }
+        if (!Double.isFinite(bias)) {
+            throw new ValueException(String.format("%s(%s) = bias %e: %s", name, toString(), bias, typeName()));
+        }
+        if (!Double.isFinite(linear)) {
+            throw new UncertaintyException(String.format("%s(%s) = linear %e: %s", name, toString(), linear, typeName()));
+        }
+        final long bound = Math.min(BOUND_MAX, (long) bounding * BOUND_DENOM);
+        pack(value, variance, false, false, Math.min(bound, bound()));
+        this.bias = bias;
+        this.linear = linear;
         return this;
     }
 
