@@ -59,9 +59,9 @@ public class Momentum {
     /*
      * Calculate momentum factor
      */
-    public static final int maxS = 512;
+    public static final int maxS = 128;
     public static final int dividS = 16;
-    public static final int maxN = 200;    // maxFactorial = 171
+    public static final int maxN = 200;
     private static final double ssFactor[][] = new double[maxS][maxN];
     static {
         final double factorS = 1.0 / dividS;
@@ -96,11 +96,14 @@ public class Momentum {
         final int lower = (int) Math.floor(s * dividS);
         final int upper = (int) Math.ceil(s * dividS);
         if (lower == upper) {
-            return ssFactor[lower][n/2 - 1];
+            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0];
         } else if (upper < maxS) {
-            return ssFactor[lower][n/2 - 1] + (ssFactor[upper][n/2 - 1] - ssFactor[lower][n/2 - 1]) * (s * dividS - lower);
+            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0] + 
+                (ssFactor[upper][n/2 - 1] / ssFactor[upper][0] - 
+                 ssFactor[lower][n/2 - 1] / ssFactor[lower][0]) * 
+                (s * dividS - lower);
         } else {
-            return ssFactor[lower][n/2 - 1];
+            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0];
         }
     }
 }

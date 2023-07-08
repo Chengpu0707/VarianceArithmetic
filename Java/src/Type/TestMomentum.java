@@ -110,10 +110,11 @@ public class TestMomentum {
                 fw.write(String.format("%f\t", s));
             }
             fw.write("\n");
+            final double maxS = (double) Momentum.maxS / Momentum.dividS;
             for (int i = 2; i <= Momentum.maxN; i += 2) {
-                fw.write(String.format("%d\t", i));
-                for (double s = 0; s < 16; s += 0.1) {
-                    fw.write(String.format("%e\t", Momentum.factor(i*2, s)));
+                fw.write(String.format("%d\t%e\t", i, Momentum.doubleFactorial(i - 1)));
+                for (double s = 0.1; s < maxS; s += 0.1) {
+                    fw.write(String.format("%e\t", Momentum.factor(i, s)));
                 }
                 fw.write("\n");
             }

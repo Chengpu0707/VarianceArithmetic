@@ -1534,26 +1534,6 @@ P(x^c)^2 &= \sum_{n=1}^{c} P(x)^{2n} (2n-1)!! \sum_{j=1}^{n-1} \begin{pmatrix} c
 
 \subsection{Uncertainty Statistics and Bounding Leakage}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
-\captionof{figure}{
-The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\tilde{y}^2$.
-}
-\label{fig: Square_Root_Distribution}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Distribution.png} 
-\captionof{figure}{
-The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
-}
-\label{fig: Square_Distribution}
-\end{figure}
-
 For this purpose, the distribution should be close enough to Gaussian in one of its representation. 
 \begin{itemize}
 
@@ -1564,10 +1544,6 @@ $\sqrt{3 \pm 1}$ looks quite Gaussian, while $\sqrt{0 \pm 1}$ deviates from Gaus
 The result resembles Gaussian more when less data is cut off by $\tilde{x} < -x$.
 
 \item Even when functions $f(x)$ are defined for all $x$, the distribution of $f(x \pm \delta x)$ deviates significantly from Gaussian near $x=0$. 
-Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$.
-$(5 \pm 1)^2$ looks quite Gaussian, while $(0 \pm 1)^2$ deviates from Gaussian significantly.
-In fact, $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics} which is not symmetric.
-The peak near $(x+\tilde{x})^2 = 0$ is caused by $\tilde{x} < -x$.
 
 \end{itemize}
 For $f(x + \tilde{x})$ to be defined, or close to Gaussian-distributed, it is necessary to cut the range of $\tilde{x}$ to $-x < \tilde{x}$.
@@ -1575,6 +1551,38 @@ Such cut introduce a \emph{bounding leakage} $\epsilon = 1 - \xi(\frac{1}{2} + \
 Different $f(x)$ requires different upper bound for $P(x)$, e.g., $(x \pm \delta x)^2$ with $P(x)=1/5$ and $\sqrt{x \pm \delta x}$ with $P(x)=1/3$ has very similar resemblance to the corresponding Gaussian distribution of the same deviation.
 
 
+
+\subsection{Expansion Boundary}
+
+When Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} has $P(x)$ as the input, such as for $\ln(x)$ or $x^c$, both break down at $0 \pm \delta x$.
+$0 \pm \delta x$ thus forms a Taylor expansion boundary for $f(x \pm \delta x)$.
+Above the applicable threshold, the result uncertainty distribution starts to deviate from Gaussian.
+
+Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}:
+\begin{itemize}
+
+\item $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics}.
+
+\item Visually, $(1 \pm 1)^2$ and $(2 \pm 1)^2$ deviates from Gaussian significantly.
+
+\item Visually, $(3 \pm 1)^2$ starts to look close to Gaussian, but still has a significant peak at $x + \tilde{x} = 0$.
+
+\item $(5 \pm 1)^2$ is quite comparable to the corresponding Gaussian distribution of the same mode and deviation, which is shown in the dash line of the same color.
+The quantitative difference between the two distributions is 2.18%.
+
+\end{itemize}
+
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}^2$ according to Formula \eqref{eqn: power distribution}.  
+It shows that $\sqrt{3 \pm 1}^2$ is as close to Gaussian as $(5 \pm 1)^2$, e.g., the quantitative difference between the $\sqrt{3 \pm 1}^2$ distribution with Gaussian is 2.75%.
+Even though $x^2$ is defined across 0, the uncertainty distribution of $(x \pm \delta x)^2$ deviates from Gaussian more than that of $\sqrt{x \pm \delta x}$ when $x \rightarrow 0$.
+
+The first derivative of $x^c$ is either 0 or $\infty$ at $x = 0$.
+Formula \eqref{eqn: function distribution} shows that when $f^{(1)}_x \rightarrow 0$ or $f^{(1)}_x \rightarrow \infty$, the uncertainty distribution deviates significantly from Gaussian.
+Thus, $f^{(1)}_x \rightarrow 0$ or $f^{(1)}_x \rightarrow \infty$ forms the Taylor expansion boundary for Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}.
+
+
+For $x^c$, when $P(x)$ is more than the applicable precision threshold, the underlying uncertainty distribution deviates significantly from Gaussian, as show in Figure \ref{fig: Cubic_Distribution} and \ref{fig: Cubic_Root_Distribution}.
+Thus, each $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ is also expected to serve as a separation boundary for Formula \eqref{eqn: Taylor 1d variance}, and the applicable precision threshold should be defined against this boundary, e.g., against $a$ rather than $0$ for $(x+a)^c$.
 
 
 

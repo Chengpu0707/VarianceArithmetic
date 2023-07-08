@@ -728,17 +728,40 @@ When $f(x)=x^c$:
 
 \fi
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Cubic_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^3$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\sqrt[3]{\tilde{y}}$.
+}
+\label{fig: Cubic_Distribution}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Cubic_Root_Distribution.png} 
+\captionof{figure}{
+The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\tilde{y}^3$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+}
+\label{fig: Cubic_Root_Distribution}
+\end{figure}
+
+
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
-In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$, which are two different representations of the same underlying random variable \cite{Probability_Statistics}.
-If $\rho(\tilde{x}, x, \delta x)$ is given by Formula \eqref{eqn: central limit theorem}, Formula \eqref{eqn: function distribution} can be simplified as Formula \eqref{eqn: Gaussian function distribution}, in which $N(\tilde{z})$ is the probability density function for normal distribution \cite{Probability_Statistics}.
+In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$, which are two different representations of the same underlying random variable.
+The same underlying distribution can be normalized, as Formula \eqref{eqn: Gaussian function distribution}, in which $N(\tilde{z})$ is the probability density function for normal distribution \cite{Probability_Statistics}.
 \begin{align}
 \label{eqn: function distribution}
 \rho(\tilde{x}, x, \delta x) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
 = \rho(\tilde{y}, y, \delta y) d\tilde{y}; \\
 \label{eqn: Gaussian function distribution}
 \tilde{z} \equiv \frac{f^{-1}(\tilde{y}) - x}{\delta x}:&\eqspace 
- \tilde{y} = f(x + \tilde{z} \delta x); \eqspace 
- \rho(\tilde{y}, y, \delta y) d \tilde{y} = N(\tilde{z}) d \tilde{z};
+ \tilde{x} = x + \tilde{z} \delta x; \eqspace 
+ \rho(\tilde{x}, x, \delta x) d \tilde{x} = \rho(\tilde{y}, y, \delta y) d \tilde{y} = N(\tilde{z}) d \tilde{z};
 \end{align}
 For example, Formula \eqref{eqn: exp distribution}, \eqref{eqn: log distribution}, and \eqref{eqn: power distribution} give the $\rho(\tilde{y}, y, \delta y)$ for $e^x$, $\ln(x)$, and $x^c$, respectively:
 \begin{align}
@@ -749,6 +772,28 @@ y = \ln(x): &\; \rho(\tilde{y}, y, \delta y) = e^{\tilde{y}} \frac{1}{\delta x} 
 \label{eqn: power distribution}
 y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\delta x} N(\frac{\tilde{y}^\frac{1}{c} - x}{\delta x}); 
 \end{align}
+
+Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$:
+\begin{itemize}
+
+\item If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
+
+\item Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}.
+Because $f^{(1)}_x|_{x=0} = 0$, $\rho(\tilde{y}, y, \delta y) = \infty$ at $\tilde{y} = 0$, so that $(0 \pm 1)^3$, $(1 \pm 1)^3$, $(2 \pm 1)^3$ and $(3 \pm 1)^3$ deviates significantly from Gaussian, while $(5 \pm 1)^3$ looks Gaussian but still with an infinitive but narrow peak at $\tilde{y} = 0$.
+
+\item Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
+Because $f^{(1)}_x|_{x=0} = \infty$, $\rho(\tilde{y}, y, \delta y) = 0$ at $\tilde{y} = 0$.
+All distributions looks close to Gaussian except $\sqrt[3]{0 \pm 1}$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+The legend shows quantitatively how the distributions for $\sqrt[3]{x \pm 1}$ become more and more Gaussian with the increasing $x$.
+
+\end{itemize}
+If the underlying result distribution for $f(x)$ needs to be Gaussian, $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ serves as separation boundaries.
+
+
+
+
 
 
 \subsection{Analytic Functions}
@@ -810,6 +855,20 @@ P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \fra
   + (\frac{31}{360} 5!! - 2 \frac{1}{2} \frac{1}{8}) (\delta x)^6
   + (\frac{127}{20160} 7!! - 2 \frac{1}{2} \frac{1}{48} - (\frac{1}{8})^2) (\delta x)^8 \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8
+\end{align*}
+
+\begin{align*}
+\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!} \\
+ & \simeq \frac{1}{1!} \cos(x) \tilde{x} - \frac{1}{2!} \sin(x) \tilde{x}^2 - \frac{1}{3!} \cos(x) \tilde{x}^3 + \frac{1}{4!} \sin(x) \tilde{x}^4 + \\
+ &\eqspace  \frac{1}{5!} \cos(x) \tilde{x}^5 - \frac{1}{6!} \sin(x) \tilde{x}^6 - \frac{1}{7!} \cos(x) \tilde{x}^7 + \frac{1}{8!} \sin(x) \tilde{x}^8; \\
+\widehat{\sin(x)} &= \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \\
+ &\simeq  \sin(x) \left( \frac{1}{2}(\delta x)^2 - \frac{1}{24} (\delta x)^4 + \frac{1}{720} (\delta x)^4 - \frac{1}{40320} (\delta x)^8 \right); \\
+\delta^2 \sin(x) &=  - \widehat{\sin(x)}^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \\
+ &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
+  + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
+ &\simeq \cos(x)^2 (\delta x)^2 + (-2 \frac{3!!}{1!3!} \cos(x)^2 + \frac{3!!}{2!2!}\sin(x)^2 - \frac{1}{4}\sin(x)^2)(\delta x)^4 + \\
+ &\eqspace (2 \frac{5!!}{1!5!} \cos(x)^2 - 2 \frac{5!!}{2!4!}\sin(x)^2 + \frac{5!!}{3!3!} \cos(x)^2 - \frac{1}{24}\sin(x)^2)(\delta x)^6 \\
+ &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 - (\frac{1}{3}\sin(x)^2 + \frac{1}{6} \cos(x)^2) (\delta x)^6;
 \end{align*}
 
 \begin{align*}
@@ -884,9 +943,12 @@ In Formula \eqref{eqn: Taylor 1d variance}, the variance $\delta^2 f(x)$ is deco
 The choice of the bounding factor $\sigma$ needs careful scrutiny.
 If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} to diverge in most cases.
 For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern, so that $\sigma$ should be limited, and $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
+$\zeta(2n)$ is normalized so that $\delta^2 x = (\delta x)^2$ for any choice of $\sigma$.
 \begin{align}
+&\widehat{\zeta(2n)} = \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
+  = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \nonumber \\
 \label{eqn: momentum factor} 
-\zeta(2n) &\equiv2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!} \\
+\zeta(2n) &\equiv \widehat{\zeta(2n)} / \widehat{\zeta(2)}; \\
 \label{eqn: momentum even} 
 M(x, 2n) &= (\delta x)^{2n} \zeta(2n); 
 \end{align}
@@ -943,8 +1005,7 @@ $\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \
 \captionof{table}{The fitted $\lambda$ in $\zeta(2n) \sim \lambda^{2n}$, and the bounding leakage $\epsilon$ as a function of bound factor $\sigma$.}
 \end{table}
 
-
-Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$, which always converge:
+Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$:
 \begin{align}
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
@@ -955,6 +1016,22 @@ Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for
 P(e^x)^2 &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!} - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
  &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
 \end{align}
+Formula \eqref{eqn: exp precision} always converges.
+
+Formula \eqref{eqn: sin bias} and \eqref{eqn: sin precision} give the result for $\sin(x)$:
+\begin{align}
+\label{eqn: sin Taylor}
+\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!}; \\
+\label{eqn: sin bias}
+\widehat{\sin(x)} &= \sin(x) \sum_{n=1}^{\infty} (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \\
+ &\simeq  \sin(x) \left( \frac{1}{2}(\delta x)^2 - \frac{1}{24} (\delta x)^4 + \frac{1}{720} (\delta x)^6 \right); \\
+\label{eqn: sin precision}
+\delta^2 \sin(x) &= - \widehat{\sin(x)}^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \nonumber \\
+ &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
+  + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
+ &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 - (\frac{1}{3}\sin(x)^2 + \frac{1}{6} \cos(x)^2) (\delta x)^6;
+\end{align}
+Formula \eqref{eqn: sin precision} may diverge if $\delta x$ is too large.
 
 Formula \eqref{eqn: log bias} and \eqref{eqn: log precision} give the result for $\ln(x)$:
 \begin{align}
@@ -994,8 +1071,6 @@ P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} 
 P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
 \end{align}
 
-The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$. or the difference speed of variance increases of $x^c$ depending on different $c$.
-
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.
 $\upsilon(2n)$ depends on $f(x)$, and so does $\lambda$.
 From Formula \eqref{eqn: square root precision} and \eqref{eqn: inversion precision}, $\lambda$ is larger for $1/x$ than for $\sqrt{x}$.
@@ -1003,8 +1078,13 @@ For each function, the maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance
 When the applicable precision threshold is larger than $1/\sigma$, the integration range in Formula \eqref{eqn: variance momentum} needs to be reduced to $1/P(x)$. 
 Generally, $1/\sigma$ provides a rough estimation for the applicable precision threshold.
 
+For $x^c$, when $P(x)$ is more than the applicable precision threshold, the underlying uncertainty distribution deviates significantly from Gaussian, as show in Figure \ref{fig: Cubic_Distribution} for $x^3$ and Figure \ref{fig: Cubic_Root_Distribution} for $\sqrt[3]{x}$.
+
+For $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ according to Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}.
+
 Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
 
+The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
 
 Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
 \begin{align}
@@ -1018,55 +1098,6 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
   \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} - f(x,y); 
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
-
-
-
-\subsection{The Boundary Condition at Zero}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Distribution.png} 
-\captionof{figure}{
-The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
-}
-\label{fig: Square_Distribution}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
-\captionof{figure}{
-The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\tilde{y}^2$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
-}
-\label{fig: Square_Root_Distribution}
-\end{figure}
-
-
-When Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} has $P(x)$ as the input, such as for $\ln(x)$ or $x^c$, both break down at $0 \pm \delta x$, even the function may be defined across 0, such as $x^2$ or $x^3$.
-Above the applicable threshold, the result uncertainty distribution starts to deviate from Gaussian.
-
-Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}:
-\begin{itemize}
-
-\item $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics}.
-
-\item Visually, $(1 \pm 1)^2$ and $(2 \pm 1)^2$ deviates from Gaussian significantly.
-
-\item Visually, $(3 \pm 1)^2$ starts to look close to Gaussian, but still has a significant peak at $x + \tilde{x} = 0$.
-
-\item $(5 \pm 1)^2$ looks definitely Gaussian.
-
-\end{itemize}
-
-Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}^2$ according to Formula \eqref{eqn: power distribution}.  
-It shows that $\sqrt{3 \pm 1}^2$ is as close to Gaussian as $(5 \pm 1)^2$.
-Even though $x^2$ is defined across 0, the uncertainty distribution of $(x + \delta x)^2$ deviates from Gaussian more than that of $\sqrt{x + \delta x}$ when $x \rightarrow 0$.
 
 
 
@@ -1101,12 +1132,14 @@ P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4) + 2 (\frac{1}
 The statistical variance can be decomposed as the sum of:
 \begin{itemize}
 \item The \emph{linear variance}, which is the $(\delta x)^2$ term in Formula \eqref{eqn: Taylor 1d variance}. 
+The square root of the linear variance is defined as the \emph{linear deviation}, which is directly observable experimentally.
 
 \item The \emph{calculation cost}, which is the total variance minus the linear variance.  
+The 100\% minus the percentage of the linear deviation to the total deviation is is defined as the \emph{calculation cost percentage}.
 \end{itemize}
 
-The linear deviation is wrong if the independent uncertainty assumption is applied wrongly.
-For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear deviation is only $1/2$-fold according to Formula \eqref{eqn: square precision} and \eqref{eqn: multiplication precision}.
+The linear variance is wrong if the independent uncertainty assumption is applied wrongly.
+For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear variance is only $1/2$-fold according to Formula \eqref{eqn: square precision} and \eqref{eqn: multiplication precision}.
 
 When the inputs obeys the uncorrelated uncertainty assumption, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
 For example, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions, which is derived from Formula \eqref{eqn: Taylor 1d variance}.
@@ -1120,20 +1153,20 @@ Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependenc
 \delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
 \end{align}
 
-For $f(x) - f(x)$, the linear deviation is $0$ according to Formula \eqref{eqn: sum dependency}.
-The linear deviation becomes $0$ when the calculation results in a constant.
+For $f(x) - f(x)$, the linear variance is $0$ according to Formula \eqref{eqn: sum dependency}.
+The linear variance becomes $0$ when the calculation results in a constant.
 
-After the $f^{-1}(f(x))$ calculation, the linear deviation can be recovered completely, while the calculation cost always increases.
+After the $f^{-1}(f(x))$ calculation, the linear variance can be recovered completely, while the calculation cost always increases.
 
 The increase of the calculation cost depends on the actual steps of calculation, which is the \emph{dependency problem} of variance arithmetic.
-For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is more than double of the calculation cost of $\sqrt{x^2}$.
+For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is more than quadruple of the calculation cost of $\sqrt{x^2}$.
 \begin{align}
 \label{eqn: square root}
 P(\sqrt{x}^2)^2 &\simeq P(x)^2 + 4 P(x)^4 + 41 P(x)^6; \\
 \label{eqn: root square}
 P(\sqrt{x^2})^2 &\simeq P(x)^2 + P(x)^4 + \frac{41}{16} P(x)^6;
 \end{align}
-The dependency problem also exists in interval arithmetic, and to a much larger extend, because variance arithmetic has no dependency problem due to different analytic expression.
+The dependency problem also exists in interval arithmetic, and to a much larger extend, because using Taylor series, variance arithmetic can avoid the dependency problem due to different analytic expression.
 
 The calculation costs is the unwanted part of the calculation which should be minimized by optimizing the calculation steps.
 
