@@ -38,11 +38,11 @@ public class Momentum {
     }
 
     public static final int maxFactorial = 171;
-    private static final double[] sDoubleFactorial = new double[maxFactorial];
+    private static final double[] sDoubleFactorial = new double[maxFactorial*2];
     static {
         sDoubleFactorial[0] = 1;
         sDoubleFactorial[1] = 1;
-        for (int i = 2; i < maxFactorial; ++i) {
+        for (int i = 2; i < (maxFactorial*2); ++i) {
             sDoubleFactorial[i] = sDoubleFactorial[i-2]*i;
         }
     }
@@ -52,7 +52,7 @@ public class Momentum {
         return sDoubleFactorial[n] * sDoubleFactorial[n - 1];
     }
     public static double doubleFactorial(int n) {
-        if ((n < 0) || (n >= maxFactorial)) return Double.NaN;
+        if ((n < 0) || (n >= (maxFactorial*2))) return Double.NaN;
         return sDoubleFactorial[n];
     }
 

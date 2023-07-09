@@ -730,12 +730,14 @@ When $f(x)=x^c$:
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Cubic_Distribution.png} 
+\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
 \captionof{figure}{
-The probability density function for $(x \pm 1)^3$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\sqrt[3]{\tilde{y}}$.
+The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\tilde{y}^3$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
-\label{fig: Cubic_Distribution}
+\label{fig: Square_Root_Distribution}
 \end{figure}
 
 \begin{figure}[p]
@@ -750,10 +752,35 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \label{fig: Cubic_Root_Distribution}
 \end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
+Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+}
+\label{fig: Square_Distribution}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Cubic_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^3$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $\sqrt[3]{\tilde{y}}$.
+Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+}
+\label{fig: Cubic_Distribution}
+\end{figure}
+
 
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
 In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$, which are two different representations of the same underlying random variable.
 The same underlying distribution can be normalized, as Formula \eqref{eqn: Gaussian function distribution}, in which $N(\tilde{z})$ is the probability density function for normal distribution \cite{Probability_Statistics}.
+Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$, so that $\rho(\tilde{y}, y, \delta y) = 0$ when $f^{(1)}_x=\infty$, and $\rho(\tilde{y}, y, \delta y) = \infty$ when $f^{(1)}_x=0$.
 \begin{align}
 \label{eqn: function distribution}
 \rho(\tilde{x}, x, \delta x) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
@@ -773,23 +800,26 @@ y = \ln(x): &\; \rho(\tilde{y}, y, \delta y) = e^{\tilde{y}} \frac{1}{\delta x} 
 y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\delta x} N(\frac{\tilde{y}^\frac{1}{c} - x}{\delta x}); 
 \end{align}
 
-Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$:
-\begin{itemize}
+If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
 
-\item If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
-
-\item Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}.
-Because $f^{(1)}_x|_{x=0} = 0$, $\rho(\tilde{y}, y, \delta y) = \infty$ at $\tilde{y} = 0$, so that $(0 \pm 1)^3$, $(1 \pm 1)^3$, $(2 \pm 1)^3$ and $(3 \pm 1)^3$ deviates significantly from Gaussian, while $(5 \pm 1)^3$ looks Gaussian but still with an infinitive but narrow peak at $\tilde{y} = 0$.
-
-\item Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
-Because $f^{(1)}_x|_{x=0} = \infty$, $\rho(\tilde{y}, y, \delta y) = 0$ at $\tilde{y} = 0$.
-All distributions looks close to Gaussian except $\sqrt[3]{0 \pm 1}$.
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
+All distributions looks close to Gaussian except $\sqrt{0 \pm 1}$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
-The legend shows quantitatively how the distributions for $\sqrt[3]{x \pm 1}$ become more and more Gaussian with the increasing $x$.
+The legend shows quantitatively how the distributions for $\sqrt{x \pm 1}$ become more and more Gaussian with the increasing $x$.
 
-\end{itemize}
-If the underlying result distribution for $f(x)$ needs to be Gaussian, $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ serves as separation boundaries.
+Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
+Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ which has two equal peaks..
+Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
+
+Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}.
+The uncertainty distributions for $(0 \pm 1)^2$ and $(1 \pm 1)^2$ deviate significantly from Gaussian, while the uncertainty distributions for $(4 \pm 1)^2$ and $(5 \pm 1)^2$ look Gaussian but each still with an infinitive but narrower peak at $\tilde{y} = 0$.
+
+Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}.
+Compared with $(x \pm 1)^2$, $(x \pm 1)^3$ distributes on $\tilde{y} < 0$ also, and it looks much less Gaussian.
+Quantitatively, the uncertainty distributions for $(5 \pm 1)^3$ is as close to Gaussian as that of $(2.5 \pm 1)^2$.
+
+%If the underlying result distribution for $f(x)$ needs to be Gaussian, $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ serves as separation boundaries.
 
 
 
@@ -899,6 +929,15 @@ P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2
 \frac{\widehat{1/x}}{1/x} &\simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
 P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 105 - 2 * 15 - 3^2) P(x)^8 
  = P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
+\end{align*}
+
+\begin{align*}
+\zeta(\sigma, 2n + 2) &= (2n + 1) \zeta(\sigma, 2n) - 2 N(\sigma) \sigma^{2n + 1}; \\ 
+\alpha \lambda^{2n+2} &= (2n + 1) \alpha \lambda^{2n} - 2 N(\sigma) \sigma \sigma^{2n}; \\
+\lambda^2 &= (2n + 1) - \frac{2 N(\sigma) \sigma}{\alpha} (\frac{\sigma}{\lambda})^{2n} 
+ \simeq (2n + 1) - \frac{2 N(\sigma) \sigma}{\alpha}(1 + 2n \frac{\sigma - \lambda}{\lambda}); \\
+\frac{2 N(\sigma) \sigma}{\alpha} &= 1 - \lambda^2; \\
+\lambda = (1 - \lambda^2) (\sigma - \lambda);
 \end{align*}
 
 \fi
@@ -1074,7 +1113,7 @@ P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8;
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.
 $\upsilon(2n)$ depends on $f(x)$, and so does $\lambda$.
 From Formula \eqref{eqn: square root precision} and \eqref{eqn: inversion precision}, $\lambda$ is larger for $1/x$ than for $\sqrt{x}$.
-For each function, the maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} to be applicable is defined as \emph{applicable precision threshold}, which could be smaller than $1/\sigma$ because according to Table 1, $\zeta(2n)$ increases with $2n$ slightly slower than $\sigma^{2n}$.
+For each function, the maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} to be applicable is defined as \emph{applicable precision threshold}.
 When the applicable precision threshold is larger than $1/\sigma$, the integration range in Formula \eqref{eqn: variance momentum} needs to be reduced to $1/P(x)$. 
 Generally, $1/\sigma$ provides a rough estimation for the applicable precision threshold.
 
