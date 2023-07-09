@@ -918,6 +918,15 @@ P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \fra
 \end{align*}
 
 \begin{align*}
+&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+\frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \\
+ &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{24} P(x)^4; \\
+P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
+ &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1)^2 (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{8}{3}) P(x)^6;
+\end{align*}
+
+\begin{align*}
 (1 + p)^2 - 1 &= 2p + 1p^2; \\
 \frac{\widehat{x^2}}{x^2} &= P(x)^2; \\
 P(x^2)^2 &= 4 P(x)^2 + (3 - 1) P(x)^4; \\
@@ -944,6 +953,8 @@ P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 10
 \end{align*}
 
 \fi
+
+
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about result distribution, but just some simple statistics of the result, such as the result deviation.
@@ -986,18 +997,19 @@ The choice of the bounding factor $\sigma$ needs careful scrutiny.
 The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ cause a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
 If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} to diverge in most cases.
-For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern, so that $\sigma$ should be limited, and $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
-$\zeta(2n)$ is normalized so that $\delta^2 x = (\delta x)^2$ for any choice of $\sigma$.
+For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern.
+When $\sigma$ is limited, $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
+$\zeta(2n)$ is normalized for $\zeta(2) = 1$ so that $\delta^2 x = (\delta x)^2$ for any choice of $\sigma$.
 \begin{align}
 \label{eqn: bounding leakage}
 \epsilon &= 2 - 2 \xi(\frac{1}{2} + \sigma); \\
-&\widehat{\zeta(2n)} = \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
-  = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \nonumber \\
 \label{eqn: momentum factor} 
-\zeta(2n) &\equiv \widehat{\zeta(2n)} / \widehat{\zeta(2)}; \\
+\zeta(2n) &= \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
+  = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
 \label{eqn: momentum even} 
 M(x, 2n) &= (\delta x)^{2n} \zeta(2n);
 \end{align}
+
 Figure \ref{fig: Momentum_Factor_Bounding} shows that the variance momentum factor $\zeta(2n)$ approaches $(2n-1)!!$ with increasing Taylor expansion order $2n$, but for a larger $2n$, $\zeta(2n)$ reaches $(2n-1)!!$ at a larger $\sigma$. 
 When $\sigma^2 \gg 2n$, $\zeta(2n)$ increases with $2n$ as $(2n-1)!!$ which is faster than $\sigma^{2n}$.
 When $\sigma^2 \ll 2n$, before $\zeta(2n)$ reaches $(2n-1)!!$, $\zeta(2n)$ increases with $2n$ as $\sigma^{2n} /2n$ which is slower than $\sigma^{2n}$.
@@ -1034,8 +1046,7 @@ Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp bias}
-\frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!} \\
- &\simeq \frac{1}{2} (\delta x)^2 + \frac{1}{8} (\delta x)^4 + \frac{1}{48} (\delta x)^6 + \frac{1}{384} (\delta x)^8; \\
+\frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!}; \\
 \label{eqn: exp precision}
 P(e^x)^2 &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!} - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
  &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
@@ -1046,8 +1057,7 @@ Formula \eqref{eqn: sin bias} and \eqref{eqn: sin precision} give the result for
 \label{eqn: sin Taylor}
 \sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!}; \\
 \label{eqn: sin bias}
-\widehat{\sin(x)} &= \sin(x) \sum_{n=1}^{\infty} (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \\
- &\simeq  \sin(x) \left( \frac{1}{2}(\delta x)^2 - \frac{1}{24} (\delta x)^4 + \frac{1}{720} (\delta x)^6 \right); \\
+\widehat{\sin(x)} &= \sin(x) \sum_{n=1}^{\infty} (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!}; \\
 \label{eqn: sin precision}
 \delta^2 \sin(x) &= - \widehat{\sin(x)}^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \nonumber \\
  &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
@@ -1061,10 +1071,9 @@ Formula \eqref{eqn: log bias} and \eqref{eqn: log precision} give the result for
 & \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
 \label{eqn: log bias}
 \widehat{\ln(x)} &= -\sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n}; \\
- & P(x) \leq 1/5:\eqspace \widehat{\ln(x)} \simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6 - \frac{105}{8} P(x)^8; \\
 \label{eqn: log precision}
 \delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j} - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
- & P(x) \leq 1/5:\eqspace \delta^2 \ln(x) \simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8; 
+ &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8; 
 \end{align}
 
 Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result for $x^c$.
@@ -1077,20 +1086,14 @@ Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result
 P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \left(\frac{\widehat{x^c}}{x^c}\right)^2;
 \end{align}
-As the special cases for Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}, when $P(x) \leq 1/5$, Formula \eqref{eqn: square bias} and \eqref{eqn: square precision} give the result for $x^2$, Formula \eqref{eqn: square root bias} and \eqref{eqn: square root precision} give the result for $\sqrt{x}$, and Formula \eqref{eqn: inversion bias} and \eqref{eqn: inversion precision} give the result for $1/x$: 
+As the special cases for Formula \eqref{eqn: power precision}, Formula eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, and Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$: 
 \begin{align}
-\label{eqn: square bias}
-\frac{\widehat{x^2}}{x^2} &= P(x)^2; \\
 \label{eqn: square precision}
 P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
-\label{eqn: square root bias}
-\frac{\widehat{\sqrt{x}}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6; \\
 \label{eqn: square root precision}
 P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6; \\
-\label{eqn: inversion bias}
-\frac{\widehat{x^c}}{x^c} &\simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
 \label{eqn: inversion precision}
-P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
+P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; 
 \end{align}
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.

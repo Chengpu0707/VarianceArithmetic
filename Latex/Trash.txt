@@ -1605,6 +1605,15 @@ $\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \
 Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
 
 
+\begin{align*}
+&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+\frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \\
+ &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{24} P(x)^4; \\
+P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
+ &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1)^2 (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{8}{3}) P(x)^6;
+\end{align*}
+
 
 
 
