@@ -499,8 +499,10 @@ x =&\; S \; 2^{E};\\
 
 However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
 When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
-The precision scaling principle chooses to scarify $R$ in favor of $V$, thus introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, e.g., which is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
-When $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation, such probability is virtually 0 according formula \eqref{eqn: rounding error range vs deviation}.
+The precision scaling principle chooses to scarify $R$ in favor of $V$.
+
+This choice of $V$ introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
+To reduce the representation bounding leakage to virtually 0, $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation.
 
 
 
@@ -809,7 +811,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 The legend shows quantitatively how the distributions for $\sqrt{x \pm 1}$ become more and more Gaussian with the increasing $x$.
 
 Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
-Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ which has two equal peaks..
+Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ which has two equal peaks.
 Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
 
 Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}.
@@ -898,7 +900,8 @@ P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \fra
   + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
  &\simeq \cos(x)^2 (\delta x)^2 + (-2 \frac{3!!}{1!3!} \cos(x)^2 + \frac{3!!}{2!2!}\sin(x)^2 - \frac{1}{4}\sin(x)^2)(\delta x)^4 + \\
  &\eqspace (2 \frac{5!!}{1!5!} \cos(x)^2 - 2 \frac{5!!}{2!4!}\sin(x)^2 + \frac{5!!}{3!3!} \cos(x)^2 - \frac{1}{24}\sin(x)^2)(\delta x)^6 \\
- &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 - (\frac{1}{3}\sin(x)^2 + \frac{1}{6} \cos(x)^2) (\delta x)^6;
+ &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 + (-\frac{2}{3}\sin(x)^2 + \frac{13}{24} \cos(x)^2) (\delta x)^6 \\
+ &\simeq \cos(x)^2 (\delta x)^2 + \frac{1} {2}(1 - 3 \cos(x)^2) (\delta x)^4 - \frac{1}{24} (16 - 29 \cos(x)^2) (\delta x)^6;
 \end{align*}
 
 \begin{align*}
@@ -980,16 +983,20 @@ In Formula \eqref{eqn: Taylor 1d variance}, the variance $\delta^2 f(x)$ is deco
 \end{itemize} 
 
 The choice of the bounding factor $\sigma$ needs careful scrutiny.
+The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ cause a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
+When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
 If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} to diverge in most cases.
 For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern, so that $\sigma$ should be limited, and $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
 $\zeta(2n)$ is normalized so that $\delta^2 x = (\delta x)^2$ for any choice of $\sigma$.
 \begin{align}
+\label{eqn: bounding leakage}
+\epsilon &= 2 - 2 \xi(\frac{1}{2} + \sigma); \\
 &\widehat{\zeta(2n)} = \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
   = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \nonumber \\
 \label{eqn: momentum factor} 
 \zeta(2n) &\equiv \widehat{\zeta(2n)} / \widehat{\zeta(2)}; \\
 \label{eqn: momentum even} 
-M(x, 2n) &= (\delta x)^{2n} \zeta(2n); 
+M(x, 2n) &= (\delta x)^{2n} \zeta(2n);
 \end{align}
 Figure \ref{fig: Momentum_Factor_Bounding} shows that the variance momentum factor $\zeta(2n)$ approaches $(2n-1)!!$ with increasing Taylor expansion order $2n$, but for a larger $2n$, $\zeta(2n)$ reaches $(2n-1)!!$ at a larger $\sigma$. 
 When $\sigma^2 \gg 2n$, $\zeta(2n)$ increases with $2n$ as $(2n-1)!!$ which is faster than $\sigma^{2n}$.
@@ -997,7 +1004,8 @@ When $\sigma^2 \ll 2n$, before $\zeta(2n)$ reaches $(2n-1)!!$, $\zeta(2n)$ incre
 Thus it is possible to choose $\sigma$ so that $\zeta(2n) \sim \sigma^{2n}$ for $2n < 200$ which is the practical range for Taylor expansion.
 
 Figure \ref{fig: Momentum_Factor_Expansion} shows that when $3 \leq \sigma \leq 6$, $\zeta(2n) \sim \lambda^{2n}$ in which $\lambda$ is a fitting parameter.
-Table 1 contains the $\lambda$ for different $\sigma$, in which $\lambda$ is always slightly smaller than $\sigma$, as expected.
+It shows that $\lambda$ is always slightly smaller than $\sigma$, as expected.
+It also shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$.
 
 \begin{figure}[p]
 \centering
@@ -1019,32 +1027,9 @@ The smaller diagram shows the starting portion of $\zeta(2n)$ vs $2n$ for differ
 \label{fig: Momentum_Factor_Expansion}
 \end{figure}
 
-The limited range of $\tilde{x}$ cause the bounding leakage $\epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma)$.
-Table 1 shows $\epsilon$ vs $\sigma$.
-When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
+Thus, $\sigma = 5$ for variance arithmetic.
 
-Thus, $\sigma \leq 5$ for variance arithmetic.
-
-\begin{table}[h]
-\label{tab: bounding leakage}
-\centering
-\begin{tabular}{|l|c|c|c|c|} 
-\hline 
-$\sigma$ & 3 & 4 & 5 & 6 \\ 
-\hline 
-$\lambda$ & 2.947726 & 3.913554 & 4.855937 & 5.758552 \\ 
-\hline 
-%$1 / \lambda$ & 0.339245 & 0.255522 & 0.205933 & 0.173655 \\ 
-%\hline 
-%$\zeta(2)$ & 0.970709 & 0.998866 & 0.999985 & 1 \\ 
-%\hline 
-$\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \times 10^{-9}$ \\ 
-\hline 
-\end{tabular}
-\captionof{table}{The fitted $\lambda$ in $\zeta(2n) \sim \lambda^{2n}$, and the bounding leakage $\epsilon$ as a function of bound factor $\sigma$.}
-\end{table}
-
-Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$:
+Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$, which always converge:
 \begin{align}
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
@@ -1055,9 +1040,8 @@ Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for
 P(e^x)^2 &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!} - \left( \frac{\widehat{e^x}}{e^x} \right)^2 \\
  &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
 \end{align}
-Formula \eqref{eqn: exp precision} always converges.
 
-Formula \eqref{eqn: sin bias} and \eqref{eqn: sin precision} give the result for $\sin(x)$:
+Formula \eqref{eqn: sin bias} and \eqref{eqn: sin precision} give the result for $\sin(x)$, which converge when $\delta x < 1$:
 \begin{align}
 \label{eqn: sin Taylor}
 \sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!}; \\
@@ -1068,9 +1052,8 @@ Formula \eqref{eqn: sin bias} and \eqref{eqn: sin precision} give the result for
 \delta^2 \sin(x) &= - \widehat{\sin(x)}^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \nonumber \\
  &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
   + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
- &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 - (\frac{1}{3}\sin(x)^2 + \frac{1}{6} \cos(x)^2) (\delta x)^6;
+ &\simeq \cos(x)^2 (\delta x)^2 + \frac{1} {2}(1 - 3 \cos(x)^2) (\delta x)^4 - \frac{1}{24} (16 - 29 \cos(x)^2) (\delta x)^6;
 \end{align}
-Formula \eqref{eqn: sin precision} may diverge if $\delta x$ is too large.
 
 Formula \eqref{eqn: log bias} and \eqref{eqn: log precision} give the result for $\ln(x)$:
 \begin{align}
@@ -1111,17 +1094,14 @@ P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8;
 \end{align}
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.
-$\upsilon(2n)$ depends on $f(x)$, and so does $\lambda$.
-From Formula \eqref{eqn: square root precision} and \eqref{eqn: inversion precision}, $\lambda$ is larger for $1/x$ than for $\sqrt{x}$.
-For each function, the maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} to be applicable is defined as \emph{applicable precision threshold}.
-When the applicable precision threshold is larger than $1/\sigma$, the integration range in Formula \eqref{eqn: variance momentum} needs to be reduced to $1/P(x)$. 
-Generally, $1/\sigma$ provides a rough estimation for the applicable precision threshold.
+$\lambda$ depends on $f(x)$, .e.g., it is larger for $1/x$ than for $\sqrt{x}$.
+The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$.
 
-For $x^c$, when $P(x)$ is more than the applicable precision threshold, the underlying uncertainty distribution deviates significantly from Gaussian, as show in Figure \ref{fig: Cubic_Distribution} for $x^3$ and Figure \ref{fig: Cubic_Root_Distribution} for $\sqrt[3]{x}$.
+For $y = x^3$, when $P(x)$ is more than the applicable precision threshold, the infinitive peak at $\tilde{y} = 0$, as show in Figure \ref{fig: Cubic_Distribution}, makes Formula \eqref{eqn: power precision} diverges.
+On the other hand, for $y = \sqrt[3]{x}$, as show in Figure \ref{fig: Cubic_Root_Distribution}, the integration range in Formula \eqref{eqn: variance momentum} can be reduced to $1/P(x)$ for $\sqrt[3]{x \pm \delta x}$ when $1/\sigma < P(x)$ except for $\sqrt[3]{0 \pm \delta x}$.
+The reduction of the integration range in Formula \eqref{eqn: variance momentum} also means larger bounding leakage according to Formula \eqref{eqn: bounding leakage}.
 
 For $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ according to Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}.
-
-Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
 

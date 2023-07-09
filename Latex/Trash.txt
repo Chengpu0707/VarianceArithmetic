@@ -1581,9 +1581,28 @@ Formula \eqref{eqn: function distribution} shows that when $f^{(1)}_x \rightarro
 Thus, $f^{(1)}_x \rightarrow 0$ or $f^{(1)}_x \rightarrow \infty$ forms the Taylor expansion boundary for Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}.
 
 
-For $x^c$, when $P(x)$ is more than the applicable precision threshold, the underlying uncertainty distribution deviates significantly from Gaussian, as show in Figure \ref{fig: Cubic_Distribution} and \ref{fig: Cubic_Root_Distribution}.
 Thus, each $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ is also expected to serve as a separation boundary for Formula \eqref{eqn: Taylor 1d variance}, and the applicable precision threshold should be defined against this boundary, e.g., against $a$ rather than $0$ for $(x+a)^c$.
 
+\begin{table}[h]
+\label{tab: bounding leakage}
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline 
+$\sigma$ & 3 & 4 & 5 & 6 \\ 
+\hline 
+$\lambda$ & 2.947726 & 3.913554 & 4.855937 & 5.758552 \\ 
+\hline 
+%$1 / \lambda$ & 0.339245 & 0.255522 & 0.205933 & 0.173655 \\ 
+%\hline 
+%$\zeta(2)$ & 0.970709 & 0.998866 & 0.999985 & 1 \\ 
+%\hline 
+$\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \times 10^{-9}$ \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The fitted $\lambda$ in $\zeta(2n) \sim \lambda^{2n}$, and the bounding leakage $\epsilon$ as a function of bound factor $\sigma$.}
+\end{table}
+
+Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
 
 
 
