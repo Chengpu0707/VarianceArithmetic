@@ -393,6 +393,10 @@ If $S$ is even, the rounding error is reduce by half after rounding up; Otherwis
 Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process. 
 Thus, the rounding error is limited to $(-1/2, +1/2)$ of the LSB of $S$.
 
+The carry sign $\sim$ bit in variance arithmetic has the same functionality to reduce rounding errors as the sticky bit or guard bits in conventional floating-point calculations.
+Instead of being an extra bit, the carry sign $\sim$ bit is part of the representation, to minimized rounding error further.
+For example, in multiplication, the carry signs of both operand determines that of the result, which then determines how to round up the significand of the result. 
+
 
 \subsection{Probability Distribution of Rounding Errors}
 
@@ -782,7 +786,6 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
 In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$, which are two different representations of the same underlying random variable.
 The same underlying distribution can be normalized, as Formula \eqref{eqn: Gaussian function distribution}, in which $N(\tilde{z})$ is the probability density function for normal distribution \cite{Probability_Statistics}.
-Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$, so that $\rho(\tilde{y}, y, \delta y) = 0$ when $f^{(1)}_x=\infty$, and $\rho(\tilde{y}, y, \delta y) = \infty$ when $f^{(1)}_x=0$.
 \begin{align}
 \label{eqn: function distribution}
 \rho(\tilde{x}, x, \delta x) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
@@ -802,26 +805,29 @@ y = \ln(x): &\; \rho(\tilde{y}, y, \delta y) = e^{\tilde{y}} \frac{1}{\delta x} 
 y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\delta x} N(\frac{\tilde{y}^\frac{1}{c} - x}{\delta x}); 
 \end{align}
 
-If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
+Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$.
+A \emph{zero} of the uncertainty distribution happens when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, y, \delta y) = 0$, while a \emph{pole} happens when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, y, \delta y) = \infty$.
+Zeros and poles have different impacts on the properties of of the uncertainty distributions.
 
-Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
+If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
+From another prospective, a linear transformation generates neither zero nor pole according Formula \eqref{eqn: function distribution}.
+
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 All distributions looks close to Gaussian except $\sqrt{0 \pm 1}$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 The legend shows quantitatively how the distributions for $\sqrt{x \pm 1}$ become more and more Gaussian with the increasing $x$.
 
-Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}.
-Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ which has two equal peaks.
+Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which also has a zero at $x=0$.
+Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ has two equal peaks instead of one larger peak on the positive side only.
 Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
 
-Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}.
+Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a pole at $x=0$.
 The uncertainty distributions for $(0 \pm 1)^2$ and $(1 \pm 1)^2$ deviate significantly from Gaussian, while the uncertainty distributions for $(4 \pm 1)^2$ and $(5 \pm 1)^2$ look Gaussian but each still with an infinitive but narrower peak at $\tilde{y} = 0$.
 
-Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}.
+Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}, which also has a pole at $x=0$.
 Compared with $(x \pm 1)^2$, $(x \pm 1)^3$ distributes on $\tilde{y} < 0$ also, and it looks much less Gaussian.
 Quantitatively, the uncertainty distributions for $(5 \pm 1)^3$ is as close to Gaussian as that of $(2.5 \pm 1)^2$.
-
-%If the underlying result distribution for $f(x)$ needs to be Gaussian, $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ serves as separation boundaries.
 
 
 
@@ -870,13 +876,17 @@ N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!}
  &= \frac{1}{2} (2n+1)!! - N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
 \int_{-\infty}^{-\sigma} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} &= \int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z}; \\
 \int_{-\sigma}^{+\sigma} \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
-\int_{-\sigma}^{+\sigma} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n-1)!!}{(2j + 2n-1)!!}; \\
-\zeta(2n) &= 2 N(\sigma) \frac{\sigma^{2n+1}}{2n + 1} + 2 N(\sigma) \frac{\sigma^{2n+2}}{2n + 1} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n+2 - 1)!!}{(2j+2n+2-1)!!} \\
+ &= 2 N(\sigma) \sigma^{2(n+1)-2} \sum_{j=1}^{\infty} \sigma^{2(j-1) + 3} \frac{(2(n+1)-1)!!}{(2(n+1) + 2(j-1) + 1)!!};
+\end{align*}
+
+\begin{align*}
+\zeta(2n) &= \int_{-\sigma}^{+\sigma} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z} = 2 N(\sigma) \sigma^{2n} \sum_{j=0}^{\infty} \sigma^{2j+1} \frac{(2n-1)!!}{(2j + 2n+1)!!}; \\
+\zeta(2n) &= 2 N(\sigma) \frac{\sigma^{2n+1}}{2n + 1} + 2 N(\sigma) \frac{\sigma^{2n+2}}{2n+1} \sum_{j=1}^{\infty} \sigma^{2(j-1)+1} \frac{(2(n+1)- 1)!!}{(2(j-1)+2(n+1)+1)!!} \\
  &= 2 N(\sigma) \frac{\sigma^{2n + 1}}{2n + 1} + \frac{\zeta(\sigma, 2n + 2)}{2n + 1}; \\
 \zeta(\sigma, 2n + 2) &= (2n + 1) \zeta(\sigma, 2n) - 2 N(\sigma) \sigma^{2n + 1};
 \end{align*}
 
-\begin{align*}
+begin{align*}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}
  \simeq \tilde{x} + \frac{1}{2} \tilde{x}^2 + \frac{1}{6} \tilde{x}^3 + \frac{1}{24} \tilde{x}^4 + \frac{1}{120} \tilde{x}^5 + \frac{1}{720} \tilde{x}^6; \\
 \frac{\widehat{e^x}}{e^x} &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} 
@@ -943,25 +953,16 @@ P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 10
  = P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
 \end{align*}
 
-\begin{align*}
-\zeta(\sigma, 2n + 2) &= (2n + 1) \zeta(\sigma, 2n) - 2 N(\sigma) \sigma^{2n + 1}; \\ 
-\alpha \lambda^{2n+2} &= (2n + 1) \alpha \lambda^{2n} - 2 N(\sigma) \sigma \sigma^{2n}; \\
-\lambda^2 &= (2n + 1) - \frac{2 N(\sigma) \sigma}{\alpha} (\frac{\sigma}{\lambda})^{2n} 
- \simeq (2n + 1) - \frac{2 N(\sigma) \sigma}{\alpha}(1 + 2n \frac{\sigma - \lambda}{\lambda}); \\
-\frac{2 N(\sigma) \sigma}{\alpha} &= 1 - \lambda^2; \\
-\lambda = (1 - \lambda^2) (\sigma - \lambda);
-\end{align*}
-
 \fi
 
 
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
-However, normal scientific and engineering calculations usually do not care about result distribution, but just some simple statistics of the result, such as the result deviation.
+However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
 Using Taylor expansion is one way to get the simple statistics.
 
 An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
-Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is the \emph{bounding factor} that determines the $\tilde{x}$ range to be $(-\sigma \delta x, +\sigma \delta x)$.
+Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
 \begin{align}
 \label{eqn: Taylor 1d} 
 \tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
@@ -993,53 +994,35 @@ In Formula \eqref{eqn: Taylor 1d variance}, the variance $\delta^2 f(x)$ is deco
 
 \end{itemize} 
 
-The choice of the bounding factor $\sigma$ needs careful scrutiny.
-The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ cause a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
+The choice of the bounding factor $\sigma$ needs careful considerations.
+If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
+When $\sigma$ is limited, the limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
-If $\sigma = \infty$, $M(x, 2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} to diverge in most cases.
-For the limited $x$, the behavior of $\lim_{\tilde{x} \rightarrow \infty} f(x + \tilde{x})$ is not of primary concern.
-When $\sigma$ is limited, $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
-$\zeta(2n)$ is normalized for $\zeta(2) = 1$ so that $\delta^2 x = (\delta x)^2$ for any choice of $\sigma$.
 \begin{align}
 \label{eqn: bounding leakage}
 \epsilon &= 2 - 2 \xi(\frac{1}{2} + \sigma); \\
 \label{eqn: momentum factor} 
 \zeta(2n) &= \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
   = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
+\label{eqn: momentum factor lower} 
+ &= (2n - 1) \zeta(\sigma, 2n - 2) - 2 N(\sigma) \sigma^{2n - 1}; \\
+\label{eqn: momentum factor higher} 
+&\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq N(\sigma) \frac{\sigma^{2n+1}}{2n+1}; \\
 \label{eqn: momentum even} 
 M(x, 2n) &= (\delta x)^{2n} \zeta(2n);
 \end{align}
+$M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
+\begin{itemize}
+\item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
 
-Figure \ref{fig: Momentum_Factor_Bounding} shows that the variance momentum factor $\zeta(2n)$ approaches $(2n-1)!!$ with increasing Taylor expansion order $2n$, but for a larger $2n$, $\zeta(2n)$ reaches $(2n-1)!!$ at a larger $\sigma$. 
-When $\sigma^2 \gg 2n$, $\zeta(2n)$ increases with $2n$ as $(2n-1)!!$ which is faster than $\sigma^{2n}$.
-When $\sigma^2 \ll 2n$, before $\zeta(2n)$ reaches $(2n-1)!!$, $\zeta(2n)$ increases with $2n$ as $\sigma^{2n} /2n$ which is slower than $\sigma^{2n}$.
-Thus it is possible to choose $\sigma$ so that $\zeta(2n) \sim \sigma^{2n}$ for $2n < 200$ which is the practical range for Taylor expansion.
+\item For $2n < 10$ when $5 \leq \sigma$, Formula \eqref{eqn: momentum factor lower} becomes virtually $\zeta(2n) = (2n-1)!!$ numerically.  
 
-Figure \ref{fig: Momentum_Factor_Expansion} shows that when $3 \leq \sigma \leq 6$, $\zeta(2n) \sim \lambda^{2n}$ in which $\lambda$ is a fitting parameter.
-It shows that $\lambda$ is always slightly smaller than $\sigma$, as expected.
-It also shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$.
+\item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
+$\lambda$ is always slightly smaller than $\sigma$, as expected.
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Momentum_Factor_Bounding.png} 
-\captionof{figure}{
-The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the bounding factor $\sigma$ according to Formula \eqref{eqn: momentum factor}, for different Taylor expansion order $2n$ as shown in the legend. 
-}
-\label{fig: Momentum_Factor_Bounding}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Momentum_Factor_Expansion.png} 
-\captionof{figure}{
-The momentum factor $\zeta(2n)$ in Formula \eqref{eqn: momentum even} vs the Taylor expansion order $2n$ according to Formula \eqref{eqn: momentum factor}, for different $\sigma$ as shown in the legend. 
-Also shown is the $(2n - 1)!!$ vs $2n$.
-The smaller diagram shows the starting portion of $\zeta(2n)$ vs $2n$ for different $\sigma$.
-}
-\label{fig: Momentum_Factor_Expansion}
-\end{figure}
-
-Thus, $\sigma = 5$ for variance arithmetic.
+\item $\zeta(2)$ has to be extremely close to 1 to satisfy $\delta^2 x = (\delta x)^2$, which is the case when $5 \leq \sigma$ numerically.
+\end{itemize}
+Thus, $\sigma = 5$ in variance arithmetic.
 
 Formula \eqref{eqn: exp bias} and \eqref{eqn: exp precision} give the result for $e^x$, which always converge:
 \begin{align}
@@ -1086,7 +1069,7 @@ Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result
 P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \left(\frac{\widehat{x^c}}{x^c}\right)^2;
 \end{align}
-As the special cases for Formula \eqref{eqn: power precision}, Formula eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, and Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$: 
+As the special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, and Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$: 
 \begin{align}
 \label{eqn: square precision}
 P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
@@ -1096,15 +1079,12 @@ P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} 
 P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; 
 \end{align}
 
-If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\sigma + \lambda)$.
+If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/\lambda$.
 $\lambda$ depends on $f(x)$, .e.g., it is larger for $1/x$ than for $\sqrt{x}$.
 The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$.
 
-For $y = x^3$, when $P(x)$ is more than the applicable precision threshold, the infinitive peak at $\tilde{y} = 0$, as show in Figure \ref{fig: Cubic_Distribution}, makes Formula \eqref{eqn: power precision} diverges.
-On the other hand, for $y = \sqrt[3]{x}$, as show in Figure \ref{fig: Cubic_Root_Distribution}, the integration range in Formula \eqref{eqn: variance momentum} can be reduced to $1/P(x)$ for $\sqrt[3]{x \pm \delta x}$ when $1/\sigma < P(x)$ except for $\sqrt[3]{0 \pm \delta x}$.
-The reduction of the integration range in Formula \eqref{eqn: variance momentum} also means larger bounding leakage according to Formula \eqref{eqn: bounding leakage}.
-
-For $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ according to Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}.
+Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Cubic_Distribution}.
+Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}.
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
 
@@ -1229,7 +1209,7 @@ Thus, the effective bit counts for $S$ and $V$ depend on the statistical precisi
 
 \item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
 \end{itemize}
-
+Thus, variance arithmetic is a modern implementation of significance arithmetic \cite{Significance_Arithmetic} \cite{Digital_Significance_Arithmetic} \cite{Unnormalized_Arithmetic}.
 
 
 

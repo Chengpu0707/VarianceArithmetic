@@ -106,7 +106,7 @@ public class TestMomentum {
         try (
             final FileWriter fw = new FileWriter("C:/Users/Cheng/Documents/Proj/VarianceArithemtic/Java/Output/MomentumFactor.txt")) {
             final double maxS = (double) Momentum.maxS / Momentum.dividS;
-            fw.write("s\t(2n-1)!!");
+            fw.write("s\t(2n-1)!!\t");
             for (double s = 0.1; s < maxS; s += 0.1) {
                 fw.write(String.format("%f\t", s));
             }

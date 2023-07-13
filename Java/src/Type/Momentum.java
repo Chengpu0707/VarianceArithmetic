@@ -96,14 +96,11 @@ public class Momentum {
         final int lower = (int) Math.floor(s * dividS);
         final int upper = (int) Math.ceil(s * dividS);
         if (lower == upper) {
-            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0];
+            return ssFactor[lower][n/2 - 1];
         } else if (upper < maxS) {
-            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0] + 
-                (ssFactor[upper][n/2 - 1] / ssFactor[upper][0] - 
-                 ssFactor[lower][n/2 - 1] / ssFactor[lower][0]) * 
-                (s * dividS - lower);
+            return ssFactor[lower][n/2 - 1] + (ssFactor[upper][n/2 - 1] - ssFactor[lower][n/2 - 1]) * (s * dividS - lower);
         } else {
-            return ssFactor[lower][n/2 - 1] / ssFactor[lower][0];
+            return ssFactor[lower][n/2 - 1];
         }
     }
 }
