@@ -393,33 +393,16 @@ If $S$ is even, the rounding error is reduce by half after rounding up; Otherwis
 Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process. 
 Thus, the rounding error is limited to $(-1/2, +1/2)$ of the LSB of $S$.
 
-The carry sign $\sim$ bit in variance arithmetic has the same functionality to reduce rounding errors as the sticky bit or guard bits in conventional floating-point calculations.
-Instead of being an extra bit, the carry sign $\sim$ bit is part of the representation, to minimized rounding error further.
-For example, in multiplication, the carry signs of both operand determines that of the result, which then determines how to round up the significand of the result. 
+The carry sign $\sim$ bit in variance arithmetic has the same functionality as the sticky bit or guard bits in conventional floating-point calculations  to reduce rounding errors.
+Numerically, using the sticky bit and guard bits, the accuracy of the conventional floating-point calculation on a modern computer is pretty high, e.g., for $\sqrt{x^2}$ and $(\sqrt{x})^2$, the error is limited to the least significant 2 bits.
+It is the scenario demonstrated by Formula \eqref{eqn: float num calc} that is the major problem, when the rounding errors are saved as part of the data.
+Thus, unlike the sticky bit and the guard bits, instead of being an extra bit, the carry sign $\sim$ bit is part of the representation.
+For example, in addition, the carry sign bits of both operand determine how to round the result significand. 
 
 
 \subsection{Probability Distribution of Rounding Errors}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Prec_Rnd_ErrDist.png}
-\captionof{figure}{
-Measured probability distribution of rounding errors of precision round-up rule for the minimal significand thresholds 0, 1, 2, 4, and 8 respectively.  
-}
-\label{fig: Prec_Rnd_Err_Dist}
-\end{figure}
-
-An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Standard}\cite{Precise_Numerical_Methods}\cite{Stochastic_Arithmetic}.  
-Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.  
-
-To estimate the rounding error distribution within its bounding range (-1/2, +1/2), a large number of positive random integers are converted into precision values and then rounded up once at a step time until each of them has a significand smaller than a predefined minimal significand threshold.  
-The precision value at each step is compared with the original value for the rounding error.  
-Figure \ref{fig: Prec_Rnd_Err_Dist} shows the result histogram of rounding errors for the minimal significand thresholds 0, 1, 4, 8, 16, respectively. 
-For example, when the sigificand threshold is 0 or 1, the last steps of rounding are fixed, as $ ... \rightarrow 1+ \rightarrow 1- \rightarrow 0+$, while $1+$ can be reached in two ways, either $3- \rightarrow 1+$ or $2+ \rightarrow 1+$, so that the rounding errors deviate from the uniformly distributed when the sigificand threshold is small.
-Thus, the logic LSB of the significand to store value should be at the $\chi$-th bit from the true LSB of the significand, to increase the minimal significand to $2^{\chi}$.
-$\chi$ is the \emph{bits calculated inside uncertainty}.
-Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$. 
-
+Another advantage of using one simple carry sign bit instead of the sticky bit and guard bits is that the rounding error can be demonstrated as nearly uniformly distributed using the round-up rules of variance arithmetic.
 
 
 \subsection{Result Uncertainty For Addition and Subtraction}
@@ -434,6 +417,18 @@ $P_{2}(x)$ is already close to the corresponding Gaussian distribution with the 
 }
 \label{fig: Prec_Add_Err_Dist}
 \end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
+\captionof{figure}{
+The result uncertainty distribution density function $P_8/2$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+}
+\label{fig: Prec_RndByDev_Dist}
+\end{figure}
+
+
 
 The variance arithmetic also tracks the rounding error bounding range $R$ together with the significand $S$. 
 
@@ -474,16 +469,6 @@ The rounding error distribution is extended to describe uncertainty distribution
 
 
 \subsection{The Precision Scaling Principle}
-
-\begin{figure}%[p]
-\centering
-\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
-\captionof{figure}{
-The result uncertainty distribution density function $P_8/2$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
-When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
-}
-\label{fig: Prec_RndByDev_Dist}
-\end{figure}
 
 Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
 To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
@@ -928,12 +913,14 @@ P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \fra
 \end{align*}
 
 \begin{align*}
-&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix} \\
+ &\simeq c \tilde{x} + \frac{c(c-1)}{2} \tilde{x}^2 + \frac{c(c-1)(c-2)}{6} \tilde{x}^3 + \frac{c(c-1)(c-2)(c-3)}{24} \tilde{x}^4 + \\
+ &\eqspace \frac{c(c-1)(c-2)(c-3)(c-4)}{120} \tilde{x}^5 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{720} \tilde{x}^6; \\
 \frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \\
- &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{24} P(x)^4; \\
+ &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
 P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
- &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1)^2 (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{8}{3}) P(x)^6;
+ &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align*}
 
 \begin{align*}
@@ -957,18 +944,19 @@ P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 10
 
 
 
+
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
 Using Taylor expansion is one way to get the simple statistics.
 
 An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
-Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
+Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: Taylor 1d bias} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $M(x, n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
 \begin{align}
 \label{eqn: Taylor 1d} 
 \tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
 \label{eqn: variance momentum}
 & M(x, n) \equiv (\delta x)^n \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace M(x, 2n+1) = 0; \\
-\label{eqn: calc bias}
+\label{eqn: Taylor 1d bias}
 \widehat{f(x)} &\equiv \overline{f(x)} - f(x) =  \int_{-\sigma}^{+\sigma} (f(x + \tilde{x}) - f(x)) \rho(\tilde{x}, x, \delta x) d \tilde{x}
  = \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!}; \\
 \label{eqn: Taylor 1d variance}
@@ -977,12 +965,12 @@ Using Formula \eqref{eqn: Gaussian function distribution}, Formula \eqref{eqn: c
 \label{eqn: accum calc bias}
 \widehat{f(\widehat{x})} &= f(x + \widehat{x}) - f(x) + \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x}{n!};
 \end{align}
-In Formula \eqref{eqn: calc bias}, the mean $\overline{f(x)}$ is decomposed as the sum of:
+In Formula \eqref{eqn: Taylor 1d bias}, the mean $\overline{f(x)}$ is decomposed as the sum of:
 \begin{itemize}
 \item The \emph{accurate result} $f(x)$: the result as if there were no input uncertainty, and 
 
 \item The \emph{variance bias} $\widehat{f(x)}$: the result changes due to the input uncertainty.
-If $x \pm \delta x$ already contains variance bias, Formula \eqref{eqn: calc bias} becomes  Formula \eqref{eqn: accum calc bias}.
+If $x \pm \delta x$ already contains variance bias, Formula \eqref{eqn: Taylor 1d bias} becomes  Formula \eqref{eqn: accum calc bias}.
 
 \end{itemize} 
 In Formula \eqref{eqn: Taylor 1d variance}, the variance $\delta^2 f(x)$ is decomposed as the difference of:
@@ -1001,15 +989,15 @@ When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most
 \begin{align}
 \label{eqn: bounding leakage}
 \epsilon &= 2 - 2 \xi(\frac{1}{2} + \sigma); \\
+\label{eqn: momentum even} 
+M(x, 2n) &= (\delta x)^{2n} \zeta(2n); \\
 \label{eqn: momentum factor} 
-\zeta(2n) &= \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
+\zeta(2n) &\equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z}
   = 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
 \label{eqn: momentum factor lower} 
  &= (2n - 1) \zeta(\sigma, 2n - 2) - 2 N(\sigma) \sigma^{2n - 1}; \\
 \label{eqn: momentum factor higher} 
-&\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq N(\sigma) \frac{\sigma^{2n+1}}{2n+1}; \\
-\label{eqn: momentum even} 
-M(x, 2n) &= (\delta x)^{2n} \zeta(2n);
+&\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq 2 N(\sigma) \frac{\sigma^{2n+1}}{2n+1};
 \end{align}
 $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a \emph{variance momentum factor} $\zeta(2n)$ defined in Formula \eqref{eqn: momentum factor}.
 \begin{itemize}
@@ -1019,6 +1007,7 @@ $M(x, 2n)$ is calculated by Formula \eqref{eqn: momentum even}, which contains a
 
 \item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
 $\lambda$ is always slightly smaller than $\sigma$, as expected.
+When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
 
 \item $\zeta(2)$ has to be extremely close to 1 to satisfy $\delta^2 x = (\delta x)^2$, which is the case when $5 \leq \sigma$ numerically.
 \end{itemize}
@@ -1067,7 +1056,8 @@ Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result
 \frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix}; \\
 \label{eqn: power precision}
 P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \left(\frac{\widehat{x^c}}{x^c}\right)^2;
+ - \left(\frac{\widehat{x^c}}{x^c}\right)^2; \\
+ &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align}
 As the special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, and Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$: 
 \begin{align}
@@ -1080,8 +1070,8 @@ P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6;
 \end{align}
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/\lambda$.
-$\lambda$ depends on $f(x)$, .e.g., it is larger for $1/x$ than for $\sqrt{x}$.
-The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$.
+$\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
+The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$ according to Formula \eqref{eqn: momentum factor higher}.
 
 Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Cubic_Distribution}.
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power bias} and \eqref{eqn: power precision}.
@@ -1103,15 +1093,14 @@ Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} ar
 
 
 
-
-\subsection{Linear Deviation and Calculation Cost}
-
-\iffalse
+\subsection{Dependency Tracing}
 
 \begin{align*}
-&\widehat{f(x) + g(x)} = \sum_{n=1}^{\infty} M(x, n) \frac{f^{(n)}_x + g^{(n)}_x}{n!} = \widehat{f(x)} + \widehat{g(x)}; \\
-&\delta^2 (f(x)+g(x)) = \sum_{n=1}^{\infty} M(x, n) \sum_{j=1}^{n-1} \frac{f^{(j)}_x + g^{(j)}_x}{j!} \frac{f^{(n-j)}_x + g^{(n-j)}_x}{(n-j)!} \\
-&= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 2 \sum_{n=2}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!};
+&\widehat{(f(x)+g(x))} = \sum_{n=1}^{\infty} M(x, 2n) \frac{f^{(2n)}_x + g^{(2n)}_x}{n!} = \widehat{f(x)} + \widehat{g(x)}; \\
+&\delta^2 (f(x)+g(x)) = \sum_{n=1}^{\infty} M(x, 2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x + 
+  g^{(j)}_x}{j!} \frac{f^{(2n-j)}_x + g^{(2n-j)}_x}{(2n-j)!} - \widehat{f(x) + g(x)}^2 \\
+&= \delta^2 f(x) + \delta^2 g(x) + 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 
+  2 \sum_{n=2}^{\infty} M(x,2n) \sum_{j=1}^{2n-1} \frac{f^{(2n-j)}_x }{(2n-j)!} \frac{g^{(j)}_x}{j!};
 \end{align*}
 
 \begin{align*}
@@ -1121,6 +1110,37 @@ Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} ar
   \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(m-i,n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \\
 &= \delta^2 f(x, y) + \delta^2 g(x, y) + 2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} \delta^2 x + 2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \delta^2 y + ...;
 \end{align*}
+
+\begin{align*}
+&\widehat{(f(x)+g(x))} = \\
+&\delta^2 (f(x)+g(x)) 
+\end{align*}
+
+
+When the inputs obeys the uncorrelated uncertainty assumption, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties, as far as the same imprecise value always corresponds to the same variable when applying Formula \eqref{eqn: Taylor 1d bias}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d bias}, and \eqref{eqn: Taylor 2d variance}.
+For example, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions, which is derived from Formula \eqref{eqn: Taylor 1d variance}.
+Formula \eqref{eqn: sum dependency} can be extended to multiple variables, such as to $\delta^2 (f(x, y) + g(x, y))$.
+Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependency}  calculate the product of two positive functions.
+\begin{align}
+\label{eqn: sum dependency}
+\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 
+  2 \sum_{n=1}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
+\label{eqn: product dependency}
+\delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
+
+For $f(x) - f(x)$, the linear variance is $0$ according to Formula \eqref{eqn: sum dependency}.
+The linear variance becomes $0$ when the calculation results in a constant.
+
+
+
+ 
+
+
+
+\subsection{Linear Deviation and Calculation Cost}
+
+\iffalse
 
 \begin{align*}
 P((\sqrt{x})^2) &\simeq \frac{1}{4} (4 P(x)^2 + 2 P(x)^4) + \frac{7}{32} (4 P(x)^2)^2 = P(x)^2 + 4 P(x)^4; \\
@@ -1142,21 +1162,6 @@ The 100\% minus the percentage of the linear deviation to the total deviation is
 
 The linear variance is wrong if the independent uncertainty assumption is applied wrongly.
 For example, if the square of an input imprecise value is mistakenly carried out as multiplication of two different input imprecise values, the result linear variance is only $1/2$-fold according to Formula \eqref{eqn: square precision} and \eqref{eqn: multiplication precision}.
-
-When the inputs obeys the uncorrelated uncertainty assumption, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
-For example, Formula \eqref{eqn: sum dependency} calculate the sum of any two functions, which is derived from Formula \eqref{eqn: Taylor 1d variance}.
-Formula \eqref{eqn: sum dependency} can be extended to multiple variables, such as to $\delta^2 (f(x, y) + g(x, y))$.
-Using Formula \eqref{eqn: sum dependency}, Formula \eqref{eqn: product dependency}  calculate the product of two positive functions.
-\begin{align}
-\label{eqn: sum dependency}
-\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 
-  + 2 \sum_{n=1}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
-\label{eqn: product dependency}
-\delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
-\end{align}
-
-For $f(x) - f(x)$, the linear variance is $0$ according to Formula \eqref{eqn: sum dependency}.
-The linear variance becomes $0$ when the calculation results in a constant.
 
 After the $f^{-1}(f(x))$ calculation, the linear variance can be recovered completely, while the calculation cost always increases.
 

@@ -1605,14 +1605,29 @@ $\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \
 Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
 
 
-\begin{align*}
-&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
-\frac{\widehat{x^c}}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \\
- &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{24} P(x)^4; \\
-P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \left(\frac{\widehat{x^c}}{x^c}\right)^2 \\
- &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1)^2 (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{8}{3}) P(x)^6;
-\end{align*}
+\subsection{Probability Distribution of Rounding Errors}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_Rnd_ErrDist.png}
+\captionof{figure}{
+Measured probability distribution of rounding errors of precision round-up rule for the minimal significand thresholds 0, 1, 2, 4, and 8 respectively.  
+}
+\label{fig: Prec_Rnd_Err_Dist}
+\end{figure}
+
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Standard}\cite{Precise_Numerical_Methods}\cite{Stochastic_Arithmetic}.  
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.  
+
+To estimate the rounding error distribution within its bounding range (-1/2, +1/2), a large number of positive random integers are converted into precision values and then rounded up once at a step time until each of them has a significand smaller than a predefined minimal significand threshold.  
+The precision value at each step is compared with the original value for the rounding error.  
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows the result histogram of rounding errors for the minimal significand thresholds 0, 1, 4, 8, 16, respectively. 
+For example, when the sigificand threshold is 0 or 1, the last steps of rounding are fixed, as $ ... \rightarrow 1+ \rightarrow 1- \rightarrow 0+$, while $1+$ can be reached in two ways, either $3- \rightarrow 1+$ or $2+ \rightarrow 1+$, so that the rounding errors deviate from the uniformly distributed when the sigificand threshold is small.
+Thus, the logic LSB of the significand to store value should be at the $\chi$-th bit from the true LSB of the significand, to increase the minimal significand to $2^{\chi}$.
+$\chi$ is the \emph{bits calculated inside uncertainty}.
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$. 
+
+
 
 
 
