@@ -1627,6 +1627,13 @@ Thus, the logic LSB of the significand to store value should be at the $\chi$-th
 $\chi$ is the \emph{bits calculated inside uncertainty}.
 Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$. 
 
+\begin{align}
+\label{eqn: sum dependency}
+\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 
+  2 \sum_{n=1}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
+\label{eqn: product dependency}
+\delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
 
 
 
