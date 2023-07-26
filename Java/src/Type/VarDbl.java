@@ -23,22 +23,16 @@ import java.util.Arrays;
 public class VarDbl implements IReal {
     public VarDbl(final double value, final double variance) throws ValueException, UncertaintyException {
         pack(value, variance, false, false, BOUND_MAX);
-        bias = 0;
-        linear = variance();
     }
     public VarDbl(final double value) throws ValueException {
         try {
             pack(value, Double.NaN, false, false, BOUND_MAX);
-            bias = 0;
-            linear = variance();
         } catch (UncertaintyException e) {
         }
     }
     public VarDbl() {
         try {
             pack(0, 0, false, false, BOUND_MAX);
-            bias = 0;
-            linear = 0;
         } catch (ValueException | UncertaintyException e) {
         }
     }
@@ -46,8 +40,6 @@ public class VarDbl implements IReal {
     public VarDbl(VarDbl other) {
         this.val = other.val;
         this.var = other.var;
-        this.linear = other.linear;
-        this.bias = other.bias;
     }
 
 
@@ -113,14 +105,6 @@ public class VarDbl implements IReal {
         return variance() / value / value;
     }
 
-    public double ldev() {
-        return Math.sqrt(linear);
-    }
-
-    public double bias() {
-        return bias;
-    }
-
     @Override
     public VarDbl negate() {
         boolean neg = !neg();
@@ -133,38 +117,6 @@ public class VarDbl implements IReal {
     public VarDbl shift(int bits) throws ValueException, UncertaintyException {
         if (bits == 0) {
             return this;
-        }
-
-        final Dbl dLnr = new Dbl(linear);
-        dLnr.shift(2*bits);
-        final double linear;
-        try {
-            linear = dLnr.toDouble();
-        } catch (ValueException e) {
-            throw new UncertaintyException(String.format(
-                "Linear variance: %s shifted by %d", IReal.format(this.linear, 2), bits
-            ));
-        }
-        if (!Double.isFinite(linear)) {
-            throw new UncertaintyException(String.format(
-                "Linear variance: %s shifted by %d", IReal.format(this.linear, 2), bits
-            ));
-        }
-
-        final Dbl dBias = new Dbl(bias);
-        dBias.shift(bits);
-        final double bias;
-        try {
-            bias = dBias.toDouble();
-        } catch (ValueException e) {
-            throw new UncertaintyException(String.format(
-                "Linear variance: %s shifted by %d", IReal.format(this.bias, 2), bits
-            ));
-        }
-        if (!Double.isFinite(bias)) {
-            throw new UncertaintyException(String.format(
-                "Linear variance: %s shifted by %d", IReal.format(this.bias, 2), bits
-            ));
         }
 
         int exp = exp() + bits;
@@ -193,8 +145,6 @@ public class VarDbl implements IReal {
             exp = Dbl.DOUBLE_EXP_MIN;
         }
         pack(exp, neg(), rVal.val, rVal.rndErr, rVar.val, rVar.rndErr, bound());
-        this.linear = linear;
-        this.bias = bias;
         return this;
     }
 
@@ -207,8 +157,6 @@ public class VarDbl implements IReal {
     @Override
     public VarDbl multiply(double fold) throws ValueException, UncertaintyException {
         pack(value() * fold, variance() * fold * fold, rndv(), rndr(), bound());
-        bias *= fold;
-        linear *= fold * fold;
         return this;
     }
 
@@ -220,8 +168,6 @@ public class VarDbl implements IReal {
         if (exponent == 1) {
             return new VarDbl(this);
         }
-        final double value = Math.pow(value(), exponent);
-        final double linear = this.linear * value * value * exponent * exponent;
         throw new ValueException("NotImplementedException");
     }
 
@@ -237,8 +183,6 @@ public class VarDbl implements IReal {
         VarDbl v = (VarDbl) other;
         final double value = value() + v.value();
         final double variance = variance() + v.variance();
-        final double bias = this.bias + v.bias;
-        final double linear = this.linear + v.linear;
         boolean rndErr = (neg() == v.neg())
             ? ((rndv() == v.rndv())? rndv() : false) 
             : ((rndv() != v.rndv())? rndv() : false);
@@ -251,17 +195,7 @@ public class VarDbl implements IReal {
             throw new UncertaintyException(String.format("%s + %s = %e: %s", 
                         toString(), other.toString(), variance, typeName()));
         }
-        if (!Double.isFinite(bias)) {
-            throw new ValueException(String.format("%s + %s = %e: %s", 
-                        IReal.format(this.bias, 3), IReal.format(v.bias, 3), bias, typeName()));
-        }
-        if (!Double.isFinite(linear)) {
-            throw new UncertaintyException(String.format("%s + %s = %e: %s", 
-                        IReal.format(this.linear, 3), IReal.format(v.linear, 3), linear, typeName()));
-        }
         pack(value, variance, rndErr, (rndr() == v.rndr())? rndr() : false, bound);
-        this.bias = bias;
-        this.linear = linear;
         return this;
     }
 
@@ -279,8 +213,6 @@ public class VarDbl implements IReal {
         final double value = tVal * oVal;
         final double variance = tVar * oVal * oVal + oVar * tVal * tVal + tVar * oVar;
         final long bound = Math.min(this.bound(), o.bound());
-        final double bias = (tVal + this.bias) * (oVal + o.bias) - value;
-        final double linear = this.linear * oVal * oVal + o.linear * tVal * tVal;
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%s * %s = %e: %s", 
                         toString(), other.toString(), value, typeName()));
@@ -289,19 +221,9 @@ public class VarDbl implements IReal {
             throw new UncertaintyException(String.format("%s * %s = %e: %s", 
                         toString(), other.toString(), variance, typeName()));
         }
-        if (!Double.isFinite(bias)) {
-            throw new ValueException(String.format("%s * %s = %e: %s", 
-                        IReal.format(this.bias, 3), IReal.format(o.bias, 3), bias, typeName()));
-        }
-        if (!Double.isFinite(linear)) {
-            throw new ValueException(String.format("%s * %s = %e: %s", 
-                        IReal.format(this.linear, 3), IReal.format(o.linear, 3), linear, typeName()));
-        }
         pack(value, variance, 
             (rndv() == o.rndv())? rndv() : false, (rndr() == o.rndr())? rndr() : false, 
             bound);
-        this.linear = linear;
-        this.bias = bias;
         return this;
     }
 
@@ -320,7 +242,6 @@ public class VarDbl implements IReal {
             throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
         }
         final double value = s1dTaylor[0];
-        final double linear = s1dTaylor[1] * s1dTaylor[1] * this.linear;
         double variance = 0;
         for (int n = 1; n <= Momentum.maxN; ++n) {
             bias += s1dTaylor[2*n] * Momentum.factor(2*n, bounding);
@@ -334,16 +255,8 @@ public class VarDbl implements IReal {
         if (!Double.isFinite(variance)) {
             throw new UncertaintyException(String.format("%s(%s) = variance %e: %s", name, toString(), variance, typeName()));
         }
-        if (!Double.isFinite(bias)) {
-            throw new ValueException(String.format("%s(%s) = bias %e: %s", name, toString(), bias, typeName()));
-        }
-        if (!Double.isFinite(linear)) {
-            throw new UncertaintyException(String.format("%s(%s) = linear %e: %s", name, toString(), linear, typeName()));
-        }
         final long bound = Math.min(BOUND_MAX, (long) bounding * BOUND_DENOM);
         pack(value, variance, false, false, Math.min(bound, bound()));
-        this.bias = bias;
-        this.linear = linear;
         return this;
     }
 
@@ -351,8 +264,6 @@ public class VarDbl implements IReal {
 
     private long val;
     private long var;
-    private double linear;
-    private double bias;
 
     // encode for val
     static final int EXP_SHIFT = 53;
