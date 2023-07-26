@@ -72,9 +72,9 @@ public class TestMomentum {
     public void TestFactor() {
         final double s = 1.75;
         final int n = 2;
-        assertEquals(0.201767, Momentum.factor(n, s), 1E-6);
-        final double pdf = 2 * Momentum.pdf(s);
-        assertEquals(0.172555, pdf, 1E-6);
+        assertEquals(0.617911, Momentum.factor(n, s), 1E-6);
+        final double pdf = 2 * s * s * Momentum.pdf(s);
+        assertEquals(0.528449, pdf, 1E-6);
 
         double term = pdf * s / (n + 1);
         double sum = 0;
@@ -85,19 +85,21 @@ public class TestMomentum {
             next = sum + term;
         }
         assertEquals(sum, Momentum.factor(n, s), 1E-6);
-        assertEquals(sum, pdf*s/(n+1) + s*s/(n+1) * Momentum.factor(n+2, s), 1E-6);
+        assertEquals(Momentum.factor(n+2, s), (n+1) * sum - pdf*s, 1E-6);
 
         sum = 0;
-        term = pdf * s / (2 + n - 1);
+        term = pdf * s /(n + 1);
         sum += term;
-        assertEquals(0.100657, term, 1E-6);
-        term = pdf * s * s * s / (2 + n - 1) / (4 + 2*n - 1);
-        assertEquals(0.044037, term, 1E-6);
+        assertEquals(0.308262, term, 1E-6);
+        term *= s * s /(n + 3);
+        assertEquals(0.188810, term, 1E-6);
         sum += term;
-        term = pdf * s * s * s * s * s / (2 + n - 1) / (4 + 2*n - 1) / (6 + 2*n - 1);
-        assertEquals(0.014985, term, 1E-6);
+        term *= s * s /(n + 5);
+        assertEquals(0.082604, term, 1E-6);
+        term *= s * s /(n + 7);
+        assertEquals(0.028108, term, 1E-6);
         sum += term;
-        assertTrue(pdf * sum < Momentum.factor(n, s));
+        assertEquals(sum + 0.092731, Momentum.factor(n, s), 1E-6);
     }
 
     @Test
