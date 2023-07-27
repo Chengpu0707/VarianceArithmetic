@@ -209,11 +209,18 @@ public class IntvDbl implements IReal{
     @Override
     public IntvDbl add(IReal other) throws TypeException, ValueException, UncertaintyException {
         if (other == null) {
-            throw new TypeException(String.format("%s: %s + null", toString(), typeName()));
+            return this;
         }
         if (!(other instanceof IntvDbl)) {
             throw new TypeException(String.format("%s: %s + %s: %s", 
                         toString(), typeName(), other.toString(), other.typeName()));
+        }
+        return add( (IntvDbl) other);
+    }
+
+    public IntvDbl add(IntvDbl other) throws ValueException, UncertaintyException {
+        if (other == null) {
+            return this;
         }
         final double value = value() + other.value();
         final double range = uncertainty() + other.uncertainty();
@@ -231,11 +238,18 @@ public class IntvDbl implements IReal{
     @Override
     public IntvDbl multiply(IReal other) throws TypeException, ValueException, UncertaintyException {
         if (other == null) {
-            throw new TypeException(String.format("%s: %s * null", toString(), typeName()));
+            return this;
         }
         if (!(other instanceof IntvDbl)) {
             throw new TypeException(String.format("%s: %s * %s: %s", 
                         toString(), typeName(), other.toString(), other.typeName()));
+        }
+        return multiply((IntvDbl) other);
+    }
+
+    public IntvDbl multiply(IntvDbl other) throws ValueException, UncertaintyException {
+        if (other == null) {
+            return this;
         }
         final double value = other.value();
         final double range = other.uncertainty();

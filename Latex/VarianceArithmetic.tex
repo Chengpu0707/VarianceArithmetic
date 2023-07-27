@@ -1164,13 +1164,15 @@ Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a
 \hat{c} (f(x, y) g(x, y)) &\equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!}; \\
 \label{eqn: sum variance}
-\delta^2 (f + g) &= \delta^2 f + \delta^2 g + 2 \hat{c} (f g); \\
+\delta^2 (f + g) &= \delta^2 f + \delta^2 g + \hat{c} (f\;g); \\
 \label{eqn: prod variance}
-\hat{v} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
+\delta^2 (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
     \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
     \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \nonumber \\
-&\eqspace - \left( \overline{f} g + f \overline{g} + 2 \hat{c} (f g) \right)^2;
+&\eqspace - \left( \overline{f} g + f \overline{g} + \hat{c} (f g) \right)^2;
 \end{align}
+Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
+For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$, $\hat{c} (f(x) g(x)) = (\delta x)^{2m+2n} \zeta(2m+2n-1) a\;b$ which is the variance component due to the correlation between $a \tilde{x}^m$ and $b \tilde{x}^n$, and which is part of the result variane when applying Formula \eqref{eqn: Taylor 1d variance} to $a \tilde{x}^m + b \tilde{x}^n$.
 
 The result variance in Formula \eqref{eqn: sum variance} or \eqref{eqn: prod variance} becomes zero for a constant expression, which is demonstrated by Formula \eqref{eqn: sum dependency} and \eqref{eqn: prod dependency}.
 \begin{align}
@@ -1195,7 +1197,8 @@ f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
 \end{align}
 
 On the other hand, it is important to apply correct formula based on dependency.
-For example, if Formula \eqref{eqn: multiplication precision} were applied instead of Formula \eqref{eqn: square precision}, the result variance would be only half.
+For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
+
 
 
 \subsection{A Variance Representation}
@@ -1209,7 +1212,7 @@ To be compatible with the conventional 64-bit floating-point standard \cite{Floa
 \item The representation needs 1 bit for sign, and 2 bit for the carry error sign for $S$ and $V$ respectively.
 
 \item The representation stores the bounding leakage $\epsilon$ as an 8-bit floating-point value, with 4-bit for the exponent.
-Thus, the minimal non-zero bounding leakage is approximately $\frac{15.259}{16} 10^{-6}$ which is equivalent to $\sigma \leq 4.467$.
+The maximal value for $\epsilon$ is $15\;2^{15-19} = 15/16$, while the minimal non-zero value for $\epsilon$ is $2^{-19} = 1.907 10^{-6}$ which is equivalent to $\sigma=4.763$.
 The result bounding leakage is approximated as $\epsilon = \epsilon_1 + \epsilon_2 - \epsilon_1 \epsilon_2$ in which $\epsilon_1$ and $\epsilon_2$ are the bounding leakages of the two operands for a calculation, respectively.
 \end{itemize}
 The total bit count of each imprecise value in the variance representation is 128.

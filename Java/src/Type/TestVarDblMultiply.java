@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import Type.IReal.ValueException;
-import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
 
 public class TestVarDblMultiply {
@@ -45,7 +44,7 @@ public class TestVarDblMultiply {
             prod2.multiply(op1);
             test(prod2, value, dev, tolerance, eTest);
             return prod2;
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
             return null;
         }
@@ -110,7 +109,7 @@ public class TestVarDblMultiply {
             assertEquals(1, prod.value() / Math.sqrt(Double.MAX_VALUE), 3E-16);
             final double variance = Double.MAX_VALUE * 1E-6 + Double.MAX_VALUE / 2 + 1E-6 * Double.MAX_VALUE / 2;
             assertEquals(1, prod.variance() / variance, 3E-16);
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
     }
@@ -141,7 +140,7 @@ public class TestVarDblMultiply {
             assertEquals(5L << 50, re.var());
             assertEquals(2, re.value(), 1E-16);
             assertEquals(2 * Math.sqrt(5), re.uncertainty(), 1E-16);
-        } catch (ValueException | UncertaintyException | TypeException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
         

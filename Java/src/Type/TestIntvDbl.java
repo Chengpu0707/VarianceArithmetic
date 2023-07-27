@@ -533,7 +533,7 @@ public class TestIntvDbl {
             final double range = range1 + range2;
             assertEquals(String.format("%s + %s: range %e != %e", op.toString(), op2.toString(), range, res.uncertainty()), 
                          range, res.uncertainty(), TOLERANCE);
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
     }
@@ -566,7 +566,7 @@ public class TestIntvDbl {
             res.add(op2);
             fail();
         } catch (ValueException e) {
-        } catch (TypeException | UncertaintyException e) {
+        } catch (UncertaintyException e) {
             fail(e.getMessage());
         }
 
@@ -576,17 +576,7 @@ public class TestIntvDbl {
             res.add(new IntvDbl(0, Double.MAX_VALUE));
             fail();
         } catch (UncertaintyException e) {
-        } catch (TypeException | ValueException e) {
-            fail(e.getMessage());
-        }
-
-        try {
-            op = new IntvDbl();
-            res = op.clone();
-            res.add(null);
-            fail();
-        } catch (TypeException e) {
-        } catch (ValueException | UncertaintyException e) {
+        } catch (ValueException e) {
             fail(e.getMessage());
         }
 
@@ -689,7 +679,7 @@ public class TestIntvDbl {
             assertEquals(0, res.value(), 0);
             assertEquals(1, res.uncertainty(), 0);
         } catch (ValueException e) {
-        } catch (TypeException | UncertaintyException e) {
+        } catch (UncertaintyException e) {
             fail(e.getMessage());
         }
 
@@ -700,7 +690,7 @@ public class TestIntvDbl {
             res.multiply(op2);
             fail();
         } catch (UncertaintyException e) {
-        } catch (TypeException | ValueException e) {
+        } catch (ValueException e) {
             fail(e.getMessage());
         }
 
@@ -711,17 +701,7 @@ public class TestIntvDbl {
             res.multiply(op2);
             fail();
         } catch (UncertaintyException e) {
-        } catch (TypeException | ValueException e) {
-            fail(e.getMessage());
-        }
-
-        try {
-            op = new IntvDbl();
-            res = op.clone();
-            res.multiply(null);
-            fail();
-        } catch (TypeException e) {
-        } catch (ValueException | UncertaintyException e) {
+        } catch (ValueException e) {
             fail(e.getMessage());
         }
     }

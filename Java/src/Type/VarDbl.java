@@ -10,29 +10,24 @@ import java.util.Arrays;
  * It implements IReal.power() using the VarDbl.taylor().
  * 
  * This class contains the following data management private methods
- *      protected void pack(final double value, final double variance, final boolean rnd, final boolean rndr, final bound);
- *      private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long bound);
- *      private void pack(final Dbl dVal, final Dbl dVar, long bound)
- * 
- * The constructor assume:
- *      bias = 0
- *      linear = variance
- * The above two member are accumulated during calculation
+ *      protected void pack(final double value, final double variance, final boolean rnd, final boolean rndr, final leak);
+ *      private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long leak);
+ *      private void pack(final Dbl dVal, final Dbl dVar, long leak)
  *      
  */
 public class VarDbl implements IReal {
     public VarDbl(final double value, final double variance) throws ValueException, UncertaintyException {
-        pack(value, variance, false, false, BOUND_MAX);
+        pack(value, variance, false, false, LEAK_VAL_MAX);
     }
     public VarDbl(final double value) throws ValueException {
         try {
-            pack(value, Double.NaN, false, false, BOUND_MAX);
+            pack(value, Double.NaN, false, false, LEAK_VAL_MAX);
         } catch (UncertaintyException e) {
         }
     }
     public VarDbl() {
         try {
-            pack(0, 0, false, false, BOUND_MAX);
+            pack(0, 0, false, false, LEAK_VAL_MAX);
         } catch (ValueException | UncertaintyException e) {
         }
     }
@@ -105,10 +100,17 @@ public class VarDbl implements IReal {
         return variance() / value / value;
     }
 
+    public double leakage()  { 
+        final long leak = (var & LEAK_MASK) >>> LEAK_SHIFT;
+        long exp = leak >> LEAK_EXP_SHIFT;
+        long val = leak & LEAK_VAL_MASK;
+        return (val << exp) * LEAK_FACTOR; 
+    }
+
     @Override
     public VarDbl negate() {
         boolean neg = !neg();
-        pack(exp(), neg, val(), rndv(), var(), rndr(), bound());
+        pack(exp(), neg, val(), rndv(), var(), rndr(), leak());
         return this;
     }
 
@@ -121,7 +123,7 @@ public class VarDbl implements IReal {
 
         int exp = exp() + bits;
         if ((Dbl.DOUBLE_EXP_MIN <= exp) && (exp <= Dbl.DOUBLE_EXP_MAX)) {
-            pack(exp, neg(), val(), rndv(), var(), rndr(), bound());
+            pack(exp, neg(), val(), rndv(), var(), rndr(), leak());
             return this;
         }
         if (exp > Dbl.DOUBLE_EXP_MAX) {
@@ -144,19 +146,19 @@ public class VarDbl implements IReal {
             }
             exp = Dbl.DOUBLE_EXP_MIN;
         }
-        pack(exp, neg(), rVal.val, rVal.rndErr, rVar.val, rVar.rndErr, bound());
+        pack(exp, neg(), rVal.val, rVal.rndErr, rVar.val, rVar.rndErr, leak());
         return this;
     }
 
     @Override
     public VarDbl add(double offset) throws ValueException, UncertaintyException {
-        pack(value() + offset, variance(), rndv(), rndr(), bound());
+        pack(value() + offset, variance(), rndv(), rndr(), leak());
         return this;
     }
 
     @Override
     public VarDbl multiply(double fold) throws ValueException, UncertaintyException {
-        pack(value() * fold, variance() * fold * fold, rndv(), rndr(), bound());
+        pack(value() * fold, variance() * fold * fold, rndv(), rndr(), leak());
         return this;
     }
 
@@ -174,19 +176,26 @@ public class VarDbl implements IReal {
     @Override
     public VarDbl add(final IReal other) throws TypeException, ValueException, UncertaintyException {
         if (other == null) {
-            throw new TypeException(String.format("%s: %s + null", toString(), typeName()));
+            return this;
         }
         if (!(other instanceof VarDbl)) {
             throw new TypeException(String.format("%s: %s + %s: %s", 
                         toString(), typeName(), other.toString(), other.typeName()));
         }
-        VarDbl v = (VarDbl) other;
-        final double value = value() + v.value();
-        final double variance = variance() + v.variance();
-        boolean rndErr = (neg() == v.neg())
-            ? ((rndv() == v.rndv())? rndv() : false) 
-            : ((rndv() != v.rndv())? rndv() : false);
-        final long bound = Math.min(this.bound() >> BOUND_SHIFT, v.bound() >> BOUND_SHIFT);
+        return add((VarDbl) other);
+    }
+
+    public VarDbl add(final VarDbl other) throws ValueException, UncertaintyException {
+        if (other == null) {
+            return this;
+        }
+        final double value = value() + other.value();
+        final double variance = variance() + other.variance();
+        boolean rndErr = (neg() == other.neg())
+            ? ((rndv() == other.rndv())? rndv() : false) 
+            : ((rndv() != other.rndv())? rndv() : false);
+        final double tLkg = this.leakage(), oLkg = other.leakage();
+        final long leak = leak(tLkg + oLkg - tLkg * oLkg);
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%s + %s = %e: %s", 
                         toString(), other.toString(), value, typeName()));
@@ -195,24 +204,28 @@ public class VarDbl implements IReal {
             throw new UncertaintyException(String.format("%s + %s = %e: %s", 
                         toString(), other.toString(), variance, typeName()));
         }
-        pack(value, variance, rndErr, (rndr() == v.rndr())? rndr() : false, bound);
+        pack(value, variance, rndErr, (rndr() == other.rndr())? rndr() : false, leak);
         return this;
     }
 
     @Override
     public VarDbl multiply(final IReal other) throws TypeException, ValueException, UncertaintyException {
         if (other == null) {
-            throw new TypeException(String.format("%s: %s * null", toString(), typeName()));
+            return this;
         }
         if (!(other instanceof VarDbl)) {
             throw new TypeException(String.format("%s: %s * %s: %s", 
                         toString(), typeName(), other.toString(), other.typeName()));
         }
-        VarDbl o = (VarDbl) other;
-        final double tVal = value(), tVar = variance(), oVal = o.value(), oVar = o.variance();
+        return multiply((VarDbl) other);
+    }
+
+    public VarDbl multiply(final VarDbl other) throws ValueException, UncertaintyException {
+        final double tVal = value(), tVar = variance(), oVal = other.value(), oVar = other.variance();
         final double value = tVal * oVal;
         final double variance = tVar * oVal * oVal + oVar * tVal * tVal + tVar * oVar;
-        final long bound = Math.min(this.bound(), o.bound());
+        final double tLkg = this.leakage(), oLkg = other.leakage();
+        final long leak = leak(tLkg + oLkg - tLkg * oLkg);
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%s * %s = %e: %s", 
                         toString(), other.toString(), value, typeName()));
@@ -222,8 +235,8 @@ public class VarDbl implements IReal {
                         toString(), other.toString(), variance, typeName()));
         }
         pack(value, variance, 
-            (rndv() == o.rndv())? rndv() : false, (rndr() == o.rndr())? rndr() : false, 
-            bound);
+            (rndv() == other.rndv())? rndv() : false, (rndr() == other.rndr())? rndr() : false, 
+            leak);
         return this;
     }
 
@@ -231,12 +244,11 @@ public class VarDbl implements IReal {
      * 1d Taylor expansion.
      * 
      * @param name:         the name of the Taylor expansion, for exception logging.
-     * @param bounding:     the bounding factor.  it is infinitive if it is NaN. 
-     * @param bias:         f(x + bias) - f(x)
      * @param s1dTaylor:    the Taylor expansion coefficent, with f(x) as s1dTaylor[0].  It should already contains /n!.
      * @param byPrec:       if to expand by precision
+     * @param bounding:     the bounding factor.  it is infinitive if it is NaN. 
      */
-    VarDbl taylor(final String name, double bounding, double bias, double[] s1dTaylor, boolean byPrec) throws ValueException, UncertaintyException {
+    VarDbl taylor(final String name, double[] s1dTaylor, boolean byPrec, double bounding) throws ValueException, UncertaintyException {
         final int maxN = s1dTaylor.length;
         if (maxN < 2) {
             throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
@@ -244,7 +256,6 @@ public class VarDbl implements IReal {
         final double value = s1dTaylor[0];
         double variance = 0;
         for (int n = 1; n <= Momentum.maxN; ++n) {
-            bias += s1dTaylor[2*n] * Momentum.factor(2*n, bounding);
             for (int j = 1; j < n; ++j) {
                 variance += s1dTaylor[2*j] * s1dTaylor[2*n - 2*j] * Momentum.factor(2*n, bounding);
             }
@@ -255,8 +266,9 @@ public class VarDbl implements IReal {
         if (!Double.isFinite(variance)) {
             throw new UncertaintyException(String.format("%s(%s) = variance %e: %s", name, toString(), variance, typeName()));
         }
-        final long bound = Math.min(BOUND_MAX, (long) bounding * BOUND_DENOM);
-        pack(value, variance, false, false, Math.min(bound, bound()));
+        final double leakage = 2 - 2* Momentum.cdf(0.5 + bounding);
+        final long leak = leak(leakage);
+        pack(value, variance, false, false, leak);
         return this;
     }
 
@@ -269,7 +281,7 @@ public class VarDbl implements IReal {
     static final int EXP_SHIFT = 53;
     static final long VAL_MASK = (1L << EXP_SHIFT) - 1;
     // encode for var
-    static final int BOUND_SHIFT = 56;
+    static final int LEAK_SHIFT = 56;
     static final int VAR_RND_SHIFT = 55;
     static final int VAL_RND_SHIFT = 54;
     static final int SIGN_SHIFT = EXP_SHIFT;
@@ -277,9 +289,15 @@ public class VarDbl implements IReal {
     static final long SIGN_MASK = 1L << SIGN_SHIFT;
     static final long VAR_RND_MASK = 1L << VAR_RND_SHIFT;
     static final long VAL_RND_MASK = 1L << VAL_RND_SHIFT;
-    static final long BOUND_MAX = (1L << (Long.SIZE - BOUND_SHIFT)) - 1;
-    static final long BOUND_MASK = BOUND_MAX << BOUND_SHIFT;
-    static final int BOUND_DENOM = 32;
+    static final long LEAK_MASK = ((1L << (Long.SIZE - LEAK_SHIFT)) - 1) << LEAK_SHIFT;
+    static final int LEAK_EXP_SHIFT = 4;
+    static final long LEAK_VAL_MAX = (1L << LEAK_EXP_SHIFT) - 1;
+    static final long LEAK_VAL_MASK = LEAK_VAL_MAX;
+    static final long LEAK_EXP_MAX = (1L << (Long.SIZE - LEAK_SHIFT - LEAK_EXP_SHIFT)) - 1;
+    static final long LEAK_EXP_MASK = LEAK_EXP_MAX << LEAK_EXP_SHIFT;
+    static final long LEAK_EXP_OFFSET = 19;
+    static final double LEAK_FACTOR = 1.0f / (1L << LEAK_EXP_OFFSET);
+    static final double LEAK_MAX = (LEAK_VAL_MAX << LEAK_EXP_MAX) * LEAK_FACTOR;
  
     protected int exp()     { return (int) ((val >>> EXP_SHIFT) - Dbl.DOUBLE_EXP_OFFSET); }
     protected boolean neg() { return (var & SIGN_MASK) != 0; }
@@ -287,17 +305,37 @@ public class VarDbl implements IReal {
     protected boolean rndv() { return (var & VAL_RND_MASK) != 0; }
     protected long var()    { return var & VAR_MASK; }
     protected boolean rndr() { return (var & VAR_RND_MASK) != 0; }
-    protected long bound()  { return var >> BOUND_SHIFT; }
-
-    private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long bound) {
-        this.val = ((exp + Dbl.DOUBLE_EXP_OFFSET) << EXP_SHIFT) | (val & VAL_MASK);
-        this.var = (bound << BOUND_SHIFT) | (rndr? VAR_RND_MASK : 0) | (rnd? VAL_RND_MASK : 0) | (neg? SIGN_MASK : 0) | (var & VAR_MASK);
+    protected long leak()  { 
+        return var >> LEAK_SHIFT; 
     }
 
-    private void pack(final Dbl dVal, final Dbl dVar, long bound) throws UncertaintyException {
+    static protected long leak(double leakage) throws ValueException {
+        if ((leakage < 0) || (1 < leakage)) {
+            throw new ValueException(String.format("Invalid leakage %g", leakage));
+        } 
+        if (leakage > LEAK_MAX) {
+            leakage = LEAK_MAX;
+        }
+        Dbl dbl = new Dbl( leakage / LEAK_FACTOR );
+        dbl.upBy(Dbl.DOUBLE_EXP_SHIFT - VarDbl.LEAK_EXP_SHIFT);
+        if (dbl.exp() < 0) {
+            dbl.upBy( -dbl.exp() );
+        }
+        while (VarDbl.LEAK_VAL_MAX < dbl.val()) {
+            dbl.upOnce();
+        }
+        return (dbl.exp() << VarDbl.LEAK_EXP_SHIFT) | dbl.val();
+    }
+
+    private void pack(int exp, boolean neg, long val, boolean rnd, long var, boolean rndr, long leak) {
+        this.val = ((exp + Dbl.DOUBLE_EXP_OFFSET) << EXP_SHIFT) | (val & VAL_MASK);
+        this.var = (leak << LEAK_SHIFT) | (rndr? VAR_RND_MASK : 0) | (rnd? VAL_RND_MASK : 0) | (neg? SIGN_MASK : 0) | (var & VAR_MASK);
+    }
+
+    private void pack(final Dbl dVal, final Dbl dVar, long leak) throws UncertaintyException {
         if (dVar.val() == 0) {
             dVal.normalize();
-            pack(dVal.exp(), dVal.neg(), dVal.val(), dVal.rndErr(), 0L, dVar.rndErr(), BOUND_MAX);
+            pack(dVal.exp(), dVal.neg(), dVal.val(), dVal.rndErr(), 0L, dVar.rndErr(), leak);
             return;
         }
         int shift = Math.max(0, Dbl.msb(dVar.val()) - (SIGN_SHIFT - 1));
@@ -316,10 +354,10 @@ public class VarDbl implements IReal {
             exp = dVal.exp();
         }
 
-        pack(exp, dVal.neg(), dVal.val(), dVal.rndErr(), dVar.val(), dVar.rndErr(), bound);
+        pack(exp, dVal.neg(), dVal.val(), dVal.rndErr(), dVar.val(), dVar.rndErr(), leak);
     }
 
-    protected void pack(double value, double variance, boolean rndv, boolean rndr, long bound) throws ValueException, UncertaintyException {
+    protected void pack(double value, double variance, boolean rndv, boolean rndr, long leak) throws ValueException, UncertaintyException {
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%.3e~%.3e: %s()", value, Math.sqrt(variance), typeName()));
         }
@@ -336,6 +374,6 @@ public class VarDbl implements IReal {
         }
         final Dbl dVal = new Dbl(value, rndv);
         final Dbl dVar = new Dbl(variance, rndr);
-        pack(dVal, dVar, bound);
+        pack(dVal, dVar, leak);
     }
 }

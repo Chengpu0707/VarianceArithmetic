@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
 
@@ -41,7 +40,7 @@ public class TestVarDblAdd {
             sum2.add(op1);
             test(sum2, value, dev, tolerance);
             return sum2;
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
             return null;
         }
@@ -108,7 +107,7 @@ public class TestVarDblAdd {
             assertEquals(1.94025E-11, dif.value() + 1.0/3, 1E-16);
 //            assertEquals(0, dif.add(new VarDbl(1.0/3)).value(), 1E-16);
 
-        } catch (ValueException | UncertaintyException | TypeException e) {
+        } catch (ValueException | UncertaintyException e) {
            fail();;
         }
     }

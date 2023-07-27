@@ -27,7 +27,7 @@ public class TestDblCompare {
             final IntvDbl res = op1.multiply(op2);
             assertEquals(intvValue, res.value(), 5E-16);
             assertEquals(intvUncertainty, res.uncertainty(), 3E-16);
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
 
@@ -37,7 +37,7 @@ public class TestDblCompare {
             final VarDbl res = op1.multiply(op2);
             assertEquals(varValue, res.value(), 2E-16);
             assertEquals(varUncertainty, res.uncertainty(), 2E-16);
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
     }
@@ -89,7 +89,7 @@ public class TestDblCompare {
             final VarDbl res = op1.add(op2);
             assertEquals(2, res.value(), TOLERANCE);
             assertEquals(4.472135954999579393, res.uncertainty(), TOLERANCE);
-        } catch (ValueException | UncertaintyException | TypeException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
         
@@ -99,7 +99,7 @@ public class TestDblCompare {
             final IntvDbl res = (IntvDbl) op1.add(op2);
             assertEquals(2, res.value(), TOLERANCE);
             assertEquals(9, res.uncertainty(), TOLERANCE);
-        } catch (ValueException | UncertaintyException | TypeException e) {
+        } catch (ValueException | UncertaintyException e) {
             fail();
         }
 
