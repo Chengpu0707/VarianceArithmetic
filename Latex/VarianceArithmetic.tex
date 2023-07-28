@@ -1159,7 +1159,8 @@ Formula \eqref{eqn: sum variance} calculate the sum of any two functions, while 
 Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a cross calculation $\hat{c} (f g)$ between $f$ and $g$, as shown in Formula \eqref{eqn: cross dependency} and \eqref{eqn: cross dependency 2d}.
 \begin{align}
 \label{eqn: cross dependency}
-\hat{c} (f(x) g(x)) &\equiv \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!}; \\
+\hat{c} (f(x) g(x)) &\equiv \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n)
+  \left( \frac{f^{(n)}_x }{n!} \frac{g^{(n)}_x}{n!} + \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \right); \\
 \label{eqn: cross dependency 2d}
 \hat{c} (f(x, y) g(x, y)) &\equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!}; \\
@@ -1170,9 +1171,15 @@ Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a
     \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
     \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \nonumber \\
 &\eqspace - \left( \overline{f} g + f \overline{g} + \hat{c} (f g) \right)^2;
-\end{align}
+\end{align} 
 Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
-For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$, $\hat{c} (f(x) g(x)) = (\delta x)^{2m+2n} \zeta(2m+2n-1) a\;b$ which is the variance component due to the correlation between $a \tilde{x}^m$ and $b \tilde{x}^n$, and which is part of the result variane when applying Formula \eqref{eqn: Taylor 1d variance} to $a \tilde{x}^m + b \tilde{x}^n$.
+For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$, Formula \eqref{eqn: sum cross 1} shows how $a \tilde{x}^m$ correlates with $b \tilde{x}^n$ in Formula \eqref{eqn: Taylor 1d variance}, while Formula \eqref{eqn: sum cross 2} shows how $a \tilde{x}^n$ correlates with $b \tilde{x}^n$ in Formula \eqref{eqn: Taylor 1d variance}.
+\begin{align}
+\label{eqn: sum cross 1}
+m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) a b; \\
+\label{eqn: sum cross 2}
+m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b;
+\end{align}
 
 The result variance in Formula \eqref{eqn: sum variance} or \eqref{eqn: prod variance} becomes zero for a constant expression, which is demonstrated by Formula \eqref{eqn: sum dependency} and \eqref{eqn: prod dependency}.
 \begin{align}
