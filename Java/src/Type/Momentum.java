@@ -61,7 +61,7 @@ public class Momentum {
      */
     public static final int maxS = 128;
     public static final int dividS = 16;
-    public static final int maxN = 200;
+    public static final int maxN = 100;
     private static final double ssFactor[][] = new double[maxS][maxN];
     static {
         final double factorS = 1.0 / dividS;
@@ -83,8 +83,8 @@ public class Momentum {
             }
         }
     }
-    public static double factor(int n, double s) {
-        if ((n <= 0) || (maxN < n) || (s < 0)) {
+    public static double factor(int n, double s, boolean normalized) {
+        if ((n <= 0) || (maxN*2 < n) || (s < 0)) {
             return Double.NaN;
         }
         if ((n % 2) == 1) {
@@ -95,12 +95,23 @@ public class Momentum {
         }
         final int lower = (int) Math.floor(s * dividS);
         final int upper = (int) Math.ceil(s * dividS);
+        final double ret;
         if (lower == upper) {
-            return ssFactor[lower][n/2 - 1];
+            ret = ssFactor[lower][n/2 - 1];
         } else if (upper < maxS) {
-            return ssFactor[lower][n/2 - 1] + (ssFactor[upper][n/2 - 1] - ssFactor[lower][n/2 - 1]) * (s * dividS - lower);
+            ret = ssFactor[lower][n/2 - 1] + (ssFactor[upper][n/2 - 1] - ssFactor[lower][n/2 - 1]) * (s * dividS - lower);
         } else {
-            return ssFactor[lower][n/2 - 1];
+            ret = ssFactor[lower][n/2 - 1];
         }
+        if (normalized) {
+            if (n == 2)
+                return 1;
+            else
+                return ret / factor(2, s, false); 
+        } else
+            return ret; 
+    }
+    public static double factor(int n, double s) {
+        return factor(n, s, true);
     }
 }

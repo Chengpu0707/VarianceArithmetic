@@ -1,13 +1,8 @@
 package Type;
 
-import java.util.Arrays;
 
 /*
  * A base class for storage type for variance arithmetic.
- * It add a taylor() method for the general Taylor expansion using the following approximation:
- *  *) M(x, 2n) = (dx)^(2n) (2n-1)!!
- *  *) M(x, 2n+1) = 0
- * It implements IReal.power() using the VarDbl.taylor().
  * 
  * This class contains the following data management private methods
  *      protected void pack(final double value, final double variance, final boolean rnd, final boolean rndr, final leak);
@@ -246,18 +241,26 @@ public class VarDbl implements IReal {
      * @param name:         the name of the Taylor expansion, for exception logging.
      * @param s1dTaylor:    the Taylor expansion coefficent, with f(x) as s1dTaylor[0].  It should already contains /n!.
      * @param byPrec:       if to expand by precision
-     * @param bounding:     the bounding factor.  it is infinitive if it is NaN. 
+     * @param bounding:     the bounding factor.   
      */
     VarDbl taylor(final String name, double[] s1dTaylor, boolean byPrec, double bounding) throws ValueException, UncertaintyException {
         final int maxN = s1dTaylor.length;
         if (maxN < 2) {
             throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
         }
-        final double value = s1dTaylor[0];
+        double value = s1dTaylor[0];
         double variance = 0;
-        for (int n = 1; n <= Momentum.maxN; ++n) {
+        double var = byPrec? precSq() : variance();
+        double varn = var;
+        for (int n = 2; n < Momentum.maxN*2; n += 2, varn *= var) {
+            value += s1dTaylor[n] * Momentum.factor(n, bounding) * varn;
             for (int j = 1; j < n; ++j) {
-                variance += s1dTaylor[2*j] * s1dTaylor[2*n - 2*j] * Momentum.factor(2*n, bounding);
+                variance += s1dTaylor[j] * s1dTaylor[n - j] * Momentum.factor(n, bounding) * varn;
+            }
+            for (int j = 2; j < n; j += 2) {
+                variance -= s1dTaylor[j] * Momentum.factor(j, bounding) * 
+                            s1dTaylor[n - j] * Momentum.factor(n - j, bounding) * 
+                            varn;
             }
         }
         if (!Double.isFinite(value)) {
@@ -272,6 +275,7 @@ public class VarDbl implements IReal {
         return this;
     }
 
+ 
     
 
     private long val;

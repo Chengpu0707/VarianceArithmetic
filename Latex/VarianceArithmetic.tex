@@ -715,7 +715,7 @@ When $f(x)=x^c$:
 \captionof{figure}{
 The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Square_Root_Distribution}
@@ -727,7 +727,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Cubic_Root_Distribution}
@@ -739,7 +739,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
-Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Square_Distribution}
@@ -751,7 +751,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $(x \pm 1)^3$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\sqrt[3]{\tilde{y}}$.
-Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Cubic_Distribution}
@@ -775,7 +775,7 @@ y = x^c: &\; \rho(\tilde{y}, y, \delta y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}
 Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: distribution mode} gives the equation for the mode of the result distribution, whose solutions $f^{-1}(\tilde{y}_m)$ for $e^x$, $\ln(x)$, and $x^c$ are Formula \eqref{eqn: exp mode}, \eqref{eqn: log mode}, and \eqref{eqn: power mode} respectively.
 \begin{align}
 \label{eqn: distribution mode}
-\frac{d^2 \tilde{z}}{d \tilde{y}^2} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z}; &\eqspace \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}; \\
+\eqspace \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}: &\eqspace \frac{d^2 \tilde{z}}{d \tilde{y}^2} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z}; \\
 \label{eqn: exp mode}
 \tilde{y} = e^{\tilde{x}}: &\eqspace \ln(\tilde{y}_m) = x - (\delta x)^2; \\
 \label{eqn: log mode}
@@ -877,14 +877,17 @@ P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \fra
 \end{align*}
 
 \begin{align*}
-\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!} \\
+\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} \\
  & \simeq \frac{1}{1!} \cos(x) \tilde{x} - \frac{1}{2!} \sin(x) \tilde{x}^2 - \frac{1}{3!} \cos(x) \tilde{x}^3 + \frac{1}{4!} \sin(x) \tilde{x}^4 + \\
  &\eqspace  \frac{1}{5!} \cos(x) \tilde{x}^5 - \frac{1}{6!} \sin(x) \tilde{x}^6 - \frac{1}{7!} \cos(x) \tilde{x}^7 + \frac{1}{8!} \sin(x) \tilde{x}^8; \\
 \hat{b} \sin(x) &= \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \\
  &\simeq  \sin(x) \left( \frac{1}{2}(\delta x)^2 - \frac{1}{24} (\delta x)^4 + \frac{1}{720} (\delta x)^4 - \frac{1}{40320} (\delta x)^8 \right); \\
-\delta^2 \sin(x) &=  - (\hat{b} \sin(x))^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \\
- &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
-  + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
+\delta^2 \sin(x) &= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) \\
+ &\eqspace \left( (-1)^{n-1} \sum_{j=1}^{n-1} \frac{\cos(x)^2}{(2j+1)!(2n-2j-1)!} + (-1)^{n} \sum_{j=1}^{n-1} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
+&= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 +
+   \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n} \sum_{j=1}^{n-1} \frac{(2j+1)\sin(x)^2 - (2n-2j)\cos(x)^2}{(2j+1)!(2n-2j)!} \\
+&= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n}
+   \sum_{j=1}^{n-1} \frac{(2n+1)\sin(x)^2 - (2n-2j)}{(2j+1)!(2n-2j)!} \\
  &\simeq \cos(x)^2 (\delta x)^2 + (-2 \frac{3!!}{1!3!} \cos(x)^2 + \frac{3!!}{2!2!}\sin(x)^2 - \frac{1}{4}\sin(x)^2)(\delta x)^4 + \\
  &\eqspace (2 \frac{5!!}{1!5!} \cos(x)^2 - 2 \frac{5!!}{2!4!}\sin(x)^2 + \frac{5!!}{3!3!} \cos(x)^2 - \frac{1}{24}\sin(x)^2)(\delta x)^6 \\
  &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 + (-\frac{2}{3}\sin(x)^2 + \frac{13}{24} \cos(x)^2) (\delta x)^6 \\
@@ -921,7 +924,7 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmat
 P(x^2)^2 &= 4 P(x)^2 + (3 - 1) P(x)^4; \\
 \sqrt{1 + p} - 1 & = \sum_{n=1} \frac{(2n-3)!!}{2^n n!}
  \simeq \frac{1}{2} p - \frac{1}{8} p^2 + \frac{1}{16} p^3 - \frac{5}{128} p^4 + \frac{7}{256} p^5 - \frac{21}{1024} p^6 + \frac{33}{2048} p^7 - \frac{429}{32768} P(x)^8; \\
-\frac{hat{b} \sqrt{x}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 - \frac{45045}{32768} P(x)^8; \\
+\frac{\hat{b} \sqrt{x}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 - \frac{45045}{32768} P(x)^8; \\
 P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2
   + ((\frac{1}{16} + \frac{1}{64}) 3 - \frac{1}{64}) P(x)^4
   + ((\frac{7}{256} + \frac{5}{512} + \frac{1}{256}) 5!! - \frac{15}{512}) P(x)^6 \\
@@ -950,15 +953,15 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 \label{eqn: variance momentum}
 & \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
 \label{eqn: Taylor 1d mean}
-\overline{f(x)} &\equiv \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
-  = \sum_{n=1}^{\infty}(\delta x)^{2n} \zeta(2n) \frac{f^{(2n)}_x}{(2n)!} + f(x); \\
+\overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
+  = \sum_{n=0}^{\infty}(\delta x)^{2n} \zeta(2n) \frac{f^{(2n)}_x}{(2n)!} \equiv f(x) + \hat{b} f(x); \\
 \label{eqn: Taylor 1d variance}
-\delta^2 f(x) &\equiv \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x)^2 N(\tilde{x}) d \tilde{z} - \overline{f(x)}^2 \nonumber \\
- &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!}
- - \left( \overline{f(x)} - f(x) \right)^2; 
+\delta^2 f(x) &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x)^2 N(\tilde{x}) d \tilde{z} - \overline{f(x)}^2 \nonumber \\
+ &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - \left( \hat{b} f(x) \right)^2; 
 \end{align}
-\begin{align}
-\end{align}
+Formula \eqref{eqn: Taylor 1d mean} define $\hat{b} f(x)$ for calculation convenience, which captures the behavior of $f(x)$ at the tails of the result uncertainty distribution.
+In contrast, Formula \eqref{eqn: distribution mode} captures the behavior of $f(x)$ at the mode of the result uncertainty distribution.
+Both captures the effect of the input uncertainty to $f(x)$.
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
@@ -966,13 +969,11 @@ When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula
 \begin{itemize}
 \item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
 
-\item For $2n < 10$ when $5 \leq \sigma$, Formula \eqref{eqn: momentum factor lower} becomes virtually $\zeta(2n) = (2n-1)!!$ numerically.  
+\item For $2n < 10$ when $5 \leq \sigma$, Formula \eqref{eqn: momentum factor lower} can be approximated by $\zeta(2n) = (2n-1)!!$.  
 
 \item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
 $\lambda$ is always slightly smaller than $\sigma$, as expected.
 When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
-
-\item $\zeta(2)$ has to be extremely close to 1 to satisfy $\delta^2 x = (\delta x)^2$, which is the case when $5 \leq \sigma$ numerically.
 \end{itemize}
 \begin{align}
 \label{eqn: momentum factor} 
@@ -997,7 +998,7 @@ Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which al
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp precision}
-P(e^x)^2 &= \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!}
+P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!}
  - \left( \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!} \right)^2 \\
  &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
 \end{align}
@@ -1015,11 +1016,10 @@ Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
 Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, which converge when $\delta x < 1$:
 \begin{align}
 \label{eqn: sin Taylor}
-\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sin(x) (-1)^{n+1} \frac{\tilde{x}^{2n+2}}{(2n + 2)!}; \\
+\sin(x + \tilde{x}) &= \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) &= - \left( \sin(x) \sum_{n=1}^{\infty} (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \right)^2 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \nonumber \\
- &\eqspace \left( \sum_{j=1}^{\frac{n-1}{2}} (-1)^{n+j} \frac{\cos(x)^2}{(2j-1)!(2n-2j+1)!} 
-  + \sum_{j=2}^{\frac{n-1}{2}-1} (-1)^{n+j} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
+\delta^2 \sin(x) &= (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n} \sum_{j=1}^{n-1} \frac{(2n+1)\sin(x)^2 - (2n-2j)}{(2j+1)!(2n-2j)!} \nonumber \\
+ &\eqspace - \left(\sum_{n=1}^{\infty}(\delta x)^{2n} \zeta(2n) (-1)^{n} \frac{\sin(x)}{(2n)!}\right)^2   \\
  &\simeq \cos(x)^2 (\delta x)^2 + \frac{1} {2}(1 - 3 \cos(x)^2) (\delta x)^4 - \frac{1}{24} (16 - 29 \cos(x)^2) (\delta x)^6;
 \end{align}
 
@@ -1051,17 +1051,21 @@ Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
 
+The independent uncertainty assumption is vital for variance arithmetic.
+For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
+
 Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
 \begin{align}
 \label{eqn: Taylor 2d mean}
 \overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}
+\equiv f(x,y) + \hat{b} f(x,y); \\
 \label{eqn: Taylor 2d variance}
 \delta^2 f(x, y) &= \int \int f(x + \tilde{x}, y + \tilde{y})^2 
     \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \left( \overline{f(x, y)} \right)^2 \nonumber \\
 &= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
   \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
- &\eqspace - f(x,y)^2 - \left( \overline{f(x, y)} - f(x,y) \right)^2; 
+ &\eqspace - f(x,y)^2 - \left( \hat{b} f(x,y) \right)^2; 
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
@@ -1151,6 +1155,16 @@ f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \fr
 &\eqspace\eqspace\eqspace - 3 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 - 4  g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + g(x)^{(4)}_x / g(x)^{(1)}_x = 0;\\
 \end{align*}
 
+Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
+For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$:
+\begin{align*}
+m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2m} \zeta(2m-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2n} \zeta(2n-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+\delta^2 (f(x) g(x)) &= (\delta x)^{2m+2n} \zeta(2m+2n-1) a b;
+\end{align*}
+
 \fi
 
 When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to account for correlation between uncertainties, such as the correlation between $f(x)$ and $g(x)$ through $x$ when applying Formula \eqref{eqn: Taylor 1d variance}, or the correlation between $f(x, y)$ and $g(x, y)$ through $(x, y)$ when applying Formula \eqref{eqn: Taylor 2d variance}.
@@ -1159,8 +1173,7 @@ Formula \eqref{eqn: sum variance} calculate the sum of any two functions, while 
 Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a cross calculation $\hat{c} (f g)$ between $f$ and $g$, as shown in Formula \eqref{eqn: cross dependency} and \eqref{eqn: cross dependency 2d}.
 \begin{align}
 \label{eqn: cross dependency}
-\hat{c} (f(x) g(x)) &\equiv \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n)
-  \left( \frac{f^{(n)}_x }{n!} \frac{g^{(n)}_x}{n!} + \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \right); \\
+\hat{c} (f(x) g(x)) &\equiv 2 \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!}; \\
 \label{eqn: cross dependency 2d}
 \hat{c} (f(x, y) g(x, y)) &\equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!}; \\
@@ -1173,13 +1186,6 @@ Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a
 &\eqspace - \left( \overline{f} g + f \overline{g} + \hat{c} (f g) \right)^2;
 \end{align} 
 Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
-For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$, Formula \eqref{eqn: sum cross 1} shows how $a \tilde{x}^m$ correlates with $b \tilde{x}^n$ in Formula \eqref{eqn: Taylor 1d variance}, while Formula \eqref{eqn: sum cross 2} shows how $a \tilde{x}^n$ correlates with $b \tilde{x}^n$ in Formula \eqref{eqn: Taylor 1d variance}.
-\begin{align}
-\label{eqn: sum cross 1}
-m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) a b; \\
-\label{eqn: sum cross 2}
-m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b;
-\end{align}
 
 The result variance in Formula \eqref{eqn: sum variance} or \eqref{eqn: prod variance} becomes zero for a constant expression, which is demonstrated by Formula \eqref{eqn: sum dependency} and \eqref{eqn: prod dependency}.
 \begin{align}
@@ -1203,8 +1209,6 @@ f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
 \delta^2 f^{-1}(f(x)) &= (\delta x)^2;
 \end{align}
 
-On the other hand, it is important to apply correct formula based on dependency.
-For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
 
 
 
@@ -1263,7 +1267,7 @@ Modelling errors arise when an approximate analytic solution is used, or when a 
 
 
 \clearpage
-\section{Standards and Methods for Comparing Arithmetic}
+\section{Comparing Arithmetic}
 \label{sec: validation}
 
 

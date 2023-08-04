@@ -68,10 +68,24 @@ public class TestMomentum {
     }
 
     @Test
+    public void TestFactorNorm() {
+        assertEquals(1.0, Momentum.factor(2, 6, false), 1E-6);
+        assertEquals(1.0, Momentum.factor(2, 5, false), 2E-4);
+        assertEquals(1.0, Momentum.factor(2, 4, false), 2E-3);
+
+        assertEquals(1, Momentum.factor(2, 5, true), 0);
+        assertEquals(1, Momentum.factor(4, 5, true)/3, 2E-4);
+        assertEquals(1, Momentum.factor(6, 5, true)/15, 3E-3);
+        assertEquals(1, Momentum.factor(8, 5, true)/105, 3E-3);
+        assertEquals(1, Momentum.factor(10, 5, true)/945, 1E-2);
+    }
+
+
+    @Test
     public void TestFactor() {
         final double s = 1.75;
         final int n = 2;
-        assertEquals(0.617911, Momentum.factor(n, s), 1E-6);
+        assertEquals(0.617911, Momentum.factor(n, s, false), 1E-6);
         final double pdf = 2 * s * s * Momentum.pdf(s);
         assertEquals(0.528449, pdf, 1E-6);
 
@@ -83,8 +97,8 @@ public class TestMomentum {
             term *= s * s / j;
             next = sum + term;
         }
-        assertEquals(sum, Momentum.factor(n, s), 1E-6);
-        assertEquals(Momentum.factor(n+2, s), (n+1) * sum - pdf*s, 1E-6);
+        assertEquals(sum, Momentum.factor(n, s, false), 1E-6);
+        assertEquals(Momentum.factor(n+2, s, false), (n+1) * sum - pdf*s, 1E-6);
 
         sum = 0;
         term = pdf * s /(n + 1);
@@ -98,7 +112,7 @@ public class TestMomentum {
         term *= s * s /(n + 7);
         assertEquals(0.028108, term, 1E-6);
         sum += term;
-        assertEquals(sum + 0.092731, Momentum.factor(n, s), 1E-6);
+        assertEquals(sum + 0.092731, Momentum.factor(n, s, false), 1E-6);
     }
 
     @Test
@@ -115,7 +129,7 @@ public class TestMomentum {
             for (int i = 2; i <= Momentum.maxN; i += 2) {
                 fw.write(String.format("%d\t%e\t", i, Momentum.doubleFactorial(i - 1)));
                 for (double s = 0.1; s < maxS; s += 0.1) {
-                    fw.write(String.format("%e\t", Momentum.factor(i, s)));
+                    fw.write(String.format("%e\t", Momentum.factor(i, s, false)));
                 }
                 fw.write("\n");
             }
