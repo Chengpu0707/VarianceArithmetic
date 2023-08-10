@@ -11,7 +11,7 @@ public class TestHistogram {
 		final Histogram histo = new Histogram();
 		Assert.assertTrue( null == histo.histo() );
 		Assert.assertTrue( histo.accum( 0 ) );
-		Assert.assertArrayEquals( new double[] {1}, histo.histo(), TOLERANCE );
+		Assert.assertArrayEquals( new double[] {0}, histo.histo(), TOLERANCE );
 		Assert.assertTrue( histo.accum( 0.01 ) );
 		Assert.assertArrayEquals( new double[] {1}, histo.histo(), TOLERANCE );
 		Assert.assertTrue( histo.accum( -0.01 ) );

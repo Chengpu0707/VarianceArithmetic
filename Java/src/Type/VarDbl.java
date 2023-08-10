@@ -240,17 +240,17 @@ public class VarDbl implements IReal {
      * 
      * @param name:         the name of the Taylor expansion, for exception logging.
      * @param s1dTaylor:    the Taylor expansion coefficent, with f(x) as s1dTaylor[0].  It should already contains /n!.
-     * @param byPrec:       if to expand by precision
-     * @param bounding:     the bounding factor.   
+     * @param inPrec:       if to expand by input precision
+     * @param outPrec:      if the variance result needs to be multiplied by s1dTaylor[0]
+     * @param bounding:     the bounding factor. 
+     * 
+     * @return:  
      */
-    VarDbl taylor(final String name, double[] s1dTaylor, boolean byPrec, double bounding) throws ValueException, UncertaintyException {
-        final int maxN = s1dTaylor.length;
-        if (maxN < 2) {
-            throw new ValueException(String.format("Taylor expansion with invalid coefficient of length %s", java.util.Arrays.toString(s1dTaylor)));
-        }
-        double value = s1dTaylor[0];
+    VarDbl taylor(final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec, double bounding) 
+            throws ValueException, UncertaintyException {
+        double value = outPrec? 1 : s1dTaylor[0];
         double variance = 0;
-        double var = byPrec? precSq() : variance();
+        double var = inPrec? precSq() : variance();
         double varn = var;
         for (int n = 2; n < Momentum.maxN*2; n += 2, varn *= var) {
             value += s1dTaylor[n] * Momentum.factor(n, bounding) * varn;
@@ -262,6 +262,10 @@ public class VarDbl implements IReal {
                             s1dTaylor[n - j] * Momentum.factor(n - j, bounding) * 
                             varn;
             }
+        }
+        if (outPrec) {
+            value *= s1dTaylor[0];
+            variance *= s1dTaylor[0] * s1dTaylor[0];
         }
         if (!Double.isFinite(value)) {
             throw new ValueException(String.format("%s(%s) = value %e: %s", name, toString(), value, typeName()));

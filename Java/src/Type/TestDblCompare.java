@@ -10,7 +10,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
 

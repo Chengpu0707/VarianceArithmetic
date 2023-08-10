@@ -1,5 +1,10 @@
 package Stats;
 
+/*
+ * To construct a distogram:
+ * 	*) symetric distributed between -d_maxRange and +d_maxRange
+ *  *) with divids for each 1
+ */
 public class Histogram {
 
 	public final int d_maxRange;
@@ -71,7 +76,7 @@ public class Histogram {
 		return sRes;
 	}
 	public double[] histo() {
-		return histo( actRange() );
+		return histo( d_maxRange * d_divids );
 	}
 	
 	public Stat stat() {

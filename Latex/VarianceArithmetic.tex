@@ -265,9 +265,7 @@ The variance arithmetic calculates the uncertainty variance around each output v
 It is based on:
 \begin{itemize}
 \item the round up rule,
-
 \item the precision scaling principle, and
-
 \item the uncorrelated uncertainty assumption.
 \end{itemize}  
 
@@ -619,6 +617,7 @@ It is $2 \pm 9$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
 
 
 
+
 \subsection{Uncertainty Distribution}
 
 \iffalse
@@ -716,6 +715,7 @@ When $f(x)=x^c$:
 The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
+The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Square_Root_Distribution}
@@ -728,6 +728,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
+The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Cubic_Root_Distribution}
@@ -740,6 +741,7 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
 Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
+The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
 \label{fig: Square_Distribution}
@@ -747,19 +749,21 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Cubic_Distribution.png} 
+\includegraphics[height=2.5in]{Inverse_Square_Distribution.png} 
 \captionof{figure}{
-The probability density function for $(x \pm 1)^3$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\sqrt[3]{\tilde{y}}$.
-Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
+The probability density function for $1/(x \pm 1)^2$, for different $x$ as shown in the legend. 
+The $y$-axis is scaled as $1/\sqrt{\tilde{y}}$.
+The probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
+The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
 }
-\label{fig: Cubic_Distribution}
+\label{fig: Inverse_Square_Distribution}
 \end{figure}
 
 
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
-In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$ or $\tilde{z}$ , which are different representations of the same underlying random variable.
+%Formula \eqref{eqn: function distribution} is the uncertainty distribution density function \cite{Statistical_Methods}.
+In Formula \eqref{eqn: function distribution} \cite{Statistical_Methods}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$ or $\tilde{z}$ , which are different representations of the same underlying random variable.
 Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: exp distribution}, \eqref{eqn: log distribution}, and \eqref{eqn: power distribution} give the $\rho(\tilde{y}, y, \delta y)$ for $e^x$, $\ln(x)$, and $x^c$, respectively.
 \begin{align}
 \label{eqn: function distribution}
@@ -792,22 +796,26 @@ If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\
 From another prospective, a linear transformation generates neither zero nor pole according Formula \eqref{eqn: function distribution}.
 
 Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
-All distributions looks close to Gaussian except $\sqrt{0 \pm 1}$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
+The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
 The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
-The legend shows quantitatively how the distributions for $\sqrt{x \pm 1}$ become more and more Gaussian with the increasing $x$.
+%All distributions looks close to Gaussian except $\sqrt{0 \pm 1}$.
 
 Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which also has a zero at $x=0$.
 Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ has two equal peaks instead of one larger peak on the positive side only.
-Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
+%Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
 
 Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a pole at $x=0$.
 The uncertainty distributions for $(0 \pm 1)^2$ and $(1 \pm 1)^2$ deviate significantly from Gaussian, while the uncertainty distributions for $(4 \pm 1)^2$ and $(5 \pm 1)^2$ look Gaussian but each still with an infinitive but narrower peak at $\tilde{y} = 0$.
+According to Formula \eqref{eqn: power mode}, $(0 \pm 1)^2$ and $(1 \pm 1)^2$ has no mode.
+$(0 \pm 1)^2$ is actually the $\chi^2$ distribution \cite{Statistical_Methods}.
 
-Figure \ref{fig: Cubic_Distribution} shows the probability density function for $(x \pm 1)^3$ according to Formula \eqref{eqn: power distribution}, which also has a pole at $x=0$.
-Compared with $(x \pm 1)^2$, $(x \pm 1)^3$ distributes on $\tilde{y} < 0$ also, and it looks much less Gaussian.
-Quantitatively, the uncertainty distributions for $(5 \pm 1)^3$ is as close to Gaussian as that of $(2.5 \pm 1)^2$.
+Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
+Figure \ref{fig: Inverse_Square_Distribution} looks more like Figure \ref{fig: Square_Root_Distribution} than Figure \ref{fig: Square_Distribution}, showing that pole or zero determines the properties of uncertainty distributions.
 
+In all the figures, the percentage values of difference agree well with the visual difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$.
+The differences become more and more Gaussian with the increasing $x$ for all cases.
+ 
 
 
 
@@ -929,12 +937,15 @@ P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2
   + ((\frac{1}{16} + \frac{1}{64}) 3 - \frac{1}{64}) P(x)^4
   + ((\frac{7}{256} + \frac{5}{512} + \frac{1}{256}) 5!! - \frac{15}{512}) P(x)^6 \\
  &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + \frac{180034033932044865}{72057594037927936} P(x)^8; \\
-\frac{1}{1 + p} - 1 &\simeq -p + p^2 - p^3 + p^4 - p^5 + p^6 - p^7 + p^8; \\
-\frac{\hat{b} 1/x}{1/x} &\simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
+\frac{1}{1 + p} - 1 & = \sum_{n=1}^{\infty} (-1)^n p^n \simeq -p + p^2 - p^3 + p^4 - p^5 + p^6 - p^7 + p^8; \\
+\frac{\hat{b} 1/x}{1/x} & = \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
 P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 105 - 2 * 15 - 3^2) P(x)^8 \\
- &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; 
+ &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; \\
+\frac{1}{(1 + p)^2} - 1 & = \sum_{n=1}^{\infty} (-1)^n p^n \simeq -2 p + 3 p^2 - 4 p^3 + 5 p^4 - 6 p^5 + 7 p^6 - 8 p^7 + 9 p^8; \\
+\frac{\hat{b} 1/x^2}{1/x^2} & = \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \simeq 3 P(x)^2 + 15 P(x)^4 + 105 P(x)^6 + 945 P(x)^8; \\
+P(1/x^2)^2 &\simeq 4 P(x)^2 + (25 * 3 - 9) P(x)^4 + (70 * 15 - 90) P(x)^6 + (147 * 105 - 855) P(x)^8 \\
+ &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + 14580 P(x)^8;
 \end{align*}
-
 
 \fi
 
@@ -969,7 +980,7 @@ When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula
 \begin{itemize}
 \item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
 
-\item For $2n < 10$ when $5 \leq \sigma$, Formula \eqref{eqn: momentum factor lower} can be approximated by $\zeta(2n) = (2n-1)!!$.  
+\item For $2n < 10$ when $5 \leq \sigma$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
 
 \item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
 $\lambda$ is always slightly smaller than $\sigma$, as expected.
@@ -986,6 +997,7 @@ When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ betwe
 
 The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
+$\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisions_Physical_Measurements}.
 \begin{equation}
 \label{eqn: bounding leakage}
 \epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma);
@@ -998,7 +1010,7 @@ Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which al
 \label{eqn: exp Taylor}
 &\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp precision}
-P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!}
+P(e^x)^2 &\simeq \frac{\delta^2 e^x}{e^{2x}} = \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!}
  - \left( \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!} \right)^2 \\
  &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
 \end{align}
@@ -1028,7 +1040,7 @@ Formula \eqref{eqn: power precision} gives the result variance for $x^c$.
 \label{eqn: power Taylor}
 &\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
 \label{eqn: power precision}
-P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+P(x^c)^2 &\simeq \frac{\delta^2 x^{2c}}{x^c} = \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \left( \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \right)^2; \\
  &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align}
@@ -1046,7 +1058,7 @@ If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\inf
 $\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
 The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$ according to Formula \eqref{eqn: momentum factor higher}.
 
-Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Cubic_Distribution}.
+Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Inverse_Square_Distribution}.
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power precision}.
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
@@ -1199,10 +1211,10 @@ For the composite function $f(g(x))$, Formula \eqref{eqn: Taylor 1d variance} be
 However, because the reverse function satisfies Formula \eqref{eqn: reverse}, the original variance $(\delta x)^2$ is restored in Formula \eqref{eqn: reverse variance} when applying Formula \eqref{eqn: Taylor 1d variance}, which is another case of dependency tracing in variance arithmetic.
 \begin{align}
 \label{eqn: composite taylor}
-f(g(x + \tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + ... \\
- t1 &= f(g(x))^{(1)}_g g(x)^{(1)}_x; \nonumber \\
- t2 &= f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \nonumber \\
- t3 &= f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \nonumber \\
+f(g(x + \tilde{x})) &= f(g(x)) + t_1 \tilde{x} + t_2 \frac{\tilde{x}^2}{2!} + t_3 \frac{\tilde{x}^3}{3!} + ... \\
+ t_1 &= f(g(x))^{(1)}_g g(x)^{(1)}_x; \nonumber \\
+ t_2 &= f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \nonumber \\
+ t_3 &= f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \nonumber \\
 \label{eqn: reverse}
 f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
 \label{eqn: reverse variance}
@@ -1247,29 +1259,9 @@ Thus, the effective bit counts for $S$ and $V$ depend on the statistical precisi
 Thus, variance arithmetic is a modern implementation of significance arithmetic \cite{Significance_Arithmetic} \cite{Digital_Significance_Arithmetic} \cite{Unnormalized_Arithmetic}.
 
 
-\subsection{Types of Uncertainties Included in Precision Arithmetic}
-
-There are four sources of result uncertainty after a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
-\begin{itemize}
-\item input uncertainties
-\item rounding errors
-\item truncation errors
-\item modelling errors
-\end{itemize}
-
-As described previously, both input uncertainties and rounding errors are included in the uncertainty specification of variance arithmetic.
-
-In many cases, because a numerical algorithm approaches its analytic counterpart only after infinitive execution, a good numerical algorithm should have an estimator of the \emph{truncation error} toward its analytic counterpart, such as the Cauchy reminder estimator for Taylor expansion \cite{Numerical_Recipes}, or the residual error for numerical integration \cite{Numerical_Recipes}.  Using conventional floating-point arithmetic, a subjective upper limit is chosen for the truncation error, to stop the numerical algorithm at limited execution \cite{Numerical_Recipes}. However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually give a falsely small result precision. Because variance arithmetic tracks rounding errors of a calculation efficiently, it can be used to search for the optimal execution termination point for the numerical algorithm when the truncation error is no longer significant, which is named as the \emph{truncation rule} in this paper. In other words, using variance arithmetic, the result precision of a calculation is determined by the inputs and the calculation itself.  Section \ref{sec: taylor expansion} and \ref{sec: integration} will provide such cases of applying truncation rule to Taylor expansion and numerical integration, respectively.
-
-Modelling errors arise when an approximate analytic solution is used, or when a real problem is simplified to obtain the solution.  For example, Section \ref{sec: FFT} demonstrates that the discrete Fourier transformation is only an approximation for the mathematically defined Fourier transformation.  Conceptually, modelling errors originate from mathematics, so they are outside the domain for variance arithmetic.
-
-
-
-
 \clearpage
-\section{Comparing Arithmetic}
+\section{Verification Method For Variance Arithmetic}
 \label{sec: validation}
-
 
 \subsection{Comparing Standards}
 
@@ -1284,24 +1276,48 @@ The statistics of the value errors defines the \emph{tracking ratio}:
 An ideal tracking ratio should be close to 1, regardless of input uncertainty precision, amount of calculation, and the nature of the calculation.
 
 
+\subsection{Types of Uncertainties}
+
+There are four sources of result uncertainty for a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
+\begin{itemize}
+\item input uncertainties
+\item rounding errors
+\item truncation errors
+\item modelling errors
+\end{itemize}
+
+As described previously, both \emph{input uncertainties} and \emph{rounding errors} are included in the uncertainty specification of variance arithmetic.
+Gaussian noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each algorithm.
+
+In many cases, because a numerical algorithm approaches its analytic counterpart only after infinitive execution, a good numerical algorithm should have an estimator of the \emph{truncation error} toward its analytic counterpart, such as the Cauchy reminder estimator for Taylor expansion \cite{Numerical_Recipes}, or the residual error for numerical integration \cite{Numerical_Recipes}.  
+Using conventional floating-point arithmetic, a subjective upper limit is chosen for the truncation error, to stop the numerical algorithm at limited execution \cite{Numerical_Recipes}. 
+However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually give a falsely small result precision. 
+Because variance arithmetic tracks rounding errors of a calculation efficiently, it can be used to search for the optimal execution termination point for the numerical algorithm when the truncation error is no longer significant, which is named as the \emph{truncation rule} in this paper. In other words, using variance arithmetic, the result precision of a calculation is determined by the inputs and the calculation itself.  
+Section \ref{sec: taylor expansion} and \ref{sec: integration} will provide such cases of applying truncation rule to Taylor expansion and numerical integration, respectively.
+
+The \emph{modelling errors} arise when an approximate analytic solution is used, or when a real problem is simplified to obtain the solution.  
+For example, Section \ref{sec: FFT} demonstrates that the discrete Fourier transformation is only an approximation for the mathematically defined Fourier transformation.  
+Conceptually, modelling errors originate from mathematics, so they are outside the domain for variance arithmetic.
 
 
-\subsection{Comparing Algorithms for Tests}
+\subsection{Types of Calculations}
 
 Algorithms of completely different nature with each representative for its category are needed to test the generic applicability of uncertainty-bearing arithmetic.  
-
 An algorithm can be categorized by comparing the amount of its input and output data:
 \begin{itemize}
-\item \emph{Transforming}: 
-A transforming algorithm has about equal amounts of input and output data.  
+\item transformation
+\item generation
+\item reduction
+\end{itemize}
+
+A \emph{transformation} algorithm has about equal amounts of input and output data.  
 The information contained in the data remains about the same after transforming.  
 The Discrete Fourier Transformation is a typical transforming algorithm, which contains exactly the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
 Matrix inversion is another such reversible algorithm.  
-For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after forward and reverse transformation, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
+For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after forward and reverse transformation according to Formula \eqref{eqn: reverse variance}, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
 A test of uncertainty-bearing arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}, and a test of matrix inversion is provided in Section \ref{sec: matrix}.
 
-\item \emph{Generating}:  
-A generating algorithm has much more output data than input data.  
+A \emph{generation} algorithm has much more output data than input data.  
 Solving differential equations numerically and generating a numerical table of a specific function are two typical generating algorithms.  
 The generating algorithm codes mathematical knowledge into data, so there is an increase of information in the output data.  
 From the perspective of encoding information into data, Taylor expansion is also a generating algorithm. 
@@ -1310,14 +1326,11 @@ Some generating algorithms are theoretical calculations which involve no impreci
 Section \ref{sec: recursion} demonstrates such an algorithm, which calculates a table of the sine function using trigonometric relations and two precise input data, $sin(0)=0$ and $sin(\pi/2)=1$.  
 In some other generating algorithms, the accumulation of rounding errors and input uncertainty should stop the algorithm at an optimal termination point using the truncation rule, which is demonstrated in Section \ref{sec: taylor expansion}.
 
-\item \emph{Reducing}:  
-A reducing algorithm has much less output data than input data such as numerical integration and statistical characterization of a data set.  
+A \emph{reduction} algorithm has much less output data than input data such as numerical integration and statistical characterization of a data set.  
 Some information of the data is lost while other information is extracted during reducing.  
 Conventional wisdom is that a reducing algorithm generally benefits from a larger input data set \cite{Probability_Statistics}.  
 Such a notion needs to be re-evaluated when uncertainty accumulates during calculation.  
 A test of uncertainty-bearing arithmetic using numerical integration is provided in Section \ref{sec: integration}.
-
-\end{itemize}
 
 Other relations between the input and output can also be used to categorize an algorithm.  
 \begin{itemize}
@@ -1333,14 +1346,16 @@ Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} 
 \end{itemize}
 
 
-\subsection{Input Data to Use}
+\clearpage
+\section{Verification Using Math Library Functions}
+\label{sec: Math Library}
 
-Gaussian noise are added to simulate input data of specified uncertainty deviation.
+
 
 
 
 \clearpage
-\section{ Comparison Using FFT}
+\section{Verification Using FFT}
 \label{sec: FFT}
 
 
