@@ -62,9 +62,10 @@ public class TestMomentum {
         assertEquals(3, Momentum.doubleFactorial(3), 0);
         assertEquals(8, Momentum.doubleFactorial(4), 0);
         assertEquals(15, Momentum.doubleFactorial(5), 0);
-        assertEquals(2.7253921397507295E78, Momentum.doubleFactorial(99), 1E78);
-        assertEquals(1.0898143681335199E154, Momentum.doubleFactorial(170), 1E154);
-        assertEquals(1.863582569508319E156, Momentum.doubleFactorial(170)*171, 1E156);
+        assertEquals(2.7253921397507295E78, Momentum.doubleFactorial(99), 1E69);
+        assertEquals(1.0898143681335199E154, Momentum.doubleFactorial(170), 1E145);
+        assertEquals(1.863582569508319E156, Momentum.doubleFactorial(170)*171, 1E147);
+        assertEquals(1.183050330245448E188, Momentum.doubleFactorial(200), 1E179);
     }
 
     @Test

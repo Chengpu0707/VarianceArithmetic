@@ -7,17 +7,17 @@ package Stats;
  */
 public class Histogram {
 
-	public final int d_maxRange;
+	public final double d_maxRange;
 	public final int d_divids;
 	protected final int d_center;
 	protected final int[] d_sHistogram;
 	protected final Stat d_stat = new Stat();
 	protected int d_actRange = 0;
 	
-	public Histogram( int maxRange, int divids ) {
+	public Histogram( double maxRange, int divids ) {
 		d_maxRange = maxRange;
 		d_divids = Math.abs(divids);
-		d_center = d_divids * maxRange;
+		d_center = (int) (d_divids * maxRange);
 		d_sHistogram = new int[1 + d_center * 2];
 	}
 	public Histogram( int range ) {
@@ -30,7 +30,7 @@ public class Histogram {
 	public int divids() {
 		return d_divids;
 	}
-	public int maxRange() {
+	public double maxRange() {
 		return d_maxRange;
 	}
 	
@@ -76,7 +76,7 @@ public class Histogram {
 		return sRes;
 	}
 	public double[] histo() {
-		return histo( d_maxRange * d_divids );
+		return histo( (int) (d_maxRange * d_divids) );
 	}
 	
 	public Stat stat() {

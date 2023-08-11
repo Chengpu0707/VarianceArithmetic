@@ -61,7 +61,7 @@ public class Momentum {
      */
     public static final int maxS = 128;
     public static final int dividS = 16;
-    public static final int maxN = 100;
+    public static final int maxN = 200;
     private static final double ssFactor[][] = new double[maxS][maxN];
     static {
         final double factorS = 1.0 / dividS;

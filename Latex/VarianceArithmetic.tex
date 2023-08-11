@@ -1051,7 +1051,9 @@ P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
 \label{eqn: square root precision}
 P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6; \\
 \label{eqn: inversion precision}
-P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; 
+P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; \\
+\label{eqn: inversion square precision}
+P(1/x^2)^2 &\simeq 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6;
 \end{align}
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/\lambda$.
@@ -1263,13 +1265,19 @@ Thus, variance arithmetic is a modern implementation of significance arithmetic 
 \section{Verification Method For Variance Arithmetic}
 \label{sec: validation}
 
-\subsection{Comparing Standards}
+
+\subsection{Verification Method}
+
+Gaussian noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each algorithm.
+
+
+\subsection{Verification Standards}
 
 Algorithms each with a known analytic result are used to characterize a uncertainty-bearing arithmetic. 
 The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
 The statistics of the value errors defines the \emph{tracking ratio}:
 \begin{itemize}
-\item For variance arithmetic and independence arithmetic, it is the ratio of the standard deviation of the value error to the output deviation.
+\item For variance arithmetic, it is the ratio of the standard deviation of the value error to the output deviation.
 
 \item For interval arithmetic, it is the ratio of the range of the value error to the output range.
 \end{itemize}
@@ -1287,7 +1295,6 @@ There are four sources of result uncertainty for a calculation \cite{Statistical
 \end{itemize}
 
 As described previously, both \emph{input uncertainties} and \emph{rounding errors} are included in the uncertainty specification of variance arithmetic.
-Gaussian noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each algorithm.
 
 In many cases, because a numerical algorithm approaches its analytic counterpart only after infinitive execution, a good numerical algorithm should have an estimator of the \emph{truncation error} toward its analytic counterpart, such as the Cauchy reminder estimator for Taylor expansion \cite{Numerical_Recipes}, or the residual error for numerical integration \cite{Numerical_Recipes}.  
 Using conventional floating-point arithmetic, a subjective upper limit is chosen for the truncation error, to stop the numerical algorithm at limited execution \cite{Numerical_Recipes}. 
@@ -1346,12 +1353,83 @@ Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} 
 \end{itemize}
 
 
+
+
 \clearpage
 \section{Verification Using Math Library Functions}
 \label{sec: Math Library}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_Dev.png} 
+\captionof{figure}{
+The measured vs calculated uncertainty deviation for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend. 
+The $x$-axis is in radians divided by $\pi$.
+The calculated values are obtained by Formula \eqref{eqn: sin precision}, while each measured deviation is obtained by 10000 samples using library \textit{sin} function.
+Each measured values fits well with the corresponding calculated value.
+$\delta^2 \sin(x)$ are shown to have the same periodicity as $\sin(x)$.
+}
+\label{fig: Sin_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_Dev.png} 
+\captionof{figure}{
+The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend. 
+The $x$-axis is the exponent $c$ from $-2$ to $+3$.
+The calculated values are obtained by Formula \eqref{eqn: power precision}, while each measured deviation is obtained by 10000 samples using library \textit{pow} function.
+Each measured values fits well with the corresponding calculated value except when $c < -1.5$ and $\delta x = 0.2$.
+}
+\label{fig: Pow_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_Converge.png} 
+\captionof{figure}{
+The individual variance term of $(1 \pm \delta x)^{-2}$ for the different Taylor expansion order $2n$, and different $\delta x$ as shown in the legend. 
+The $x$-axis is Taylor expansion order $2n$ from 1 to 400 in Formula \eqref{eqn: Taylor 1d variance}.
+The $y$-axis is the contribution to $(1 \pm \delta x)^{-2}$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
+It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges.
+}
+\label{fig: Pow_Converge}
+\end{figure}
 
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_Histogram.png} 
+\captionof{figure}{
+The measured probability density of $(1 \pm \delta x)^{c}$ for different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
+The $x$-axis is the deviation from the mean of $(1 \pm \delta x)^{c}$.
+The $y$-axis is the measured histogram at each $x$.
+}
+\label{fig: Pow_Histogram}
+\end{figure}
+
+
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions using Gaussian sampling.
+For example, Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
+Smaller input uncertainty always result in smaller output uncertainty.
+Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$.
+\begin{itemize}
+\item When $x=0$, $\sin(x) \simeq x$, so that $\delta^2 \sin(x) \simeq (\delta x)^2$.
+\item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
+\end{itemize}
+
+Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$.  
+\begin{itemize}
+\item Figure \ref{fig: Pow_Converge} shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges, so that Formula \eqref{eqn: inversion square precision} can not be applied when $P(x) = 0.2$, but it can be applied when $P(x) = 0.195$ which is confirmed by Figure \ref{fig: Pow_Dev}.
+Figure \ref{fig: Pow_Dev} also shows that when $c \geq -1.5$, $(x \pm \delta x)^c$ converges for $P(x) = 0.2$, which is expected from the difference of Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision}.
+
+\item Figure \ref{fig: Pow_Histogram} shows that when Formula \eqref{eqn: inversion square precision} is no longer applicable due to large $P(x)$, the result distribution deviates significantly from Gaussian, such as for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$.
+Figure \ref{fig: Inverse_Square_Distribution} is the corresponding theoretical distribution of Figure \ref{fig: Pow_Histogram} but with different $x$ scaling, which correctly predicts the shape of the Gaussian distribution in Figure \ref{fig: Pow_Histogram}.
+\end{itemize}
+In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} suggests that the result uncertainty distribution can no longer be approximated by Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
+Weather this observation can be generalized remains a question.
+
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions using Gaussian sampling.
 
 
 \clearpage
