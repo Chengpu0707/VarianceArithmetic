@@ -178,6 +178,7 @@ public class TestTaylor {
 
     @Test
     public void TestPowerDump() {
+        final boolean gaussian = false;
         final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
         final double[] sPower = new double[] {
             -2, -1.75, -5.0/3, -1.5, -4.0/3, -1.25, 
@@ -189,7 +190,7 @@ public class TestTaylor {
         Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter("./Power.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./PowerGN.txt" : "./PowerUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -228,7 +229,7 @@ public class TestTaylor {
                         Stat stat = new Stat();
                         Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = rand.nextGaussian();
+                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
                             if (BINDING <= Math.abs(d)) {
                                 leak += 1;
                                 continue;
@@ -300,6 +301,7 @@ public class TestTaylor {
 
     @Test
     public void TestExpDump() {
+        final boolean gaussian = true;
         final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
         final double[] sExp = new double[] {
             -100, -50, -20, -10, -5, -2, -1, -0.5, -0.2, -0.1,
@@ -308,7 +310,7 @@ public class TestTaylor {
         Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter("./Exp.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./ExpGN.txt" : "./ExpUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -347,7 +349,7 @@ public class TestTaylor {
                         Stat stat = new Stat();
                         Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = rand.nextGaussian();
+                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
                             if (BINDING <= Math.abs(d)) {
                                 leak += 1;
                                 continue;
@@ -418,6 +420,7 @@ public class TestTaylor {
 
     @Test
     public void TestLogDump() {
+        final boolean gaussian = true;
         final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
         final double[] sBase = new double[] {
             0.5, 0.75, 0.875, 
@@ -426,7 +429,7 @@ public class TestTaylor {
         Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter("./Log.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./LogGN.txt" : "./LogUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -465,7 +468,7 @@ public class TestTaylor {
                         Stat stat = new Stat();
                         Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = rand.nextGaussian();
+                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
                             if (BINDING <= Math.abs(d)) {
                                 leak += 1;
                                 continue;
@@ -534,6 +537,7 @@ public class TestTaylor {
 
     @Test
     public void TestSinDump() {
+        final boolean gaussian = true;
         final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
         final double[] sRad = new double[] {
             -1.0, -1.0/12*11, -1.0/6*5, -1.0/4*3, -1.0/3*2, -1.0/12*7, 
@@ -544,7 +548,7 @@ public class TestTaylor {
         Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter("./Sin.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./SinGN.txt" : "./SinUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -582,7 +586,7 @@ public class TestTaylor {
                         Stat stat = new Stat();
                         Histogram histo = new Histogram(BINDING/8.0, DIVIDS*8);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = rand.nextGaussian();
+                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
                             if (BINDING <= Math.abs(d)) {
                                 leak += 1;
                                 continue;

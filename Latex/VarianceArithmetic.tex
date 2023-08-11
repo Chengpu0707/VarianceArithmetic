@@ -1268,7 +1268,7 @@ Thus, variance arithmetic is a modern implementation of significance arithmetic 
 
 \subsection{Verification Method}
 
-Gaussian noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each algorithm.
+Gaussian noise or white noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each calculation.
 
 
 \subsection{Verification Standards}
@@ -1409,7 +1409,7 @@ The $y$-axis is the measured histogram at each $x$.
 \end{figure}
 
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions using Gaussian sampling.
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions.
 For example, Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
 Smaller input uncertainty always result in smaller output uncertainty.
 Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$.
@@ -1429,7 +1429,8 @@ Figure \ref{fig: Inverse_Square_Distribution} is the corresponding theoretical d
 In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} suggests that the result uncertainty distribution can no longer be approximated by Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
 Weather this observation can be generalized remains a question.
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions using Gaussian sampling.
+Adding Gaussian noise or white noise does not change the result significantly.
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions.
 
 
 \clearpage
