@@ -178,7 +178,7 @@ public class TestTaylor {
 
     @Test
     public void TestPowerDump() {
-        final boolean gaussian = false;
+        final boolean gaussian = true;
         final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
         final double[] sPower = new double[] {
             -2, -1.75, -5.0/3, -1.5, -4.0/3, -1.25, 
