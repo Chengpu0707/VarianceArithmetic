@@ -18,7 +18,10 @@ import Type.IReal.ValueException;
 
 
 public class TestTaylor {
-    final static double TOLERANCE = 3E-16;
+    static final int SAMPLES = 10000;
+    static final int BINDING = 5, DIVIDS = 2;
+    static final double TOLERANCE = 3E-16;
+
     VarDbl var;
 
     private void init(double value, double dev) {
@@ -39,8 +42,7 @@ public class TestTaylor {
     @Test
     public void testPowerExpansion() {
         final double[] sTaylor = Taylor.power(-2);
-        final double[] sDev = new double[] {0.2, 0.199, 0.198, 0.197, 0.196, 0.195};
-        final double bounding = 5;
+        final double[] sDev = new double[] {0.2, 0.199, 0.198, 0.197, 0.196, 0.195, 1.0/6};
         final double[] sVar = new double[sDev.length];
         try (
             final FileWriter fw = new FileWriter("./PowerExpansion.txt")) {
@@ -51,16 +53,16 @@ public class TestTaylor {
             }
             fw.write("\n");
             for (int n = 2; n < Momentum.maxN*2; n += 2) {
-                fw.write(String.format("%d\t%e\t", n, Momentum.factor(n, bounding)));
+                fw.write(String.format("%d\t%e\t", n, Momentum.factor(n, BINDING)));
                 for (int i = 0; i < sDev.length; ++i) {
                     sVar[i] *= sDev[i] * sDev[i];
-                    final double value = Momentum.factor(n, bounding) * sVar[i];
+                    final double value = Momentum.factor(n, BINDING) * sVar[i];
                     double variance = 0;
                     for (int j = 1; j < n; ++j) {
-                        variance += sTaylor[j] * sTaylor[n-j] * Momentum.factor(n, bounding) * sVar[i];
+                        variance += sTaylor[j] * sTaylor[n-j] * Momentum.factor(n, BINDING) * sVar[i];
                     }
                     for (int j = 2; j < n; j += 2) {
-                        variance -= sTaylor[j] * sTaylor[n-j] * Momentum.factor(j, bounding) * Momentum.factor(n - j, bounding) * sVar[i];
+                        variance -= sTaylor[j] * sTaylor[n-j] * Momentum.factor(j, BINDING) * Momentum.factor(n - j, BINDING) * sVar[i];
                     }
                     fw.write(String.format("%e\t%e\t%e\t", sVar[i], value, variance));
                 }
@@ -177,9 +179,11 @@ public class TestTaylor {
     }
 
     @Test
-    public void TestPowerDump() {
-        final boolean gaussian = true;
-        final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
+    public void testPowerDump() {
+        testPowerDump(true);
+        testPowerDump(false);
+    }
+    private void testPowerDump(boolean gaussian) {
         final double[] sPower = new double[] {
             -2, -1.75, -5.0/3, -1.5, -4.0/3, -1.25, 
             -1, -0.75, -2.0/3, -0.5, -1.0/3, -0.25, -0.1, -0.01 -1E-3, -1E-6, 
@@ -300,9 +304,11 @@ public class TestTaylor {
     }
 
     @Test
-    public void TestExpDump() {
-        final boolean gaussian = true;
-        final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
+    public void testExpDump() {
+        testExpDump(true);
+        testExpDump(false);
+    }
+    private void testExpDump(boolean gaussian) {
         final double[] sExp = new double[] {
             -100, -50, -20, -10, -5, -2, -1, -0.5, -0.2, -0.1,
             0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
@@ -419,9 +425,11 @@ public class TestTaylor {
     }
 
     @Test
-    public void TestLogDump() {
-        final boolean gaussian = true;
-        final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
+    public void testLogDump() {
+        testLogDump(true);
+        testLogDump(false);
+    }
+    private void testLogDump(boolean gaussian) {
         final double[] sBase = new double[] {
             0.5, 0.75, 0.875, 
             1, 2, 5, 10};
@@ -501,7 +509,7 @@ public class TestTaylor {
     }
 
     @Test
-    public void TestSin() {
+    public void testSin() {
         double[] sTaylor = Taylor.sin(Math.PI / 6);
         assertEquals(0.5, sTaylor[0], TOLERANCE);
         assertEquals(Math.sqrt(3)/2, sTaylor[1], TOLERANCE);
@@ -536,9 +544,11 @@ public class TestTaylor {
     }
 
     @Test
-    public void TestSinDump() {
-        final boolean gaussian = true;
-        final int SAMPLES = 10000, BINDING = 5, DIVIDS = 2;
+    public void testSinDump() {
+        testSinDump(true);
+        testSinDump(false);
+    }
+    private void testSinDump(boolean gaussian) {
         final double[] sRad = new double[] {
             -1.0, -1.0/12*11, -1.0/6*5, -1.0/4*3, -1.0/3*2, -1.0/12*7, 
             -1.0/2, -1.0/12*5, -1.0/3, -1.0/4, -1.0/6, -1.0/12,

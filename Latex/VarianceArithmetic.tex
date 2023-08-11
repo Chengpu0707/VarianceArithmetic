@@ -1059,6 +1059,7 @@ P(1/x^2)^2 &\simeq 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6;
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/\lambda$.
 $\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
 The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$ according to Formula \eqref{eqn: momentum factor higher}.
+For safety, $1/6$ can be used as the applicable precision threshold, which will be required by Formula \eqref{eqn: variance momentum UN}.
 
 Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Inverse_Square_Distribution}.
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power precision}.
@@ -1266,14 +1267,9 @@ Thus, variance arithmetic is a modern implementation of significance arithmetic 
 \label{sec: validation}
 
 
-\subsection{Verification Method}
-
-Gaussian noise or white noise are added to simulate input data of specified uncertainty deviation, and statistical methods are used to characterize result uncertainty for each calculation.
-
-
 \subsection{Verification Standards}
 
-Algorithms each with a known analytic result are used to characterize a uncertainty-bearing arithmetic. 
+Analytic functions each with a known analytic result are used to characterize a uncertainty-bearing arithmetic. 
 The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
 The statistics of the value errors defines the \emph{tracking ratio}:
 \begin{itemize}
@@ -1282,6 +1278,18 @@ The statistics of the value errors defines the \emph{tracking ratio}:
 \item For interval arithmetic, it is the ratio of the range of the value error to the output range.
 \end{itemize}
 An ideal tracking ratio should be close to 1, regardless of input uncertainty precision, amount of calculation, and the nature of the calculation.
+
+
+\subsection{Verification Method}
+
+For an analytic function with know result, Gaussian noise or white noise \cite{Statistical_Methods} of specified uncertainty deviation are added to input data, and statistical methods are used to characterize the value errors.
+
+Because a uniform distribution between $(-\sqrt{3}, +\sqrt{3})$ has deviation 1, Formula \eqref{eqn: variance momentum UN} is the variance momentum for the white noise, which is similar to Formula \eqref{eqn: momentum factor higher} when $n \rightarrow \infty$.
+\begin{align}
+\label{eqn: variance momentum UN}
+\zeta(n) &\equiv \int_{-\sqrt{3}}^{+\sqrt{3}} \frac{1}{2 \sqrt{3}} \tilde{z}^n d \tilde{z} = 
+\begin{cases} \zeta(2n+1) = 0; \\ \zeta(2n) = \frac{3^{n}}{2n + 1}; \end{cases}
+\end{align}
 
 
 \subsection{Types of Uncertainties}
@@ -1402,14 +1410,14 @@ It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ cl
 \includegraphics[height=2.5in]{Pow_Histogram.png} 
 \captionof{figure}{
 The measured probability density of $(1 \pm \delta x)^{c}$ for different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
-The $x$-axis is the deviation from the mean of $(1 \pm \delta x)^{c}$.
+The $x$-axis is the normalized deviation from the mean of $(1 \pm \delta x)^{c}$.
 The $y$-axis is the measured histogram at each $x$.
 }
 \label{fig: Pow_Histogram}
 \end{figure}
 
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions.
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 For example, Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
 Smaller input uncertainty always result in smaller output uncertainty.
 Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$.
@@ -1423,14 +1431,15 @@ Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very w
 \item Figure \ref{fig: Pow_Converge} shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges, so that Formula \eqref{eqn: inversion square precision} can not be applied when $P(x) = 0.2$, but it can be applied when $P(x) = 0.195$ which is confirmed by Figure \ref{fig: Pow_Dev}.
 Figure \ref{fig: Pow_Dev} also shows that when $c \geq -1.5$, $(x \pm \delta x)^c$ converges for $P(x) = 0.2$, which is expected from the difference of Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision}.
 
-\item Figure \ref{fig: Pow_Histogram} shows that when Formula \eqref{eqn: inversion square precision} is no longer applicable due to large $P(x)$, the result distribution deviates significantly from Gaussian, such as for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$.
-Figure \ref{fig: Inverse_Square_Distribution} is the corresponding theoretical distribution of Figure \ref{fig: Pow_Histogram} but with different $x$ scaling, which correctly predicts the shape of the Gaussian distribution in Figure \ref{fig: Pow_Histogram}.
+\item Figure \ref{fig: Pow_Histogram} shows the result distribution deviates significantly from Gaussian for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$.
+Figure \ref{fig: Inverse_Square_Distribution} contains the corresponding theoretical distribution of Figure \ref{fig: Pow_Histogram} but with different $x$ scaling, which predicts the shape of the Gaussian distribution in Figure \ref{fig: Pow_Histogram}.
 \end{itemize}
-In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} suggests that the result uncertainty distribution can no longer be approximated by Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
+In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} coincides with the result uncertainty distribution deviating from Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
 Weather this observation can be generalized remains a question.
 
-Adding Gaussian noise or white noise does not change the result significantly.
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions.
+Adding either Gaussian noise or white noise does not change the result variance significantly.
+
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 
 
 \clearpage
