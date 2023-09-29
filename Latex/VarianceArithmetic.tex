@@ -1268,7 +1268,7 @@ Thus, variance arithmetic is a modern implementation of significance arithmetic 
 
 \subsection{Verification Standards}
 
-Analytic functions each with a known analytic result are used to characterize a uncertainty-bearing arithmetic. 
+Analytic functions each with a precisely known result are used to characterize a uncertainty-bearing arithmetic. 
 The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
 The statistics of the value errors defines the \emph{tracking ratio}:
 \begin{itemize}
@@ -1281,7 +1281,7 @@ An ideal tracking ratio should be close to 1, regardless of input uncertainty pr
 
 \subsection{Verification Method}
 
-For an analytic function with know result, Gaussian noise or white noise \cite{Statistical_Methods} of specified uncertainty deviation are added to input data, and statistical methods are used to characterize the value errors.
+For an analytic function with know result, Gaussian noise or white noise \cite{Statistical_Methods} of specified uncertainty deviation are added to input data, and statistical methods are used to characterize the corresponding value errors.
 
 Because a uniform distribution between $(-\sqrt{3}, +\sqrt{3})$ has deviation 1, Formula \eqref{eqn: variance momentum UN} is the variance momentum for the white noise, which is similar to Formula \eqref{eqn: momentum factor higher} when $n \rightarrow \infty$.
 \begin{align}
@@ -1395,10 +1395,10 @@ Each measured values fits well with the corresponding calculated value except wh
 \centering
 \includegraphics[height=2.5in]{Pow_Converge.png} 
 \captionof{figure}{
-The individual variance term of $(1 \pm \delta x)^{-2}$ for the different Taylor expansion order $2n$, and different $\delta x$ as shown in the legend. 
+The individual variance term of $(1 \pm \delta x)^{c}$ for the different Taylor expansion order $2n$, different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
 The $x$-axis is Taylor expansion order $2n$ from 1 to 400 in Formula \eqref{eqn: Taylor 1d variance}.
-The $y$-axis is the contribution to $(1 \pm \delta x)^{-2}$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
-It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges.
+The $y$-axis is the contribution to $(1 \pm \delta x)^{c}$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
+It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, $(1 \pm 0.2)^{-1}$ seems diverges, and other cases clearly converge.
 }
 \label{fig: Pow_Converge}
 \end{figure}
@@ -1425,13 +1425,16 @@ Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same period
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
 \end{itemize}
 
-Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$.  
+Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$. 
+The reason why Formula \eqref{eqn: power precision} is not applicable needs further discussion:
 \begin{itemize}
 \item Figure \ref{fig: Pow_Converge} shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges, so that Formula \eqref{eqn: inversion square precision} can not be applied when $P(x) = 0.2$, but it can be applied when $P(x) = 0.195$ which is confirmed by Figure \ref{fig: Pow_Dev}.
-Figure \ref{fig: Pow_Dev} also shows that when $c \geq -1.5$, $(x \pm \delta x)^c$ converges for $P(x) = 0.2$, which is expected from the difference of Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision}.
+Figure \ref{fig: Pow_Dev} also shows that $(x \pm \delta x)^c$ converges better for smaller $c$ for the same $P(x)$, which is expected from the difference of Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision}.
 
-\item Figure \ref{fig: Pow_Histogram} shows the result distribution deviates significantly from Gaussian for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$.
-Figure \ref{fig: Inverse_Square_Distribution} contains the corresponding theoretical distribution of Figure \ref{fig: Pow_Histogram} but with different $x$ scaling, which predicts the shape of the Gaussian distribution in Figure \ref{fig: Pow_Histogram}.
+\item Figure \ref{fig: Pow_Histogram} shows the result distribution deviates significantly from Gaussian for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$, because the distribution has too much skewness \cite{Statistical_Methods}.
+Figure \ref{fig: Pow_Histogram} also shows that when $P(x)$ becomes finer, the result distribution approaches Gaussian more.
+Figure \ref{fig: Inverse_Square_Distribution} predicts the shape of the uncertainty distribution for $(1 \pm 0.195)^{-2}$ in Figure \ref{fig: Pow_Histogram}.
+Similarly, Figure \ref{fig: Square_Root_Distribution} predicts the shape of the uncertainty distribution for $(1 \pm 0.195)^{0.5}$ in Figure \ref{fig: Pow_Histogram}.
 \end{itemize}
 In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} coincides with the result uncertainty distribution deviating from Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
 Weather this observation can be generalized remains a question.

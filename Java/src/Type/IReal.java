@@ -126,7 +126,7 @@ public interface IReal {
 	}
 
 	/*
-	 * To be used to overide IReal.toString()
+	 * To be used to overide Object.toString()
 	 */
 	static String toString( IReal real, String deliminator ) {
 		try {

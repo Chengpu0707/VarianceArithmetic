@@ -3,13 +3,12 @@ package Type;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import org.junit.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.Random;
-
-import org.junit.Test;
 
 import Stats.Histogram;
 import Stats.Stat;
@@ -41,30 +40,39 @@ public class TestTaylor {
 
     @Test
     public void testPowerExpansion() {
-        final double[] sTaylor = Taylor.power(-2);
-        final double[] sDev = new double[] {0.2, 0.199, 0.198, 0.197, 0.196, 0.195, 1.0/6};
-        final double[] sVar = new double[sDev.length];
+        final double[] sExp = new double[] {-2, -1.5, -1, -0.5, 0.5, 1.5};
+        final double[] sDev = new double[] {0.2, 0.195};
+        final double[][] ssVar = new double[sExp.length][];
         try (
             final FileWriter fw = new FileWriter("./PowerExpansion.txt")) {
             fw.write("2n\tMomentum\t");
-            for (int i = 0; i < sDev.length; ++i) {
-                fw.write(String.format("%e\t%.3f Value\t%.3f Variance\t", sDev[i], sDev[i], sDev[i]));
-                sVar[i] = 1;
+            for (int j = 0; j < sExp.length; ++j) {
+                ssVar[j] = new double[sDev.length];
+                for (int i = 0; i < sDev.length; ++i) {
+                    fw.write(String.format("Exp=%.2f, Dev=%.2e\tVariance\tValue\t", 
+                            sExp[j], sDev[i]));
+                    ssVar[j][i] = 1;
+                }
             }
             fw.write("\n");
             for (int n = 2; n < Momentum.maxN*2; n += 2) {
                 fw.write(String.format("%d\t%e\t", n, Momentum.factor(n, BINDING)));
-                for (int i = 0; i < sDev.length; ++i) {
-                    sVar[i] *= sDev[i] * sDev[i];
-                    final double value = Momentum.factor(n, BINDING) * sVar[i];
-                    double variance = 0;
-                    for (int j = 1; j < n; ++j) {
-                        variance += sTaylor[j] * sTaylor[n-j] * Momentum.factor(n, BINDING) * sVar[i];
+                for (int j = 0; j < sExp.length; ++j) {
+                    final double[] sTaylor = Taylor.power(sExp[j]);
+                    for (int i = 0; i < sDev.length; ++i) {
+                        ssVar[j][i] *= sDev[i] * sDev[i];
+                        final double value = Momentum.factor(n, BINDING) * ssVar[j][i];
+                        double variance = 0;
+                        for (int k = 1; k < n; ++k) {
+                            variance += sTaylor[k] * sTaylor[n-k] * 
+                                Momentum.factor(n, BINDING) * ssVar[j][i];
+                        }
+                        for (int k = 2; k < n; k += 2) {
+                            variance -= sTaylor[k] * sTaylor[n-k] * 
+                                Momentum.factor(k, BINDING) * Momentum.factor(n - k, BINDING) * ssVar[j][i];
+                        }
+                        fw.write(String.format("%e\t%e\t%e\t", ssVar[j][i], variance, value));
                     }
-                    for (int j = 2; j < n; j += 2) {
-                        variance -= sTaylor[j] * sTaylor[n-j] * Momentum.factor(j, BINDING) * Momentum.factor(n - j, BINDING) * sVar[i];
-                    }
-                    fw.write(String.format("%e\t%e\t%e\t", sVar[i], value, variance));
                 }
                 fw.write("\n");
             }
