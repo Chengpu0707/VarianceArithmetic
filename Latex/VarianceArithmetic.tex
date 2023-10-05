@@ -997,7 +997,7 @@ When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula
 
 \item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
 $\lambda$ is always slightly smaller than $\sigma$, as expected.
-When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
+%When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
 \end{itemize}
 \begin{align}
 \label{eqn: momentum factor} 
@@ -1400,7 +1400,7 @@ $\delta^2 \sin(x)$ are shown to have the same periodicity as $\sin(x)$.
 The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend. 
 The $x$-axis is the exponent $c$ from $-2$ to $+3$.
 The calculated values are obtained by Formula \eqref{eqn: power precision}, while each measured deviation is obtained by 10000 samples using library \textit{pow} function.
-Each measured values fits well with the corresponding calculated value except when $c < -1.5$ and $\delta x = 0.2$.
+Each measured values fits well with the corresponding calculated value except when $c < -1$ and $\delta x = 0.2$.
 }
 \label{fig: Pow_Dev}
 \end{figure}
@@ -1439,11 +1439,11 @@ Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same period
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
 \end{itemize}
 
-Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$. 
+Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1$. 
 The reason why Formula \eqref{eqn: power precision} is not applicable at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
 \begin{itemize}
 \item 
-Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision}, and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^c$ diverges faster when $c<-1.5$, which is confirmed by Figure \ref{fig: Pow_Converge}, in which $(1 \pm 0.2)^{-2}$ clearly diverges.
+Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision}, and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^c$ diverges faster when $c<-1$, which is confirmed by Figure \ref{fig: Pow_Converge}, in which $(1 \pm 0.2)^{-2}$ clearly diverges.
 
 \item 
 When the deviation is reduced slightly to below the estimated applicable precision threshold $1/\sigma$, Figure \ref{fig: Pow_Converge} shows that Formula \eqref{eqn: inversion square precision} converges for $(1 \pm 0.195)^{-2}$, which is confirmed by Figure \ref{fig: Pow_Dev}.
@@ -1457,7 +1457,7 @@ Figure \ref{fig: Pow_Histogram} shows that the measured probability density dist
 Thus, $(x \pm \delta x)^{-2}$ has an  applicable precision threshold lower than $0.2$.
 To calculate $(1 \pm 0.2)^{-2}$, it is necessary to choose $\sigma < 5$, which results in a larger bounding leakage.
 However, it is not clear the consequence of variance arithmetic with mixed $\sigma$.
-For now, variance arithmetic will not be applied when $P(x)$ is not below the applicable precision threshold.
+For now, variance arithmetic will not be applied when $P(x)$ is not below the applicable precision threshold for $\sigma=5$.
 
 Adding either Gaussian noise or white noise does not change the result variance significantly.
 Figure \ref{fig: Pow_Dev} is indistinguishable for both cases, while Figure \ref{fig: Pow_Histogram} is closer to uniformly distributed for white noise.
