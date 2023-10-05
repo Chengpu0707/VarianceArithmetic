@@ -1635,6 +1635,11 @@ Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$.
 \delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
 \end{align}
 
+One fundamental difference between variance arithmetic and statistical propagation of uncertainty is that variance arithmetic tracks the correlation between uncertainties, while statistical propagation of uncertainty tracks the the correlation between the two values. 
+According to \eqref{eqn: uncertainty level} and \eqref{eqn: uncertainty correlation}, the correlation at the level of uncertainty is much less than the correlation between the two values overall.
+
+
+
 
 
 

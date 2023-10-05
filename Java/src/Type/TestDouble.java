@@ -105,6 +105,15 @@ public class TestDouble {
     }
 
     @Test
+    public void testPowExpNeg2() {
+        assertEquals(1.0, Math.pow( 1, -2 ), 0);
+        assertEquals(0.25, Math.pow( 2, -2 ), 0);
+        assertEquals(4, Math.pow( 0.5, -2 ), 0);
+        assertEquals(1 /1.001/1.001, Math.pow( 1.001, -2 ), 2E-16);
+        assertEquals(1 /0.999/0.999, Math.pow( 0.999, -2 ), 2E-16);
+    }
+
+    @Test
     public void testSqrt() {
         assertEquals(0, Math.sqrt( 0 ), 0);
         assertEquals(2, Math.sqrt( 4 ), 0);

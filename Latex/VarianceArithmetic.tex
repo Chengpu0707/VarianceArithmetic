@@ -88,20 +88,20 @@ When the precision requirements are not satisfied, the bias of the outputs can b
 \section{Introduction}
 \label{sec: introduction}
 
-\subsection{Measurement Precision}
+\subsection{Measurement Uncertainty}
 
-Except for the simplest counting, scientific and engineering measurements never give completely precise results \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
+Except for the simplest counting, scientific and engineering measurements never give completely precise results \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
+In scientific and engineering measurements, the uncertainty of a measurement $x$ usually is characterized by either the sample deviation $\delta x$ or the uncertainty range $\Delta x$ \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
+\begin{itemize}
+\item If $\delta x = 0$ or $\Delta x = 0$, $x$ is a \emph{precise value}.
+
+\item Otherwise, $x$ is an \emph{imprecise value}.
+\end{itemize}
+ 
+$P \equiv \delta x / |x|$ is defined as the \emph{statistical precision} (or simply precision in this paper) of the measurement, in which $x$ is the value, and $\delta x$ is the uncertainty deviation.
+A larger precision means a coarser measurement while a smaller precision mean finer measurement.
 The precision of measured values ranges from an order-of-magnitude estimation of astronomical measurements to $10^{-2}$ to $10^{-4}$ of common measurements to $10^{-14}$ of state-of-art measurements of basic physics constants \cite{Basic_Constants_Measurements}.  
 
-In scientific and engineering measurements, the uncertainty of a measurement $x$ usually is characterized by either the sample deviation $\delta x$ or the uncertainty range $\Delta x$ \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics}.  
-$P \equiv \delta x / |x|$ is defined as the \emph{statistical precision} (or simply precision in this paper) of the measurement, in which $x$ is the value, and $\delta x$ is the uncertainty deviation.
-\begin{itemize}
-\item If the deviation is 0, the value is a \emph{precise value}.
-
-\item Otherwise, it is an \emph{imprecise value}.
-\end{itemize}
-The statistical precision represents the reliable information content of a measurement statistically, with finer statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
- 
 
 
 \subsection{Problem of Conventional Floating-Point Arithmetic}
@@ -185,6 +185,7 @@ In another approach, random interval arithmetic \cite{Random_Interval_Arithmetic
 A third problem is that the results of interval arithmetic may depend strongly on the actual expression of an analytic function $f(x)$.  
 For example, Formula \eqref{eqn: interval depend 1}, Formula \eqref{eqn: interval depend 2} and Formula \eqref{eqn: interval depend 3} are different expressions of the same $f(x)$; however, the correct result is obtained only through Formula \eqref{eqn: interval depend 1}, and uncertainty may be exaggerated in the other two forms, e.g., by 67-fold and 33-fold at input range [0.49, 0.51] using Formula \eqref{eqn: interval depend 2} and Formula \eqref{eqn: interval depend 3}, respectively.  
 This is called the dependence problem of interval arithmetic \cite{Interval_Arithmetic}.  
+There is no known generic way to apply Taylor expansion in interval arithmetic, so that the dependence problem is an intrinsic problem for interval arithmetic.
 \begin{align}
 \label{eqn: interval depend 1} & 
 f(x) = (x - 1/2)^{2} - 1/4; \\
@@ -247,21 +248,43 @@ As show later in this paper, the variance arithmetic achieved significance arith
 
 
 
-\subsection{Previous Version of Variance Arithmetic}
-
 \subsection{ An Overview of This Paper}
 
-In this paper, a new floating-point arithmetic called \emph{variance arithmetic} \cite{Prev_Precision_Arithmetic} is developed to track uncertainty during floating-point calculations, as described in Section \ref{sec: variance arithmetic}.  Generic standards and systematic methods for validating uncertainty-bearing arithmetics are discussed in Section \ref{sec: validation}.  Variance arithmetic is compared with other uncertainty-bearing arithmetics in Section \ref{sec: FFT} to Section \ref{sec: integration}.  A brief discussion is provided in Section \ref{sec: conclusion and discussion}.
+In this paper, a new floating-point arithmetic called \emph{variance arithmetic} is developed to track uncertainty during floating-point calculations, as described in Section \ref{sec: variance arithmetic}.  
+Generic standards and systematic methods for validating uncertainty-bearing arithmetics are discussed in Section \ref{sec: validation}.  
+Variance arithmetic is compared with other uncertainty-bearing arithmetics in Section \ref{sec: FFT} to Section \ref{sec: integration}.  A brief discussion is provided in Section \ref{sec: conclusion and discussion}.
+
+Variance arithmetic is an improvement of the previously published precision arithmetic by the same author \cite{Prev_Precision_Arithmetic}.
+This paper is comparable to its processor \cite{Prev_Precision_Arithmetic}:
+\begin{itemize}
+\item Section \ref{sec: introduction} remains almost unchanged.
+
+\item The basic assumptions in Section \ref{sec: variance arithmetic} are identical.
+The variance arithmetic improves over its processor in the following areas:
+\begin{itemize}
+\item Unlike its processor, the variance arithmetic no longer has the dependency problem.
+Instead, the variance arithmetic can trace dependency between uncertainties through the identities of variables.
+
+\item The digital representation gives a defined behavior of bits calculated inside uncertainty. 
+\end{itemize}
+
+\item Section \ref{sec: validation} remains largely unchanged, except it contains the last subsection from  its processor.
+
+\item Section \ref{sec: Math Library} is new, to provide a statistical test of variance arithmetic in using the common math library functions.
+
+\item Section \ref{sec: FFT} is redone using the new implementation of variance arithmetic.
+
+\end{itemize}
 
 
 \clearpage
 \section{The Variance Arithmetic}
-\label{sec: Variance arithmetic}
+\label{sec: variance arithmetic}
 
 
 \subsection{Foundation for Variance Arithmetic}
 
-The variance arithmetic calculates the uncertainty variance around each output value.
+The variance arithmetic calculates the uncertainty variance around each output value \cite{Prev_Precision_Arithmetic}.
 It is based on:
 \begin{itemize}
 \item the round up rule,
@@ -269,22 +292,30 @@ It is based on:
 \item the uncorrelated uncertainty assumption.
 \end{itemize}  
 
-The variance arithmetic uses \emph{the round up rule} to avoid the rounding error accumulation in the conventional floating-point representation.
+The variance arithmetic uses \emph{the round up rule} \cite{Prev_Precision_Arithmetic} to avoid the rounding error accumulation in the conventional floating-point representation.
 
-For an imprecise value $x$ with statistical deviation $\delta x$ of its uncertainty, variance arithmetic regards the \emph{statistical precision} $P(x) = \delta x/|x|$ of as the information content of the measurement $x \pm \delta x$.
-Variance arithmetic is based on the \emph{precision scaling principle}: When a imprecise is multiplied by a precise value, the result precision equals the precision of the imprecise value.
+The statistical precision $P(x) = \delta x/|x|$ represents the reliable information content of a measurement statistically, with finer or smaller statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
+$P(x)$ has an upper bound of $1$.
+When $1 \leq P(x)$:
+\begin{itemize}
+\item Either $\delta x$ is too coarse to determine the actual value of $x$, 
 
-The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
-The correlated parts common to different measurements are regarded as signals, which can either be desired or unwanted.
-As shown later in this paper, this assumption can be turned into a realistic and simple statistical requirement or test between two inputs, e.g, even if the two inputs are highly correlated to each other, if they have fine enough precision, their uncertainty can be regarded as uncorrelated of each other.
-The uncorrelated uncertainty assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
+\item Or $x \pm \delta x$ is a measurement of $0$.
+\end{itemize}
+Variance arithmetic is based on the \emph{precision scaling principle} \cite{Prev_Precision_Arithmetic}: When a imprecise is multiplied by a precise value, the result precision equals the precision of the imprecise value.
+
+The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
+This assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
+It is much weaker than requiring any two different inputs to be independent of each other.
+It can be turned into a realistic and simple statistical requirement or test between two inputs.
 
 The uncorrelated uncertainty assumption only applies to imprecise inputs.
-When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties.
+When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties through their associated variables, such as $x \pm \delta x$ and $y \pm \delta y$.
+Variance arithmetic has no dependency problem for analytic questions, which is different from the claim of its predecessor \cite{Prev_Precision_Arithmetic}.
 
 
 
-\subsection{The Uncorrelated Uncertainty Assumption}
+\subsection{The Uncorrelated Uncertainty Assumption \cite{Prev_Precision_Arithmetic}}
 
 \begin{figure}[p]
 \centering
@@ -308,21 +339,22 @@ When there is a good estimation of the sources of uncertainty, the uncorrelated 
 This criterion is necessary to ascertain repeated measurements of the same signal.   
 Otherwise, the uncorrelated uncertainty assumption can be judged by the correlation and the respectively precision of two measurements.  
 
+The correlated parts common to different measurements are regarded as signals, which can either be desired or unwanted.
 Let $X$, $Y$, and $Z$ denote three mutually independent random variables \cite{Probability_Statistics} with variance $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
 Let $\alpha$ denote a constant.  
 Let $Cov()$ denote the covariance function.  
 Let $\gamma$ denote the correlation between $(X + Y)$ and $(\alpha X + Z)$. And let:
 \begin{align}
+\label{eqn: uncertainty ratio}
 & \eta _{1} ^{2} \equiv \frac{V(Y)}{V(X)}; \eqspace
- \eta _{2} ^{2} \equiv \frac{V(Z)}{V(\alpha X)} =\frac{V(Z)}{\alpha ^{2} V(X)}; \\
-\label{eqn: correlation}
+ \eta _{2} ^{2} \equiv \frac{V(Z)}{V(\alpha X)} =\frac{V(Z)}{\alpha ^{2} V(X)};  \\
+\label{eqn: uncertainty correlation}
 & \gamma =\frac{Cov(X+Y,\alpha X+Z)}{\sqrt{V(X+Y)} \sqrt{V(\alpha X+Z)}}  =\frac{\alpha /|\alpha |}{\sqrt{1+\eta _{1} ^{2} } \sqrt{1+\eta _{2} ^{2}}} \equiv \frac{\alpha /|\alpha |}{1+\eta ^{2}};
 \end{align}
+Formula \eqref{eqn: uncertainty correlation} gives the correlation $\gamma$ between two random variables, each of which contains a completely uncorrelated part and a completely correlated part $X$, with $\eta$ being the average ratio between these two parts.  
+Formula \eqref{eqn: uncertainty correlation} can also be interpreted reversely: if two random variables are correlated by $\gamma$, each of them can be viewed hypothetically as containing a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.
 
-Formula \eqref{eqn: correlation} gives the correlation $\gamma$ between two random variables, each of which contains a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.  
-Formula \eqref{eqn: correlation} can also be interpreted reversely: if two random variables are correlated by $\gamma$, each of them can be viewed as containing a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.
-
-One special application of Formula \eqref{eqn: correlation} is the correlation between a measured signal and its true signal, in which noise is the uncorrelated part between the two.  
+One special application of Formula \eqref{eqn: uncertainty correlation} is the correlation between a measured signal and its true signal, in which noise is the uncorrelated part between the two.  
 Figure \ref{fig: Signal_and_Noise} shows the effect of noise on the most significant two bits of a 4-bit measured signal when $\eta=1/4$.  
 Its top chart shows a triangular waveform between 0 and 16 as a black line, and a white noise between -2 and +2, using the grey area.  
 The measured signal is the sum of the triangle waveform and the noise.  
@@ -331,7 +363,7 @@ The 3rd bit is affected by the noise during its transition between 0 and 1.
 For example, when the signal is slightly below 8, only a small positive noise can turn the 3rd digit from 0 to 1.  
 The bottom chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 2nd digit of the signal and the measurement as a black line and a grey line, respectively.  
 Figure \ref{fig: Signal_and_Noise} clearly shows that the correlation between the measurement and the true signal is less at the 2nd digit than at the 3rd digit.  
-Quantitatively, according to Formula \eqref{eqn: correlation}:
+Quantitatively, according to Formula \eqref{eqn: uncertainty correlation}:
 
 \begin{enumerate}
 \item  The overall measurement is 99.2\% correlated to the signal with $\eta=1/8$;
@@ -342,9 +374,9 @@ Quantitatively, according to Formula \eqref{eqn: correlation}:
 \end{enumerate}
 The above conclusion agrees with the common experiences that, below the noise level of measured signals, noises rather than true signals dominate each digit.  
 
-Similarly, while the correlated portion between two values has exactly the same value at each bit of the two values, the ratio of the uncorrelated portion to the correlated portion increases by 2-fold for each bit down from MSB of the two values, regardless of the nature of the uncorrelated portion.  
-Quantitatively, let $P$ denote the larger precision (which means coarser precision) of the two values, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at level of uncertainty; then $\eta_{P}$ increases with decreased $P$ according to Formula \eqref{eqn: uncertainty level}. 
-According to Formula \eqref{eqn: correlation}, if two significant values are overall correlated with $\gamma$, at the level of uncertainty the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: uncertainty correlation}.
+Similarly, while the correlated portion between two values has exactly the same value at each bit of the two values, the ratio of the uncorrelated portion to the correlated portion increases by 2-fold for each bit down from MSB of the two values. 
+Quantitatively, let $P$ denote the precision of an imprecise value, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at level of uncertainty; then $\eta_{P}$ increases with decreased $P$ according to Formula \eqref{eqn: uncertainty level}. 
+According to Formula \eqref{eqn: uncertainty correlation}, if two significant values are overall correlated with $\gamma$, at the level of uncertainty the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: uncertainty correlation}.
 \begin{align}
 \label{eqn: uncertainty level}
 & \eta_{P} = \frac{\eta}{P}, \eqspace P < 1; \\
@@ -354,29 +386,28 @@ According to Formula \eqref{eqn: correlation}, if two significant values are ove
 
 Figure \ref{fig: Independent_Uncertainty_Assumption} plots the relation of $\gamma$ vs. $P$ for each given $\gamma_{P}$ in Formula \eqref{eqn: uncertainty correlation}.  
 When $\gamma_{P}$ is less than a predefined maximal threshold (e.g., 2\%, 5\% or 10\%), the two values can be deemed virtually uncorrelated of each other at the level of uncertainty.  
-If the two values are independent of each other at their uncertainty levels, their uncertainties are uncorrelated of each other.  
+%If the two values are independent of each other at their uncertainty levels, their uncertainties are uncorrelated of each other.  
 Thus for each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of variance arithmetic holds.  
 The maximal allowed correlation is a function of the larger precision of the two values according to Formula \eqref{eqn: uncertainty correlation}.  
 Figure \ref{fig: Independent_Uncertainty_Assumption} shows that for two precisely measured values, their correlation $\gamma$ is allowed to be quite high.  
-To be acceptable in variance arithmetic, each of the low-resolution values should contain enough noise in its uncertainty, so that they do not have much correction through the systematic error \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.  
 Thus, the uncertainty assumption uncertainty assumption has much weaker statistical requirement than the assumption for independence arithmetic, which requires the two values to be independent of each other.
 
-It is tempting to add noise to otherwise unqualified values to make their uncertainties uncertainty assumption of each other.  
-As an extreme case of this approach, if two values are constructed by adding noise to the same signal, they are 50\% correlated at the uncertainty level so that they will not satisfy the uncorrelated uncertainty assumption\footnote{The 50\% curve in Figure \ref{fig: Independent_Uncertainty_Assumption} thus defines the maximal possible correlations between any two measured signals. 
-This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sense because the measurable correlation between two measurements should be limited by the precision of their measurements.}.
-
-One fundamental difference between variance arithmetic and statistical propagation of uncertainty is that variance arithmetic tracks the correlation between uncertainties, while statistical propagation of uncertainty tracks the the correlation between the two values. 
-According to \eqref{eqn: uncertainty level} and \eqref{eqn: correlation}, the correlation at the level of uncertainty is much less than the correlation between the two values overall.
-
-
+It is tempting to add noise to otherwise unqualified values to make them satisfy the uncertainties uncertainty assumption.  
+As an extreme case of this approach, if two values are constructed by adding noise to the same signal, they are 50\% correlated at the uncertainty level so that they will not satisfy the uncorrelated uncertainty assumption, which defines the upper bound for $\gamma_{P}$. 
+\footnote{
+The 50\% curve in Figure \ref{fig: Independent_Uncertainty_Assumption} thus defines the maximal possible correlations between any two measured signals. 
+This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sense because the measurable correlation between two measurements should be limited by the precision of their measurements..
+}
 
 
-\subsection{The Round Up Rule}
+
+
+\subsection{The Round Up Rule \cite{Prev_Precision_Arithmetic}}
 
 The variance arithmetic uses \emph{the round up rule} to avoid the rounding error accumulation in the conventional floating-point representation.
 Let the content of a floating-point number be denoted as $S\; 2^E$, in which $S$ is the significand \footnote{While ``significand'' is the official word \cite{Floating_Point_Standard} to describe ``The component of a binary floating-point number that consists of an explicit or implicit leading bit to the left of its implied binary point and a fraction field to the right'', ``mantissa'' is often unofficially used instead.} and $E$ is the exponent of 2 of the floating-point number.  
 In addition, the variance representation contains a \emph{carry sign} $\sim$  to indicate the sign of its rounding error.
-When $E$ needs to be increased, $S$ is \emph{round up} is needed, which proceeds according to the following round up rule:
+When $E$ needs to be increased by 1, $S$ is \emph{round up} once, which proceeds according to the following round up rule, to limit the rounding error to $(-1/2, +1/2)$ of LSB (Least Significant Bit) of the significand:
 \begin{itemize}
 \item A value of $(2S) \sim 2^E$ is rounded up to $S \sim 2^{E+1}$.  
 
@@ -385,25 +416,31 @@ When $E$ needs to be increased, $S$ is \emph{round up} is needed, which proceeds
 \item A value of $(2S+1)\!-\!2^E$ is rounded up to $S\!+\!2^{E+1}$.
 
 \item If $\sim$ is unknown, it is initiated as $-$, so that 1 is rounded up to 0.
+Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process.
 \end{itemize}
 
-If $S$ is even, the rounding error is reduce by half after rounding up; Otherwise the new half bit rounding error is canceled by the existing rounding error.
-Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process. 
-Thus, the rounding error is limited to $(-1/2, +1/2)$ of the LSB of $S$.
-
-The carry sign $\sim$ bit in variance arithmetic has the same functionality as the sticky bit or guard bits in conventional floating-point calculations  to reduce rounding errors.
+The carry sign $\sim$ bit in variance arithmetic has the same functionality as the sticky bit or guard bits in conventional floating-point calculations \cite{Floating_Point_Arithmetic} to reduce rounding errors.
 Numerically, using the sticky bit and guard bits, the accuracy of the conventional floating-point calculation on a modern computer is pretty high, e.g., for $\sqrt{x^2}$ and $(\sqrt{x})^2$, the error is limited to the least significant 2 bits.
 It is the scenario demonstrated by Formula \eqref{eqn: float num calc} that is the major problem, when the rounding errors are saved as part of the data.
-Thus, unlike the sticky bit and the guard bits, instead of being an extra bit, the carry sign $\sim$ bit is part of the representation.
-For example, in addition, the carry sign bits of both operand determine how to round the result significand. 
+Thus, the carry sign $\sim$ bit is part of the variance arithmetic representation.
+%In other calculation, the carry sign bits of both operand determine how to round the result significand. 
 
 
-\subsection{Probability Distribution of Rounding Errors}
+\subsection{Probability Distribution of Rounding Errors \cite{Prev_Precision_Arithmetic}}
 
-Another advantage of using one simple carry sign bit instead of the sticky bit and guard bits is that the rounding error can be demonstrated as nearly uniformly distributed using the round-up rules of variance arithmetic.
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Arithmetic}. 
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.
+Empirically, the rounding error are uniformly distributed within $(-1/2, +1/2)$ of LSB of the significand, in which $1/2$ is the \emph{bounding range} $R$ of the rounding error.
+Let $P_R(x)$ be the distribution density function for the rounding error with a bounding range of $R$.
+\begin{equation}
+\label{eqn: rounding error 1/2 distribution}
+P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2; 
+\end{equation}
+The variance for $P_{1/2}(x)$ is $1/12$.
 
 
-\subsection{Result Uncertainty For Addition and Subtraction}
+
+\subsection{Result Uncertainty For Addition and Subtraction  \cite{Prev_Precision_Arithmetic}}
 
 \begin{figure}[p]
 \centering
@@ -420,7 +457,7 @@ $P_{2}(x)$ is already close to the corresponding Gaussian distribution with the 
 \centering
 \includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
 \captionof{figure}{
-The result uncertainty distribution density function $P_8/2$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
+The result uncertainty distribution density function $P_{8/2}$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
 When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
 }
 \label{fig: Prec_RndByDev_Dist}
@@ -428,24 +465,13 @@ When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
 
 
 
-The variance arithmetic also tracks the rounding error bounding range $R$ together with the significand $S$. 
 
-The results of addition and subtraction are:
-\begin{equation}
-\label{eqn: rounding error +-}
-S_1 \tilt_1 R_1 \pm S_1 \tilt_2 R_2 = (S_{1} \pm S_{2}) \tilt (R_1 + R_2);
-\end{equation}
-Let $P_R(x)$ be the bounding distribution density function.
 The uncorrelated uncertainty assumption suggests that the result bounding distribution density function of addition or subtraction is the convolution of the input density functions \cite{Probability_Statistics}.  
-Starting from rounding error distribution:
-\begin{align}
-\label{eqn: rounding error 1/2 distribution}
-& P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2;  \\
+\begin{equation}
 \label{eqn:rounding error n/2 distribution}
-& P_{\frac{n}{2}}(x) \equiv \int _{-\infty}^{+\infty}P_{\frac{1}{2}}(y)P_{\frac{n-1}{2}}(x-y)dy=\int _{-1/2}^{+1/2}P_{\frac{n-1}{2}}(x-y) dy,\eqspace n=2,3,4\dots;
-\end{align}
-
-Figure \ref{fig: Prec_Add_Err_Dist} shows the probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
+P_{\frac{n}{2}}(x) \equiv \int _{-\infty}^{+\infty}P_{\frac{1}{2}}(y)P_{\frac{n-1}{2}}(x-y)dy=\int _{-1/2}^{+1/2}P_{\frac{n-1}{2}}(x-y) dy,\eqspace n=2,3,4\dots;
+\end{equation}
+Figure \ref{fig: Prec_Add_Err_Dist} shows the probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}.  
 $P_{2}(x)$ is already close to the corresponding Gaussian distribution with the same mean and deviation, which is plotted in dash line of the same color.
 
 The Lyapunov form of the central limit theorem \cite{Probability_Statistics} states that if $X_i$ is a random variable with mean $\mu_i$ and variance $V_i$ for each $i$ among a series of $n$ mutually independent random variables, then with increased $n$, the sum $\sum\limits_{i}^{n} X_i$ converges in distribution to the Gaussian distribution with mean $\sum\limits_{i}^{n} \mu_i$ and variance $\sum\limits_{i}^{n} V_i$. Applying the central limit theorem to the addition and subtraction: 
@@ -458,15 +484,30 @@ V = n/12 = R/6;
 
 \item Figure \ref{fig: Prec_Add_Err_Dist} shows that such convergence to Gaussian distribution is very quick. 
 
-\item The stable rounding error distribution is \emph{independent} of any initial rounding error distribution. 
+\item The stable rounding error distribution is independent of any initial rounding error distribution. 
 \end{itemize} 
 
 Also due to the center-limit theorem, uncertainty in general is expected to be Gaussian distributed \cite{Statistical_Methods} \cite{Probability_Statistics}. 
 The rounding error distribution is extended to describe uncertainty distribution in general.
 
+For simplicity, define operator $\delta^2 f(x) \equiv (\delta f(x))^2$. 
+Formula \eqref{eqn: addition and subtraction} give the result variance of addition and subtraction surrounding $x \pm y$.
+Formula \eqref{eqn: central limit theorem} gives the probability density function for $x \pm \delta x$ in general, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}.
+Formula \eqref{eqn: central limit theorem} can be normalized as Formula \eqref{eqn: normalized distribution}.
+\begin{align}
+\label{eqn: addition and subtraction}
+\delta^2 (x \pm y) &= \delta^2 x + \delta^2 y; \\
+\label{eqn: central limit theorem}
+\rho(\tilde{x}, x, \delta x) & = \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x}); \\
+\label{eqn: normalized distribution}
+\tilde{z} \equiv \frac{\tilde{x} - x}{\delta x}:\eqspace & \rho(\tilde{x}, x, \delta x) d \tilde{x} = N(\tilde{z}) d \tilde{z};
+\end{align}
+
+Formula \eqref{eqn: addition and subtraction} is different from Formula \eqref{eqn: stat +} and \eqref{eqn: stat -}, because in variance arithmetic, the correlation between $x$ and $y$ does not contribute to the result distribution as far as the uncorrelated uncertainty assumption is satisfied.
+It may show that Formula \eqref{eqn: stat +} and \eqref{eqn: stat -} are wrong statistically for the result uncertainty.
 
 
-\subsection{The Precision Scaling Principle}
+\subsection{The Precision Scaling Principle  \cite{Prev_Precision_Arithmetic}}
 
 Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
 To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
@@ -485,34 +526,12 @@ x =&\; S \; 2^{E};\\
 \end{align}
 
 However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
-When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
+When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$ in distribution, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
 The precision scaling principle chooses to scarify $R$ in favor of $V$.
-
-This choice of $V$ introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
+This choice introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
 To reduce the representation bounding leakage to virtually 0, $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation.
 
 
-
-
-
-\subsection{Addition and Subtraction}
-
-
-For simplicity, define $\delta^2 f(x) \equiv (\delta f(x))^2$. 
-Formula \eqref{eqn: addition and subtraction} give the result variance of addition and subtraction surrounding $x \pm y$ when the uncorrelated uncertainty assumption is satisfied:
-\begin{equation}
-\label{eqn: addition and subtraction}
-\delta^2 (x \pm y) = \delta^2 x + \delta^2 y;
-\end{equation}
-
-According to the central limit theorem \cite{Probability_Statistics}, addition and subtraction make $x \pm \delta x$ Gaussian distributed, with Formula \eqref{eqn: central limit theorem} as the probability density function, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}.
-Formula \eqref{eqn: central limit theorem} can be normalized as Formula \eqref{eqn: normalized distribution}.
-\begin{align}
-\label{eqn: central limit theorem}
-& \rho(\tilde{x}, x, \delta x) \equiv \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x}); \\
-\label{eqn: normalized distribution}
-& \tilde{z} \equiv \frac{\tilde{x} - x}{\delta x}:\eqspace \rho(\tilde{x}, x, \delta x) d \tilde{x} = N(\tilde{z}) d \tilde{z};
-\end{align}
 
 
 
@@ -575,7 +594,7 @@ Thus,
 Two imprecise values can be compared statistically using their difference \cite{Statistical_Methods}.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the probability for them to be not equal is $\xi(\frac{0.002}{0.00224}) = 81.4\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 If the threshold probability of not equality is $80\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
-Using this method, even if the value difference is zero, the two imprecise values still have $50\%$ probability of not equal to each other, so that only the threshold probability of not equality can be set.
+%Using this method, even if the value difference is zero, the two imprecise values still have $50\%$ probability of not equal to each other, so that only the threshold probability of not equality can be set.
 
 
 
@@ -598,9 +617,9 @@ Using this method, even if the value difference is zero, the two imprecise value
 But the range needs to be centered at $|x||y|$.
 \fi
 
-To obey the precision scaling principle, the he result of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$.
+To obey the precision scaling principle, the result of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$.
 The result of multiplying $0 \pm \delta x$ by $0 \pm \delta y$ is a normal production distribution \cite{Probability_Statistics}, which is centered at 0 with variance $(\delta x)^2 (\delta y)^2$.
-The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication} and \eqref{eqn: multiplication precision} for the result variance and precision surrounding the result $xy$, respectively.
+The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication}  \cite{Prev_Precision_Arithmetic} and \eqref{eqn: multiplication precision}  \cite{Prev_Precision_Arithmetic} for the result variance and precision surrounding the result $xy$, respectively.
 \begin{align}
 \label{eqn: multiplication decomposed}
 & (x \pm \delta x) \times (y \pm \delta y) = (x + (0 \pm \delta x)) \times (y + (0 \pm \delta y)); \\
@@ -610,7 +629,7 @@ The general multiplication can be decomposed as Formula \eqref{eqn: multiplicati
 xy \neq 0: P(x y)^2 &= P(x)^2 + P(y)^2 + P(x)^2 P(y)^2;
 \end{align}
 
-Formula \eqref{eqn: multiplication precision} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
+Formula \eqref{eqn: multiplication} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
 Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for the interval arithmetic multiplication.  
 The result of Formula \eqref{eqn: float num calc} calculated by variance arithmetic is $2 \pm 2\sqrt{5}$.
 It is $2 \pm 9$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
@@ -712,11 +731,10 @@ When $f(x)=x^c$:
 \centering
 \includegraphics[height=2.5in]{Square_Root_Distribution.png} 
 \captionof{figure}{
-The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
-The $y$-axis is scaled as $\tilde{y}^3$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
-The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+The probability density function for $\tilde{y} = \sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
+The $x$-axis is scaled as $\tilde{y}^2$.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Gaussian distribution $\varrho(\tilde{x})$ of the same mode and the same deviation in the dash line of the same color.
+The legend for the Gaussian distribution shows the value of Gaussian difference in percentage.
 }
 \label{fig: Square_Root_Distribution}
 \end{figure}
@@ -727,9 +745,8 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
-Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
-The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Gaussian distribution $\varrho(\tilde{x})$ of the same mode and the same deviation in the dash line of the same color.
+The legend for the Gaussian distribution shows the value of Gaussian difference in percentage.
 }
 \label{fig: Cubic_Root_Distribution}
 \end{figure}
@@ -740,9 +757,8 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
-Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
-The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+Some probability density function $\rho(\tilde{x})$ in solid line is compared with a Gaussian distribution $\varrho(\tilde{x})$ of the same mode and the same deviation in the dash line of the same color.
+The legend for the Gaussian distribution shows the value of Gaussian difference in percentage.
 }
 \label{fig: Square_Distribution}
 \end{figure}
@@ -753,9 +769,8 @@ The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated 
 \captionof{figure}{
 The probability density function for $1/(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $1/\sqrt{\tilde{y}}$.
-The probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $\varrho(\tilde{x})$ of the same mode in the dash line of the same color.
-The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
+The probability density function $\rho(\tilde{x})$ in solid line is compared with a Gaussian distribution $\varrho(\tilde{x})$ of the same mode and the same deviation in the dash line of the same color.
+The legend for the Gaussian distribution shows the value of Gaussian difference in percentage.
 }
 \label{fig: Inverse_Square_Distribution}
 \end{figure}
@@ -788,6 +803,9 @@ Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: distributi
 \tilde{y} = \tilde{x}^c: &\eqspace (\tilde{y}_m)^{1/c} = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2};
 \end{align}
 
+The \emph{Gaussian difference} of $\rho(f^{-1}(\tilde{y}), x, \delta x)$ is calculated as $\int_{-\infty}^{+\infty} |\rho(f^{-1}(\tilde{y}), x, \delta x) - \varrho(\tilde{y})| d \tilde{y}$ in which $\varrho(\tilde{y})$ is the Gaussian distribution of the same mode and the same deviation $\delta x$.
+A Gaussian difference of 0 means a perfect Gaussian.
+
 Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$.
 A \emph{zero} of the uncertainty distribution happens when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, y, \delta y) = 0$, while a \emph{pole} happens when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, y, \delta y) = \infty$.
 Zeros and poles have different impacts on the properties of of the uncertainty distributions.
@@ -797,13 +815,9 @@ From another prospective, a linear transformation generates neither zero nor pol
 
 Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
-The mode of $\rho(\tilde{x})$ is calculated by Formula \eqref{eqn: power mode}.
-The difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$ is calculated as $\int_{-\infty}^{+\infty} |\rho(\tilde{x}) - \varrho(\tilde{x})| d \tilde{x}$ which is shown as the percentage value of the legend for the normal distribution.
-%All distributions looks close to Gaussian except $\sqrt{0 \pm 1}$.
 
 Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which also has a zero at $x=0$.
-Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ has two equal peaks instead of one larger peak on the positive side only.
-%Quantitatively, the uncertainty distributions for $\sqrt[3]{5 \pm 1}$ is as close to Gaussian as that of $\sqrt{3 \pm 1}$.
+Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ has two equal peaks instead of one larger peak on the positive side only for $\sqrt{x \pm 1}$.
 
 Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a pole at $x=0$.
 The uncertainty distributions for $(0 \pm 1)^2$ and $(1 \pm 1)^2$ deviate significantly from Gaussian, while the uncertainty distributions for $(4 \pm 1)^2$ and $(5 \pm 1)^2$ look Gaussian but each still with an infinitive but narrower peak at $\tilde{y} = 0$.
@@ -813,8 +827,7 @@ $(0 \pm 1)^2$ is actually the $\chi^2$ distribution \cite{Statistical_Methods}.
 Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 Figure \ref{fig: Inverse_Square_Distribution} looks more like Figure \ref{fig: Square_Root_Distribution} than Figure \ref{fig: Square_Distribution}, showing that pole or zero determines the properties of uncertainty distributions.
 
-In all the figures, the percentage values of difference agree well with the visual difference between $\rho(\tilde{x})$ and $\varrho(\tilde{x})$.
-The differences become more and more Gaussian with the increasing $x$ for all cases.
+In all the figures, $\rho(f^{-1}(\tilde{y}), x, \delta x)$ becomes more and more Gaussian-like with decreasing $p(x)$ when the mode of the distributions is farther away from either zero or pole.
  
 
 
@@ -954,10 +967,10 @@ P(1/x^2)^2 &\simeq 4 P(x)^2 + (25 * 3 - 9) P(x)^4 + (70 * 15 - 90) P(x)^6 + (147
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
-Using Taylor expansion is one way to get the simple statistics.
+Using Taylor expansion is one way to get the simple statistics when the result uncertainty distribution is nearly Gaussian.
 
 An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
-Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
+Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} \cite{Prev_Precision_Arithmetic} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
 \begin{align}
 \label{eqn: Taylor 1d} 
 \tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
@@ -972,7 +985,7 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 \end{align}
 Formula \eqref{eqn: Taylor 1d mean} define $\hat{b} f(x)$ for calculation convenience, which captures the behavior of $f(x)$ at the tails of the result uncertainty distribution.
 In contrast, Formula \eqref{eqn: distribution mode} captures the behavior of $f(x)$ at the mode of the result uncertainty distribution.
-Both captures the effect of the input uncertainty to $f(x)$.
+Both captures the effect of the input uncertainty distribution to $f(x)$.
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
@@ -995,6 +1008,12 @@ When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ betwe
 &\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq 2 N(\sigma) \frac{\sigma^{2n+1}}{2n+1};
 \end{align}
 
+The property of $\zeta(2n)$ when $\sigma^2 \ll 2n$ is not sensitive to the underlying uncertainty distribution.  If the normal distribution $N(\tilde{z)}$ in Formula \eqref{eqn: variance momentum} is replaced by a uniform distribution between $[-\sigma, +\sigma]$,  Formula \eqref{eqn: variance momentum UN} is similar to Formula \eqref{eqn: momentum factor higher}:
+\begin{align}
+\label{eqn: variance momentum UN}
+\zeta(n) &\equiv \int_{-\sigma}^{+\sigma} \frac{1}{2 \sigma} \tilde{z}^{2n} d \tilde{z} = 2 \frac{1}{2 \sigma} \frac{{\sigma}^{2n+1}}{2n + 1}; 
+\end{align}
+
 The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
 $\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisions_Physical_Measurements}.
@@ -1002,6 +1021,8 @@ $\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisi
 \label{eqn: bounding leakage}
 \epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma);
 \end{equation}
+
+When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \leq 16$, which makes Formula \eqref{eqn: Taylor 1d variance} quite insensitive to the actual value of $\sigma$.
 
 Thus, $\sigma = 5$ in variance arithmetic.
 
@@ -1065,10 +1086,7 @@ Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
 
-The independent uncertainty assumption is vital for variance arithmetic.
-For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
-
-Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance}.
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
 \begin{align}
 \label{eqn: Taylor 2d mean}
 \overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
@@ -1083,6 +1101,9 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
+The independent uncertainty assumption is vital for variance arithmetic.
+For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
+By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
 
 
 \subsection{Dependency Tracing}
@@ -1199,7 +1220,7 @@ Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a
     \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \nonumber \\
 &\eqspace - \left( \overline{f} g + f \overline{g} + \hat{c} (f g) \right)^2;
 \end{align} 
-Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
+%Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
 
 The result variance in Formula \eqref{eqn: sum variance} or \eqref{eqn: prod variance} becomes zero for a constant expression, which is demonstrated by Formula \eqref{eqn: sum dependency} and \eqref{eqn: prod dependency}.
 \begin{align}
@@ -1223,7 +1244,7 @@ f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
 \delta^2 f^{-1}(f(x)) &= (\delta x)^2;
 \end{align}
 
-
+Due to dependency tracing for analytic questions, variance arithmetic does not suffer from the dependency problem \cite{Interval_Arithmetic} which has plague interval arithmetic.
 
 
 \subsection{A Variance Representation}
@@ -1234,7 +1255,7 @@ To be compatible with the conventional 64-bit floating-point standard \cite{Floa
 
 \item The bit counts for $S$ and $V$ are 53 respectively.
 
-\item The representation needs 1 bit for sign, and 2 bit for the carry error sign for $S$ and $V$ respectively.
+\item The representation needs 1 bit for sign, 1 bit for the carry error sign for $S$, and 1 bit for the carry error sign for $V$, respectively.
 
 \item The representation stores the bounding leakage $\epsilon$ as an 8-bit floating-point value, with 4-bit for the exponent.
 The maximal value for $\epsilon$ is $15\;2^{15-19} = 15/16$, while the minimal non-zero value for $\epsilon$ is $2^{-19} = 1.907 10^{-6}$ which is equivalent to $\sigma=4.763$.
@@ -1266,7 +1287,7 @@ Thus, variance arithmetic is a modern implementation of significance arithmetic 
 \label{sec: validation}
 
 
-\subsection{Verification Standards}
+\subsection{Verification Standards \cite{Prev_Precision_Arithmetic}}
 
 Analytic functions each with a precisely known result are used to characterize a uncertainty-bearing arithmetic. 
 The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
@@ -1279,19 +1300,12 @@ The statistics of the value errors defines the \emph{tracking ratio}:
 An ideal tracking ratio should be close to 1, regardless of input uncertainty precision, amount of calculation, and the nature of the calculation.
 
 
-\subsection{Verification Method}
+\subsection{Verification Method \cite{Prev_Precision_Arithmetic}}
 
 For an analytic function with know result, Gaussian noise or white noise \cite{Statistical_Methods} of specified uncertainty deviation are added to input data, and statistical methods are used to characterize the corresponding value errors.
 
-Because a uniform distribution between $(-\sqrt{3}, +\sqrt{3})$ has deviation 1, Formula \eqref{eqn: variance momentum UN} is the variance momentum for the white noise, which is similar to Formula \eqref{eqn: momentum factor higher} when $n \rightarrow \infty$.
-\begin{align}
-\label{eqn: variance momentum UN}
-\zeta(n) &\equiv \int_{-\sqrt{3}}^{+\sqrt{3}} \frac{1}{2 \sqrt{3}} \tilde{z}^n d \tilde{z} = 
-\begin{cases} \zeta(2n+1) = 0; \\ \zeta(2n) = \frac{3^{n}}{2n + 1}; \end{cases}
-\end{align}
 
-
-\subsection{Types of Uncertainties}
+\subsection{Types of Uncertainties \cite{Prev_Precision_Arithmetic}}
 
 There are four sources of result uncertainty for a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
 \begin{itemize}
@@ -1314,7 +1328,7 @@ For example, Section \ref{sec: FFT} demonstrates that the discrete Fourier trans
 Conceptually, modelling errors originate from mathematics, so they are outside the domain for variance arithmetic.
 
 
-\subsection{Types of Calculations}
+\subsection{Types of Calculations to Verify \cite{Prev_Precision_Arithmetic}}
 
 Algorithms of completely different nature with each representative for its category are needed to test the generic applicability of uncertainty-bearing arithmetic.  
 An algorithm can be categorized by comparing the amount of its input and output data:
@@ -1338,7 +1352,7 @@ From the perspective of encoding information into data, Taylor expansion is also
 In generating algorithms, input uncertainty should also be considered when deciding if the result is good enough so that the calculation can stop.  
 Some generating algorithms are theoretical calculations which involve no imprecise input so that all result uncertainty is due to rounding errors.  
 Section \ref{sec: recursion} demonstrates such an algorithm, which calculates a table of the sine function using trigonometric relations and two precise input data, $sin(0)=0$ and $sin(\pi/2)=1$.  
-In some other generating algorithms, the accumulation of rounding errors and input uncertainty should stop the algorithm at an optimal termination point using the truncation rule, which is demonstrated in Section \ref{sec: taylor expansion}.
+The generated data have different precision.
 
 A \emph{reduction} algorithm has much less output data than input data such as numerical integration and statistical characterization of a data set.  
 Some information of the data is lost while other information is extracted during reducing.  
@@ -1425,23 +1439,31 @@ Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same period
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
 \end{itemize}
 
-Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$. 
-The reason why Formula \eqref{eqn: power precision} is not applicable needs further discussion:
+Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1.5$. 
+The reason why Formula \eqref{eqn: power precision} is not applicable at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
 \begin{itemize}
-\item Figure \ref{fig: Pow_Converge} shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.195)^{-2}$ clearly converges, so that Formula \eqref{eqn: inversion square precision} can not be applied when $P(x) = 0.2$, but it can be applied when $P(x) = 0.195$ which is confirmed by Figure \ref{fig: Pow_Dev}.
-Figure \ref{fig: Pow_Dev} also shows that $(x \pm \delta x)^c$ converges better for smaller $c$ for the same $P(x)$, which is expected from the difference of Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision}.
+\item 
+Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision}, and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^c$ diverges faster when $c<-1.5$, which is confirmed by Figure \ref{fig: Pow_Converge}, in which $(1 \pm 0.2)^{-2}$ clearly diverges.
 
-\item Figure \ref{fig: Pow_Histogram} shows the result distribution deviates significantly from Gaussian for $(1 \pm 0.195)^{-2}$ when $P(x) = 0.2$, because the distribution has too much skewness \cite{Statistical_Methods}.
-Figure \ref{fig: Pow_Histogram} also shows that when $P(x)$ becomes finer, the result distribution approaches Gaussian more.
-Figure \ref{fig: Inverse_Square_Distribution} predicts the shape of the uncertainty distribution for $(1 \pm 0.195)^{-2}$ in Figure \ref{fig: Pow_Histogram}.
-Similarly, Figure \ref{fig: Square_Root_Distribution} predicts the shape of the uncertainty distribution for $(1 \pm 0.195)^{0.5}$ in Figure \ref{fig: Pow_Histogram}.
+\item 
+When the deviation is reduced slightly to below the estimated applicable precision threshold $1/\sigma$, Figure \ref{fig: Pow_Converge} shows that Formula \eqref{eqn: inversion square precision} converges for $(1 \pm 0.195)^{-2}$, which is confirmed by Figure \ref{fig: Pow_Dev}.
+
+\item
+The convergence of $(1 \pm 0.195)^{-2}$ is not related to underlying data.
+Figure \ref{fig: Pow_Histogram} shows that the measured probability density distributions for  $(1 \pm 0.2)^{-2}$ and  $(1 \pm 0.2)^{-0.195}$ are quite similar, while the other measured probability density distributions are close to Gaussian.
+
 \end{itemize}
-In the case of $(1 \pm \delta x)^{-2}$, the failure of Formula \eqref{eqn: inversion square precision} coincides with the result uncertainty distribution deviating from Gaussian, so that the actual result uncertainty distribution according to Formula \eqref{eqn: power distribution} should be used to calculate the result variance.
-Weather this observation can be generalized remains a question.
+
+Thus, $(x \pm \delta x)^{-2}$ has an  applicable precision threshold lower than $0.2$.
+To calculate $(1 \pm 0.2)^{-2}$, it is necessary to choose $\sigma < 5$, which results in a larger bounding leakage.
+However, it is not clear the consequence of variance arithmetic with mixed $\sigma$.
+For now, variance arithmetic will not be applied when $P(x)$ is not below the applicable precision threshold.
 
 Adding either Gaussian noise or white noise does not change the result variance significantly.
+Figure \ref{fig: Pow_Dev} is indistinguishable for both cases, while Figure \ref{fig: Pow_Histogram} is closer to uniformly distributed for white noise.
 
 Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
+
 
 
 \clearpage
@@ -1449,7 +1471,7 @@ Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin 
 \label{sec: FFT}
 
 
-\subsection{Frequency Response of Discrete Fourier Transformation}
+\subsection{Unfaithful Frequency Response of Discrete Fourier Transformation}
 
 \begin{figure}%[p]
 \includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 

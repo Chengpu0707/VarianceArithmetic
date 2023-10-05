@@ -21,6 +21,15 @@ public class TestTaylor {
     static final int BINDING = 5, DIVIDS = 2;
     static final double TOLERANCE = 3E-16;
 
+    static final double[] sGass = new double[SAMPLES];
+    static final double[] sUnif = new double[SAMPLES];
+    static {
+        for (var i = 0; i < SAMPLES; ++i) {
+            Random rand = new Random();
+            sGass[i] = rand.nextGaussian();
+            sUnif[i] = (rand.nextDouble() - 0.5) * Math.sqrt(12);
+        }
+    }
     VarDbl var;
 
     private void init(double value, double dev) {
@@ -199,7 +208,6 @@ public class TestTaylor {
             1, 1.25, 4.0/3, 1.5, 5.0/3, 1.75, 
             2, 2.25, 7.0/3, 2.5, 8.0/3, 2.75, 3};
         final double[] sDev = new double[] {0.2, 0.195, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002};
-        Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
             final FileWriter fw = new FileWriter(gaussian? "./PowerGN.txt" : "./PowerUN.txt")) {
@@ -234,28 +242,40 @@ public class TestTaylor {
                         sTaylor[0] = 1;
                         final VarDbl var = new VarDbl(1, dev * dev);
                         var.taylor(String.format("pow^(%f)", p), sTaylor, true, true, BINDING);
-                        final double unc = var.uncertainty();
                         final double mode = (1 + Math.sqrt(1 - 4*(p-1)*dev*dev))/2;
 
-                        double leak = 0;
                         Stat stat = new Stat();
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
-                            if (BINDING <= Math.abs(d)) {
-                                leak += 1;
-                                continue;
-                            }
+                            final double d = gaussian? sGass[i] : sUnif[i];
                             final double res = Math.pow(1 + d*dev, p);
                             assertEquals(1, Math.pow(1 + d*dev, -p)*res, 4E-16);
                             stat.accum(res);
-                            histo.accum((res - var.value())/unc);
                         }
+
+                        double leak = 0;
+                        Histogram histo = new Histogram(BINDING, DIVIDS);
+                        final double rdev = stat.dev();
+                        final double ravg = stat.avg();
+                        for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res = Math.pow(1 + d*dev, p);
+                            if (!histo.accum((res - ravg)/rdev)) {
+                                leak += 1;
+                            }
+                        }
+
                         fw.write(String.format("%g\t%g\t%g\t%g\t%g\t%g\t", 
-                                 leak / SAMPLES, stat.avg(), var.value(), stat.dev(), unc, mode));
+                                 leak / SAMPLES, ravg, var.value(), rdev, var.uncertainty(), mode));
                         final double[] sHisto = histo.histo();
-                        for (int i = 0; i < sHisto.length; ++i) {
-                            sb.append(String.format("%g\t", sHisto[i]));
+                        if (sHisto == null) {
+                            int LENGTH = BINDING * DIVIDS + 1;
+                            for (int i = 0; i < LENGTH; ++i) {
+                                sb.append("\t");
+                            }
+                        } else {
+                            for (int i = 0; i < sHisto.length; ++i) {
+                                sb.append(String.format("%g\t", sHisto[i]));
+                            }
                         }
                     } catch (ValueException | UncertaintyException e) {
                         fail(e.getMessage());
@@ -356,24 +376,28 @@ public class TestTaylor {
                         sTaylor[0] = Math.exp(exp);
                         final VarDbl var = new VarDbl(exp, dev * dev);
                         var.taylor(String.format("exp", exp, dev), sTaylor, false, true, BINDING);
-                        final double unc = var.uncertainty();
                         final double mode = exp - dev*dev;
 
-                        double leak = 0;
                         Stat stat = new Stat();
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
-                            if (BINDING <= Math.abs(d)) {
-                                leak += 1;
-                                continue;
-                            }
+                            final double d = gaussian? sGass[i] : sUnif[i];
                             final double res = Math.exp(exp + d*dev);
                             stat.accum(res);
-                            histo.accum((res - Math.exp(exp))/unc);
+                        }
+
+                        double leak = 0;
+                        Histogram histo = new Histogram(BINDING, DIVIDS);
+                        final double rdev = stat.dev();
+                        final double ravg = stat.avg();
+                        for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res = Math.exp(exp + d*dev);
+                            if (!histo.accum((res - ravg)/rdev)) {
+                                leak += 1;
+                            }
                         }
                         fw.write(String.format("%g\t%g\t%g\t%g\t%g\t%g\t", 
-                                 leak / SAMPLES, stat.avg(), var.value(), stat.dev(), unc, mode));
+                                 leak / SAMPLES, ravg, var.value(), rdev, var.uncertainty(), mode));
                         final double[] sHisto = histo.histo();
                         for (int i = 0; i < sHisto.length; ++i) {
                             sb.append(String.format("%g\t", sHisto[i]));
@@ -442,8 +466,7 @@ public class TestTaylor {
             0.5, 0.75, 0.875, 
             1, 2, 5, 10};
         final double[] sDev = new double[] {0.195, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
-        Random rand = new Random();
-        final StringBuilder sb = new StringBuilder();
+       final StringBuilder sb = new StringBuilder();
         try (
             final FileWriter fw = new FileWriter(gaussian? "./LogGN.txt" : "./LogUN.txt")) {
             fw.write("Dev\t");
@@ -477,28 +500,32 @@ public class TestTaylor {
                         sTaylor[0] = Math.log(base);
                         final VarDbl var = new VarDbl(base, dev * dev);
                         var.taylor("log", sTaylor, true, false, BINDING);
-                        final double unc = var.uncertainty();
                         final double mode = (base + Math.sqrt(base*base + 4*dev*dev))/2;
 
-                        double leak = 0;
                         Stat stat = new Stat();
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
-                            if (BINDING <= Math.abs(d)) {
-                                leak += 1;
-                                continue;
-                            }
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res = Math.log(base + d*dev);
+                            stat.accum(res);
+                        }
+
+                        double leak = 0;
+                        Histogram histo = new Histogram(BINDING, DIVIDS);
+                        final double rdev = stat.dev();
+                        final double ravg = stat.avg();
+                        for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
                             if (base + d*dev <= 0) {
                                 leak += 1;
                                 continue;
                             }
                             final double res = Math.log(base + d*dev);
-                            stat.accum(res);
-                            histo.accum(res - Math.log(base));
+                            if (!histo.accum((res - ravg)/rdev)) {
+                                leak += 1;
+                            }
                         }
                         fw.write(String.format("%g\t%g\t%g\t%g\t%g\t%g\t", 
-                                 leak / SAMPLES, stat.avg(), var.value(), stat.dev(), unc, mode));
+                                 leak / SAMPLES, ravg, var.value(), rdev, var.uncertainty(), mode));
                         final double[] sHisto = histo.histo();
                         for (int i = 0; i < sHisto.length; ++i) {
                             sb.append(String.format("%g\t", sHisto[i]));
@@ -563,7 +590,6 @@ public class TestTaylor {
             0, 1.0/12, 1.0/6, 1.0/4, 1.0/3, 1.0/12*5,
             1.0/2, 1.0/12*7, 1.0/3*2, 1.0/4*3, 1.0/6*5, 1.0/12*11, 1.0};
         final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
-        Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
             final FileWriter fw = new FileWriter(gaussian? "./SinGN.txt" : "./SinUN.txt")) {
@@ -597,24 +623,28 @@ public class TestTaylor {
                         final double[] sTaylor = Taylor.sin(rad*Math.PI);
                         final VarDbl var = new VarDbl(rad*Math.PI, dev * dev);
                         var.taylor("sin", sTaylor, false, false, BINDING);
-                        final double unc = var.uncertainty();
                         final double mode = var.value() - Math.sin(rad*Math.PI);
 
-                        double leak = 0;
                         Stat stat = new Stat();
-                        Histogram histo = new Histogram(BINDING/8.0, DIVIDS*8);
                         for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? rand.nextGaussian() : (rand.nextDouble() - 0.5) * Math.sqrt(12);
-                            if (BINDING <= Math.abs(d)) {
-                                leak += 1;
-                                continue;
-                            }
+                            final double d = gaussian? sGass[i] : sUnif[i];
                             final double res = Math.sin(rad*Math.PI + d*dev);
                             stat.accum(res);
-                            histo.accum(res - var.value());
+                        }
+
+                        double leak = 0;
+                        Histogram histo = new Histogram(BINDING, DIVIDS);
+                        final double rdev = stat.dev();
+                        final double ravg = stat.avg();
+                        for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res = Math.sin(rad*Math.PI + d*dev);
+                            if (!histo.accum((res - ravg)/rdev)) {
+                                leak += 1;
+                            }
                         }
                         fw.write(String.format("%g\t%g\t%g\t%g\t%g\t%g\t", 
-                                 leak / SAMPLES, stat.avg(), var.value(), stat.dev(), unc, mode));
+                                 leak / SAMPLES, ravg, var.value(), rdev, var.uncertainty(), mode));
                         final double[] sHisto = histo.histo();
                         for (int i = 0; i < sHisto.length; ++i) {
                             sb.append(String.format("%g\t", sHisto[i]));
