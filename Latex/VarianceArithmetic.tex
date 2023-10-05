@@ -1471,7 +1471,7 @@ Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin 
 \label{sec: FFT}
 
 
-\subsection{Unfaithful Frequency Response of Discrete Fourier Transformation}
+\subsection{Unfaithful Frequency Response of Discrete Fourier Transformation \cite{Prev_Precision_Arithmetic}}
 
 \begin{figure}%[p]
 \includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 
@@ -1537,7 +1537,7 @@ For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to 
 The most convenient signals to test uncertainty-bearing arithmetic are sine or cosine signals with frequencies as an integer-fold of $2\pi/N$.  
  
 
-\subsection{FFT (Fast Fourier Transformation)}
+\subsection{FFT (Fast Fourier Transformation) \cite{Prev_Precision_Arithmetic}}
 
 When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}, in which $m = L, L-1,\dots 1,0$ indicates progress of the transformation, and $j$ is the bit-reverse of $n$:
 \begin{align}
@@ -1555,7 +1555,12 @@ Let $\ll$ denote a bit left-shift operation and let \& denote a bitwise AND oper
 \label{eqn: FFT phase array}
 \varphi [n] \equiv \exp{(i 2\pi \frac{n}{2^{L}})}: \eqspace & \exp{(i 2\pi \frac{n}{2^{L-m}})} = \varphi [(n \ll m)\& ((1 \ll L)-1)];
 \end{align}
-Formula \eqref{eqn: Danielson-Lanczos} always sums up two mutually independent operands, so there is no dependency problem in FFT.  
+Formula \eqref{eqn: Danielson-Lanczos} always sums up two mutually independent operands.  
+
+
+
+
+
 
 
 

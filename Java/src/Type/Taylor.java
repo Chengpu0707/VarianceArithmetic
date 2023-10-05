@@ -1,8 +1,5 @@
 package Type;
 
-
-
-
 public class Taylor {
     
     static double[] power(double exponent) {
