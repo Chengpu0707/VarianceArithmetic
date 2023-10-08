@@ -1249,22 +1249,23 @@ Due to dependency tracing using Taylor expansion, variance arithmetic does not s
 \subsection{Avoiding Dependency Problem}
 
 However, variance arithmetic may still suffer from \emph{dependency problem} when an imprecise input is used multiple times without dependency tracing.
-For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations when the input variance is $(\delta x)^2$.
+For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations to calculate $x^2 - x$ when the input variance is $(\delta x)^2$.
 \begin{table}
 \label{eqn: dependency example}
 \centering
 \begin{tabular}{|l|l|l|} 
 \hline 
-Formula & Result Variance & Over-estimation \\ 
+Formula & Over-estimation & Wrong Independency \\ 
 \hline 
-\eqref{eqn: interval depend 1} & $4 x^2 (\delta x)^2 + 2 (\delta x)^4$ & $0$ \\
+\eqref{eqn: interval depend 1} & $0$ & \\
 \hline 
-\eqref{eqn: interval depend 2} & $(4 x^2 + 1) (\delta x)^2 + 2 (\delta x)^4$ & $+(\delta x)^2$ \\
+\eqref{eqn: interval depend 2} & $+(\delta x)^2$ & between $x^2$ and $x$ \\
 \hline 
-\eqref{eqn: interval depend 3} & $(2 x^2 - 2 x + 1) (\delta x)^2 + (\delta x)^4$ & $-(2 x^2 - 2x + 1)(\delta x)^2 - (\delta x)^4$ \\
+\eqref{eqn: interval depend 3} & $-(2 x^2 + 2x - 1)(\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
 \hline 
 \end{tabular}
-\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.}
+\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
+The correct result variance is $4 x^2 (\delta x)^2 + 2 (\delta x)^4$.}
 \end{table}
 
 To avoid the dependency problem, the conventional numerical algorithms need to be reevaluated.

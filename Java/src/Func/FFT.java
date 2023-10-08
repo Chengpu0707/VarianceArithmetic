@@ -21,8 +21,9 @@ public class FFT {
     }
 
     /*
-     * @Param order: the size of [0, 2*PI] is (1<<order), so 2 < order <= MAX_QUARD_ORDER+2
-     * @Param idex: the index in [0, 2*PI]
+     * @return: sine(idx/(1<<order)*2*PI)
+     * @param order: the size of [0, 2*PI] is (1<<order), so 2 < order <= MAX_QUARD_ORDER+2
+     * @param idx: the index in [0, 2*PI]
      */
     static double sin(int idx, int order) {
         if (order < 2) {
@@ -62,8 +63,21 @@ public class FFT {
         return sin(idx + (1 << (order - 2)), order);
     }
 
-
-    static IReal[] transform(IReal[] sData, boolean forward) {
+    /*
+     * @param sData: an array of size (2<<order), with each datum contains (real, image)
+     */
+    static IReal[] transform(final IReal[] sData, boolean forward) {
+        int order = 2;
+        for (; order <= MAX_QUARD_ORDER + 2; ++order) {
+            if ((2 << order) == sData.length) {
+                break;
+            }
+        }
+        if (order > MAX_QUARD_ORDER + 2) {
+            return null;
+        }
+        final IReal[] sRes = new IReal[2 << order];
+        
         return null;
     }
 
