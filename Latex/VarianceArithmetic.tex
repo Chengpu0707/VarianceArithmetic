@@ -268,11 +268,12 @@ Instead, the variance arithmetic can trace dependency between uncertainties thro
 \item The digital representation gives a defined behavior of bits calculated inside uncertainty. 
 \end{itemize}
 
-\item Section \ref{sec: validation} remains largely unchanged, except it contains the last subsection from  its processor.
+\item Section \ref{sec: validation} remains largely unchanged, except it contains the last subsection from its processor.
 
 \item Section \ref{sec: Math Library} is new, to provide a statistical test of variance arithmetic in using the common math library functions.
 
-\item Section \ref{sec: FFT} is redone using the new implementation of variance arithmetic.
+\item Section \ref{sec: FFT} is redone using the new implementation of variance arithmetic.  
+As a linear calculation with each input datum used only once, FFT provides an ideal test case.
 
 \end{itemize}
 
@@ -1101,10 +1102,6 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
-The independent uncertainty assumption is vital for variance arithmetic.
-For example, if Formula \eqref{eqn: multiplication precision} for $x \times y$ were applied instead of Formula \eqref{eqn: square precision} for $x^2$, the result variance for $x^2$ would be only half.
-By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
-
 
 \subsection{Dependency Tracing}
 
@@ -1202,6 +1199,7 @@ m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
 
 \fi
 
+By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
 When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to account for correlation between uncertainties, such as the correlation between $f(x)$ and $g(x)$ through $x$ when applying Formula \eqref{eqn: Taylor 1d variance}, or the correlation between $f(x, y)$ and $g(x, y)$ through $(x, y)$ when applying Formula \eqref{eqn: Taylor 2d variance}.
 
 Formula \eqref{eqn: sum variance} calculate the sum of any two functions, while Formula \eqref{eqn: prod variance} calculate the result of $f(x) g(x)$.
@@ -1244,7 +1242,49 @@ f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
 \delta^2 f^{-1}(f(x)) &= (\delta x)^2;
 \end{align}
 
-Due to dependency tracing for analytic questions, variance arithmetic does not suffer from the dependency problem \cite{Interval_Arithmetic} which has plague interval arithmetic.
+Due to dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plague interval arithmetic.
+
+
+
+\subsection{Avoiding Dependency Problem}
+
+However, variance arithmetic may still suffer from \emph{dependency problem} when an imprecise input is used multiple times without dependency tracing.
+For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations when the input variance is $(\delta x)^2$.
+\begin{table}
+\label{eqn: dependency example}
+\centering
+\begin{tabular}{|l|l|l|} 
+\hline 
+Formula & Result Variance & Over-estimation \\ 
+\hline 
+\eqref{eqn: interval depend 1} & $4 x^2 (\delta x)^2 + 2 (\delta x)^4$ & $0$ \\
+\hline 
+\eqref{eqn: interval depend 2} & $(4 x^2 + 1) (\delta x)^2 + 2 (\delta x)^4$ & $+(\delta x)^2$ \\
+\hline 
+\eqref{eqn: interval depend 3} & $(2 x^2 - 2 x + 1) (\delta x)^2 + (\delta x)^4$ & $-(2 x^2 - 2x + 1)(\delta x)^2 - (\delta x)^4$ \\
+\hline 
+\end{tabular}
+\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.}
+\end{table}
+
+To avoid the dependency problem, the conventional numerical algorithms need to be reevaluated.
+\begin{itemize}
+\item   
+Traditional computer numerical algorithms are designed to choose an execution path to minimize rounding errors of the conventional floating-point calculations, such as the Gaussian elimination for the first-order solving linear equation \cite{Numerical_Recipes}.
+The existence of different execution paths suggests that the solution itself is designed with dependency problem.
+In contrast, variance arithmetic should be used on the analytic expression for the solution, to trace dependencies of each input when it appears multiple times in the analytic solution.
+Section \ref{sec: matrix} will compare matrix inversion using either strict variance arithmetic or Gaussian elimination.
+
+\item  
+Traditional time-series data processing uses one input multiple times, which may also cause the dependency problem.
+Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} will compare time-series linear regression using either strict variance arithmetic or a traditional progressive approach.
+
+\item
+The usages of intermediate variable and conditional execution need to be examined because they may upset the dependency tracing. 
+
+\end{itemize}
+
+
 
 
 \subsection{A Variance Representation}
@@ -1360,20 +1400,6 @@ Conventional wisdom is that a reducing algorithm generally benefits from a large
 Such a notion needs to be re-evaluated when uncertainty accumulates during calculation.  
 A test of uncertainty-bearing arithmetic using numerical integration is provided in Section \ref{sec: integration}.
 
-Other relations between the input and output can also be used to categorize an algorithm.  
-\begin{itemize}
-\item  In an \emph{expressive} algorithm, each output is implemented as an analytic mathematical expression of inputs.  
-Formula \eqref{eqn: Taylor 1d variance} and Formula \eqref{eqn: Taylor 2d variance} of variance arithmetic are powerful tools to solve expressive algorithms using variance arithmetic.  
-
-\item  In a \emph{progressive} algorithm, each output is based on partial inputs and previously generated outputs.  
-If an output depends on the state which is defined by previous inputs and outputs, the algorithm is also progressive.  
-Most practical algorithms are progressive.  
-Even if there may be an expected analytic mathematical expression between its input and output, an algorithm may not be expressive due to its progressive implementation.  
-The dependence problem usually exists in a progressive algorithm.  
-Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} discusses the behaviors of all the three arithmetic for a progressive algorithm.
-\end{itemize}
-
-
 
 
 \clearpage
@@ -1384,11 +1410,10 @@ Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} 
 \centering
 \includegraphics[height=2.5in]{Sin_Dev.png} 
 \captionof{figure}{
-The measured vs calculated uncertainty deviation for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend. 
-The $x$-axis is in radians divided by $\pi$.
+The measured vs calculated uncertainty deviation for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend, in which "Gaussian" means using Gaussian noise, and "calculated" means the result from variance arithmetic. 
+The $x$-axis is in radians divided by $\pi$, from $-1$ to $+1$.
 The calculated values are obtained by Formula \eqref{eqn: sin precision}, while each measured deviation is obtained by 10000 samples using library \textit{sin} function.
-Each measured values fits well with the corresponding calculated value.
-$\delta^2 \sin(x)$ are shown to have the same periodicity as $\sin(x)$.
+%Each measured values fits well with the corresponding calculated value.
 }
 \label{fig: Sin_Dev}
 \end{figure}
@@ -1397,12 +1422,23 @@ $\delta^2 \sin(x)$ are shown to have the same periodicity as $\sin(x)$.
 \centering
 \includegraphics[height=2.5in]{Pow_Dev.png} 
 \captionof{figure}{
-The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend. 
+The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend, in which "white" means using white noise, "Gaussian" means using Gaussian noise, and "calculated" means the result from variance arithmetic. 
 The $x$-axis is the exponent $c$ from $-2$ to $+3$.
 The calculated values are obtained by Formula \eqref{eqn: power precision}, while each measured deviation is obtained by 10000 samples using library \textit{pow} function.
-Each measured values fits well with the corresponding calculated value except when $c < -1$ and $\delta x = 0.2$.
+%Each measured values fits well with the corresponding calculated value except when $c < -1$ and $\delta x = 0.2$.
 }
 \label{fig: Pow_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_Histogram.png} 
+\captionof{figure}{
+The measured probability density of $(1 \pm \delta x)^{c}$ for different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
+The $x$-axis is the normalized deviation from the mean of $(1 \pm \delta x)^{c}$.
+The $y$-axis is the measured histogram at each $x$.
+}
+\label{fig: Pow_Histogram}
 \end{figure}
 
 \begin{figure}[p]
@@ -1418,20 +1454,10 @@ It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, $(1 \pm 0.2)^{-1}$ seems dive
 \end{figure}
 
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Pow_Histogram.png} 
-\captionof{figure}{
-The measured probability density of $(1 \pm \delta x)^{c}$ for different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
-The $x$-axis is the normalized deviation from the mean of $(1 \pm \delta x)^{c}$.
-The $y$-axis is the measured histogram at each $x$.
-}
-\label{fig: Pow_Histogram}
-\end{figure}
 
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested and verified by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
-For example, Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
+Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
 Smaller input uncertainty always result in smaller output uncertainty.
 Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$.
 \begin{itemize}
@@ -1439,7 +1465,11 @@ Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same period
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
 \end{itemize}
 
-Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1$. 
+Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1$.
+The measured results of using white noise is also displayed in Figure \ref{fig: Pow_Dev}, which are always slightly smaller than the corresponding results using Gaussian noise, probably due to the long tails of Gaussian distributions. 
+As expected, the results of using Gaussian noise fit better with the calculated result of variance arithmetic, especially when the deviation is larger.
+However, using white noise has one advantage over using Gaussian noise: It shows clearer the effect of the non-linearity of $f(x)$ in Formula \eqref{eqn: function distribution}, e.g., the result distribution deviates more from a uniform distribution for a larger input deviation. 
+
 The reason why Formula \eqref{eqn: power precision} is not applicable at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
 \begin{itemize}
 \item 
@@ -1449,20 +1479,12 @@ Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqre
 When the deviation is reduced slightly to below the estimated applicable precision threshold $1/\sigma$, Figure \ref{fig: Pow_Converge} shows that Formula \eqref{eqn: inversion square precision} converges for $(1 \pm 0.195)^{-2}$, which is confirmed by Figure \ref{fig: Pow_Dev}.
 
 \item
-The convergence of $(1 \pm 0.195)^{-2}$ is not related to underlying data.
-Figure \ref{fig: Pow_Histogram} shows that the measured probability density distributions for  $(1 \pm 0.2)^{-2}$ and  $(1 \pm 0.2)^{-0.195}$ are quite similar, while the other measured probability density distributions are close to Gaussian.
+Figure \ref{fig: Pow_Histogram} shows that the measured probability density distributions for  $(1 \pm 0.2)^{-2}$ and  $(1 \pm 0.2)^{-0.195}$ are quite similar, suggesting that the convergence of $(1 \pm 0.195)^{-2}$ and the divergence of $(1 \pm 0.2)^{-2}$ is not related to underlying data. 
 
 \end{itemize}
+Thus, $(x \pm \delta x)^{-2}$ has an applicable precision threshold lower than $0.2$, so that it needs to be calculated with a $\sigma < 5$, and the result has a larger bounding leakage.
+For the discussion simplicity, the cases of applicable precision thresholds less than $1/5$ are avoided in this paper.
 
-Thus, $(x \pm \delta x)^{-2}$ has an  applicable precision threshold lower than $0.2$.
-To calculate $(1 \pm 0.2)^{-2}$, it is necessary to choose $\sigma < 5$, which results in a larger bounding leakage.
-However, it is not clear the consequence of variance arithmetic with mixed $\sigma$.
-For now, variance arithmetic will not be applied when $P(x)$ is not below the applicable precision threshold for $\sigma=5$.
-
-Adding either Gaussian noise or white noise does not change the result variance significantly.
-Figure \ref{fig: Pow_Dev} is indistinguishable for both cases, while Figure \ref{fig: Pow_Histogram} is closer to uniformly distributed for white noise.
-
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are all verified by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 
 
 
