@@ -265,7 +265,10 @@ The variance arithmetic improves over its processor in the following areas:
 \item Unlike its processor, the variance arithmetic no longer has the dependency problem.
 Instead, the variance arithmetic can trace dependency between uncertainties through the identities of variables.
 
-\item The digital representation gives a defined behavior of bits calculated inside uncertainty. 
+\item The digital representation gives a defined behavior of bits calculated inside uncertainty.
+
+\item The result variance using Taylor expansion was statistically inaccurate previously. 
+The new approach no longer calculate variance around the value if there were no uncertainty.
 \end{itemize}
 
 \item Section \ref{sec: validation} remains largely unchanged, except it contains the last subsection from its processor.
@@ -841,27 +844,44 @@ In all the figures, $\rho(f^{-1}(\tilde{y}), x, \delta x)$ becomes more and more
 & \tilde{y} = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
 \overline{f(x)} &\equiv \int \tilde{y} \rho(\tilde{y}, y, \delta y) d \tilde{y}
  = \int \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n N(\tilde{z}) d \tilde{z}
- = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} (\delta x)^{n} \int \tilde{z}^n N(\tilde{z}) d \tilde{z}; \\
-\hat{b} f(x) &\equiv \overline{f(x)} - f(x) = \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} M(x,n); \\
+ = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} (\delta x)^{n} \int \tilde{z}^n N(\tilde{z}) d \tilde{z} \\
+&= \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} (\delta x)^{n} \zeta(n)
+ = \sum_{n=0}^{\infty} \frac{f^{(2n)}_x}{(2n)!} (\delta x)^{2n} \zeta(2n); \\
 \delta^2 f(x) &\equiv \int \tilde{y}^2 \rho(\tilde{y}, y, \delta y) d \tilde{y} - \overline{f(x)}^2
- = \int (\sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n)^2 \rho(\tilde{y}, y, \delta y) d \tilde{y} - \overline{f(x)}^2 \\
-&= \sum_{n=0}^{\infty} \sum_{j=0}^{n} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} M(x, n)
- - \left(\hat{b} f(x) + f(x) \right)^2 \\
-&= \sum_{n=1}^{\infty} \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} M(x, n) + f(x)^2
- + 2 f(x) \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{(n)!} M(x, n) \\
-&\;\;- (\hat{b} f(x))^2 - 2 f(x) \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{(n)!} M(x, n) - f(x)^2  \\
-&= \sum_{n=1}^{\infty} \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} M(x, n) - (\hat{b} f(x))^2;
+ = \int (\sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n)^2 N(\tilde{z}) d \tilde{z} - \overline{f(x)}^2 \\
+&= \sum_{n=0}^{\infty} \sum_{j=0}^{2n} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} (\delta x)^{2n} \zeta(2n)
+ - \sum_{n=0}^{\infty} \sum_{j=0}^{n} \frac{f^{(2j)}_x}{(2j)!} \frac{f^{(2n-2j)}_x}{(2n-2j)!} (\delta x)^{2n} \zeta(2j) \zeta(2n - 2j) \\
+&= \sum_{n=1}^{\infty} (\delta x)^{2n} ( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!}
+  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \\
+&\eqspace + 2 \zeta(2n) f(x) \frac{f^{(2n)}_x}{(2n)!} - 2 f(x) \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}) \\
+&= \sum_{n=1}^{\infty} (\delta x)^{2n} \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!}
+  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right) \\
+&= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \\
+&\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
 \end{align*}
 
 \begin{align*}
-\int \tilde{z}^{n} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} &= -\int \tilde{z}^{n - 1} e^{-\frac{\tilde{z}^2}{2}} d {-\frac{\tilde{z}^2}{2}}
-  = - z^{n-1} e^{-\frac{z^2}{2}} + (n-1) \int \tilde{z}^{n-2} e^{-\frac{\tilde{z}^2}{2}} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+\delta^2 f(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - \overline{f(x)}^2 \\
+  &= \sum_{n=1}^{\infty} (\delta x)^{2n} \frac{\zeta(2n)}{(2n)!} (f(x)^2)^{(2n)}_x - \overline{f(x)}^2; \\
+  &= (\delta x)^2 (f(x) f^{(2)}_x + (f^{(1)}_x)^2 - f(x) f^{(2)}_x) \\
+  &\eqspace + (\delta x)^4 (\frac{1}{4} f(x) f^{(4)}_x + f^{(1)}_x f^{(3)}_x + \frac{3}{4} (f^{(2)}_x)^2 - \frac{1}{4} f(x) f^{(4)}_x - \frac{1}{4} (f^{(2)}_x)^2)    \\
+  & = (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 (f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2) + o((\delta x)^6);  \\
+\overline{f(x)} &= f(x) + (\delta x)^2 \frac{1}{2} f^{(2)}_x + (\delta x)^4 \frac{1}{8} f^{(4)}_x + o((\delta x)^6); \\
+f(x + \tilde{x})^2 &= f(x)^2 + \frac{\tilde{x}}{1!} (2 f(x) f^{(1)}_x) + \frac{\tilde{x}^2}{2!} (2 f(x) f^{(2)}_x + 2 (f^{(1)}_x)^2) \\
+&\eqspace + \frac{\tilde{x}^3}{3!} (2 f(x) f^{(3)}_x + 6 f^{(1)}_x f^{(2)}_x) 
+     + \frac{\tilde{x}^4}{4!} (2 f(x) f^{(4)}_x + 8 f^{(1)}_x f^{(3)}_x + 6 (f^{(2)}_x)^);
+\end{align*}
+
+
+\begin{align*}
+\int^z \tilde{z}^{n} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} &= -\int^z \tilde{z}^{n - 1} e^{-\frac{\tilde{z}^2}{2}} d {-\frac{\tilde{z}^2}{2}}
+  = - z^{n-1} e^{-\frac{z^2}{2}} + (n-1) \int^z \tilde{z}^{n-2} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
  &= - z^{n-1} e^{-\frac{z^2}{2}} - (n-1) z^{n-3} e^{-\frac{z^2}{2}} 
-  + (n-1) (n-3) \int_{-z} \tilde{z}^{n -3} e^{-\frac{\tilde{z}^2}{2}} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+  + (n-1) (n-3) \int^z \tilde{z}^{n -3} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
  &= - \frac{(n-1)!!}{(n-1)!!} z^{n-1} e^{-\frac{z^2}{2}} - \frac{(n-1)!!}{(n-3)!!} z^{n-3} e^{-\frac{z^2}{2}} 
   + (n-1) (n-3) \int \tilde{z}^{n -3} e^{-\frac{\tilde{z}^2}{2}} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z}; \\
-\int \tilde{z}^{2n + 1} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} &= - (2n)!! N(z) \sum_{j=0}^{n} \frac{z^{2j}}{(2j)!!}; \\
-\int \tilde{z}^{2n + 2} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} &= (2n + 1)!! \xi(z) - (2n + 1)!! N(z) \sum_{j=0}^{n} \frac{z^{2j + 1}}{(2j + 1)!!};
+\int^z \tilde{z}^{2n + 1} N(\tilde{z}) d \tilde{z} &= - (2n)!! N(z) \sum_{j=0}^{n} \frac{z^{2j}}{(2j)!!}; \\
+\int^z \tilde{z}^{2n + 2} N(\tilde{z}) d \tilde{z} &= (2n + 1)!! \xi(z) - (2n + 1)!! N(z) \sum_{j=0}^{n} \frac{z^{2j + 1}}{(2j + 1)!!};
 \end{align*}
 
 \begin{align*}
@@ -885,83 +905,79 @@ N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!}
 \zeta(\sigma, 2n + 2) &= (2n + 1) \zeta(\sigma, 2n) - 2 N(\sigma) \sigma^{2n + 1};
 \end{align*}
 
-begin{align*}
-&\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}
- \simeq \tilde{x} + \frac{1}{2} \tilde{x}^2 + \frac{1}{6} \tilde{x}^3 + \frac{1}{24} \tilde{x}^4 + \frac{1}{120} \tilde{x}^5 + \frac{1}{720} \tilde{x}^6; \\
-\frac{\hat{b} e^x}{e^x} &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} 
- \simeq \frac{1}{2} (\delta x)^2 + \frac{1}{8} (\delta x)^4 + \frac{1}{48} (\delta x)^6 + \frac{1}{384} (\delta x)^8; \\
-P(e^x)^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(2n - 1)!!}{j!\;(2n - j)!}
- - \left( \frac{\hat{b} e^x}{e^x} \right)^2 \\
- &\simeq (\delta x)^2 + (\frac{7}{12} 3!! - \frac{1}{4}) (\delta x)^4 
-  + (\frac{31}{360} 5!! - 2 \frac{1}{2} \frac{1}{8}) (\delta x)^6
-  + (\frac{127}{20160} 7!! - 2 \frac{1}{2} \frac{1}{48} - (\frac{1}{8})^2) (\delta x)^8 \\
+\begin{align*}
+e^{x + \tilde{x}} &= e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}
+ \simeq e^x \left(1 + \tilde{x} + \frac{1}{2} \tilde{x}^2 + \frac{1}{6} \tilde{x}^3 + \frac{1}{24} \tilde{x}^4 + \frac{1}{120} \tilde{x}^5 + \frac{1}{720} \tilde{x}^6 \right); \\
+\overline{e^x} &= e^x \sum_{n=0}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} 
+ \simeq e^x \left(1 + \frac{1!!}{2!} (\delta x)^2 + \frac{3!!}{4!} (\delta x)^4 + \frac{5!!}{6!} (\delta x)^6 + \frac{7!!}{8!} (\delta x)^8 \right); \\
+P(e^x)^2 &\simeq \frac{\delta^2 e^x}{(e^x)^2} =  \sum_{n=1}^{\infty} (\delta x)^{2n} \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!} 
+   	- \sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!}  \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right); \\
+ &= (\delta x)^2 + (\frac{7}{4} - \frac{1}{4}) (\delta x)^4 + (\frac{31}{24} - \frac{1}{8}) (\delta x)^6
+  + (\frac{127}{192} - \frac{7}{192}) (\delta x)^8 \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8
 \end{align*}
 
 \begin{align*}
-\sin(x + \tilde{x}) &= \sin(x) + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} \\
- & \simeq \frac{1}{1!} \cos(x) \tilde{x} - \frac{1}{2!} \sin(x) \tilde{x}^2 - \frac{1}{3!} \cos(x) \tilde{x}^3 + \frac{1}{4!} \sin(x) \tilde{x}^4 + \\
+\sin(x + \tilde{x}) - \sin(x) &= \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!} + \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} \\
+& \simeq \frac{1}{1!} \cos(x) \tilde{x} - \frac{1}{2!} \sin(x) \tilde{x}^2 - \frac{1}{3!} \cos(x) \tilde{x}^3 + \frac{1}{4!} \sin(x) \tilde{x}^4 + \\
  &\eqspace  \frac{1}{5!} \cos(x) \tilde{x}^5 - \frac{1}{6!} \sin(x) \tilde{x}^6 - \frac{1}{7!} \cos(x) \tilde{x}^7 + \frac{1}{8!} \sin(x) \tilde{x}^8; \\
-\hat{b} \sin(x) &= \sum_{n=1}^{\infty} \sin(x) (-1)^{n} \frac{(\delta x)^{2n}}{(2n)!} \\
- &\simeq  \sin(x) \left( \frac{1}{2}(\delta x)^2 - \frac{1}{24} (\delta x)^4 + \frac{1}{720} (\delta x)^4 - \frac{1}{40320} (\delta x)^8 \right); \\
-\delta^2 \sin(x) &= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) \\
- &\eqspace \left( (-1)^{n-1} \sum_{j=1}^{n-1} \frac{\cos(x)^2}{(2j+1)!(2n-2j-1)!} + (-1)^{n} \sum_{j=1}^{n-1} \frac{\sin(x)^2}{(2j)!(2n-2j)!} \right)  \\
-&= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 +
-   \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n} \sum_{j=1}^{n-1} \frac{(2j+1)\sin(x)^2 - (2n-2j)\cos(x)^2}{(2j+1)!(2n-2j)!} \\
-&= - (\hat{b} \sin(x))^2 + (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n}
-   \sum_{j=1}^{n-1} \frac{(2n+1)\sin(x)^2 - (2n-2j)}{(2j+1)!(2n-2j)!} \\
- &\simeq \cos(x)^2 (\delta x)^2 + (-2 \frac{3!!}{1!3!} \cos(x)^2 + \frac{3!!}{2!2!}\sin(x)^2 - \frac{1}{4}\sin(x)^2)(\delta x)^4 + \\
- &\eqspace (2 \frac{5!!}{1!5!} \cos(x)^2 - 2 \frac{5!!}{2!4!}\sin(x)^2 + \frac{5!!}{3!3!} \cos(x)^2 - \frac{1}{24}\sin(x)^2)(\delta x)^6 \\
- &\simeq \cos(x)^2 (\delta x)^2 + (\frac{1}{2}\sin(x)^2 - \cos(x)^2) (\delta x)^4 + (-\frac{2}{3}\sin(x)^2 + \frac{13}{24} \cos(x)^2) (\delta x)^6 \\
- &\simeq \cos(x)^2 (\delta x)^2 + \frac{1} {2}(1 - 3 \cos(x)^2) (\delta x)^4 - \frac{1}{24} (16 - 29 \cos(x)^2) (\delta x)^6;
+\overline{\sin(x)} &= \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\zeta(2n)}{(2n)!} (\delta x)^{2n} \\
+ &\simeq  \sin(x) \left(1 - \frac{1!!}{2!} (\delta x)^2 + \frac{3!!}{4!} (\delta x)^4 - \frac{5!!}{6!} (\delta x)^6 + \frac{7!!}{8!} (\delta x)^8 \right); \\
+\delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1}
+	\left( \cos(x)^2 \sum_{j=0}^{n-1} \frac{\zeta(2n)}{(2j+1)!(2n-2j-1)!} - \sin(x)^2 \sum_{j=1}^{n-1} \frac{\zeta(2n) - \zeta(2j) \zeta(2n-2j)}{(2j)!(2n-2j)!} \right) \\ 
+ &\simeq (\delta x)^2 \cos(x)^2 - (\delta x)^4 \left( \cos(x)^2 - \sin(x)^2 (\frac{3}{4} - \frac{1}{4}) \right) + \\
+ &\eqspace (\delta x)^6 \left(\cos(x)^2 \frac{2}{3} - \sin(x)^2 (\frac{5}{8} - \frac{1}{8}) \right) -
+    (\delta x)^8 \left(\cos(x)^2 \frac{1}{3} - \sin(x)^2 (\frac{21}{64} - \frac{7}{192}) \right)  \\
+ &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 \left( \cos(x)^2 - \sin(x)^2 \frac{1}{2} \right) + \\
+ &\eqspace (\delta x)^6 \left(\cos(x)^2 \frac{2}{3} - \sin(x)^2 \frac{1}{2} \right) - (\delta x)^8 \left(\cos(x)^2 \frac{1}{3} - \sin(x)^2 \frac{7}{24} \right); \\
+ &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  - (\delta x)^8 (\cos(x)^2 \frac{5}{8} - \frac{7}{24});
 \end{align*}
 
 \begin{align*}
 & \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
-\hat{b} \ln(x) &= -\sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n} 
- \simeq - \frac{1}{2} P(x)^2 - \frac{3}{4} P(x)^4 - \frac{5}{2} P(x)^6 - \frac{105}{8} P(x)^8; \\
+\overline{\ln(x)}  &= \ln(x) -\sum_{n=1}^{+\infty} P(x)^{2n} \frac{\zeta(2n)}{2n}; \\
 &\sum_{j=1}^{2n-1} \frac{1}{j} \frac{1}{2n - j} = \frac{1}{2n} \sum_{j=1}^{2n-1} \frac{1}{j} +  \frac{1}{2n - j} = \frac{2}{2n} \sum_{j=1}^{2n-1} \frac{1}{j}
  = \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}; \\
-\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j} - \left(\frac{\hat{b} x^c}{x^c}\right)^2 \\
- &\simeq P(x)^2 + (\frac{1}{2} \frac{11}{6} 3!! - \frac{1}{4}) P(x)^4 
-  + (\frac{1}{3} \frac{137}{60} 5!! - 2 \frac{1}{2} \frac{3}{4}) P(x)^6
-  + (\frac{1}{4} \frac{363}{140} 7!!- 2 \frac{1}{2} \frac{5}{2} - (\frac{3}{4})^2 ) \\
- &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8;
+\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
+   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
+ &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\frac{\zeta(2n)}{n} \sum_{j=1}^{2n-1} \frac{1}{j} 
+     - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)} \frac{\zeta(2n - 2j)}{(2n - 2j)} \right) \\
+ &\simeq P(x)^2 + P(x)^4 (\frac{11}{8} - \frac{1}{4}) + P(x)^6 (\frac{137}{24} - \frac{3}{4}) + P(x)^8 (\frac{1089}{32} - \frac{49}{16}) \\
+ &\simeq P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32};
 \end{align*}
 
 \begin{align*}
-&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix} \\
- &\simeq c \tilde{x} + \frac{c(c-1)}{2} \tilde{x}^2 + \frac{c(c-1)(c-2)}{6} \tilde{x}^3 + \frac{c(c-1)(c-2)(c-3)}{24} \tilde{x}^4 + \\
- &\eqspace \frac{c(c-1)(c-2)(c-3)(c-4)}{120} \tilde{x}^5 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{720} \tilde{x}^6; \\
-\frac{\hat{b} x^c}{x^c} &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \\
- &\simeq \frac{c(c-1)}{2} P(x)^2 + \frac{c(c-1)(c-2)(c-3)}{8} P(x)^4 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{48} P(x)^6; \\
-P(x^c)^2 &= \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \left(\frac{\hat{b} x^c}{x^c}\right)^2 \\
+&(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c \sum_{n=1}^{\infty} (\frac{\tilde{x}}{x})^n \begin{pmatrix} c \\ n \end{pmatrix} \\
+\frac{(x + \tilde{x})^c}{x^c} &\simeq c (\frac{\tilde{x}}{x}) + \frac{c(c-1)}{2!} (\frac{\tilde{x}}{x})^2
+ + \frac{c(c-1)(c-2)}{3!} (\frac{\tilde{x}}{x})^3 + \frac{c(c-1)(c-2)(c-3)}{4!} (\frac{\tilde{x}}{x})^4 + \\
+ &\eqspace \frac{c(c-1)(c-2)(c-3)(c-4)}{5!} (\frac{\tilde{x}}{x})^5 + \frac{c(c-1)(c-2)(c-3)(c-4)(c-5)}{6!} (\frac{\tilde{x}}{x})^6; \\
+P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \sum_{j=1}^{n-1} \zeta(2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \zeta(2n - 2j) \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right)\\
  &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align*}
 
 \begin{align*}
-(1 + p)^2 - 1 &= 2p + 1p^2; \\
-\frac{\hat{b} x^2}{x^2} &= P(x)^2; \\
-P(x^2)^2 &= 4 P(x)^2 + (3 - 1) P(x)^4; \\
-\sqrt{1 + p} - 1 & = \sum_{n=1} \frac{(2n-3)!!}{2^n n!}
- \simeq \frac{1}{2} p - \frac{1}{8} p^2 + \frac{1}{16} p^3 - \frac{5}{128} p^4 + \frac{7}{256} p^5 - \frac{21}{1024} p^6 + \frac{33}{2048} p^7 - \frac{429}{32768} P(x)^8; \\
-\frac{\hat{b} \sqrt{x}}{\sqrt{x}} &\simeq - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 - \frac{45045}{32768} P(x)^8; \\
-P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2
-  + ((\frac{1}{16} + \frac{1}{64}) 3 - \frac{1}{64}) P(x)^4
-  + ((\frac{7}{256} + \frac{5}{512} + \frac{1}{256}) 5!! - \frac{15}{512}) P(x)^6 \\
- &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + \frac{180034033932044865}{72057594037927936} P(x)^8; \\
-\frac{1}{1 + p} - 1 & = \sum_{n=1}^{\infty} (-1)^n p^n \simeq -p + p^2 - p^3 + p^4 - p^5 + p^6 - p^7 + p^8; \\
-\frac{\hat{b} 1/x}{1/x} & = \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \simeq P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + 105 P(x)^8; \\
-P(1/x)^2 &\simeq P(x)^2 + (3 * 3 - 1) P(x)^4 + (5 * 15 - 2 * 3) P(x)^6 + (7 * 105 - 2 * 15 - 3^2) P(x)^8 \\
- &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + 696 P(x)^8; \\
-\frac{1}{(1 + p)^2} - 1 & = \sum_{n=1}^{\infty} (-1)^n p^n \simeq -2 p + 3 p^2 - 4 p^3 + 5 p^4 - 6 p^5 + 7 p^6 - 8 p^7 + 9 p^8; \\
-\frac{\hat{b} 1/x^2}{1/x^2} & = \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \simeq 3 P(x)^2 + 15 P(x)^4 + 105 P(x)^6 + 945 P(x)^8; \\
-P(1/x^2)^2 &\simeq 4 P(x)^2 + (25 * 3 - 9) P(x)^4 + (70 * 15 - 90) P(x)^6 + (147 * 105 - 855) P(x)^8 \\
- &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + 14580 P(x)^8;
+& f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!} \\
+\delta^2 f(x, y) &= \int \int f(x + \tilde{x}, y + \tilde{y})^2 
+    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \overline{f(x, y)}^2 \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \;(
+  \sum_{i=0}^{2m} \sum_{j=0}^{2n} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}); \\
+&=  (\delta x)^2 
+\sum_{j=0}^{2n} & \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+ &\eqspace - \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
+ & = \sum_{j=1}^{2n-1} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+ &\eqspace - \sum_{j=1}^{n-1} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
+ &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,0)}_{(x,y)}}{i!}\frac{f^{(2m-i,2n)}_{(x,y)}}{(2m-i)!\;(2n)!}
+    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,0)}_{(x,y)}}{(2i)!}\frac{f^{(2m-2i,2n)}_{(x,y)}}{(2m-2i)!\;(2n)!}) \\
+ &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,2n)}_{(x,y)}}{i!\;(2n)!}\frac{f^{(2m-i,0)}_{(x,y)}}{(2m-i)!}
+    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,2n)}_{(x,y)}}{(2i)!(2n)!} \frac{f^{(2m-2i,0)}_{(x,y)}}{(2m-2i)!})
 \end{align*}
 
 \fi
+
 
 
 
@@ -979,25 +995,25 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 & \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
-  = \sum_{n=0}^{\infty}(\delta x)^{2n} \zeta(2n) \frac{f^{(2n)}_x}{(2n)!} \equiv f(x) + \hat{b} f(x); \\
+  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
+\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
 \label{eqn: Taylor 1d variance}
-\delta^2 f(x) &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x)^2 N(\tilde{x}) d \tilde{z} - \overline{f(x)}^2 \nonumber \\
- &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - \left( \hat{b} f(x) \right)^2; 
+&\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
+ 	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right); \\
+  &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
+  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
 \end{align}
-Formula \eqref{eqn: Taylor 1d mean} define $\hat{b} f(x)$ for calculation convenience, which captures the behavior of $f(x)$ at the tails of the result uncertainty distribution.
-In contrast, Formula \eqref{eqn: distribution mode} captures the behavior of $f(x)$ at the mode of the result uncertainty distribution.
-Both captures the effect of the input uncertainty distribution to $f(x)$.
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
 When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula \eqref{eqn: momentum factor}:
 \begin{itemize}
-\item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
-
 \item For $2n < 10$ when $5 \leq \sigma$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
 
+\item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
+
 \item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
-$\lambda$ is always slightly smaller than $\sigma$, as expected.
+$\lambda$ is always slightly smaller than $\sigma$ empirically, as expected.
 %When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
 \end{itemize}
 \begin{align}
@@ -1012,10 +1028,10 @@ $\lambda$ is always slightly smaller than $\sigma$, as expected.
 The property of $\zeta(2n)$ when $\sigma^2 \ll 2n$ is not sensitive to the underlying uncertainty distribution.  If the normal distribution $N(\tilde{z)}$ in Formula \eqref{eqn: variance momentum} is replaced by a uniform distribution between $[-\sigma, +\sigma]$,  Formula \eqref{eqn: variance momentum UN} is similar to Formula \eqref{eqn: momentum factor higher}:
 \begin{align}
 \label{eqn: variance momentum UN}
-\zeta(n) &\equiv \int_{-\sigma}^{+\sigma} \frac{1}{2 \sigma} \tilde{z}^{2n} d \tilde{z} = 2 \frac{1}{2 \sigma} \frac{{\sigma}^{2n+1}}{2n + 1}; 
+\zeta(2n) &\equiv \int_{-\sigma}^{+\sigma} \frac{1}{2 \sigma} \tilde{z}^{2n} d \tilde{z} = 2 \frac{1}{2 \sigma} \frac{{\sigma}^{2n+1}}{2n + 1}; 
 \end{align}
 
-The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}.
+The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
 $\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisions_Physical_Measurements}.
 \begin{equation}
@@ -1030,11 +1046,12 @@ Thus, $\sigma = 5$ in variance arithmetic.
 Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which always converge:
 \begin{align}
 \label{eqn: exp Taylor}
-&\frac{e^{x + \tilde{x}} - e^x}{e^x} = e^{\tilde{x}} - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{n!}; \\
+& e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp precision}
-P(e^x)^2 &\simeq \frac{\delta^2 e^x}{e^{2x}} = \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j!\;(2n - j)!}
- - \left( \sum_{n=1}^{\infty} \zeta(2n) (\delta x)^{2n} \frac{1}{(2n)!} \right)^2 \\
- &\simeq (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8;
+P(e^x)^2 & = \frac{\delta^2 e^x}{\overline{e^x}^2} \simeq \frac{\delta^2 e^x}{(e^x)^2}
+     = \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
+ -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
+ &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
 \end{align}
 
 Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
@@ -1042,43 +1059,45 @@ Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
 \label{eqn: log Taylor}
 & \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
 \label{eqn: log precision}
-\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}
-   - \left( \sum_{n=1}^{+\infty} \zeta(2n) P(x)^{2n} \frac{1}{2n} \right)^2 \\
- &\simeq P(x)^2 + \frac{5}{2} P(x)^4 + \frac{32}{3} P(x)^6 + 65 P(x)^8; 
+\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
+   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
+ &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
 \end{align}
 
 Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, which converge when $\delta x < 1$:
 \begin{align}
 \label{eqn: sin Taylor}
-\sin(x + \tilde{x}) &= \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
+& \sin(x + \tilde{x}) = \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) &= (\delta x)^2 \cos(x)^2 + \sum_{n=2}^{\infty} (\delta x)^{2n} \zeta(2n) (-1)^{n} \sum_{j=1}^{n-1} \frac{(2n+1)\sin(x)^2 - (2n-2j)}{(2j+1)!(2n-2j)!} \nonumber \\
- &\eqspace - \left(\sum_{n=1}^{\infty}(\delta x)^{2n} \zeta(2n) (-1)^{n} \frac{\sin(x)}{(2n)!}\right)^2   \\
- &\simeq \cos(x)^2 (\delta x)^2 + \frac{1} {2}(1 - 3 \cos(x)^2) (\delta x)^4 - \frac{1}{24} (16 - 29 \cos(x)^2) (\delta x)^6;
+\delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1} \nonumber \\
+ & \left( \cos(x)^2 \sum_{j=0}^{n-1} \frac{\zeta(2n)}{(2j+1)!(2n-2j-1)!}
+      - \sin(x)^2 \sum_{j=1}^{n-1} \frac{\zeta(2n) - \zeta(2j) \zeta(2n-2j)}{(2j)!(2n-2j)!} \right) \\ 
+ &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  + o((\delta x)^8);
 \end{align}
 
-Formula \eqref{eqn: power precision} gives the result variance for $x^c$.
+Formula \eqref{eqn: power precision} gives the result variance for $x^c$, in which $\begin{pmatrix} c \\ n \end{pmatrix} = \frac{\prod_{j=0}^{n-1} (c -j)}{n!}$:
 \begin{align}
 \label{eqn: power Taylor}
-&\frac{(x + \tilde{x})^c - x^c}{x^c} = (1 + \frac{\tilde{x}}{x})^c - 1 = \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+&(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
 \label{eqn: power precision}
-P(x^c)^2 &\simeq \frac{\delta^2 x^{2c}}{x^c} = \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \sum_{j=1}^{n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \left( \sum_{n=1}^{\infty} \zeta(2n) P(x)^{2n} \begin{pmatrix} c \\ 2n \end{pmatrix} \right)^2; \\
- &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
+P(x^c)^2 &= \frac{\delta^2 x^c}{\overline{x^c}^2} \simeq \frac{\delta^2 x^c}{(x^c)^2} = \sum_{n=1}^{\infty} P(x)^{2n} \nonumber \\
+ & \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \sum_{j=1}^{n-1} \zeta(2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \zeta(2n - 2j) \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right)\\
+ &= c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6 + o(P(x)^8);
 \end{align}
-As the special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, and Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$: 
+As the special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$, and Formula \eqref{eqn: inversion square precision} gives the result variance for $1/x^2$: 
 \begin{align}
 \label{eqn: square precision}
 P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
 \label{eqn: square root precision}
-P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6; \\
+P(\sqrt{x})^2 &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion precision}
-P(1/x)^2 &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6; \\
+P(1/x)^2 &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion square precision}
-P(1/x^2)^2 &\simeq 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6;
+P(1/x^2)^2 &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
 \end{align}
 
-If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/\lambda$.
+If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\lambda \sigma)$.
 $\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
 The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$ according to Formula \eqref{eqn: momentum factor higher}.
 
@@ -1089,16 +1108,19 @@ The variance formula using Taylor expansion shows the nature of the calculation,
 
 Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
 \begin{align}
+\label{eqn: Taylor 2d}
+&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
 \label{eqn: Taylor 2d mean}
 \overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}
-\equiv f(x,y) + \hat{b} f(x,y); \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
 \label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \int \int f(x + \tilde{x}, y + \tilde{y})^2 
-    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \left( \overline{f(x, y)} \right)^2 \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
-  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
- &\eqspace - f(x,y)^2 - \left( \hat{b} f(x,y) \right)^2; 
+\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
+&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\;\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
+&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
+&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
+      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
+&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
 
@@ -1108,184 +1130,138 @@ Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} ar
 \iffalse
 
 \begin{align*}
-\hat{c} (f(x) g(x)) &\equiv \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!}; \\
-\hat{c} (f(x, y) g(x, y)) &\equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta x)^{2n} \zeta(2m) \zeta(2n)
-  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!};
+(f(x) g(x))^{(i)} &= (f(x)^{(1)} g(x) + f(x) g(x)^{(1)})^{(i-1)} \\ 
+  &= (f(x)^{(2)} g(x) + 2  f(x)^{(1)} g(x)^{(1)} + f(x) g(x)^{(2)})^{(i-2)} \\
+  &= (f(x)^{(3)} g(x) + 3  f(x)^{(2)} g(x)^{(1)} + 3  f(x)^{(1)} g(x)^{(2)} + f(x) g(x)^{(3)})^{(i-3)} \\
+  &= \sum_{j=0}^{i} \frac{i!}{j! (i-j)!} f(x)^{(j)} g(x)^{(i-j)}; \\
+(f(x)^2 g(x)^2)^{(i)} &=2 \left( (f g) (f g)^{(1)} \right)^{(i-1)} \\
+  &= 2 \left( (f g)^{(1)} (f g)^{(1)} + (f g) (f g)^{(2)} \right)^{(i-2)} \\
+  &= 2 \left( 3 (f g)^{(1)} (f g)^{(2)} + (f g) (f g)^{(3)} \right)^{(i-3)} \\
+  &= 2 \left( 4 (f g)^{(1)} (f g)^{(3)} + 3 (f g)^{(2)} (f g)^{(2)} + (f g) (f g)^{(4)} \right)^{(i-4)}
 \end{align*}
 
 \begin{align*}
-\hat{b} (f(x)+g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{f^{(2n)}_x + g^{(2n)}_x}{n!} = \widehat{f(x)} + \widehat{g(x)}; \\
-\hat{v} (f(x)+g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x + 
-  g^{(j)}_x}{j!} \frac{f^{(2n-j)}_x + g^{(2n-j)}_x}{(2n-j)!} \\
-&= \delta^2 f(x) + \delta^2 g(x) + 2 \hat{c} (f(x) g(x)); \\
-f^{(n)}_x = -(-f)^{(n)}_x&:\eqspace \hat{b}(f(x)-f(x)) = 0;\eqspace \hat{v} (f(x)-f(x)) = 0;\eqspace \delta^2 (f(x)-f(x)) = 0;
+\delta^2 (c_1 f + c_0) &= c_1^2 \delta^2f; \\
+\delta^2 (f + g) &= \overline{(f + g)^2} - \overline{(f + g)}^2 = \overline{f^2} - \overline{f}^2 + 2 \overline{f g} - 2 \overline{f} \overline{g} + \overline{g^2} - \overline{f}^2 \\
+ &= \delta^2 f + \delta^2 g + 2 (\overline{fg} - \overline{f}\overline{g}); \\
+\overline{f g} &= \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{\zeta(2n)}{(2n)!} (f g)^{(2n)}_x 
+  = \sum_{n=0}^{\infty}(\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{f^{(j)}_x}{j!} \frac{g^{(2n - j)}_x}{(2n - j)!};  \\
+\overline{f} \overline{g} &= \sum_{n=0}^{\infty}(\delta x)^{2n} \sum_{j=0}^{n} \frac{\zeta(2j) f^{(2j)}_x}{(2j)!} \frac{\zeta(2n - 2j) g^{(2n - 2j)}_x}{(2n - 2j)!};  \\
+\delta^2 (f g) &= \overline{f^2 g^2} - \overline{f g}^2; \\
+\delta^2 f(g) &= \overline{f(g)^2} - \overline{f(g)}^2;
 \end{align*}
 
+When $(f g)^{(n)} = f^{(n)} g^{(n)}$, $\overline{f^n g^n} = \overline{f^n} \overline{g^n}$.
 \begin{align*}
-\hat{v} &(f(x, y) + g(x, y)) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta x)^{2n} \zeta(2m) \zeta(2n)
-  \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)} + g^{(i,j)}_{(x,y)}}{i!\;j!} \frac{f^{(2m-i,2n-j)}_{(x,y)} + g^{(2m-i,2n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} - f(x,y)^2 - g(x,y)^2 \\
-& = \hat{v} f(x, y) + \hat{v} g(x, y) + 2 \hat{c} (f(x, y) g(x, y));
-\end{align*}
-
-\begin{align*}
-\hat{b} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{(f g)^{(2n)}_x}{(2n)!} 
- = \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{(2n)!}{(2n-j)! \;j!} \frac{f^{(j)}_x g^{(2n-j)}_x}{(2n)!} \\
- &= f(x) \hat{b} (g(x)) + \hat{b} (f(x)) g(x) + 2 \hat{c} (f(x) g(x)); \\
-\hat{v} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(fg)^{(j)}_x}{j!} \frac{(fg)^{(2n-j)}_x}{(2n-j)!} \\
- &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
-    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
-    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) ;
-\end{align*}
-
-\begin{align*}
-& (f^{-1})^{(1)}_x = - f^{-2} f^{(1)}_x;\\
-& (f^{-1})^{(2)}_x = - f^{-2} f^{(2)}_x + 2 f^{-3} (f^{(1)}_x)^2;\\
-& (f^{-1})^{(3)}_x = - f^{-2} f^{(3)}_x + 6 f^{-3} f^{(2)}_x f^{(1)}_x - 6 f^{-4} (f^{(1)}_x)^3; \\
-& (f^{-1})^{(4)}_x = - f^{-2} f^{(4)}_x + 8 f^{-3} f^{(3)}_x f^{(1)}_x + 6 f^{-3} (f^{(2)}_x)^2 - 36 f^{-4} f^{(2)}_x (f^{(1)}_x)^2
-  + 24 f^{-5} (f^{(1)}_x)^4; \\
-& f^{(1)}_x f^{-1} + f (f^{-1})^{(1)}_x = f^{(1)}_x f^{-1} - f^{(1)}_x f^{-1} = 0; \\
-& f^{(2)}_x f^{-1} + 2 f^{(1)}_x (f^{-1})^{(1)}_x + f (f^{-1})^{(2)}_x = f^{-1} f^{(2)}_x -2 f^{-2} (f^{(1)}_x)^2
-  - f^{-1} f^{(2)}_x + 2 f^{-2} (f^{(1)}_x)^2 = 0; \\
-& f^{(3)}_x f^{-1} + 3 f^{(2)}_x (f^{-1})^{(1)}_x + 3 f^{(1)}_x (f^{-1})^{(2)}_x + f (f^{-1})^{(3)}_x \\
-&\eqspace =  f^{-1} f^{(3)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x + 6 f^{-3} (f^{(1)}_x)^3
- - f^{-1} f^{(3)}_x + 6 f^{-2} f^{(2)}_x f^{(1)}_x - 6 f^{-3} (f^{(1)}_x)^3 \\
-&\eqspace = 0;
-\end{align*}
-
-\begin{align*}
-f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
-& t1 = f(g(x))^{(1)}_g g(x)^{(1)}_x; \\
-& t2 = f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \\
-& t3 = f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \\
-& t4 = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + \\
-&\eqspace\eqspace\eqspace 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + \\
-&\eqspace\eqspace\eqspace f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x; \\
-&\eqspace = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 6 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 \\
-&\eqspace\eqspace\eqspace + 4 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x;
-\end{align*}
-
-For $f(x) = g^{-1}(x)$:
-\begin{align*}
- 1 &= \frac{d x}{d x} = \frac{d x}{d g} \frac{d g}{d x}; \\
-f(g(x))^{(1)}_g &= 1/g(x)^{(1)}_x; \\
- 0 &= \frac{d^2 x}{d g^2} \frac{d g}{d x} + \frac{d x}{d g} \frac{d^2 g}{d x^2} \frac{d x}{d g}; \\
- \frac{d^2 x}{d g^2} &= - \frac{d^2 g}{d x^2} (\frac{d x}{d g})^3; \\
-f(g(x))^{(2)}_g &= - g(x)^{(2)}_x / (g(x)^{(1)}_x)^3; \\
- \frac{d^3 x}{d g^3}& = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 - 3 \frac{d^2 g}{d x^2} (\frac{d x}{d g})^2 \frac{d^2 x}{d g^2}
- = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 + 3 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^5 ; \\
-f(g(x))^{(3)}_g &= - g(x)^{(3)}_x / (g(x)^{(1)}_x)^4 + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^5; \\
- \frac{d^4 x}{d g^4} &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 - 4 \frac{d^3 g}{d x^3} (\frac{d x}{d g})^3 \frac{d^2 x}{d g^2}
-    + 6 \frac{d^2 g}{d x^2} \frac{d^3 g}{d x^3} (\frac{d x}{d g})^6 + 15 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^4 \frac{d^2 x}{d g^2}; \\
- &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 + 10 \frac{d^3 g}{d x^3} \frac{d^2 g}{d x^2} (\frac{d x}{d g})^6 - 15 (\frac{d^2 g}{d x^2})^3 (\frac{d x}{d g})^7; \\ 
-f(g(x))^{(4)}_g &= - g(x)^{(4)}_x / (g(x)^{(1)}_x)^5 + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^6 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^7; \\
-f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
-& t1 = 1; \\
-& t2 = - g(x)^{(2)}_x / g(x)^{(1)}_x + g(x)^{(2)}_x / g(x)^{(1)}_x = 0; \\
-& t3 = - g(x)^{(3)}_x / g(x)^{(1)}_x + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^2 - 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^ + g(x)^{(3)}_x / g(x)^{(1)}_x = 0; \\
-& t4 = - g(x)^{(4)}_x / g(x)^{(1)}_x + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
-&\eqspace\eqspace\eqspace - 6 g(x)^{(3)}_x  g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + 18 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
-&\eqspace\eqspace\eqspace - 3 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 - 4  g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + g(x)^{(4)}_x / g(x)^{(1)}_x = 0;\\
-\end{align*}
-
-Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
-For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$:
-\begin{align*}
-m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
-&\delta^2 (f(x) + g(x)) = (\delta x)^{2m} \zeta(2m-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
-m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
-&\delta^2 (f(x) + g(x)) = (\delta x)^{2n} \zeta(2n-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
-\delta^2 (f(x) g(x)) &= (\delta x)^{2m+2n} \zeta(2m+2n-1) a b;
+\delta^2 (f + g) &= \delta^2 f + \delta^2 g + 2 (\overline{fg} - \overline{f}\overline{g}) =  \delta^2 f + \delta^2 g;  \\
+\delta^2 (f g) &= \overline{f^2 g^2} - \overline{f g}^2 = \overline{f^2}\;\overline{g^2} - \overline{f}^2 \overline{g}^2
+  = (\delta^2 f + \overline{f}^2)(\delta^2 g + \overline{g}^2) - \overline{f}^2 \overline{g}^2 \\
+  &= (\delta^2 f) (\delta^2 g) + \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2; 
 \end{align*}
 
 \fi
 
-By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
-When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to account for correlation between uncertainties, such as the correlation between $f(x)$ and $g(x)$ through $x$ when applying Formula \eqref{eqn: Taylor 1d variance}, or the correlation between $f(x, y)$ and $g(x, y)$ through $(x, y)$ when applying Formula \eqref{eqn: Taylor 2d variance}.
-
-Formula \eqref{eqn: sum variance} calculate the sum of any two functions, while Formula \eqref{eqn: prod variance} calculate the result of $f(x) g(x)$.
-Both Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} contains a cross calculation $\hat{c} (f g)$ between $f$ and $g$, as shown in Formula \eqref{eqn: cross dependency} and \eqref{eqn: cross dependency 2d}.
 \begin{align}
-\label{eqn: cross dependency}
-\hat{c} (f(x) g(x)) &\equiv 2 \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!}; \\
-\label{eqn: cross dependency 2d}
-\hat{c} (f(x, y) g(x, y)) &\equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n) 
- \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!}; \\
 \label{eqn: sum variance}
-\delta^2 (f + g) &= \delta^2 f + \delta^2 g + \hat{c} (f\;g); \\
+\delta^2 (f + g) &= \delta^2 f + \delta^2 g + 2 (\overline{fg} - \overline{f}\overline{g}); \\
 \label{eqn: prod variance}
-\delta^2 (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
-    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
-    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \nonumber \\
-&\eqspace - \left( \overline{f} g + f \overline{g} + \hat{c} (f g) \right)^2;
-\end{align} 
-%Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
-
-The result variance in Formula \eqref{eqn: sum variance} or \eqref{eqn: prod variance} becomes zero for a constant expression, which is demonstrated by Formula \eqref{eqn: sum dependency} and \eqref{eqn: prod dependency}.
-\begin{align}
-\label{eqn: sum dependency}
-0 &= \delta^2 (f - f); \\
-\label{eqn: prod dependency}
-0 &= \delta^2 (f / f) = \hat{c} (f / f); 
+\delta^2 (f g) &= \overline{f^2 g^2} - \overline{f g}^2; \\
+\label{eqn: composite variance}
+\delta^2 f(g) &= \overline{f(g)^2} - \overline{f(g)}^2; \\
+\label{eqn: linear variance}
+\delta^2 (c_1 f + c_0) &= c_1^2 \delta^2f; 
 \end{align}
 
-For the composite function $f(g(x))$, Formula \eqref{eqn: Taylor 1d variance} becomes complicated quickly, as shown by their corresponding Taylor expansion of Formula \eqref{eqn: composite taylor}.
-However, because the reverse function satisfies Formula \eqref{eqn: reverse}, the original variance $(\delta x)^2$ is restored in Formula \eqref{eqn: reverse variance} when applying Formula \eqref{eqn: Taylor 1d variance}, which is another case of dependency tracing in variance arithmetic.
-\begin{align}
-\label{eqn: composite taylor}
-f(g(x + \tilde{x})) &= f(g(x)) + t_1 \tilde{x} + t_2 \frac{\tilde{x}^2}{2!} + t_3 \frac{\tilde{x}^3}{3!} + ... \\
- t_1 &= f(g(x))^{(1)}_g g(x)^{(1)}_x; \nonumber \\
- t_2 &= f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \nonumber \\
- t_3 &= f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \nonumber \\
-\label{eqn: reverse}
-f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
-\label{eqn: reverse variance}
-\delta^2 f^{-1}(f(x)) &= (\delta x)^2;
-\end{align}
+%By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
+When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to trace dependency between uncertainties.
+For example:
+\begin{itemize}
+\item Formula \eqref{eqn: sum variance} shows $\delta^2 (f + g)$, whose dependence tracing can be demonstrated by $\delta^2 (f - f) = 0$  and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter case corresponding to Formula \eqref{eqn: addition and subtraction}.  
 
-Due to dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plague interval arithmetic.
+\item Formula \eqref{eqn: prod variance} shows  $\delta^2 (f g)$, whose dependence tracing can be demonstrated by $\delta^2 (f/f) = 0$  and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter case corresponding to Formula \eqref{eqn: multiplication}.  
+
+\item Formula \eqref{eqn: composite variance} shows  $\delta^2 f(g(x))$, whose dependence tracing can be demonstrated by $\delta^2 (f^{-1}(f)) = \delta^2 x$.  
+
+\item Formula \eqref{eqn: linear variance} shows the variance of linear transformation of a function, which can be applied to Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} for more generic dependency tracing.
+\end{itemize}
+Because of dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plagued interval arithmetic.
 
 
 
-\subsection{Avoiding Dependency Problem}
+\subsection{Progressive Execution and Dependency Problem}
 
-However, variance arithmetic may still suffer from \emph{dependency problem} when an imprecise input is used multiple times without dependency tracing.
-For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations to calculate $x^2 - x$ when the input variance is $(\delta x)^2$.
+\iffalse
+
+\begin{align*}
+f(g)^{(1)} &= f^{(1)} g^{(1)}; \\
+f(g)^{(2)} &= f^{(2)} (g^{(1)})^2 +  f^{(1)} g^{(2)}; \\
+f(g)^{(3)} &= f^{(3)} (g^{(1)})^3 + 3 f^{(2)} g^{(1)} g^{(2)} +  f^{(1)} g^{(3)}; \\
+f(g)^{(4)} &= f^{(4)} (g^{(1)})^4 + 6 f^{(3)} (g^{(1)})^2 g^{(2)} + 3 f^{(2)} (g^{(2)})^2 + 4 f^{(2)} g^{(1)} g^{(3)} + f^{(1)} g^{(4)}; \\
+\delta^2 f(g(x)) &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4
+    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \\
+  &\eqspace + f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x) + o((\delta x)^6); \\
+\delta^2 f(x))|_{\delta^2 x = \delta^2 g(x)} &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4 
+    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \\
+  &\eqspace + f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4) + o((\delta x)^6) ;
+\end{align*}
+
+\begin{align*}
+(x + \tilde{x})^{2} - (x + \tilde{x}) &= \frac{1}{1!} (2x - 1) \tilde{x} + \frac{1}{2!} 2 \tilde{x}^2 ; \\
+\delta^2  (x^{2} - x) &= (2x - 1)^2 (\delta x)^2 + 2 (\delta x)^4; \\
+\delta^2 ((x - 1/2)^{2} - 1/4) &\longrightarrow (4x^2 - 4x + 1) (\delta x)^2 + 2 (\delta x)^4; \\
+\delta^2 (x^{2} - x) &\longrightarrow (4 x^2 + 1) (\delta x)^2 + 2 (\delta x)^4;  \\
+\delta^2 (x - 1) x &\longrightarrow (2 x^2 - 2x + 1) (\delta x)^2 + (\delta x)^4 ;
+\end{align*}
+
+\fi
+
+Dependency tracing requires final analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
+It conflicts with traditional numerical algorithms which execute progressively.
+For example:
+\begin{itemize}
+\item 
+Traditionally, $x^2 - x$ can be calculated equivalently as Formula \eqref{eqn: interval depend 1}, \eqref{eqn: interval depend 2}, and \eqref{eqn: interval depend 3}.
+When applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations, only Formula \eqref{eqn: interval depend 1} gives the correct result, while the other two violate dependency tracing and give wrong results, as shown in Table 1.
+It shows that the dependency problem of interval arithmetic \cite{Interval_Arithmetic} may be due to the lack of dependency tracing.
+
+\item In Gaussian elimination for linear equation \cite{Numerical_Recipes}, the execution is carried out progressively in the path to minimize rounding errors using conventional floating-point calculations, without any consideration for dependency tracing.
+The existence of different execution paths suggests that the solution itself is designed with dependency problem.
+Instead, in Section \ref{sec: matrix}, variance arithmetic uses the matrix inversion formula by the determinants of sub-matrices, which is advised against by traditional numerical algorithm \cite{Numerical_Recipes}.
+
+\item Formula \eqref{eqn: composite variance 1d} is the single-variable version of Formula \eqref{eqn: composite variance}.
+If instead, $\delta^2 f(g(x))$ is calculated as $\delta^2 f(x)$ with $\delta^2 x = \delta^2 g(x)$, the result Formula \eqref{eqn: progressive variance} depends on the sequence of the composite functions, such as $P(\sqrt{x}^2)^2 \simeq P(x)^2 + \frac{9}{2} P(x)^4$ v.s. $P(\sqrt{x^2})^2 \simeq P(x)^2 + \frac{9}{8} P(x)^4$.
+\end{itemize}
+Thus, when the dependency tracing is not applied strictly, variance arithmetic will have dependency problem.
+To avoid such dependency problem, all the conventional numerical algorithms need to be reevaluated for variance arithmetic.
+
 \begin{table}
 \label{eqn: dependency example}
 \centering
 \begin{tabular}{|l|l|l|} 
 \hline 
-Formula & Over-estimation & Wrong Independency \\ 
+Formula & Result difference & Wrong independence \\ 
 \hline 
 \eqref{eqn: interval depend 1} & $0$ & \\
 \hline 
-\eqref{eqn: interval depend 2} & $+(\delta x)^2$ & between $x^2$ and $x$ \\
+\eqref{eqn: interval depend 2} & $4 x (\delta x)^2$ & between $x^2$ and $x$ \\
 \hline 
-\eqref{eqn: interval depend 3} & $-(2 x^2 + 2x - 1)(\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
+\eqref{eqn: interval depend 3} & $( - 2 x^2 + 2 x) (\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
 \hline 
 \end{tabular}
 \captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
-The correct result variance is $4 x^2 (\delta x)^2 + 2 (\delta x)^4$.}
+The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.}
 \end{table}
 
-To avoid the dependency problem, the conventional numerical algorithms need to be reevaluated.
-\begin{itemize}
-\item   
-Traditional computer numerical algorithms are designed to choose an execution path to minimize rounding errors of the conventional floating-point calculations, such as the Gaussian elimination for the first-order solving linear equation \cite{Numerical_Recipes}.
-The existence of different execution paths suggests that the solution itself is designed with dependency problem.
-In contrast, variance arithmetic should be used on the analytic expression for the solution, to trace dependencies of each input when it appears multiple times in the analytic solution.
-Section \ref{sec: matrix} will compare matrix inversion using either strict variance arithmetic or Gaussian elimination.
-
-\item  
-Traditional time-series data processing uses one input multiple times, which may also cause the dependency problem.
-Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} will compare time-series linear regression using either strict variance arithmetic or a traditional progressive approach.
-
-\item
-The usages of intermediate variable and conditional execution need to be examined because they may upset the dependency tracing. 
-
-\end{itemize}
-
-
+\begin{align}
+\label{eqn: composite variance 1d}
+\delta^2 f(g(x)) &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4
+    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \nonumber \\
+  &\eqspace + f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x) + o((\delta x)^6); \\
+\label{eqn: progressive variance}
+\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4 
+    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \nonumber \\
+  &\eqspace + f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4) + o((\delta x)^6) ; 
+\end{align}
 
 
 \subsection{A Variance Representation}
@@ -1562,11 +1538,37 @@ The most convenient signals to test uncertainty-bearing arithmetic are sine or c
 
 \subsection{FFT (Fast Fourier Transformation) \cite{Prev_Precision_Arithmetic}}
 
+\iffalse
+
+\fi
+
+Forward:
+\begin{align*}
+L = 1:\;& o=0: & [0, 1]; \\
+ & o = 1: & F = [0 + 1, 0 - 1]; \\
+L = 2:\;& o=0: & [0, 2, 1, 3]; \\
+ & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
+ & o = 2: & [0 + 1 + 2 + 3, 0 + i 1 - 2 - i 3 , 0 - 1 + 2 - 3, 0 - i 1 - 2 + i 3; \\
+ & [0, 1, 0, -1]:& [0, i 2, 0, - i 2]; \\
+ & [1, 0, -1, 0]:& [0, 2, 0, 2];
+\end{align*}
+
+Reverse:
+\begin{align*}
+L = 1:\;& o=0: & [0, 1]; \\
+ & o = 1: & F = [0 + 1, 0 - 1]; \\
+L = 2:\;& o=0: & [0, 2, 1, 3]; \\
+ & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
+ & o = 2: & [0 + 1 + 2 + 3, 0 - i 1 - 2 + i 3 , 0 - 1 + 2 - 3, 0 + i 1 - 2 - i 3; \\
+ & [0, i 2, 0, - i 2]:& [0, 4, 0, -4]; \\
+ & [0, 2, 0, 2]:& [4, 0, -4, 0];
+\end{align*}
+
 When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}, in which $m = L, L-1,\dots 1,0$ indicates progress of the transformation, and $j$ is the bit-reverse of $n$:
 \begin{align}
 m=L: \eqspace & H[n,\frac{k}{2^{m}}] = h[j],  k,n = 0,1\dots N-1; \\
 \label{eqn: Danielson-Lanczos}
-m=L-1 \dots 0: \eqspace & H[n,\frac{k}{2^{m}}] = H[n,\frac{k}{2^{m+1}}] + H[n,\frac{k}{2^{m+1}}]\; \exp{(+i 2\pi \frac{n}{2^{L-m}})}; \\
+m=L-1 \dots 0: \eqspace & H[n,\frac{k}{2^{m}}] = H[n,\frac{k}{2^{m}}] + H[n,\frac{k}{2^{m+1}}]\; \exp{(+i 2\pi \frac{n}{2^{L-m}})}; \\
 m=0: \eqspace & H[n] = H[n,\frac{k}{2^{m}}];
 \end{align}
 Thus, each output value is obtained after applying Formula \eqref{eqn: Danielson-Lanczos} $L$ times.  

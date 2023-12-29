@@ -37,7 +37,7 @@ public class IntvDbl implements IReal{
         }      
         this.value = value;
         this.range = range;
-        if (!IReal.isFinite(this)) {
+        if (!isFinite()) {
             throw new IReal.UncertaintyException(String.format("%s: %s", toString(), typeName()));
         }
     }
@@ -156,7 +156,7 @@ public class IntvDbl implements IReal{
 
     @Override
     public IntvDbl power(double exponent) throws ValueException, UncertaintyException {
-        if (!Double.isFinite(exponent) || !IReal.isFinite(this)) {
+        if (!Double.isFinite(exponent) || !isFinite()) {
             throw new ValueException(String.format("pow([%.3e, %.3e]: %s, %.3e)", 
                         value - range, value + range, typeName(), exponent));
         }

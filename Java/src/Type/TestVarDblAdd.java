@@ -76,6 +76,12 @@ public class TestVarDblAdd {
     }
 
     @Test
+    public void testAddLSB() {
+        test(1.0, IReal.getLSB(1.0), 1.0, IReal.getLSB(1.0), 2.0, 0.0, 1E-16);
+        test(1.0/3, IReal.getLSB(1.0/3), 2.0/3, IReal.getLSB(2.0/3), 1.0, 0.0, 1E-16);
+    }
+
+    @Test
     public void testAddRoundingError() {
         try {
             final VarDbl op1 = new VarDbl(1.0/3, 1.0/(1L << 20));
@@ -105,7 +111,7 @@ public class TestVarDblAdd {
             assertEquals(-35, dif.exp());
             assertEquals(Math.abs(val), dif.val());
             assertEquals(1.94025E-11, dif.value() + 1.0/3, 1E-16);
-//            assertEquals(0, dif.add(new VarDbl(1.0/3)).value(), 1E-16);
+            assertEquals(2.910383E-11, dif.add(new VarDbl(1.0/3)).value(), 1E-16);
 
         } catch (ValueException | UncertaintyException e) {
            fail();;
@@ -153,5 +159,4 @@ public class TestVarDblAdd {
              Math.sqrt(Double.MAX_VALUE) / 4, Math.sqrt(Double.MAX_VALUE / 4), 
              Math.sqrt(Double.MAX_VALUE) * 3 / 4, Math.sqrt(Double.MAX_VALUE / 2), 3E-16);
     }
-
 }

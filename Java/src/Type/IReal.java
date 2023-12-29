@@ -26,6 +26,11 @@ public interface IReal {
 	double uncertainty() throws UncertaintyException;
 	
 	/*
+	 * Clone the value.
+	 */
+	IReal clone();
+
+    /*
 	 * Negate the value, and return this.
 	 */
 	IReal negate();
@@ -51,16 +56,23 @@ public interface IReal {
 
 	/*
 	 * powered by accurate value, and return this.
-	 * If exponent is false, and if 
 	 */
 	IReal power( double exponent ) throws ValueException, UncertaintyException;
+
 	
 	IReal add( final IReal other ) throws TypeException, ValueException, UncertaintyException;
+
+    default IReal minus( final IReal other ) throws TypeException, ValueException, UncertaintyException {
+        return add( other.clone().negate() );
+    }
 
 	
 	IReal multiply( final IReal other ) throws TypeException, ValueException, UncertaintyException;
 
-	/*
+	default IReal divid( final IReal other ) throws TypeException, ValueException, UncertaintyException {
+        return multiply( other.clone().power(-1) );
+    }
+ 	/*
 	 * When the decomposed double value is no longer a double
 	 */
 	public static class ValueException extends Exception {
@@ -99,10 +111,10 @@ public interface IReal {
 	/*
 	 * If the range of (value, uncertainty) is finite using RealTool.isfinite(...)
 	 */
-	static boolean isFinite( IReal real ) {
+	default boolean isFinite() {
 		try {
-			final double value = real.value();
-			final double uncertainty = real.uncertainty();
+			final double value = value();
+			final double uncertainty = uncertainty();
 			return Double.isFinite(value + uncertainty) && Double.isFinite(value - uncertainty);
 	 	} catch (ValueException | UncertaintyException e) {
 			return false;

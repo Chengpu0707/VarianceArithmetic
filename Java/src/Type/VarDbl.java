@@ -14,10 +14,16 @@ public class VarDbl implements IReal {
     public VarDbl(final double value, final double variance) throws ValueException, UncertaintyException {
         pack(value, variance, false, false, LEAK_VAL_MAX);
     }
-    public VarDbl(final double value) throws ValueException {
+    public VarDbl(final double value) {
         try {
             pack(value, Double.NaN, false, false, LEAK_VAL_MAX);
-        } catch (UncertaintyException e) {
+        } catch (UncertaintyException | ValueException e) {
+        }
+    }
+    public VarDbl(final long value) {
+        try {
+            pack(value, 0.0, false, false, LEAK_VAL_MAX);
+        } catch (UncertaintyException | ValueException e) {
         }
     }
     public VarDbl() {

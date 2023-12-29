@@ -53,7 +53,7 @@ public class TestTaylor {
         final double[] sDev = new double[] {0.2, 0.195};
         final double[][] ssVar = new double[sExp.length][];
         try (
-            final FileWriter fw = new FileWriter("./PowerExpansion.txt")) {
+            final FileWriter fw = new FileWriter("./Output/PowerExpansion.txt")) {
             fw.write("2n\tMomentum\t");
             for (int j = 0; j < sExp.length; ++j) {
                 ssVar[j] = new double[sDev.length];
@@ -210,7 +210,7 @@ public class TestTaylor {
         final double[] sDev = new double[] {0.2, 0.195, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002};
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter(gaussian? "./PowerGN.txt" : "./PowerUN.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./Output/PowerGN.txt" : "./Output/PowerUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -341,10 +341,9 @@ public class TestTaylor {
             -100, -50, -20, -10, -5, -2, -1, -0.5, -0.2, -0.1,
             0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100};
         final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
-        Random rand = new Random();
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter(gaussian? "./ExpGN.txt" : "./ExpUN.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./Output/ExpGN.txt" : "./Output/ExpUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -468,7 +467,7 @@ public class TestTaylor {
         final double[] sDev = new double[] {0.195, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
        final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter(gaussian? "./LogGN.txt" : "./LogUN.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./Output/LogGN.txt" : "./Output/LogUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
@@ -592,7 +591,7 @@ public class TestTaylor {
         final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
         final StringBuilder sb = new StringBuilder();
         try (
-            final FileWriter fw = new FileWriter(gaussian? "./SinGN.txt" : "./SinUN.txt")) {
+            final FileWriter fw = new FileWriter(gaussian? "./Output/SinGN.txt" : "./Output/SinUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));
