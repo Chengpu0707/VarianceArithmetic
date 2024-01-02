@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import Type.Dbl;
 import Type.IReal;
 import Type.VarDbl;
 import Type.IReal.TypeException;
@@ -15,88 +16,84 @@ import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
 
 public class TestFFT {
-    static final double TOLERANCE = 2E-16;
-    
     static final double q1 = Math.sin(Math.PI/8);
     static final double q2 = Math.sin(Math.PI/4);
     static final double q3 = Math.sin(Math.PI/8*3);
 
     static final VarDbl ZERO = new VarDbl();
-    static final VarDbl POS_ONE = new VarDbl(1);
-    static final VarDbl NEG_ONE = new VarDbl(-1);
 
     @Test
     public void testSine() {
-        assertEquals(-q3, FFT.sin(-5, 4), TOLERANCE);
+        assertEquals(-q3, FFT.sin(-5, 4), Dbl.getLSB(q3));
 
-        assertEquals(-1,  FFT.sin(-4, 4), TOLERANCE);
-        assertEquals(-q3, FFT.sin(-3, 4), TOLERANCE);
-        assertEquals(-q2, FFT.sin(-2, 4), TOLERANCE);
-        assertEquals(-q1, FFT.sin(-1, 4), TOLERANCE);
+        assertEquals(-1,  FFT.sin(-4, 4), Dbl.getLSB(1.0));
+        assertEquals(-q3, FFT.sin(-3, 4), Dbl.getLSB(q3));
+        assertEquals(-q2, FFT.sin(-2, 4), Dbl.getLSB(q2));
+        assertEquals(-q1, FFT.sin(-1, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.sin(0, 4), TOLERANCE);
-        assertEquals(q1, FFT.sin(1, 4), TOLERANCE);
-        assertEquals(q2, FFT.sin(2, 4), TOLERANCE);
-        assertEquals(q3, FFT.sin(3, 4), TOLERANCE);
+        assertEquals(0, FFT.sin(0, 4), Double.MIN_VALUE);
+        assertEquals(q1, FFT.sin(1, 4), Dbl.getLSB(q1));
+        assertEquals(q2, FFT.sin(2, 4), Dbl.getLSB(q2));
+        assertEquals(q3, FFT.sin(3, 4), Dbl.getLSB(q3));
 
-        assertEquals(1, FFT.sin(4, 4), TOLERANCE);
-        assertEquals(q3, FFT.sin(5, 4), TOLERANCE);
-        assertEquals(q2, FFT.sin(6, 4), TOLERANCE);
-        assertEquals(q1, FFT.sin(7, 4), TOLERANCE);
+        assertEquals(1, FFT.sin(4, 4), Dbl.getLSB(1.0));
+        assertEquals(q3, FFT.sin(5, 4), Dbl.getLSB(q3));
+        assertEquals(q2, FFT.sin(6, 4), Dbl.getLSB(q2));
+        assertEquals(q1, FFT.sin(7, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.sin(8, 4), TOLERANCE);
-        assertEquals(-q1, FFT.sin(9, 4), TOLERANCE);
-        assertEquals(-q2, FFT.sin(10, 4), TOLERANCE);
-        assertEquals(-q3, FFT.sin(11, 4), TOLERANCE);
-        assertEquals(-1, FFT.sin(12, 4), TOLERANCE);
+        assertEquals(0, FFT.sin(8, 4), Double.MIN_VALUE);
+        assertEquals(-q1, FFT.sin(9, 4), Dbl.getLSB(q1));
+        assertEquals(-q2, FFT.sin(10, 4), Dbl.getLSB(q2));
+        assertEquals(-q3, FFT.sin(11, 4), Dbl.getLSB(q3));
+        assertEquals(-1, FFT.sin(12, 4), Dbl.getLSB(1.0));
 
-        assertEquals(-q3, FFT.sin(13, 4), TOLERANCE);
-        assertEquals(-q2, FFT.sin(14, 4), TOLERANCE);
-        assertEquals(-q1, FFT.sin(15, 4), TOLERANCE);
-        assertEquals(0, FFT.sin(16, 4), TOLERANCE);
+        assertEquals(-q3, FFT.sin(13, 4), Dbl.getLSB(q3));
+        assertEquals(-q2, FFT.sin(14, 4), Dbl.getLSB(q2));
+        assertEquals(-q1, FFT.sin(15, 4), Dbl.getLSB(q1));
+        assertEquals(0, FFT.sin(16, 4), Double.MIN_VALUE);
 
-        assertEquals(q1, FFT.sin(17, 4), TOLERANCE);
-        assertEquals(q2, FFT.sin(18, 4), TOLERANCE);
-        assertEquals(q3, FFT.sin(19, 4), TOLERANCE);
+        assertEquals(q1, FFT.sin(17, 4), Dbl.getLSB(q1));
+        assertEquals(q2, FFT.sin(18, 4), Dbl.getLSB(q2));
+        assertEquals(q3, FFT.sin(19, 4), Dbl.getLSB(q3));
         
-        assertEquals(1, FFT.sin(20, 4), TOLERANCE);
+        assertEquals(1, FFT.sin(20, 4), Dbl.getLSB(1.0));
     }
 
     @Test
     public void testCosine() {
-        assertEquals(-q1, FFT.cos(-5, 4), TOLERANCE);
+        assertEquals(-q1, FFT.cos(-5, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.cos(-4, 4), TOLERANCE);
-        assertEquals(q1, FFT.cos(-3, 4), TOLERANCE);
-        assertEquals(q2, FFT.cos(-2, 4), TOLERANCE);
-        assertEquals(q3, FFT.cos(-1, 4), TOLERANCE);
+        assertEquals(0, FFT.cos(-4, 4), Double.MIN_VALUE);
+        assertEquals(q1, FFT.cos(-3, 4), Dbl.getLSB(q1));
+        assertEquals(q2, FFT.cos(-2, 4), Dbl.getLSB(q2));
+        assertEquals(q3, FFT.cos(-1, 4), Dbl.getLSB(q3));
 
-        assertEquals(1, FFT.cos(0, 4), TOLERANCE);
-        assertEquals(q3, FFT.cos(1, 4), TOLERANCE);
-        assertEquals(q2, FFT.cos(2, 4), TOLERANCE);
-        assertEquals(q1, FFT.cos(3, 4), TOLERANCE);
+        assertEquals(1, FFT.cos(0, 4), Dbl.getLSB(1.0));
+        assertEquals(q3, FFT.cos(1, 4), Dbl.getLSB(q3));
+        assertEquals(q2, FFT.cos(2, 4), Dbl.getLSB(q2));
+        assertEquals(q1, FFT.cos(3, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.cos(4, 4), TOLERANCE);
-        assertEquals(-q1, FFT.cos(5, 4), TOLERANCE);
-        assertEquals(-q2, FFT.cos(6, 4), TOLERANCE);
-        assertEquals(-q3, FFT.cos(7, 4), TOLERANCE);
+        assertEquals(0, FFT.cos(4, 4), Double.MIN_VALUE);
+        assertEquals(-q1, FFT.cos(5, 4), Dbl.getLSB(q1));
+        assertEquals(-q2, FFT.cos(6, 4), Dbl.getLSB(q2));
+        assertEquals(-q3, FFT.cos(7, 4), Dbl.getLSB(q3));
 
-        assertEquals(-1, FFT.cos(8, 4), TOLERANCE);
-        assertEquals(-q3, FFT.cos(9, 4), TOLERANCE);
-        assertEquals(-q2, FFT.cos(10, 4), TOLERANCE);
-        assertEquals(-q1, FFT.cos(11, 4), TOLERANCE);
+        assertEquals(-1, FFT.cos(8, 4), Dbl.getLSB(1.0));
+        assertEquals(-q3, FFT.cos(9, 4), Dbl.getLSB(q3));
+        assertEquals(-q2, FFT.cos(10, 4), Dbl.getLSB(q2));
+        assertEquals(-q1, FFT.cos(11, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.cos(12, 4), TOLERANCE);
-        assertEquals(q1, FFT.cos(13, 4), TOLERANCE);
-        assertEquals(q2, FFT.cos(14, 4), TOLERANCE);
-        assertEquals(q3, FFT.cos(15, 4), TOLERANCE);
+        assertEquals(0, FFT.cos(12, 4), Double.MIN_VALUE);
+        assertEquals(q1, FFT.cos(13, 4), Dbl.getLSB(q1));
+        assertEquals(q2, FFT.cos(14, 4), Dbl.getLSB(q2));
+        assertEquals(q3, FFT.cos(15, 4), Dbl.getLSB(q3));
 
-        assertEquals(1, FFT.cos(16, 4), TOLERANCE);
-        assertEquals(q3, FFT.cos(17, 4), TOLERANCE);
-        assertEquals(q2, FFT.cos(18, 4), TOLERANCE);
-        assertEquals(q1, FFT.cos(19, 4), TOLERANCE);
+        assertEquals(1, FFT.cos(16, 4), Dbl.getLSB(1.0));
+        assertEquals(q3, FFT.cos(17, 4), Dbl.getLSB(q3));
+        assertEquals(q2, FFT.cos(18, 4), Dbl.getLSB(q2));
+        assertEquals(q1, FFT.cos(19, 4), Dbl.getLSB(q1));
 
-        assertEquals(0, FFT.cos(20, 4), TOLERANCE);
+        assertEquals(0, FFT.cos(20, 4), Double.MIN_VALUE);
     }
 
     @Test
@@ -128,7 +125,11 @@ public class TestFFT {
             freq * 2 < sz);
         final VarDbl[] sData = new VarDbl[sz << 1];
         for (int i = 0; i < sz; ++i) {
-            sData[i << 1] = new VarDbl( FFT.sin(freq * i, order) );
+            try {
+                sData[i << 1] = new VarDbl( FFT.sin(freq * i, order) );
+            } catch (ValueException e) {
+                fail(e.getMessage());
+            }
             sData[(i << 1) + 1] = ZERO;
         }
         try {
@@ -137,8 +138,7 @@ public class TestFFT {
                 if (i == ((freq << 1) + 1))
                     assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
                             order, freq, i, sz >> 1, sSpec[i]),
-                        sz >> 1, sSpec[i].value(), 
-                        Math.abs(sigma * sSpec[i].value() * sSpec[i].uncertainty()));
+                        sz >> 1, sSpec[i].value(), sigma * sSpec[i].uncertainty());
                 else if (i == (((sz - freq) << 1) + 1))
                     assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
                             order, freq, i, -(sz >> 1), sSpec[i]),
@@ -170,7 +170,11 @@ public class TestFFT {
             freq * 2 < sz);
         final VarDbl[] sData = new VarDbl[sz << 1];
         for (int i = 0; i < sz; ++i) {
-            sData[i << 1] = new VarDbl( FFT.cos(freq * i, order) );
+            try {
+                sData[i << 1] = new VarDbl( FFT.cos(freq * i, order) );
+            } catch (ValueException e) {
+                fail(e.getMessage());
+            }
             sData[(i << 1) + 1] = ZERO;
         }
         try {
@@ -180,21 +184,18 @@ public class TestFFT {
                     assertEquals(String.format("Cos Forward FFT order %d freq %d, index %d: %d != %s", 
                             order, freq, i, sz >> 1, sSpec[i]),
                         sz >> 1, sSpec[i].value(), 
-                        Math.abs(sigma * sSpec[i].value() * sSpec[i].uncertainty()));
+                        Math.abs(sigma * sSpec[i].uncertainty()));
                 else
-                    assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
+                    assertEquals(String.format("Cos Forward FFT order %d freq %d, index %d: %d != %s", 
                             order, freq, i, sz >> 1, sSpec[i]),
-                        0, sSpec[i].value(), sSpec[i].uncertainty());
+                        0, sSpec[i].value(), sigma * sSpec[i].uncertainty());
              }
 
             final IReal[] sRev = FFT.transform(sSpec, false);
             for (int i = 0; i < 8; ++i) {
                 assertEquals(String.format("Cos Reverse FFT order %d freq %d, index %d: %s != %s", 
                         order, freq, i, sRev[i].toString(), sData[i].toString()),
-                    sData[i].value(), sRev[i].value(), 
-                    (sRev[i].value() == 0)
-                        ? sigma * sRev[i].uncertainty()
-                        : Math.abs(sigma * sRev[i].value() * sRev[i].uncertainty()));
+                    sData[i].value(), sRev[i].value(), sigma * sRev[i].uncertainty());
             }
         } catch (TypeException | ValueException | UncertaintyException e) {
             fail(e.getMessage());
@@ -203,13 +204,12 @@ public class TestFFT {
 
     @Test
     public void testAllTransform() {
-        final double sigma = 3.0;
-        testCos(3, 1, sigma);
+        final double SIGMA = 3.0;
         for (int order = 2; order <= FFT.MAX_ORDER; ++order) {
             final int maxFreq = 1 << (order - 1);
             for (int freq = 1; freq < maxFreq; ++ freq) {
-                testSin(order, freq, sigma);
-                testCos(order, freq, sigma);
+                testSin(order, freq, SIGMA);
+                testCos(order, freq, SIGMA);
             }
         }
     }

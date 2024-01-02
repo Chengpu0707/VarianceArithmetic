@@ -31,8 +31,8 @@ public class TestVarDblAdd {
                         final double value, final double dev,
                         final double tolerance) {
         try {
-            final VarDbl op1 = new VarDbl(value1, dev1*dev1);
-            final VarDbl op2 = new VarDbl(value2, dev2*dev2);
+            final VarDbl op1 = new VarDbl(value1, dev1);
+            final VarDbl op2 = new VarDbl(value2, dev2);
             final VarDbl sum1 = op1.clone();
             sum1.add(op2);
             test(sum1, value, dev, tolerance);
@@ -77,46 +77,10 @@ public class TestVarDblAdd {
 
     @Test
     public void testAddLSB() {
-        test(1.0, IReal.getLSB(1.0), 1.0, IReal.getLSB(1.0), 2.0, 0.0, 1E-16);
-        test(1.0/3, IReal.getLSB(1.0/3), 2.0/3, IReal.getLSB(2.0/3), 1.0, 0.0, 1E-16);
+        test(1.0, Dbl.getLSB(1.0), 1.0, Dbl.getLSB(1.0), 2.0, 0.0, 1E-16);
+        test(1.0/3, Dbl.getLSB(1.0/3), 2.0/3, Dbl.getLSB(2.0/3), 1.0, 0.0, 1E-16);
     }
 
-    @Test
-    public void testAddRoundingError() {
-        try {
-            final VarDbl op1 = new VarDbl(1.0/3, 1.0/(1L << 20));
-            final VarDbl op2 = new VarDbl(2.0/3, 4.0/(1L << 20));
-            assertEquals(22906492245L, op1.val());
-            assertEquals(22906492245L, op2.val());
-            assertEquals(-36, op1.exp());
-            assertEquals(-35, op2.exp());
-            assertEquals(1.0 * op1.val() /(1L << 36), op1.value(), 1E-16);
-            assertEquals(-4.8506E-12, op1.value() - 1.0/3, 1E-16);
-            assertEquals(-9.7012E-12, op2.value() - 2.0/3, 1E-16);
-            // The rounding error accumulates when it is always rounded off in addition
-            assertEquals(-1.4552E-11, op1.value() + op2.value() - 1.0, 1E-16);
-            assertEquals(-2.91038E-11, 1.0 * (op1.val() /2 + op2.val()) /(1L << 35) - 1.0, 1E-16);
-            // Whe the rounding error is accounted for
-            assertEquals(true, op1.rndv());
-            assertEquals(true, op2.rndv());
-            assertEquals(0, 1.0 * (1 + op1.val() /2 + op2.val()) /(1L << 35) - 1.0, 1E-16);
-            test(1.0/3, 0.001, 2.0/3, 0.002, 1, Math.sqrt(5) * 0.001, 1E-16);
-
-            // When the rounding errors do not cancel each other, conventional double calc gives better result
-            final Dbl res = new Dbl(op1.value() - op2.value());
-            assertEquals(4.8506E-12, res.toDouble() + 1.0/3, 1E-16);
-            final long val = 1 + op1.val() /2 - op2.val();
-            assertEquals(1.94025E-11, 1.0 * val /(1L << 35) + 1.0/3, 1E-16);
-            final VarDbl dif = (VarDbl) op1.add(op2.negate());
-            assertEquals(-35, dif.exp());
-            assertEquals(Math.abs(val), dif.val());
-            assertEquals(1.94025E-11, dif.value() + 1.0/3, 1E-16);
-            assertEquals(2.910383E-11, dif.add(new VarDbl(1.0/3)).value(), 1E-16);
-
-        } catch (ValueException | UncertaintyException e) {
-           fail();;
-        }
-    }
 
     @Test
     public void testSbtraction() {
@@ -130,17 +94,6 @@ public class TestVarDblAdd {
 
         final double dev = Math.sqrt(0.001*0.001 + 0.002*0.002);
         test(1.001, 0.001, -1, 0.002, 0.001, dev, 2E-7);
-    }
-
-    @Test
-    public void testValVanish() {
-        VarDbl sum;
-        sum = test(1.0/3, 1 << 20, 2.0/3, 1 << 20, 1, Math.sqrt(2) * (1 << 20), 1E-16);
-        assertEquals(32, sum.val());
-        sum = test(1.0/3, 1 << 20, 2.0/3, 2 << 20, 1, Math.sqrt(5) * (1 << 20), 1E-16);
-        assertEquals(32, sum.val());
-        sum = test(1.0/3, 2 << 20, 2.0/3, 2 << 20, 1, Math.sqrt(2) * (2 << 20), 1E-16);
-        assertEquals(16, sum.val());
     }
 
     @Test

@@ -34,9 +34,9 @@ public class TestTaylor {
 
     private void init(double value, double dev) {
         try {
-            var = new VarDbl(value, dev*dev);
+            var = new VarDbl(value, dev);
         } catch (ValueException | UncertaintyException e) {
-            fail();
+            fail(e.getMessage());
         }
     }
 
@@ -240,7 +240,7 @@ public class TestTaylor {
                     try {
                         final double[] sTaylor = Taylor.power(p);
                         sTaylor[0] = 1;
-                        final VarDbl var = new VarDbl(1, dev * dev);
+                        final VarDbl var = new VarDbl(1, dev);
                         var.taylor(String.format("pow^(%f)", p), sTaylor, true, true, BINDING);
                         final double mode = (1 + Math.sqrt(1 - 4*(p-1)*dev*dev))/2;
 
@@ -373,7 +373,7 @@ public class TestTaylor {
                     try {
                         final double[] sTaylor = Taylor.exp();
                         sTaylor[0] = Math.exp(exp);
-                        final VarDbl var = new VarDbl(exp, dev * dev);
+                        final VarDbl var = new VarDbl(exp, dev);
                         var.taylor(String.format("exp", exp, dev), sTaylor, false, true, BINDING);
                         final double mode = exp - dev*dev;
 
@@ -497,7 +497,7 @@ public class TestTaylor {
                     try {
                         final double[] sTaylor = Taylor.log();
                         sTaylor[0] = Math.log(base);
-                        final VarDbl var = new VarDbl(base, dev * dev);
+                        final VarDbl var = new VarDbl(base, dev);
                         var.taylor("log", sTaylor, true, false, BINDING);
                         final double mode = (base + Math.sqrt(base*base + 4*dev*dev))/2;
 
@@ -620,7 +620,7 @@ public class TestTaylor {
                 for (double dev: sDev) {
                     try {
                         final double[] sTaylor = Taylor.sin(rad*Math.PI);
-                        final VarDbl var = new VarDbl(rad*Math.PI, dev * dev);
+                        final VarDbl var = new VarDbl(rad*Math.PI, dev);
                         var.taylor("sin", sTaylor, false, false, BINDING);
                         final double mode = var.value() - Math.sin(rad*Math.PI);
 

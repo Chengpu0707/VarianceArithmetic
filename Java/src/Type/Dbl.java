@@ -6,17 +6,27 @@ import Type.IReal.ValueException;
 
 /*
  * A tool class to decompose double into different components:
- *    Dbl(double): to decompose a double into (exp, val, neg), with true value as (neg? -1 : +1) * val * 2^exp
- *    normalize(): to fit (exp, val, neg) into a double format.
- *    toDouble(): to compose a double from (exp, val, neg).  It also normalizes the object
+ *      Dbl(double): to decompose a double into (exp, val, neg), with true value as 
+ *          (neg? -1 : +1) * val * 2^exp
+ *      normalize(): to fit (exp, val, neg) into a double format.
+ *      toDouble(): to compose a double from (exp, val, neg).  It also normalizes the object
  * 
  * Dbl is expected to hold finite value only, so both Dbl(double) and toDouble() may through Type.IReal.ValueException.
  *  *) exp is stored as a signed value (with offset of Dbl.DOUBLE_EXP_OFFSET already subtracted)
  *  *) The significand has an extra bit Dbl.DOUBLE_VAL_EXTRA when the stored exp is not (Dbl.DOUBLE_EXP_MIN - 1).
  * 
+ * Dbl can also be constructed with an extra rounding error:
+ *      Dbl( final int exp, final boolean neg, final long val, final boolean rndErr )
+ * This constructor is no longer used.
+ * 
  * Dbl also has a member rndErr, to minimize rounding error, with the following functions:
  *      upOnce()
  *      toExp(exp)
+ * Both of these two functions are no longer used.
+ * 
+ * Dbl contains other tools:
+ *      int msb(long val): a quick search to find the most significant bit.
+ *      double getLSB(double value): Return the absolute value equivalent to the LSB of "value".
  */
 public class Dbl {
     private int exp;        // exponent
@@ -56,7 +66,7 @@ public class Dbl {
         this.rndErr = other.rndErr;
     }
 
-    public Dbl(final double value, boolean rndErr) throws ValueException {
+    private Dbl(final double value, boolean rndErr) throws ValueException {
         if (!Double.isFinite(value)) {
             throw new IReal.ValueException(String.format("Init Dbl with %e", value));
         }
@@ -228,5 +238,33 @@ public class Dbl {
                 return true;
             }
         }
+    }
+
+	/*
+	 * Return the absolute value equivalent to the LSB of "value"
+	 */
+	static public double getLSB(double value) {
+		if (!Double.isFinite(value)) {
+			return 0;
+		}
+		try {
+			final Dbl d = new Dbl(value);
+			final Dbl lsb = new Dbl( d.exp(), false, 1, d.rndErr());
+			return lsb.toDouble();
+		} catch (ValueException e) {
+			return 0;
+		}
+	}
+
+	/*
+	 * Return the absolute value equivalent to the LSB of "value".
+     * Or 0 if the "value" can be hold accurately in double
+	 */
+    static public double getLSB(long value) {
+        // (long) this.double is casted to Long.MAX_VALUE, so the following does not work
+        // if ((long) this.value == value)
+        return (Math.abs(value) <= Dbl.DOUBLE_VAL_MAX)
+            ? 0 
+            : Dbl.getLSB((double) value);
     }
 }

@@ -13,23 +13,28 @@ import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
 
 public class TestVarDbl {
+    static final double tolerance = Double.MIN_NORMAL;
     VarDbl op;
     VarDbl op2;
     VarDbl res;
     
-    @Test 
-    public void testSimple() {
+    @Test
+    public void testCompareTo() {
         try {
-            double value = 0;
-            double dev =  Double.MIN_NORMAL;
-            op = new VarDbl(value, dev*dev);
-            final double tolerance = Math.pow(2, op.exp());
-            assertEquals(value, op.value(), tolerance);
-            assertEquals(Math.sqrt(dev*dev), op.uncertainty(), tolerance);
+            op = new VarDbl(1.001, 0.001);
+            op2 = new VarDbl(1.000, 0.002);
+            assertEquals(0, op.compareTo(op2));
+            assertEquals(1, op.compareTo(op2, 0.4));
+        
+            op = new VarDbl(1.002, 0.001);
+            assertEquals(1, op.compareTo(op2));
+            assertEquals(-1, op2.compareTo(op));
+
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
     }
+
 
     @Test
     public void testHash() {
@@ -51,9 +56,18 @@ public class TestVarDbl {
 
     private void testToString(String str, double value, double dev) {
         try {
-            op = new VarDbl(value, dev*dev);
+            op = new VarDbl(value, dev);
             assertEquals(str, op.toString());
         } catch (ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+     }
+ 
+    private void testToString(String str, double value) {
+        try {
+            op = new VarDbl(value);
+            assertEquals(str, op.toString());
+        } catch (ValueException e) {
             fail(e.getMessage());
         }
      }
@@ -64,17 +78,27 @@ public class TestVarDbl {
         testToString("-1~100", -1, 100);
         testToString("-1~1.0e+03", -1, 1000);    
         testToString("1.000e-03~1.0e-03", 0.001, 0.001);
-        testToString("1.000e-03~2.2e-19", 0.001,Double.NaN);
-        testToString("1.341e+154~1.5e+138", Math.sqrt(Double.MAX_VALUE), Double.NaN);
+        testToString("1.000e-03~1.3e-19", 0.001);
+        testToString("1.341e+154~8.6e+137", Math.sqrt(Double.MAX_VALUE));
         testToString("2.225e-308", Double.MIN_NORMAL, Double.MIN_VALUE);
-        testToString("2.225e-308", Double.MIN_NORMAL, Double.NaN);        
+        testToString("2.225e-308", Double.MIN_NORMAL);        
     }
  
+    @Test 
+    public void testInitLong() {
+        op = new VarDbl(1);
+        assertEquals(1, op.value(), tolerance);
+        assertEquals(0, op.uncertainty(), tolerance);
+
+        op = new VarDbl(Long.MAX_VALUE);
+        assertEquals(9.223372036854776E18, op.value(), 1E17);
+        assertEquals(2048 * VarDbl.DEVIATION_OF_LSB, op.uncertainty(), tolerance);
+    }
+
     @Test
     public void testInitMax() {
         try {
-            res = new VarDbl(Double.MAX_VALUE/2, Double.NaN);
-        } catch( UncertaintyException ex) {
+            res = new VarDbl(Double.MAX_VALUE/2);
         } catch( ValueException e) {
             fail(e.getMessage());
         }
@@ -93,28 +117,31 @@ public class TestVarDbl {
     }
     
     private void testNegate() {
-        try {
-            res = op.clone();
-            res.negate();
-            final double tolerance = Math.pow(2, res.exp());
-            assertEquals(-op.value(), res.value(), tolerance);
-            assertEquals(op.uncertainty(), res.uncertainty(), tolerance);
-        } catch (ValueException | UncertaintyException e) {
-            fail(e.getMessage());
-        }
+        res = op.clone();
+        res.negate();
+        assertEquals(-op.value(), res.value(), 
+                     (res.value() == 0)? tolerance : res.getLSB());
+        final double uncertainty = res.uncertainty();
+        assertEquals(op.uncertainty(), uncertainty, 
+                     (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
     }
     
     private void testShift( int bits ) {
         try {
             res = op.clone();
             res.shift(bits);
-            final double tolerance = Math.pow(2, res.exp());
             if (bits >= 0) {
-                assertEquals(op.value() * (1L << bits), res.value(), tolerance);
-                assertEquals(op.uncertainty() * (1L << bits), res.uncertainty(), tolerance);
+                assertEquals(op.value() * (1L << bits), res.value(), 
+                             (res.value() == 0)? tolerance : res.getLSB());
+                final double uncertainty = res.uncertainty();
+                assertEquals(op.uncertainty() * (1L << bits), uncertainty, 
+                             (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
             } else {
-                assertEquals(op.value() / (1L << -bits), res.value(), tolerance);
-                assertEquals(op.uncertainty() / (1L << -bits), res.uncertainty(), tolerance);
+                assertEquals(op.value() / (1L << -bits), res.value(), 
+                             (res.value() == 0)? tolerance : res.getLSB());
+                final double uncertainty = res.uncertainty();
+                assertEquals(op.uncertainty() / (1L << -bits), uncertainty, 
+                             (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
             }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
@@ -129,10 +156,13 @@ public class TestVarDbl {
     private void testOffset( double offset ) {
         try {
             res = op.clone();
-            res.add(offset);
-            final double tolerance = Math.pow(2, res.exp());
-            assertEquals(op.value() + offset, res.value(), tolerance);
-            assertEquals(op.uncertainty(), res.uncertainty(), tolerance);
+            res.add(new VarDbl(offset));
+            assertEquals(op.value() + offset, res.value(), 
+                         (res.value() == 0)? tolerance : res.getLSB());
+            if (op.uncertainty() > 0) {
+                final double uncertainty = res.uncertainty();
+                assertEquals(op.uncertainty(), uncertainty, Dbl.getLSB(uncertainty));
+            }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
@@ -152,10 +182,18 @@ public class TestVarDbl {
     private void testScale( double fold ) {
         try {
             res = op.clone();
-            res.multiply(fold);
-            final double tolerance = Math.pow(2, res.exp());
-            assertEquals(op.value() * fold, res.value(), tolerance);
-            assertEquals(op.uncertainty() * Math.abs(fold), res.uncertainty(), tolerance);
+            op2 = new VarDbl(fold);
+            res.multiply(op2);
+            assertEquals(op.value() * fold, res.value(), 
+                         (res.value() == 0)? tolerance : res.getLSB());
+            if (op.uncertainty() > 0) {
+                double exp = op.uncertainty() * Math.abs(fold);
+                double lsb = op2.uncertainty() * Math.abs(op.value());
+                if (exp < lsb)
+                    exp = lsb;
+                final double uncertainty = res.uncertainty();
+                assertEquals(exp, uncertainty, Dbl.getLSB(uncertainty));
+            }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
@@ -174,10 +212,12 @@ public class TestVarDbl {
 
     private void testSingle(double value, double dev) {
         try {
-            op = new VarDbl(value, dev*dev);
-            final double tolerance = Math.pow(2, op.exp());
-            assertEquals(value, op.value(), tolerance);
-            assertEquals(Math.sqrt(dev*dev), op.uncertainty(), tolerance);
+            op = new VarDbl(value, dev);
+            assertEquals(value, op.value(), 
+                         (op.value() == 0)? tolerance : op.getLSB());
+            final double uncertainty = op.uncertainty();
+            assertEquals(Math.sqrt(dev*dev), uncertainty, 
+                         (uncertainty == 0)? tolerance : op.getLSB());
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
@@ -276,6 +316,7 @@ public class TestVarDbl {
         testSingle(-maxValue, 0);
         testSingle( maxValue, maxValue);
         testSingle(-maxValue, maxValue);
+        // the half bit dominants
         testSingle( maxValue, Math.sqrt(maxValue));
         testSingle(-maxValue, Math.sqrt(maxValue));
     }
@@ -297,7 +338,7 @@ public class TestVarDbl {
     public void testScaleOverflow() {
         try {
             res = new VarDbl(Double.MAX_VALUE/2, Math.sqrt(Double.MAX_VALUE/2));
-            res.multiply(4);
+            res.multiply(new VarDbl(4));
             fail();
         } catch (ValueException e) {
         } catch (UncertaintyException e) {
@@ -309,7 +350,7 @@ public class TestVarDbl {
     public void testOffsetOverflow() {
         try {
             res = new VarDbl(Double.MAX_VALUE/2, Math.sqrt(Double.MAX_VALUE/2));
-            res.add(Double.MAX_VALUE);
+            res.add(new VarDbl(Double.MAX_VALUE));
             fail();
         } catch (ValueException e) {
         } catch (UncertaintyException e) {

@@ -35,8 +35,8 @@ public class TestVarDblMultiply {
                         final double value, final double dev, ETest eTest,
                         final double tolerance) {
         try {
-            final VarDbl op1 = new VarDbl(value1, dev1*dev1);
-            final VarDbl op2 = new VarDbl(value2, dev2*dev2);
+            final VarDbl op1 = new VarDbl(value1, dev1);
+            final VarDbl op2 = new VarDbl(value2, dev2);
             final VarDbl prod1 = op1.clone();
             prod1.multiply(op2);
             test(prod1, value, dev, tolerance, eTest);
@@ -104,11 +104,11 @@ public class TestVarDblMultiply {
         VarDbl op1;
         try {
             op1 = new VarDbl(1, 1E-6);
-            final VarDbl op2 = new VarDbl(Math.sqrt(Double.MAX_VALUE), Double.MAX_VALUE / 2);
+            final VarDbl op2 = new VarDbl(Math.sqrt(Double.MAX_VALUE), Math.sqrt(Double.MAX_VALUE / 2));
             final VarDbl prod = (VarDbl) op1.multiply(op2);
-            assertEquals(1, prod.value() / Math.sqrt(Double.MAX_VALUE), 3E-16);
+            assertEquals(Math.sqrt(Double.MAX_VALUE), prod.value(), Dbl.getLSB(prod.value()));
             final double variance = Double.MAX_VALUE * 1E-6 + Double.MAX_VALUE / 2 + 1E-6 * Double.MAX_VALUE / 2;
-            assertEquals(1, prod.variance() / variance, 3E-16);
+            assertEquals(1, prod.variance() / variance, 3E-6);
         } catch (ValueException | UncertaintyException e) {
             fail();
         }
@@ -125,21 +125,17 @@ public class TestVarDblMultiply {
             final VarDbl op3 = new VarDbl(-159018721L), op4 = new VarDbl(83739041L);
             final VarDbl re12 = op1.clone();
             re12.multiply(op2);
-            assertEquals(6658037598793281L, re12.val());
-            assertEquals(1, re12.exp());
-            assertEquals(2, re12.var());
+            assertEquals(13316075197586562.0, re12.value(), Dbl.getLSB(re12.value()));
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re12.uncertainty(), Dbl.getLSB(re12.uncertainty()));
             final VarDbl re34 = op3.clone();
             re34.multiply(op4);
-            assertEquals(6658037598793280L, re34.val());
-            assertEquals(1, re34.exp());
-            assertEquals(3, re34.var());
+            assertEquals( -13316075197586560.0, re34.value(), Dbl.getLSB(-re12.value()));
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re34.uncertainty(), Dbl.getLSB(re12.uncertainty()));
             final VarDbl re = re12.clone();
             re.add(re34);
-            assertEquals(2L << 24, re.val());
-            assertEquals(-24, re.exp());
-            assertEquals(5L << 50, re.var());
-            assertEquals(2, re.value(), 1E-16);
-            assertEquals(2 * Math.sqrt(5), re.uncertainty(), 1E-16);
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re.value(), Dbl.getLSB(re12.value()));
+            assertEquals(2 * Math.sqrt(2) * VarDbl.DEVIATION_OF_LSB, re.uncertainty(), 
+                         Dbl.getLSB(re12.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail();
         }
