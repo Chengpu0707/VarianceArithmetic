@@ -590,8 +590,7 @@ public class TestTaylor {
             1.0/2, 1.0/12*7, 1.0/3*2, 1.0/4*3, 1.0/6*5, 1.0/12*11, 1.0};
         final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001};
         final StringBuilder sb = new StringBuilder();
-        try (
-            final FileWriter fw = new FileWriter(gaussian? "./Output/SinGN.txt" : "./Output/SinUN.txt")) {
+        try (final FileWriter fw = new FileWriter(gaussian? "./Output/SinGN.txt" : "./Output/SinUN.txt")) {
             fw.write("Dev\t");
             for (double dev: sDev) {
                 fw.write(String.format("%g\t\t\t\t\t\t", dev));

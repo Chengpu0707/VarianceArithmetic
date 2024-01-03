@@ -3,24 +3,197 @@ package Func;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
 
 import org.junit.Test;
 
+import Stats.Histogram;
 import Type.Dbl;
 import Type.IReal;
 import Type.VarDbl;
+import Type.IntvDbl;
 import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
 import Type.IReal.ValueException;
+
+
+enum SignalType {
+    Sin,
+    Cos
+}
+
+enum RealType {
+    Var,
+    Intv
+}
+
+enum TestType {
+    Forward,
+    Reverse,
+    RoundTrip,
+}
+
+enum NoiseType {
+    Gaussian,
+    Uniform
+}
+
+class Signal {
+    static final int BINDING = 3, DIVIDS = 5;
+
+    static Random rand = new Random();
+
+    final RealType realType;
+
+    final int order;
+    final int size;
+    final int freq;
+    final SignalType signal;
+    final double[] sWave, sFreq;
+
+    final NoiseType noiseType;
+    final double noise;
+
+    final IReal[] sData, sSpec, sRound, sBack, sRev;
+
+    final Histogram spec = new Histogram(BINDING, DIVIDS);
+    final Histogram round = new Histogram(BINDING, DIVIDS);
+    final Histogram rev = new Histogram(BINDING, DIVIDS);
+
+    Signal(RealType realType, int order, int freq, SignalType signal, 
+                NoiseType noiseType, double noise) 
+            throws ArithmeticException, TypeException, ValueException, UncertaintyException {
+        this.realType = realType;
+        this.order = order;
+        this.freq = freq;
+        this.signal = signal;
+        this.noiseType = noiseType;
+        this.noise = Math.abs(noise);
+
+        size = 1 << order;
+        if (freq * 2 >= size) {
+            throw new ArithmeticException(String.format("Sin invalid freq %d for order %d", freq, order));
+        }
+        sWave = new double[size << 1];
+        sFreq = new double[size << 1];
+
+        switch (realType) {
+            case Var:
+                sData = new VarDbl[size << 1];
+                sBack = new VarDbl[size << 1];
+                break;
+        
+            case Intv:
+                sData = new IntvDbl[size];
+                sBack = new IntvDbl[size];
+                for (int i = 0; i < size; ++i) {
+                }
+                break;
+            default:
+                throw new ArithmeticException(String.format("Unknown realType %s", realType));
+        }
+
+        switch (noiseType) {
+            case Gaussian:
+                break;
+            case Uniform:
+                break;
+            default:
+                throw new ArithmeticException(String.format("Unknown noise type %s", noiseType));
+        }
+
+        switch (signal) {
+            case Sin:
+                for (int i = 0; i < size; ++i) {
+                    sWave[i << 1] = FFT.sin(freq * i, order);
+                }
+                sFreq[(freq << 1) + 1] = size >> 1;
+                sFreq[((size - freq) << 1) + 1] = - (size >> 1);
+                break;
+            case Cos:
+                for (int i = 0; i < size; ++i) {
+                    sWave[i << 1] = FFT.cos(freq * i, order);
+                }
+                sFreq[freq << 1] = size >> 1;
+                sFreq[(size - freq) << 1] = size >> 1;
+                break;
+            default:
+                throw new ArithmeticException(String.format("Unknown signal %s", signal));
+        }
+
+        for (int i = 0; i < size; ++i) {
+            final double n;
+            switch (noiseType) {
+                case Gaussian:
+                    n = rand.nextGaussian() * noise;
+                    break;
+                case Uniform:
+                    n = (rand.nextDouble() - 0.5) * Math.sqrt(12) * noise;
+                    break;
+                default:
+                    n = 0;
+            }
+            switch (realType) {
+                case Var:
+                    sData[i << 1] = new VarDbl(sWave[i << 1] + n, noise);
+                    sData[(i << 1) + 1] = new VarDbl();
+                    switch (signal) {
+                        case Sin:
+                            sBack[i << 1] = new VarDbl();
+                            sBack[(i << 1) + 1] = new VarDbl(sFreq[(i << 1) + 1] + n, noise);
+                            break;
+                        case Cos:
+                            sBack[i << 1] = new VarDbl(sFreq[i << 1] + n, noise);
+                            sBack[(i << 1) + 1] = new VarDbl();
+                            break;
+                    }
+                    break;
+                case Intv:
+                    sData[i << 1] = new IntvDbl(sWave[i << 1] + n, noise);
+                    sData[(i << 1) + 1] = new IntvDbl();
+                    switch (signal) {
+                        case Sin:
+                            sData[i << 1] = new IntvDbl();
+                            sBack[(i << 1) + 1] = new IntvDbl(sFreq[(i << 1) + 1] + n, noise);
+                            break;
+                        case Cos:
+                            sBack[i << 1] = new IntvDbl(sFreq[i << 1] + n, noise);
+                            sBack[(i << 1) + 1] = new IntvDbl();
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        sSpec = FFT.transform(sData, true);
+        sRound = FFT.transform(sSpec, false);
+        sRev = FFT.transform(sBack, false);
+
+        for (int i = 0; i < (size << 1); ++i) {
+            final double unc1 = sSpec[i].uncertainty();
+            if (unc1 > 0)
+                spec.accum((sSpec[i].value() - sFreq[i])/unc1);
+            final double unc2 = sRound[i].uncertainty();
+            if (unc2 > 0)
+                rev.accum((sRound[i].value() - sWave[i])/unc2);
+            final double unc3 = sRev[i].uncertainty();
+            if (unc3 > 0)
+                round.accum((sRev[i].value() - sWave[i])/unc3);
+        }
+    }
+}
+
+
+
 
 public class TestFFT {
     static final double q1 = Math.sin(Math.PI/8);
     static final double q2 = Math.sin(Math.PI/4);
     static final double q3 = Math.sin(Math.PI/8*3);
-
-    static final VarDbl ZERO = new VarDbl();
 
     @Test
     public void testSine() {
@@ -119,98 +292,78 @@ public class TestFFT {
         }
     }
 
-    void testSin(int order, int freq, double sigma) {
-        final int sz = 1 << order;
-        assertTrue(String.format("Sin invalid freq %d for order %d", freq, order), 
-            freq * 2 < sz);
-        final VarDbl[] sData = new VarDbl[sz << 1];
-        for (int i = 0; i < sz; ++i) {
-            try {
-                sData[i << 1] = new VarDbl( FFT.sin(freq * i, order) );
-            } catch (ValueException e) {
-                fail(e.getMessage());
-            }
-            sData[(i << 1) + 1] = ZERO;
-        }
+    static void test(RealType realType, NoiseType noiseType, double noise, 
+                     SignalType signal, int order, int freq) {
+        final double sigma = (realType == RealType.Var)? 3.0 : 1.0;
         try {
-            final IReal[] sSpec = FFT.transform(sData, true);
-            for (int i = 0; i < sz; ++i) {
-                if (i == ((freq << 1) + 1))
-                    assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
-                            order, freq, i, sz >> 1, sSpec[i]),
-                        sz >> 1, sSpec[i].value(), sigma * sSpec[i].uncertainty());
-                else if (i == (((sz - freq) << 1) + 1))
-                    assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
-                            order, freq, i, -(sz >> 1), sSpec[i]),
-                        -(sz >> 1), sSpec[i].value(), 
-                        Math.abs(sigma * sSpec[i].value() * sSpec[i].uncertainty()));
-                else
-                    assertEquals(String.format("Sin Forward FFT order %d freq %d, index %d: %d != %s", 
-                            order, freq, i, sz >> 1, sSpec[i]),
-                        0, sSpec[i].value(), sigma * sSpec[i].uncertainty());
-             }
-
-            final IReal[] sRev = FFT.transform(sSpec, false);
-            for (int i = 0; i < 8; ++i) {
-                assertEquals(String.format("Sin Reverse FFT order %d freq %d, index %d: %s != %s", 
-                        order, freq, i, sRev[i].toString(), sData[i].toString()),
-                    sData[i].value(), sRev[i].value(), 
-                    (sRev[i].value() == 0)
-                        ? sigma * sRev[i].uncertainty()
-                        : Math.abs(sigma * sRev[i].value() * sRev[i].uncertainty()));
+            Signal out = new Signal(RealType.Var, order, freq, 
+                                            signal, noiseType, noise);
+            for (int i = 0; i < (2 << order); ++i) {
+                assertEquals(String.format("Forward %d: %.3e vs %.3e", i, 
+                        out.sSpec[i].value() - out.sFreq[i], sigma * out.sSpec[i].uncertainty()),
+                    out.sFreq[i], out.sSpec[i].value(), sigma * out.sSpec[i].uncertainty());
+                assertEquals(String.format("Backward %d: %.3e vs %.3e", i, 
+                        out.sRev[i].value() - out.sWave[i], sigma * out.sRev[i].uncertainty()),
+                    out.sWave[i], out.sRev[i].value(), sigma * out.sRev[i].uncertainty());
+                 assertEquals(String.format("Roundtrip %d: %.3e vs %.3e", i, 
+                        out.sRound[i].value() - out.sWave[i], sigma * out.sRound[i].uncertainty()),
+                    out.sData[i].value(), out.sRound[i].value(), sigma * out.sRound[i].uncertainty());
             }
-        } catch (TypeException | ValueException | UncertaintyException e) {
+        } catch (ArithmeticException | TypeException | ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
     }
 
-    void testCos(int order, int freq, double sigma) {
-        final int sz = 1 << order;
-        assertTrue(String.format("Cos invalid freq %d for order %d", freq, order), 
-            freq * 2 < sz);
-        final VarDbl[] sData = new VarDbl[sz << 1];
-        for (int i = 0; i < sz; ++i) {
-            try {
-                sData[i << 1] = new VarDbl( FFT.cos(freq * i, order) );
-            } catch (ValueException e) {
-                fail(e.getMessage());
-            }
-            sData[(i << 1) + 1] = ZERO;
+    void dump(final FileWriter fw, final Histogram histo) throws IOException {
+        fw.write(String.format("\t%.3e\t%.3e\t%.3e\t%.3e", 
+                 histo.stat().avg(), histo.stat().dev(), histo.stat().min(), histo.stat().max()));
+        final double[] sHisto = histo.histo();
+        if (sHisto != null) {
+            for (int i = 0; i < sHisto.length; ++i) 
+                fw.write(String.format("\t%.3g", sHisto[i]));
         }
-        try {
-            final IReal[] sSpec = FFT.transform(sData, true);
-            for (int i = 0; i < sz; ++i) {
-                if ((i == (freq << 1)) || (i == ((sz - freq) << 1)))
-                    assertEquals(String.format("Cos Forward FFT order %d freq %d, index %d: %d != %s", 
-                            order, freq, i, sz >> 1, sSpec[i]),
-                        sz >> 1, sSpec[i].value(), 
-                        Math.abs(sigma * sSpec[i].uncertainty()));
-                else
-                    assertEquals(String.format("Cos Forward FFT order %d freq %d, index %d: %d != %s", 
-                            order, freq, i, sz >> 1, sSpec[i]),
-                        0, sSpec[i].value(), sigma * sSpec[i].uncertainty());
-             }
+        fw.write("\n");
+    }
 
-            final IReal[] sRev = FFT.transform(sSpec, false);
-            for (int i = 0; i < 8; ++i) {
-                assertEquals(String.format("Cos Reverse FFT order %d freq %d, index %d: %s != %s", 
-                        order, freq, i, sRev[i].toString(), sData[i].toString()),
-                    sData[i].value(), sRev[i].value(), sigma * sRev[i].uncertainty());
+    void dump(RealType realType, NoiseType noiseType, double noise) {
+        final String pathOut = (noise == 0)
+            ? String.format("./Output/FFT%s.txt", realType)
+            : String.format("./Output/FFT%s%s%.0e.txt", noiseType, noise);
+        try (final FileWriter fw = new FileWriter(pathOut)) {
+            fw.write(String.format("RealType\t%s\tNoiseType\t%s\tNoise\t%.3e\n", 
+                     realType, noiseType, noise));
+            fw.write("Signal\tOrder\tFreq\tTest\tMean\tDev\tMin\tMax");
+            for (int i = -Signal.BINDING * Signal.DIVIDS; i <= Signal.BINDING * Signal.DIVIDS; ++i) {
+                fw.append(String.format("\t%.1f", ((double) i) / Signal.DIVIDS));  
+            }
+            fw.write("\n");
+            for (int order = 2; order <= FFT.MAX_ORDER; ++order) {
+                final int maxFreq = 1 << (order - 1);
+                for (int freq = 1; freq < maxFreq; ++ freq) {
+                    for (SignalType signal : SignalType.values()) {
+                        final Signal out = new Signal(RealType.Var, order, freq, 
+                                                      signal, noiseType, noise);
+                        fw.write(String.format("%s\t%d\t%d\t%s", 
+                                 signal, order, freq, "Forward"));
+                        dump(fw, out.spec);
+                        fw.write(String.format("%s\t%d\t%d\t%s", 
+                                 signal, order, freq, "Backward"));
+                        dump(fw, out.rev);
+                        fw.write(String.format("%s\t%d\t%d\t%s", 
+                                 signal, order, freq, "Roundtrip"));
+                        dump(fw, out.round);
+                    }
+                }
             }
         } catch (TypeException | ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void testAllTransform() {
-        final double SIGMA = 3.0;
-        for (int order = 2; order <= FFT.MAX_ORDER; ++order) {
-            final int maxFreq = 1 << (order - 1);
-            for (int freq = 1; freq < maxFreq; ++ freq) {
-                testSin(order, freq, SIGMA);
-                testCos(order, freq, SIGMA);
-            }
-        }
+    public void DumpClean() {
+        dump(RealType.Var, NoiseType.Gaussian, 0);
     }
 }
