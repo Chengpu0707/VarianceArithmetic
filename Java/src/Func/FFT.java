@@ -30,7 +30,10 @@ public class FFT {
      * @param order: the size of [0, 2*PI] is (1<<order), so 2 < order <= MAX_QUARD_ORDER+2
      * @param idx: the index in [0, 2*PI]
      */
-    static double sin(int idx, int order) {
+    static double sin(long idx, int order) {
+        if (idx < 0) {
+            return -sin(-idx, order);
+        }
         if (order < 2) {
              throw new IllegalArgumentException(
                 String.format("The order %d < 2", order, MAX_QUARD_ORDER));
@@ -39,12 +42,9 @@ public class FFT {
             throw new IllegalArgumentException(
                 String.format("The order %d is too large for the cached max order %d", order, MAX_QUARD_ORDER));
         }
-        if (idx < 0) {
-            return -sin(-idx, order);
-        }
-        int u = idx << (MAX_QUARD_ORDER - (order - 2));
-        final int quart = u >> MAX_QUARD_ORDER;
-        u -= quart << MAX_QUARD_ORDER;
+        final int size = 1 << (order - 2);
+        int u = ((int) (idx % size)) << (MAX_ORDER - order);
+        final int quart = (int) (idx / size);
         switch (quart % 4) {
             case 0:
                 return sSin[u];
@@ -56,11 +56,12 @@ public class FFT {
                 return -sSin[MAX_SIZE - u];
             default:
                 throw new UnknownError(
-                    String.format("The internal error for geting sine for index %d and order%d/%d", idx, order, MAX_QUARD_ORDER));
+                    String.format("Invalid quart %d for geting sine for index %d and order %d/%d", 
+                                  quart, idx, order, MAX_QUARD_ORDER));
         }
     }
 
-    static double cos(int idx, int order) {
+    static double cos(long idx, int order) {
         if (order < 2) {
              throw new IllegalArgumentException(
                 String.format("The order %d < 2", order, MAX_QUARD_ORDER));
