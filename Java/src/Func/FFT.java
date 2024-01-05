@@ -1,6 +1,7 @@
 package Func;
 
 import Type.IReal;
+import Type.IntvDbl;
 import Type.VarDbl;
 import Type.IReal.TypeException;
 import Type.IReal.UncertaintyException;
@@ -117,8 +118,16 @@ public class FFT {
             }
         }
         if (order > MAX_ORDER) {
-            return null;
+            throw new IllegalArgumentException(String.format("Invalid input array size %d", sData.length));
         }
+        final RealType realType;
+        if (sData[0] instanceof VarDbl) 
+            realType = RealType.Var;
+        else if (sData[0] instanceof IntvDbl)
+            realType = RealType.Intv;
+        else
+            throw new IllegalArgumentException(String.format("Invalid input array type %s", sData[0]));
+
         final IReal[] sRes = useOriginalArray? sData : new IReal[2 << order];
         
         final int[] sIndex = bitReversedIndices(order);
@@ -149,8 +158,12 @@ public class FFT {
 
         for (int o = 2, k = 2; o <= order; ++o, k <<= 1) {
             for (int j = 0; j < k; j++) {
-                final VarDbl cos = new VarDbl(cos( j, o ));
-                final VarDbl sin = new VarDbl(forward? sin( j, o ) : -sin( j, o ));
+                final IReal cos = (realType == RealType.Var)
+                                    ? new VarDbl(cos( j, o ))
+                                    : new IntvDbl(cos( j, o ));
+                final IReal sin = (realType == RealType.Var)
+                                    ? new IntvDbl(forward? sin( j, o ) : -sin( j, o ))
+                                    : new IntvDbl(forward? sin( j, o ) : -sin( j, o ));
                 for (int i = 0; i < sIndex.length; i += (k << 1) ) {
                     final int idx0 = (i + j) << 1;
                     final int idx1 = idx0 + (k << 1);

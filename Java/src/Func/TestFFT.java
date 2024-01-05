@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.Test;
@@ -25,12 +27,9 @@ import Type.IReal.ValueException;
 enum SignalType {
     Sin,
     Cos,
-    Slope
-}
+    Slope,
 
-enum RealType {
-    Var,
-    Intv
+    Aggr   // aggregated Sin and Cos for all frequencies 
 }
 
 enum TestType {
@@ -39,14 +38,18 @@ enum TestType {
     RoundTrip,
 }
 
-enum NoiseType {
-    Gaussian,
-    Uniform
+class Measure {
+    static final int BINDING = 3, DIVIDS = 5;
+
+    final Stat specStat = new Stat();
+    final Stat roundStat = new Stat();
+    final Stat revStat = new Stat();
+    final Histogram specHisto = new Histogram(BINDING, DIVIDS);
+    final Histogram roundHisto = new Histogram(BINDING, DIVIDS);
+    final Histogram revHisto = new Histogram(BINDING, DIVIDS);
 }
 
 class Signal {
-    static final int BINDING = 3, DIVIDS = 5;
-
     static Random rand = new Random();
 
     final RealType realType;
@@ -62,12 +65,8 @@ class Signal {
 
     final IReal[] sData, sSpec, sRound, sBack, sRev;
 
-    final Stat specStat = new Stat();
-    final Stat roundStat = new Stat();
-    final Stat revStat = new Stat();
-    final Histogram specHisto = new Histogram(BINDING, DIVIDS);
-    final Histogram roundHisto = new Histogram(BINDING, DIVIDS);
-    final Histogram revHisto = new Histogram(BINDING, DIVIDS);
+    final Measure measure = new Measure();
+    static final Map<RealType, Map<Integer, Map<NoiseType, Map<Double, Measure>>>> ssssAggr = new HashMap<>();
 
     Signal(RealType realType, int order, int freq, SignalType signal, 
                 NoiseType noiseType, double noise) 
@@ -93,10 +92,8 @@ class Signal {
                 break;
         
             case Intv:
-                sData = new IntvDbl[size];
-                sBack = new IntvDbl[size];
-                for (int i = 0; i < size; ++i) {
-                }
+                sData = new IntvDbl[size << 1];
+                sBack = new IntvDbl[size << 1];
                 break;
             default:
                 throw new ArithmeticException(String.format("Unknown realType %s", realType));
@@ -139,35 +136,89 @@ class Signal {
                 throw new ArithmeticException(String.format("Unknown signal %s", signal));
         }
 
-        for (int i = 0; i < (size << 1); ++i) {
-            if (noise == 0) {
-                sData[i] = new VarDbl(sWave[i] + getNoise());
-                sBack[i] = new VarDbl(sFreq[i] + getNoise());
-            } else {
-                sData[i] = new VarDbl(sWave[i] + getNoise(), noise);
-                sBack[i] = new VarDbl(sFreq[i] + getNoise(), noise);
-            }
-         }
+        switch (realType) {
+            case Var:
+                for (int i = 0; i < (size << 1); ++i) {
+                    if (noise == 0) {
+                        sData[i] = new VarDbl(sWave[i] + getNoise());
+                        sBack[i] = new VarDbl(sFreq[i] + getNoise());
+                    } else {
+                        sData[i] = new VarDbl(sWave[i] + getNoise(), noise);
+                        sBack[i] = new VarDbl(sFreq[i] + getNoise(), noise);
+                    }
+                }
+                break;       
+            case Intv:
+                for (int i = 0; i < (size << 1); ++i) {
+                    if (noise == 0) {
+                        sData[i] = new IntvDbl(sWave[i] + getNoise());
+                        sBack[i] = new IntvDbl(sFreq[i] + getNoise());
+                    } else {
+                        sData[i] = new IntvDbl(sWave[i] + getNoise(), noise);
+                        sBack[i] = new IntvDbl(sFreq[i] + getNoise(), noise);
+                    }
+                }
+                break;
+        }
 
         sSpec = FFT.transform(sData, true);
         sRound = FFT.transform(sSpec, false);
         sRev = FFT.transform(sBack, false);
 
+        Measure aggr = null;
+        if (signal != SignalType.Slope) {
+            Map<Integer, Map<NoiseType, Map<Double, Measure>>> sssAggr = ssssAggr.get(realType);
+            if (sssAggr == null) {
+                sssAggr =  new HashMap<>();
+                ssssAggr.put(realType, sssAggr);
+            }
+            Map<NoiseType, Map<Double, Measure>> ssAggr = sssAggr.get(order);
+            if (ssAggr == null) {
+                ssAggr = new HashMap<>();
+                sssAggr.put(order, ssAggr);
+            }
+            Map<Double, Measure> sAggr = ssAggr.get(noiseType);
+            if (sAggr == null) {
+                sAggr = new HashMap<>();
+                ssAggr.put(noiseType, sAggr);
+            }
+            aggr = sAggr.get(noise);
+            if (aggr == null) {
+                aggr = new Measure();
+                sAggr.put(noise, aggr);
+            }
+        }
+
         for (int i = 0; i < (size << 1); ++i) {
             final double unc1 = sSpec[i].uncertainty();
-            specStat.accum(unc1);
-            if (unc1 > 0)
-                specHisto.accum((sSpec[i].value() - sFreq[i])/unc1);
+            measure.specStat.accum(unc1);
+            if (aggr != null)
+                aggr.specStat.accum(unc1);
+            if (unc1 > 0) {
+                 measure.specHisto.accum((sSpec[i].value() - sFreq[i])/unc1);
+                if (aggr != null)
+                    aggr.specHisto.accum((sSpec[i].value() - sFreq[i])/unc1);
+            }
 
             final double unc2 = sRound[i].uncertainty();
-            revStat.accum(unc2);
-            if (unc2 > 0)
-                revHisto.accum((sRound[i].value() - sWave[i])/unc2);
+            measure.revStat.accum(unc2);
+            if (aggr != null)
+                aggr.revStat.accum(unc2);
+            if (unc2 > 0) {
+                 measure.revHisto.accum((sRound[i].value() - sWave[i])/unc2);
+                if (aggr != null)
+                    aggr.revHisto.accum((sRound[i].value() - sWave[i])/unc2);
+            }
 
             final double unc3 = sRev[i].uncertainty();
-            roundStat.accum(unc3);
-            if (unc3 > 0)
-                roundHisto.accum((sRev[i].value() - sWave[i])/unc3);
+            measure.roundStat.accum(unc3);
+            if (aggr != null)
+                aggr.roundStat.accum(unc3);
+            if (unc3 > 0) {
+                 measure.roundHisto.accum((sRev[i].value() - sWave[i])/unc3);
+                if (aggr != null)
+                    aggr.roundHisto.accum((sRev[i].value() - sWave[i])/unc3);
+            }
         }
     }
 
@@ -299,7 +350,7 @@ public class TestFFT {
                      SignalType signal, int order, int freq) {
         final double sigma = (realType == RealType.Var)? 5.0 : 1.0;
         try {
-            Signal out = new Signal(RealType.Var, order, freq, signal, noiseType, noise);
+            Signal out = new Signal(realType, order, freq, signal, noiseType, noise);
             StringBuilder sb = new  StringBuilder();
             for (int i = 0; i < (2 << order); ++i) {
                 if (Math.abs(out.sSpec[i].value() - out.sFreq[i]) > sigma * out.sSpec[i].uncertainty())
@@ -332,27 +383,32 @@ public class TestFFT {
     }
 
     void dump(final FileWriter fw, RealType realType, NoiseType noiseType, double noise,
+              SignalType signal, int order, int freq, final Measure measure) throws IOException {
+        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
+                 realType, noiseType, noise, signal, order, freq, "Forward"));
+        dump(fw, measure.specStat, measure.specHisto);
+        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
+                 realType, noiseType, noise, signal, order, freq, "Backward"));
+        dump(fw, measure.revStat, measure.revHisto);
+        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
+                 realType, noiseType, noise, signal, order, freq, "Roundtrip"));
+        dump(fw, measure.roundStat, measure.roundHisto);
+    }
+
+    void run(final FileWriter fw, RealType realType, NoiseType noiseType, double noise,
               SignalType signal, int order, int freq) 
             throws IOException, ArithmeticException, TypeException, ValueException, UncertaintyException {
         final Signal out = new Signal(realType, order, freq, signal, noiseType, noise);
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Forward"));
-        dump(fw, out.specStat, out.specHisto);
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Backward"));
-        dump(fw, out.revStat, out.revHisto);
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Roundtrip"));
-        dump(fw, out.roundStat, out.roundHisto);
+        dump(fw, realType, noiseType, noise, signal, order, freq, out.measure);
     }
 
-    void dump(final FileWriter fw, RealType realType, double noise,
+    void run(final FileWriter fw, RealType realType, double noise,
               SignalType signal, int order, int freq) 
             throws IOException, ArithmeticException, TypeException, ValueException, UncertaintyException {
-        dump(fw, realType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
-        dump(fw, realType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
-        dump(fw, realType, NoiseType.Uniform,  noise, SignalType.Sin, order, freq);
-        dump(fw, realType, NoiseType.Uniform,  noise, SignalType.Cos, order, freq);
+        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
+        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
+        run(fw, realType, NoiseType.Uniform,  noise, SignalType.Sin, order, freq);
+        run(fw, realType, NoiseType.Uniform,  noise, SignalType.Cos, order, freq);
     }
 
 
@@ -362,8 +418,8 @@ public class TestFFT {
             fw.write("RealType\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest");
             fw.write("\tUncertaintyMean\tUncertaintyDev\tUncertaintyMin\tUncertaintyMax");
             fw.write("\tErrorMean\tErrorDev\tErrorMin\tErrorMax");
-            for (int i = -Signal.BINDING * Signal.DIVIDS; i <= Signal.BINDING * Signal.DIVIDS; ++i) {
-                fw.append(String.format("\t%.1f", ((double) i) / Signal.DIVIDS));  
+            for (int i = - Measure.BINDING * Measure.DIVIDS; i <= Measure.BINDING * Measure.DIVIDS; ++i) {
+                fw.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
             }
             fw.write("\n");
             final int[] sFreq = new int[]{1, 2, 3, 4, 5, 6};
@@ -372,13 +428,38 @@ public class TestFFT {
             for (int order = 4; order <= FFT.MAX_ORDER; ++order) {
                 final int maxFreq = (1 << (order - 1)) - 1;
                 for (final double noise : sNoise) {
-                    dump(fw, realType, NoiseType.Gaussian, noise, SignalType.Slope, order, 0);
-                    dump(fw, realType, NoiseType.Uniform, noise, SignalType.Slope, order, 0);
-                    dump(fw, realType, noise, SignalType.Slope, order, maxFreq);
+                    run(fw, realType, NoiseType.Gaussian, noise, SignalType.Slope, order, 0);
+                    run(fw, realType, NoiseType.Uniform, noise, SignalType.Slope, order, 0);
+                    run(fw, realType, noise, SignalType.Slope, order, maxFreq);
                 }
                 for (final int freq : sFreq) {
                     for (final double noise : sNoise) {
-                        dump(fw, realType, noise, SignalType.Sin, order, freq);
+                        run(fw, realType, noise, SignalType.Sin, order, freq);
+                    }
+                }
+                final Map<Integer, Map<NoiseType, Map<Double, Measure>>> sssAggr = Signal.ssssAggr.get(realType);
+                if (sssAggr == null) {
+                    fail(String.format("Found no aggregated result for %s order=%d", 
+                         realType, order));
+                }
+                final Map<NoiseType, Map<Double, Measure>> ssAggr = sssAggr.get(order);
+                if (ssAggr == null) {
+                    fail(String.format("Found no aggregated result for %s order=%d", 
+                         realType, order));
+                }
+                for (NoiseType noiseType: NoiseType.values()) {
+                    final Map<Double, Measure> sAggr = ssAggr.get(noiseType);
+                    if (sAggr == null) {
+                        fail(String.format("Found no aggregated result for %s order=%d %s", 
+                            realType, order, noiseType));
+                    }
+                    for (double noise: sNoise) {
+                        final Measure aggr = sAggr.get(noise);
+                        if (aggr == null) {
+                            fail(String.format("Found no aggregated result for %s order=%d %s noise=%.3e", 
+                                realType, order, noiseType, noise));
+                        }
+                        dump(fw, realType, noiseType, noise, SignalType.Aggr, order, 0, aggr);
                     }
                 }
             }
