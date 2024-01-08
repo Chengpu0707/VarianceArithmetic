@@ -1,5 +1,6 @@
 package Func;
 
+import Stats.Noise;
 import Type.IReal;
 import Type.IntvDbl;
 import Type.VarDbl;
@@ -17,12 +18,15 @@ public class FFT {
 
     /*
     * A cached sine function with resolution down to PI/2^(MAX_QUARD_ORDER+1)
+    * Use "noiseDev" to reduce systemic numerical errors in sin()
     */
     private static final int MAX_SIZE = (1 << MAX_QUARD_ORDER);
     private static final double[] sSin = new double[MAX_SIZE + 1];
+    private static final double noiseDev = 0;
     static {
+        Noise noise = new Noise();
         for (int i = 0; i <= MAX_SIZE; ++i) {
-            sSin[i] = Math.sin(Math.PI * 0.5 * i / MAX_SIZE);
+            sSin[i] = Math.sin(Math.PI * 0.5 * i / MAX_SIZE) + noise.white(noiseDev);
         }
     }
 
@@ -162,7 +166,7 @@ public class FFT {
                                     ? new VarDbl(cos( j, o ))
                                     : new IntvDbl(cos( j, o ));
                 final IReal sin = (realType == RealType.Var)
-                                    ? new IntvDbl(forward? sin( j, o ) : -sin( j, o ))
+                                    ? new VarDbl(forward? sin( j, o ) : -sin( j, o ))
                                     : new IntvDbl(forward? sin( j, o ) : -sin( j, o ));
                 for (int i = 0; i < sIndex.length; i += (k << 1) ) {
                     final int idx0 = (i + j) << 1;

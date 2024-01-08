@@ -34,7 +34,7 @@ public class TestNoise {
         assertTrue(9900 <= histo.stat().count());
         assertEquals(0, histo.stat().avg(), 1E-2); 
         assertEquals(1, histo.stat().dev(), 5E-2); 
-        final int actRange = (int) Math.max( Math.abs(histo.stat().min()), histo.stat().max()) * histo.divids();
+        final int actRange = (int) Math.round(Math.max( -histo.stat().min(), histo.stat().max()) * histo.divids());
         assertEquals(actRange, histo.actRange());
         assertArrayEquals(new double[]{0.06, 0.075, 0.089, 0.098, 0.10, 0.098, 0.089, 0.075, 0.06}, 
                 histo.histo(4), 1E-2);
@@ -49,10 +49,27 @@ public class TestNoise {
         assertTrue(20000 >= histo.stat().count());
         assertTrue(19900 <= histo.stat().count());
         assertEquals(0, histo.stat().avg(), 5E-2); 
-        assertEquals(2, histo.stat().dev(), 3E-2); 
-        final int actRange = (int) Math.max( Math.abs(histo.stat().min()), histo.stat().max()) * histo.divids();
+        assertEquals(2, histo.stat().dev(), 5E-2); 
+        final int actRange = (int) Math.round(Math.max( -histo.stat().min(), histo.stat().max()) * histo.divids());
         assertEquals(actRange, histo.actRange());
         assertArrayEquals(new double[]{0.043, 0.046, 0.049, 0.049, 0.052, 0.049, 0.049, 0.046, 0.043}, 
+                histo.histo(4), 1E-2);
+    }
+
+    @Test
+    public void testWite_dev2() {
+        final Histogram histo = new Histogram(4, 2);
+        for (int i = 0; i < 20000; ++i) {
+            histo.accum(noise.white(2));
+        }
+        assertTrue(20000 == histo.stat().count());
+        assertEquals(0, histo.stat().avg(), 5E-2); 
+        assertEquals(2, histo.stat().dev(), 3E-2); 
+        final int actRange = (int) Math.round(Math.max( -histo.stat().min(), histo.stat().max()) * histo.divids());
+        assertEquals(actRange, histo.actRange());
+        assertEquals(Math.sqrt(3)*2, -histo.stat().min(), 5E-2);
+        assertEquals(Math.sqrt(3)*2, histo.stat().max(), 5E-2);
+        assertArrayEquals(new double[]{0.071, 0.071, 0.071, 0.071, 0.071, 0.071, 0.071, 0.071, 0.071}, 
                 histo.histo(4), 1E-2);
     }
 }

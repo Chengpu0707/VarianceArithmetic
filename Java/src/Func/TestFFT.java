@@ -9,11 +9,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.junit.Test;
 
 import Stats.Histogram;
+import Stats.Noise;
 import Stats.Stat;
 import Type.Dbl;
 import Type.IReal;
@@ -50,7 +50,7 @@ class Measure {
 }
 
 class Signal {
-    static Random rand = new Random();
+    static Noise rand = new Noise();
 
     final RealType realType;
 
@@ -225,9 +225,9 @@ class Signal {
     double getNoise() {
         switch (noiseType) {
             case Gaussian:
-                return rand.nextGaussian() * noise;
+                return rand.gaussian(noise);
             case Uniform:
-                return (rand.nextDouble() - 0.5) * Math.sqrt(12) * noise;
+                return rand.white(noise);
             default:
                 return 0;
         }
@@ -346,13 +346,58 @@ public class TestFFT {
         }
     }
 
+    static void dump(final FileWriter fw, TestType test, String part, 
+                     IReal[] sOut, double[] sIdeal) throws IOException {
+        fw.write(String.format("\n%s\t%s\tValue\tReal", test, part));
+        for (int i = 0; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", sOut[i].value()));
+        fw.write(String.format("\n%s\t%s\tError\tReal", test, part));
+        for (int i = 0; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", Math.abs(sOut[i].value() - sIdeal[i])));
+        fw.write(String.format("\n%s\t%s\tUncertainty\tReal", test, part));
+        for (int i = 0; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", sOut[i].uncertainty()));
+        fw.write(String.format("\n%s\t%s\tNormalized\tReal", test, part));
+        for (int i = 0; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", (sOut[i].value() == sIdeal[i])?
+                        0 : Math.abs(sOut[i].value() - sIdeal[i])/ sOut[i].uncertainty()));
+
+        fw.write(String.format("\n%s\t%s\tValue\tImag", test, part));
+        for (int i = 1; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", sOut[i].value()));
+        fw.write(String.format("\n%s\t%s\tError\tImag", test, part));
+        for (int i = 1; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", Math.abs(sOut[i].value() - sIdeal[i])));
+        fw.write(String.format("\n%s\t%s\tUncertainty\tImag", test, part));
+        for (int i = 1; i < sOut.length; i += 2)
+            fw.write(String.format("\t%e", sOut[i].uncertainty()));
+        fw.write(String.format("\n%s\t%s\tNormalized\tImag", test, part));
+        for (int i = 1; i < sOut.length; i += 2) 
+            fw.write(String.format("\t%e", (sOut[i].value() == sIdeal[i])?
+                        0 : Math.abs(sOut[i].value() - sIdeal[i])/ sOut[i].uncertainty()));
+    }
+
     static void test(RealType realType, NoiseType noiseType, double noise, 
                      SignalType signal, int order, int freq) {
         final double sigma = (realType == RealType.Var)? 5.0 : 1.0;
-        try {
+        final String pathOut = String.format("./Output/FFT%s_%s%.3e_%s_%d_%d.txt", 
+                realType, noiseType, noise, signal, order, freq);
+        try (final FileWriter fw = new FileWriter(pathOut)) {
             Signal out = new Signal(realType, order, freq, signal, noiseType, noise);
+
+            fw.write(String.format("realType\t%s\t\tnoiseType\t%s\tnoise\t%.3e\tsignal\t%s\torder\t%d\tfreq\t%d", 
+                     realType, noiseType, noise, signal, order, freq));
+            fw.write("\n\t\t\tIndex");
+            for (int i = 0; i < out.size; ++i)
+                fw.write(String.format("\t%d", i));
+            dump(fw, TestType.Forward, "input", out.sData, out.sWave);
+            dump(fw, TestType.Forward, "output", out.sSpec, out.sFreq);
+            dump(fw, TestType.RoundTrip, "output", out.sRound, out.sWave);
+            dump(fw, TestType.Reverse, "input", out.sBack, out.sFreq);
+            dump(fw, TestType.Reverse, "output", out.sRev, out.sWave);
+
             StringBuilder sb = new  StringBuilder();
-            for (int i = 0; i < (2 << order); ++i) {
+            for (int i = 0; i < (out.size << 1); ++i) {
                 if (Math.abs(out.sSpec[i].value() - out.sFreq[i]) > sigma * out.sSpec[i].uncertainty())
                     sb.append(String.format("Forward %d: %.3e vs %.3e\n", i, 
                         out.sSpec[i].value() - out.sFreq[i], sigma * out.sSpec[i].uncertainty()));
@@ -364,7 +409,11 @@ public class TestFFT {
                         out.sRound[i].value() - out.sWave[i], sigma * out.sRound[i].uncertainty()));
             }
             assertEquals("", sb.toString());
-        } catch (ArithmeticException | TypeException | ValueException | UncertaintyException e) {
+        } catch (TypeException | ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        } catch (ArithmeticException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
             fail(e.getMessage());
         }
     }
@@ -423,7 +472,8 @@ public class TestFFT {
             }
             fw.write("\n");
             final int[] sFreq = new int[]{1, 2, 3, 4, 5, 6};
-            final double[] sNoise = new double[]{0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1};
+            final double[] sNoise = new double[]{0, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 
+                                                 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1};
 
             for (int order = 4; order <= FFT.MAX_ORDER; ++order) {
                 final int maxFreq = (1 << (order - 1)) - 1;
