@@ -27,26 +27,9 @@ import Type.IReal.ValueException;
 enum SignalType {
     Sin,
     Cos,
-    Slope,
+    Linear,
 
-    Aggr   // aggregated Sin and Cos for all frequencies 
-}
-
-enum TestType {
-    Forward,
-    Reverse,
-    RoundTrip,
-}
-
-class Measure {
-    static final int BINDING = 3, DIVIDS = 5;
-
-    final Stat specStat = new Stat();
-    final Stat roundStat = new Stat();
-    final Stat revStat = new Stat();
-    final Histogram specHisto = new Histogram(BINDING, DIVIDS);
-    final Histogram roundHisto = new Histogram(BINDING, DIVIDS);
-    final Histogram revHisto = new Histogram(BINDING, DIVIDS);
+    Aggr,  // aggregated Sin and Cos for all frequencies 
 }
 
 class Signal {
@@ -102,7 +85,7 @@ class Signal {
         switch (noiseType) {
             case Gaussian:
                 break;
-            case Uniform:
+            case White:
                 break;
             default:
                 throw new ArithmeticException(String.format("Unknown noise type %s", noiseType));
@@ -124,7 +107,7 @@ class Signal {
                 sFreq[freq << 1] = peak;
                 sFreq[(size - freq) << 1] = peak;
                 break;
-            case Slope:
+            case Linear:
                 sFreq[0] = size * (size - 1) / 2;
                 for (int i = 1; i < size; ++i) {
                     sWave[i << 1] = i;
@@ -166,7 +149,7 @@ class Signal {
         sRev = FFT.transform(sBack, false);
 
         Measure aggr = null;
-        if (signal != SignalType.Slope) {
+        if (signal != SignalType.Linear) {
             Map<Integer, Map<NoiseType, Map<Double, Measure>>> sssAggr = ssssAggr.get(realType);
             if (sssAggr == null) {
                 sssAggr =  new HashMap<>();
@@ -191,33 +174,33 @@ class Signal {
 
         for (int i = 0; i < (size << 1); ++i) {
             final double unc1 = sSpec[i].uncertainty();
-            measure.specStat.accum(unc1);
+            measure.sStat.get(TestType.Forward).accum(unc1);
             if (aggr != null)
-                aggr.specStat.accum(unc1);
+                aggr.sStat.get(TestType.Forward).accum(unc1);
             if (unc1 > 0) {
-                 measure.specHisto.accum((sSpec[i].value() - sFreq[i])/unc1);
+                 measure.sHisto.get(TestType.Forward).accum((sSpec[i].value() - sFreq[i])/unc1);
                 if (aggr != null)
-                    aggr.specHisto.accum((sSpec[i].value() - sFreq[i])/unc1);
+                    aggr.sHisto.get(TestType.Forward).accum((sSpec[i].value() - sFreq[i])/unc1);
             }
 
             final double unc2 = sRound[i].uncertainty();
-            measure.revStat.accum(unc2);
+            measure.sStat.get(TestType.Roundtrip).accum(unc2);
             if (aggr != null)
-                aggr.revStat.accum(unc2);
+                aggr.sStat.get(TestType.Roundtrip).accum(unc2);
             if (unc2 > 0) {
-                 measure.revHisto.accum((sRound[i].value() - sWave[i])/unc2);
+                measure.sHisto.get(TestType.Roundtrip).accum((sRound[i].value() - sData[i].value())/unc2);
                 if (aggr != null)
-                    aggr.revHisto.accum((sRound[i].value() - sWave[i])/unc2);
+                    aggr.sHisto.get(TestType.Roundtrip).accum((sRound[i].value() - sData[i].value())/unc2);
             }
 
             final double unc3 = sRev[i].uncertainty();
-            measure.roundStat.accum(unc3);
+            measure.sStat.get(TestType.Reverse).accum(unc3);
             if (aggr != null)
-                aggr.roundStat.accum(unc3);
+                aggr.sStat.get(TestType.Reverse).accum(unc3);
             if (unc3 > 0) {
-                 measure.roundHisto.accum((sRev[i].value() - sWave[i])/unc3);
+                 measure.sHisto.get(TestType.Reverse).accum((sRev[i].value() - sWave[i])/unc3);
                 if (aggr != null)
-                    aggr.roundHisto.accum((sRev[i].value() - sWave[i])/unc3);
+                    aggr.sHisto.get(TestType.Reverse).accum((sRev[i].value() - sWave[i])/unc3);
             }
         }
     }
@@ -226,7 +209,7 @@ class Signal {
         switch (noiseType) {
             case Gaussian:
                 return rand.gaussian(noise);
-            case Uniform:
+            case White:
                 return rand.white(noise);
             default:
                 return 0;
@@ -238,6 +221,10 @@ class Signal {
 
 
 public class TestFFT {
+    static final int[] sFreq = new int[]{1, 2, 3, 4, 5, 6, 7};
+    static final double[] sNoise = new double[]{0, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 
+                                                1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1};
+
     static final double q1 = Math.sin(Math.PI/8);
     static final double q2 = Math.sin(Math.PI/4);
     static final double q3 = Math.sin(Math.PI/8*3);
@@ -346,69 +333,78 @@ public class TestFFT {
         }
     }
 
-    static void dump(final FileWriter fw, TestType test, String part, 
+    static void dump(final FileWriter fw, final String tag, TestType test, String part, 
                      IReal[] sOut, double[] sIdeal) throws IOException {
-        fw.write(String.format("\n%s\t%s\tValue\tReal", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tValue\tReal", tag, test, part));
         for (int i = 0; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", sOut[i].value()));
-        fw.write(String.format("\n%s\t%s\tError\tReal", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tError\tReal", tag, test, part));
         for (int i = 0; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", Math.abs(sOut[i].value() - sIdeal[i])));
-        fw.write(String.format("\n%s\t%s\tUncertainty\tReal", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tUncertainty\tReal", tag, test, part));
         for (int i = 0; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", sOut[i].uncertainty()));
-        fw.write(String.format("\n%s\t%s\tNormalized\tReal", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tNormalized\tReal", tag, test, part));
         for (int i = 0; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", (sOut[i].value() == sIdeal[i])?
                         0 : Math.abs(sOut[i].value() - sIdeal[i])/ sOut[i].uncertainty()));
 
-        fw.write(String.format("\n%s\t%s\tValue\tImag", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tValue\tImag", tag, test, part));
         for (int i = 1; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", sOut[i].value()));
-        fw.write(String.format("\n%s\t%s\tError\tImag", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tError\tImag", tag, test, part));
         for (int i = 1; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", Math.abs(sOut[i].value() - sIdeal[i])));
-        fw.write(String.format("\n%s\t%s\tUncertainty\tImag", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tUncertainty\tImag", tag, test, part));
         for (int i = 1; i < sOut.length; i += 2)
             fw.write(String.format("\t%e", sOut[i].uncertainty()));
-        fw.write(String.format("\n%s\t%s\tNormalized\tImag", test, part));
+        fw.write(String.format("\n%s\t%s\t%s\tNormalized\tImag", tag, test, part));
         for (int i = 1; i < sOut.length; i += 2) 
             fw.write(String.format("\t%e", (sOut[i].value() == sIdeal[i])?
                         0 : Math.abs(sOut[i].value() - sIdeal[i])/ sOut[i].uncertainty()));
     }
 
-    static void test(RealType realType, NoiseType noiseType, double noise, 
-                     SignalType signal, int order, int freq) {
-        final double sigma = (realType == RealType.Var)? 5.0 : 1.0;
-        final String pathOut = String.format("./Output/FFT%s_%s%.3e_%s_%d_%d.txt", 
-                realType, noiseType, noise, signal, order, freq);
+    static void inspect(RealType realType, double sigma) {
+        final String pathOut = String.format("./Output/FFT%s_spec.txt", realType);
+        final int maxOrder = 7;
         try (final FileWriter fw = new FileWriter(pathOut)) {
-            Signal out = new Signal(realType, order, freq, signal, noiseType, noise);
-
-            fw.write(String.format("realType\t%s\t\tnoiseType\t%s\tnoise\t%.3e\tsignal\t%s\torder\t%d\tfreq\t%d", 
-                     realType, noiseType, noise, signal, order, freq));
-            fw.write("\n\t\t\tIndex");
-            for (int i = 0; i < out.size; ++i)
+            fw.write("RealType\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest\tI/O\tMeasure\tPart");
+            for (int i = 0; i < (2 << maxOrder); ++i)
                 fw.write(String.format("\t%d", i));
-            dump(fw, TestType.Forward, "input", out.sData, out.sWave);
-            dump(fw, TestType.Forward, "output", out.sSpec, out.sFreq);
-            dump(fw, TestType.RoundTrip, "output", out.sRound, out.sWave);
-            dump(fw, TestType.Reverse, "input", out.sBack, out.sFreq);
-            dump(fw, TestType.Reverse, "output", out.sRev, out.sWave);
-
-            StringBuilder sb = new  StringBuilder();
-            for (int i = 0; i < (out.size << 1); ++i) {
-                if (Math.abs(out.sSpec[i].value() - out.sFreq[i]) > sigma * out.sSpec[i].uncertainty())
-                    sb.append(String.format("Forward %d: %.3e vs %.3e\n", i, 
-                        out.sSpec[i].value() - out.sFreq[i], sigma * out.sSpec[i].uncertainty()));
-                if (Math.abs(out.sRev[i].value() - out.sWave[i]) > sigma * out.sRev[i].uncertainty())
-                    sb.append(String.format("Backward %d: %.3e vs %.3e\n", i, 
-                        out.sRev[i].value() - out.sWave[i], sigma * out.sRev[i].uncertainty()));
-                if (Math.abs(out.sRound[i].value() - out.sData[i].value()) > sigma * out.sRound[i].uncertainty())
-                    sb.append(String.format("Roundtrip %d: %.3e vs %.3e\n", i, 
-                        out.sRound[i].value() - out.sWave[i], sigma * out.sRound[i].uncertainty()));
+            for (final NoiseType noiseType: NoiseType.values()) {
+                for (int n = 0; n < sNoise.length; ++n) {
+                    final  double noise = sNoise[n];
+                    for (final SignalType signal: SignalType.values()) {
+                        if (signal == SignalType.Aggr) 
+                            continue;
+                        for (int order = 4; order <= maxOrder; ++order) {
+                            for (int f = 0; f < sFreq.length; ++f) {
+                                final int freq = sFreq[f];
+                                Signal out = new Signal(realType, order, freq, signal, noiseType, noise);
+                                final String tag = String.format("%s\t%s\t%.3e\t%s\t%d\t%d", 
+                                        realType, noiseType, noise, signal, order, freq);
+                                dump(fw, tag, TestType.Forward, "input", out.sData, out.sWave);
+                                dump(fw, tag, TestType.Forward, "output", out.sSpec, out.sFreq);
+                                dump(fw, tag, TestType.Reverse, "input", out.sBack, out.sFreq);
+                                dump(fw, tag, TestType.Reverse, "output", out.sRev, out.sWave);
+                                
+                                if (sigma > 0) {
+                                    StringBuilder sb = new  StringBuilder();
+                                    for (int i = 0; i < (out.size << 1); ++i) {
+                                        if (Math.abs(out.sSpec[i].value() - out.sFreq[i]) > sigma * out.sSpec[i].uncertainty())
+                                            sb.append(String.format("%s Forward %d: %.3e vs %.3e\n", tag, i, 
+                                                out.sSpec[i].value() - out.sFreq[i], sigma * out.sSpec[i].uncertainty()));
+                                        if (Math.abs(out.sRev[i].value() - out.sWave[i]) > sigma * out.sRev[i].uncertainty())
+                                            sb.append(String.format("%s Reverse %d: %.3e vs %.3e\n", tag, i, 
+                                                out.sRev[i].value() - out.sWave[i], sigma * out.sRev[i].uncertainty()));
+                                    }
+                                    assertEquals("", sb.toString());
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            assertEquals("", sb.toString());
         } catch (TypeException | ValueException | UncertaintyException e) {
             fail(e.getMessage());
         } catch (ArithmeticException e) {
@@ -417,6 +413,17 @@ public class TestFFT {
             fail(e.getMessage());
         }
     }
+
+    void inspect(RealType realType) {
+        inspect(realType, 0);
+    }
+
+    @Test
+    public void inspectVarDbl() {
+        inspect(RealType.Var);
+    }
+
+
 
     void dump(final FileWriter fw, final Stat stat, final Histogram histo) throws IOException {
         fw.write(String.format("\t%.3e\t%.3e\t%.3e\t%.3e", 
@@ -433,15 +440,11 @@ public class TestFFT {
 
     void dump(final FileWriter fw, RealType realType, NoiseType noiseType, double noise,
               SignalType signal, int order, int freq, final Measure measure) throws IOException {
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Forward"));
-        dump(fw, measure.specStat, measure.specHisto);
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Backward"));
-        dump(fw, measure.revStat, measure.revHisto);
-        fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
-                 realType, noiseType, noise, signal, order, freq, "Roundtrip"));
-        dump(fw, measure.roundStat, measure.roundHisto);
+        for (TestType test: TestType.values()) {
+            fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
+                    realType, noiseType, noise, signal, order, freq, test));
+            dump(fw, measure.sStat.get(test), measure.sHisto.get(test));
+        }
     }
 
     void run(final FileWriter fw, RealType realType, NoiseType noiseType, double noise,
@@ -456,8 +459,8 @@ public class TestFFT {
             throws IOException, ArithmeticException, TypeException, ValueException, UncertaintyException {
         run(fw, realType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
         run(fw, realType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
-        run(fw, realType, NoiseType.Uniform,  noise, SignalType.Sin, order, freq);
-        run(fw, realType, NoiseType.Uniform,  noise, SignalType.Cos, order, freq);
+        run(fw, realType, NoiseType.White,  noise, SignalType.Sin, order, freq);
+        run(fw, realType, NoiseType.White,  noise, SignalType.Cos, order, freq);
     }
 
 
@@ -471,16 +474,12 @@ public class TestFFT {
                 fw.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
             }
             fw.write("\n");
-            final int[] sFreq = new int[]{1, 2, 3, 4, 5, 6};
-            final double[] sNoise = new double[]{0, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 
-                                                 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1};
-
             for (int order = 4; order <= FFT.MAX_ORDER; ++order) {
                 final int maxFreq = (1 << (order - 1)) - 1;
                 for (final double noise : sNoise) {
-                    run(fw, realType, NoiseType.Gaussian, noise, SignalType.Slope, order, 0);
-                    run(fw, realType, NoiseType.Uniform, noise, SignalType.Slope, order, 0);
-                    run(fw, realType, noise, SignalType.Slope, order, maxFreq);
+                    run(fw, realType, NoiseType.Gaussian, noise, SignalType.Linear, order, 0);
+                    run(fw, realType, NoiseType.White, noise, SignalType.Linear, order, 0);
+                    run(fw, realType, noise, SignalType.Linear, order, maxFreq);
                 }
                 for (final int freq : sFreq) {
                     for (final double noise : sNoise) {
@@ -523,12 +522,7 @@ public class TestFFT {
     }
 
     @Test
-    public void DumpVarDbl() {
+    public void dumpVarDbl() {
         dump(RealType.Var);
-    }
-
-    @Test
-    public void DumpIntvDbl() {
-        dump(RealType.Intv);
     }
 }

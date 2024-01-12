@@ -199,7 +199,8 @@ Interval arithmetic has very coarse and algorithm-specific precision but constan
 It represents the other extreme from conventional floating-point arithmetic.  
 To meet practical needs, a better uncertainty-bearing arithmetic should be based on statistical propagation of the rounding error, while also allowing reasonable bounding leakage for normal usages, which is achieved in the variance arithmetic, as show later in this paper.
 
-In this paper, an interval is presented as $x \pm \Delta x$, in which $x$ is the middle of the range, and $\Delta x$ is the half range.
+As shown previously \cite{Prev_Precision_Arithmetic}, interval arithmetic grossly exaggerates calculation uncertainty, e.g., for $f^{-1}(f(x))$ the result uncertainty is much larger than the original uncertainty.
+On the other hand, as shown later in this paper, the variance arithmetic provides stable bounding for a given bounding leakage, e.g., $\pm 3.1$-fold of the result deviation from the mean for a bounding leakage of $2 \times 10^{-7}$.
 
 
 \subsection{Statistical Propagation of Uncertainty}
@@ -235,50 +236,52 @@ They both treat the reliable bit counts as integers when applying their rules, w
 The significance arithmetic marketed by Mathematica \cite{Mathematica_Significance_Arithmetic} uses a linear error model that is consistent with a first-order approximation of interval arithmetic \cite{Precise_Numerical_Methods}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}, and further provides an arbitrary precision representation which is in the framework of  conventional floating-point arithmetic. 
 It is definitely not a statistical approach. 
 
-Stochastic arithmetic \cite{Stochastic_Arithmetic}\cite{CADNA_library}, which can also be categorized as significance arithmetic, randomizes the least significant bits (LSB) of each of input floating-point values, repeats the same calculation multiple times, and then uses statistics to seek invariant digits among the calculation results as significant digits.  
+Stochastic arithmetic \cite{Stochastic_Arithmetic} \cite{CADNA_library}, which can also be categorized as significance arithmetic, randomizes the least significant bits (LSB) of each of input floating-point values, repeats the same calculation multiple times, and then uses statistics to seek invariant digits among the calculation results as significant digits.  
 This approach may require too much calculation since the number of necessary repeats for each input is specific to each algorithm, especially when the algorithm contains branches.  
 Its sampling approach may be more time-consuming and less accurate than direct statistical characterization \cite{Probability_Statistics}, such as directly calculating the mean and deviation of the underlying distribution.  
 It is based on modeling rounding errors in conventional floating-point arithmetic, which is quite complicated.  
 A better approach may be to define arithmetic rules that make error tracking by probability easier.
 
-As the mathematical foundation to significance arithmetic, when a uncertainty-bearing value is multiplied by a constant, the significance or relative precision still holds, while the absolute precision \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements} scales with the constant.  
-In this respect, fixed-point arithmetic \cite{Fixed_Point_Arithmetic}, which assumes a fixed absolute precision, does not have a sounding mathematical foundation.
-
-As show later in this paper, the variance arithmetic achieved significance arithmetic, allowing the significance bit count to be real numbers.
+One problem of significance arithmetic is that itself can not properly specifies the uncertainty \cite{Prev_Precision_Arithmetic}.
+For example, if the least significand bit of significand is used to specify uncertainty, then the representation have very coarse precision, such as $1 \pm 10^{-3} = 1024 \times 2^{-10}$  \cite{Prev_Precision_Arithmetic}.
+Introducing limited bits calculated inside uncertainty can not avoid this problem completely.
+Thus, the resolution of the conventional floating-point representation is desired.
+This is the reason why variance arithmetic abandoned the significance arithmetic nature of its predecessor \cite{Prev_Precision_Arithmetic}.
 
 
 
 \subsection{ An Overview of This Paper}
 
-In this paper, a new floating-point arithmetic called \emph{variance arithmetic} is developed to track uncertainty during floating-point calculations, as described in Section \ref{sec: variance arithmetic}.  
-Generic standards and systematic methods for validating uncertainty-bearing arithmetics are discussed in Section \ref{sec: validation}.  
-Variance arithmetic is compared with other uncertainty-bearing arithmetics in Section \ref{sec: FFT} to Section \ref{sec: integration}.  A brief discussion is provided in Section \ref{sec: conclusion and discussion}.
+In this paper, a new floating-point arithmetic called \emph{variance arithmetic} is developed to track uncertainty during floating-point calculations of analytic functions, as described in Section \ref{sec: variance arithmetic}. 
+Compare to its predecessor \cite{Prev_Precision_Arithmetic}:
+ \begin{itemize}
+\item The introduction section \ref{sec: introduction} remains almost unchanged, except it quotes the negative results from \cite{Prev_Precision_Arithmetic} for interval arithmetic and significance arithmetic.
 
-Variance arithmetic is an improvement of the previously published precision arithmetic by the same author \cite{Prev_Precision_Arithmetic}.
-This paper is comparable to its processor \cite{Prev_Precision_Arithmetic}:
-\begin{itemize}
-\item Section \ref{sec: introduction} remains almost unchanged.
+\item The theoretical foundation section \ref{sec: variance arithmetic} has the following significant differences:
 
-\item The basic assumptions in Section \ref{sec: variance arithmetic} are identical.
-The variance arithmetic improves over its processor in the following areas:
-\begin{itemize}
-\item Unlike its processor, the variance arithmetic no longer has the dependency problem.
-Instead, the variance arithmetic can trace dependency between uncertainties through the identities of variables.
+\begin{enumerate}
+\item Both have identical uncorrelated uncertainty assumption.
 
-\item The digital representation gives a defined behavior of bits calculated inside uncertainty.
+\item The variance arithmetic has different digital presentation.
 
-\item The result variance using Taylor expansion was statistically inaccurate previously. 
-The new approach no longer calculate variance around the value if there were no uncertainty.
-\end{itemize}
+\item The variance arithmetic has similar Taylor expansion formulas, but the variance is centered around statistical means instead of the calculation results assuming no uncertainty, so variance arithmetic agrees with statistics strictly.
 
-\item Section \ref{sec: validation} remains largely unchanged, except it contains the last subsection from its processor.
+\item The theoretical  convergence and statistical binding leakage of the result uncertainties of the variance arithmetic are provided.
+
+\item The variance arithmetic has no dependency problem for analytic questions.
+Instead, the variance arithmetic uses statistics to trace dependency.
+\end{enumerate}
+
+\item Section \ref{sec: validation} remains largely unchanged, except major improvement on the descriptions of validation methods and standards.
 
 \item Section \ref{sec: Math Library} is new, to provide a statistical test of variance arithmetic in using the common math library functions.
 
-\item Section \ref{sec: FFT} is redone using the new implementation of variance arithmetic.  
-As a linear calculation with each input datum used only once, FFT provides an ideal test case.
+\item Section \ref{sec: FFT} reproduces the previous result for the input data with added noises.  
+It added a new signal for test.
+It also evaluates the calculation errors of the library $\sin$ and $\tan$ functions.
 
 \end{itemize}
+
 
 
 \clearpage
@@ -286,17 +289,7 @@ As a linear calculation with each input datum used only once, FFT provides an id
 \label{sec: variance arithmetic}
 
 
-\subsection{Foundation for Variance Arithmetic}
-
-The variance arithmetic calculates the uncertainty variance around each output value \cite{Prev_Precision_Arithmetic}.
-It is based on:
-\begin{itemize}
-\item the round up rule,
-\item the precision scaling principle, and
-\item the uncorrelated uncertainty assumption.
-\end{itemize}  
-
-The variance arithmetic uses \emph{the round up rule} \cite{Prev_Precision_Arithmetic} to avoid the rounding error accumulation in the conventional floating-point representation.
+\subsection{Foundation for the Variance Arithmetic}
 
 The statistical precision $P(x) = \delta x/|x|$ represents the reliable information content of a measurement statistically, with finer or smaller statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
 $P(x)$ has an upper bound of $1$.
@@ -306,17 +299,17 @@ When $1 \leq P(x)$:
 
 \item Or $x \pm \delta x$ is a measurement of $0$.
 \end{itemize}
-Variance arithmetic is based on the \emph{precision scaling principle} \cite{Prev_Precision_Arithmetic}: When a imprecise is multiplied by a precise value, the result precision equals the precision of the imprecise value.
 
 The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
 This assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
 It is much weaker than requiring any two different inputs to be independent of each other.
 It can be turned into a realistic and simple statistical requirement or test between two inputs.
 
-The uncorrelated uncertainty assumption only applies to imprecise inputs.
-When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for correlation between uncertainties through their associated variables, such as $x \pm \delta x$ and $y \pm \delta y$.
-Variance arithmetic has no dependency problem for analytic questions, which is different from the claim of its predecessor \cite{Prev_Precision_Arithmetic}.
+Taylor expansion can be used to calculate the result variance of analytic functions.
 
+The uncorrelated uncertainty assumption only applies to imprecise inputs.
+When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, the variance arithmetic uses statistics to account for the correlation between uncertainties through their associated variables.
+Thus, the variance arithmetic has no dependency problem.
 
 
 \subsection{The Uncorrelated Uncertainty Assumption \cite{Prev_Precision_Arithmetic}}
@@ -326,6 +319,7 @@ Variance arithmetic has no dependency problem for analytic questions, which is d
 \includegraphics[height=2.5in]{Signal_and_Noise.png}
 \captionof{figure}{
 Effect of noise on bit values of a measured value.  The triangular wave signal and the added white noise are shown at top using the thin black line and the grey area, respectively.  The values are measured by a theoretical 4-bit Digital-to-Analog Converter in ideal condition, assuming LSB is the 0th bit.  The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
+This figure has been published previously \cite{Prev_Precision_Arithmetic}.
 }
 \label{fig: Signal_and_Noise}
 \end{figure}
@@ -335,6 +329,7 @@ Effect of noise on bit values of a measured value.  The triangular wave signal a
 \includegraphics[height=2.5in]{Independent_Uncertainty_Assumption.png} 
 \captionof{figure}{
 Allowed maximal correlation between two values vs. input precisions and independence standard (as shown in legend) for the independence uncertainty assumption of variance arithmetic to be true.
+This figure has been published previously \cite{Prev_Precision_Arithmetic}.
 }
 \label{fig: Independent_Uncertainty_Assumption}
 \end{figure}
@@ -404,70 +399,29 @@ This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sens
 }
 
 
+\subsection{Result Uncertainty For Pure Rounding  \cite{Prev_Precision_Arithmetic}}
 
-
-\subsection{The Round Up Rule \cite{Prev_Precision_Arithmetic}}
-
-The variance arithmetic uses \emph{the round up rule} to avoid the rounding error accumulation in the conventional floating-point representation.
-Let the content of a floating-point number be denoted as $S\; 2^E$, in which $S$ is the significand \footnote{While ``significand'' is the official word \cite{Floating_Point_Standard} to describe ``The component of a binary floating-point number that consists of an explicit or implicit leading bit to the left of its implied binary point and a fraction field to the right'', ``mantissa'' is often unofficially used instead.} and $E$ is the exponent of 2 of the floating-point number.  
-In addition, the variance representation contains a \emph{carry sign} $\sim$  to indicate the sign of its rounding error.
-When $E$ needs to be increased by 1, $S$ is \emph{round up} once, which proceeds according to the following round up rule, to limit the rounding error to $(-1/2, +1/2)$ of LSB (Least Significant Bit) of the significand:
-\begin{itemize}
-\item A value of $(2S) \sim 2^E$ is rounded up to $S \sim 2^{E+1}$.  
-
-\item A value of $(2S+1)\!+\!2^E$ is rounded up to $(S+1)\!-\!2^{E+1}$.
-  
-\item A value of $(2S+1)\!-\!2^E$ is rounded up to $S\!+\!2^{E+1}$.
-
-\item If $\sim$ is unknown, it is initiated as $-$, so that 1 is rounded up to 0.
-Even if the initial $\sim$ is wrong, the rounding error will be either reduced or corrected by the round up process.
-\end{itemize}
-
-The carry sign $\sim$ bit in variance arithmetic has the same functionality as the sticky bit or guard bits in conventional floating-point calculations \cite{Floating_Point_Arithmetic} to reduce rounding errors.
-Numerically, using the sticky bit and guard bits, the accuracy of the conventional floating-point calculation on a modern computer is pretty high, e.g., for $\sqrt{x^2}$ and $(\sqrt{x})^2$, the error is limited to the least significant 2 bits.
-It is the scenario demonstrated by Formula \eqref{eqn: float num calc} that is the major problem, when the rounding errors are saved as part of the data.
-Thus, the carry sign $\sim$ bit is part of the variance arithmetic representation.
-%In other calculation, the carry sign bits of both operand determine how to round the result significand. 
-
-
-\subsection{Probability Distribution of Rounding Errors \cite{Prev_Precision_Arithmetic}}
-
-An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Arithmetic}. 
-Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.
-Empirically, the rounding error are uniformly distributed within $(-1/2, +1/2)$ of LSB of the significand, in which $1/2$ is the \emph{bounding range} $R$ of the rounding error.
-Let $P_R(x)$ be the distribution density function for the rounding error with a bounding range of $R$.
+Empirically, the pure rounding error due to round-off is shown to be uniformly distributed between the half bit of the least significant bit of the siginficand \cite{Prev_Precision_Arithmetic}, whose probability density function is shown in Formula \eqref{eqn: rounding error 1/2 distribution}:
 \begin{equation}
 \label{eqn: rounding error 1/2 distribution}
 P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2; 
 \end{equation}
-The variance for $P_{1/2}(x)$ is $1/12$.
 
 
 
 \subsection{Result Uncertainty For Addition and Subtraction  \cite{Prev_Precision_Arithmetic}}
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[height=2.5in]{Prec_Add_ErrDist.png} 
 \captionof{figure}{
 The probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
 The legend shows $n$.
 $P_{2}(x)$ is already close to the corresponding Gaussian distribution with the same mean and deviation, which is plotted in dash line of the same color.
+This figure has been published previously \cite{Prev_Precision_Arithmetic}.
 }
 \label{fig: Prec_Add_Err_Dist}
 \end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
-\captionof{figure}{
-The result uncertainty distribution density function $P_{8/2}$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
-When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
-}
-\label{fig: Prec_RndByDev_Dist}
-\end{figure}
-
-
 
 
 The uncorrelated uncertainty assumption suggests that the result bounding distribution density function of addition or subtraction is the convolution of the input density functions \cite{Probability_Statistics}.  
@@ -479,12 +433,8 @@ Figure \ref{fig: Prec_Add_Err_Dist} shows the probability distribution $P_{\frac
 $P_{2}(x)$ is already close to the corresponding Gaussian distribution with the same mean and deviation, which is plotted in dash line of the same color.
 
 The Lyapunov form of the central limit theorem \cite{Probability_Statistics} states that if $X_i$ is a random variable with mean $\mu_i$ and variance $V_i$ for each $i$ among a series of $n$ mutually independent random variables, then with increased $n$, the sum $\sum\limits_{i}^{n} X_i$ converges in distribution to the Gaussian distribution with mean $\sum\limits_{i}^{n} \mu_i$ and variance $\sum\limits_{i}^{n} V_i$. Applying the central limit theorem to the addition and subtraction: 
-\begin{equation}
-\label{eqn: rounding error range vs deviation}
-V = n/12 = R/6;
-\end{equation}
-\begin{itemize}
-\item $P_{n/2}(x)$ converges in distribution to a Gaussian distribution of mean $0$ and variance $V$ as in Formula \eqref{eqn: rounding error range vs deviation}.
+\begin{itemize} 
+\item $P_{n/2}(x)$ converges in distribution to a Gaussian distribution.
 
 \item Figure \ref{fig: Prec_Add_Err_Dist} shows that such convergence to Gaussian distribution is very quick. 
 
@@ -500,7 +450,7 @@ Formula \eqref{eqn: central limit theorem} gives the probability density functio
 Formula \eqref{eqn: central limit theorem} can be normalized as Formula \eqref{eqn: normalized distribution}.
 \begin{align}
 \label{eqn: addition and subtraction}
-\delta^2 (x \pm y) &= \delta^2 x + \delta^2 y; \\
+\delta^2 (x \pm y) &= (\delta x)^2 + (\delta y)^2; \\
 \label{eqn: central limit theorem}
 \rho(\tilde{x}, x, \delta x) & = \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x}); \\
 \label{eqn: normalized distribution}
@@ -511,32 +461,20 @@ Formula \eqref{eqn: addition and subtraction} is different from Formula \eqref{e
 It may show that Formula \eqref{eqn: stat +} and \eqref{eqn: stat -} are wrong statistically for the result uncertainty.
 
 
-\subsection{The Precision Scaling Principle  \cite{Prev_Precision_Arithmetic}}
 
-Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
-To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
-According to the precision scaling principle:
+\subsection{A Variance Representation}
+
+A variance arithmetic representation uses a pair of conventional floating-point numbers to represent the value and the variance of an imprecise value.
+The square root of a variance is defined as an \emph{uncertainty}.  
+When the uncertainty is not specified:
 \begin{itemize}
-\item During each round up, $V$ is reduced to 1/4-fold. 
+\item A conventional floating-point value has $1/\sqrt{3}$-fold of its least significant value as its uncertainty, in which the \emph{least significant value} is defined as the equivalent value of the least significant bit of the significand of the conventional floating-point value, e.g., the least significant value of $1.0$ is $2^{-52}$.
+Essentially, the floating value is regarded as containing a rounding error uniformly distributed within the least significant bit of its significand.
 
-\item During each round down, $V$ is increased to 4-fold.
+\item An integer value within the range of $(-2^{53}, +2^{53})$ has 0 as its uncertainty.
+
+\item An integer value outside the range of $(-2^{53}, +2^{53})$ is converted to a conventional floating-point value.
 \end{itemize}
-Using the precision scaling principle, the variance representation represents $x \pm \delta x$ as:
-\begin{align}
-\label{eqn: accurate value}
-x =&\; S \; 2^{E};\\
-\label{eqn: uncertainty variance}
-(\delta x)^2 =&\; V \; 2^{2E};
-\end{align}
-
-However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
-When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$ in distribution, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
-The precision scaling principle chooses to scarify $R$ in favor of $V$.
-This choice introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
-To reduce the representation bounding leakage to virtually 0, $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation.
-
-
-
 
 
 \subsection{Comparison}
@@ -595,10 +533,18 @@ Thus,
 
 \fi
 
-Two imprecise values can be compared statistically using their difference \cite{Statistical_Methods}.
-For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the probability for them to be not equal is $\xi(\frac{0.002}{0.00224}) = 81.4\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
-If the threshold probability of not equality is $80\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
-%Using this method, even if the value difference is zero, the two imprecise values still have $50\%$ probability of not equal to each other, so that only the threshold probability of not equality can be set.
+Two imprecise values can be compared statistically using their difference:
+\begin{itemize}
+\item When the value difference is zero, the two imprecise values are equal.  
+Such definition of equality deviates from statistics.
+In statistics, such two imprecise value has $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
+
+\item Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal to each other, or less or more than each other.
+For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the z-value for the difference is $z = 0.002 / 0.00224$, and the probability for them to be not equal is $\xi(|z|) - \xi(-|z|) = 62.8\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
+If the threshold probability of not equality is $50\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
+Instead of using the threshold probability, the bounding range for z can be used, such as $|z| \leq 0.67448975$ for the equivalent threshold probability of $50\%$.
+\end{itemize}
+
 
 
 
@@ -781,7 +727,7 @@ The legend for the Gaussian distribution shows the value of Gaussian difference 
 
 
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
-%Formula \eqref{eqn: function distribution} is the uncertainty distribution density function \cite{Statistical_Methods}.
+Formula \eqref{eqn: function distribution} is the uncertainty distribution density function \cite{Statistical_Methods}.
 In Formula \eqref{eqn: function distribution} \cite{Statistical_Methods}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$ or $\tilde{z}$ , which are different representations of the same underlying random variable.
 Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: exp distribution}, \eqref{eqn: log distribution}, and \eqref{eqn: power distribution} give the $\rho(\tilde{y}, y, \delta y)$ for $e^x$, $\ln(x)$, and $x^c$, respectively.
 \begin{align}
@@ -831,7 +777,8 @@ $(0 \pm 1)^2$ is actually the $\chi^2$ distribution \cite{Statistical_Methods}.
 Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 Figure \ref{fig: Inverse_Square_Distribution} looks more like Figure \ref{fig: Square_Root_Distribution} than Figure \ref{fig: Square_Distribution}, showing that pole or zero determines the properties of uncertainty distributions.
 
-In all the figures, $\rho(f^{-1}(\tilde{y}), x, \delta x)$ becomes more and more Gaussian-like with decreasing $p(x)$ when the mode of the distributions is farther away from either zero or pole.
+In all the figures, the probability density function in the $\tilde{z}$ representation becomes more Gaussian-like when the mode of the distributions is further away from either zero or pole.
+Such observation leads to the following Taylor method to calculate the result variances when the distribution is nearly Gaussian in the $\tilde{z}$ representation.
  
 
 
@@ -857,10 +804,7 @@ In all the figures, $\rho(f^{-1}(\tilde{y}), x, \delta x)$ becomes more and more
 &= \sum_{n=1}^{\infty} (\delta x)^{2n} \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!}
   - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right) \\
 &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \\
-&\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
-\end{align*}
-
-\begin{align*}
+&\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8); \\
 \delta^2 f(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - \overline{f(x)}^2 \\
   &= \sum_{n=1}^{\infty} (\delta x)^{2n} \frac{\zeta(2n)}{(2n)!} (f(x)^2)^{(2n)}_x - \overline{f(x)}^2; \\
   &= (\delta x)^2 (f(x) f^{(2)}_x + (f^{(1)}_x)^2 - f(x) f^{(2)}_x) \\
@@ -995,7 +939,9 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 & \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
-  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
+  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!};
+\end{align}
+\begin{align}
 \delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
 \label{eqn: Taylor 1d variance}
 &\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
@@ -1116,7 +1062,7 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 \label{eqn: Taylor 2d variance}
 \delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
 &\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\;\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
 &\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
 &\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
       + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
@@ -1264,62 +1210,55 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.}
 \end{align}
 
 
-\subsection{A Variance Representation}
-
-To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, a variance representation has the following bit assignment for Formula \eqref{eqn: accurate value} and \eqref{eqn: uncertainty variance}:
-\begin{itemize}
-\item The bit count for $E$ is 11.
-
-\item The bit counts for $S$ and $V$ are 53 respectively.
-
-\item The representation needs 1 bit for sign, 1 bit for the carry error sign for $S$, and 1 bit for the carry error sign for $V$, respectively.
-
-\item The representation stores the bounding leakage $\epsilon$ as an 8-bit floating-point value, with 4-bit for the exponent.
-The maximal value for $\epsilon$ is $15\;2^{15-19} = 15/16$, while the minimal non-zero value for $\epsilon$ is $2^{-19} = 1.907 10^{-6}$ which is equivalent to $\sigma=4.763$.
-The result bounding leakage is approximated as $\epsilon = \epsilon_1 + \epsilon_2 - \epsilon_1 \epsilon_2$ in which $\epsilon_1$ and $\epsilon_2$ are the bounding leakages of the two operands for a calculation, respectively.
-\end{itemize}
-The total bit count of each imprecise value in the variance representation is 128.
-
-In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
-\begin{enumerate}
-\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
-
-\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
-
-\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
-\end{enumerate}
-Thus, the effective bit counts for $S$ and $V$ depend on the statistical precision $P \equiv \delta x / |x|$ of an imprecise value $x$:
-\begin{itemize}
-\item When $P \geq 2^{-26} \simeq 1.5\;10^{-8}$, the significance bit count is $26 - \log_{2} P$, which means maximally 26-bit calculated inside uncertainty.
-
-\item When $2^{-26} > P > 2^{-53} \simeq 1.1\;10^{-16}$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $P$.
-
-\item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
-\end{itemize}
-Thus, variance arithmetic is a modern implementation of significance arithmetic \cite{Significance_Arithmetic} \cite{Digital_Significance_Arithmetic} \cite{Unnormalized_Arithmetic}.
-
 
 \clearpage
-\section{Verification Method For Variance Arithmetic}
+\section{Verification Methods}
 \label{sec: validation}
 
+\subsection{Verification Methods and Standards}
 
-\subsection{Verification Standards \cite{Prev_Precision_Arithmetic}}
-
-Analytic functions each with a precisely known result are used to characterize a uncertainty-bearing arithmetic. 
-The difference between the arithmetic result and the analytic result is defined as the \emph{value error}.
-The statistics of the value errors defines the \emph{tracking ratio}:
+Analytic functions each with precisely known results are used to validate the variance arithmetic. 
+The difference between an arithmetic result and the corresponding analytic result is defined as the \emph{value error} \cite{Prev_Precision_Arithmetic}.
+The ratio of the value error to the uncertainty is defined as the \emph{normalized error} \cite{Prev_Precision_Arithmetic}.
 \begin{itemize}
-\item For variance arithmetic, it is the ratio of the standard deviation of the value error to the output deviation.
+\item If the value error is Gaussian distributed with the uncertainty as the distribution deviation, the normalized error is normal distributed.
 
-\item For interval arithmetic, it is the ratio of the range of the value error to the output range.
+\item If the value error is uniformly distributed with the uncertainty as the distribution deviation, the normalized error is uniformly distributed with a range of $\pm \sqrt{3}$.
 \end{itemize}
-An ideal tracking ratio should be close to 1, regardless of input uncertainty precision, amount of calculation, and the nature of the calculation.
+
+The input uncertainties can come from different sources:
+\begin{itemize}
+\item When the error deviations are obtained statistically \cite{Statistical_Methods}, the deviations are used as the uncertainties. 
+
+\item When no error is specified, the variance arithmetic assume the least significant value of each floating-point value to be imprecision, so it may not accurately account for both numerical errors of library functions and the rounding errors of conventional floating-point calculations.
+
+\item Either Gaussian noises or white noises \cite{Probability_Statistics} of a specific deviation can be added to the input \cite{Prev_Precision_Arithmetic}.
+If the added noises are much larger than the numerical errors and the rounding errors, the deviation accurately describe the corresponding errors.
+Because the variance arithmetic only deals with the uncertainties, the result uncertainties using either Gaussian noises or white noises should be identical.
+\end{itemize}
+Whether the input uncertainties accurately describe the corresponding errors or not will result in different result error characteristics.
+
+The result of using variance arithmetic are analyzed statistically, for the following statistical properties:
+\begin{itemize}
+\item the \emph{error deviations}, as the abbreviation for the deviations of the normalized errors. 
+They should be precisely $1$ when the input uncertainties accurately specify the corresponding input errors, or close to $1$ otherwise, showing the \emph{tracking power} of the variance arithmetic.
+
+\item the \emph{error maximums}, as the abbreviation for the maximums of the absolute normalized errors.  
+They should be close to an empirical value $3.1$, showing the \emph{bounding power} of the variance arithmetic for the given bounding leakage, 
+
+\item the \emph{error histograms}, as the abbreviation for the histograms of the normalized errors.  
+They should usually be normal distributed or Gaussian distributed, showing the \emph{convergence power} according to the central limit theorem \cite{Probability_Statistics}.
+
+\item the \emph{uncertainty means}, as the abbreviation for the means of the result uncertainties.  
+The trend of output uncertainty means vs input uncertainty means is defined as the \emph{error response}.
+The trend of output uncertainty means vs the amount of calculations is defined as the \emph{calculation response}.
+
+\item the \emph{uncertainty deviations}, as the abbreviation for the deviations of the result uncertainties.  
+They are usually much small than the corresponding uncertainty mean if the input has been added with noises of a specified deviation.
+\end{itemize}
+The racking power is central to the variance arithmetic.
 
 
-\subsection{Verification Method \cite{Prev_Precision_Arithmetic}}
-
-For an analytic function with know result, Gaussian noise or white noise \cite{Statistical_Methods} of specified uncertainty deviation are added to input data, and statistical methods are used to characterize the corresponding value errors.
 
 
 \subsection{Types of Uncertainties \cite{Prev_Precision_Arithmetic}}
@@ -1359,7 +1298,7 @@ A \emph{transformation} algorithm has about equal amounts of input and output da
 The information contained in the data remains about the same after transforming.  
 The Discrete Fourier Transformation is a typical transforming algorithm, which contains exactly the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
 Matrix inversion is another such reversible algorithm.  
-For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after forward and reverse transformation according to Formula \eqref{eqn: reverse variance}, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
+For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after a \emph{round-trip} transformation which is a forward and reverse transformation, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
 A test of uncertainty-bearing arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}, and a test of matrix inversion is provided in Section \ref{sec: matrix}.
 
 A \emph{generation} algorithm has much more output data than input data.  
@@ -1472,12 +1411,30 @@ For the discussion simplicity, the cases of applicable precision thresholds less
 
 \subsection{Unfaithful Frequency Response of Discrete Fourier Transformation \cite{Prev_Precision_Arithmetic}}
 
+\iffalse
+
+The Fourier transformation of a linear signal $h[n] = n$. 
+Let $y \equiv i 2\pi n /N$:
+\begin{align*}
+& G(y) = \sum_{k=0}^{N-1}  e^{y k} = \sum_{k=0}^{N-1}  (e^y)^k = \frac{e^{N y} - 1}{e^y - 1}
+ = \begin{cases} y = 0: \eqspace N \\ y \neq 0: \eqspace 0 \end{cases}; \\
+H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k} 
+ = \frac{d G}{y} = \frac{N e^{N y}}{e^y - 1} - \frac{e^{N y} - 1}{(e^y - 1)^2} e^y = \frac{N}{e^y - 1} \\
+ &= \frac{N}{\cos(y) - 1 + i \sin(y)} = \frac{N}{2} \frac{\cos(y) - 1 -  i \sin(y)}{1 - \cos(y)} 
+  = - \frac{N}{2}(1 + i \frac{2 \sin(\frac{y}{2}) \cos(\frac{y}{2})}{2 \sin^2(\frac{y}{2})}) \\
+ &= \begin{cases} y = 0: \eqspace \frac{N^2}{2} \\ y \neq 0: \eqspace - \frac{N}{2}(1 + i \frac{1}{\tan(\frac{n}{N} \pi)}) \end{cases};
+\end{align*}
+
+\fi
+
 \begin{figure}%[p]
 \includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 
 \captionof{figure}{Unfaithful representations of perfect sine signals in the Discrete Fourier Transformation.  
 The calculation is done on 1024 samples using FFT on a series of perfect sine signals having amplitude of 1 and slightly different frequencies as shown in legends.  
 In the drawing, x axis shows frequency, y axis shows either intensity or phase (inlet).  
-A faithful representation is also included for comparison, whose phase is $\pi /2$ at the index frequency, and undetermined at other frequencies.}
+A faithful representation is also included for comparison, whose phase is $\pi /2$ at the index frequency, and undetermined at other frequencies.
+This figure has been published previously \cite{Prev_Precision_Arithmetic}.
+}
 \label{fig: FFT_Unfaithful}
 \end{figure}
 
@@ -1533,14 +1490,41 @@ h[N] = h[0];
 Thus, the discrete Fourier transformation has an implied assumption that the signal $h[k]$ repeats itself outside the region of $[0, N-1]$ \cite{Numerical_DFT}.  
 For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to signal periodicity, resulting in larger peak width, lower peak height, and the wrong phase.  
 
-The most convenient signals to test uncertainty-bearing arithmetic are sine or cosine signals with frequencies as an integer-fold of $2\pi/N$.  
- 
 
-\subsection{FFT (Fast Fourier Transformation) \cite{Prev_Precision_Arithmetic}}
+
+\subsection{Testing Signals}
+
+
+The following signals are used for testing:
+\begin{itemize}
+\item \emph{Sin}: $h(n) = \sin(n 2\pi f/N), f = 1, 2, ... N/2 -1$, in which $f$ is defined as the \emph{index frequency}.
+
+\item \emph{Cos}: $h(n) = \cos(n 2\pi f/N), f = 1, 2, ... N/2 -1$, in which $f$ is the index frequency.
+
+\item \emph{Linear}: $h[n] = n$, whose discrete Fourier transformation is Formula \eqref{eqn: Fourier spec for linear}.
+\begin{align}
+& y \equiv i 2\pi \frac{n}{N}: \eqspace G(y) = \sum_{k=0}^{N-1}  e^{y k} = \frac{e^{N y} - 1}{e^y - 1}
+ = \begin{cases} y = 0: \eqspace N \\ y \neq 0: \eqspace 0 \end{cases}; \nonumber \\
+\label{eqn: Fourier spec for linear}
+H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace - \frac{N}{2}(1 + i /\tan(\frac{n}{N} \pi)) \end{cases};
+\end{align}
+
+\end{itemize}
+Both Sin and Cos signals are faithful in Fourier transformation.
+
+Empirically:
+\begin{itemize}
+\item The results from Sin and Cos are statistically indistinguishable from each other.
+
+\item The results from Sin at different frequencies are statistically indistinguishable from each other.
+
+\item The results from adding Gaussian noise or adding white noise are statistically indistinguishable from each other, except in rare situations.
+\end{itemize}
+
+
+\subsection{FFT (Fast Fourier Transformation)}
 
 \iffalse
-
-\fi
 
 Forward:
 \begin{align*}
@@ -1564,46 +1548,247 @@ L = 2:\;& o=0: & [0, 2, 1, 3]; \\
  & [0, 2, 0, 2]:& [4, 0, -4, 0];
 \end{align*}
 
-When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}, in which $m = L, L-1,\dots 1,0$ indicates progress of the transformation, and $j$ is the bit-reverse of $n$:
-\begin{align}
-m=L: \eqspace & H[n,\frac{k}{2^{m}}] = h[j],  k,n = 0,1\dots N-1; \\
-\label{eqn: Danielson-Lanczos}
-m=L-1 \dots 0: \eqspace & H[n,\frac{k}{2^{m}}] = H[n,\frac{k}{2^{m}}] + H[n,\frac{k}{2^{m+1}}]\; \exp{(+i 2\pi \frac{n}{2^{L-m}})}; \\
-m=0: \eqspace & H[n] = H[n,\frac{k}{2^{m}}];
-\end{align}
-Thus, each output value is obtained after applying Formula \eqref{eqn: Danielson-Lanczos} $L$ times.  
-$L$ is called the FFT order in this paper.  
+\fi
 
-The calculation of the term $\exp{(i 2\pi \frac{n}{2^{L-m}})}$ in Formula \eqref{eqn: Danielson-Lanczos} can be simplified.  
-Let $\ll$ denote a bit left-shift operation and let \& denote a bitwise AND operation:
-\begin{align}
-\label{eqn: FFT phase array}
-\varphi [n] \equiv \exp{(i 2\pi \frac{n}{2^{L}})}: \eqspace & \exp{(i 2\pi \frac{n}{2^{L-m}})} = \varphi [(n \ll m)\& ((1 \ll L)-1)];
-\end{align}
-Formula \eqref{eqn: Danielson-Lanczos} always sums up two mutually independent operands.  
+When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}. 
+\begin{itemize}
+\item The amount of calculation is $L$.
 
+\item For each output, each input is only used once, so there is no dependency problem.
 
+\item The major source of the calculation  error for \emph{Sin} and \emph{Cos} signals is the calculation errors of the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
+
+\item The forward and reverse transformation is identical except a sign.  
+
+\item The forward transformation cancels each datum of a \emph{Sin} or \emph{Cos} signal into a spectrum of mostly $0$ values, so it is more susceptible to calculation errors, but the distributions of the calculation errors converge to normal distribution quicker.
+
+\item The reverse transformation spread the spectrum of mostly $0$ values to each datum of a \emph{Sin} or \emph{Cos} signal, so it is less susceptible to calculation errors, but the distributions of the calculation errors converge to normal distribution slower.
+
+\end{itemize}
 
 
+\subsection{Evaluating Floating-Point Calculation Errors}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Uncertainty.png} 
+\captionof{figure}{
+The result uncertainty means and uncertainty deviations using Sin and Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_Sin_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Error.png} 
+\captionof{figure}{
+The result error maximums and error deviations using Sin and Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_Sin_Error}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Order7_Freq15_Spec_Clean.png} 
+\captionof{figure}{
+The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a clean Sin signal of order 7 and index frequency 15, as shown in the legend.
+}
+\label{fig: FFT_Sin_Order7_Freq15_Spec_Clean}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Order7_Freq15_Spec_Noisy.png} 
+\captionof{figure}{
+The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a Sin signal of order 7 and index frequency 15 with $10^{-15}$ white noises, as shown in the legend.
+}
+\label{fig: FFT_Sin_Order7_Freq15_Spec_Noisy}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Error_Histogram.png} 
+\captionof{figure}{
+The histograms of the normalized errors of Sin and Cos signals at FFT with $10^{-15}$ white noises for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_Sin_Error_Histogram}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_Error.png} 
+\captionof{figure}{
+The mean and deviation of the result uncertainties of Linear signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_Linear_Error}
+\end{figure}
+
+
+Figure \ref{fig: FFT_Sin_Uncertainty} shows the result uncertainty means and uncertainty deviations for forward, reverse and roundtrip FFT transformations on Sin/Cos signals vs. FFT order $L$.
+The trends of the uncertainty means with the FFT order agree with the different natures of the forward, reverse and roundtrip FFT transformations on Sin and Cos signals:
+\begin{itemize}
+\item For the forward transformations, the uncertainty means increase exponentially as $1.36^L$ with the FFT order $L$.
+
+\item For the reverse transformations, the uncertainty means remain a constant about $1.67 \times 10^{-16}$ with the FFT order $L$.
+
+\item For the roundtrip transformations, the uncertainty means remain a constant about $1.38 \times 10^{-16}$ with the FFT order $L$.
+\end{itemize}
+The input uncertainties are the least significant values of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
+This input uncertainties transfer to the result uncertainty deviations differently for different transformations in Figure \ref{fig: FFT_Sin_Uncertainty}.
+\begin{itemize}
+\item For the forward transformation, the result uncertainty deviations are comparable to the corresponding uncertainty mean.
+
+\item For the reverse and roundtrip transformations, the result uncertainty deviations are much to the corresponding uncertainty mean.
+\end{itemize}
+
+Even the result uncertainties grow quite differently for the different transformations in Figure \ref{fig: FFT_Sin_Uncertainty}, the variance arithmetic is capable of both tracking and bounding the result errors, as demonstrated by Figure \ref{fig: FFT_Sin_Error}:
+\begin{itemize}
+\item The error deviations are between $0.42$ and $1.21$, confirming the tracking power of the variance arithmetic.
+
+\item The error maximums stabilize at the value of $3.1$, confirming the bounding power of the variance arithmetic.
+\end{itemize}
+
+However, the tracking power of the variance arithmetic is not perfect in Figure \ref{fig: FFT_Sin_Error}:
+\begin{itemize}
+\item All error deviations are not strictly $1$.
+
+\item The error deviations of the roundtrip transformation shows a slow linear increase of $0.0322 L$ with the FFT order $L$.
+\end{itemize}  
+This imperfection is found to be the result of numerical errors in the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$:
+\begin{enumerate}
+\item The variance arithmetic can not account for numerical errors beyond the least significant values in the library function, which will probably increase with the FFT order $L$.
+
+\item Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} shows how the variance arithmetic uses uncertainties to track the value errors in a FFT spectrum on average.
+The two peaks of the value errors at the index frequencies $\pm 15$ are expected, but Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} also shows a few other peaks such as at $\pm 17$, $\pm 45$, and $\pm 47$, suggesting systematic errors from the library function.
+
+\item To overcome such systematic errors, $10^{-15}$ white noises are added to the Sin and Cos signals.
+The results in the corresponding FFT spectrum in Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Noisy} looks no longer structured. 
+Figure \ref{fig: FFT_Sin_Error_Histogram} confirms that the normalized errors for the forward transformation are normal distributed with the noises.
+
+\item In Figure \ref{fig: FFT_Sin_Error_Histogram}, the normalized errors for the roundtrip transformation are still not normal distributed, and the corresponding error deviations still increase with the FFT order $L$ as $0.0262 L$.
+When $10^{-12}$ white noises are added to the Sin and Cos signals, for the roundtrip transformation, the normalized errors become a constant of $1$, and the normalized errors become normal distributed.
+
+\item In the above steps, the noises are only added to the Sin and Cos signals.
+If $10^{-15}$ white noises are added to the library function, the result error deviations remain near $1$ for the roundtrip transformation.
+Thus, the library function $\sin(x), x \in [0, \pi/2]$ is estimated to contains $10^{-15}$ numerical errors.
+\end{enumerate}
+Figure \ref{fig: FFT_Linear_Error} shows the result error maximums and error deviations for forward, reverse and roundtrip FFT transformations on Linear signals vs. FFT order $L$.
+Linear signals contain the library function $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$ for the FFT order $L$ in Formula \eqref{eqn: Fourier spec for linear}.
+Unlike $\sin(x)$, $\tan(x)$ is not bounded, e.g., for order $18$, the maximal $\tan$ value is $4.78 \times 10^6$, whose least significant value is about $10^{-10}$, which is larger that $10^{-16}$ for the maximal $\sin$ value.
+All error deviations are different noticeably from $1$ but still near $1$ in Figure \ref{fig: FFT_Linear_Error}. 
+For the order $18$ roundtrip transformations, $10^{-3}$ input noises are necessary for the result error deviation to be 1 and the result value errors to be normal distributed, which is proportional to the $10^{-12}$ input noise necessary for the Sin and Cos signals.
+
+For pure floating-point FFT calculations, both the tracking power and the bounding power of the variance arithmetic are validated.
 
 
 
+\subsection{Evaluating Error Response}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_Uncertainty_vs_Uncertainty.png} 
+\captionof{figure}{
+The result uncertainty means using Sin and Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Sin_Uncertainty_vs_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_Uncertainty_vs_Uncertainty.png} 
+\captionof{figure}{
+The result uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Linear_Uncertainty_vs_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_ErrorDev_vs_Uncertainty.png} 
+\captionof{figure}{
+The result error deviations using Sin and Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Sin_ErrorDev_vs_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_ErrorDev_vs_Uncertainty.png} 
+\captionof{figure}{
+The result error deviations using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Linear_ErrorDev_vs_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Sin_ErrorMax_vs_Uncertainty.png} 
+\captionof{figure}{
+The result error deviations using Sin and Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Sin_ErrorMax_vs_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_ErrorMax_vs_Uncertainty.png} 
+\captionof{figure}{
+The result error deviations using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+}
+\label{fig: FFT_Linear_ErrorMax_vs_Uncertainty}
+\end{figure}
 
 
-\subsection{Evaluating Calculation Inside Uncertainty}
+Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty}  shows the result uncertainty means vs. different input uncertainties using Sin and Cos signals of order 18:
+\begin{itemize}
+\item As expected, the result uncertainty means using either Gaussian noises or white noises are identical.
 
-Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1} shows the output deviations and value errors for a noisy sine signal after forward FFT.  It shows that the output deviations using variance arithmetic are slightly larger than the output deviations using independence arithmetic, but much less than those using interval arithmetic.  For a fixed input deviation, the output deviation using independence arithmetic is a constant for each FFT.  Because the value and uncertainty interact with each other through normalization in variance arithmetic, output deviations of Formula \eqref{eqn: Danielson-Lanczos} are no longer a constant.  One interesting consequence is that only in variance arithmetic the output deviations for a noisy input signal are larger than those for a corresponding clean input signal.
+\item As expected, the result uncertainty means for the forward transformation is order-of-magnitude larger than the corresponding uncertainty means for the reverse transformation.
 
-Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1} shows that the value errors calculated using variance arithmetic are comparable to those using conventional floating-point arithmetic, and they are both comparable to the output deviations using either variance arithmetic or independence arithmetic.  In other words, the result of calculating 2-bit or 53-bit into uncertainty are quite comparable so that the limited calculation inside uncertainty is reasonable.  
+\item The result uncertainty means for the roundtrip transformation is order-of-magnitude smaller than the corresponding uncertainty means for both the forward transformation and the reverse transformations, showing that the variance arithmetic can largely recover the original uncertainties.
+However, the result uncertainty means are not exactly 0, probably due to the rounding errors of the conventional floating-point calculations. 
 
-Figure \ref{fig: Precx_FFT_Sin_Profile_Freq1} compares the output value errors of variance arithmetic calculating different bits inside uncertainty.  With no calculation inside uncertainty, the output value errors exist only on four levels.  Such quantum distribution is reduced noticeably by the 2-bit calculation inside uncertainty, and is further reduced by the 4-bit calculation inside uncertainty.  Compared with Figure \ref{fig: Prec4_FFT_Sin_Profile_Freq1}, Figure \ref{fig: Precx_FFT_Sin_Profile_Freq1} shows that the result using variance arithmetic with the 4-bit calculation inside uncertainty approaches that using independence arithmetic so that the 4-bit calculation inside uncertainty seems sufficient.  variance arithmetic with the 4-bit calculation inside uncertainty is used for further tests.
+\item All the result uncertainty means increases linearly with the corresponding input uncertainties, except for the roundtrip transformations when the input uncertainties are below $10^{-13}$.
+This is expected because all FFT transformations are linear.
+
+\item When an added noise is less than the rounding error and the numerical error, it becomes ineffective so that the result uncertainty means will no longer decrease with the lower input noise uncertainties.
+For Sin and Cos signals, the maximal least significant values are around $10^{-16}$, which is the lower linear limits for both the forward and the reverse transformations.
+However, for the roundtrip transformation, this lower limit is around $10^{-13}$.
+This is understandable because the roundtrip transformation is the forward transformation followed by the reverse transformation, so that the effect of the least significant values should be amplified.
+
+\end{itemize}
+ 
+Figure \ref{fig: FFT_Linear_Uncertainty_vs_Uncertainty} is identical to Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty} except that it is for the Linear signals.
+Because $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$ have much larger least significant values than $\sin(\pi j /2^L), j = 0, 1, ... 2^{L-1}$, the lower linear limits for the Linear signals are much larger than the corresponding lower linear limits for the Sin and Cos signals: $10^{-10}$ for the forward and reverse transformations, and $10^{-8}$ for the roundtrip transformation.
+
+Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} show the result error deviations vs. different input uncertainties using either Sin and Cos or Linear signals of order 18.
+When the input uncertainties can accurately describe the corresponding errors, the result error deviations are constant 1 and the result value errors are normal distributed.
+\begin{itemize}
+\item For Sin and Cos signals, the lower limit is $10^{-15}$ for the forward and reverse transformations, and $10^{-12}$ for the roundtrip transformation.
+The $10^{-15}$ agree with the previously estimated numerical errors for $\sin(\pi j /2^L), j = 0, 1, ... 2^{L-1}$.
+
+\item For Linear signals, the lower limit is $10^{-10}$ for the forward and reverse transformations, and $10^{-3}$ for the roundtrip transformation.
+The $10^{-10}$ agree with the previously estimated numerical errors for $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$.
+
+\item The roundtrip transformation contains the combined amount calculation of the forward and the reverse transformations, so that it has higher lower limits, $10^{-12}$ for Sin and Cos signals, and $10^{-2}$ for Linear signals.
+
+\item The transition of error deviations to 1 in Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} is much sharper than the transition of uncertainty means to the linear regions in Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty} and \ref{fig: FFT_Linear_Uncertainty_vs_Uncertainty}.
+\end{itemize}
+Adding noises then checking error deviations to be 1 seems a valid way to evaluate numerical errors in library functions.
+
+Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} show the result normalized error maximums vs. different input uncertainties using either Sin and Cos or Linear signals of order 18.
+Except when the input uncertainties are accurate for the corresponding input errors for the reverse transformations, the error maximums are  $3.1$.
+
+Figure \ref{fig: FFT_Sin_Error_Histogram} shows that when the input noises is white, the result normalized errors are largely uniformly distributed.
+When the input uncertainties are accurate for the corresponding input errors, the error maximums in Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} are $\sqrt{3}$, also suggesting that the result normalized errors are largely uniformly distributed.
+The loss of the convergence power of the reverse transformations needs further investigations.
+
+For FFT calculations with different uncertainties, both the tracking power and the bounding power of the variance arithmetic are validated, and the error response is found to be linear when the input uncertainties are accurate for the corresponding input errors.
 
 
-\subsection{Evaluating Uncertainty Distribution}
 
-Each output value error is normalized with the corresponding output uncertainty deviation before it is counted for histogram. If output value errors are Gaussian-distributed with the deviation given precisely by the corresponding output uncertainty deviation, then the normalized histogram should be normal-distributed.  Figure \ref{fig: Indp_Sin_NormDist} and Figure \ref{fig: Prec4_Sin_NormDist} show that such histograms using wither independence arithmetic or variance arithmetic with 4-bit calculated inside uncertainty are both best fit by Gaussian distribution with the deviation of 0.98 and the mean of 0.06.  Due to limited bits calculated inside uncertainty and normalization, the population at where the value errors are zero is expected to be larger for the variance arithmetic, e.g., during normalization, all values which is less than 4-fold of resolution becomes 0. This phenomenon is confirmed by Figure \ref{fig: Prec4_Sin_NormDist}.
-
-variance arithmetic tracks all increases of rounding errors, but it cannot track decreases of the rounding error due to mutual cancellations during arithmetic operations.  Hence the uncertainty distribution provided by variance arithmetic serves as the bounding distribution for value errors, and the actual distribution could be narrower than the bounding distribution.  FFT provides a good test for such probability bounding.  Its forward and reverse algorithms are identical except for a constant so that they result in exactly the same bounding probability distributions.  On the other hand, the forward FFT condenses a sine signal into only two non-zero imaginary values by mutual cancellation of signal components, while the reverse FFT spreads only two non-zero imaginary values to construct a sine signal.  Thus, the forward FFT is more sensitive to calculation errors than the reverse FFT, and should have a broader actual uncertainty distribution.  Indeed in Figure \ref{fig: Prec4_Sin_NormDist}, the histogram for the reverse algorithm for a sine signal with added noise is narrow than that of the forward algorithm, with that for the round-trip algorithm in the middle of the two.
 
 
 

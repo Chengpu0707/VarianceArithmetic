@@ -1640,6 +1640,325 @@ According to \eqref{eqn: uncertainty level} and \eqref{eqn: uncertainty correlat
 
 
 
+\subsection{Dependency Tracing}
+
+\begin{align*}
+\delta^2 &(f(x)+g(x)) = \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1} \frac{f^{(j)}_x + g^{(j)}_x}{j!} \frac{f^{(2n-j)}_x + g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) \\
+ &\eqspace  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x + g^{(2j)}_x}{(2j)!} \zeta(2j) \frac{f^{(2n-2j)}_x + g^{(2n-2j)}_x}{(2n-2j)!} \zeta(2n-2j) ) \\
+&= \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=1}^{\infty} (\delta x)^{2n} \left(
+    \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) 
+  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{g^{(2n-2j)}_x \zeta(2n-2j)}{(2n-2j)!} \right) \\
+&\equiv \delta^2 f(x) + \delta^2 g(x) + 2 \hat{c} (f(x), g(x)); \\
+\hat{c} &(f(x), g(x)) = (\delta x)^2 f^{(1)}_x g^{(1)}_x 
+    + (\delta x)^4 \frac{1}{2} (f^{(1)}_x g^{(3)}_x + f^{(2)}_x g^{(2)}_x + f^{(3)}_x g^{(1)}_x) + o((\delta x)^6);
+\end{align*}
+
+\begin{align*}
+\delta^2 &(f(x, y) + g(x,y)) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
+ &\eqspace (
+  \sum_{i=0}^{2m} \sum_{j=0}^{2n} 
+      \frac{f^{(i,j)}_{(x,y)}+g^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}+g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} 
+      \frac{f^{(2i,2j)}_{(x,y)}+g^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!} \zeta(2i) \zeta(2j)\;
+      \frac{f^{(2m-2i,2n-2j)}_{(x,y)}+g^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}\zeta(2m-2i) \zeta(2n-2j)); \\ 
+&= \delta^2 f(x, y) + \delta^2 g(x, y) + 2 \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
+&\eqspace (\sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\;
+     \frac{g^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!(2n-2j)!}); \\
+&\equiv \delta^2 f(x,y) + \delta^2 g(x,y) + 2 \hat{c} (f(x,y), g(x,y)); \\
+\hat{c} &(f(x,y), g(x,y)) = (\delta x)^2 (f^{(0,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(0,1)}_{(x,y)} 
+      - f^{(0,0)}_{(x,y)} g^{(2,0)}_{(x,y)} - f^{(2,0)}_{(x,y)} g^{(0,1)}_{(x,y)}) \\
+&\eqspace + (\delta y)^2 f^{(0,1)} g^{(0,1)}_{(x,y)} \\
+&\eqspace + (\delta x)^2 (\delta y)^2 (f^{(0,0)}_{(x,y)} g^{(2,2)}_{(x,y)} \frac{1}{4} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} \frac{1}{2} 
+     + f^{(0,2)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)} \frac{1}{2} + f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)}
+     + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} \frac{1}{2} \\
+&\eqspace \eqspace  + f^{(2,0)}_{(x,y)} g^{(0,2)}_{(x,y)} \frac{1}{4} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \frac{1}{2} + f^{(2,2)}_{(x,y)} g^{(0,0)}_{(x,y)} \frac{1}{4} 
+     - f^{(0,0)}_{(x,y)} g^{(2,2)}_{(x,y)} \frac{1}{4} - f^{(0,2)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4} - f^{(2,0)}_{(x,y)} g^{(0,2)}_{(x,y)} \frac{1}{4}
+     - f^{(2,2)}_{(x,y)} g^{(0,0)}_{(x,y)} \frac{1}{4} ) \\
+&\eqspace + (\delta x)^4 (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} \frac{1}{2} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)} \frac{1}{2}
+     + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{3}{4} - f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4}) \\
+& = (\delta x)^2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + (\delta y)^2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \\
+&\eqspace     + (\delta x)^4 \frac{1}{2} (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)})
+     + (\delta y)^4 \frac{1}{2} (f^{(0,1)}_{(x,y)} g^{(0,3)}_{(x,y)} + f^{(0,2)}_{(x,y)} g^{(0,2)}_{(x,y)} + f^{(0,3)}_{(x,y)} g^{(0,1)}_{(x,y)}) \\
+&\eqspace + (\delta x)^2 (\delta y)^2 \frac{1}{2} (2 f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)}
+    + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)});
+\end{align*}
+
+\begin{align*}
+\delta^2 (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1}
+    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
+    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \zeta(2n)  \\
+ &\eqspace - \sum_{j=1}^{n-1}
+    \left( \sum_{k=0}^{2j} \frac{f^{(k)}_x}{k!} \frac{g^{(2j-k)}_x}{(2j-k)!} \zeta(2j) \right)
+    \left( \sum_{l=0}^{2n-2j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-2j-l)}_x}{(2n-2j-l)!} \zeta(2n-2j) \right))  \\
+&= \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1} \sum_{k=0}^{j} \sum_{l=0}^{2n-j} 
+     \frac{f^{(k)}_x}{k!} \frac{f^{(l)}_x}{l!} \frac{g^{(j-k)}_x}{(j-k)!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \zeta(2n) \\
+&\eqspace - \sum_{j=1}^{n-1} \sum_{k=0}^{2j} \sum_{l=0}^{2n-2j} 
+     \frac{f^{(k)}_x}{k!} \frac{f^{(l)}_x}{l!} \frac{g^{(2j-k)}_x}{(2j-k)!} \frac{g^{(2n-2j-l)}_x}{(2n-2j-l)!} \zeta(2j) \zeta(2n-2j)) \\
+\end{align*}
+
+
+
+\iffalse
+
+\begin{align*}
+f^{(n)}_x = -(-f)^{(n)}_x&:\eqspace \hat{b}(f(x)-f(x)) = 0;\eqspace \hat{v} (f(x)-f(x)) = 0;\eqspace \delta^2 (f(x)-f(x)) = 0;
+\end{align*}
+
+\begin{align*}
+\hat{b} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{(f g)^{(2n)}_x}{(2n)!} 
+ = \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{(2n)!}{(2n-j)! \;j!} \frac{f^{(j)}_x g^{(2n-j)}_x}{(2n)!} \\
+ &= f(x) \hat{b} (g(x)) + \hat{b} (f(x)) g(x) + 2 \hat{c} (f(x) g(x)); \\
+\hat{v} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(fg)^{(j)}_x}{j!} \frac{(fg)^{(2n-j)}_x}{(2n-j)!} \\
+ &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
+    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
+    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) ;
+\end{align*}
+
+\begin{align*}
+& (f^{-1})^{(1)}_x = - f^{-2} f^{(1)}_x;\\
+& (f^{-1})^{(2)}_x = - f^{-2} f^{(2)}_x + 2 f^{-3} (f^{(1)}_x)^2;\\
+& (f^{-1})^{(3)}_x = - f^{-2} f^{(3)}_x + 6 f^{-3} f^{(2)}_x f^{(1)}_x - 6 f^{-4} (f^{(1)}_x)^3; \\
+& (f^{-1})^{(4)}_x = - f^{-2} f^{(4)}_x + 8 f^{-3} f^{(3)}_x f^{(1)}_x + 6 f^{-3} (f^{(2)}_x)^2 - 36 f^{-4} f^{(2)}_x (f^{(1)}_x)^2
+  + 24 f^{-5} (f^{(1)}_x)^4; \\
+& f^{(1)}_x f^{-1} + f (f^{-1})^{(1)}_x = f^{(1)}_x f^{-1} - f^{(1)}_x f^{-1} = 0; \\
+& f^{(2)}_x f^{-1} + 2 f^{(1)}_x (f^{-1})^{(1)}_x + f (f^{-1})^{(2)}_x = f^{-1} f^{(2)}_x -2 f^{-2} (f^{(1)}_x)^2
+  - f^{-1} f^{(2)}_x + 2 f^{-2} (f^{(1)}_x)^2 = 0; \\
+& f^{(3)}_x f^{-1} + 3 f^{(2)}_x (f^{-1})^{(1)}_x + 3 f^{(1)}_x (f^{-1})^{(2)}_x + f (f^{-1})^{(3)}_x \\
+&\eqspace =  f^{-1} f^{(3)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x + 6 f^{-3} (f^{(1)}_x)^3
+ - f^{-1} f^{(3)}_x + 6 f^{-2} f^{(2)}_x f^{(1)}_x - 6 f^{-3} (f^{(1)}_x)^3 \\
+&\eqspace = 0;
+\end{align*}
+
+\begin{align*}
+f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
+& t1 = f(g(x))^{(1)}_g g(x)^{(1)}_x; \\
+& t2 = f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \\
+& t3 = f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \\
+& t4 = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + \\
+&\eqspace\eqspace\eqspace 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + \\
+&\eqspace\eqspace\eqspace f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x; \\
+&\eqspace = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 6 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 \\
+&\eqspace\eqspace\eqspace + 4 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x;
+\end{align*}
+
+For $f(x) = g^{-1}(x)$:
+\begin{align*}
+ 1 &= \frac{d x}{d x} = \frac{d x}{d g} \frac{d g}{d x}; \\
+f(g(x))^{(1)}_g &= 1/g(x)^{(1)}_x; \\
+ 0 &= \frac{d^2 x}{d g^2} \frac{d g}{d x} + \frac{d x}{d g} \frac{d^2 g}{d x^2} \frac{d x}{d g}; \\
+ \frac{d^2 x}{d g^2} &= - \frac{d^2 g}{d x^2} (\frac{d x}{d g})^3; \\
+f(g(x))^{(2)}_g &= - g(x)^{(2)}_x / (g(x)^{(1)}_x)^3; \\
+ \frac{d^3 x}{d g^3}& = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 - 3 \frac{d^2 g}{d x^2} (\frac{d x}{d g})^2 \frac{d^2 x}{d g^2}
+ = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 + 3 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^5 ; \\
+f(g(x))^{(3)}_g &= - g(x)^{(3)}_x / (g(x)^{(1)}_x)^4 + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^5; \\
+ \frac{d^4 x}{d g^4} &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 - 4 \frac{d^3 g}{d x^3} (\frac{d x}{d g})^3 \frac{d^2 x}{d g^2}
+    + 6 \frac{d^2 g}{d x^2} \frac{d^3 g}{d x^3} (\frac{d x}{d g})^6 + 15 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^4 \frac{d^2 x}{d g^2}; \\
+ &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 + 10 \frac{d^3 g}{d x^3} \frac{d^2 g}{d x^2} (\frac{d x}{d g})^6 - 15 (\frac{d^2 g}{d x^2})^3 (\frac{d x}{d g})^7; \\ 
+f(g(x))^{(4)}_g &= - g(x)^{(4)}_x / (g(x)^{(1)}_x)^5 + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^6 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^7; \\
+f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
+& t1 = 1; \\
+& t2 = - g(x)^{(2)}_x / g(x)^{(1)}_x + g(x)^{(2)}_x / g(x)^{(1)}_x = 0; \\
+& t3 = - g(x)^{(3)}_x / g(x)^{(1)}_x + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^2 - 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^ + g(x)^{(3)}_x / g(x)^{(1)}_x = 0; \\
+& t4 = - g(x)^{(4)}_x / g(x)^{(1)}_x + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
+&\eqspace\eqspace\eqspace - 6 g(x)^{(3)}_x  g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + 18 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
+&\eqspace\eqspace\eqspace - 3 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 - 4  g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + g(x)^{(4)}_x / g(x)^{(1)}_x = 0;\\
+\end{align*}
+
+Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
+For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$:
+\begin{align*}
+m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2m} \zeta(2m-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2n} \zeta(2n-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+\delta^2 (f(x) g(x)) &= (\delta x)^{2m+2n} \zeta(2m+2n-1) a b;
+\end{align*}
+
+\fi
+
+By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
+When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to account for cross dependency between uncertainties.
+
+The cross dependency between $f$ and $g$ is defined as $\hat{c} (f,g)$, as Formula \eqref{eqn: cross dependency 1d} and \eqref{eqn: cross dependency 2d}:
+\begin{align}
+\label{eqn: cross dependency 1d}
+\hat{c} & (f(x), g(x)) \equiv \sum_{n=1}^{\infty} (\delta x)^{2n} ( \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) 
+    - \sum_{j=1}^{n-1} \frac{f^{(j)}_x \zeta(2j)}{(2j)!} \frac{g^{(2n-2j)}_x \zeta(2n-2j)}{(2n-2j)!} ) \\
+&\eqspace = (\delta x)^2 f^{(1)}_x g^{(1)}_x 
+    + (\delta x)^4 \frac{1}{2} (f^{(1)}_x g^{(3)}_x + f^{(2)}_x g^{(2)}_x + f^{(3)}_x g^{(1)}_x) + o((\delta x)^6); \\
+\hat{c} & (f(x,y), g(x,y)) \equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} (
+    \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+\label{eqn: cross dependency 2d}
+&\eqspace\eqspace  - \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)! (2j)!} \; \frac{g^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)! (2n-2j)!}) \\
+&\eqspace \simeq (\delta x)^2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + (\delta y)^2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \nonumber \\
+&\eqspace\eqspace  + (\delta x)^4 \frac{1}{2} (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)}) \nonumber \\
+&\eqspace\eqspace + (\delta y)^4 \frac{1}{2} (f^{(0,1)}_{(x,y)} g^{(0,3)}_{(x,y)} + f^{(0,2)}_{(x,y)} g^{(0,2)}_{(x,y)} + f^{(0,3)}_{(x,y)} g^{(0,1)}_{(x,y)}) \nonumber \\
+&\eqspace\eqspace + (\delta x)^2 (\delta y)^2 \frac{1}{2} (2 f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)}
+    + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)});
+\end{align} 
+By definition, $\hat{c} (f,g)$ has the following properties:
+\begin{itemize}
+\item Reflective: $\hat{c} (f,g) = \hat{c} (g,f)$;
+\item Identity: $\hat{c} (f,f) = \delta^2 f$;
+\item Independent: $\hat{c} (f(x), g(y)) = 0$;
+\item Linear: $\hat{c} (f, c_0 + c_1 g) = 0 + c_1 \hat{c} (f,g)$, in which $c_0$ and $c_1$ are two constants.
+\end{itemize}
+
+Using $\hat{c} (f,g)$, Formula \eqref{eqn: sum variance} calculates the sum of any two functions according to either Formula \eqref{eqn: Taylor 1d variance} or \eqref{eqn: Taylor 2d variance}.  
+\begin{align}
+\label{eqn: sum variance}
+\delta^2 (f + g) &= \delta^2 f + \delta^2 g + 2 \hat{c} (f,g);
+\end{align}
+The following two special cases of Formula \eqref{eqn: sum variance} suggest that $\hat{c} (f,g)$ properly captures the cross dependency between $f$ and $f$:
+\begin{itemize}
+\item $\delta^2 (f + f) = 4 \delta^2 f =\delta^2 2f;$
+\item $\delta^2 (f - f) = 0;$
+\end{itemize}
+
+For the composite function $f(g(x))$, Formula \eqref{eqn: Taylor 1d variance} becomes complicated quickly, as shown by their corresponding Taylor expansion of Formula \eqref{eqn: composite taylor}.
+However, because the reverse function satisfies Formula \eqref{eqn: reverse}, the original variance $(\delta x)^2$ is restored in Formula \eqref{eqn: reverse variance} when applying Formula \eqref{eqn: Taylor 1d variance}, which is another case of dependency tracing in variance arithmetic.
+\begin{align}
+\label{eqn: composite taylor}
+f(g(x + \tilde{x})) &= f(g(x)) + t_1 \tilde{x} + t_2 \frac{\tilde{x}^2}{2!} + t_3 \frac{\tilde{x}^3}{3!} + ... \\
+ t_1 &= f(g(x))^{(1)}_g g(x)^{(1)}_x; \nonumber \\
+ t_2 &= f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \nonumber \\
+ t_3 &= f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \nonumber \\
+\label{eqn: reverse}
+f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
+\label{eqn: reverse variance}
+\delta^2 f^{-1}(f(x)) &= (\delta x)^2;
+\end{align}
+
+Due to dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plague interval arithmetic.
+
+
+
+\subsection{Avoiding Dependency Problem}
+
+However, variance arithmetic may still suffer from \emph{dependency problem} when an imprecise input is used multiple times without dependency tracing.
+For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations to calculate $x^2 - x$ when the input variance is $(\delta x)^2$.
+\begin{table}
+\label{eqn: dependency example}
+\centering
+\begin{tabular}{|l|l|l|} 
+\hline 
+Formula & Over-estimation & Wrong Independency \\ 
+\hline 
+\eqref{eqn: interval depend 1} & $0$ & \\
+\hline 
+\eqref{eqn: interval depend 2} & $+(\delta x)^2$ & between $x^2$ and $x$ \\
+\hline 
+\eqref{eqn: interval depend 3} & $-(2 x^2 + 2x - 1)(\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
+\hline 
+\end{tabular}
+\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
+The correct result variance is $4 x^2 (\delta x)^2 + 2 (\delta x)^4$.}
+\end{table}
+
+To avoid the dependency problem, the conventional numerical algorithms need to be reevaluated.
+\begin{itemize}
+\item   
+Traditional computer numerical algorithms are designed to choose an execution path to minimize rounding errors of the conventional floating-point calculations, such as the Gaussian elimination for the first-order solving linear equation \cite{Numerical_Recipes}.
+The existence of different execution paths suggests that the solution itself is designed with dependency problem.
+In contrast, variance arithmetic should be used on the analytic expression for the solution, to trace dependencies of each input when it appears multiple times in the analytic solution.
+Section \ref{sec: matrix} will compare matrix inversion using either strict variance arithmetic or Gaussian elimination.
+
+\item  
+Traditional time-series data processing uses one input multiple times, which may also cause the dependency problem.
+Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} will compare time-series linear regression using either strict variance arithmetic or a traditional progressive approach.
+
+\item
+The usages of intermediate variable and conditional execution need to be examined because they may upset the dependency tracing. 
+
+\end{itemize}
+
+
+It is the scenario demonstrated by Formula \eqref{eqn: float num calc} that is the major problem, when the rounding errors are saved as part of the data.
+Thus, the carry sign $\sim$ bit is part of the variance arithmetic representation.
+%In other calculation, the carry sign bits of both operand determine how to round the result significand. 
+
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Arithmetic}. 
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.
+
+
+\subsection{The Precision Scaling Principle  \cite{Prev_Precision_Arithmetic}}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
+\captionof{figure}{
+The result uncertainty distribution density function $P_{8/2}$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+}
+\label{fig: Prec_RndByDev_Dist}
+\end{figure}
+
+
+Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
+To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
+According to the precision scaling principle:
+\begin{itemize}
+\item During each round up, $V$ is reduced to 1/4-fold. 
+
+\item During each round down, $V$ is increased to 4-fold.
+\end{itemize}
+Using the precision scaling principle, the variance representation represents $x \pm \delta x$ as:
+\begin{align}
+\label{eqn: accurate value}
+x =&\; S \; 2^{E};\\
+\label{eqn: uncertainty variance}
+(\delta x)^2 =&\; V \; 2^{2E};
+\end{align}
+
+However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
+When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$ in distribution, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
+The precision scaling principle chooses to scarify $R$ in favor of $V$.
+This choice introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
+To reduce the representation bounding leakage to virtually 0, $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation.
+
+
+
+\subsection{A Variance Representation}
+
+To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, a variance representation has the following bit assignment for Formula \eqref{eqn: accurate value} and \eqref{eqn: uncertainty variance}:
+\begin{itemize}
+\item The bit count for $E$ is 11.
+
+\item The bit counts for $S$ and $V$ are 53 respectively.
+
+\item The representation needs 1 bit for sign, 1 bit for the carry error sign for $S$, and 1 bit for the carry error sign for $V$, respectively.
+
+\item The representation stores the bounding leakage $\epsilon$ as an 8-bit floating-point value, with 4-bit for the exponent.
+The maximal value for $\epsilon$ is $15\;2^{15-19} = 15/16$, while the minimal non-zero value for $\epsilon$ is $2^{-19} = 1.907 10^{-6}$ which is equivalent to $\sigma=4.763$.
+The result bounding leakage is approximated as $\epsilon = \epsilon_1 + \epsilon_2 - \epsilon_1 \epsilon_2$ in which $\epsilon_1$ and $\epsilon_2$ are the bounding leakages of the two operands for a calculation, respectively.
+\end{itemize}
+The total bit count of each imprecise value in the variance representation is 128.
+
+In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
+\begin{enumerate}
+\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
+
+\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
+\end{enumerate}
+Thus, the effective bit counts for $S$ and $V$ depend on the statistical precision $P \equiv \delta x / |x|$ of an imprecise value $x$:
+\begin{itemize}
+\item When $P \geq 2^{-26} \simeq 1.5\;10^{-8}$, the significance bit count is $26 - \log_{2} P$, which means maximally 26-bit calculated inside uncertainty.
+
+\item When $2^{-26} > P > 2^{-53} \simeq 1.1\;10^{-16}$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $P$.
+
+\item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
+\end{itemize}
+Thus, variance arithmetic is a modern implementation of significance arithmetic \cite{Significance_Arithmetic} \cite{Digital_Significance_Arithmetic} \cite{Unnormalized_Arithmetic}.
+
+
+
+
+
+
+
 
 
 
