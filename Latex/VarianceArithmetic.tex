@@ -939,9 +939,7 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 & \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
-  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!};
-\end{align}
-\begin{align}
+  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
 \delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
 \label{eqn: Taylor 1d variance}
 &\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
@@ -949,6 +947,8 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
   &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
   &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
 \end{align}
+When $f(x) \neq 0$, $\delta f(x) \;/|f(x)|$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
+It is an approximation to the $f(x)$ precision $P(f(x)) = \delta f(x) \;/|\overline{f(x)}|$
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
@@ -994,8 +994,7 @@ Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which al
 \label{eqn: exp Taylor}
 & e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \label{eqn: exp precision}
-P(e^x)^2 & = \frac{\delta^2 e^x}{\overline{e^x}^2} \simeq \frac{\delta^2 e^x}{(e^x)^2}
-     = \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
+\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
  -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
 \end{align}
@@ -1026,8 +1025,8 @@ Formula \eqref{eqn: power precision} gives the result variance for $x^c$, in whi
 \label{eqn: power Taylor}
 &(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
 \label{eqn: power precision}
-P(x^c)^2 &= \frac{\delta^2 x^c}{\overline{x^c}^2} \simeq \frac{\delta^2 x^c}{(x^c)^2} = \sum_{n=1}^{\infty} P(x)^{2n} \nonumber \\
- & \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+\frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=1}^{\infty} P(x)^{2n} 
+ \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \sum_{j=1}^{n-1} \zeta(2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \zeta(2n - 2j) \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right)\\
  &= c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6 + o(P(x)^8);
 \end{align}
@@ -1236,18 +1235,20 @@ The input uncertainties can come from different sources:
 If the added noises are much larger than the numerical errors and the rounding errors, the deviation accurately describe the corresponding errors.
 Because the variance arithmetic only deals with the uncertainties, the result uncertainties using either Gaussian noises or white noises should be identical.
 \end{itemize}
-Whether the input uncertainties accurately describe the corresponding errors or not will result in different result error characteristics.
+Whether the input uncertainties accurately describe the corresponding errors or not will result in quite different result error characteristics.
 
 The result of using variance arithmetic are analyzed statistically, for the following statistical properties:
 \begin{itemize}
 \item the \emph{error deviations}, as the abbreviation for the deviations of the normalized errors. 
 They should be precisely $1$ when the input uncertainties accurately specify the corresponding input errors, or close to $1$ otherwise, showing the \emph{tracking power} of the variance arithmetic.
+They replace tracking ratios \cite{Prev_Precision_Arithmetic}.
 
 \item the \emph{error maximums}, as the abbreviation for the maximums of the absolute normalized errors.  
 They should be close to an empirical value $3.1$, showing the \emph{bounding power} of the variance arithmetic for the given bounding leakage, 
+They replace bounding ratios \cite{Prev_Precision_Arithmetic}.
 
 \item the \emph{error histograms}, as the abbreviation for the histograms of the normalized errors.  
-They should usually be normal distributed or Gaussian distributed, showing the \emph{convergence power} according to the central limit theorem \cite{Probability_Statistics}.
+They should usually be normal distributed, showing the \emph{convergence power} according to the central limit theorem \cite{Probability_Statistics}.
 
 \item the \emph{uncertainty means}, as the abbreviation for the means of the result uncertainties.  
 The trend of output uncertainty means vs input uncertainty means is defined as the \emph{error response}.
@@ -1298,7 +1299,8 @@ A \emph{transformation} algorithm has about equal amounts of input and output da
 The information contained in the data remains about the same after transforming.  
 The Discrete Fourier Transformation is a typical transforming algorithm, which contains exactly the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
 Matrix inversion is another such reversible algorithm.  
-For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after a \emph{round-trip} transformation which is a forward and reverse transformation, which provides an objective testing standard for a uncertainty-bearing arithmetic.  
+For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after a \emph{round-trip} transformation which is a \emph{forward} followed by a \emph{reverse} transformation.  
+The errors after the roundtrip transformation are $0$ ideally \footnote{When noises are added to the original input signal, the value errors should be the results minus the overall input data. The previous approaches \cite{Prev_Precision_Arithmetic} used the original input data wrongly.}, so both the error deviation and the error maximums should be $0$.
 A test of uncertainty-bearing arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}, and a test of matrix inversion is provided in Section \ref{sec: matrix}.
 
 A \emph{generation} algorithm has much more output data than input data.  
@@ -1324,12 +1326,27 @@ A test of uncertainty-bearing arithmetic using numerical integration is provided
 
 \begin{figure}[p]
 \centering
+\includegraphics[height=2.5in]{Exp_Dev.png} 
+\captionof{figure}{
+The measured deviation vs calculated uncertainty for $\exp(x \pm \delta x)$, for different $\delta x$ as shown in the legend, in which "Error" means the measured error deviation, and "Uncertainty" means the uncertainties from variance arithmetic. 
+}
+\label{fig: Exp_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Log_Dev.png} 
+\captionof{figure}{
+The measured deviation vs calculated uncertainty for $\log(x \pm \delta x)$, for different $\delta x$ as shown in the legend, in which "Error" means the measured error deviation, and "Uncertainty" means the uncertainties from variance arithmetic. 
+}
+\label{fig: Log_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
 \includegraphics[height=2.5in]{Sin_Dev.png} 
 \captionof{figure}{
-The measured vs calculated uncertainty deviation for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend, in which "Gaussian" means using Gaussian noise, and "calculated" means the result from variance arithmetic. 
-The $x$-axis is in radians divided by $\pi$, from $-1$ to $+1$.
-The calculated values are obtained by Formula \eqref{eqn: sin precision}, while each measured deviation is obtained by 10000 samples using library \textit{sin} function.
-%Each measured values fits well with the corresponding calculated value.
+The measured deviation vs calculated uncertainty for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend, in which "Error" means the measured error deviation, and "Uncertainty" means the uncertainties from variance arithmetic. 
 }
 \label{fig: Sin_Dev}
 \end{figure}
@@ -1338,68 +1355,75 @@ The calculated values are obtained by Formula \eqref{eqn: sin precision}, while 
 \centering
 \includegraphics[height=2.5in]{Pow_Dev.png} 
 \captionof{figure}{
-The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend, in which "white" means using white noise, "Gaussian" means using Gaussian noise, and "calculated" means the result from variance arithmetic. 
+The measured vs calculated uncertainty deviation for $(1 \pm \delta x)^c$, for different $\delta x$ as shown in the legend, in which "Error" means the measured error deviation, and "Uncertainty" means the uncertainties from variance arithmetic. 
 The $x$-axis is the exponent $c$ from $-2$ to $+3$.
-The calculated values are obtained by Formula \eqref{eqn: power precision}, while each measured deviation is obtained by 10000 samples using library \textit{pow} function.
-%Each measured values fits well with the corresponding calculated value except when $c < -1$ and $\delta x = 0.2$.
 }
 \label{fig: Pow_Dev}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Pow_Histogram.png} 
-\captionof{figure}{
-The measured probability density of $(1 \pm \delta x)^{c}$ for different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
-The $x$-axis is the normalized deviation from the mean of $(1 \pm \delta x)^{c}$.
-The $y$-axis is the measured histogram at each $x$.
-}
-\label{fig: Pow_Histogram}
-\end{figure}
-
-\begin{figure}[p]
-\centering
 \includegraphics[height=2.5in]{Pow_Converge.png} 
 \captionof{figure}{
-The individual variance term of $(1 \pm \delta x)^{c}$ for the different Taylor expansion order $2n$, different \textit{exp=}$c$ and \textit{dev=}$\delta x$ as shown in the legend. 
+The individual variance term of $(1 \pm \delta x)^c$ for the different Taylor expansion order $2n$, for different $c$ and $\delta x$ as shown in the legend. 
 The $x$-axis is Taylor expansion order $2n$ from 1 to 400 in Formula \eqref{eqn: Taylor 1d variance}.
-The $y$-axis is the contribution to $(1 \pm \delta x)^{c}$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
+The $y$-axis is the contribution to $(1 \pm \delta x)^c$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
 It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, $(1 \pm 0.2)^{-1}$ seems diverges, and other cases clearly converge.
 }
 \label{fig: Pow_Converge}
 \end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_Histogram.png} 
+\captionof{figure}{
+The measured probability density of $(1 \pm \delta x)^{exp}$ for different $exp$ and $\delta x$ as shown in the legend. 
+The $x$-axis is the normalized deviation from the mean of $(1 \pm \delta x)^{exp}$.
+The $y$-axis is the measured histogram at each $x$.
+}
+\label{fig: Pow_Histogram}
+\end{figure}
+
 
 
 Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested and verified by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
+At each point, the result error deviation is obtained by 10000 samples using a library function, the result uncertainty is calculated by the variance arithmetic.
 
-Figure \ref{fig: Sin_Dev} shows that the measured result deviations agree very well with the calculated result deviations using Formula \eqref{eqn: sin precision}.
-Smaller input uncertainty always result in smaller output uncertainty.
+Figure \ref{fig: Exp_Dev} shows that the measured deviations agree very well with the uncertainties using Formula \eqref{eqn: exp precision} for $e^{x + \delta x}$.
+Both increase linearly with $x$ and exponentially with $\delta x$.
+
+Figure \ref{fig: Log_Dev} shows that the measured deviations agree very well with the uncertainties using Formula \eqref{eqn: log precision} for $\log(x + \delta x)$.
+Both decrease exponentially with $x$ and increase exponentially with $\delta x$.
+The measured deviations has a lower limit of $x = 5 \delta x$ because the sampling could result in negative input to the $\log$ function, while the uncertainties have the same lower limit because Formula \eqref{eqn: log precision} starts to diverge.
+
+Figure \ref{fig: Sin_Dev} shows that the measured deviations agree very well with the uncertainties using Formula \eqref{eqn: sin precision} for $\sin(x + \delta x)$.
+Both increasing linearly exponentially with $\delta x$.
 Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$.
 \begin{itemize}
 \item When $x=0$, $\sin(x) \simeq x$, so that $\delta^2 \sin(x) \simeq (\delta x)^2$.
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
 \end{itemize}
 
-Figure \ref{fig: Pow_Dev} shows that the measured result deviations agree very well with the calculated result deviations of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} except when $\delta x =0.2$ and $c < -1$.
-The measured results of using white noise is also displayed in Figure \ref{fig: Pow_Dev}, which are always slightly smaller than the corresponding results using Gaussian noise, probably due to the long tails of Gaussian distributions. 
-As expected, the results of using Gaussian noise fit better with the calculated result of variance arithmetic, especially when the deviation is larger.
-However, using white noise has one advantage over using Gaussian noise: It shows clearer the effect of the non-linearity of $f(x)$ in Formula \eqref{eqn: function distribution}, e.g., the result distribution deviates more from a uniform distribution for a larger input deviation. 
-
+Figure \ref{fig: Pow_Dev} shows that the measured deviations agree very well with the uncertainties of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} for $(1 + \delta x)^c$ except when $\delta x =0.2$ and $c < -1$.
+Both increasing linearly exponentially with $\delta x$.
+Both approach $0$ when $c$ approaches $0$.
 The reason why Formula \eqref{eqn: power precision} is not applicable at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
+Figure \ref{fig: Pow_Converge} shows the individual variance term of $(1 \pm \delta x)^c$ for the different Taylor expansion order $2n$, for different $c$ and $\delta x$.
 \begin{itemize}
 \item 
-Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: inversion precision}, and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^c$ diverges faster when $c<-1$, which is confirmed by Figure \ref{fig: Pow_Converge}, in which $(1 \pm 0.2)^{-2}$ clearly diverges.
+Formula \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^c$ diverges faster when $c=-2$ vs when$c=-1$ , which is confirmed by Figure \ref{fig: Pow_Converge}.
 
 \item 
-When the deviation is reduced slightly to below the estimated applicable precision threshold $1/\sigma$, Figure \ref{fig: Pow_Converge} shows that Formula \eqref{eqn: inversion square precision} converges for $(1 \pm 0.195)^{-2}$, which is confirmed by Figure \ref{fig: Pow_Dev}.
+When the deviation is reduced slightly to below $1/\sigma$, Figure \ref{fig: Pow_Converge} shows that Formula \eqref{eqn: inversion square precision} diverges for $(1 \pm 0.2)^{-1.5}$ but converges for $(1 \pm 0.195)^{-2}$, which is confirmed by Figure \ref{fig: Pow_Dev}.
+It also shows that the convergence is more sensitive to $\delta x$ than $c$, so the convergence threshold is relatively hard, which is estimated as $\delta x = 0.196$ for $c=-2$.
 
 \item
-Figure \ref{fig: Pow_Histogram} shows that the measured probability density distributions for  $(1 \pm 0.2)^{-2}$ and  $(1 \pm 0.2)^{-0.195}$ are quite similar, suggesting that the convergence of $(1 \pm 0.195)^{-2}$ and the divergence of $(1 \pm 0.2)^{-2}$ is not related to underlying data. 
+Figure \ref{fig: Pow_Histogram} shows that the measured probability density distributions of the sampling for $(1 \pm 0.2)^{-2}$ and  $(1 \pm 0.2)^{-0.195}$ are quite similar, suggesting that the convergence of $(1 \pm 0.195)^{-2}$ and the divergence of $(1 \pm 0.2)^{-2}$ is an artifact of the variance arithmetic only. 
 
+\item When the bounding factor $\sigma$ is reduced to $4.9$, Formula \eqref{eqn: inversion square precision} also converges for $(1 \pm 0.2)^{-2}$.
+It is even possible that the bounding factor $\sigma$ is part of another variance arithmetic representation, the  $\sigma$ is adjusted to let each calculation converges if possible, or to reflect the amount of the result bounding leakage if two $\sigma$s from two imprecise values needs to be combined.
+For the discussion simplicity, the cases of the bounding factor $\sigma$ other than constant $5$ are avoided in this paper.
 \end{itemize}
-Thus, $(x \pm \delta x)^{-2}$ has an applicable precision threshold lower than $0.2$, so that it needs to be calculated with a $\sigma < 5$, and the result has a larger bounding leakage.
-For the discussion simplicity, the cases of applicable precision thresholds less than $1/5$ are avoided in this paper.
 
 
 
@@ -1490,6 +1514,9 @@ h[N] = h[0];
 Thus, the discrete Fourier transformation has an implied assumption that the signal $h[k]$ repeats itself outside the region of $[0, N-1]$ \cite{Numerical_DFT}.  
 For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to signal periodicity, resulting in larger peak width, lower peak height, and the wrong phase.  
 
+The unfaithfulness of the discrete Fourier transformation to the Fourier transformation is a very serious example of modeling errors, but this problem has not be addressed previously.
+Because the discrete Fourier transformation has widest applications in science and engineering, this problem really need some serious attention.
+The validation of the variance arithmetic using discrete Fourier transformation will avoid unfaithful frequency.
 
 
 \subsection{Testing Signals}
@@ -1510,7 +1537,6 @@ H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \
 \end{align}
 
 \end{itemize}
-Both Sin and Cos signals are faithful in Fourier transformation.
 
 Empirically:
 \begin{itemize}
@@ -1552,17 +1578,24 @@ L = 2:\;& o=0: & [0, 2, 1, 3]; \\
 
 When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}. 
 \begin{itemize}
-\item The amount of calculation is $L$.
+\item The amount of calculation is $L$, because for each output, increasing $L$ by 1 results in one additional step of sum of multiplication.
+
+\item Each step in the forward transformation thus increase the variance by $2$-fold, so that the result uncertainty means increase with the FFT order $L$ as $\sqrt{2}^L$.
+Because the reverse transformation divides the result by $2^L$, the result uncertainty means decrease with the FFT order $L$ as $\sqrt{1/2}^L$.
+The result uncertainty means for the roundtrip transformations is thus: $\sqrt{2}^L \times \sqrt{1/2}^L = 1$.
 
 \item For each output, each input is only used once, so there is no dependency problem.
 
-\item The major source of the calculation  error for \emph{Sin} and \emph{Cos} signals is the calculation errors of the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
+\item The major source of the calculation error for \emph{Sin} and \emph{Cos} signals is the calculation errors of the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
+The major source of the calculation error for \emph{Linear} signals is the calculation errors of the library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$.
 
-\item The forward and reverse transformation is identical except a sign.  
+\item The forward and reverse transformations are identical except a sign, so they are essentially an identical algorithm.  
 
-\item The forward transformation cancels each datum of a \emph{Sin} or \emph{Cos} signal into a spectrum of mostly $0$ values, so it is more susceptible to calculation errors, but the distributions of the calculation errors converge to normal distribution quicker.
+\item The forward transformation cancels each datum of a \emph{Sin} or \emph{Cos} signal into a spectrum of mostly $0$ values, so it is more susceptible to calculation errors.
+On the other hand, the input data contains real values close to 1, so the uncertainties grows faster if no noise is added.
 
-\item The reverse transformation spread the spectrum of mostly $0$ values to each datum of a \emph{Sin} or \emph{Cos} signal, so it is less susceptible to calculation errors, but the distributions of the calculation errors converge to normal distribution slower.
+\item The reverse transformation spread the spectrum of mostly $0$ values to each datum of a \emph{Sin} or \emph{Cos} signal, so it is less susceptible to calculation errors.
+On the other hand, the uncertainties grows faster if no noise is added.
 
 \end{itemize}
 
@@ -1582,7 +1615,7 @@ The result uncertainty means and uncertainty deviations using Sin and Cos signal
 \centering
 \includegraphics[height=2.5in]{FFT_Sin_Error.png} 
 \captionof{figure}{
-The result error maximums and error deviations using Sin and Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The result error deviations and error maximums using Sin and Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
 \label{fig: FFT_Sin_Error}
 \end{figure}
@@ -1592,7 +1625,7 @@ The result error maximums and error deviations using Sin and Cos signals vs. FFT
 \centering
 \includegraphics[height=2.5in]{FFT_Sin_Order7_Freq15_Spec_Clean.png} 
 \captionof{figure}{
-The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a clean Sin signal of order 7 and index frequency 15, as shown in the legend.
+The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a clean Sin signal of order 6 and index frequency 7, as shown in the legend.
 }
 \label{fig: FFT_Sin_Order7_Freq15_Spec_Clean}
 \end{figure}
@@ -1601,7 +1634,7 @@ The real and imaginary absolute value errors and uncertainties in the FFT spectr
 \centering
 \includegraphics[height=2.5in]{FFT_Sin_Order7_Freq15_Spec_Noisy.png} 
 \captionof{figure}{
-The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a Sin signal of order 7 and index frequency 15 with $10^{-15}$ white noises, as shown in the legend.
+The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a Sin signal of order 6 and index frequency 7 with $10^{-16}$ white noises, as shown in the legend.
 }
 \label{fig: FFT_Sin_Order7_Freq15_Spec_Noisy}
 \end{figure}
@@ -1620,7 +1653,7 @@ The histograms of the normalized errors of Sin and Cos signals at FFT with $10^{
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_Error.png} 
 \captionof{figure}{
-The mean and deviation of the result uncertainties of Linear signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The result error deviations and error maximums of Linear signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
 \label{fig: FFT_Linear_Error}
 \end{figure}
@@ -1631,19 +1664,18 @@ The trends of the uncertainty means with the FFT order agree with the different 
 \begin{itemize}
 \item For the forward transformations, the uncertainty means increase exponentially as $1.36^L$ with the FFT order $L$.
 
-\item For the reverse transformations, the uncertainty means remain a constant about $1.67 \times 10^{-16}$ with the FFT order $L$.
+\item For the reverse transformations, the uncertainty means remain a constant about $1.4 \times 10^{-16}$ with the FFT order $L$.
 
-\item For the roundtrip transformations, the uncertainty means remain a constant about $1.38 \times 10^{-16}$ with the FFT order $L$.
+\item For the roundtrip transformations, the uncertainty means remain a constant about $1.7 \times 10^{-16}$ with the FFT order $L$.
 \end{itemize}
-The input uncertainties are the least significant values of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
-This input uncertainties transfer to the result uncertainty deviations differently for different transformations in Figure \ref{fig: FFT_Sin_Uncertainty}.
+Figure \ref{fig: FFT_Sin_Uncertainty} also shows the differences of input data:
 \begin{itemize}
-\item For the forward transformation, the result uncertainty deviations are comparable to the corresponding uncertainty mean.
+\item For the forward transformation, the input uncertainties are the least significant values of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$, so that the result uncertainty deviations are comparable to the corresponding uncertainty mean.
 
-\item For the reverse and roundtrip transformations, the result uncertainty deviations are much to the corresponding uncertainty mean.
+\item For the reverse transformation, the input uncertainties come from the peaks while most other values are $0$, so that the result uncertainty deviations are much to the corresponding uncertainty means.
 \end{itemize}
 
-Even the result uncertainties grow quite differently for the different transformations in Figure \ref{fig: FFT_Sin_Uncertainty}, the variance arithmetic is capable of both tracking and bounding the result errors, as demonstrated by Figure \ref{fig: FFT_Sin_Error}:
+Figure \ref{fig: FFT_Sin_Error} shows that the variance arithmetic is capable of both tracking and bounding the result errors:
 \begin{itemize}
 \item The error deviations are between $0.42$ and $1.21$, confirming the tracking power of the variance arithmetic.
 
@@ -1660,31 +1692,31 @@ This imperfection is found to be the result of numerical errors in the library f
 \begin{enumerate}
 \item The variance arithmetic can not account for numerical errors beyond the least significant values in the library function, which will probably increase with the FFT order $L$.
 
-\item Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} shows how the variance arithmetic uses uncertainties to track the value errors in a FFT spectrum on average.
-The two peaks of the value errors at the index frequencies $\pm 15$ are expected, but Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} also shows a few other peaks such as at $\pm 17$, $\pm 45$, and $\pm 47$, suggesting systematic errors from the library function.
+\item Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} shows how the variance arithmetic uses uncertainties to track the value errors in a FFT spectrum of a Sin signal with index frequency $7$.
+The two peaks of the value errors at the index frequencies $\pm 7$ are expected, but Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} also shows peaks at $\pm 11$, suggesting systematic errors from the library function.
 
-\item To overcome such systematic errors, $10^{-15}$ white noises are added to the Sin and Cos signals.
+\item To overcome such systematic errors, $10^{-16}$ white noises are added to the Sin signal.
 The results in the corresponding FFT spectrum in Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Noisy} looks no longer structured. 
-Figure \ref{fig: FFT_Sin_Error_Histogram} confirms that the normalized errors for the forward transformation are normal distributed with the noises.
+Figure \ref{fig: FFT_Sin_Error_Histogram} confirms that the normalized errors for the forward transformation are normal distributed.
 
-\item In Figure \ref{fig: FFT_Sin_Error_Histogram}, the normalized errors for the roundtrip transformation are still not normal distributed, and the corresponding error deviations still increase with the FFT order $L$ as $0.0262 L$.
-When $10^{-12}$ white noises are added to the Sin and Cos signals, for the roundtrip transformation, the normalized errors become a constant of $1$, and the normalized errors become normal distributed.
+\item In Figure \ref{fig: FFT_Sin_Error_Histogram}, the normalized errors for the reverse transformation are still not normal distributed, and the corresponding error deviations still increase with the FFT order $L$ as $0.0262 L$.
+When $10^{-12}$ white noises are added to the Sin signal, for the reverse transformation, the normalized errors become a constant of $1$, and the normalized errors become normal distributed.
 
-\item In the above steps, the noises are only added to the Sin and Cos signals.
-If $10^{-15}$ white noises are added to the library function, the result error deviations remain near $1$ for the roundtrip transformation.
-Thus, the library function $\sin(x), x \in [0, \pi/2]$ is estimated to contains $10^{-15}$ numerical errors.
+\item In the above steps, the noises are only added to the Sin signal.
+If $10^{-15}$ white noises are added to the sin library function instead, the result error deviations remain near $1$ for the reverse transformation.
+Thus, the library function $\sin(x), x \in [0, \pi/2]$ is estimated to contain $10^{-15}$ numerical errors.
 \end{enumerate}
+Figure \ref{fig: FFT_Sin_Error_Histogram} shows that different input data have different sensitivity to the calculation errors.
+However, the reason why the reverse transformation is much more sensitive to the numerical errors of the library $\sin$ is not clear.
+
 Figure \ref{fig: FFT_Linear_Error} shows the result error maximums and error deviations for forward, reverse and roundtrip FFT transformations on Linear signals vs. FFT order $L$.
-Linear signals contain the library function $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$ for the FFT order $L$ in Formula \eqref{eqn: Fourier spec for linear}.
+Linear signals contain the library function $\tan(\pi (j - 1) /2^L), j = 1, 2, ... 2^{L-1}$ for the FFT order $L$ in Formula \eqref{eqn: Fourier spec for linear}.
 Unlike $\sin(x)$, $\tan(x)$ is not bounded, e.g., for order $18$, the maximal $\tan$ value is $4.78 \times 10^6$, whose least significant value is about $10^{-10}$, which is larger that $10^{-16}$ for the maximal $\sin$ value.
 All error deviations are different noticeably from $1$ but still near $1$ in Figure \ref{fig: FFT_Linear_Error}. 
-For the order $18$ roundtrip transformations, $10^{-3}$ input noises are necessary for the result error deviation to be 1 and the result value errors to be normal distributed, which is proportional to the $10^{-12}$ input noise necessary for the Sin and Cos signals.
-
-For pure floating-point FFT calculations, both the tracking power and the bounding power of the variance arithmetic are validated.
+For the order $18$ reverse transformations, $10^{-3}$ input noises are necessary for the result error deviation to be 1 and the result value errors to be normal distributed, which is proportional to the $10^{-12}$ input noise necessary for the Sin and Cos signals.
 
 
-
-\subsection{Evaluating Error Response}
+\subsection{Evaluating Error Responses}
 
 \begin{figure}[p]
 \centering
@@ -1726,7 +1758,7 @@ The result error deviations using Linear signals of order 18 vs. input uncertain
 \centering
 \includegraphics[height=2.5in]{FFT_Sin_ErrorMax_vs_Uncertainty.png} 
 \captionof{figure}{
-The result error deviations using Sin and Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+The result error maximums using Sin and Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
 }
 \label{fig: FFT_Sin_ErrorMax_vs_Uncertainty}
 \end{figure}
@@ -1735,7 +1767,7 @@ The result error deviations using Sin and Cos signals of order 18 vs. input unce
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_ErrorMax_vs_Uncertainty.png} 
 \captionof{figure}{
-The result error deviations using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
+The result error maximums using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations using either Gaussian noise or white noise, as shown in the legend.
 }
 \label{fig: FFT_Linear_ErrorMax_vs_Uncertainty}
 \end{figure}
@@ -1745,118 +1777,169 @@ Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty}  shows the result uncertain
 \begin{itemize}
 \item As expected, the result uncertainty means using either Gaussian noises or white noises are identical.
 
-\item As expected, the result uncertainty means for the forward transformation is order-of-magnitude larger than the corresponding uncertainty means for the reverse transformation.
+\item As expected, the result uncertainty means for the forward transformation is two order-of-magnitude larger than the corresponding uncertainty means for the reverse transformation.
 
-\item The result uncertainty means for the roundtrip transformation is order-of-magnitude smaller than the corresponding uncertainty means for both the forward transformation and the reverse transformations, showing that the variance arithmetic can largely recover the original uncertainties.
-However, the result uncertainty means are not exactly 0, probably due to the rounding errors of the conventional floating-point calculations. 
+\item As expected, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties. 
 
-\item All the result uncertainty means increases linearly with the corresponding input uncertainties, except for the roundtrip transformations when the input uncertainties are below $10^{-13}$.
+\item All the result uncertainty means increases linearly with the corresponding input uncertainties, except for the reverse transformations when the input uncertainties are below $10^{-13}$.
 This is expected because all FFT transformations are linear.
-
-\item When an added noise is less than the rounding error and the numerical error, it becomes ineffective so that the result uncertainty means will no longer decrease with the lower input noise uncertainties.
-For Sin and Cos signals, the maximal least significant values are around $10^{-16}$, which is the lower linear limits for both the forward and the reverse transformations.
-However, for the roundtrip transformation, this lower limit is around $10^{-13}$.
-This is understandable because the roundtrip transformation is the forward transformation followed by the reverse transformation, so that the effect of the least significant values should be amplified.
 
 \end{itemize}
  
 Figure \ref{fig: FFT_Linear_Uncertainty_vs_Uncertainty} is identical to Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty} except that it is for the Linear signals.
-Because $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$ have much larger least significant values than $\sin(\pi j /2^L), j = 0, 1, ... 2^{L-1}$, the lower linear limits for the Linear signals are much larger than the corresponding lower linear limits for the Sin and Cos signals: $10^{-10}$ for the forward and reverse transformations, and $10^{-8}$ for the roundtrip transformation.
+Because the $\tan$ library function has much larger least significant values than the library $\sin$ functions, the lower linear limits for the Linear signals are much larger than the corresponding lower linear limits for the Sin and Cos signals: $10^{-11}$ for the forward and the roundtrip transformations, and $10^{-8}$ for the reverse transformation.
+When the input uncertainties are more than $10^{-11}$, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties. 
 
-Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} show the result error deviations vs. different input uncertainties using either Sin and Cos or Linear signals of order 18.
+Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} shows the result error deviations vs. different input uncertainties using Sin and Cos of order 18.
 When the input uncertainties can accurately describe the corresponding errors, the result error deviations are constant 1 and the result value errors are normal distributed.
 \begin{itemize}
-\item For Sin and Cos signals, the lower limit is $10^{-15}$ for the forward and reverse transformations, and $10^{-12}$ for the roundtrip transformation.
-The $10^{-15}$ agree with the previously estimated numerical errors for $\sin(\pi j /2^L), j = 0, 1, ... 2^{L-1}$.
+\item For the forward transformations, the lower limit is $10^{-15}$, which agrees with the previously estimated numerical errors for the $\sin$ library function.
 
-\item For Linear signals, the lower limit is $10^{-10}$ for the forward and reverse transformations, and $10^{-3}$ for the roundtrip transformation.
-The $10^{-10}$ agree with the previously estimated numerical errors for $\tan(\pi j /2^L), j = 0, 1, ... 2^{L-1} - 1$.
+\item For the reverse transformations, the lower limit is $10^{-12}$, which is slightly larger the lower limit of the linear range of the uncertainty means in Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty}.
 
-\item The roundtrip transformation contains the combined amount calculation of the forward and the reverse transformations, so that it has higher lower limits, $10^{-12}$ for Sin and Cos signals, and $10^{-2}$ for Linear signals.
-
-\item The transition of error deviations to 1 in Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} is much sharper than the transition of uncertainty means to the linear regions in Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty} and \ref{fig: FFT_Linear_Uncertainty_vs_Uncertainty}.
+\item For the roundtrip transformation, the result is expected to be $0$, and the error deviations indeed drop to $0$ when the input uncertainty is more than $10^{-13}$.
+Figure \ref{fig: FFT_Sin_Error_Histogram} shows that the numerical errors of the $\sin$ library function is the reason why the result value errors are not $0$ for the roundtrip transformations when the input uncertainty is less than $10^{-13}$.
 \end{itemize}
-Adding noises then checking error deviations to be 1 seems a valid way to evaluate numerical errors in library functions.
 
-Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} show the result normalized error maximums vs. different input uncertainties using either Sin and Cos or Linear signals of order 18.
-Except when the input uncertainties are accurate for the corresponding input errors for the reverse transformations, the error maximums are  $3.1$.
+Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} repeats Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} for Linear signals instead, which contain much more numerical errors than those for Sin and Cos signals.
+The lower limits for the error deviations to be $1$ are much larger, e.g.,  $10^{-2}$ instead of $10^{-12}$ for the reverse transformations.
+It is a little bit surprising that the rounding errors could have such a large impact on the result distribution.
 
-Figure \ref{fig: FFT_Sin_Error_Histogram} shows that when the input noises is white, the result normalized errors are largely uniformly distributed.
-When the input uncertainties are accurate for the corresponding input errors, the error maximums in Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} are $\sqrt{3}$, also suggesting that the result normalized errors are largely uniformly distributed.
-The loss of the convergence power of the reverse transformations needs further investigations.
+When the input uncertainties can accurately describe the corresponding errors, the error deviations have a sudden change to $1$ in both Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} than the graduate changes to the linear region of the uncertainty means in Figure \ref{fig: FFT_Sin_Uncertainty_vs_Uncertainty} and \ref{fig: FFT_Linear_Uncertainty_vs_Uncertainty}, so checking if the error deviations to be $1$ is a better method to if the results contain excess errors which are not specified by the result uncertainty.
 
-For FFT calculations with different uncertainties, both the tracking power and the bounding power of the variance arithmetic are validated, and the error response is found to be linear when the input uncertainties are accurate for the corresponding input errors.
-
+Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} show the result error maximums vs. different input uncertainties using either Sin and Cos signals, or Linear signals of order 18 are constant $3.1$ except for the roundtrip transformations when the input uncertainties are large enough so that the numerical errors are no longer effective: $10^{-13}$ for Sin and Cos signals, $10^{-8}$ for Linear signals.
+Compared with Figure \ref{fig: FFT_Sin_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty}, Figure \ref{fig: FFT_Sin_ErrorMax_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} show that the error maximums are less sensitive to how accurate the uncertainties describes the corresponding value errors.
 
 
 
 
 
-\subsection{Evaluating Uncertainty-Tracking}
-
-Figure \ref{fig: All_For_AvgDev_vs_FFTOrder} shows that for the same input deviation, the output deviations of the forward FFT increase exponentially with the FFT order using all three arithmetics.  Figure \ref{fig: All_For_AvgDev_vs_InDev} shows that for the same FFT order, the output deviations of the forward FFT increase linearly with the input deviation using all three arithmetics.  The output deviation does not change with input frequency so that all data of the same input deviation and the same FFT order but with different input frequencies can be pooled together during analysis.  The trends in Figure \ref{fig: All_For_AvgDev_vs_FFTOrder} and Figure \ref{fig: All_For_AvgDev_vs_InDev} are modeled by Formula \eqref{eqn: fitting error}, in which $L$ is the FFT order, $\delta x$ is the input deviation, $\delta$y is the average output deviation, and $\alpha$ and $\beta$ are empirical fitting constants: 
-\begin{equation}
-\label{eqn: fitting error}
-\delta y = \alpha \beta ^{L} \delta x;
-\end{equation}
-$\beta$ measures the propagation speed of the deviation with an increased amount of calculation in Formula \eqref{eqn: fitting error}.  It is called \emph{propagation base rate}.  Unless $\beta$ is close to 1, $\beta$ dominates $\alpha$ in fitting, thus determining characteristics of Formula \eqref{eqn: fitting error}.  
-
-It turns out that Formula \eqref{eqn: fitting error} is a very good fit for both average output deviations and value errors for all three arithmetics, such as demonstrated in Figure \ref{fig: Prec4_For_AvgErr_vs_FFTOrder_InDev}.  Because uncertainty-tracking is a competition between error propagation and uncertainty propagation, the average output tracking ratio for the forward FFT is expected to fit Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting significand coefficient}, in which $z$ is the average output tracking ratio, $L$ is the FFT order, $(\alpha _{dev}, \beta _{dev})$ and $(\alpha _{err}, \beta _{err})$ are fitting parameters of Formula \eqref{eqn: fitting error} for average output deviations and value errors, respectively:
-\begin{equation}
-\label{eqn: fitting significand} 
-z = \alpha \beta ^{L};
-\end{equation}
-\begin{equation}
-\label{eqn: fitting significand coefficient} 
-\alpha = \alpha _{err} / \alpha _{dev}; \eqspace \beta = \beta _{err} / \beta_{dev};
-\end{equation}
 
 
-The estimated average output tracking ratio can then be compared with the measured ones to evaluate the predictability of the uncertainty-tracking mechanism.  One example of measured average output tracking ratios is shown in Figure \ref{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}, which shows that the average output tracking ratios using variance arithmetic are a constant despite that both average output uncertainty deviations and value errors increase linearly with the input deviation and exponentially with the FFT order.  Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting significand} are found empirically to be a good fit for any FFT algorithm with any input signal using any arithmetic.
+\subsection{Evaluating Calculation Responses}
 
-The Reverse FFT algorithm is identical to the Forward FFT algorithm, except when:
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_Uncertainty_vs_Order.png} 
+\captionof{figure}{
+The result uncertainty means using Linear signals vs. FFT Orders for forward, reverse and roundtrip FFT transformations with either no noise or $10^{-5}$ Gaussian noise, as shown in the legend.
+}
+\label{fig: FFT_Linear_Uncertainty_vs_Order}
+\end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_Error_vs_Order.png} 
+\captionof{figure}{
+The result error deviations and error maximums using Linear signals vs. FFT Orders for forward, reverse and roundtrip FFT transformations with $10^{-5}$ Gaussian noise, as shown in the legend.
+}
+\label{fig: FFT_Linear_Error_vs_Order}
+\end{figure}
+
+Figure \ref{fig: FFT_Linear_Uncertainty_vs_Order} shows the result uncertainty means vs. FFT Orders for forward, reverse and roundtrip FFT transformations of Linear signals.
+When no noise is added, Figure \ref{fig: FFT_Linear_Uncertainty_vs_Order} is comparable to Figure \ref{fig: FFT_Sin_Uncertainty}: 
 \begin{itemize}
-\item  The Reverse FFT algorithm uses constant (-i) instead of (+i) in Formula \eqref{eqn: Danielson-Lanczos}.
+\item Because the $\tan$ function contains more calculation errors, the uncertainty means of the forward transformation of Linear signals increase faster exponentially with the FFT order $L$: $2.88^L$ vs $1.36^L$.
 
-\item  The Reverse FFT algorithm divides the result further by $2^{L}$.  
+\item Because the FFT spectra no longer contain mostly $0$ values, the uncertainty means of the reverse transformation of Linear signals also increase exponentially with the FFT order.
+
+\item The uncertainty means of the roundtrip transformation are less than the corresponding uncertainty means of the reverse transformation, and they increase slower with the FFT order $L$: $2.04^L$ vs $2.09^L$.  
+This suggests that the roundtrip transformation can still recover part of the the original uncertainties.
 \end{itemize}
-Thus, the average output deviations and value errors of the reverse FFT algorithm are expected to obey Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting reverse coefficient} , in which $(\alpha_{for}$, $\beta_{for})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting error} for the forward FFT, while the average output tracking ratios are expected to obey Formula \eqref{eqn: fitting significand coefficient} with the same $\alpha$ and $\beta$ as those of the forward FFT.  
-\begin{equation}
-\label{eqn: fitting reverse coefficient} 
-\alpha = \alpha _{for}; \eqspace  \beta = \beta _{for}/2;
-\end{equation}
-
-The Round-trip FFT is the forward FFT followed by the reverse FFT, with the output of the forward FFT as input to the reverse FFT.  Thus, both its average output deviations and value errors are expected to fit Formula \eqref{eqn: fitting error} and Formula \eqref{eqn: fitting round-trip coefficient}, in which $(\alpha _{for}, \beta _{for})$ and $(\alpha _{rev}, \beta _{rev})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting error} for the forward FFT and the reverse FFT, respectively.  Its tracking ratios are expected to fit Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting round-trip coefficient}, in which $(\alpha _{for}, \beta _{for})$ and $(\alpha _{rev}, \beta _{rev})$ are corresponding fitting parameters of Formula \eqref{eqn: fitting significand} for the forward FFT and the reverse FFT, respectively.
-\begin{equation}
-\label{eqn: fitting round-trip coefficient} 
-\alpha = \alpha _{for} \alpha _{rev}; \eqspace \beta = \beta _{for} \beta _{rev};
-\end{equation}
-
-Figure \ref{fig: Indp_PropBase_AvgSig}, Figure \ref{fig: Prec4_PropBase_AvgSig} and Figure \ref{fig: Intv_PropBase_AvgSig} show the fitting of $\beta$ for independent, precision and interval arithmetic for all the three algorithms, respectively.  These three figures show that all measured $\beta$ make no distinction between input signals for any algorithms using any arithmetic, e.g., there is no difference between the real part and the imaginary part for a sine signal.  The estimated $\beta$ for average tracking ratios is obtained from Formula \eqref{eqn: fitting significand coefficient}.  The estimated $\beta$ for average uncertainty deviations and value errors for the reverse FFT and the roundtrip FFT are obtained from Formula \eqref{eqn: fitting reverse coefficient} and Formula \eqref{eqn: fitting round-trip coefficient}, respectively.  The estimated $\beta$ for average uncertainty deviations for the forward FFT is $\sqrt{2}$, which will be demonstrated later.  The measured $\beta$ and the estimated $\beta$ agree well with each other in all cases.  This confirms that uncertainty-tracking is a simple competition between the error propagation and uncertainty propagation:
+When $10^{-5}$ noises added, so that the input uncertainty accurately describes its value errors:
 \begin{itemize}
-\item  Figure \ref{fig: Indp_PropBase_AvgSig} confirms that independence arithmetic is ideal for uncertainty-tracking for FFT algorithms: 1) $\beta$ for tracking ratios is a constant 1; and 2) $\beta$ for both the average output deviations and value errors is both 1 for the round-trip FFT because the result signal after the round-trip FFT should be restored as the original signal.  Thus, theoretical $\beta$ for the forward FFT and the reverse FFT are $\sqrt{2}$ and $1/\sqrt{2}$, respectively.
+\item The result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$, as expected.
 
-\item  variance arithmetic has $\beta$ for average output deviations slightly larger than those of value errors, resulting in $\beta$ for average output tracking ratios to be a constant slightly less than 1.  Its $\beta$ for average output deviations is slightly larger than the corresponding $\beta$ of independence arithmetic, so its average output deviations propagate slightly faster with an increased FFT order than those of independent arithmetic.  Such slightly faster increase with the amount calculation is anticipated by the difference between Formula \eqref{eqn: uncertainty *} and Formula \eqref{eqn: stat *}  with $\gamma=0$.
+\item The result uncertainty means for the reverse transformations decrease with the FFT order $L$ as $\sqrt{1/2}^L$, as expected.
 
-\item  The $\beta$ for average output deviations using interval arithmetic is always much larger than $\beta$ for average output value errors, resulting in $\beta$ for average output tracking ratios of about $0.62$ for the forward and reverse FFT, and about $0.39  \cong {0.62}^{2}$ for the roundtrip FFT.  Consequently, using interval arithmetic, the average output deviations propagate much faster with the amount of calculations than the value error does.  Such fast propagation of uncertainty ranges is intrinsic to interval arithmetic due to its worst-case assumption.  
+\item The result uncertainty means for the roundtrip transformations always equal the corresponding input uncertainties, as expected.
 \end{itemize}
+The above differences again highlight the contrasts of the value error distributions whether the input uncertainties accurately describe the corresponding errors or not.
 
-Figure \ref{fig: All_For_AvgSig_vs_FFTOrder} shows that for the forward FFT, the measured average output tracking ratios using either variance arithmetic or independence arithmetic are approximately constant of 0.8 in both cases, regardless of the FFT order.  In contrast, Figure \ref{fig: All_For_AvgSig_vs_FFTOrder} shows that using interval arithmetic the measured average output tracking ratios decrease exponentially with the FFT order L.  Such trends of average tracking ratios hold for all three FFT algorithms and all input signals.  Thus, in this case, the direct uncertainty tracking provided by variance arithmetic is better than the indirect uncertainty tracking provided by interval arithmetic.   
-
-Figure \ref{fig: Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec} shows that using variance arithmetic, each average output uncertainty deviation equals the corresponding input uncertainty deviation for all FFT orders after a round-trip operation.  Thus, after each round-trip operation, variance arithmetic restores the original signal and the corresponding uncertainty for FFT.  Such behavior seems ideal for a reversible algorithm.  In contrast, Figure \ref{fig: Intv_Rnd_AvgErr_vs_FFTOrder_InPrec} shows that using interval arithmetic, the average output uncertainty deviations increase exponentially with FFT orders, which means the undesirable broadening of uncertainty in the restored signal after a round-trip operation.
-
-
-\subsection{Evaluating Uncertainty-Bounding }
-
-While uncertainty tracking is the result of the propagation competition between average output deviations and average values errors with increased amount of calculations, uncertainty bounding is the result of the propagation competition between output bounding ranges and maximal value errors, both of which still fit Formula \eqref{eqn: fitting error} well using any arithmetic experimentally.  Formula \eqref{eqn: fitting significand} and Formula \eqref{eqn: fitting significand coefficient}  can be used to estimate the maximal bounding ratio as well.  For example, Figure \ref{fig: All_For_MaxBnd_vs_FFTOrder} shows that the maximal output bounding ratios using variance arithmetic fit Formula \eqref{eqn: fitting significand} well.  Unlike average output tracking ratios in Figure \ref{fig: All_For_AvgSig_vs_FFTOrder}, the maximal output bounding ratios increase slowly with the FFT order using either variance arithmetic or independent arithmetic.  In contrast, interval arithmetic has its maximal bounding ratios decreasing exponentially with the increased FFT order for all algorithms while keeping its bounding leakages at constant 0.  Detailed analysis shows that in interval arithmetic, $\beta$ for the maximal uncertainty bounding ranges exceeds $\beta$ for the maximal value error, suggesting the source of over-estimating uncertainty range with the increased amount of calculations.  Defining empirical \emph{deviation leakage} as the frequency of the value errors to be outside the range of mean $\pm$ deviation, Figure \ref{fig: Prec4_DevLeak_vs_FFTOrder_InPrec} shows that the deviation leakages is roughly a constant using variance arithmetic, suggesting the statistical nature of uncertainty bounding using variance arithmetic.  Whether variance arithmetic is better than interval arithmetic in uncertainty bounding depends on the statistical requirements for the uncertainty bounding:
+Figure \ref{fig: FFT_Linear_Error_vs_Order} shows the error deviations and error maximums vs. FFT Orders for forward, reverse and roundtrip FFT transformations of Linear signals with $10^{-5}$ noises added.
 \begin{itemize}
-\item  In the situation when absolute bounding is required, interval arithmetic is the only choice.
+\item When the FFT order $L$ is smaller than 8, the error maximums are not stabilized because there is not enough calculations.
 
-\item  In the range estimation \cite{Statistical_Methods} involving low-resolution measurements whose sources of uncertainty are unclear, interval arithmetic is a better choice because the independence uncertainty assumption of variance arithmetic may not be satisfied. 
+\item When the FFT order $L$ is larger than 14, the error deviations starts to deviates from constant $1$ because the increasing $L$ brings more numerical errors in the $\tan$ library function.
 
-\item  Otherwise, variance arithmetic should be more suitable for normal usages.  
 \end{itemize}
+
+
+
+\subsection{Summary}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_ErrorDev_vs_Uncertainty_Order.png} 
+\captionof{figure}{
+The result error deviations using Linear signals vs. input uncertainties and FFT Orders for roundtrip FFT transformations with $10^{-5}$ Gaussian noise.
+The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
+}
+\label{fig: FFT_Linear_ErrorDev_vs_Uncertainty_Order}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_ErrorMax_vs_Uncertainty_Order.png} 
+\captionof{figure}{
+The result error maximums using Linear signals vs. input uncertainties and FFT Orders for roundtrip FFT transformations with $10^{-5}$ Gaussian noise.
+The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
+}
+\label{fig: FFT_Linear_ErrorMax_vs_Uncertainty_Order}
+\end{figure}
+
+Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty_Order} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty_Order} shows the overall dependency of either error deviations or error maximums to both input uncertainties and the amount of calculations for the reverse transform of Linear signals.
+Figure \ref{fig: FFT_Linear_Error} and \ref{fig: FFT_Linear_Error_vs_Order} are their cross sections along the amount of calculations, while Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty} and \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty} are their cross sections along the input uncertainties.
+
+When the uncertainties accurately describe the corresponding value errors, and when the value errors are not expected to be $0$:
+\begin{itemize}
+\item The error deviations equal $1$, as the flat area in Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty_Order}.
+
+\item The error maximums equal the $3.1$, as the flat area in Figure \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty_Order}.
+
+\item The result uncertainties increases linearly with the input uncertainties, so the error response is linear for FFT.
+
+item The result uncertainties increases exponentially with the amount of calculations, so the calculation response is exponential for FFT.
+
+\item The normalized errors are normal distributed, regardless of the input error distributions, such as the histogram for the forward transformation in Figure \ref{fig: FFT_Sin_Error_Histogram}.
+\end{itemize}
+Although the variance arithmetic can not accurately account for the numerical errors of library functions, it can track the result value errors effectively, even when both value errors and the corresponding uncertainties change exponentially:
+\begin{itemize}
+\item The error deviations are bound between the range about $1/2$ to $2$, as the rough area in Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty_Order}.
+
+\item The error maximums are bound between the range about $2.7$ to $3.1$, as the rough area in Figure \ref{fig: FFT_Linear_ErrorMax_vs_Uncertainty_Order}.
+
+\item The normalized errors are not normal distributed, showing the characteristics of the numerical errors, such as the histogram for the reverse transformation in Figure \ref{fig: FFT_Sin_Error_Histogram}.
+\end{itemize}
+So both the tracking power and the bounding power of the variance arithmetic are validated for FFT calculations.
+
+The seemly small numerical errors in library functions may have profound impact on the result.
+\begin{itemize}
+\item For the $18$-order FFT reverse transformations, the estimated $10^{-15}$ $\sin$ errors is equivalent to $10^{-12}$ input errors, while the estimated $10^{-10}$ $\tan$ errors is equivalent to $10^{-3}$ input errors. 
+
+\item For the FFT reverse transformations, the equivalent input errors of the $\tan$ are shown as the edge that separate the mountain-like area and the plain-like area in Figure \ref{fig: FFT_Linear_ErrorDev_vs_Uncertainty_Order}. 
+From it, the $\tan$ numerical errors will affect the result of a $20$-order FFT transformation noticeably. 
+
+\end{itemize}
+By adding noises to the input data and checking if the error deviations be $1$, the amount of numerical errors in the library functions can be evaluated.
+
+However, it is difficult to predict the impact of these numerical errors: 
+\begin{itemize}
+\item They depend strongly on the library functions, such as between $\sin$ and $\tan$.
+
+\item They depend on how one library function is applied, such as the increasing impact with the increasing $L$ for $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$.
+
+\item They depend strongly on the input data, such as the differences between the forward and the reverse transformation using essentially the same algorithm.
+
+\end{itemize}
+Thus, it is important to rely on the tracking power of the variance arithmetic for the corresponding uncertainties of numerical results.
+When the result value error is not known, if the symmetric valid range of a numerical result can be obtained, and if the ratio of the valid range to the result uncertainty is not $2 \times 3.1$, then the result uncertainty does not accurately describe the result value errors.
+
+
+
+
+
+
 
 
 \clearpage
