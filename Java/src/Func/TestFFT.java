@@ -468,8 +468,8 @@ public class TestFFT {
         final String pathOut = String.format("./Output/FFT%s.txt", realType);
         try (final FileWriter fw = new FileWriter(pathOut)) {
             fw.write("RealType\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest");
-            fw.write("\tUncertaintyMean\tUncertaintyDev\tUncertaintyMin\tUncertaintyMax");
-            fw.write("\tErrorMean\tErrorDev\tErrorMin\tErrorMax");
+            fw.write("\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Maximum");
+            fw.write("\tError Mean\tError Deviation\tError Minimum\tError Maximum");
             for (int i = - Measure.BINDING * Measure.DIVIDS; i <= Measure.BINDING * Measure.DIVIDS; ++i) {
                 fw.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
             }
