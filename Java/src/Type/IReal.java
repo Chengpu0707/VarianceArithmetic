@@ -127,7 +127,7 @@ public interface IReal {
 	}
 
     default double getLSB() {
-        return Dbl.getLSB(value());
+        return Math.ulp(value());
     }
 }
 

@@ -1,6 +1,6 @@
 {
     "java.project.sourcePaths": [
-        "VarianceArithmetic"
+        "Backup/Java/src"
     ],
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {

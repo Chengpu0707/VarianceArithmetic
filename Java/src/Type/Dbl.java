@@ -1,4 +1,4 @@
-package Type;
+
 
 import Type.IReal.ValueException;
 
@@ -239,22 +239,6 @@ public class Dbl {
             }
         }
     }
-
-	/*
-	 * Return the absolute value equivalent to the LSB of "value"
-	 */
-	static public double getLSB(double value) {
-		if (!Double.isFinite(value)) {
-			return 0;
-		}
-		try {
-			final Dbl d = new Dbl(value);
-			final Dbl lsb = new Dbl( d.exp(), false, 1, d.rndErr());
-			return lsb.toDouble();
-		} catch (ValueException e) {
-			return 0;
-		}
-	}
 
 	/*
 	 * Return the absolute value equivalent to the LSB of "value".

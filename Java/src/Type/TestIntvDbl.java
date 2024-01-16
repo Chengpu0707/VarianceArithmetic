@@ -114,7 +114,7 @@ public class TestIntvDbl {
         res = op.clone();
         res.negate();
         assertEquals(-op.value(), res.value(), res.uncertainty());
-        assertEquals(op.uncertainty(), res.uncertainty(), Dbl.getLSB(res.uncertainty()));
+        assertEquals(op.uncertainty(), res.uncertainty(), Math.ulp(res.uncertainty()));
     }
     
     private void testShift( int bits ) {
@@ -124,11 +124,11 @@ public class TestIntvDbl {
             if (bits >= 0) {
                 assertEquals(op.value() * (1L << bits), res.value(), res.uncertainty());
                 assertEquals(op.uncertainty() * (1L << bits), res.uncertainty(), 
-                             Dbl.getLSB(res.uncertainty()));
+                             Math.ulp(res.uncertainty()));
             } else {
                 assertEquals(op.value() / (1L << -bits), res.value(), res.uncertainty());
                 assertEquals(op.uncertainty() / (1L << -bits), res.uncertainty(), 
-                             Dbl.getLSB(res.uncertainty()));
+                             Math.ulp(res.uncertainty()));
             }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
@@ -147,7 +147,7 @@ public class TestIntvDbl {
             assertEquals(op.value() + offset, res.value(), res.uncertainty());
             final double uncertainty = res.uncertainty();
             assertEquals(uncertainty, res.uncertainty(), 
-                         Dbl.getLSB(res.uncertainty()));
+                         Math.ulp(res.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
@@ -202,7 +202,7 @@ public class TestIntvDbl {
             final double div = op.uncertainty() / DIVIDS;
             if (div > 0) {
                 for (int i = -DIVIDS; i < 0; ++i) {
-                    final double offset = op.uncertainty() * i / DIVIDS + Dbl.getLSB(op.value());
+                    final double offset = op.uncertainty() * i / DIVIDS + Math.ulp(op.value());
                     final double d = Math.pow(op.value() + offset, exponent);
                     assertEquals(String.format("(%.3e in %s)^%.3e = %.3e vs %s: %.3e less than %.3e", 
                                     op.value() + offset, op.toString(), exponent, d, res.toString(),
@@ -211,7 +211,7 @@ public class TestIntvDbl {
                     powerStat.accum((res.value() - d)/ res.uncertainty());
                 }
                 for (int i = 1; i <= DIVIDS; ++i) {
-                    final double offset = op.uncertainty() * i / DIVIDS - Dbl.getLSB(op.value());
+                    final double offset = op.uncertainty() * i / DIVIDS - Math.ulp(op.value());
                     final double d = Math.pow(op.value() + offset, exponent);
                     assertEquals(String.format("(%.3e in %s)^%.3e = %.3e vs %s", 
                                     op.value() + offset, op.toString(), exponent, d, res.toString()),
@@ -303,8 +303,8 @@ public class TestIntvDbl {
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
-        assertEquals(value, op.value(), Dbl.getLSB(Math.abs(value)));
-        assertEquals(range, op.uncertainty(), Dbl.getLSB(op.uncertainty()));
+        assertEquals(value, op.value(), Math.ulp(Math.abs(value)));
+        assertEquals(range, op.uncertainty(), Math.ulp(op.uncertainty()));
         testClone();
         testNegate();
         testShift();
@@ -423,12 +423,12 @@ public class TestIntvDbl {
     public void testInitLSB() {
         try {
             op = new IntvDbl(1);
-            assertEquals(1, op.value(), Dbl.getLSB(Math.abs(op.value())));
-            assertEquals(0, op.uncertainty(), Dbl.getLSB(op.uncertainty()));
+            assertEquals(1, op.value(), Math.ulp(Math.abs(op.value())));
+            assertEquals(0, op.uncertainty(), Math.ulp(op.uncertainty()));
 
             op = new IntvDbl(1.0);
-            assertEquals(1, op.value(), Dbl.getLSB(Math.abs(op.value())));
-            assertEquals(Dbl.getLSB(1.0), op.uncertainty(), Dbl.getLSB(op.uncertainty()));
+            assertEquals(1, op.value(), Math.ulp(Math.abs(op.value())));
+            assertEquals(Math.ulp(1.0), op.uncertainty(), Math.ulp(op.uncertainty()));
 
             op = new IntvDbl(Double.MIN_NORMAL);
             assertEquals(Double.MIN_NORMAL, op.value(), Double.MIN_VALUE);
@@ -558,10 +558,10 @@ public class TestIntvDbl {
 
     private void testAdd( double value1, double range1, double value2, double range2, boolean isAdd) {
         if (Double.isNaN(range1)) {
-            range1 = Dbl.getLSB(value1);
+            range1 = Math.ulp(value1);
         }
         if (Double.isNaN(range2)) {
-            range2 = Dbl.getLSB(value2);
+            range2 = Math.ulp(value2);
         }
         try {
             op = new IntvDbl(value1, range1);
@@ -575,7 +575,7 @@ public class TestIntvDbl {
             final double range = range1 + range2;
             assertEquals(String.format("%s + %s: range %e != %e", 
                             op.toString(), op2.toString(), range, res.uncertainty()), 
-                         range, res.uncertainty(), Dbl.getLSB(res.uncertainty()));
+                         range, res.uncertainty(), Math.ulp(res.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail();
         }

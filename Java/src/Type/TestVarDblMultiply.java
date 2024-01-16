@@ -106,7 +106,7 @@ public class TestVarDblMultiply {
             op1 = new VarDbl(1, 1E-6);
             final VarDbl op2 = new VarDbl(Math.sqrt(Double.MAX_VALUE), Math.sqrt(Double.MAX_VALUE / 2));
             final VarDbl prod = (VarDbl) op1.multiply(op2);
-            assertEquals(Math.sqrt(Double.MAX_VALUE), prod.value(), Dbl.getLSB(prod.value()));
+            assertEquals(Math.sqrt(Double.MAX_VALUE), prod.value(), Math.ulp(prod.value()));
             final double variance = Double.MAX_VALUE * 1E-6 + Double.MAX_VALUE / 2 + 1E-6 * Double.MAX_VALUE / 2;
             assertEquals(1, prod.variance() / variance, 3E-6);
         } catch (ValueException | UncertaintyException e) {
@@ -125,17 +125,17 @@ public class TestVarDblMultiply {
             final VarDbl op3 = new VarDbl(-159018721L), op4 = new VarDbl(83739041L);
             final VarDbl re12 = op1.clone();
             re12.multiply(op2);
-            assertEquals(13316075197586562.0, re12.value(), Dbl.getLSB(re12.value()));
-            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re12.uncertainty(), Dbl.getLSB(re12.uncertainty()));
+            assertEquals(13316075197586562.0, re12.value(), Math.ulp(re12.value()));
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re12.uncertainty(), Math.ulp(re12.uncertainty()));
             final VarDbl re34 = op3.clone();
             re34.multiply(op4);
-            assertEquals( -13316075197586560.0, re34.value(), Dbl.getLSB(-re12.value()));
-            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re34.uncertainty(), Dbl.getLSB(re12.uncertainty()));
+            assertEquals( -13316075197586560.0, re34.value(), Math.ulp(-re12.value()));
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re34.uncertainty(), Math.ulp(re12.uncertainty()));
             final VarDbl re = re12.clone();
             re.add(re34);
-            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re.value(), Dbl.getLSB(re12.value()));
+            assertEquals(2 * VarDbl.DEVIATION_OF_LSB, re.value(), Math.ulp(re12.value()));
             assertEquals(2 * Math.sqrt(2) * VarDbl.DEVIATION_OF_LSB, re.uncertainty(), 
-                         Dbl.getLSB(re12.uncertainty()));
+                         Math.ulp(re12.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail();
         }

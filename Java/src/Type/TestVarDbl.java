@@ -123,7 +123,7 @@ public class TestVarDbl {
                      (res.value() == 0)? tolerance : res.getLSB());
         final double uncertainty = res.uncertainty();
         assertEquals(op.uncertainty(), uncertainty, 
-                     (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
+                     (uncertainty == 0)? tolerance : Math.ulp(uncertainty));
     }
     
     private void testShift( int bits ) {
@@ -135,13 +135,13 @@ public class TestVarDbl {
                              (res.value() == 0)? tolerance : res.getLSB());
                 final double uncertainty = res.uncertainty();
                 assertEquals(op.uncertainty() * (1L << bits), uncertainty, 
-                             (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
+                             (uncertainty == 0)? tolerance : Math.ulp(uncertainty));
             } else {
                 assertEquals(op.value() / (1L << -bits), res.value(), 
                              (res.value() == 0)? tolerance : res.getLSB());
                 final double uncertainty = res.uncertainty();
                 assertEquals(op.uncertainty() / (1L << -bits), uncertainty, 
-                             (uncertainty == 0)? tolerance : Dbl.getLSB(uncertainty));
+                             (uncertainty == 0)? tolerance : Math.ulp(uncertainty));
             }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
@@ -161,7 +161,7 @@ public class TestVarDbl {
                          (res.value() == 0)? tolerance : res.getLSB());
             if (op.uncertainty() > 0) {
                 final double uncertainty = res.uncertainty();
-                assertEquals(op.uncertainty(), uncertainty, Dbl.getLSB(uncertainty));
+                assertEquals(op.uncertainty(), uncertainty, Math.ulp(uncertainty));
             }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
@@ -192,7 +192,7 @@ public class TestVarDbl {
                 if (exp < lsb)
                     exp = lsb;
                 final double uncertainty = res.uncertainty();
-                assertEquals(exp, uncertainty, Dbl.getLSB(uncertainty));
+                assertEquals(exp, uncertainty, Math.ulp(uncertainty));
             }
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());

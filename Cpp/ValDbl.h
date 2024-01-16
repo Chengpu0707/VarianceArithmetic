@@ -39,7 +39,7 @@ private:
     double _variance = 0;
 
     // assume uniform distribution within ulp()
-    constexpr static const double c_init = 1.0 / sqrt(3);
+    constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
 
 public:
     double value() const { return _value; }
@@ -86,7 +86,7 @@ inline VarDbl::VarDbl(double value, double uncertainty)
 
 inline VarDbl::VarDbl(double value) 
 {
-    init(value, ulp(value)*c_init, "VarDbl(double value)");
+    init(value, ulp(value)*DEVIATION_OF_LSB, "VarDbl(double value)");
 }
 
 inline VarDbl::VarDbl(long long value) noexcept 
@@ -97,7 +97,7 @@ inline VarDbl::VarDbl(long long value) noexcept
         return;
     }
     value = (double) value;
-    init(value, ulp(value)*c_init, "VarDbl(long long value)");
+    init(value, ulp(value)*DEVIATION_OF_LSB, "VarDbl(long long value)");
 }
 
 

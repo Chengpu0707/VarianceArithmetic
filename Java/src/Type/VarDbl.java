@@ -10,10 +10,10 @@ public class VarDbl implements IReal {
 
     static final double DEVIATION_OF_LSB = 1.0 / Math.sqrt(3);
     static public double getLSB(double value) {
-        return Dbl.getLSB(value) * DEVIATION_OF_LSB;
+        return Math.ulp(value) * DEVIATION_OF_LSB;
     }
     static public double getLSB(long value) {
-        return Dbl.getLSB(value) * DEVIATION_OF_LSB;
+        return Math.ulp(value) * DEVIATION_OF_LSB;
     }
 
     private double value;

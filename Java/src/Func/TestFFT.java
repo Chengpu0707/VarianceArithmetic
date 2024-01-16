@@ -15,7 +15,6 @@ import org.junit.Test;
 import Stats.Histogram;
 import Stats.Noise;
 import Stats.Stat;
-import Type.Dbl;
 import Type.IReal;
 import Type.VarDbl;
 import Type.IntvDbl;
@@ -231,81 +230,81 @@ public class TestFFT {
 
     @Test
     public void testSine() {
-        assertEquals(-q3, FFT.sin(-5, 4), Dbl.getLSB(q3));
+        assertEquals(-q3, FFT.sin(-5, 4), Math.ulp(q3));
 
-        assertEquals(-1,  FFT.sin(-4, 4), Dbl.getLSB(1.0));
-        assertEquals(-q3, FFT.sin(-3, 4), Dbl.getLSB(q3));
-        assertEquals(-q2, FFT.sin(-2, 4), Dbl.getLSB(q2));
-        assertEquals(-q1, FFT.sin(-1, 4), Dbl.getLSB(q1));
+        assertEquals(-1,  FFT.sin(-4, 4), Math.ulp(1.0));
+        assertEquals(-q3, FFT.sin(-3, 4), Math.ulp(q3));
+        assertEquals(-q2, FFT.sin(-2, 4), Math.ulp(q2));
+        assertEquals(-q1, FFT.sin(-1, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.sin(0, 4), Double.MIN_VALUE);
-        assertEquals(q1, FFT.sin(1, 4), Dbl.getLSB(q1));
-        assertEquals(q2, FFT.sin(2, 4), Dbl.getLSB(q2));
-        assertEquals(q3, FFT.sin(3, 4), Dbl.getLSB(q3));
+        assertEquals(q1, FFT.sin(1, 4), Math.ulp(q1));
+        assertEquals(q2, FFT.sin(2, 4), Math.ulp(q2));
+        assertEquals(q3, FFT.sin(3, 4), Math.ulp(q3));
 
-        assertEquals(1, FFT.sin(4, 4), Dbl.getLSB(1.0));
-        assertEquals(q3, FFT.sin(5, 4), Dbl.getLSB(q3));
-        assertEquals(q2, FFT.sin(6, 4), Dbl.getLSB(q2));
-        assertEquals(q1, FFT.sin(7, 4), Dbl.getLSB(q1));
+        assertEquals(1, FFT.sin(4, 4), Math.ulp(1.0));
+        assertEquals(q3, FFT.sin(5, 4), Math.ulp(q3));
+        assertEquals(q2, FFT.sin(6, 4), Math.ulp(q2));
+        assertEquals(q1, FFT.sin(7, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.sin(8, 4), Double.MIN_VALUE);
-        assertEquals(-q1, FFT.sin(9, 4), Dbl.getLSB(q1));
-        assertEquals(-q2, FFT.sin(10, 4), Dbl.getLSB(q2));
-        assertEquals(-q3, FFT.sin(11, 4), Dbl.getLSB(q3));
-        assertEquals(-1, FFT.sin(12, 4), Dbl.getLSB(1.0));
+        assertEquals(-q1, FFT.sin(9, 4), Math.ulp(q1));
+        assertEquals(-q2, FFT.sin(10, 4), Math.ulp(q2));
+        assertEquals(-q3, FFT.sin(11, 4), Math.ulp(q3));
+        assertEquals(-1, FFT.sin(12, 4), Math.ulp(1.0));
 
-        assertEquals(-q3, FFT.sin(13, 4), Dbl.getLSB(q3));
-        assertEquals(-q2, FFT.sin(14, 4), Dbl.getLSB(q2));
-        assertEquals(-q1, FFT.sin(15, 4), Dbl.getLSB(q1));
+        assertEquals(-q3, FFT.sin(13, 4), Math.ulp(q3));
+        assertEquals(-q2, FFT.sin(14, 4), Math.ulp(q2));
+        assertEquals(-q1, FFT.sin(15, 4), Math.ulp(q1));
         assertEquals(0, FFT.sin(16, 4), Double.MIN_VALUE);
 
-        assertEquals(q1, FFT.sin(17, 4), Dbl.getLSB(q1));
-        assertEquals(q2, FFT.sin(18, 4), Dbl.getLSB(q2));
-        assertEquals(q3, FFT.sin(19, 4), Dbl.getLSB(q3));
+        assertEquals(q1, FFT.sin(17, 4), Math.ulp(q1));
+        assertEquals(q2, FFT.sin(18, 4), Math.ulp(q2));
+        assertEquals(q3, FFT.sin(19, 4), Math.ulp(q3));
         
-        assertEquals(1, FFT.sin(20, 4), Dbl.getLSB(1.0));
+        assertEquals(1, FFT.sin(20, 4), Math.ulp(1.0));
     }
 
     @Test
     public void testLargeIndexSin() {
-        assertEquals(FFT.sin(16, FFT.MAX_ORDER), FFT.sin(268451838, 15), Dbl.getLSB(1.0));
-        assertEquals(0, FFT.sin(-2147483648L, 17), Dbl.getLSB(1.0));
-        assertEquals(FFT.sin(49152L, 18), FFT.sin(2147532800L, 18), Dbl.getLSB(1.0));
+        assertEquals(FFT.sin(16, FFT.MAX_ORDER), FFT.sin(268451838, 15), Math.ulp(1.0));
+        assertEquals(0, FFT.sin(-2147483648L, 17), Math.ulp(1.0));
+        assertEquals(FFT.sin(49152L, 18), FFT.sin(2147532800L, 18), Math.ulp(1.0));
     }
 
     @Test
     public void testCosine() {
-        assertEquals(-q1, FFT.cos(-5, 4), Dbl.getLSB(q1));
+        assertEquals(-q1, FFT.cos(-5, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.cos(-4, 4), Double.MIN_VALUE);
-        assertEquals(q1, FFT.cos(-3, 4), Dbl.getLSB(q1));
-        assertEquals(q2, FFT.cos(-2, 4), Dbl.getLSB(q2));
-        assertEquals(q3, FFT.cos(-1, 4), Dbl.getLSB(q3));
+        assertEquals(q1, FFT.cos(-3, 4), Math.ulp(q1));
+        assertEquals(q2, FFT.cos(-2, 4), Math.ulp(q2));
+        assertEquals(q3, FFT.cos(-1, 4), Math.ulp(q3));
 
-        assertEquals(1, FFT.cos(0, 4), Dbl.getLSB(1.0));
-        assertEquals(q3, FFT.cos(1, 4), Dbl.getLSB(q3));
-        assertEquals(q2, FFT.cos(2, 4), Dbl.getLSB(q2));
-        assertEquals(q1, FFT.cos(3, 4), Dbl.getLSB(q1));
+        assertEquals(1, FFT.cos(0, 4), Math.ulp(1.0));
+        assertEquals(q3, FFT.cos(1, 4), Math.ulp(q3));
+        assertEquals(q2, FFT.cos(2, 4), Math.ulp(q2));
+        assertEquals(q1, FFT.cos(3, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.cos(4, 4), Double.MIN_VALUE);
-        assertEquals(-q1, FFT.cos(5, 4), Dbl.getLSB(q1));
-        assertEquals(-q2, FFT.cos(6, 4), Dbl.getLSB(q2));
-        assertEquals(-q3, FFT.cos(7, 4), Dbl.getLSB(q3));
+        assertEquals(-q1, FFT.cos(5, 4), Math.ulp(q1));
+        assertEquals(-q2, FFT.cos(6, 4), Math.ulp(q2));
+        assertEquals(-q3, FFT.cos(7, 4), Math.ulp(q3));
 
-        assertEquals(-1, FFT.cos(8, 4), Dbl.getLSB(1.0));
-        assertEquals(-q3, FFT.cos(9, 4), Dbl.getLSB(q3));
-        assertEquals(-q2, FFT.cos(10, 4), Dbl.getLSB(q2));
-        assertEquals(-q1, FFT.cos(11, 4), Dbl.getLSB(q1));
+        assertEquals(-1, FFT.cos(8, 4), Math.ulp(1.0));
+        assertEquals(-q3, FFT.cos(9, 4), Math.ulp(q3));
+        assertEquals(-q2, FFT.cos(10, 4), Math.ulp(q2));
+        assertEquals(-q1, FFT.cos(11, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.cos(12, 4), Double.MIN_VALUE);
-        assertEquals(q1, FFT.cos(13, 4), Dbl.getLSB(q1));
-        assertEquals(q2, FFT.cos(14, 4), Dbl.getLSB(q2));
-        assertEquals(q3, FFT.cos(15, 4), Dbl.getLSB(q3));
+        assertEquals(q1, FFT.cos(13, 4), Math.ulp(q1));
+        assertEquals(q2, FFT.cos(14, 4), Math.ulp(q2));
+        assertEquals(q3, FFT.cos(15, 4), Math.ulp(q3));
 
-        assertEquals(1, FFT.cos(16, 4), Dbl.getLSB(1.0));
-        assertEquals(q3, FFT.cos(17, 4), Dbl.getLSB(q3));
-        assertEquals(q2, FFT.cos(18, 4), Dbl.getLSB(q2));
-        assertEquals(q1, FFT.cos(19, 4), Dbl.getLSB(q1));
+        assertEquals(1, FFT.cos(16, 4), Math.ulp(1.0));
+        assertEquals(q3, FFT.cos(17, 4), Math.ulp(q3));
+        assertEquals(q2, FFT.cos(18, 4), Math.ulp(q2));
+        assertEquals(q1, FFT.cos(19, 4), Math.ulp(q1));
 
         assertEquals(0, FFT.cos(20, 4), Double.MIN_VALUE);
     }

@@ -77,8 +77,8 @@ public class TestVarDblAdd {
 
     @Test
     public void testAddLSB() {
-        test(1.0, Dbl.getLSB(1.0), 1.0, Dbl.getLSB(1.0), 2.0, 0.0, 1E-16);
-        test(1.0/3, Dbl.getLSB(1.0/3), 2.0/3, Dbl.getLSB(2.0/3), 1.0, 0.0, 1E-16);
+        test(1.0, Math.ulp(1.0), 1.0, Math.ulp(1.0), 2.0, 0.0, 1E-16);
+        test(1.0/3, Math.ulp(1.0/3), 2.0/3, Math.ulp(2.0/3), 1.0, 0.0, 1E-16);
     }
 
 

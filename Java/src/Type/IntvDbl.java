@@ -13,10 +13,10 @@ import Stats.Stat;
 public class IntvDbl implements IReal{
     static final double RANGE_OF_LSB = 1.0;
     static double getLSB(double value) {
-        return Dbl.getLSB(value) * RANGE_OF_LSB;
+        return Math.ulp(value) * RANGE_OF_LSB;
     }
     static double getLSB(long value) {
-        return Dbl.getLSB(value) * RANGE_OF_LSB;
+        return Math.ulp(value) * RANGE_OF_LSB;
     }
     
     private double value;
@@ -169,31 +169,31 @@ public class IntvDbl implements IReal{
         mm.accum(d);
  
         if (Math.floor(exponent) != Math.ceil(exponent)) {
-            d = Math.pow((value - range), (exponent - Dbl.getLSB(exponent)));
+            d = Math.pow((value - range), (exponent - Math.ulp(exponent)));
             if (!Double.isFinite(d)) {
                 throw new ValueException(String.format("%s^%.3e: %.3e^%.3e=%.3e", 
-                            toString(), exponent, value - range, exponent - Dbl.getLSB(exponent), d));
+                            toString(), exponent, value - range, exponent - Math.ulp(exponent), d));
             }
             mm.accum(d);
 
-            d = Math.pow((value + range), (exponent - Dbl.getLSB(exponent)));
+            d = Math.pow((value + range), (exponent - Math.ulp(exponent)));
             if (!Double.isFinite(d)) {
                 throw new ValueException(String.format("%s^%.3e: %.3e^%.3e=%.3e", 
-                            toString(), exponent, value + range, exponent - Dbl.getLSB(exponent), d));
+                            toString(), exponent, value + range, exponent - Math.ulp(exponent), d));
             }
             mm.accum(d);
 
-            d = Math.pow((value - range), (exponent + Dbl.getLSB(exponent)));
+            d = Math.pow((value - range), (exponent + Math.ulp(exponent)));
             if (!Double.isFinite(d)) {
                 throw new ValueException(String.format("%s^%.3e: %.3e^%.3e=%.3e", 
-                            toString(), exponent, value - range, exponent + Dbl.getLSB(exponent), d));
+                            toString(), exponent, value - range, exponent + Math.ulp(exponent), d));
             }
             mm.accum(d);
 
-            d = Math.pow((value + range), (exponent + Dbl.getLSB(exponent)));
+            d = Math.pow((value + range), (exponent + Math.ulp(exponent)));
             if (!Double.isFinite(d)) {
                 throw new ValueException(String.format("%s^%.3e: %.3e^%.3e=%.3e", 
-                            toString(), exponent, value + range, exponent + Dbl.getLSB(exponent), d));
+                            toString(), exponent, value + range, exponent + Math.ulp(exponent), d));
             }
             mm.accum(d);
         }
@@ -208,7 +208,7 @@ public class IntvDbl implements IReal{
         }
 
         value = (mm.max() + mm.min()) * 0.5;
-        range = (mm.max() - mm.min()) * 0.5 + Dbl.getLSB(value);
+        range = (mm.max() - mm.min()) * 0.5 + Math.ulp(value);
         return this;
     }
 
@@ -298,7 +298,7 @@ public class IntvDbl implements IReal{
         }
         mm.accum(d);
         this.value = mm.max() * 0.5 + mm.min() * 0.5;
-        this.range = mm.max() * 0.5 - mm.min() * 0.5 + Dbl.getLSB(this.value);
+        this.range = mm.max() * 0.5 - mm.min() * 0.5 + Math.ulp(this.value);
         return this;
     }
 }
