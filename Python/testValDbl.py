@@ -1,5 +1,6 @@
 import math
 import unittest
+import sys
 
 from VarDbl import VarDbl, ValDblValueError, ValDblUncertaintyError
 
@@ -27,43 +28,68 @@ class TestInit (unittest.TestCase):
         self.assertEqual(-(1 << 53), v.value())
         self.assertEqual(0, v.uncertainty())
 
+        # lost resolution
         v = VarDbl((1 << 53) + 1)
         f = float((1 << 53) + 1)
         self.assertEqual(f, v.value())
         self.assertEqual(math.ulp(f), v.uncertainty())
 
+    def testInit(self):
+        v = VarDbl(-1, 0)
+        self.assertEqual(-1, v.value())
+        self.assertEqual(0, v.uncertainty())
 
-    def testValDblValueError(self):
+        v = VarDbl(-1, 1)
+        self.assertEqual(-1, v.value())
+        self.assertEqual(1, v.uncertainty())
+
+        v = VarDbl(-1, -1)
+        self.assertEqual(-1, v.value())
+        self.assertEqual(1, v.uncertainty())
+
+    def failValDblValueError(self, value):
         try:
-            VarDbl(float('nan'))
-            self.fail('Init ValDbl with nan')
+            VarDbl(value)
+            self.fail(f'Init ValDbl with {value}')
         except ValDblValueError as ex:
             self.assertIsNotNone(ex.__traceback__)
         except BaseException as ex:
             self.fail(ex)
+
+    def testValDblValueError(self):
+        self.failValDblValueError(float('nan'))
+        self.failValDblValueError(float('inf'))
+
+    def failValDblUncertaintyError(self, value, uncertainty):
         try:
-            VarDbl(float('inf'))
-            self.fail('Init ValDbl with inf')
-        except ValDblValueError as ex:
+            VarDbl(value, uncertainty)
+            self.fail(f'Init ValDbl with {value}~{uncertainty}')
+        except ValDblUncertaintyError as ex:
             self.assertIsNotNone(ex.__traceback__)
         except BaseException as ex:
             self.fail(ex)
 
     def testValDblUncertaintyError(self):
-        try:
-            VarDbl(0, float('nan'))
-            self.fail('Init ValDbl with nan')
-        except ValDblUncertaintyError as ex:
-            self.assertIsNotNone(ex.__traceback__)
-        except BaseException as ex:
-            self.fail(ex)
-        try:
-            VarDbl(0, float('inf'))
-            self.fail('Init ValDbl with inf')
-        except ValDblUncertaintyError as ex:
-            self.assertIsNotNone(ex.__traceback__)
-        except BaseException as ex:
-            self.fail(ex)
+        self.failValDblUncertaintyError(0, float('nan'))
+        self.failValDblUncertaintyError(0, float('inf'))
+            
+    def testUncertaintyRange(self):
+        maxU = math.sqrt(sys.float_info.max)
+        minU = math.sqrt(math.ulp(sys.float_info.min))
+
+        self.failValDblUncertaintyError(0, maxU + math.ulp(maxU))
+
+        v = VarDbl(sys.float_info.max, maxU - math.ulp(maxU))
+        self.assertEqual(sys.float_info.max, v.value())
+        self.assertTrue(maxU - math.ulp(maxU) <= v.uncertainty() <= maxU + math.ulp(maxU))
+        
+        v = VarDbl(sys.float_info.min, minU)
+        self.assertEqual(sys.float_info.min, v.value())
+        self.assertTrue(minU - math.ulp(minU) <= v.uncertainty() <= minU + math.ulp(minU))
+
+        v = VarDbl(sys.float_info.min, minU * 0.5)
+        self.assertEqual(sys.float_info.min, v.value())
+        self.assertAlmostEqual(0, v.uncertainty(), math.ulp(minU))
 
 
 if __name__ == '__main__':

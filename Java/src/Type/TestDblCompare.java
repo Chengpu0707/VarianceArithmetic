@@ -92,7 +92,7 @@ public class TestDblCompare {
             final VarDbl res = op1.add(op2);
             assertEquals(2, res.value(), res.uncertainty());
             assertEquals(1.6329931618554523, res.uncertainty(), 
-                         Dbl.getLSB(res.uncertainty()));
+                         Math.ulp(res.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail(e.getMessage());
         }
@@ -102,7 +102,7 @@ public class TestDblCompare {
             final IntvDbl op2 = new IntvDbl(-13316075197586560L, 2);
             final IntvDbl res = (IntvDbl) op1.add(op2);
             assertEquals(2, res.value(), res.uncertainty());
-            assertEquals(4, res.uncertainty(), Dbl.getLSB(res.uncertainty()));
+            assertEquals(4, res.uncertainty(), Math.ulp(res.uncertainty()));
         } catch (ValueException | UncertaintyException e) {
             fail();
         }

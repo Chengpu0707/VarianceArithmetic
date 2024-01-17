@@ -16,7 +16,7 @@ public class IntvDbl implements IReal{
         return Math.ulp(value) * RANGE_OF_LSB;
     }
     static double getLSB(long value) {
-        return Math.ulp(value) * RANGE_OF_LSB;
+        return Dbl.getLSB(value) * RANGE_OF_LSB;
     }
     
     private double value;

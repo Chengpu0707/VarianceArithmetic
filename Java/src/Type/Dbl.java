@@ -1,4 +1,4 @@
-
+package Type;
 
 import Type.IReal.ValueException;
 
@@ -240,15 +240,15 @@ public class Dbl {
         }
     }
 
-	/*
-	 * Return the absolute value equivalent to the LSB of "value".
-     * Or 0 if the "value" can be hold accurately in double
-	 */
     static public double getLSB(long value) {
-        // (long) this.double is casted to Long.MAX_VALUE, so the following does not work
-        // if ((long) this.value == value)
-        return (Math.abs(value) <= Dbl.DOUBLE_VAL_MAX)
-            ? 0 
-            : Dbl.getLSB((double) value);
+        /*
+         * Long.MAX_VALUE == 9223372036854775807
+         * (double) Long.MAX_VALUE == 9223372036854776000.000000
+         * (long) ((double) Long.MAX_VALUE) == 9223372036854775807
+         */
+        if ((-Dbl.DOUBLE_VAL_MAX <= value) && (value <= Dbl.DOUBLE_VAL_MAX))
+            return 0;
+        return Math.ulp((double) value);
     }
+
 }

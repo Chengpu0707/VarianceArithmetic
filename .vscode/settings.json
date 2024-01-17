@@ -1,6 +1,7 @@
 {
     "java.project.sourcePaths": [
-        "Backup/Java/src"
+        "Backup/Java/src",
+        "Java\\src"
     ],
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
@@ -57,6 +58,17 @@
         "xmemory": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
-    }
+        "xutility": "cpp",
+        "stacktrace": "cpp",
+        "cassert": "cpp"
+    },
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./Python",
+        "-p",
+        "test*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }

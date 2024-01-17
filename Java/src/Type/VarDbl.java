@@ -13,7 +13,7 @@ public class VarDbl implements IReal {
         return Math.ulp(value) * DEVIATION_OF_LSB;
     }
     static public double getLSB(long value) {
-        return Math.ulp(value) * DEVIATION_OF_LSB;
+        return Dbl.getLSB(value) * DEVIATION_OF_LSB;
     }
 
     private double value;

@@ -364,7 +364,7 @@ public class TestFFT {
     }
 
     static void inspect(RealType realType, double sigma) {
-        final String pathOut = String.format("./Output/FFT%s_spec.txt", realType);
+        final String pathOut = String.format("./Java/Output/FFT%s_spec.txt", realType);
         final int maxOrder = 7;
         try (final FileWriter fw = new FileWriter(pathOut)) {
             fw.write("RealType\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest\tI/O\tMeasure\tPart");
@@ -464,7 +464,7 @@ public class TestFFT {
 
 
     void dump(RealType realType) {
-        final String pathOut = String.format("./Output/FFT%s.txt", realType);
+        final String pathOut = String.format("./Java/Output/FFT%s.txt", realType);
         try (final FileWriter fw = new FileWriter(pathOut)) {
             fw.write("RealType\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest");
             fw.write("\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Maximum");

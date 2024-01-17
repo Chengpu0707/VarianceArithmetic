@@ -84,7 +84,7 @@ public class TestTaylor {
         final double[] sDev = new double[] {0.2, 0.195};
         final double[][] ssVar = new double[sExp.length][];
         try (
-            final FileWriter fw = new FileWriter("./Output/PowerExpansion.txt")) {
+            final FileWriter fw = new FileWriter("./Java/Output/PowerExpansion.txt")) {
             fw.write("2n\tMomentum\t");
             for (int j = 0; j < sExp.length; ++j) {
                 ssVar[j] = new double[sDev.length];
@@ -239,7 +239,7 @@ public class TestTaylor {
             1, 1.25, 4.0/3, 1.5, 5.0/3, 1.75,
             2, 2.25, 7.0/3, 2.5, 8.0/3, 2.75, 3};
         final double[] sNoise = new double[] {0.2, 0.195, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Output/PowVar.txt", !gaussian)) {
+        try (final FileWriter fw = new FileWriter("./Java/Output/PowVar.txt", !gaussian)) {
            if (gaussian) 
                 dumpHeader(fw, "Pow");
             for (double dev: sNoise) {
@@ -331,7 +331,7 @@ public class TestTaylor {
     private void testExpDump(boolean gaussian) {
         final double[] sExp = new double[] {-10, -5, -2, -1, 0, 1, 2, 5, 10};
         final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Output/ExpVar.txt", !gaussian)) {
+        try (final FileWriter fw = new FileWriter("./Java/Output/ExpVar.txt", !gaussian)) {
             if (gaussian)
                 dumpHeader(fw, "Sin");
 
@@ -423,7 +423,7 @@ public class TestTaylor {
         final double[] sBase = new double[] {
             0.05, 0.07, 0.1, 0.15, 0.2, 0.25, 0.35, 0.5, 0.75, 1, 2, 5, 10};
         final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Output/LogVar.txt", !gaussian)) {
+        try (final FileWriter fw = new FileWriter("./Java/Output/LogVar.txt", !gaussian)) {
             if (gaussian)
                 dumpHeader(fw, "Log");
 
@@ -515,7 +515,7 @@ public class TestTaylor {
             0, 1.0/12, 1.0/6, 1.0/4, 1.0/3, 1.0/12*5,
             1.0/2, 1.0/12*7, 1.0/3*2, 1.0/4*3, 1.0/6*5, 1.0/12*11, 1.0};
         final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Output/SinVar.txt", !gaussian)) {
+        try (final FileWriter fw = new FileWriter("./Java/Output/SinVar.txt", !gaussian)) {
             if (gaussian) 
                 dumpHeader(fw, "Sin");
 

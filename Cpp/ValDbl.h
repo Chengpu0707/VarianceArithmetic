@@ -1,8 +1,10 @@
 #include <cmath>
 #include <exception>
-#include <limits>
+#include <format>   // not supported in gcc 13.2.0
+#include <sstream>
 #include <string>
 
+#include "Test.h"
 
 #ifndef __ValDbl_h__
 #define __ValDbl_h__
@@ -31,8 +33,6 @@ public:
     }
 };
 
-
-
 class VarDbl {
 private:
     double _value = 0;
@@ -45,13 +45,13 @@ public:
     double value() const { return _value; }
     double uncertainty() const { return sqrt(_variance); }
 
-    // unit in the last place
-    static double ulp(double x);
-
     // constructors
     explicit VarDbl(double value, double uncertainty);
-    explicit VarDbl(double value);  // assume ulp as uncertainty
-    explicit VarDbl(long long value) noexcept;   // may loss resolution
+        // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
+    explicit VarDbl(double value);
+        // assume ulp as uncertainty
+    explicit VarDbl(long long value) noexcept;
+        // may loss resolution
     explicit VarDbl(long value) : VarDbl((long long) value) {}
     explicit VarDbl(int value) : VarDbl((long long) value) {}
 
@@ -69,24 +69,18 @@ private:
 };
 
 
-
-
-inline double VarDbl::ulp(double x) 
-{
-    if (x > 0)
-        return std::nexttoward(x, std::numeric_limits<double>::infinity()) - x;
-    else 
-        return x - std::nexttoward(x, -std::numeric_limits<double>::infinity());
-}
-
 inline VarDbl::VarDbl(double value, double uncertainty) 
 {
-    init(value, uncertainty, "VarDbl(double value, double uncertainty)");
+    std::ostringstream ss;
+    ss << "VarDbl(double " << value << ", double " << uncertainty << ")";
+    init(value, uncertainty, ss.str());
 }
 
 inline VarDbl::VarDbl(double value) 
 {
-    init(value, ulp(value)*DEVIATION_OF_LSB, "VarDbl(double value)");
+    std::ostringstream ss;
+    ss << "VarDbl(double " << value << ")";
+    init(value, Test::ulp(value)*DEVIATION_OF_LSB, ss.str());
 }
 
 inline VarDbl::VarDbl(long long value) noexcept 
@@ -96,8 +90,10 @@ inline VarDbl::VarDbl(long long value) noexcept
         _variance = 0;
         return;
     }
+    std::ostringstream ss;
+    ss << "VarDbl(long " << value << ")";
     value = (double) value;
-    init(value, ulp(value)*DEVIATION_OF_LSB, "VarDbl(long long value)");
+    init(value, Test::ulp(value)*DEVIATION_OF_LSB, ss.str());
 }
 
 

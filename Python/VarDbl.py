@@ -2,7 +2,7 @@ import math
 from typing import Optional, Union
 
 class ValDblValueError (BaseException):
-    def __init__(self, value, *args: object) -> None:
+    def __init__(self, value: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
 
@@ -24,8 +24,11 @@ class VarDbl:
         
     def __init__(self, value: Union[float, int], uncertainty: Optional[float]=None) -> None:
         '''
-        Intialize with "value" and "uncertainty"
-        Both have to be finite. Otherwise ValDblValueError or ValDblUncertaintyError will throw
+        Intialize with "value" and "uncertainty".
+        "uncertainty" will be absolute, and limited between 
+            math.sqrt(sys.float_info.min) and math.sqrt(sys.float_info.max)
+        Both have to be finite. 
+            Otherwise ValDblValueError or ValDblUncertaintyError will throw.
 
         When "uncertainty" is not specified:
              *) An int is initialized with uncertainty = 0
@@ -38,7 +41,7 @@ class VarDbl:
                     self._variance = 0.0
                     return
                 value = float(value)
-            uncertainty = math.ulp(value)
+            uncertainty = math.ulp(value) 
         if not math.isfinite(value):
             raise ValDblValueError(value)
         variance = uncertainty * uncertainty
