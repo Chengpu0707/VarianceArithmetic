@@ -8,4 +8,4 @@ Cpp/*.exe
 ToolBox/*
 Gassian/*
 Latex/*
-Pyton/*.pyc
+Python/__pycache__/*

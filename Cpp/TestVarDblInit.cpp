@@ -120,7 +120,20 @@ void testUncertaintyRange() {
     Test::assertEquals(zero.uncertainty(), 0);
 }
 
-
+void testRepresentation() 
+{
+    const VarDbl v(-sqrt(2), sqrt(2));
+    Test::assertTrue(v.to_string() == "-1.414214~1.414214", v.to_string());
+    std::ostringstream os;
+    os.precision(17);
+    os << v;
+    Test::assertEqual(os.str(), std::string("-1.4142135623730951~1.4142135623730951"), os.str());
+    std::istringstream is(os.str());
+    VarDbl vr;
+    is >> vr;
+    Test::assertEquals(vr.value(), v.value(), Test::ulp(v.value()));
+    Test::assertEquals(vr.uncertainty(), v.uncertainty(), Test::ulp(v.uncertainty()));
+}
 
 int main() {
     testInitInt();
@@ -128,6 +141,7 @@ int main() {
     testInitUncertainty();
     testInitException();
     testUncertaintyRange();
+    testRepresentation();
 
     std::cout << "All VarDbl init tests are successful";
     return 0;

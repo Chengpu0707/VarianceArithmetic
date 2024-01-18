@@ -60,7 +60,8 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "stacktrace": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "sstream": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",

@@ -1,4 +1,5 @@
 import math
+import pickle
 import unittest
 import sys
 
@@ -90,6 +91,23 @@ class TestInit (unittest.TestCase):
         v = VarDbl(sys.float_info.min, minU * 0.5)
         self.assertEqual(sys.float_info.min, v.value())
         self.assertAlmostEqual(0, v.uncertainty(), math.ulp(minU))
+
+
+class TestRepresentation (unittest.TestCase):
+    def testStr(self):
+        v = VarDbl(-math.sqrt(2), math.sqrt(2))
+        self.assertEqual('-1.414214e+00~1.414e+00', str(v))
+
+    def testRepr(self):
+        v = VarDbl(-math.sqrt(2), math.sqrt(2))
+        with open('./Java/Output/data.pickle', 'wb') as f:
+            pickle.dump(v, f, pickle.HIGHEST_PROTOCOL)
+        with open('./Java/Output/data.pickle', 'rb') as f:
+            vr = pickle.load(f)
+        self.assertEqual(v._value, vr._value, math.ulp(v._value))
+        self.assertEqual(v._variance, vr._variance, math.ulp(v._value))
+
+
 
 
 if __name__ == '__main__':

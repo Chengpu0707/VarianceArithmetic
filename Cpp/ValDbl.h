@@ -46,6 +46,7 @@ public:
     double uncertainty() const { return sqrt(_variance); }
 
     // constructors
+    VarDbl();
     explicit VarDbl(double value, double uncertainty);
         // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
     explicit VarDbl(double value);
@@ -54,6 +55,11 @@ public:
         // may loss resolution
     explicit VarDbl(long value) : VarDbl((long long) value) {}
     explicit VarDbl(int value) : VarDbl((long long) value) {}
+
+    // i/o
+    std::string to_string() const;
+    friend std::ostream & operator <<(std::ostream& out, const VarDbl& v);
+    friend std::istream & operator >>(std::istream& in, VarDbl& v);
 
 private:
     void init(double value, double uncertainty, const std::string what) 
@@ -68,6 +74,10 @@ private:
     }
 };
 
+inline VarDbl::VarDbl() {
+    _value = 0;
+    _variance = 0;
+}
 
 inline VarDbl::VarDbl(double value, double uncertainty) 
 {
@@ -94,6 +104,31 @@ inline VarDbl::VarDbl(long long value) noexcept
     ss << "VarDbl(long " << value << ")";
     value = (double) value;
     init(value, Test::ulp(value)*DEVIATION_OF_LSB, ss.str());
+}
+
+inline std::string VarDbl::to_string() const {
+    return std::to_string(value()) + '~' + std::to_string(uncertainty());
+}
+
+inline std::ostream & operator <<(std::ostream& out, const VarDbl& v) 
+{
+    out << v.value() << '~' << v.uncertainty();
+    return out;
+}
+
+inline std::istream & operator >>(std::istream& in, VarDbl& v) 
+{
+    double value, uncertainty;
+    char sep;
+    in >> value >> sep >> uncertainty;
+    if (sep != '~') {
+        std::ostringstream ss;
+        ss << "Invalid separator for " << value << sep << uncertainty;
+        throw std::invalid_argument(ss.str());
+    }
+    v._value = value;
+    v._variance = uncertainty * uncertainty;
+    return in;
 }
 
 

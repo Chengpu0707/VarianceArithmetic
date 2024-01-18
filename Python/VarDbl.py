@@ -50,3 +50,9 @@ class VarDbl:
         self._value = value
         self._variance = variance
 
+    def __str__(self) -> str:
+        return f'{self.value():.6e}~{self.uncertainty():.3e}'
+
+    def __repr__(self) -> str:
+        return f'{repr(self._value)}~{repr(self._variance)}'
+
