@@ -48,70 +48,29 @@ public class TestTaylor {
         System.out.println(System.getProperty("user.dir"));
     }
 
-    void dumpHeader(final FileWriter fw, final String func) throws IOException {
-        fw.write("NoiseType\tNoise\tX\t");
-        fw.write(func);
-        fw.write("\tDeviation\tUncertainty\tMean\tBias\tLeak");
-        for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i) {
-            fw.write(String.format("\t%.1f", ((double) i) / DIVIDS));  
-        }
-        fw.write("\n");
-    }
-
-    void dumpResult(final FileWriter fw, double x, double y, 
-                    boolean gaussian, double noise, double leak,
-                    final Stat stat, final Histogram histo) throws IOException {
-        fw.write(String.format("%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", 
-                    gaussian? "Gaussian" : "Uniform", noise, x, y, 
-                    stat.dev(), var.uncertainty(), 
-                    stat.avg() - y, var.value() - y, leak / SAMPLES));
-        final double[] sHisto = histo.histo();
-        if (sHisto == null) {
-            for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i) {
-                fw.write("\t");
-            }
-        } else {
-            for (int i = 0; i < sHisto.length; ++i) {
-                fw.write(String.format("\t%g", sHisto[i]));
-            }
-        }
-        fw.write("\n");
-    }
-
     @Test
     public void testPowerExpansion() {
         final double[] sExp = new double[] {-2, -1.5, -1, -0.5, 0.5, 1.5};
         final double[] sDev = new double[] {0.2, 0.195};
-        final double[][] ssVar = new double[sExp.length][];
         try (
             final FileWriter fw = new FileWriter("./Java/Output/PowerExpansion.txt")) {
-            fw.write("2n\tMomentum\t");
-            for (int j = 0; j < sExp.length; ++j) {
-                ssVar[j] = new double[sDev.length];
-                for (int i = 0; i < sDev.length; ++i) {
-                    fw.write(String.format("Exp=%.2f, Dev=%.2e\tVariance\tValue\t", 
-                            sExp[j], sDev[i]));
-                    ssVar[j][i] = 1;
-                }
-            }
+            fw.write("2n\tMomentum\tExponent\tInput Uncertainty\tTerm\tVariance\n");
             fw.write("\n");
-            for (int n = 2; n < Momentum.maxN*2; n += 2) {
-                fw.write(String.format("%d\t%e\t", n, Momentum.factor(n, BINDING)));
+             for (int n = 2; n < Momentum.maxN*2; n += 2) {
+                final double factor = Momentum.factor(n, BINDING);
                 for (int j = 0; j < sExp.length; ++j) {
                     final double[] sTaylor = Taylor.power(sExp[j]);
                     for (int i = 0; i < sDev.length; ++i) {
-                        ssVar[j][i] *= sDev[i] * sDev[i];
-                        final double value = Momentum.factor(n, BINDING) * ssVar[j][i];
                         double variance = 0;
                         for (int k = 1; k < n; ++k) {
-                            variance += sTaylor[k] * sTaylor[n-k] * 
-                                Momentum.factor(n, BINDING) * ssVar[j][i];
+                            variance += sTaylor[k] * sTaylor[n-k] * factor;
                         }
                         for (int k = 2; k < n; k += 2) {
                             variance -= sTaylor[k] * sTaylor[n-k] * 
-                                Momentum.factor(k, BINDING) * Momentum.factor(n - k, BINDING) * ssVar[j][i];
+                                Momentum.factor(k, BINDING) * Momentum.factor(n - k, BINDING);
                         }
-                        fw.write(String.format("%e\t%e\t%e\t", ssVar[j][i], variance, value));
+                        fw.write(String.format("%d\t%e\t%e\t%e\t%e\t%e\n", 
+                                 n, factor, sExp[j], sDev[i], variance, variance * Math.pow(sDev[i], n)));
                     }
                 }
                 fw.write("\n");
@@ -122,6 +81,110 @@ public class TestTaylor {
         } 
     }
 
+
+    void dumpTest(final String test, boolean gaussian, final double[] sX, final double[] sDev) {
+        try (final FileWriter fw = new FileWriter(String.format("./Java/Output/%sVar.txt", test), !gaussian)) {
+            if (gaussian) {
+                fw.write("NoiseType\tNoise\tX\t");
+                fw.write(test);
+                fw.write("\tError Deviation\tValue Deviation\tUncertainty\tMean\tBias\tLeak");
+                for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i)
+                    fw.write(String.format("\t%.1f", ((double) i) / DIVIDS));  
+                fw.write("\n");
+            }
+            for (double dev: sDev) {
+                for (double x: sX) {
+                    try {
+                        final double[] sTaylor;
+                        if (test.equals("pow")) {
+                            sTaylor = Taylor.power(x);
+                            sTaylor[0] = 1;
+                            var = new VarDbl(1, dev);
+                            var.taylor(test, sTaylor, true, true, BINDING);
+                        } else if (test == "exp") {
+                            sTaylor = Taylor.exp();
+                            sTaylor[0] = Math.exp(x);  
+                            var = new VarDbl(x, dev);
+                            var.taylor(test, sTaylor, false, true, BINDING);
+                        } else if (test == "log") {
+                            sTaylor = Taylor.log();
+                            sTaylor[0] = Math.log(x);
+                            var = new VarDbl(x, dev);
+                            var.taylor(test, sTaylor, true, false, BINDING);
+                        } else if (test == "sin") {
+                            sTaylor = Taylor.sin(x*Math.PI);
+                            sTaylor[0] = Math.sin(x*Math.PI);
+                            var = new VarDbl(x*Math.PI, dev);
+                            var.taylor(test, sTaylor, false, false, BINDING);
+                        } else
+                            throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
+ 
+                        Stat stat = new Stat();
+                        for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res;
+                            if (test.equals("pow"))
+                                res = Math.pow(1 + d*dev, x);
+                            else if (test.equals("exp"))
+                                res = Math.exp(x + d*dev);
+                            else if (test.equals("log"))
+                                res = Math.log(x + d*dev);
+                            else if (test == "sin")
+                                res = Math.sin(x*Math.PI + d*dev);
+                            else
+                                throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
+                            stat.accum(res);
+                        }
+ 
+                         double leak = 0;
+                         Histogram histo = new Histogram(BINDING, DIVIDS);
+                         final double vdev = stat.dev();
+                         final double vavg = stat.avg();
+                         stat.clear();
+                         for (int i = 0; i < SAMPLES; ++i) {
+                            final double d = gaussian? sGass[i] : sUnif[i];
+                            final double res;
+                            if (test.equals("pow"))
+                                res = Math.pow(1 + d*dev, x);
+                            else if (test.equals("exp"))
+                                res = Math.exp(x + d*dev);
+                            else if (test.equals("log"))
+                                res = Math.log(x + d*dev);
+                            else if (test == "sin")
+                                res = Math.sin(x*Math.PI + d*dev);
+                            else
+                                throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
+                            stat.accum((res - sTaylor[0])/var.uncertainty());
+                            if (!histo.accum((res - vavg)/vdev)) {
+                                leak += 1;
+                            }
+                        }
+ 
+                        fw.write(String.format("%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", 
+                                    gaussian? "Gaussian" : "Uniform", dev, x, sTaylor[0], 
+                                    stat.dev(), vdev, var.uncertainty(), 
+                                    vavg - sTaylor[0], var.value() - sTaylor[0], leak / SAMPLES));
+                        final double[] sHisto = histo.histo();
+                        if (sHisto == null) {
+                            for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i) {
+                                fw.write("\t");
+                            }
+                        } else {
+                            for (int i = 0; i < sHisto.length; ++i) {
+                                fw.write(String.format("\t%g", sHisto[i]));
+                            }
+                        }
+                        fw.write("\n");
+                    } catch (ValueException | UncertaintyException e) {
+                        if (!test.equals("log"))
+                            fail(e.getMessage());
+                    }
+                 }
+             }
+         } catch (IOException e) {
+             fail(e.getMessage());
+         }  
+    }
 
     @Test
     public void testPower() {
@@ -238,48 +301,8 @@ public class TestTaylor {
             1E-6, 1E-3, 0.01, 0.1, 0.25, 1.0/3, 0.5, 2.0/3, 0.75, 
             1, 1.25, 4.0/3, 1.5, 5.0/3, 1.75,
             2, 2.25, 7.0/3, 2.5, 8.0/3, 2.75, 3};
-        final double[] sNoise = new double[] {0.2, 0.195, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Java/Output/PowVar.txt", !gaussian)) {
-           if (gaussian) 
-                dumpHeader(fw, "Pow");
-            for (double dev: sNoise) {
-                for (double p: sPower) {
-                    try {
-                        final double[] sTaylor = Taylor.power(p);
-                        sTaylor[0] = 1;
-                        var = new VarDbl(1, dev);
-                        var.taylor(String.format("pow^(%f)", p), sTaylor, true, true, BINDING);
-
-                        Stat stat = new Stat();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.pow(1 + d*dev, p);
-                            assertEquals(1, Math.pow(1 + d*dev, -p)*res, 4E-16);
-                            stat.accum(res);
-                        }
-
-                        double leak = 0;
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
-                        final double rdev = stat.dev();
-                        final double ravg = stat.avg();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.pow(1 + d*dev, p);
-                            if (!histo.accum((res - ravg)/rdev)) {
-                                leak += 1;
-                            }
-                        }
-
-                        dumpResult(fw, p, 1, 
-                                    gaussian, dev, leak, stat, histo);
-                    } catch (ValueException | UncertaintyException e) {
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            fail(e.getMessage());
-        } 
+        final double[] sDev = new double[] {0.2, 0.195, 0.1, 0.05, 0.02, 0.01};
+        dumpTest("pow", gaussian, sPower, sDev);
     }
 
     @Test
@@ -330,47 +353,8 @@ public class TestTaylor {
     }
     private void testExpDump(boolean gaussian) {
         final double[] sExp = new double[] {-10, -5, -2, -1, 0, 1, 2, 5, 10};
-        final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Java/Output/ExpVar.txt", !gaussian)) {
-            if (gaussian)
-                dumpHeader(fw, "Sin");
-
-            for (double noise: sNoise) {
-                for (double exp: sExp) {
-                    try {
-                        final double[] sTaylor = Taylor.exp();
-                        sTaylor[0] = Math.exp(exp);
-                        var = new VarDbl(exp, noise);
-                        var.taylor(String.format("exp", exp, noise), sTaylor, false, true, BINDING);
-
-                        Stat stat = new Stat();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.exp(exp + d*noise);
-                            stat.accum(res);
-                        }
-
-                        double leak = 0;
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
-                        final double rdev = stat.dev();
-                        final double ravg = stat.avg();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.exp(exp + d*noise);
-                            if (!histo.accum((res - ravg)/rdev)) {
-                                leak += 1;
-                            }
-                        }
-                        dumpResult(fw, exp, Math.exp(exp),  
-                                    gaussian, noise, leak, stat, histo);
-                    } catch (ValueException | UncertaintyException e) {
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            fail(e.getMessage());
-        } 
+        final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
+        dumpTest("exp", gaussian, sExp, sDev);
     }
 
     @Test
@@ -420,52 +404,10 @@ public class TestTaylor {
         testLogDump(false);
     }
     private void testLogDump(boolean gaussian) {
-        final double[] sBase = new double[] {
+        final double[] sX = new double[] {
             0.05, 0.07, 0.1, 0.15, 0.2, 0.25, 0.35, 0.5, 0.75, 1, 2, 5, 10};
-        final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Java/Output/LogVar.txt", !gaussian)) {
-            if (gaussian)
-                dumpHeader(fw, "Log");
-
-            for (double noise: sNoise) {
-                for (double base: sBase) {
-                    final double[] sTaylor = Taylor.log();
-                    sTaylor[0] = Math.log(base);
-                    try {
-                        var = new VarDbl(base, noise);
-                        var.taylor("log", sTaylor, true, false, BINDING);
-
-                        Stat stat = new Stat();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double x = base + d*noise;
-                            if (x <= 0)
-                                throw new IllegalArgumentException();
-                            final double res = Math.log(x);
-                            stat.accum(res);
-                        }
-
-                        double leak = 0;
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
-                        final double rdev = stat.dev();
-                        final double ravg = stat.avg();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.log(base + d*noise);
-                            if (!histo.accum((res - ravg)/rdev)) {
-                                leak += 1;
-                            }
-                        }
-                        dumpResult(fw, base, Math.log(base), 
-                                    gaussian, noise, leak, stat, histo);
-                    } catch (ValueException | UncertaintyException | IllegalArgumentException e) {
-                        continue;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            fail(e.getMessage());
-        } 
+        final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
+        dumpTest("log", gaussian, sX, sDev);
     }
 
     @Test
@@ -509,51 +451,13 @@ public class TestTaylor {
         testSinDump(false);
     }
     private void testSinDump(boolean gaussian) {
-        final double[] sRad = new double[] {
+        final double[] sX = new double[] {
             -1.0, -1.0/12*11, -1.0/6*5, -1.0/4*3, -1.0/3*2, -1.0/12*7, 
             -1.0/2, -1.0/12*5, -1.0/3, -1.0/4, -1.0/6, -1.0/12,
             0, 1.0/12, 1.0/6, 1.0/4, 1.0/3, 1.0/12*5,
             1.0/2, 1.0/12*7, 1.0/3*2, 1.0/4*3, 1.0/6*5, 1.0/12*11, 1.0};
-        final double[] sNoise = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
-        try (final FileWriter fw = new FileWriter("./Java/Output/SinVar.txt", !gaussian)) {
-            if (gaussian) 
-                dumpHeader(fw, "Sin");
-
-            for (double dev: sNoise) {
-                for (double rad: sRad) {
-                    try {
-                        final double[] sTaylor = Taylor.sin(rad*Math.PI);
-                        var = new VarDbl(rad*Math.PI, dev);
-                        var.taylor("sin", sTaylor, false, false, BINDING);
-
-                        Stat stat = new Stat();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.sin(rad*Math.PI + d*dev);
-                            stat.accum(res);
-                        }
-
-                        double leak = 0;
-                        Histogram histo = new Histogram(BINDING, DIVIDS);
-                        final double rdev = stat.dev();
-                        final double ravg = stat.avg();
-                        for (int i = 0; i < SAMPLES; ++i) {
-                            final double d = gaussian? sGass[i] : sUnif[i];
-                            final double res = Math.sin(rad*Math.PI + d*dev);
-                            if (!histo.accum((res - ravg)/rdev)) {
-                                leak += 1;
-                            }
-                        }
-                        dumpResult(fw, rad, Math.sin(rad*Math.PI), 
-                                    gaussian, dev, leak, stat, histo);
-                    } catch (ValueException | UncertaintyException e) {
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            fail(e.getMessage());
-        } 
+        final double[] sDev = new double[] {0.2, 0.1, 0.05, 0.02, 0.01};
+        dumpTest("sin", gaussian, sX, sDev);
     }
 }
 
