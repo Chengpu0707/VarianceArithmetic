@@ -1,9 +1,16 @@
 #include "ValDbl.h"
 
+using namespace var_dbl;
 
+void testInitCopy() {
+    const VarDbl vs(-1, 4);
+    const VarDbl vc(vs);
+    Test::assertEqual(vs.value(), vc.value());
+    Test::assertEqual(vs.uncertainty(), vc.uncertainty());
+}
 
 void testInitInt() {
-    const VarDbl v0(0), v1(-1);
+    const VarDbl v0, v1(-1);
     Test::assertEqual(v0.value(), 0.0);
     Test::assertEqual(v0.uncertainty(), 0.0);
     Test::assertEqual(v1.value(), -1.0);
@@ -72,7 +79,7 @@ void testUncertaintyError(double value, double uncertainty, std::string what )
     try {
         const VarDbl v(value, uncertainty);
         Test::fail();
-    } catch(UncertaintyError ex) {
+    } catch(VarianceError ex) {
         Test::assertEqual(ex.what, what);    
     } catch (std::exception ex) {
         Test::fail();
@@ -122,26 +129,162 @@ void testUncertaintyRange() {
 
 void testRepresentation() 
 {
-    const VarDbl v(-sqrt(2), sqrt(2));
-    Test::assertTrue(v.to_string() == "-1.414214~1.414214", v.to_string());
+    const VarDbl v(1e-11, sqrt(2));
+    Test::assertTrue(v.to_string() == "1.000000e-11~1.414214e+00", v.to_string());
     std::ostringstream os;
     os.precision(17);
     os << v;
-    Test::assertEqual(os.str(), std::string("-1.4142135623730951~1.4142135623730951"), os.str());
+    Test::assertEqual(os.str(), std::string("9.99999999999999939e-12~1.41421356237309515e+00"), os.str());
     std::istringstream is(os.str());
     VarDbl vr;
     is >> vr;
-    Test::assertEquals(vr.value(), v.value(), Test::ulp(v.value()));
-    Test::assertEquals(vr.uncertainty(), v.uncertainty(), Test::ulp(v.uncertainty()));
+    Test::assertEquals(vr.value(), v.value());
+    Test::assertEquals(vr.uncertainty(), v.uncertainty());
+    os.str("");
+    os << 1 << "+-" << 2;
+    std::istringstream is2(os.str());
+    try {
+        is2 >> vr;
+        Test::fail("Illegal VarDbl stream accepted");
+    } catch (std::invalid_argument ex) {
+    } catch (...) {
+        Test::fail("Illegal VarDbl stream with invalid exception");
+    }
 }
 
-int main() {
+void testAddVarDbl() 
+{
+    VarDbl v1(sqrt(2), sqrt(2));
+    VarDbl v2(-sqrt(2), sqrt(2));
+    VarDbl v = v1 + v2;
+    Test::assertEquals(0, v.value());
+    Test::assertEquals(2, v.uncertainty());
+
+    v1 += v2;
+    Test::assertEquals(0, v1.value());
+    Test::assertEquals(2, v1.uncertainty());
+}
+
+void testSubVarDbl() 
+{
+    VarDbl v1(sqrt(2), sqrt(2));
+    VarDbl v2(-sqrt(2), sqrt(2));
+
+    VarDbl v = v2 - v1;
+    Test::assertEquals(-2*sqrt(2), v.value());
+    Test::assertEquals(2, v.uncertainty());
+
+    v2 -= v1;
+    Test::assertEquals(-2*sqrt(2), v2.value());
+    Test::assertEquals(2, v2.uncertainty());
+}
+
+void testAddInt() 
+{
+    VarDbl v1(1, sqrt(2));
+    VarDbl v = v1 + 2;
+    Test::assertEquals(3, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
+    v1 += 2;
+    Test::assertEquals(3, v1.value());
+    Test::assertEquals(sqrt(2), v1.uncertainty());
+}
+
+void testSubInt() 
+{
+    VarDbl v1(1, sqrt(2));
+    VarDbl v = v1 - 2;
+    Test::assertEquals(-1, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
+    v1 -= 2;
+    Test::assertEquals(-1, v1.value());
+    Test::assertEquals(sqrt(2), v1.uncertainty());
+}
+
+void testAddFloat() 
+{
+    VarDbl v1(1, sqrt(2));
+    VarDbl v = v1 + 2.0;
+    Test::assertEquals(3, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
+    VarDbl v2(1.0);
+    v = v2 + 2.0;
+    Test::assertEquals(3, v.value());
+    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
+
+    v1 += 2.0;
+    Test::assertEquals(3, v1.value());
+    Test::assertEquals(sqrt(2), v1.uncertainty());
+
+    v2 += 2.0;
+    Test::assertEquals(3, v2.value());
+    Test::assertTrue(Test::ulp(3.5) < v2.uncertainty() < Test::ulp(4.0));
+}
+
+void testSubFloat() 
+{
+    VarDbl v1(1, sqrt(2));
+    VarDbl v = v1 - 2.0;
+    Test::assertEquals(-1, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
+    VarDbl v2(1.0);
+    v = v2 - 2.0;
+    Test::assertEquals(-1, v.value());
+    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
+
+    v1 -= 2.0;
+    Test::assertEquals(-1, v1.value());
+    Test::assertEquals(sqrt(2), v1.uncertainty());
+
+    v2 -= 2.0;
+    Test::assertEquals(-1, v2.value());
+    Test::assertTrue(Test::ulp(3.5) < v2.uncertainty() < Test::ulp(4.0));
+}
+
+void testAddSubException()
+{
+    const double maxV = std::numeric_limits<double>::max();
+    const double maxU = sqrt(maxV);
+    try {
+        VarDbl(maxV, maxU) + VarDbl(maxV, maxU);
+        Test::fail("testAddSubException() value overflow");
+    } catch (ValueError ex) { 
+    } catch (...) {
+        Test::fail("testAddSubException() catch wrong ValueError");
+    }
+
+    try {
+        VarDbl(maxV, maxU) - VarDbl(maxV, maxU);
+        Test::fail("testAddSubException() variance overflow");
+    } catch (VarianceError ex) { 
+    } catch (...) {
+        Test::fail("testAddSubException() catch wrong VarianceError");
+    }
+}
+
+
+
+int main() 
+{
+    testInitCopy();
     testInitInt();
     testInitDouble();
     testInitUncertainty();
     testInitException();
     testUncertaintyRange();
+
     testRepresentation();
+
+    testAddVarDbl();
+    testSubVarDbl();
+    testAddInt();
+    testSubInt();
+    testAddFloat();
+    testSubFloat();
 
     std::cout << "All VarDbl init tests are successful";
     return 0;

@@ -108,7 +108,114 @@ class TestRepresentation (unittest.TestCase):
         self.assertEqual(v._variance, vr._variance, math.ulp(v._value))
 
 
+class TestAdd (unittest.TestCase):
+    def testNeg(self):
+        v1 = VarDbl(1, 2)
+        v = - v1
+        self.assertEqual(-1, v.value())
+        self.assertEqual(2, v.uncertainty())
+    
 
+    def testAddVarDbl(self):
+        v1 = VarDbl(math.sqrt(2), math.sqrt(2))
+        v2 = VarDbl(-math.sqrt(2), math.sqrt(2))
+        v = v1 + v2
+        self.assertEqual(0, v.value())
+        self.assertEqual(2, v.uncertainty())
+
+        v1 += v2
+        self.assertEqual(0, v1.value())
+        self.assertEqual(2, v1.uncertainty())
+
+    def testSubVarDbl(self):
+        v1 = VarDbl(math.sqrt(2), math.sqrt(2))
+        v2 = VarDbl(-math.sqrt(2), math.sqrt(2))
+
+        v = v2 - v1
+        self.assertEqual(-2*math.sqrt(2), v.value())
+        self.assertEqual(2, v.uncertainty())
+
+        v2 -= v1
+        self.assertEqual(-2*math.sqrt(2), v2.value())
+        self.assertEqual(2, v2.uncertainty())
+
+    def testAddInt(self):
+        v1 = VarDbl(1, math.sqrt(2))
+        v = v1 + 2
+        self.assertEqual(3, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
+
+        v1 += 2
+        self.assertEqual(3, v1.value())
+        self.assertEqual(math.sqrt(2), v1.uncertainty())
+
+    def testSubInt(self):
+        v1 = VarDbl(1, math.sqrt(2))
+        v = v1 - 2
+        self.assertEqual(-1, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
+
+        v1 -= 2
+        self.assertEqual(-1, v1.value())
+        self.assertEqual(math.sqrt(2), v1.uncertainty())
+
+    def testAddFloat(self):
+        v1 = VarDbl(1, math.sqrt(2))
+        v = v1 + 2.0
+        self.assertEqual(3, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
+
+        v2 = VarDbl(1.0)
+        v = v2 + 2.0
+        self.assertEqual(3, v.value())
+        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
+
+        v1 += 2.0
+        self.assertEqual(3, v1.value())
+        self.assertEqual(math.sqrt(2), v1.uncertainty())
+
+        v2 += 2.0
+        self.assertEqual(3, v2.value())
+        self.assertTrue(math.ulp(3.5) < v2.uncertainty() < math.ulp(4.0))
+
+
+    def testSubFloat(self):
+        v1 = VarDbl(1, math.sqrt(2))
+        v = v1 - 2.0
+        self.assertEqual(-1, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
+
+        v2 = VarDbl(1.0)
+        v = v2 - 2.0
+        self.assertEqual(-1, v.value())
+        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
+
+        v1 -= 2.0
+        self.assertEqual(-1, v1.value())
+        self.assertEqual(math.sqrt(2), v1.uncertainty())
+
+        v2 -= 2.0
+        self.assertEqual(-1, v2.value())
+        self.assertTrue(math.ulp(3.5) < v2.uncertainty() < math.ulp(4.0))
+
+    def testAddSubException(self):
+        maxV = sys.float_info.max
+        maxU = math.sqrt(sys.float_info.max)
+        try:
+            VarDbl(maxV, maxU) + VarDbl(maxV, maxU)
+            self.fail("value overflow")
+        except ValDblValueError:
+            pass
+        except BaseException as ex:
+            self.fail(ex)
+
+        try:
+            VarDbl(maxV, maxU) - VarDbl(maxV, maxU)
+            self.fail("variance overflow")
+        except ValDblUncertaintyError:
+            pass
+        except BaseException as ex:
+            self.fail(ex)
 
 if __name__ == '__main__':
     unittest.main()

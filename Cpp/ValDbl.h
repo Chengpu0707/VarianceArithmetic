@@ -9,7 +9,11 @@
 #ifndef __ValDbl_h__
 #define __ValDbl_h__
 
-class ValueError : public std::exception {
+namespace var_dbl 
+{
+
+class ValueError : public std::exception 
+{
 public:
     const double value;
     const std::string what;
@@ -21,22 +25,33 @@ public:
 };
 
 
-class UncertaintyError : public std::exception {
+class VarianceError : public std::exception 
+{
 public:
     const double value;
-    const double uncertainty;
+    const double variance;
     const std::string what;
 
-    explicit UncertaintyError(double value, double uncertainty, const std::string what) : 
-        value(value), uncertainty(uncertainty), what(what)
+    explicit VarianceError(double value, double variance, const std::string what) : 
+        value(value), variance(variance), what(what)
     {
     }
 };
 
-class VarDbl {
-private:
+struct VarDbl {     // a plain-old-type which is easy to copy
+private:    
     double _value = 0;
     double _variance = 0;
+
+    void init(double value, double variance, const std::string what) 
+    {
+        if (!std::isfinite(value))
+            throw ValueError(value, what);
+        if (!std::isfinite(variance))
+            throw VarianceError(value, variance, what);
+        _value = value;
+        _variance = variance;
+    }
 
     // assume uniform distribution within ulp()
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
@@ -47,31 +62,30 @@ public:
 
     // constructors
     VarDbl();
-    explicit VarDbl(double value, double uncertainty);
+    VarDbl(const VarDbl& other);
+    VarDbl(double value, double uncertainty);
         // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
-    explicit VarDbl(double value);
+    VarDbl(double value);
         // assume ulp as uncertainty
-    explicit VarDbl(long long value) noexcept;
+    VarDbl(long long value) noexcept;
         // may loss resolution
-    explicit VarDbl(long value) : VarDbl((long long) value) {}
-    explicit VarDbl(int value) : VarDbl((long long) value) {}
+    VarDbl(long value) noexcept : VarDbl((long long) value) {}
+    VarDbl(int value) noexcept : VarDbl((long long) value) {}
 
     // i/o
     std::string to_string() const;
     friend std::ostream & operator <<(std::ostream& out, const VarDbl& v);
     friend std::istream & operator >>(std::istream& in, VarDbl& v);
 
-private:
-    void init(double value, double uncertainty, const std::string what) 
-    {
-        if (!std::isfinite(value))
-            throw ValueError(value, what);
-        const double variance = uncertainty * uncertainty;
-        if (!std::isfinite(variance))
-            throw UncertaintyError(value, uncertainty, what);
-        _value = value;
-        _variance = variance;
-    }
+    // +/-
+    void negate() { _value = - _value; }
+    VarDbl operator-() const;
+    VarDbl operator+(const VarDbl other) const;
+    VarDbl operator-(const VarDbl other) const;
+    VarDbl operator+=(const VarDbl other);
+    VarDbl operator-=(const VarDbl other);
+
+
 };
 
 inline VarDbl::VarDbl() {
@@ -79,18 +93,25 @@ inline VarDbl::VarDbl() {
     _variance = 0;
 }
 
+inline VarDbl::VarDbl(const VarDbl& other) 
+{
+    _value = other._value;
+    _variance = other._variance;
+}
+
 inline VarDbl::VarDbl(double value, double uncertainty) 
 {
     std::ostringstream ss;
     ss << "VarDbl(double " << value << ", double " << uncertainty << ")";
-    init(value, uncertainty, ss.str());
+    init(value, uncertainty*uncertainty, ss.str());
 }
 
 inline VarDbl::VarDbl(double value) 
 {
     std::ostringstream ss;
     ss << "VarDbl(double " << value << ")";
-    init(value, Test::ulp(value)*DEVIATION_OF_LSB, ss.str());
+    const double uncertainty = Test::ulp(value)*DEVIATION_OF_LSB; 
+    init(value, uncertainty*uncertainty, ss.str());
 }
 
 inline VarDbl::VarDbl(long long value) noexcept 
@@ -103,16 +124,19 @@ inline VarDbl::VarDbl(long long value) noexcept
     std::ostringstream ss;
     ss << "VarDbl(long " << value << ")";
     value = (double) value;
-    init(value, Test::ulp(value)*DEVIATION_OF_LSB, ss.str());
+    const double uncertainty = Test::ulp(value)*DEVIATION_OF_LSB;
+    init(value, uncertainty*uncertainty, ss.str());
 }
 
 inline std::string VarDbl::to_string() const {
-    return std::to_string(value()) + '~' + std::to_string(uncertainty());
+    std::ostringstream os;
+    os << std::scientific << value() << '~' << uncertainty();
+    return os.str();
 }
 
 inline std::ostream & operator <<(std::ostream& out, const VarDbl& v) 
 {
-    out << v.value() << '~' << v.uncertainty();
+    out << std::scientific << v.value() << '~' << v.uncertainty();
     return out;
 }
 
@@ -131,5 +155,40 @@ inline std::istream & operator >>(std::istream& in, VarDbl& v)
     return in;
 }
 
+inline VarDbl VarDbl::operator-() const 
+{
+    VarDbl ret(*this);
+    ret.negate();
+    return ret;
+}
 
+inline VarDbl VarDbl::operator+(const VarDbl other) const
+{
+    VarDbl ret(*this);
+    ret += other;
+    return ret;
+}
+
+inline VarDbl VarDbl::operator-(const VarDbl other) const
+{
+    VarDbl ret(*this);
+    ret -= other;
+    return ret;
+}
+
+inline VarDbl VarDbl::operator+=(const VarDbl other) 
+{
+    init(_value + other._value, _variance + other._variance, "+=");
+    return *this;
+}
+
+inline VarDbl VarDbl::operator-=(const VarDbl other)
+{
+    init(_value - other._value, _variance + other._variance, "-=");
+    return *this;
+}
+
+
+
+} // namespace var_dbl
 #endif // __ValDbl_h__
