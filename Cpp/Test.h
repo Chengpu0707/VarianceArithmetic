@@ -65,7 +65,8 @@ inline void Test::assertEquals(double x, double y, double delta, std::string msg
     assert(((x - delta) <= y) && (y <= (x + delta)));
 }
 
-template<typename T> inline void Test::assertEqual(const T& x, const T& y, std::string msg)
+template<typename T> 
+inline void Test::assertEqual(const T& x, const T& y, std::string msg)
 {
     if (x == y)
         return;

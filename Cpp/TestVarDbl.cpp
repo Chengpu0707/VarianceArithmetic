@@ -33,6 +33,17 @@ void testInitFloat() {
     Test::assertEqual(v1.value(), -1.0);
     Test::assertEqual(v1.uncertainty(), 
         std::numeric_limits<float>::epsilon() * VarDbl::DEVIATION_OF_LSB);
+
+    try {
+        const VarDbl v(std::numeric_limits<float>::infinity());
+        Test::fail();
+    } catch(ValueError ex) {
+    } catch (std::exception ex) {
+        Test::fail();
+    } catch (...) {
+        Test::fail();
+    }
+
 }
 
 void testInitDouble() {
@@ -197,6 +208,10 @@ void testAddInt()
     Test::assertEquals(3, v.value());
     Test::assertEquals(sqrt(2), v.uncertainty());
 
+    v = 2 + v1;
+    Test::assertEquals(3, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
     v1 += 2;
     Test::assertEquals(3, v1.value());
     Test::assertEquals(sqrt(2), v1.uncertainty());
@@ -207,6 +222,10 @@ void testSubInt()
     VarDbl v1(1, sqrt(2));
     VarDbl v = v1 - 2;
     Test::assertEquals(-1, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
+    v = 2 - v1;
+    Test::assertEquals(1, v.value());
     Test::assertEquals(sqrt(2), v.uncertainty());
 
     v1 -= 2;
@@ -221,8 +240,16 @@ void testAddFloat()
     Test::assertEquals(3, v.value());
     Test::assertEquals(sqrt(2), v.uncertainty());
 
+    v = 2.0 + v1;
+    Test::assertEquals(3, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
     VarDbl v2(1.0);
     v = v2 + 2.0;
+    Test::assertEquals(3, v.value());
+    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
+
+    v = 2.0 + v2;
     Test::assertEquals(3, v.value());
     Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
 
@@ -242,9 +269,17 @@ void testSubFloat()
     Test::assertEquals(-1, v.value());
     Test::assertEquals(sqrt(2), v.uncertainty());
 
+    v = 2.0 - v1;
+    Test::assertEquals(1, v.value());
+    Test::assertEquals(sqrt(2), v.uncertainty());
+
     VarDbl v2(1.0);
     v = v2 - 2.0;
     Test::assertEquals(-1, v.value());
+    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
+
+    v = 2.0 - v2;
+    Test::assertEquals(1, v.value());
     Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
 
     v1 -= 2.0;

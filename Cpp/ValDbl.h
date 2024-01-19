@@ -38,7 +38,7 @@ public:
     }
 };
 
-struct VarDbl {     // a plain-old-type which is cheap to copy
+struct VarDbl {     // a class which is cheap to copy
 public:
     // assume uniform distribution within ulp()
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
@@ -68,6 +68,7 @@ public:
     VarDbl(const VarDbl& other);
     VarDbl(double value, double uncertainty);
         // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
+    // conversion constructors
     VarDbl(double value);
         // assume ulp as uncertainty
     VarDbl(float value);
@@ -89,6 +90,8 @@ public:
     VarDbl operator-(VarDbl other) const;
     VarDbl operator+=(VarDbl other);
     VarDbl operator-=(VarDbl other);
+    template<typename T> friend VarDbl operator+(T first, VarDbl second);
+    template<typename T> friend VarDbl operator-(T first, VarDbl second);
 
 
 };
@@ -201,6 +204,19 @@ inline VarDbl VarDbl::operator-=(VarDbl other)
     return *this;
 }
 
+template<typename T> 
+inline VarDbl operator+(T first, VarDbl second)
+{
+    return second + first;
+}
+
+template<typename T> 
+inline VarDbl operator-(T first, VarDbl second) 
+{
+    second -= first;
+    second.negate();
+    return second;
+}
 
 
 } // namespace var_dbl
