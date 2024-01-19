@@ -25,13 +25,24 @@ void testInitInt() {
     Test::assertEqual(vO.uncertainty(), 2 / sqrt(3));
 }
 
+void testInitFloat() {
+    const VarDbl v0(0.0f), v1(-1.0f);
+    Test::assertEqual(v0.value(), 0.0);
+    Test::assertEqual(v0.uncertainty(), 8.0904004559294244e-46);
+        // std::numeric_limits<float>::min() == 1.1754943508222875e-38
+    Test::assertEqual(v1.value(), -1.0);
+    Test::assertEqual(v1.uncertainty(), 
+        std::numeric_limits<float>::epsilon() * VarDbl::DEVIATION_OF_LSB);
+}
+
 void testInitDouble() {
     // use ulp 
     const VarDbl v0(0.0), v1(-1.0), v1p(-1, 0);
     Test::assertEqual(v0.value(), 0.0);
     Test::assertEqual(v0.uncertainty(), 0.0);
     Test::assertEqual(v1.value(), -1.0);
-    Test::assertEqual(v1.uncertainty(), std::numeric_limits<double>::epsilon() /sqrt(3));
+    Test::assertEqual(v1.uncertainty(), 
+        std::numeric_limits<double>::epsilon() * VarDbl::DEVIATION_OF_LSB);
     Test::assertEqual(v1p.value(), -1.0);
     Test::assertEqual(v1p.uncertainty(), 0.0);
 }
@@ -272,6 +283,7 @@ int main()
 {
     testInitCopy();
     testInitInt();
+    testInitFloat();
     testInitDouble();
     testInitUncertainty();
     testInitException();

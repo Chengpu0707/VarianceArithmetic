@@ -38,7 +38,12 @@ public:
     }
 };
 
-struct VarDbl {     // a plain-old-type which is easy to copy
+struct VarDbl {     // a plain-old-type which is cheap to copy
+public:
+    // assume uniform distribution within ulp()
+    constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
+
+
 private:    
     double _value = 0;
     double _variance = 0;
@@ -53,8 +58,6 @@ private:
         _variance = variance;
     }
 
-    // assume uniform distribution within ulp()
-    constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
 
 public:
     double value() const { return _value; }
@@ -66,6 +69,8 @@ public:
     VarDbl(double value, double uncertainty);
         // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
     VarDbl(double value);
+        // assume ulp as uncertainty
+    VarDbl(float value);
         // assume ulp as uncertainty
     VarDbl(long long value) noexcept;
         // may loss resolution
@@ -80,10 +85,10 @@ public:
     // +/-
     void negate() { _value = - _value; }
     VarDbl operator-() const;
-    VarDbl operator+(const VarDbl other) const;
-    VarDbl operator-(const VarDbl other) const;
-    VarDbl operator+=(const VarDbl other);
-    VarDbl operator-=(const VarDbl other);
+    VarDbl operator+(VarDbl other) const;
+    VarDbl operator-(VarDbl other) const;
+    VarDbl operator+=(VarDbl other);
+    VarDbl operator-=(VarDbl other);
 
 
 };
@@ -111,6 +116,16 @@ inline VarDbl::VarDbl(double value)
     std::ostringstream ss;
     ss << "VarDbl(double " << value << ")";
     const double uncertainty = Test::ulp(value)*DEVIATION_OF_LSB; 
+    init(value, uncertainty*uncertainty, ss.str());
+}
+
+inline VarDbl::VarDbl(float value)
+{
+    std::ostringstream ss;
+    ss << "VarDbl(float " << value << ")";
+    const double uncertainty = DEVIATION_OF_LSB * ((value > 0)
+        ? std::nexttoward(value, std::numeric_limits<float>::infinity()) - value
+        : value - std::nexttoward(value, -std::numeric_limits<float>::infinity()));
     init(value, uncertainty*uncertainty, ss.str());
 }
 
@@ -162,27 +177,25 @@ inline VarDbl VarDbl::operator-() const
     return ret;
 }
 
-inline VarDbl VarDbl::operator+(const VarDbl other) const
+inline VarDbl VarDbl::operator+(VarDbl other) const
 {
-    VarDbl ret(*this);
-    ret += other;
-    return ret;
+    other.init(_value + other._value, _variance + other._variance, "+");
+    return other;
 }
 
-inline VarDbl VarDbl::operator-(const VarDbl other) const
+inline VarDbl VarDbl::operator-(VarDbl other) const
 {
-    VarDbl ret(*this);
-    ret -= other;
-    return ret;
+    other.init(_value - other._value, _variance + other._variance, "-");
+    return other;
 }
 
-inline VarDbl VarDbl::operator+=(const VarDbl other) 
+inline VarDbl VarDbl::operator+=(VarDbl other) 
 {
     init(_value + other._value, _variance + other._variance, "+=");
     return *this;
 }
 
-inline VarDbl VarDbl::operator-=(const VarDbl other)
+inline VarDbl VarDbl::operator-=(VarDbl other)
 {
     init(_value - other._value, _variance + other._variance, "-=");
     return *this;

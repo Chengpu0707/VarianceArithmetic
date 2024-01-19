@@ -108,7 +108,7 @@ class TestRepresentation (unittest.TestCase):
         self.assertEqual(v._variance, vr._variance, math.ulp(v._value))
 
 
-class TestAdd (unittest.TestCase):
+class TestAddSub (unittest.TestCase):
     def testNeg(self):
         v1 = VarDbl(1, 2)
         v = - v1
@@ -144,6 +144,9 @@ class TestAdd (unittest.TestCase):
         v = v1 + 2
         self.assertEqual(3, v.value())
         self.assertEqual(math.sqrt(2), v.uncertainty())
+        v = 2 + v1
+        self.assertEqual(3, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
 
         v1 += 2
         self.assertEqual(3, v1.value())
@@ -153,6 +156,9 @@ class TestAdd (unittest.TestCase):
         v1 = VarDbl(1, math.sqrt(2))
         v = v1 - 2
         self.assertEqual(-1, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
+        v = 2 - v1
+        self.assertEqual(1, v.value())
         self.assertEqual(math.sqrt(2), v.uncertainty())
 
         v1 -= 2
@@ -164,9 +170,15 @@ class TestAdd (unittest.TestCase):
         v = v1 + 2.0
         self.assertEqual(3, v.value())
         self.assertEqual(math.sqrt(2), v.uncertainty())
+        v = 2.0 + v1
+        self.assertEqual(3, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
 
         v2 = VarDbl(1.0)
         v = v2 + 2.0
+        self.assertEqual(3, v.value())
+        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
+        v = 2.0 + v2
         self.assertEqual(3, v.value())
         self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
 
@@ -184,10 +196,16 @@ class TestAdd (unittest.TestCase):
         v = v1 - 2.0
         self.assertEqual(-1, v.value())
         self.assertEqual(math.sqrt(2), v.uncertainty())
+        v = 2.0 - v1
+        self.assertEqual(1, v.value())
+        self.assertEqual(math.sqrt(2), v.uncertainty())
 
         v2 = VarDbl(1.0)
         v = v2 - 2.0
         self.assertEqual(-1, v.value())
+        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
+        v = 2.0 - v2
+        self.assertEqual(1, v.value())
         self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
 
         v1 -= 2.0

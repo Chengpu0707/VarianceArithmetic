@@ -76,3 +76,9 @@ class VarDbl:
 
     def __sub__(self, other):
         return self + other.__neg__()
+    
+    def __radd__(self, other):
+        return self + other
+
+    def __rsub__(self, other):
+        return -(self - other)
