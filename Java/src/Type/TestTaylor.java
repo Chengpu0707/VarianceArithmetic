@@ -87,7 +87,7 @@ public class TestTaylor {
             if (gaussian) {
                 fw.write("NoiseType\tNoise\tX\t");
                 fw.write(test);
-                fw.write("\tError Deviation\tValue Deviation\tUncertainty\tMean\tBias\tLeak");
+                fw.write("\tError Deviation\tError Minimum\tError Maximum\tValue Deviation\tUncertainty\tMean\tBias\tLeak");
                 for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i)
                     fw.write(String.format("\t%.1f", ((double) i) / DIVIDS));  
                 fw.write("\n");
@@ -160,9 +160,9 @@ public class TestTaylor {
                             }
                         }
  
-                        fw.write(String.format("%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", 
+                        fw.write(String.format("%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", 
                                     gaussian? "Gaussian" : "Uniform", dev, x, sTaylor[0], 
-                                    stat.dev(), vdev, var.uncertainty(), 
+                                    stat.dev(), stat.min(), stat.max(), vdev, var.uncertainty(), 
                                     vavg - sTaylor[0], var.value() - sTaylor[0], leak / SAMPLES));
                         final double[] sHisto = histo.histo();
                         if (sHisto == null) {
