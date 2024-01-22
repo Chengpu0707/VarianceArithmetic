@@ -63,17 +63,7 @@ void testInitFloat() {
     assertEquals( VarDbl(0.0f), 0, 8.0904004559294244e-46 );
         // std::numeric_limits<float>::min() == 1.1754943508222875e-38
     assertEquals( VarDbl(1.0f), 1, std::numeric_limits<float>::epsilon() * VarDbl::DEVIATION_OF_LSB );
-
-    try {
-        const VarDbl v(std::numeric_limits<float>::infinity());
-        Test::fail();
-    } catch(ValueError ex) {
-    } catch (std::exception ex) {
-        Test::fail();
-    } catch (...) {
-        Test::fail();
-    }
-
+    assertValueError([](){ VarDbl(std::numeric_limits<float>::infinity()); }, "VarDbl(float inf)");
 }
 
 void testInitDouble() {

@@ -60,8 +60,9 @@ inline void Test::assertEquals(double x, double y, double delta, std::string msg
         return;
     if (!msg.empty())
         std::cout << msg << '\n';
+    std::cout << std::scientific << y << " != " << x << "+-" << delta << std::endl;
 #ifdef __cpp_lib_stacktrace
-    std::cout << std::stacktrace::current() << '\n';
+    std::cout << std::stacktrace::current() << std::endl;
 #endif
     assert(((x - delta) <= y) && (y <= (x + delta)));
 }
@@ -73,8 +74,9 @@ inline void Test::assertEqual(const T& x, const T& y, std::string msg)
         return;
     if (!msg.empty())
         std::cout << msg << '\n';
+    std::cout << std::scientific << y << " != " << x << std::endl;
 #ifdef __cpp_lib_stacktrace
-    std::cout << std::stacktrace::current() << '\n';
+    std::cout << std::stacktrace::current() << std::endl;
 #endif
     assert(x == y);
 }
