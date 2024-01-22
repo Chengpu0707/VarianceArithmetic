@@ -1,10 +1,9 @@
 #include <cmath>
 #include <exception>
+#include <limits>
 #include <format>   // not supported in gcc 13.2.0
 #include <sstream>
 #include <string>
-
-#include "Test.h"
 
 #ifndef __ValDbl_h__
 #define __ValDbl_h__
@@ -25,14 +24,14 @@ public:
 };
 
 
-class VarianceError : public std::exception 
+class UncertaintyError : public std::exception 
 {
 public:
     const double value;
     const double variance;
     const std::string what;
 
-    explicit VarianceError(double value, double variance, const std::string what) : 
+    explicit UncertaintyError(double value, double variance, const std::string what) : 
         value(value), variance(variance), what(what)
     {
     }
@@ -42,6 +41,7 @@ struct VarDbl {     // a class which is cheap to copy
 public:
     // assume uniform distribution within ulp()
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
+    static double ulp(double d);
 
 
 private:    
@@ -53,7 +53,7 @@ private:
         if (!std::isfinite(value))
             throw ValueError(value, what);
         if (!std::isfinite(variance))
-            throw VarianceError(value, variance, what);
+            throw UncertaintyError(value, variance, what);
         _value = value;
         _variance = variance;
     }
@@ -61,7 +61,8 @@ private:
 
 public:
     double value() const { return _value; }
-    double uncertainty() const { return sqrt(_variance); }
+    double variance() const { return _variance; }
+    double uncertainty() const { return sqrt(variance()); }
 
     // constructors
     VarDbl();
@@ -93,8 +94,21 @@ public:
     template<typename T> friend VarDbl operator+(T first, VarDbl second);
     template<typename T> friend VarDbl operator-(T first, VarDbl second);
 
+    // *
+    VarDbl operator*(VarDbl other) const;
+    VarDbl operator*=(VarDbl other);
+    template<typename T> friend VarDbl operator*(T first, VarDbl second);
 
 };
+
+
+inline double VarDbl::ulp(double x)
+{
+    if (x > 0)
+        return (std::nexttoward(x, std::numeric_limits<double>::infinity()) - x) * DEVIATION_OF_LSB;
+    else 
+        return (x - std::nexttoward(x, -std::numeric_limits<double>::infinity())) * DEVIATION_OF_LSB;
+}
 
 inline VarDbl::VarDbl() {
     _value = 0;
@@ -118,7 +132,7 @@ inline VarDbl::VarDbl(double value)
 {
     std::ostringstream ss;
     ss << "VarDbl(double " << value << ")";
-    const double uncertainty = Test::ulp(value)*DEVIATION_OF_LSB; 
+    const double uncertainty = ulp(value); 
     init(value, uncertainty*uncertainty, ss.str());
 }
 
@@ -142,7 +156,7 @@ inline VarDbl::VarDbl(long long value) noexcept
     std::ostringstream ss;
     ss << "VarDbl(long " << value << ")";
     value = (double) value;
-    const double uncertainty = Test::ulp(value)*DEVIATION_OF_LSB;
+    const double uncertainty = ulp(value);
     init(value, uncertainty*uncertainty, ss.str());
 }
 
@@ -182,25 +196,25 @@ inline VarDbl VarDbl::operator-() const
 
 inline VarDbl VarDbl::operator+(VarDbl other) const
 {
-    other.init(_value + other._value, _variance + other._variance, "+");
+    other.init(_value + other._value, variance() + other.variance(), "+");
     return other;
 }
 
 inline VarDbl VarDbl::operator-(VarDbl other) const
 {
-    other.init(_value - other._value, _variance + other._variance, "-");
+    other.init(_value - other._value, variance() + other.variance(), "-");
     return other;
 }
 
 inline VarDbl VarDbl::operator+=(VarDbl other) 
 {
-    init(_value + other._value, _variance + other._variance, "+=");
+    init(_value + other._value, variance() + other.variance(), "+=");
     return *this;
 }
 
 inline VarDbl VarDbl::operator-=(VarDbl other)
 {
-    init(_value - other._value, _variance + other._variance, "-=");
+    init(_value - other._value, variance() + other.variance(), "-=");
     return *this;
 }
 
@@ -216,6 +230,25 @@ inline VarDbl operator-(T first, VarDbl second)
     second -= first;
     second.negate();
     return second;
+}
+
+inline VarDbl VarDbl::operator*(VarDbl other) const
+{
+    other *= *this;
+    return other;
+}
+
+inline VarDbl VarDbl::operator*=(VarDbl other) {
+    const double variance = this->variance() * other.value() * other.value() +
+                            other.variance() * value() * value() +
+                            this->variance() * other.variance();
+    init(value() * other.value(), variance, "*=");
+    return *this;
+}
+
+template<typename T> 
+inline VarDbl operator*(T first, VarDbl second) {
+    return second * VarDbl(first);
 }
 
 

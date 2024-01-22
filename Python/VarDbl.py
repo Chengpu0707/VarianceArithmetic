@@ -1,12 +1,12 @@
 import math
 from typing import Optional, Union
 
-class ValDblValueError (BaseException):
+class ValueException (BaseException):
     def __init__(self, value: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
 
-class ValDblUncertaintyError (BaseException):
+class UncertaintyException (BaseException):
     def __init__(self, value: float, uncertainty: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
@@ -14,13 +14,22 @@ class ValDblUncertaintyError (BaseException):
 
 
 class VarDbl:
+    DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
+
+    @staticmethod
+    def ulp(f: float):
+        return math.ulp(f) * VarDbl.DEVIATION_OF_LSB
+
     __slots__ = ('_value', '_variance')
 
     def value(self):
         return self._value
     
     def uncertainty(self):
-        return math.sqrt(self._variance)
+        return math.sqrt(self.variance())
+    
+    def variance(self):
+        return self._variance
         
     def __init__(self, value: Union[float, int]=0, 
                  uncertainty: Optional[float]=None,
@@ -32,7 +41,7 @@ class VarDbl:
         If "bUncertaintyAsVariance" is Ture, the uncertainty actually means variance, 
             which should only be True during intermediate calculations. 
         Both value and variance have to be finite. 
-            Otherwise ValDblValueError or ValDblUncertaintyError will throw.
+            Otherwise ValueException or UncertaintyException will throw.
 
         When "uncertainty" is not specified:
              *) An int is initialized with uncertainty = 0
@@ -45,12 +54,12 @@ class VarDbl:
                     self._variance = 0.0
                     return
                 value = float(value)
-            uncertainty = math.ulp(value) 
+            uncertainty = VarDbl.ulp(value)
         variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
         if not math.isfinite(value):
-            raise ValDblValueError(value)
+            raise ValueException(value)
         if not math.isfinite(variance):
-            raise ValDblUncertaintyError(value, uncertainty)
+            raise UncertaintyException(value, uncertainty)
         self._value = value
         self._variance = variance
     
@@ -58,7 +67,7 @@ class VarDbl:
         return f'{self.value():.6e}~{self.uncertainty():.3e}'
 
     def __repr__(self) -> str:
-        return f'{repr(self._value)}~{repr(self._variance)}'
+        return f'{repr(self.value())}~{repr(self.variance())}'
     
 
     def __neg__(self):
@@ -69,8 +78,8 @@ class VarDbl:
 
     def __add__(self, other):
         if type(other) == VarDbl:
-            value = self._value + other._value
-            variance = self._variance + other._variance
+            value = self.value() + other.value()
+            variance = self.variance() + other.variance()
             return VarDbl(value, variance, True)
         return self + VarDbl(value=other)
 
@@ -82,3 +91,15 @@ class VarDbl:
 
     def __rsub__(self, other):
         return -(self - other)
+    
+    def __mul__(self, other):
+        if type(other) == VarDbl:
+            value = self.value() * other.value()
+            variance = self.variance() * other.value() * other.value() +\
+                        other.variance() *self.value() * self.value() +\
+                        self.variance() * other.variance()
+            return VarDbl(value, variance, True)
+        return self * VarDbl(value=other)
+
+    def __rmul__(self, other):
+        return self * other

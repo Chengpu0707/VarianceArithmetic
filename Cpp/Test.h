@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath> 
 #include <iostream>
 #include <limits>
 #include <stacktrace>   // not supported in gcc 13.2.0

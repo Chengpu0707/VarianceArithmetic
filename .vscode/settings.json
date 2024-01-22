@@ -61,7 +61,11 @@
         "xutility": "cpp",
         "stacktrace": "cpp",
         "cassert": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "functional": "cpp",
+        "list": "cpp",
+        "unordered_map": "cpp",
+        "xhash": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",

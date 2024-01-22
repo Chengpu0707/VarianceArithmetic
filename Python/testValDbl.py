@@ -3,94 +3,72 @@ import pickle
 import unittest
 import sys
 
-from VarDbl import VarDbl, ValDblValueError, ValDblUncertaintyError
+from VarDbl import VarDbl, ValueException, UncertaintyException
+
+def validate(self, res, value, uncertainty):
+    self.assertAlmostEqual(value, res.value(), math.ulp(res.value()))
+    self.assertAlmostEqual(uncertainty, res.uncertainty(), math.ulp(res.uncertainty()))
+
+
 
 class TestInit (unittest.TestCase):
 
     def testInt(self):
-        v = VarDbl(0)
-        self.assertEqual(0, v.value())
-        self.assertEqual(0, v.uncertainty())
-
-        v = VarDbl(1)
-        self.assertEqual(1, v.value())
-        self.assertEqual(0, v.uncertainty())
-
-        v = VarDbl(-1)
-        self.assertEqual(-1, v.value())
-        self.assertEqual(0, v.uncertainty())
+        validate(self, VarDbl(0), 0, 0)
+        validate(self, VarDbl(1), 1, 0)
+        validate(self, VarDbl(-1), -1, 0)
 
 
     def testLargeInt(self):
-        v = VarDbl((1 << 53))
-        self.assertEqual((1 << 53), v.value())
-        self.assertEqual(0, v.uncertainty())
-        v = VarDbl(-(1 << 53))
-        self.assertEqual(-(1 << 53), v.value())
-        self.assertEqual(0, v.uncertainty())
+        validate(self, VarDbl((1 << 53)), (1 << 53), 0)
+        validate(self, VarDbl(-(1 << 53)), -(1 << 53), 0)
 
         # lost resolution
-        v = VarDbl((1 << 53) + 1)
         f = float((1 << 53) + 1)
-        self.assertEqual(f, v.value())
-        self.assertEqual(math.ulp(f), v.uncertainty())
+        validate(self, VarDbl((1 << 53) + 1), f, VarDbl.ulp(f))
+        # no lost of resolution
+        f = float(1 << 54)
+        validate(self, VarDbl(1 << 54), f, 0)
 
     def testInit(self):
-        v = VarDbl(-1, 0)
-        self.assertEqual(-1, v.value())
-        self.assertEqual(0, v.uncertainty())
+        validate(self, VarDbl(-1, 0), -1, 0)
+        validate(self, VarDbl(-1, 1), -1, 1)
+        validate(self, VarDbl(-1, -1), -1, 1)
 
-        v = VarDbl(-1, 1)
-        self.assertEqual(-1, v.value())
-        self.assertEqual(1, v.uncertainty())
-
-        v = VarDbl(-1, -1)
-        self.assertEqual(-1, v.value())
-        self.assertEqual(1, v.uncertainty())
-
-    def failValDblValueError(self, value):
+    def failValueException(self, value):
         try:
             VarDbl(value)
             self.fail(f'Init ValDbl with {value}')
-        except ValDblValueError as ex:
+        except ValueException as ex:
             self.assertIsNotNone(ex.__traceback__)
         except BaseException as ex:
             self.fail(ex)
 
-    def testValDblValueError(self):
-        self.failValDblValueError(float('nan'))
-        self.failValDblValueError(float('inf'))
+    def testValueException(self):
+        self.failValueException(float('nan'))
+        self.failValueException(float('inf'))
 
-    def failValDblUncertaintyError(self, value, uncertainty):
+    def failUncertaintyException(self, value, uncertainty):
         try:
             VarDbl(value, uncertainty)
             self.fail(f'Init ValDbl with {value}~{uncertainty}')
-        except ValDblUncertaintyError as ex:
+        except UncertaintyException as ex:
             self.assertIsNotNone(ex.__traceback__)
         except BaseException as ex:
             self.fail(ex)
 
-    def testValDblUncertaintyError(self):
-        self.failValDblUncertaintyError(0, float('nan'))
-        self.failValDblUncertaintyError(0, float('inf'))
+    def testUncertaintyException(self):
+        self.failUncertaintyException(0, float('nan'))
+        self.failUncertaintyException(0, float('inf'))
             
     def testUncertaintyRange(self):
         maxU = math.sqrt(sys.float_info.max)
-        minU = math.sqrt(math.ulp(sys.float_info.min))
-
-        self.failValDblUncertaintyError(0, maxU + math.ulp(maxU))
-
-        v = VarDbl(sys.float_info.max, maxU - math.ulp(maxU))
-        self.assertEqual(sys.float_info.max, v.value())
-        self.assertTrue(maxU - math.ulp(maxU) <= v.uncertainty() <= maxU + math.ulp(maxU))
+        self.failUncertaintyException(0, maxU + VarDbl.ulp(maxU))
+        validate(self, VarDbl(0, maxU), 0, maxU) 
         
-        v = VarDbl(sys.float_info.min, minU)
-        self.assertEqual(sys.float_info.min, v.value())
-        self.assertTrue(minU - math.ulp(minU) <= v.uncertainty() <= minU + math.ulp(minU))
-
-        v = VarDbl(sys.float_info.min, minU * 0.5)
-        self.assertEqual(sys.float_info.min, v.value())
-        self.assertAlmostEqual(0, v.uncertainty(), math.ulp(minU))
+        minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
+        validate(self, VarDbl(0, minU), 0, minU) 
+        validate(self, VarDbl(0, minU*0.5), 0, 0) 
 
 
 class TestRepresentation (unittest.TestCase):
@@ -104,117 +82,67 @@ class TestRepresentation (unittest.TestCase):
             pickle.dump(v, f, pickle.HIGHEST_PROTOCOL)
         with open('./Java/Output/data.pickle', 'rb') as f:
             vr = pickle.load(f)
-        self.assertEqual(v._value, vr._value, math.ulp(v._value))
-        self.assertEqual(v._variance, vr._variance, math.ulp(v._value))
-
+        validate(self, vr, v.value(), v.uncertainty())
+ 
 
 class TestAddSub (unittest.TestCase):
     def testNeg(self):
-        v1 = VarDbl(1, 2)
-        v = - v1
-        self.assertEqual(-1, v.value())
-        self.assertEqual(2, v.uncertainty())
-    
+        validate(self, -VarDbl(1, 2), -1, 2) 
 
     def testAddVarDbl(self):
         v1 = VarDbl(math.sqrt(2), math.sqrt(2))
         v2 = VarDbl(-math.sqrt(2), math.sqrt(2))
-        v = v1 + v2
-        self.assertEqual(0, v.value())
-        self.assertEqual(2, v.uncertainty())
-
+        validate(self, v1 + v2, 0, 2) 
         v1 += v2
-        self.assertEqual(0, v1.value())
-        self.assertEqual(2, v1.uncertainty())
+        validate(self, v1, 0, 2) 
 
     def testSubVarDbl(self):
         v1 = VarDbl(math.sqrt(2), math.sqrt(2))
         v2 = VarDbl(-math.sqrt(2), math.sqrt(2))
-
-        v = v2 - v1
-        self.assertEqual(-2*math.sqrt(2), v.value())
-        self.assertEqual(2, v.uncertainty())
-
+        validate(self, v2 - v1, -2*math.sqrt(2), 2) 
         v2 -= v1
-        self.assertEqual(-2*math.sqrt(2), v2.value())
-        self.assertEqual(2, v2.uncertainty())
+        validate(self, v2, -2*math.sqrt(2), 2) 
 
     def testAddInt(self):
         v1 = VarDbl(1, math.sqrt(2))
-        v = v1 + 2
-        self.assertEqual(3, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
-        v = 2 + v1
-        self.assertEqual(3, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
-
+        validate(self, v1 + 2, 3, math.sqrt(2)) 
+        validate(self, 2 + v1, 3, math.sqrt(2)) 
         v1 += 2
-        self.assertEqual(3, v1.value())
-        self.assertEqual(math.sqrt(2), v1.uncertainty())
+        validate(self, v1, 3, math.sqrt(2)) 
 
     def testSubInt(self):
         v1 = VarDbl(1, math.sqrt(2))
-        v = v1 - 2
-        self.assertEqual(-1, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
-        v = 2 - v1
-        self.assertEqual(1, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
-
+        validate(self, v1 - 2, -1, math.sqrt(2)) 
+        validate(self, 2 - v1, 1, math.sqrt(2)) 
         v1 -= 2
-        self.assertEqual(-1, v1.value())
-        self.assertEqual(math.sqrt(2), v1.uncertainty())
+        validate(self, v1, -1, math.sqrt(2)) 
 
     def testAddFloat(self):
         v1 = VarDbl(1, math.sqrt(2))
-        v = v1 + 2.0
-        self.assertEqual(3, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
-        v = 2.0 + v1
-        self.assertEqual(3, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
+        validate(self, v1 + 2.0, 3, math.sqrt(2)) 
+        validate(self, 2.0 + v1, 3, math.sqrt(2)) 
+        v1 += 2.0
+        validate(self, v1, 3, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        v = v2 + 2.0
-        self.assertEqual(3, v.value())
-        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
-        v = 2.0 + v2
-        self.assertEqual(3, v.value())
-        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
-
-        v1 += 2.0
-        self.assertEqual(3, v1.value())
-        self.assertEqual(math.sqrt(2), v1.uncertainty())
-
+        validate(self, v2 + 2.0, 3, VarDbl.ulp(1) * math.sqrt(5)) 
+        validate(self, 2.0 + v2, 3, VarDbl.ulp(1) * math.sqrt(5)) 
         v2 += 2.0
-        self.assertEqual(3, v2.value())
-        self.assertTrue(math.ulp(3.5) < v2.uncertainty() < math.ulp(4.0))
-
+        validate(self, v2, 3, VarDbl.ulp(1) * math.sqrt(5)) 
 
     def testSubFloat(self):
         v1 = VarDbl(1, math.sqrt(2))
-        v = v1 - 2.0
-        self.assertEqual(-1, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
+        validate(self, v1 - 2.0, -1, math.sqrt(2)) 
         v = 2.0 - v1
-        self.assertEqual(1, v.value())
-        self.assertEqual(math.sqrt(2), v.uncertainty())
+        validate(self, 2.0 - v1, 1, math.sqrt(2)) 
+        v1 -= 2.0
+        validate(self, v1, -1, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        v = v2 - 2.0
-        self.assertEqual(-1, v.value())
-        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
-        v = 2.0 - v2
-        self.assertEqual(1, v.value())
-        self.assertTrue(math.ulp(3.5) < v.uncertainty() < math.ulp(4.0))
-
-        v1 -= 2.0
-        self.assertEqual(-1, v1.value())
-        self.assertEqual(math.sqrt(2), v1.uncertainty())
-
+        validate(self, v2 - 2.0, -1, VarDbl.ulp(1) * math.sqrt(5)) 
+        validate(self, 2.0 - v2, 1, VarDbl.ulp(1) * math.sqrt(5)) 
         v2 -= 2.0
-        self.assertEqual(-1, v2.value())
-        self.assertTrue(math.ulp(3.5) < v2.uncertainty() < math.ulp(4.0))
+        validate(self, v2, -1, VarDbl.ulp(1) * math.sqrt(5)) 
 
     def testAddSubException(self):
         maxV = sys.float_info.max
@@ -222,7 +150,7 @@ class TestAddSub (unittest.TestCase):
         try:
             VarDbl(maxV, maxU) + VarDbl(maxV, maxU)
             self.fail("value overflow")
-        except ValDblValueError:
+        except ValueException:
             pass
         except BaseException as ex:
             self.fail(ex)
@@ -230,10 +158,76 @@ class TestAddSub (unittest.TestCase):
         try:
             VarDbl(maxV, maxU) - VarDbl(maxV, maxU)
             self.fail("variance overflow")
-        except ValDblUncertaintyError:
+        except UncertaintyException:
             pass
         except BaseException as ex:
             self.fail(ex)
+
+class TestMultiply (unittest.TestCase):
+
+    def testZero(self):
+        validate(self, VarDbl(0) * VarDbl(1), 0, 0)
+        validate(self, VarDbl(0) * 1, 0, 0)
+        validate(self,  1 * VarDbl(0), 0, 0)
+
+        validate(self, VarDbl(0) * VarDbl(1.0), 0, 0)
+        validate(self, VarDbl(0) * 1.0, 0, 0)
+        validate(self, 1.0 * VarDbl(0), 0, 0)
+
+        validate(self, VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3)
+        validate(self, VarDbl(0, 1e-3) * 2.0, 0, 2e-3)
+        validate(self, 2.0 * VarDbl(0, 1e-3), 0, 2e-3)
+
+        validate(self, VarDbl(0) * VarDbl(2.0, 1e-3), 0, 0)
+        validate(self, VarDbl(2, 1e-3) * 0.0, 0, 0)
+        validate(self, 0.0 * VarDbl(2, 1e-3), 0, 0)
+
+        validate(self, VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3)
+        validate(self, VarDbl(0, 1e-3) * 2.0, 0, 2e-3)
+        validate(self, 2.0 * VarDbl(0, 1e-3), 0, 2e-3)
+
+        validate(self, VarDbl(0, 1e-3) * VarDbl(2.0, 1e-2), 0, math.sqrt(4 + 1e-4)*1e-3)
+
+    def testOne(self):
+        validate(self, VarDbl(-1) * VarDbl(2), -2, 0)
+        validate(self, VarDbl(-1) * 2, -2, 0)
+        validate(self, 2 * VarDbl(-1), -2, 0)
+
+        validate(self, VarDbl(-1.0) * VarDbl(2), -2, VarDbl.ulp(2.0))
+        validate(self, VarDbl(-1.0) * 2, -2, VarDbl.ulp(2.0))
+        validate(self, 2 * VarDbl(-1.0), -2, VarDbl.ulp(2.0))
+
+        validate(self, VarDbl(-1.0) * VarDbl(2.0), -2, math.sqrt(2)*VarDbl.ulp(2.0))
+        validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3)
+        validate(self, VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3)
+        validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, math.sqrt(5 + 1e-6) * 1e-3)
+
+    def testException(self):
+        maxV = math.sqrt(sys.float_info.max) * 1.001
+        maxU = math.sqrt(sys.float_info.max) * 0.5
+        try:
+            VarDbl(maxV, maxU) * VarDbl(maxV, maxU)
+            self.fail("value overflow")
+        except ValueException:
+            pass
+        except BaseException as ex:
+            self.fail(ex)
+
+        try:
+            VarDbl(1, maxU) * VarDbl(1, maxU)
+            self.fail("variance overflow")
+        except UncertaintyException:
+            pass
+        except BaseException as ex:
+            self.fail(ex)
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

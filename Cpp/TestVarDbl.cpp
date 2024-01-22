@@ -1,38 +1,68 @@
+#include "Test.h"
 #include "ValDbl.h"
 
+#include <functional>
+
 using namespace var_dbl;
+
+
+void assertEquals(VarDbl var, double value, double uncertainty) 
+{
+    Test::assertEquals(var.value(), value);
+    Test::assertEquals(var.uncertainty(), uncertainty);
+}
+
+void assertValueError(std::function<void()> func, std::string what ) 
+{
+    try {
+        func();
+        Test::fail(what + std::string(" value overflow "));
+    } catch(ValueError ex) {
+    } catch (std::exception ex) {
+        Test::fail(what + std::string(" catch not ValueError but exception ") + ex.what());
+    } catch (...) {
+        Test::fail(what + std::string(" catch unknown exception other than ValueError"));
+    }
+}
+
+void assertUncertaintyError(std::function<void()> func, std::string what ) 
+{
+    try {
+        func();
+        Test::fail(what + std::string(" uncertainty overflow "));
+    } catch(UncertaintyError ex) {
+    } catch (std::exception ex) {
+        Test::fail(what + std::string(" catch not UncertaintyError but exception ") + ex.what());
+    } catch (...) {
+        Test::fail(what + std::string(" catch unknown exception other than UncertaintyError"));
+    }
+}
+
+
+
+
 
 void testInitCopy() {
     const VarDbl vs(-1, 4);
     const VarDbl vc(vs);
-    Test::assertEqual(vs.value(), vc.value());
-    Test::assertEqual(vs.uncertainty(), vc.uncertainty());
+    assertEquals( vc, vs.value(), vs.uncertainty() );
 }
 
 void testInitInt() {
-    const VarDbl v0, v1(-1);
-    Test::assertEqual(v0.value(), 0.0);
-    Test::assertEqual(v0.uncertainty(), 0.0);
-    Test::assertEqual(v1.value(), -1.0);
-    Test::assertEqual(v1.uncertainty(),  0.0);
+    assertEquals( VarDbl(), 0, 0 );
+    assertEquals( VarDbl(-1), -1, 0 );
 
     // when long long looses resolution
-    const long long lU = -(1LL << 53); 
-    const VarDbl vU(lU), vO(lU - 1);
-    Test::assertEqual(vU.value(), (double) lU);
-    Test::assertEqual(vU.uncertainty(), 0.0);
-    Test::assertEqual(vO.value(), (double) (lU - 1));
-    Test::assertEqual(vO.uncertainty(), 2 / sqrt(3));
+    const long long ll = (1LL << 53); 
+    assertEquals( VarDbl(ll), ll, 0 );
+    assertEquals( VarDbl(ll + 1), ll + 1, 2 / sqrt(3) );
+    assertEquals( VarDbl(ll << 1), ll << 1, 0 );
 }
 
 void testInitFloat() {
-    const VarDbl v0(0.0f), v1(-1.0f);
-    Test::assertEqual(v0.value(), 0.0);
-    Test::assertEqual(v0.uncertainty(), 8.0904004559294244e-46);
+    assertEquals( VarDbl(0.0f), 0, 8.0904004559294244e-46 );
         // std::numeric_limits<float>::min() == 1.1754943508222875e-38
-    Test::assertEqual(v1.value(), -1.0);
-    Test::assertEqual(v1.uncertainty(), 
-        std::numeric_limits<float>::epsilon() * VarDbl::DEVIATION_OF_LSB);
+    assertEquals( VarDbl(1.0f), 1, std::numeric_limits<float>::epsilon() * VarDbl::DEVIATION_OF_LSB );
 
     try {
         const VarDbl v(std::numeric_limits<float>::infinity());
@@ -48,105 +78,44 @@ void testInitFloat() {
 
 void testInitDouble() {
     // use ulp 
-    const VarDbl v0(0.0), v1(-1.0), v1p(-1, 0);
-    Test::assertEqual(v0.value(), 0.0);
-    Test::assertEqual(v0.uncertainty(), 0.0);
-    Test::assertEqual(v1.value(), -1.0);
-    Test::assertEqual(v1.uncertainty(), 
-        std::numeric_limits<double>::epsilon() * VarDbl::DEVIATION_OF_LSB);
-    Test::assertEqual(v1p.value(), -1.0);
-    Test::assertEqual(v1p.uncertainty(), 0.0);
+    assertEquals( VarDbl(0.0), 0, 0 );
+    assertEquals( VarDbl(-1.0), -1, std::numeric_limits<double>::epsilon() * VarDbl::DEVIATION_OF_LSB );
+    assertEquals( VarDbl(-2.0), -2, 2 * std::numeric_limits<double>::epsilon() * VarDbl::DEVIATION_OF_LSB );
 }
 
 void testInitUncertainty() {
-    const VarDbl v0(1, 0), v1(-1, 1), v1p(1, -1);
-    Test::assertEqual(v0.value(), 1.0);
-    Test::assertEqual(v0.uncertainty(), 0.0);
-    Test::assertEqual(v1.value(), -1.0);
-    Test::assertEqual(v1.uncertainty(), 1.0);
-    Test::assertEqual(v1p.value(), 1.0);
-    Test::assertEqual(v1p.uncertainty(), 1.0);
-}
-
-void testValueError(double value, std::string what ) 
-{
-    try {
-        const VarDbl v(value);
-        Test::fail();
-    } catch(ValueError ex) {
-        Test::assertEqual(ex.what, what);
-    } catch (std::exception ex) {
-        Test::fail();
-    } catch (...) {
-        Test::fail();
-    }
-}
-
-void testValueError(double value, double uncertainty, std::string what ) 
-{
-    try {
-        const VarDbl v(value, uncertainty);
-        Test::fail();
-    } catch(ValueError ex) {
-        Test::assertEqual(ex.what, what);    
-    } catch (std::exception ex) {
-        Test::fail();
-    } catch (...) {
-        Test::fail();
-    }
-}
-
-void testUncertaintyError(double value, double uncertainty, std::string what ) 
-{
-    try {
-        const VarDbl v(value, uncertainty);
-        Test::fail();
-    } catch(VarianceError ex) {
-        Test::assertEqual(ex.what, what);    
-    } catch (std::exception ex) {
-        Test::fail();
-    } catch (...) {
-        Test::fail();
-    }
+    assertEquals( VarDbl(1, 0), 1, 0 );
+    assertEquals( VarDbl(-1, 1), -1, 1 );
+    assertEquals( VarDbl(1, -1), 1, 1 );
 }
 
 void testInitException() {
-    testValueError(1.0 / 0.0, "VarDbl(double inf)");
-    testValueError(std::numeric_limits<double>::infinity(), 
-                    "VarDbl(double inf)");
-    testValueError(std::numeric_limits<double>::quiet_NaN(), "VarDbl(double nan)");
+    assertValueError([](){ VarDbl(1.0 / 0.0); }, "VarDbl(1.0 / 0.0)");
+    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity()); }, "VarDbl(double inf)");
+    assertValueError([](){ VarDbl(std::numeric_limits<double>::quiet_NaN()); }, "VarDbl(double nan)");
 
     // ValueError has precedence
-    testValueError(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(),
+    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()); },
                     "VarDbl(double inf, double inf)");
-    testValueError(std::numeric_limits<double>::infinity(), 0,
+    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), 0); },
                     "VarDbl(double inf, double 0)");
 
-    testUncertaintyError(0, std::numeric_limits<double>::quiet_NaN(), 
+    assertUncertaintyError([](){ VarDbl(0, std::numeric_limits<double>::quiet_NaN()); }, 
                         "VarDbl(double 0, double nan)");
     // variance calculation overflow
-    testUncertaintyError(0, std::numeric_limits<double>::max(), 
-                        "VarDbl(double 0, double 1.79769e+308)");
+    assertUncertaintyError([](){ VarDbl(0, std::numeric_limits<double>::max()); }, 
+                        "VarDbl(double 0, double overflow)");
 }
 
 void testUncertaintyRange() {
     const double maxU = sqrt(std::numeric_limits<double>::max());
-    const double minU = sqrt(Test::ulp(std::numeric_limits<double>::min()));
-
-    testUncertaintyError(std::numeric_limits<double>::max(), maxU + Test::ulp(maxU), 
+    assertUncertaintyError([maxU](){ VarDbl(std::numeric_limits<double>::max(), maxU + Test::ulp(maxU)); }, 
                          "VarDbl(double 1.79769e+308, double 1.34078e+154)");
-    
-    const VarDbl max(std::numeric_limits<double>::max(), maxU - Test::ulp(maxU));
-    Test::assertEquals(max.value(), std::numeric_limits<double>::max());
-    Test::assertEquals(max.uncertainty(), maxU);
-    
-    const VarDbl min(std::numeric_limits<double>::min(), minU);
-    Test::assertEquals(min.value(), std::numeric_limits<double>::min());
-    Test::assertEquals(min.uncertainty(), minU);
-    
-    const VarDbl zero(std::numeric_limits<double>::min(), minU * 0.5);
-    Test::assertEquals(zero.value(), std::numeric_limits<double>::min());
-    Test::assertEquals(zero.uncertainty(), 0);
+    assertEquals( VarDbl(0, maxU), 0, maxU );
+   
+    const double minU = sqrt(VarDbl::ulp(std::numeric_limits<double>::min()));
+    assertEquals( VarDbl(0, minU), 0, minU );
+    assertEquals( VarDbl(0, minU/2), 0, 0 );
 }
 
 void testRepresentation() 
@@ -178,139 +147,128 @@ void testAddVarDbl()
 {
     VarDbl v1(sqrt(2), sqrt(2));
     VarDbl v2(-sqrt(2), sqrt(2));
-    VarDbl v = v1 + v2;
-    Test::assertEquals(0, v.value());
-    Test::assertEquals(2, v.uncertainty());
-
+    assertEquals( v1 + v2, 0, 2 );
     v1 += v2;
-    Test::assertEquals(0, v1.value());
-    Test::assertEquals(2, v1.uncertainty());
+    assertEquals( v1, 0, 2 );
+    
 }
 
 void testSubVarDbl() 
 {
     VarDbl v1(sqrt(2), sqrt(2));
     VarDbl v2(-sqrt(2), sqrt(2));
-
-    VarDbl v = v2 - v1;
-    Test::assertEquals(-2*sqrt(2), v.value());
-    Test::assertEquals(2, v.uncertainty());
-
+    assertEquals( v1 - v2, 2*sqrt(2), 2 );
     v2 -= v1;
-    Test::assertEquals(-2*sqrt(2), v2.value());
-    Test::assertEquals(2, v2.uncertainty());
+    assertEquals( v2, -2*sqrt(2), 2 );
 }
 
 void testAddInt() 
 {
     VarDbl v1(1, sqrt(2));
-    VarDbl v = v1 + 2;
-    Test::assertEquals(3, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
-    v = 2 + v1;
-    Test::assertEquals(3, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
+    assertEquals( v1 + 2, 3, sqrt(2) );
+    assertEquals( 2 + v1, 3, sqrt(2) );
     v1 += 2;
-    Test::assertEquals(3, v1.value());
-    Test::assertEquals(sqrt(2), v1.uncertainty());
+    assertEquals( v1, 3, sqrt(2) );
 }
 
 void testSubInt() 
 {
     VarDbl v1(1, sqrt(2));
-    VarDbl v = v1 - 2;
-    Test::assertEquals(-1, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
-    v = 2 - v1;
-    Test::assertEquals(1, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
+    assertEquals( v1 - 2, -1, sqrt(2) );
+    assertEquals( 2 - v1, 1, sqrt(2) );
     v1 -= 2;
-    Test::assertEquals(-1, v1.value());
-    Test::assertEquals(sqrt(2), v1.uncertainty());
+    assertEquals( v1, -1, sqrt(2) );
 }
 
 void testAddFloat() 
 {
     VarDbl v1(1, sqrt(2));
-    VarDbl v = v1 + 2.0;
-    Test::assertEquals(3, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
-    v = 2.0 + v1;
-    Test::assertEquals(3, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
+    assertEquals( v1 + 2.0, 3, sqrt(2) );
+    assertEquals( 2.0 + v1, 3, sqrt(2) );
+    v1 += 2.0;
+    assertEquals( v1, 3, sqrt(2) );
 
     VarDbl v2(1.0);
-    v = v2 + 2.0;
-    Test::assertEquals(3, v.value());
-    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
-
-    v = 2.0 + v2;
-    Test::assertEquals(3, v.value());
-    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
-
-    v1 += 2.0;
-    Test::assertEquals(3, v1.value());
-    Test::assertEquals(sqrt(2), v1.uncertainty());
-
+    VarDbl v = v2 + 2.0;
+    assertEquals( v2 + 2.0, 3, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( 2.0 + v2, 3, VarDbl::ulp(1)*sqrt(5) );
     v2 += 2.0;
-    Test::assertEquals(3, v2.value());
-    Test::assertTrue(Test::ulp(3.5) < v2.uncertainty() < Test::ulp(4.0));
+    assertEquals( v2, 3, VarDbl::ulp(1)*sqrt(5) );
 }
 
 void testSubFloat() 
 {
     VarDbl v1(1, sqrt(2));
-    VarDbl v = v1 - 2.0;
-    Test::assertEquals(-1, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
-
-    v = 2.0 - v1;
-    Test::assertEquals(1, v.value());
-    Test::assertEquals(sqrt(2), v.uncertainty());
+    assertEquals( v1 - 2.0, -1, sqrt(2) );
+    assertEquals( 2.0 - v1, 1, sqrt(2) );
+    v1 -= 2.0;
+    assertEquals( v1, -1, sqrt(2) );
 
     VarDbl v2(1.0);
-    v = v2 - 2.0;
-    Test::assertEquals(-1, v.value());
-    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
-
-    v = 2.0 - v2;
-    Test::assertEquals(1, v.value());
-    Test::assertTrue(Test::ulp(3.5) < v.uncertainty() < Test::ulp(4.0));
-
-    v1 -= 2.0;
-    Test::assertEquals(-1, v1.value());
-    Test::assertEquals(sqrt(2), v1.uncertainty());
-
+    assertEquals( v2 - 2.0, -1, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( 2.0 - v2, 1, VarDbl::ulp(1)*sqrt(5) );
     v2 -= 2.0;
-    Test::assertEquals(-1, v2.value());
-    Test::assertTrue(Test::ulp(3.5) < v2.uncertainty() < Test::ulp(4.0));
+    assertEquals( v2, -1, VarDbl::ulp(1)*sqrt(5) );
 }
 
 void testAddSubException()
 {
     const double maxV = std::numeric_limits<double>::max();
     const double maxU = sqrt(maxV);
-    try {
-        VarDbl(maxV, maxU) + VarDbl(maxV, maxU);
-        Test::fail("testAddSubException() value overflow");
-    } catch (ValueError ex) { 
-    } catch (...) {
-        Test::fail("testAddSubException() catch wrong ValueError");
-    }
-
-    try {
-        VarDbl(maxV, maxU) - VarDbl(maxV, maxU);
-        Test::fail("testAddSubException() variance overflow");
-    } catch (VarianceError ex) { 
-    } catch (...) {
-        Test::fail("testAddSubException() catch wrong VarianceError");
-    }
+    assertValueError([maxV, maxU](){VarDbl(maxV, maxU) + VarDbl(maxV, maxU);}, "testAddSubException()");
+    assertUncertaintyError([maxV, maxU](){VarDbl(maxV, maxU) - VarDbl(maxV, maxU);}, "testAddSubException()");
 }
+
+void testMultiplyZero() 
+{
+    assertEquals( VarDbl(0) * VarDbl(1), 0, 0);
+    assertEquals( VarDbl(0) * 1, 0, 0);
+    assertEquals(  1 * VarDbl(0), 0, 0);
+
+    assertEquals( VarDbl(0) * VarDbl(1.0), 0, 0);
+    assertEquals( VarDbl(0) * 1.0, 0, 0);
+    assertEquals( 1.0 * VarDbl(0), 0, 0);
+
+    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
+    assertEquals( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
+    assertEquals( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
+
+    assertEquals( VarDbl(0) * VarDbl(2.0, 1e-3), 0, 0);
+    assertEquals( VarDbl(2, 1e-3) * 0.0, 0, 0);
+    assertEquals( 0.0 * VarDbl(2, 1e-3), 0, 0);
+
+    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
+    assertEquals( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
+    assertEquals( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
+
+    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0, 1e-2), 0, sqrt(4 + 1e-4)*1e-3);
+}
+
+void testMultiplyOne() 
+{
+    assertEquals( VarDbl(-1) * VarDbl(2), -2, 0);
+    assertEquals( VarDbl(-1) * 2, -2, 0);
+    assertEquals( 2 * VarDbl(-1), -2, 0);
+
+    assertEquals( VarDbl(-1.0) * VarDbl(2), -2, VarDbl::ulp(2.0));
+    assertEquals( VarDbl(-1.0) * 2, -2, VarDbl::ulp(2.0));
+    assertEquals( 2 * VarDbl(-1.0), -2, VarDbl::ulp(2.0));
+
+    assertEquals( VarDbl(-1.0) * VarDbl(2.0), -2, sqrt(2)*VarDbl::ulp(2.0));
+    assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3);
+    assertEquals( VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3);
+    assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, sqrt(5 + 1e-6) * 1e-3);
+}
+
+void testMultiplyException() 
+{
+    const double maxV = sqrt(std::numeric_limits<double>::max()) * 1.001;
+    const double maxU = sqrt(std::numeric_limits<double>::max()) * 0.5;
+    assertValueError([maxV, maxU](){VarDbl(maxV, maxU) * VarDbl(maxV, maxU);}, "testMultiplyException()");
+    assertUncertaintyError([maxU](){VarDbl(1, maxU) * VarDbl(1, maxU);}, "testMultiplyException()");
+}
+
+
 
 
 
@@ -332,6 +290,10 @@ int main()
     testSubInt();
     testAddFloat();
     testSubFloat();
+
+    testMultiplyZero();
+    testMultiplyOne();
+    testMultiplyException();
 
     std::cout << "All VarDbl init tests are successful";
     return 0;
