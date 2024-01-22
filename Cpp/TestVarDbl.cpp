@@ -258,8 +258,60 @@ void testMultiplyException()
     assertUncertaintyError([maxU](){VarDbl(1, maxU) * VarDbl(1, maxU);}, "testMultiplyException()");
 }
 
+void testCompareVarDbl()
+{
+    const VarDbl v1(1.000, 0.002);
+    const VarDbl v2(1.001, 0.001);
+    Test::assertTrue(v1 == v2);
+    Test::assertFalse(v1 != v2);
+    Test::assertFalse(v1 < v2);
+    Test::assertTrue(v1 <= v2);
+    Test::assertFalse(v1 > v2);
+    Test::assertTrue(v1 >= v2);
 
+    const VarDbl v3(1.002, 0.001);
+    Test::assertFalse(v1 == v3);
+    Test::assertTrue(v1 != v3);
+    Test::assertTrue(v1 < v3);
+    Test::assertTrue(v1 <= v3);
+    Test::assertFalse(v1 > v3);
+    Test::assertFalse(v1 >= v3);
+    Test::assertFalse(v3 < v1);
+    Test::assertFalse(v3 <= v1);
+    Test::assertTrue(v3 > v1);
+    Test::assertTrue(v3 >= v1);
+}
 
+void testCompareFloat()
+{
+    const VarDbl v1(1.000, 0.002);
+    const float v2 = 1.001;
+    Test::assertTrue(v1 == v2);
+    Test::assertFalse(v1 != v2);
+    Test::assertFalse(v1 < v2);
+    Test::assertTrue(v1 <= v2);
+    Test::assertFalse(v1 > v2);
+    Test::assertTrue(v1 >= v2);
+
+    Test::assertTrue(v2 == v1);
+    Test::assertFalse(v2 != v1);
+    Test::assertFalse(v2 < v1);
+    Test::assertTrue(v2 <= v1);
+    Test::assertFalse(v2 > v1);
+    Test::assertTrue(v2 >= v1);
+
+    const float v3 = 1.002;
+    Test::assertFalse(v1 == v3);
+    Test::assertTrue(v1 != v3);
+    Test::assertTrue(v1 < v3);
+    Test::assertTrue(v1 <= v3);
+    Test::assertFalse(v1 > v3);
+    Test::assertFalse(v1 >= v3);
+    Test::assertFalse(v3 < v1);
+    Test::assertFalse(v3 <= v1);
+    Test::assertTrue(v3 > v1);
+    Test::assertTrue(v3 >= v1);
+}
 
 
 int main() 
@@ -285,6 +337,9 @@ int main()
     testMultiplyOne();
     testMultiplyException();
 
-    std::cout << "All VarDbl init tests are successful";
+    testCompareVarDbl();
+    testCompareFloat();
+
+    std::cout << "All VarDbl tests are successful";
     return 0;
 }

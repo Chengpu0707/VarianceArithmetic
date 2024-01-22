@@ -6,8 +6,8 @@ import sys
 from VarDbl import VarDbl, ValueException, UncertaintyException
 
 def validate(self, res, value, uncertainty):
-    self.assertAlmostEqual(value, res.value(), math.ulp(res.value()))
-    self.assertAlmostEqual(uncertainty, res.uncertainty(), math.ulp(res.uncertainty()))
+    self.assertAlmostEqual(value, res.value(), delta=math.ulp(res.value()))
+    self.assertAlmostEqual(uncertainty, res.uncertainty(), delta=math.ulp(res.uncertainty()))
 
 
 
@@ -222,7 +222,74 @@ class TestMultiply (unittest.TestCase):
             self.fail(ex)
 
 
+class TestCompare (unittest.TestCase):
 
+    def testErf(self):
+        self.assertAlmostEqual(0, math.erf(0), delta=1e-3)
+        self.assertAlmostEqual(0.8427, math.erf(1), delta=1e-3)
+        self.assertAlmostEqual(-0.8427, math.erf(-1), delta=1e-3)
+        # Normal bounds
+        self.assertAlmostEqual(0.6827, math.erf(1/math.sqrt(2)), delta=1e-3)
+        self.assertAlmostEqual(0.9545, math.erf(2/math.sqrt(2)), delta=1e-3)
+        self.assertAlmostEqual(0.9973, math.erf(3/math.sqrt(2)), delta=1e-3)
+        
+    def testBindingForEqual(self):
+        self.assertAlmostEqual(0.5, math.erf(VarDbl.BINDING_FOR_EQUAL/math.sqrt(2)), delta=1e-7)
+        self.assertAlmostEqual(VarDbl.BINDING_FOR_EQUAL, math.erfc(0.5)*math.sqrt(2), delta=5e-3)
+
+    def testVarDbl(self):
+        v1 = VarDbl(1.000, 0.002)
+        v2 = VarDbl(1.001, 0.001)
+        self.assertTrue(v1 == v2)
+        self.assertFalse(v1 != v2)
+        self.assertFalse(v1 < v2)
+        self.assertTrue(v1 <= v2)
+        self.assertFalse(v1 > v2)
+        self.assertTrue(v1 >= v2)
+
+        v3 = VarDbl(1.002, 0.001)
+        self.assertFalse(v1 == v3)
+        self.assertTrue(v1 != v3)
+        self.assertTrue(v1 < v3)
+        self.assertTrue(v1 <= v3)
+        self.assertFalse(v1 > v3)
+        self.assertFalse(v1 >= v3)
+        self.assertFalse(v3 < v1)
+        self.assertFalse(v3 <= v1)
+        self.assertTrue(v3 > v1)
+        self.assertTrue(v3 >= v1)
+
+    def testFloat(self):
+        v1 = VarDbl(1.000, 0.002)
+        v2 = 1.001
+        self.assertTrue(v1 == v2)
+        self.assertFalse(v1 != v2)
+        self.assertFalse(v1 < v2)
+        self.assertTrue(v1 <= v2)
+        self.assertFalse(v1 > v2)
+        self.assertTrue(v1 >= v2)
+
+        self.assertTrue(v2 == v1)
+        self.assertFalse(v2 != v1)
+        self.assertFalse(v2 < v1)
+        self.assertTrue(v2 <= v1)
+        self.assertFalse(v2 > v1)
+        self.assertTrue(v2 >= v1)
+
+        v1 = VarDbl(1.000, 0.002)
+        v3 = 1.002
+        self.assertFalse(v1 == v3)
+        self.assertTrue(v1 != v3)
+        self.assertTrue(v1 < v3)
+        self.assertTrue(v1 <= v3)
+        self.assertFalse(v1 > v3)
+        self.assertFalse(v1 >= v3)
+        self.assertFalse(v3 < v1)
+        self.assertFalse(v3 <= v1)
+        self.assertTrue(v3 > v1)
+        self.assertTrue(v3 >= v1)
+
+ 
 
 
 

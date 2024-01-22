@@ -40,6 +40,8 @@ public:
 struct VarDbl {     // a class which is cheap to copy
 public:
     // assume uniform distribution within ulp()
+    constexpr static const double BINDING_FOR_TAYLOR = 5.0;
+    constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
     static double ulp(double d);
 
@@ -69,35 +71,55 @@ public:
     VarDbl(const VarDbl& other);
     VarDbl(double value, double uncertainty);
         // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
+    
     // conversion constructors
     VarDbl(double value);
         // assume ulp as uncertainty
     VarDbl(float value);
         // assume ulp as uncertainty
     VarDbl(long long value) noexcept;
-        // may loss resolution
+        // may result in uncertainty
     VarDbl(long value) noexcept : VarDbl((long long) value) {}
+    // always without uncertainty
     VarDbl(int value) noexcept : VarDbl((long long) value) {}
+    VarDbl(short value) noexcept : VarDbl((long long) value) {}
+    VarDbl(char value) noexcept : VarDbl((long long) value) {}
 
     // i/o
     std::string to_string() const;
     friend std::ostream & operator <<(std::ostream& out, const VarDbl& v);
     friend std::istream & operator >>(std::istream& in, VarDbl& v);
 
-    // +/-
+    // +
+    VarDbl operator+(VarDbl other) const;
+    VarDbl operator+=(VarDbl other);
+    template<typename T> friend VarDbl operator+(T first, VarDbl second);
+
+    // -
     void negate() { _value = - _value; }
     VarDbl operator-() const;
-    VarDbl operator+(VarDbl other) const;
     VarDbl operator-(VarDbl other) const;
-    VarDbl operator+=(VarDbl other);
     VarDbl operator-=(VarDbl other);
-    template<typename T> friend VarDbl operator+(T first, VarDbl second);
     template<typename T> friend VarDbl operator-(T first, VarDbl second);
 
     // *
     VarDbl operator*(VarDbl other) const;
     VarDbl operator*=(VarDbl other);
     template<typename T> friend VarDbl operator*(T first, VarDbl second);
+
+    // compare
+    bool operator==(VarDbl other) const;
+    bool operator!=(VarDbl other) const;
+    bool operator<(VarDbl other) const;
+    bool operator>(VarDbl other) const;
+    bool operator<=(VarDbl other) const;
+    bool operator>=(VarDbl other) const;
+    template<typename T> friend bool operator==(T first, VarDbl second);
+    template<typename T> friend bool operator!=(T first, VarDbl second);
+    template<typename T> friend bool operator<(T first, VarDbl second);
+    template<typename T> friend bool operator>(T first, VarDbl second);
+    template<typename T> friend bool operator<=(T first, VarDbl second);
+    template<typename T> friend bool operator>=(T first, VarDbl second);
 
 };
 
@@ -238,7 +260,8 @@ inline VarDbl VarDbl::operator*(VarDbl other) const
     return other;
 }
 
-inline VarDbl VarDbl::operator*=(VarDbl other) {
+inline VarDbl VarDbl::operator*=(VarDbl other) 
+{
     const double variance = this->variance() * other.value() * other.value() +
                             other.variance() * value() * value() +
                             this->variance() * other.variance();
@@ -250,6 +273,89 @@ template<typename T>
 inline VarDbl operator*(T first, VarDbl second) {
     return second * VarDbl(first);
 }
+
+
+
+inline bool VarDbl::operator==(VarDbl other) const
+{
+    other-= *this;
+    if (other.value() == 0)
+        return true;
+    const double uncertainty = other.uncertainty();
+    if (uncertainty == 0)
+        return false;
+    return abs(other.value() / uncertainty) <= VarDbl::BINDING_FOR_EQUAL;
+}
+
+inline bool VarDbl::operator!=(VarDbl other) const
+{
+    return !(*this == other);
+}
+
+inline bool VarDbl::operator<(VarDbl other) const
+{
+    if (*this == other)
+        return false;
+    return this->value() < other.value();
+}
+
+inline bool VarDbl::operator>(VarDbl other) const
+{
+    if (*this == other)
+        return false;
+    return this->value() > other.value();
+}
+
+inline bool VarDbl::operator<=(VarDbl other) const
+{
+    if (*this == other)
+        return true;
+    return this->value() < other.value();
+}
+
+inline bool VarDbl::operator>=(VarDbl other) const
+{
+    if (*this == other)
+        return true;
+    return this->value() > other.value();
+}
+
+template<typename T>
+inline bool operator==(T first, VarDbl second)
+{
+    return second == first;
+}
+
+template<typename T>
+inline bool operator!=(T first, VarDbl second)
+{
+    return second != first;
+}
+
+template<typename T>
+inline bool operator<(T first, VarDbl second)
+{
+    return second > first;
+}
+
+template<typename T>
+inline bool operator>(T first, VarDbl second)
+{
+    return second < first;
+}
+
+template<typename T>
+inline bool operator<=(T first, VarDbl second)
+{
+    return second >= first;
+}
+
+template<typename T>
+inline bool operator>=(T first, VarDbl second)
+{
+    return second <= first; 
+}
+
 
 
 } // namespace var_dbl

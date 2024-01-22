@@ -111,7 +111,10 @@ class Signal {
                 for (int i = 1; i < size; ++i) {
                     sWave[i << 1] = i;
                     sFreq[i << 1] = -peak;
-                    sFreq[(i << 1) + 1] = -peak / Math.tan(Math.PI * i / size);
+                    if (order < FFT.MAX_ORDER)
+                        sFreq[(i << 1) + 1] = -peak / FFT.sin((long) i, order + 1) * FFT.cos((long) i, order + 1);
+                    else
+                        sFreq[(i << 1) + 1] = -peak / Math.tan(Math.PI * i / size);
                 }
                 break;
              default:

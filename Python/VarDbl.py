@@ -14,6 +14,8 @@ class UncertaintyException (BaseException):
 
 
 class VarDbl:
+    BINDING_FOR_TAYLOR = 5.0
+    BINDING_FOR_EQUAL = 0.67448975
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
 
     @staticmethod
@@ -63,6 +65,7 @@ class VarDbl:
         self._value = value
         self._variance = variance
     
+
     def __str__(self) -> str:
         return f'{self.value():.6e}~{self.uncertainty():.3e}'
 
@@ -70,36 +73,79 @@ class VarDbl:
         return f'{repr(self.value())}~{repr(self.variance())}'
     
 
+    def __add__(self, other):
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        value = self.value() + other.value()
+        variance = self.variance() + other.variance()
+        return VarDbl(value, variance, True)
+
+    def __radd__(self, other):
+        return self + other
+
     def __neg__(self):
         ret = VarDbl()
         ret._value = - self._value
         ret._variance = self._variance
         return ret
 
-    def __add__(self, other):
-        if type(other) == VarDbl:
-            value = self.value() + other.value()
-            variance = self.variance() + other.variance()
-            return VarDbl(value, variance, True)
-        return self + VarDbl(value=other)
-
     def __sub__(self, other):
         return self + other.__neg__()
     
-    def __radd__(self, other):
-        return self + other
-
     def __rsub__(self, other):
         return -(self - other)
     
-    def __mul__(self, other):
-        if type(other) == VarDbl:
-            value = self.value() * other.value()
-            variance = self.variance() * other.value() * other.value() +\
-                        other.variance() *self.value() * self.value() +\
-                        self.variance() * other.variance()
-            return VarDbl(value, variance, True)
-        return self * VarDbl(value=other)
 
+    def __mul__(self, other):
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        value = self.value() * other.value()
+        variance = self.variance() * other.value() * other.value() +\
+                    other.variance() *self.value() * self.value() +\
+                    self.variance() * other.variance()
+        return VarDbl(value, variance, True)
+    
     def __rmul__(self, other):
         return self * other
+    
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        diff = self - other
+        if diff.value() == 0:
+            return True
+        uncertainty = diff.uncertainty()
+        if uncertainty == 0:
+            return False
+        return abs(diff.value()/uncertainty) <= VarDbl.BINDING_FOR_EQUAL
+
+    def __lt__(self, other: object) -> bool:
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        if self == other:
+            return False
+        return self.value() < other.value()
+
+    def __gt__(self, other: object) -> bool:
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        if self == other:
+            return False
+        return self.value() > other.value()
+
+    def __le__(self, other: object) -> bool:
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        if self == other:
+            return True
+        return self.value() < other.value()
+
+    def __ge__(self, other: object) -> bool:
+        if type(other) != VarDbl:
+            other = VarDbl(value=other)
+        if self == other:
+            return True
+        return self.value() > other.value()
+
+

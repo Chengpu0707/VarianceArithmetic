@@ -16,6 +16,7 @@ struct Test {
     // print current stack trace and exit
     static void fail(std::string msg = "");
     static void assertTrue(bool expression, std::string msg = "");
+    static void assertFalse(bool expression, std::string msg = "");
     static void assertEquals(double x, double y, double delta = 0, std::string msg = "");
         // ulp comparison when delta == 0
     template<typename T> static void assertEqual(const T& x, const T& y, std::string msg = "");
@@ -40,7 +41,8 @@ inline void Test::fail(std::string msg) {
 }
 
 
-inline void Test::assertTrue(bool expression, std::string msg) {
+inline void Test::assertTrue(bool expression, std::string msg) 
+{
     if (expression) 
         return;
     if (!msg.empty())
@@ -49,6 +51,11 @@ inline void Test::assertTrue(bool expression, std::string msg) {
     std::cout << std::stacktrace::current() << '\n';
 #endif
     assert(expression);
+}
+
+inline void Test::assertFalse(bool expression, std::string msg) 
+{
+    return assertTrue(!expression, msg);
 }
 
 

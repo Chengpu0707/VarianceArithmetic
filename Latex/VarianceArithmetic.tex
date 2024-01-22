@@ -1425,16 +1425,14 @@ A large leakage $\epsilon$ raises the logic questions on the validity of the res
 In an extreme approach, in another variance arithmetic representation:
 \begin{enumerate}
 
-\item Each imprecise value carries its own $\sigma$ or $\epsilon$ to indicate the statistical significance of its value for its uncertainty.
+\item Each imprecise value carries its own $\sigma$ or $\epsilon$ to indicate the statistical significance of its value to its uncertainty.
 
 \item The result $\sigma$ or $\epsilon$ involving two imprecise values can be found statistically.
 
 \item The result of an analytic function always converges but at the expense of $\epsilon$, such that  when $x \rightarrow 0$, $\epsilon \rightarrow 1$ for $\log(x + \delta x)$. 
 
-\item A calculation has to be stopped if a predefined acceptable leakage level can no longer be achieved, and the major sources of $\epsilon$ are traced for improvements or limitations.  
-For example, the acceptable leakage level of $\sigma=5$ dictates the minimal $x$ for a given $\delta x$ in $\log(x + \delta x)$ be $5 \delta x$, as the minimal non-divergent $x$ for each $\delta x$ in Figure \ref{fig: Log_Dev}.
+\item A calculation may branch based on the probability $\epsilon$.
 
-\item The acceptable leakage level should be application specific.
 \end{enumerate}
 For the discussion simplicity, the cases of the bounding factor $\sigma$ other than constant $5$ are avoided in this paper.
 
@@ -1561,7 +1559,7 @@ h[N] = h[0];
 Thus, the discrete Fourier transformation has an implied assumption that the signal $h[k]$ repeats itself outside the region of $[0, N-1]$ \cite{Numerical_DFT}.  
 For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to signal periodicity, resulting in larger peak width, lower peak height, and the wrong phase.  
 
-The unfaithfulness of the discrete Fourier transformation to the Fourier transformation is a very serious example of modeling errors, but this problem has not be addressed previously.
+The unfaithfulness of the discrete Fourier transformation to the Fourier transformation is a very serious example of modeling errors, but this problem has not be addressed seriously enough previously.
 Because the discrete Fourier transformation has widest applications in science and engineering, this problem really need some serious attention.
 
 
@@ -1654,7 +1652,7 @@ The major source of the calculation error for \emph{Linear} signals is the calcu
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Sin/Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
 \label{fig: FFT_SinCos_Clean_vs_Order}
 \end{figure}
@@ -1682,32 +1680,32 @@ The histograms of the normalized errors of Sin/Cos signals at FFT with $10^{-15}
 \includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Linear signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
 \label{fig: FFT_Linear_Clean_vs_Order}
 \end{figure}
 
 
 
-Figure \ref{fig: FFT_SinCos_Clean_vs_Order} shows the result uncertainty means and error deviations for forward, reverse and roundtrip FFT transformations on Sin/Cos signals vs. FFT order $L$.
+Figure \ref{fig: FFT_SinCos_Clean_vs_Order} shows the result uncertainty means and error deviations for forward, reverse and roundtrip FFT transformations on Sin/Cos signals without added noises vs. FFT order $L$.
 The trends of the uncertainty means with the FFT order agree with the different natures of the forward, reverse and roundtrip FFT transformations on Sin/Cos signals:
 \begin{itemize}
 \item For the forward transformations, the uncertainty means increase exponentially as $1.36^L$ with the FFT order $L$.
 
-\item For the reverse transformations, the uncertainty means remain a constant about $1.4 \times 10^{-16}$ with the FFT order $L$.
+\item For the reverse transformations, the uncertainty means remain almost a constant about $1.4 \times 10^{-16}$ with the FFT order $L$.
 
-\item For the roundtrip transformations, the uncertainty means remain a constant about $1.7 \times 10^{-16}$ with the FFT order $L$.
+\item For the roundtrip transformations, the uncertainty means remain almost a constant about $1.7 \times 10^{-16}$ with the FFT order $L$.
 
 \end{itemize}
 
 The error deviations are between $0.42$ and $1.21$, confirming the tracking power of the variance arithmetic.
 The reason why they are not constant $1$ is attributed to the numerical errors in the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$:
 \begin{enumerate}
-\item The variance arithmetic can not account for numerical errors in the library function, which will probably increase with the FFT order $L$.
-It may be the reason why the error deviations of the reverse transformation increase slowly with $L$ as $0.0322 L$.
+\item The variance arithmetic can not account for numerical errors in the $\sin$ library function, which will probably increase with the FFT order $L$.
+It is probably the reason why the error deviations of the reverse transformation increase slowly with $L$ as $0.0322 L$.
 
 \item Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} shows how the variance arithmetic uses uncertainties to track the value errors in a FFT spectrum of a Sin signal with index frequency $7$ and FFT order $7$.
-The two peaks of the value errors at the index frequencies $\pm 7$ are expected, but Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} also shows a few other large peaks, suggesting systematic errors from the library function.
+The two peaks of the value errors at the index frequencies $\pm 7$ are expected, but Figure \ref{fig: FFT_Sin_Order7_Freq15_Spec_Clean} also shows a few other large peaks, suggesting systematic errors from the $\sin$ library function.
 
 \item To overcome such systematic errors, $10^{-16}$ white noises are added to the Sin signal.
 The result corresponding FFT spectrum looks no longer structured. 
@@ -1720,7 +1718,7 @@ When $10^{-12}$ white noises are added to the Sin signal, for the reverse transf
 If instead $10^{-15}$ white noises are added to the sin library function which is also used to generate the Sin/Cos signals, the result error deviations remain near $1$ for the reverse transformation.
 Thus, the library function $\sin(x), x \in [0, \pi/2]$ is estimated to contain $10^{-15}$ numerical errors.
 
-\item The structured histogram for the reverse transformation in Figure \ref{fig: FFT_Sin_Error_Histogram} can be used as the signature of the numerical errors on the background of the $10^{16}$ Gaussian noise.
+\item The structured histogram for the reverse transformation in Figure \ref{fig: FFT_Sin_Error_Histogram} can be used as the signature of the numerical errors on the background of the $10^{-16}$ Gaussian noise.
 
 \end{enumerate}
 
@@ -1782,7 +1780,7 @@ The error deviations are scaled to the linear y-axis on the right, while the unc
 \includegraphics[height=2.5in]{FFT_SinCos_1e-12_vs_Order.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Sin/Cos signals with $10^{12}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
 \label{fig: FFT_SinCos_1e-12_vs_Order}
 \end{figure}
@@ -1827,7 +1825,7 @@ Both error response and calculation response have the expected behaviors, the re
 \includegraphics[height=2.5in]{FFT_Linear_1e-5_vs_Order.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Lienar signals with $10^{5}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
 \label{fig: FFT_Linear_1e-5_vs_Order}
 \end{figure}
@@ -1869,6 +1867,36 @@ Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_L
 
 If both the $\sin$ and the $\tan$ library functions were calculated with the variance arithmetic so that the result have ideal coverage, respectively, ideal coverage for the FFT transformations are expected, so that both figures can be greatly simplified as constant $1$ except when the FFT orders are too small to give a large enough sample size for the error deviations.
 
+
+
+
+\clearpage
+\section{Comparison Using Recursive Calculation of Sine Values}
+\label{sec: recursion}
+
+Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the phase array $\varphi[n]$ in Formula \eqref{eqn: FFT phase array}.  
+\begin{align}
+\label{eqn: phase boundary}
+& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+\label{eqn: phase sin}
+& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
+\label{eqn: phase cos}
+& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
+\end{align}
+
+This algorithm is very different from both FFT and matrix inversion in nature because Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} are no longer linear, and the test presents a pure theoretical calculation without input uncertainty.  The recursion iteration count $L$ is a good measurement for the amount of calculations.  Each repeated use of Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} accumulates calculation errors to the next usage so that both value errors and uncertainty are expected to increase with $L$.  Each recursion iteration $L$ corresponds to $2^{L-2}$ outputs, which enables statistical analysis for large $L$.  
+
+Figure \ref{fig: AvgValErr_vs_Regression} shows that both average output value errors and the corresponding average output deviation increase exponentially with the recursion count for all three arithmetics, and Figure \ref{fig: AvgErrSig_MaxBndRat_vs_Regression} shows that in response to the increased amount of calculations:
+\begin{itemize}
+\item The average tracking ratio for variance arithmetic is a constant about 0.25;
+
+\item The maximal output bounding ratio for variance arithmetic increases slowly; 
+
+\item The average tracking ratio for interval arithmetic decreases exponentially; and 
+
+\item The maximal output bounding ratio for interval arithmetic remains roughly a constant.
+\end{itemize}
+Unlike FFT algorithms, the initial precise sine values participate in every stage of the recursion, which results in few small output deviations at each recursion.  Detailed inspection shows that the maximal output bounding ratios for interval arithmetic are all obtained from small output deviations, and bounding ratios using interval arithmetic in general decrease exponentially with the amount of calculations.  Thus, the result uncertainty propagation characteristics of the regressive calculation of sine values are very similar to those of both FFT and the calculating adjugate matrix; even though all these algorithms are quite different in nature.  This may indicate again that the stability of variance arithmetic is generic, regardless of the algorithms used.
 
 
 
@@ -1989,36 +2017,6 @@ Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} shows that the average outp
 Because \textbf{$|M_{j,i}|$} and \textbf{$|M|$} are not independent of each other, \textbf{$M^{-1}$} calculated by Formula \eqref{eqn: invert matrix} contains the dependency problem. Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the tracking ratios for the adjugate matrix and the inverted matrix are both standard distributed, while they are exponentially distributed when the inverted matrix is inverted again.  Because the inverted matrix has the same tracking ratio distribution as that of the adjugated matrix, which has no dependency problem, the inverted matrix contains hardly any dependency problem.  In contrast, Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the double inverted matrix is severely affected by the dependency problem, such that its tracking ratio increases with matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.  Figure \ref{fig: Prec4_Matrix_Rnd_NormDist} shows that average tracking ratios for different matrix sizes follows a same exponential distribution, but with different extend, e.g., the distribution for matrix size 4 has yet reaches stable distribution beyond 2.5, which causes the increase of the average tracking ratio with the matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.
 
 Applying the same algorithms twice results in so much differences, which shows that the dependency problem has been embedded in the data, and which shows the importance of calibration.
-
-
-
-\clearpage
-\section{Comparison Using Recursive Calculation of Sine Values}
-\label{sec: recursion}
-
-Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the phase array $\varphi[n]$ in Formula \eqref{eqn: FFT phase array}.  
-\begin{align}
-\label{eqn: phase boundary}
-& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
-\label{eqn: phase sin}
-& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
-\label{eqn: phase cos}
-& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
-\end{align}
-
-This algorithm is very different from both FFT and matrix inversion in nature because Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} are no longer linear, and the test presents a pure theoretical calculation without input uncertainty.  The recursion iteration count $L$ is a good measurement for the amount of calculations.  Each repeated use of Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} accumulates calculation errors to the next usage so that both value errors and uncertainty are expected to increase with $L$.  Each recursion iteration $L$ corresponds to $2^{L-2}$ outputs, which enables statistical analysis for large $L$.  
-
-Figure \ref{fig: AvgValErr_vs_Regression} shows that both average output value errors and the corresponding average output deviation increase exponentially with the recursion count for all three arithmetics, and Figure \ref{fig: AvgErrSig_MaxBndRat_vs_Regression} shows that in response to the increased amount of calculations:
-\begin{itemize}
-\item The average tracking ratio for variance arithmetic is a constant about 0.25;
-
-\item The maximal output bounding ratio for variance arithmetic increases slowly; 
-
-\item The average tracking ratio for interval arithmetic decreases exponentially; and 
-
-\item The maximal output bounding ratio for interval arithmetic remains roughly a constant.
-\end{itemize}
-Unlike FFT algorithms, the initial precise sine values participate in every stage of the recursion, which results in few small output deviations at each recursion.  Detailed inspection shows that the maximal output bounding ratios for interval arithmetic are all obtained from small output deviations, and bounding ratios using interval arithmetic in general decrease exponentially with the amount of calculations.  Thus, the result uncertainty propagation characteristics of the regressive calculation of sine values are very similar to those of both FFT and the calculating adjugate matrix; even though all these algorithms are quite different in nature.  This may indicate again that the stability of variance arithmetic is generic, regardless of the algorithms used.
 
 
 
