@@ -1390,7 +1390,7 @@ It shows that $(1 \pm 0.2)^{-2}$ and $(1 \pm 0.2)^{-1.5}$ clearly diverge, $(1 \
 
 
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively, for ideal coverage.
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 
 At each point $x$ for an input uncertainty $\delta x$, the result uncertainty is calculated by the variance arithmetic.
 The corresponding value deviation is obtained by:
@@ -1408,8 +1408,8 @@ The corresponding value deviation is obtained by:
 The deviation of the value errors is defined as the \emph{value deviation}, which the uncertainty should match.
 
 \end{enumerate}
-
-%\subsection{Tracking Power}
+$\delta x$ is choose to be above  $10^{-3}$, so that the numerical errors of the math library functions will not affect the result.
+This also means that the tests are done under ideal coverage conditions.
 
 Figure \ref{fig: Exp_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: exp precision} agree very well with the measured value deviations for $e^{x + \delta x}$.
 As a result, the error deviations are very close to $1$, even both the uncertainties and the value error deviations increase exponentially with $x$ and $\delta x$.
@@ -1571,16 +1571,16 @@ Instead, the analytic result will be calculated using only Formula \eqref{eqn: F
 
 The following signals are used for testing:
 \begin{itemize}
-\item \emph{Sin}: $h(n) = \sin(n 2\pi f/N), f = 1, 2, ... N/2 -1$, in which $f$ is defined as the \emph{index frequency}.
+\item \emph{Sin}: $h(n) = \sin(n \frac{2\pi f}{N}), f = 1, 2, ... N/2 -1$, in which $f$ is defined as the \emph{index frequency}.
 
-\item \emph{Cos}: $h(n) = \cos(n 2\pi f/N), f = 1, 2, ... N/2 -1$, in which $f$ is the index frequency.
+\item \emph{Cos}: $h(n) = \cos(n \frac{2\pi f}{N}), f = 1, 2, ... N/2 -1$, in which $f$ is the index frequency.
 
 \item \emph{Linear}: $h[n] = n$, whose discrete Fourier transformation is Formula \eqref{eqn: Fourier spec for linear}.
 \begin{align}
 & y \equiv i 2\pi \frac{n}{N}: \eqspace G(y) = \sum_{k=0}^{N-1}  e^{y k} = \frac{e^{N y} - 1}{e^y - 1}
  = \begin{cases} y = 0: \eqspace N \\ y \neq 0: \eqspace 0 \end{cases}; \nonumber \\
 \label{eqn: Fourier spec for linear}
-H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace - \frac{N}{2}(1 + i /\tan(\frac{n}{N} \pi)) \end{cases};
+H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace - \frac{N}{2}(1 + i /\tan(n \pi /N)) \end{cases};
 \end{align}
 
 \end{itemize}
@@ -1625,6 +1625,9 @@ L = 2:\;& o=0: & [0, 2, 1, 3]; \\
 When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-Lanczos lemma \cite{Numerical_Recipes} can be applied to the discrete Fourier transformation as FFT \cite{Numerical_Recipes}. 
 \begin{itemize}
 
+\item For each output, each input is only used once, so there is no dependency problem when using Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} as arithmetic operations.
+This simplicity avoids introducing numerical errors from Formula \eqref{eqn: Taylor 1d variance}, because $f^{(j)}_x$ may contain numerical errors, while $(\delta x)^{2n}$ may contain rounding errors.
+
 \item When $L$ is large, the large amount of input and output data enables high quality statistical analysis.
 
 \item The amount of calculation is $L$, because for each output, increasing $L$ by 1 results in one additional step of sum of multiplication.
@@ -1632,8 +1635,6 @@ When $N = 2^{L}$, in which $L$ is a positive integer, the generalized Danielson-
 \item Each step in the forward transformation thus increase the variance by $2$-fold, so that the result uncertainty means increase with the FFT order $L$ as $\sqrt{2}^L$.
 Because the reverse transformation divides the result by $2^L$, the result uncertainty means decrease with the FFT order $L$ as $\sqrt{1/2}^L$.
 The result uncertainty means for the roundtrip transformations is thus: $\sqrt{2}^L \times \sqrt{1/2}^L = 1$.
-
-\item For each output, each input is only used once, so there is no dependency problem when using Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} as arithmetic operations.
 
 \item The major source of the calculation error for Sin/Cos signals is the calculation errors of the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
 The major source of the calculation error for \emph{Linear} signals is the calculation errors of the library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$.
@@ -1842,6 +1843,17 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 
 \begin{figure}[p]
 \centering
+\includegraphics[height=2.5in]{FFT_Slope_Forward_ErrorDev_vs_Noise_Order.png} 
+\captionof{figure}{
+The result error deviations using Slope signals vs. input uncertainties and FFT Orders for the forward transformations.
+The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
+A Slope signal is constructed by replacing $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
+}
+\label{fig: FFT_Slope_Forward_ErrorDev_vs_Noise_Order}
+\end{figure}
+
+\begin{figure}[p]
+\centering
 \includegraphics[height=2.5in]{FFT_Linear_Reverse_ErrorDev_vs_Noise_Order.png} 
 \captionof{figure}{
 The result error deviations using Linear signals vs. input uncertainties and FFT Orders for the reverse transformations.
@@ -1850,11 +1862,22 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 \label{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order}
 \end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Slope_Reverse_ErrorDev_vs_Noise_Order.png} 
+\captionof{figure}{
+The result error deviations using Slope signals vs. input uncertainties and FFT Orders for the reverse transformations.
+The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
+A Slope signal is constructed by replacing $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
+}
+\label{fig: FFT_Slope_Reverse_ErrorDev_vs_Noise_Order}
+\end{figure}
 
 
-Figure \ref{fig:  FFT_Linear_1e-5_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Lienar signals with $10^{-5}$ noises, when the input uncertainties are below the ideal coverage of $10^{-3}$.
+
+Figure \ref{fig:  FFT_Linear_1e-5_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Linear signals with $10^{-5}$ noises, when the input uncertainties are below the ideal coverage of $10^{-3}$.
 The result uncertainty means have the behaviors as if the ideal coverage has been reached.
-The result error deviations reach exactly constant $1$ between the FFT order $12$ and $16$ but deviate from $1$ when the FFT order is more than $16$, because more calculations bring more numerical errors from the $\tan$ library function.
+The result error deviations reach exactly constant $1$ between the FFT order $12$ and $16$ but deviate from $1$ when the FFT order is more than $16$, because more calculations bring more numerical errors from the $\tan$ library functions.
 This means a test calculation of smaller scale may behaves quite different from a real calculation in term of result error characteristics.
 
 Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order} show the overall dependency of error deviations to both input uncertainties and FFT orders for either the forward or the reverse transform of Linear signals, respectively.
@@ -1865,16 +1888,28 @@ However, for the forward transformations, the transition is a cliff toward a fla
 Also, the ideal coverage plain of the reverse transformation is smaller, and it is expected to disappear when the FFT order is more than $20$ for all input uncertainties.
 Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order} demonstrate the complicity when non ideal coverage presents.
 
+One way to reduce the numerical errors in Linear signals is to replace $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$, so that only $\sin$ library functions are used.
+The seemly identical signal is named as the \emph{Slope} signal.
+Compared with Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order}, Figure \ref{fig: FFT_Slope_Forward_ErrorDev_vs_Noise_Order} shows that the replacement make almost no difference  for the forward transformations.
+Compared with Figure \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order}, Figure \ref{fig: FFT_Slope_Reverse_ErrorDev_vs_Noise_Order} shows that the replacement enlarge the ideal coverage to about $80\%$ more input cases.
+The effect of such seemly idiotic mathematical replacement could be quite large and delicate, so that it seems hopeless to try to improve numerical results using this kind of maneuvers.
+
 If both the $\sin$ and the $\tan$ library functions were calculated with the variance arithmetic so that the result have ideal coverage, respectively, ideal coverage for the FFT transformations are expected, so that both figures can be greatly simplified as constant $1$ except when the FFT orders are too small to give a large enough sample size for the error deviations.
 
 
 
 
 \clearpage
-\section{Comparison Using Recursive Calculation of Sine Values}
+\section{Sine Library Function with Uncertainty}
 \label{sec: recursion}
 
-Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the phase array $\varphi[n]$ in Formula \eqref{eqn: FFT phase array}.  
+In Section \ref{sec: FFT}, both the $\sin$ library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$ and the $\tan$ library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$ have been demonstrated to have significant numerical errors, and when the $\tan$ library function is replace by the $\sin$ library function as $\sin(x) / \sin(x + \pi/2)$, the numerical errors of the $\tan$ library function can be reduced significantly.
+The question is: What is the effect of replacing the $\sin$ library function in conventional floating-point representation with a corresponding library function with uncertainty for each data?
+
+
+\subsection{Recursive Calculation of Sine Values}
+
+Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the $\sin$ library function.  
 \begin{align}
 \label{eqn: phase boundary}
 & \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\

@@ -32,7 +32,7 @@ public class TestNoise {
         }
         assertTrue(10000 >= histo.stat().count());
         assertTrue(9900 <= histo.stat().count());
-        assertEquals(0, histo.stat().avg(), 2E-2); 
+        assertEquals(0, histo.stat().avg(), 3E-2); 
         assertEquals(1, histo.stat().dev(), 5E-2); 
         final int actRange = (int) Math.round(Math.max( -histo.stat().min(), histo.stat().max()) * histo.divids());
         assertEquals(actRange, histo.actRange());

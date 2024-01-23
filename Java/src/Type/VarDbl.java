@@ -5,7 +5,6 @@ package Type;
  * A base class for storage type for variance arithmetic      
  */
 public class VarDbl implements IReal {
-    static final double BINDING_FOR_TAYLOR = 5.0;
     static final double BINDING_FOR_EQUAL = 0.67448975;
 
     static final double DEVIATION_OF_LSB = 1.0 / Math.sqrt(3);
@@ -66,8 +65,6 @@ public class VarDbl implements IReal {
 
     public int compareTo(final VarDbl other, final double binding) 
             throws ValueException, UncertaintyException {
-        if ((binding <= 0) || (BINDING_FOR_TAYLOR < binding))
-            throw new IllegalArgumentException(String.format("%s compareTo() invalid probability %f", typeName(), binding));
         final VarDbl diff = clone();
         diff.minus(other);
         if (diff.variance() == 0) {
@@ -165,7 +162,7 @@ public class VarDbl implements IReal {
         }
         final double[] sTaylor = Taylor.power(exponent);
         sTaylor[0] = Math.pow(value, exponent);
-        return taylor("power", sTaylor, true, false, BINDING_FOR_TAYLOR);
+        return taylor("power", sTaylor, true, false);
     }
 
     @Override
@@ -255,7 +252,7 @@ public class VarDbl implements IReal {
      * 
      * @return:  
      */
-    VarDbl taylor(final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec, double bounding) 
+    VarDbl taylor(final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec) 
             throws ValueException, UncertaintyException {
         if (variance() == 0) {
             throw new UncertaintyException(String.format("%s(%s) = 0 variance: %s", name, toString(), typeName()));
@@ -265,13 +262,13 @@ public class VarDbl implements IReal {
         double var = inPrec? precSq() : variance();
         double varn = var;
         for (int n = 2; n < Momentum.maxN*2; n += 2, varn *= var) {
-            value += s1dTaylor[n] * Momentum.factor(n, bounding, false) * varn;
+            value += s1dTaylor[n] * Momentum.factor(n) * varn;
             for (int j = 1; j < n; ++j) {
-                variance += s1dTaylor[j] * s1dTaylor[n - j] * Momentum.factor(n, bounding) * varn;
+                variance += s1dTaylor[j] * s1dTaylor[n - j] * Momentum.factor(n) * varn;
             }
             for (int j = 2; j < n; j += 2) {
-                variance -= s1dTaylor[j] * Momentum.factor(j, bounding) * 
-                            s1dTaylor[n - j] * Momentum.factor(n - j, bounding) * 
+                variance -= s1dTaylor[j] * Momentum.factor(j) * 
+                            s1dTaylor[n - j] * Momentum.factor(n - j) * 
                             varn;
             }
         }
@@ -288,10 +285,6 @@ public class VarDbl implements IReal {
         this.value = value;
         this.variance = variance;
         return this;
-    }
-    VarDbl taylor(final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec) 
-            throws ValueException, UncertaintyException {
-        return taylor(name, s1dTaylor, inPrec, outPrec, BINDING_FOR_TAYLOR);
     }
     
 }

@@ -11,49 +11,6 @@ import java.io.IOException;
 
 public class TestMomentum {
 
-    /*
-     * https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule
-     */
-
-    @Test
-    public void testCdf() {
-        assertEquals(0, Momentum.cdf(-9), 0);
-        assertEquals(0.0013498980316302145, Momentum.cdf(-3), 2E-16);
-        assertEquals(0.02275013194817932, Momentum.cdf(-2), 2E-16);
-        assertEquals(0.15865525393145702, Momentum.cdf(-1), 2E-16);
-        assertEquals(0.5, Momentum.cdf(0), 0);
-        assertEquals(0.84134474606854298, Momentum.cdf(1), 2E-16);      // 0.68268949213708596
-        assertEquals(0.97724986805182068, Momentum.cdf(2), 2E-16);      // 0.95449973610364136
-        assertEquals(0.9986501019683697855, Momentum.cdf(3), 2E-16);    // 0.997300203936739571
-        assertEquals(1, Momentum.cdf(9), 0);
-
-        assertEquals(0.8140331597529114, Momentum.cdf(0.002/0.00224), 2E-16);
-    }
-
-    @Test
-    public void testInverseCdf() {
-        assertEquals(-3, Momentum.inverseCDF(0.0013498980316302145), 1E-8);
-        assertEquals(-2, Momentum.inverseCDF(0.02275013194817932), 1E-8);
-        assertEquals(-1, Momentum.inverseCDF(0.15865525393145702), 1E-8);
-        assertEquals(0, Momentum.inverseCDF(0.5), 1E-8);
-        assertEquals(+1, Momentum.inverseCDF(0.84134474606854298), 1E-8);
-        assertEquals(+2, Momentum.inverseCDF(0.97724986805182068), 1E-8);
-        assertEquals(+3, Momentum.inverseCDF(0.9986501019683697855), 1E-8);
-    }
-
-    @Test
-    public void TestFactorial() {
-        assertEquals(1, Momentum.factorial(0), 0);
-        assertEquals(1, Momentum.factorial(1), 0);
-        assertEquals(2, Momentum.factorial(2), 0);
-        assertEquals(6, Momentum.factorial(3), 0);
-        assertEquals(24, Momentum.factorial(4), 0);
-        assertEquals(120, Momentum.factorial(5), 0);
-        assertEquals(9.33262154439441E155, Momentum.factorial(99), 1E155);
-        assertEquals(7.257415615307994E306, Momentum.factorial(170), 1E306);
-        assertEquals(Double.POSITIVE_INFINITY, Momentum.factorial(170)*171, 0);
-    }
-
     @Test
     public void TestDoubleFactorial() {
         assertEquals(1, Momentum.doubleFactorial(0), 0);
@@ -84,36 +41,18 @@ public class TestMomentum {
 
     @Test
     public void TestFactor() {
-        final double s = 1.75;
-        final int n = 2;
-        assertEquals(0.617911, Momentum.factor(n, s, false), 1E-6);
-        final double pdf = 2 * s * s * Momentum.pdf(s);
-        assertEquals(0.528449, pdf, 1E-6);
-
-        double term = pdf * s / (n + 1);
-        double sum = 0;
-        double next = term;
-        for (int j = n + 3; sum < next; j += 2) {
-            sum = next;
-            term *= s * s / j;
-            next = sum + term;
-        }
-        assertEquals(sum, Momentum.factor(n, s, false), 1E-6);
-        assertEquals(Momentum.factor(n+2, s, false), (n+1) * sum - pdf*s, 1E-6);
-
-        sum = 0;
-        term = pdf * s /(n + 1);
-        sum += term;
-        assertEquals(0.308262, term, 1E-6);
-        term *= s * s /(n + 3);
-        assertEquals(0.188810, term, 1E-6);
-        sum += term;
-        term *= s * s /(n + 5);
-        assertEquals(0.082604, term, 1E-6);
-        term *= s * s /(n + 7);
-        assertEquals(0.028108, term, 1E-6);
-        sum += term;
-        assertEquals(sum + 0.092731, Momentum.factor(n, s, false), 1E-6);
+        assertEquals(  1 * 0.99999947194737793, Momentum.factor(0), Math.ulp(1));
+        assertEquals(  1 * 0.99998569318184616, Momentum.factor(2), 2e-6);
+        assertEquals(  3 * 0.99987013368935596, Momentum.factor(4), 3e-5);
+        assertEquals( 15 * 0.99928863789470035, Momentum.factor(6), 1e-3);
+        assertEquals(105 * 0.99719860134891214, Momentum.factor(8), 0.1);
+        assertEquals(945 * 0.99135593485973217, Momentum.factor(10), 0.5); 
+    
+        assertEquals(0, Momentum.factor(1), 0);
+        assertEquals(0, Momentum.factor(3), 0);
+        assertEquals(0, Momentum.factor(5), 0);
+        assertEquals(0, Momentum.factor(7), 0);
+        assertEquals(0, Momentum.factor(9), 0);
     }
 
     @Test

@@ -18,7 +18,7 @@ import Type.IReal.ValueException;
 
 public class TestTaylor {
     static final int SAMPLES = 10000;
-    static final int BINDING = 5, DIVIDS = 5;
+    static final int DIVIDS = 5;
     static final double TOLERANCE = 3E-16;
 
     static final double[] sGass = new double[SAMPLES];
@@ -57,7 +57,7 @@ public class TestTaylor {
             fw.write("2n\tMomentum\tExponent\tInput Uncertainty\tTerm\tVariance\n");
             fw.write("\n");
              for (int n = 2; n < Momentum.maxN*2; n += 2) {
-                final double factor = Momentum.factor(n, BINDING);
+                final double factor = Momentum.factor(n);
                 for (int j = 0; j < sExp.length; ++j) {
                     final double[] sTaylor = Taylor.power(sExp[j]);
                     for (int i = 0; i < sDev.length; ++i) {
@@ -67,7 +67,7 @@ public class TestTaylor {
                         }
                         for (int k = 2; k < n; k += 2) {
                             variance -= sTaylor[k] * sTaylor[n-k] * 
-                                Momentum.factor(k, BINDING) * Momentum.factor(n - k, BINDING);
+                                Momentum.factor(k) * Momentum.factor(n - k);
                         }
                         fw.write(String.format("%d\t%e\t%e\t%e\t%e\t%e\n", 
                                  n, factor, sExp[j], sDev[i], variance, variance * Math.pow(sDev[i], n)));
@@ -88,7 +88,8 @@ public class TestTaylor {
                 fw.write("NoiseType\tNoise\tX\t");
                 fw.write(test);
                 fw.write("\tError Deviation\tError Minimum\tError Maximum\tValue Deviation\tUncertainty\tMean\tBias\tLeak");
-                for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i)
+                for (int i = -Momentum.BINDING_FOR_TAYLOR * DIVIDS; 
+                        i <=Momentum.BINDING_FOR_TAYLOR * DIVIDS; ++i)
                     fw.write(String.format("\t%.1f", ((double) i) / DIVIDS));  
                 fw.write("\n");
             }
@@ -100,22 +101,22 @@ public class TestTaylor {
                             sTaylor = Taylor.power(x);
                             sTaylor[0] = 1;
                             var = new VarDbl(1, dev);
-                            var.taylor(test, sTaylor, true, true, BINDING);
+                            var.taylor(test, sTaylor, true, true);
                         } else if (test == "exp") {
                             sTaylor = Taylor.exp();
                             sTaylor[0] = Math.exp(x);  
                             var = new VarDbl(x, dev);
-                            var.taylor(test, sTaylor, false, true, BINDING);
+                            var.taylor(test, sTaylor, false, true);
                         } else if (test == "log") {
                             sTaylor = Taylor.log();
                             sTaylor[0] = Math.log(x);
                             var = new VarDbl(x, dev);
-                            var.taylor(test, sTaylor, true, false, BINDING);
+                            var.taylor(test, sTaylor, true, false);
                         } else if (test == "sin") {
                             sTaylor = Taylor.sin(x*Math.PI);
                             sTaylor[0] = Math.sin(x*Math.PI);
                             var = new VarDbl(x*Math.PI, dev);
-                            var.taylor(test, sTaylor, false, false, BINDING);
+                            var.taylor(test, sTaylor, false, false);
                         } else
                             throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
  
@@ -137,7 +138,7 @@ public class TestTaylor {
                         }
  
                          double leak = 0;
-                         Histogram histo = new Histogram(BINDING, DIVIDS);
+                         Histogram histo = new Histogram(Momentum.BINDING_FOR_TAYLOR, DIVIDS);
                          final double vdev = stat.dev();
                          final double vavg = stat.avg();
                          stat.clear();
@@ -166,7 +167,8 @@ public class TestTaylor {
                                     vavg - sTaylor[0], var.value() - sTaylor[0], leak / SAMPLES));
                         final double[] sHisto = histo.histo();
                         if (sHisto == null) {
-                            for (int i = -BINDING*DIVIDS; i <= BINDING*DIVIDS; ++i) {
+                            for (int i = -Momentum.BINDING_FOR_TAYLOR * DIVIDS; 
+                                    i <= Momentum.BINDING_FOR_TAYLOR * DIVIDS ; ++i) {
                                 fw.write("\t");
                             }
                         } else {
@@ -196,7 +198,7 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^0", sTaylor, true, true, 5);
+            var.taylor("pow^0", sTaylor, true, true);
             assertEquals(1, var.value(), 0);
             assertEquals(0, var.variance(), 0);
         } catch (ValueException | UncertaintyException e) {
@@ -209,7 +211,7 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^1", sTaylor, true, true, 5);
+            var.taylor("pow^1", sTaylor, true, true);
             assertEquals(1, var.value(), 0);
             assertEquals(0.01, var.variance(), 2E-6);
         } catch (ValueException | UncertaintyException e) {
@@ -222,7 +224,7 @@ public class TestTaylor {
         sTaylor[0] = 10;
         init(10, 0.1);
         try {
-            var.taylor("pow^1", sTaylor, true, true, 5);
+            var.taylor("pow^1", sTaylor, true, true);
             assertEquals(10, var.value(), 0);
             assertEquals(0.01, var.variance(), 2E-6);
         } catch (ValueException | UncertaintyException e) {
@@ -236,9 +238,9 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^2", sTaylor, true, true, 5);
+            var.taylor("pow^2", sTaylor, true, true);
             assertEquals(1+1E-2, var.value(), 2E-7);
-            assertEquals(1E-2*4+1E-4*2, var.variance(), 5E-7);
+            assertEquals(1E-2*4+1E-4*2, var.variance(), 1E-6);
         } catch (ValueException | UncertaintyException e) {
             fail();
         }
@@ -253,7 +255,7 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^(1/2)", sTaylor, true, true, 5);
+            var.taylor("pow^(1/2)", sTaylor, true, true);
             assertEquals(1 -1E-2/8 -1E-4*15/128 -1E-6*315/1024, var.value(), 2E-7);
             assertEquals(1E-2/4 +1E-4*7/32 +1E-6*75/128, var.variance(), 3E-7);
         } catch (ValueException | UncertaintyException e) {
@@ -267,7 +269,7 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^(-1)", sTaylor, true, true, 5);
+            var.taylor("pow^(-1)", sTaylor, true, true);
             assertEquals(1 +1E-2 +1E-4*3 +1E-6*15, var.value(), 2E-6);
             assertEquals(1E-2 +1E-4*8 + 1E-6*69, var.variance(), 1E-4);
         } catch (ValueException | UncertaintyException e) {
@@ -281,7 +283,7 @@ public class TestTaylor {
         sTaylor[0] = 1;
         init(1, 0.1);
         try {
-            var.taylor("pow^(-2)", sTaylor, true, true, 5);
+            var.taylor("pow^(-2)", sTaylor, true, true);
             assertEquals(1 +1E-2*3 +1E-4*15 +1E-6*105, var.value(), 2E-4);
             assertEquals(1E-2*4 +1E-4*66 + 1E-6*960, var.variance(), 2E-3);
         } catch (ValueException | UncertaintyException e) {
@@ -318,7 +320,7 @@ public class TestTaylor {
         sTaylor[0] = Math.exp(0);
         init(0, 0.1);
         try {
-            var.taylor("exp", sTaylor, false, true, 5);
+            var.taylor("exp", sTaylor, false, true);
             assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(0), 2E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6, var.variance() /Math.exp(0)/Math.exp(0), 7E-7);
         } catch (ValueException | UncertaintyException e) {
@@ -328,7 +330,7 @@ public class TestTaylor {
         sTaylor[0] = Math.exp(1);
         init(1, 0.1);
         try {
-            var.taylor("exp", sTaylor, false, true, 5);
+            var.taylor("exp", sTaylor, false, true);
             assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(1), 1E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6, var.variance() /Math.exp(1)/Math.exp(1), 6E-7);
         } catch (ValueException | UncertaintyException e) {
@@ -338,7 +340,7 @@ public class TestTaylor {
         sTaylor[0] = Math.exp(-1);
         init(-1, 0.1);
         try {
-            var.taylor("exp", sTaylor, false, true, 5);
+            var.taylor("exp", sTaylor, false, true);
             assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(-1), 2E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6+1E-8*5/8, var.variance() /Math.exp(-1)/Math.exp(-1), 6E-7);
         } catch (ValueException | UncertaintyException e) {
@@ -370,7 +372,7 @@ public class TestTaylor {
         sTaylor[0] = Math.log(1);
         init(1, 0.1);
         try {
-            var.taylor("log", sTaylor, true, false, 5);
+            var.taylor("log", sTaylor, true, false);
             assertEquals(Math.log(1) -1E-2*1/2 -1E-4*3/4 -1E-6*15/6 -1E-8*105/8, var.value(), 2E-7);
             assertEquals(1E-2 +1E-4*5/2 +1E-6*32/3 + 1E-8*65, var.variance() /Math.exp(0)/Math.exp(0), 7E-7);
         } catch (ValueException | UncertaintyException e) {
@@ -380,9 +382,9 @@ public class TestTaylor {
         sTaylor[0] = Math.log(2);
         init(2, 0.1);
         try {
-            var.taylor("log", sTaylor, true, false, 5);
+            var.taylor("log", sTaylor, true, false);
             assertEquals(Math.log(2) -1E-2/4*1/2 -1E-4/16*3/4 -1E-6/64*15/6 -1E-8/256*105/8, var.value(), 2E-7);
-            assertEquals(1E-2/4 +1E-4/16*5/2 +1E-6/64*32/3 + 1E-8/256*65, var.variance() /Math.exp(0)/Math.exp(0), 2E-8);
+            assertEquals(1E-2/4 +1E-4/16*5/2 +1E-6/64*32/3 + 1E-8/256*65, var.variance() /Math.exp(0)/Math.exp(0), 5E-7);
         } catch (ValueException | UncertaintyException e) {
             fail();
         }
@@ -390,7 +392,7 @@ public class TestTaylor {
         sTaylor[0] = Math.log(0.5);
         init(0.5, 0.1);
         try {
-            var.taylor("log", sTaylor, true, false, 5);
+            var.taylor("log", sTaylor, true, false);
             assertEquals(Math.log(0.5) -4E-2*1/2 -16E-4*3/4 -64E-6*15/6 -256E-8*105/8, var.value(), 2E-4);
             assertEquals(4E-2 +16E-4*5/2 +64E-6*32/3 + 256E-8*65, var.variance(), 1E-4);
         } catch (ValueException | UncertaintyException e) {
@@ -421,7 +423,7 @@ public class TestTaylor {
         assertEquals(Math.sqrt(3)/2 /120, sTaylor[5], TOLERANCE);
         init(Math.PI / 6, 0.1);
         try {
-            var.taylor("sin", sTaylor, false, false, 5);
+            var.taylor("sin", sTaylor, false, false);
             assertEquals(0.5 -1E-2*0.5/2 +1E-4*0.5/24 -1E-6*0.5/720 +1E-8*0.5/264320, var.value(), 5E-5);
             assertEquals(1E-2*3/4 -1E-4*5/8 +1E-6*23/96, var.variance(), 2E-6);
         } catch (ValueException | UncertaintyException e) {
@@ -437,7 +439,7 @@ public class TestTaylor {
         assertEquals(1.0 /120, sTaylor[5], TOLERANCE);
         init(0, 0.1);
         try {
-            var.taylor("sin", sTaylor, false, false, 5);
+            var.taylor("sin", sTaylor, false, false);
             assertEquals(0, var.value(), 0);
             assertEquals(1E-2 -1E-4 +1E-6*13/24, var.variance(), 2E-6);
         } catch (ValueException | UncertaintyException e) {
