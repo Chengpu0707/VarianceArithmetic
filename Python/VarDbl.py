@@ -1,6 +1,8 @@
 import math
 from typing import Optional, Union
 
+import momentum
+
 class ValueException (BaseException):
     def __init__(self, value: float, *args: object) -> None:
         super().__init__(*args)
@@ -17,6 +19,7 @@ class VarDbl:
     BINDING_FOR_TAYLOR = 5.0
     BINDING_FOR_EQUAL = 0.67448975
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
+    _momentum = momentum.Momentum(200, 5)
 
     @staticmethod
     def ulp(f: float):

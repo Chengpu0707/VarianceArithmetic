@@ -15,8 +15,6 @@ public class FFT {
      */
     private static final int MAX_QUARD_ORDER = 16;
     static final int MAX_ORDER = MAX_QUARD_ORDER + 2;
-        // should be + 2. 
-        // + 1 to accomodate tan for the Linear Signal in TestFFT.cpp when MAX_ORDER==18
 
     /*
     * A cached sine function with resolution down to PI/2^(MAX_QUARD_ORDER+1)

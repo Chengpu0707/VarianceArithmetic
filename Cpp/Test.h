@@ -1,18 +1,16 @@
 #include <cassert>
-#include <cmath> 
 #include <iostream>
-#include <limits>
 #include <stacktrace>   // not supported in gcc 13.2.0
 #include <string>
 
+#include "ulp.h"
 
 #ifndef __Test_h__
 #define __Test_h__
+namespace var_dbl 
+{
 
 struct Test {
-    // unit in the last place
-    static double ulp(double x);
-
     // print current stack trace and exit
     static void fail(std::string msg = "");
     static void assertTrue(bool expression, std::string msg = "");
@@ -22,14 +20,6 @@ struct Test {
     template<typename T> static void assertEqual(const T& x, const T& y, std::string msg = "");
 };
 
-
-inline double Test::ulp(double x) 
-{
-    if (x > 0)
-        return std::nexttoward(x, std::numeric_limits<double>::infinity()) - x;
-    else 
-        return x - std::nexttoward(x, -std::numeric_limits<double>::infinity());
-}
 
 inline void Test::fail(std::string msg) {
     if (!msg.empty())
@@ -88,4 +78,5 @@ inline void Test::assertEqual(const T& x, const T& y, std::string msg)
     assert(x == y);
 }
 
+} // namespace var_dbl
 #endif  // __Test_h__

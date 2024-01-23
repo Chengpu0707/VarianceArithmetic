@@ -99,11 +99,11 @@ void testInitException() {
 
 void testUncertaintyRange() {
     const double maxU = sqrt(std::numeric_limits<double>::max());
-    assertUncertaintyError([maxU](){ VarDbl(std::numeric_limits<double>::max(), maxU + Test::ulp(maxU)); }, 
+    assertUncertaintyError([maxU](){ VarDbl(std::numeric_limits<double>::max(), maxU + ulp(maxU)); }, 
                          "VarDbl(double 1.79769e+308, double 1.34078e+154)");
     assertEquals( VarDbl(0, maxU), 0, maxU );
    
-    const double minU = sqrt(VarDbl::ulp(std::numeric_limits<double>::min()));
+    const double minU = sqrt(ulp(std::numeric_limits<double>::min()));
     assertEquals( VarDbl(0, minU), 0, minU );
     assertEquals( VarDbl(0, minU/2), 0, 0 );
 }
@@ -180,10 +180,10 @@ void testAddFloat()
 
     VarDbl v2(1.0);
     VarDbl v = v2 + 2.0;
-    assertEquals( v2 + 2.0, 3, VarDbl::ulp(1)*sqrt(5) );
-    assertEquals( 2.0 + v2, 3, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( v2 + 2.0, 3, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
+    assertEquals( 2.0 + v2, 3, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
     v2 += 2.0;
-    assertEquals( v2, 3, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( v2, 3, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
 }
 
 void testSubFloat() 
@@ -195,10 +195,10 @@ void testSubFloat()
     assertEquals( v1, -1, sqrt(2) );
 
     VarDbl v2(1.0);
-    assertEquals( v2 - 2.0, -1, VarDbl::ulp(1)*sqrt(5) );
-    assertEquals( 2.0 - v2, 1, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( v2 - 2.0, -1, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
+    assertEquals( 2.0 - v2, 1, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
     v2 -= 2.0;
-    assertEquals( v2, -1, VarDbl::ulp(1)*sqrt(5) );
+    assertEquals( v2, -1, sqrt(5) * ulp(1) * VarDbl::DEVIATION_OF_LSB );
 }
 
 void testAddSubException()
@@ -240,11 +240,11 @@ void testMultiplyOne()
     assertEquals( VarDbl(-1) * 2, -2, 0);
     assertEquals( 2 * VarDbl(-1), -2, 0);
 
-    assertEquals( VarDbl(-1.0) * VarDbl(2), -2, VarDbl::ulp(2.0));
-    assertEquals( VarDbl(-1.0) * 2, -2, VarDbl::ulp(2.0));
-    assertEquals( 2 * VarDbl(-1.0), -2, VarDbl::ulp(2.0));
+    assertEquals( VarDbl(-1.0) * VarDbl(2), -2, ulp(2.0) * VarDbl::DEVIATION_OF_LSB);
+    assertEquals( VarDbl(-1.0) * 2, -2, ulp(2.0) * VarDbl::DEVIATION_OF_LSB);
+    assertEquals( 2 * VarDbl(-1.0), -2, ulp(2.0) * VarDbl::DEVIATION_OF_LSB);
 
-    assertEquals( VarDbl(-1.0) * VarDbl(2.0), -2, sqrt(2)*VarDbl::ulp(2.0));
+    assertEquals( VarDbl(-1.0) * VarDbl(2.0), -2, sqrt(2)*ulp(2.0) * VarDbl::DEVIATION_OF_LSB);
     assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3);
     assertEquals( VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3);
     assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, sqrt(5 + 1e-6) * 1e-3);

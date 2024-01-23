@@ -3,7 +3,7 @@ import pickle
 import unittest
 import sys
 
-from VarDbl import VarDbl, ValueException, UncertaintyException
+from varDbl import VarDbl, ValueException, UncertaintyException
 
 def validate(self, res, value, uncertainty):
     self.assertAlmostEqual(value, res.value(), delta=math.ulp(res.value()))

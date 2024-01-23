@@ -265,7 +265,7 @@ public class VarDbl implements IReal {
         double var = inPrec? precSq() : variance();
         double varn = var;
         for (int n = 2; n < Momentum.maxN*2; n += 2, varn *= var) {
-            value += s1dTaylor[n] * Momentum.factor(n, bounding) * varn;
+            value += s1dTaylor[n] * Momentum.factor(n, bounding, false) * varn;
             for (int j = 1; j < n; ++j) {
                 variance += s1dTaylor[j] * s1dTaylor[n - j] * Momentum.factor(n, bounding) * varn;
             }

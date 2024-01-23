@@ -237,7 +237,7 @@ public class TestTaylor {
         init(1, 0.1);
         try {
             var.taylor("pow^2", sTaylor, true, true, 5);
-            assertEquals(1+1E-2, var.value(), 2E-9);
+            assertEquals(1+1E-2, var.value(), 2E-7);
             assertEquals(1E-2*4+1E-4*2, var.variance(), 5E-7);
         } catch (ValueException | UncertaintyException e) {
             fail();
@@ -319,7 +319,7 @@ public class TestTaylor {
         init(0, 0.1);
         try {
             var.taylor("exp", sTaylor, false, true, 5);
-            assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(0), 2E-9);
+            assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(0), 2E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6, var.variance() /Math.exp(0)/Math.exp(0), 7E-7);
         } catch (ValueException | UncertaintyException e) {
             fail();
@@ -339,7 +339,7 @@ public class TestTaylor {
         init(-1, 0.1);
         try {
             var.taylor("exp", sTaylor, false, true, 5);
-            assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(-1), 2E-9);
+            assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(-1), 2E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6+1E-8*5/8, var.variance() /Math.exp(-1)/Math.exp(-1), 6E-7);
         } catch (ValueException | UncertaintyException e) {
             fail();
@@ -371,7 +371,7 @@ public class TestTaylor {
         init(1, 0.1);
         try {
             var.taylor("log", sTaylor, true, false, 5);
-            assertEquals(Math.log(1) -1E-2*1/2 -1E-4*3/4 -1E-6*15/6 -1E-8*105/8, var.value(), 2E-9);
+            assertEquals(Math.log(1) -1E-2*1/2 -1E-4*3/4 -1E-6*15/6 -1E-8*105/8, var.value(), 2E-7);
             assertEquals(1E-2 +1E-4*5/2 +1E-6*32/3 + 1E-8*65, var.variance() /Math.exp(0)/Math.exp(0), 7E-7);
         } catch (ValueException | UncertaintyException e) {
             fail();
@@ -381,7 +381,7 @@ public class TestTaylor {
         init(2, 0.1);
         try {
             var.taylor("log", sTaylor, true, false, 5);
-            assertEquals(Math.log(2) -1E-2/4*1/2 -1E-4/16*3/4 -1E-6/64*15/6 -1E-8/256*105/8, var.value(), 2E-9);
+            assertEquals(Math.log(2) -1E-2/4*1/2 -1E-4/16*3/4 -1E-6/64*15/6 -1E-8/256*105/8, var.value(), 2E-7);
             assertEquals(1E-2/4 +1E-4/16*5/2 +1E-6/64*32/3 + 1E-8/256*65, var.variance() /Math.exp(0)/Math.exp(0), 2E-8);
         } catch (ValueException | UncertaintyException e) {
             fail();

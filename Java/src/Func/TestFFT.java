@@ -27,6 +27,7 @@ enum SignalType {
     Sin,
     Cos,
     Linear,
+    Slope,
 
     Aggr,  // aggregated Sin and Cos for all frequencies 
 }
@@ -107,13 +108,17 @@ class Signal {
                 sFreq[(size - freq) << 1] = peak;
                 break;
             case Linear:
+            case Slope:
                 sFreq[0] = size * (size - 1) / 2;
                 for (int i = 1; i < size; ++i) {
                     sWave[i << 1] = i;
                     sFreq[i << 1] = -peak;
-                    if (order < FFT.MAX_ORDER)
-                        sFreq[(i << 1) + 1] = -peak / FFT.sin((long) i, order + 1) * FFT.cos((long) i, order + 1);
-                    else
+                    if (signal == SignalType.Slope) {
+                        if (order < FFT.MAX_ORDER)
+                            sFreq[(i << 1) + 1] = -peak / FFT.sin(i, order + 1) * FFT.cos(i, order + 1);
+                        else
+                            sFreq[(i << 1) + 1] = -peak / Math.sin(Math.PI * i / size) * Math.cos(Math.PI * i / size);
+                    } else
                         sFreq[(i << 1) + 1] = -peak / Math.tan(Math.PI * i / size);
                 }
                 break;
@@ -456,16 +461,7 @@ public class TestFFT {
         dump(fw, realType, noiseType, noise, signal, order, freq, out.measure);
     }
 
-    void run(final FileWriter fw, RealType realType, double noise,
-              SignalType signal, int order, int freq) 
-            throws IOException, ArithmeticException, TypeException, ValueException, UncertaintyException {
-        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
-        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
-        run(fw, realType, NoiseType.White,  noise, SignalType.Sin, order, freq);
-        run(fw, realType, NoiseType.White,  noise, SignalType.Cos, order, freq);
-    }
-
-
+ 
     void dump(RealType realType) {
         final String pathOut = String.format("./Java/Output/FFT%s.txt", realType);
         try (final FileWriter fw = new FileWriter(pathOut)) {
@@ -477,15 +473,17 @@ public class TestFFT {
             }
             fw.write("\n");
             for (int order = 4; order <= FFT.MAX_ORDER; ++order) {
-                final int maxFreq = (1 << (order - 1)) - 1;
                 for (final double noise : sNoise) {
                     run(fw, realType, NoiseType.Gaussian, noise, SignalType.Linear, order, 0);
+                    run(fw, realType, NoiseType.Gaussian, noise, SignalType.Slope, order, 0);
                     run(fw, realType, NoiseType.White, noise, SignalType.Linear, order, 0);
-                    run(fw, realType, noise, SignalType.Linear, order, maxFreq);
-                }
-                for (final int freq : sFreq) {
-                    for (final double noise : sNoise) {
-                        run(fw, realType, noise, SignalType.Sin, order, freq);
+                    run(fw, realType, NoiseType.White, noise, SignalType.Slope, order, 0);
+                    
+                    for (final int freq : sFreq) {
+                        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
+                        run(fw, realType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
+                        run(fw, realType, NoiseType.White,  noise, SignalType.Sin, order, freq);
+                        run(fw, realType, NoiseType.White,  noise, SignalType.Cos, order, freq);
                     }
                 }
                 final Map<Integer, Map<NoiseType, Map<Double, Measure>>> sssAggr = Signal.ssssAggr.get(realType);

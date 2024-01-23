@@ -1,13 +1,21 @@
+/*
+VarDbl is a class to implement variance arithmetic in C++
+It is cheap to copy or to create, to encourage type conversion by coopying. 
+
+VarDbl.h is intended to be fully inline and deplored along without any making system.
+It relies only on Momentum.h, which is also in the var_dbl namespace.
+*/
 #include <cmath>
 #include <exception>
-#include <limits>
 #include <format>   // not supported in gcc 13.2.0
 #include <sstream>
 #include <string>
 
+#include "Momentum.h"
+#include "ulp.h"
+
 #ifndef __ValDbl_h__
 #define __ValDbl_h__
-
 namespace var_dbl 
 {
 
@@ -37,16 +45,17 @@ public:
     }
 };
 
-struct VarDbl {     // a class which is cheap to copy
-public:
-    // assume uniform distribution within ulp()
-    constexpr static const double BINDING_FOR_TAYLOR = 5.0;
-    constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
-    constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
-    static double ulp(double d);
 
+
+struct VarDbl { 
+public:
+    constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
+        // assume uniform distribution within ulp()
+    constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
+        // z for 50% probability of equal
 
 private:    
+    constexpr static const auto _momentum = Momentum<200, 5>();
     double _value = 0;
     double _variance = 0;
 
@@ -124,14 +133,6 @@ public:
 };
 
 
-inline double VarDbl::ulp(double x)
-{
-    if (x > 0)
-        return (std::nexttoward(x, std::numeric_limits<double>::infinity()) - x) * DEVIATION_OF_LSB;
-    else 
-        return (x - std::nexttoward(x, -std::numeric_limits<double>::infinity())) * DEVIATION_OF_LSB;
-}
-
 inline VarDbl::VarDbl() {
     _value = 0;
     _variance = 0;
@@ -154,7 +155,7 @@ inline VarDbl::VarDbl(double value)
 {
     std::ostringstream ss;
     ss << "VarDbl(double " << value << ")";
-    const double uncertainty = ulp(value); 
+    const double uncertainty = ulp(value) * DEVIATION_OF_LSB; 
     init(value, uncertainty*uncertainty, ss.str());
 }
 
@@ -178,7 +179,7 @@ inline VarDbl::VarDbl(long long value) noexcept
     std::ostringstream ss;
     ss << "VarDbl(long " << value << ")";
     value = (double) value;
-    const double uncertainty = ulp(value);
+    const double uncertainty = ulp(value) * DEVIATION_OF_LSB;
     init(value, uncertainty*uncertainty, ss.str());
 }
 
