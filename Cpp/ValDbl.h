@@ -19,27 +19,27 @@ It relies only on Momentum.h, which is also in the var_dbl namespace.
 namespace var_dbl 
 {
 
-class ValueError : public std::exception 
+class ValueException : public std::exception 
 {
 public:
     const double value;
     const std::string what;
 
-    explicit ValueError(double value, const std::string what) : 
+    explicit ValueException(double value, const std::string what) : 
         value(value), what(what)
     {
     }
 };
 
 
-class UncertaintyError : public std::exception 
+class UncertaintyException : public std::exception 
 {
 public:
     const double value;
     const double variance;
     const std::string what;
 
-    explicit UncertaintyError(double value, double variance, const std::string what) : 
+    explicit UncertaintyException(double value, double variance, const std::string what) : 
         value(value), variance(variance), what(what)
     {
     }
@@ -53,18 +53,20 @@ public:
         // assume uniform distribution within ulp()
     constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
         // z for 50% probability of equal
+    constexpr static const int BINDING_FOR_TAYLOR = 5;
+    constexpr static const int MAX_ORDER_FOR_TAYLOR = 200;
 
 private:    
-    constexpr static const auto _momentum = Momentum<200, 5>();
+    constexpr static const auto _momentum = Momentum<MAX_ORDER_FOR_TAYLOR, BINDING_FOR_TAYLOR>();
     double _value = 0;
     double _variance = 0;
 
     void init(double value, double variance, const std::string what) 
     {
         if (!std::isfinite(value))
-            throw ValueError(value, what);
+            throw ValueException(value, what);
         if (!std::isfinite(variance))
-            throw UncertaintyError(value, variance, what);
+            throw UncertaintyException(value, variance, what);
         _value = value;
         _variance = variance;
     }

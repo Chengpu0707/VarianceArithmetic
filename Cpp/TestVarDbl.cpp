@@ -17,11 +17,11 @@ void assertValueError(std::function<void()> func, std::string what )
     try {
         func();
         Test::fail(what + std::string(" value overflow "));
-    } catch(ValueError ex) {
+    } catch(ValueException ex) {
     } catch (std::exception ex) {
-        Test::fail(what + std::string(" catch not ValueError but exception ") + ex.what());
+        Test::fail(what + std::string(" catch not ValueException but exception ") + ex.what());
     } catch (...) {
-        Test::fail(what + std::string(" catch unknown exception other than ValueError"));
+        Test::fail(what + std::string(" catch unknown exception other than ValueException"));
     }
 }
 
@@ -30,11 +30,11 @@ void assertUncertaintyError(std::function<void()> func, std::string what )
     try {
         func();
         Test::fail(what + std::string(" uncertainty overflow "));
-    } catch(UncertaintyError ex) {
+    } catch(UncertaintyException ex) {
     } catch (std::exception ex) {
-        Test::fail(what + std::string(" catch not UncertaintyError but exception ") + ex.what());
+        Test::fail(what + std::string(" catch not UncertaintyException but exception ") + ex.what());
     } catch (...) {
-        Test::fail(what + std::string(" catch unknown exception other than UncertaintyError"));
+        Test::fail(what + std::string(" catch unknown exception other than UncertaintyException"));
     }
 }
 
@@ -84,7 +84,7 @@ void testInitException() {
     assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity()); }, "VarDbl(double inf)");
     assertValueError([](){ VarDbl(std::numeric_limits<double>::quiet_NaN()); }, "VarDbl(double nan)");
 
-    // ValueError has precedence
+    // ValueException has precedence
     assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()); },
                     "VarDbl(double inf, double inf)");
     assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), 0); },

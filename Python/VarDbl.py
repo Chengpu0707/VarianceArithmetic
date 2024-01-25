@@ -1,14 +1,13 @@
 import math
 from typing import Optional, Union
 
-import momentum
 
-class ValueException (BaseException):
+class ValueException (Exception):
     def __init__(self, value: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
 
-class UncertaintyException (BaseException):
+class UncertaintyException (Exception):
     def __init__(self, value: float, uncertainty: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
@@ -16,14 +15,17 @@ class UncertaintyException (BaseException):
 
 
 class VarDbl:
-    BINDING_FOR_TAYLOR = 5.0
-    BINDING_FOR_EQUAL = 0.67448975
-    DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
-    _momentum = momentum.Momentum(200, 5)
+    '''
+    A class for variance arithmetic that contains basic operations.
 
-    @staticmethod
-    def ulp(f: float):
-        return math.ulp(f) * VarDbl.DEVIATION_OF_LSB
+    The Taylor expansion part is in the class Taylor
+    '''
+    BINDING_FOR_EQUAL = 0.67448975
+        # z value for 50% probability of equal
+    DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
+        # rounding error is uniformly distrubuted within LSB of float
+    BINDING_FOR_TAYLOR = 5
+        # Taylor expansion parameters, to be honored in the class Taylor
 
     __slots__ = ('_value', '_variance')
 
@@ -53,18 +55,22 @@ class VarDbl:
              *) An float is initialized with uncertainty = math.ulp
         '''
         if uncertainty is None:
+            if type(value) == VarDbl:
+                self._value = value._value
+                self._variance = value._variance
+                return
             if type(value) == int:
                 if value == int(float(value)):
                     self._value = float(value)
                     self._variance = 0.0
                     return
                 value = float(value)
-            uncertainty = VarDbl.ulp(value)
+            uncertainty = math.ulp(value) * VarDbl.DEVIATION_OF_LSB
         variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
         if not math.isfinite(value):
-            raise ValueException(value)
+            raise ValueException(value, "__init__")
         if not math.isfinite(variance):
-            raise UncertaintyException(value, uncertainty)
+            raise UncertaintyException(value, uncertainty, "__init__")
         self._value = value
         self._variance = variance
     
@@ -150,5 +156,10 @@ class VarDbl:
         if self == other:
             return True
         return self.value() > other.value()
+  
 
-
+def validate(self, var:VarDbl, value:float, uncertainty:float=None):
+    self.assertAlmostEqual(value, var.value(), delta=math.ulp(value))
+    if uncertainty is None:
+         uncertainty = math.ulp(value)
+    self.assertAlmostEqual(uncertainty, var.uncertainty(), delta=math.ulp(value))
