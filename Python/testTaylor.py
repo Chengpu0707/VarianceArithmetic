@@ -205,7 +205,26 @@ class TestLog (unittest.TestCase):
                   ignoreAssertError=True)
         
 
-        
+class TestSin (unittest.TestCase):
+
+    def testCoeff_0(self):
+        sTaylor = taylor.sin(0)
+        validate(self, sTaylor[0], 0)
+        validate(self, sTaylor[1], 1/1, uncertainty=0.8164965809277261*math.ulp(1))
+        validate(self, sTaylor[2], 0)
+        validate(self, sTaylor[3], -1/6, uncertainty=1.4529663145135579*math.ulp(1/6))
+        validate(self, sTaylor[4], 0)
+        validate(self, sTaylor[5], 1/120, uncertainty=1.3705905728986023*math.ulp(1/120))
+
+    def testCoeff_half_pi(self):
+        sTaylor = taylor.sin(math.pi/2)
+        validate(self, sTaylor[0], 1, uncertainty=0.57735026918962581*math.ulp(1))
+        validate(self, sTaylor[1], 0, uncertainty=1.059541960031773e-32, deltaValue=6.123233995736766e-17)
+        validate(self, sTaylor[2], -1/2)
+        validate(self, sTaylor[3], 0, uncertainty=2.4068420546318608e-33, deltaValue=1.020538999289461e-17)
+        validate(self, sTaylor[4], 1/24, uncertainty=1.6442942874387492*math.ulp(1/24))
+        validate(self, sTaylor[5], 0, uncertainty=1.4294378989955562e-34, deltaValue=5.102694996447305e-19)
+       
 
 
 if __name__ == '__main__':

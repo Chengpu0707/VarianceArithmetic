@@ -850,6 +850,30 @@ N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!}
 \end{align*}
 
 \begin{align*}
+& f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!} \\
+\delta^2 f(x, y) &= \int \int f(x + \tilde{x}, y + \tilde{y})^2 
+    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \overline{f(x, y)}^2 \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \;(
+  \sum_{i=0}^{2m} \sum_{j=0}^{2n} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}); \\
+&=  (\delta x)^2 
+\sum_{j=0}^{2n} & \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+ &\eqspace - \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
+ & = \sum_{j=1}^{2n-1} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
+ &\eqspace - \sum_{j=1}^{n-1} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
+ &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,0)}_{(x,y)}}{i!}\frac{f^{(2m-i,2n)}_{(x,y)}}{(2m-i)!\;(2n)!}
+    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,0)}_{(x,y)}}{(2i)!}\frac{f^{(2m-2i,2n)}_{(x,y)}}{(2m-2i)!\;(2n)!}) \\
+ &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,2n)}_{(x,y)}}{i!\;(2n)!}\frac{f^{(2m-i,0)}_{(x,y)}}{(2m-i)!}
+    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,2n)}_{(x,y)}}{(2i)!(2n)!} \frac{f^{(2m-2i,0)}_{(x,y)}}{(2m-2i)!})
+\end{align*}
+
+\fi
+
+\iffalse
+
+\begin{align*}
 e^{x + \tilde{x}} &= e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}
  \simeq e^x \left(1 + \tilde{x} + \frac{1}{2} \tilde{x}^2 + \frac{1}{6} \tilde{x}^3 + \frac{1}{24} \tilde{x}^4 + \frac{1}{120} \tilde{x}^5 + \frac{1}{720} \tilde{x}^6 \right); \\
 \overline{e^x} &= e^x \sum_{n=0}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!} 
@@ -900,35 +924,14 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \be
  &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align*}
 
-\begin{align*}
-& f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
-\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \zeta(2m) \zeta(2n)  \frac{f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!} \\
-\delta^2 f(x, y) &= \int \int f(x + \tilde{x}, y + \tilde{y})^2 
-    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \overline{f(x, y)}^2 \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \;(
-  \sum_{i=0}^{2m} \sum_{j=0}^{2n} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}); \\
-&=  (\delta x)^2 
-\sum_{j=0}^{2n} & \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
- &\eqspace - \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
- & = \sum_{j=1}^{2n-1} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \\
- &\eqspace - \sum_{j=1}^{n-1} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\frac{f^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!\;(2n-2j)!}) \\
- &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,0)}_{(x,y)}}{i!}\frac{f^{(2m-i,2n)}_{(x,y)}}{(2m-i)!\;(2n)!}
-    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,0)}_{(x,y)}}{(2i)!}\frac{f^{(2m-2i,2n)}_{(x,y)}}{(2m-2i)!\;(2n)!}) \\
- &\eqspace + \zeta(2m) \zeta(2n) \frac{f^{(i,2n)}_{(x,y)}}{i!\;(2n)!}\frac{f^{(2m-i,0)}_{(x,y)}}{(2m-i)!}
-    - \zeta(2i) \zeta(2m-2i) \zeta(2n) \frac{f^{(2i,2n)}_{(x,y)}}{(2i)!(2n)!} \frac{f^{(2m-2i,0)}_{(x,y)}}{(2m-2i)!})
-\end{align*}
-
 \fi
-
-
-
 
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
 Using Taylor expansion is one way to get the simple statistics when the result uncertainty distribution is nearly Gaussian.
+
+\subsubsection{Uncertainty of Taylor Expansion}
 
 An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
 Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} \cite{Prev_Precision_Arithmetic} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
@@ -947,8 +950,11 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
   &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
   &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
 \end{align}
-When $f(x) \neq 0$, $\delta f(x) \;/|f(x)|$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
-It is an approximation to the $f(x)$ precision $P(f(x)) = \delta f(x) \;/|\overline{f(x)}|$
+When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
+It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
+
+
+\subsubsection{Binding Factor}
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
@@ -989,6 +995,27 @@ When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \l
 
 Thus, $\sigma = 5$ in variance arithmetic.
 
+
+\subsubsection{Termination of Taylor Expansion}
+
+Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using the variance arithmetic as well.
+\begin{itemize}
+\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
+
+\item The conventional floating-point representation has limited bit resolution.
+If the new terms for both formula start to be smaller than the corresponding least significant values, the sums can be stopped.
+
+\item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
+If the precision of the uncertainty becomes coarser than $1/\sigma$, the result should be invalidated.
+
+\item If within the range of $(x - \sigma \delta x, x + \sigma \delta x)$ an analytic function is monotonic, each term in either Formula \eqref{eqn: Taylor 1d mean} or \eqref{eqn: Taylor 1d variance} should be smaller than its corresponding previous term,
+Otherwise, the corresponding sum will diverge, and the result should be invalidated.
+
+\end{itemize}
+
+
+\subsubsection{One-dimensional Examples}
+
 Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which always converge:
 \begin{align}
 \label{eqn: exp Taylor}
@@ -997,16 +1024,6 @@ Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which al
 \frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
  -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
-\end{align}
-
-Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
-\begin{align}
-\label{eqn: log Taylor}
-& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
-\label{eqn: log precision}
-\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
-   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
- &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
 \end{align}
 
 Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, which converge when $\delta x < 1$:
@@ -1018,6 +1035,16 @@ Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, whic
  & \left( \cos(x)^2 \sum_{j=0}^{n-1} \frac{\zeta(2n)}{(2j+1)!(2n-2j-1)!}
       - \sin(x)^2 \sum_{j=1}^{n-1} \frac{\zeta(2n) - \zeta(2j) \zeta(2n-2j)}{(2j)!(2n-2j)!} \right) \\ 
  &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  + o((\delta x)^8);
+\end{align}
+
+Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
+\begin{align}
+\label{eqn: log Taylor}
+& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
+\label{eqn: log precision}
+\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
+   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
+ &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
 \end{align}
 
 Formula \eqref{eqn: power precision} gives the result variance for $x^c$, in which $\begin{pmatrix} c \\ n \end{pmatrix} = \frac{\prod_{j=0}^{n-1} (c -j)}{n!}$:
@@ -1049,7 +1076,10 @@ The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-for
 Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Inverse_Square_Distribution}.
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power precision}.
 
-The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, or the difference speed of variance increases of $x^c$ depending on different $c$.
+The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
+
+
+\subsubsection{Two-dimensional Expansion}
 
 Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
 \begin{align}
@@ -1068,6 +1098,9 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 &\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
+
+
 
 
 \subsection{Dependency Tracing}
@@ -1251,11 +1284,6 @@ Generally, the validation standards for the \emph{tracking power} of the varianc
 \item If the calculation response fits the function, such as more calculations generally results in larger result uncertainties.
 
 \end{enumerate}
-
-
-
-
-
 
 
 \subsection{Types of Uncertainties \cite{Prev_Precision_Arithmetic}}
@@ -1566,7 +1594,7 @@ Because the discrete Fourier transformation has widest applications in science a
 
 \subsection{Testing Signals}
 
-To avoid the unfaithful representation, the validation of the variance arithmetic using discrete Fourier transformation will not rely on the ideal result from continuous Fourier transformation.
+To avoid the unfaithful representation, the validation of the variance arithmetic using discrete Fourier transformation will not rely on the ideal result from the continuous Fourier transformation counterpart.
 Instead, the analytic result will be calculated using only Formula \eqref{eqn: Fourier}.
 
 The following signals are used for testing:
@@ -1580,7 +1608,7 @@ The following signals are used for testing:
 & y \equiv i 2\pi \frac{n}{N}: \eqspace G(y) = \sum_{k=0}^{N-1}  e^{y k} = \frac{e^{N y} - 1}{e^y - 1}
  = \begin{cases} y = 0: \eqspace N \\ y \neq 0: \eqspace 0 \end{cases}; \nonumber \\
 \label{eqn: Fourier spec for linear}
-H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace - \frac{N}{2}(1 + i /\tan(n \pi /N)) \end{cases};
+H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace - \frac{N}{2}(1 + i /\tan(n \frac{\pi}{N})) \end{cases};
 \end{align}
 
 \end{itemize}
@@ -1847,7 +1875,7 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 \captionof{figure}{
 The result error deviations using Slope signals vs. input uncertainties and FFT Orders for the forward transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
-A Slope signal is constructed by replacing $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
+A Slope signal is constructed by replacing $\tan(n \frac{\pi}{N})$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
 }
 \label{fig: FFT_Slope_Forward_ErrorDev_vs_Noise_Order}
 \end{figure}
@@ -1868,7 +1896,7 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 \captionof{figure}{
 The result error deviations using Slope signals vs. input uncertainties and FFT Orders for the reverse transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $4$ to $18$.
-A Slope signal is constructed by replacing $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
+A Slope signal is constructed by replacing $\tan(n \frac{\pi}{N})$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$ for the corresponding Linear signal.
 }
 \label{fig: FFT_Slope_Reverse_ErrorDev_vs_Noise_Order}
 \end{figure}
@@ -1888,19 +1916,21 @@ However, for the forward transformations, the transition is a cliff toward a fla
 Also, the ideal coverage plain of the reverse transformation is smaller, and it is expected to disappear when the FFT order is more than $20$ for all input uncertainties.
 Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order} demonstrate the complicity when non ideal coverage presents.
 
-One way to reduce the numerical errors in Linear signals is to replace $\tan(n \pi /N)$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$, so that only $\sin$ library functions are used.
+One way to reduce the numerical errors in Linear signals is to replace $\tan(n \frac{\pi}{N})$ in Formula \eqref{eqn: Fourier spec for linear} with $\frac{\sin(n \frac{2\pi}{2N})}{\sin(n \frac{2\pi}{2N} + \frac{\pi}{2})}$, so that only $\sin$ library functions are used.
 The seemly identical signal is named as the \emph{Slope} signal.
 Compared with Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order}, Figure \ref{fig: FFT_Slope_Forward_ErrorDev_vs_Noise_Order} shows that the replacement make almost no difference  for the forward transformations.
 Compared with Figure \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order}, Figure \ref{fig: FFT_Slope_Reverse_ErrorDev_vs_Noise_Order} shows that the replacement enlarge the ideal coverage to about $80\%$ more input cases.
-The effect of such seemly idiotic mathematical replacement could be quite large and delicate, so that it seems hopeless to try to improve numerical results using this kind of maneuvers.
+The effect of such seemly idiotic mathematical replacement could be quite large and delicate on the result numerical errors, so that it seems hopeless to try to improve numerical results using this kind of maneuvers using conventional floating-point calculations.
 
-If both the $\sin$ and the $\tan$ library functions were calculated with the variance arithmetic so that the result have ideal coverage, respectively, ideal coverage for the FFT transformations are expected, so that both figures can be greatly simplified as constant $1$ except when the FFT orders are too small to give a large enough sample size for the error deviations.
+Thus, it is necessary for the library functions to have corresponding uncertainty for each value, to achieve ideal coverage.
+With ideal coverage, a result uncertainty is the corresponding deviation of the value error.
+
 
 
 
 
 \clearpage
-\section{Sine Library Function with Uncertainty}
+\section{Verification of a Generated Sine Library Function with Uncertainty}
 \label{sec: recursion}
 
 In Section \ref{sec: FFT}, both the $\sin$ library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$ and the $\tan$ library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$ have been demonstrated to have significant numerical errors, and when the $\tan$ library function is replace by the $\sin$ library function as $\sin(x) / \sin(x + \pi/2)$, the numerical errors of the $\tan$ library function can be reduced significantly.

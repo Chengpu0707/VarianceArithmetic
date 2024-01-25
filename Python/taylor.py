@@ -43,8 +43,6 @@ class Taylor:
         @param inPrec:      If to expand by input precision
         @param outPrec:     if the variance result needs to be multiplied by s1dTaylor[0]
 
-        checklAlwaysDecrease    Check if the variance newVariance is decreasing
-        
         Without any otptimization, or judgement of the convergence of the result.           
         '''
         value = VarDbl(1, 0) if outPrec else s1dTaylor[0]
@@ -103,16 +101,12 @@ class Taylor:
             match i % 4:
                 case 0:
                     sTaylor.append(VarDbl(math.sin(x) * n))
-                    break
                 case 1:
-                    sTaylor[i] = math.cos(x) * n   
-                    break
+                    sTaylor.append(VarDbl(math.cos(x) * n))  
                 case 2:
-                    sTaylor[i] = -math.sin(x) * n 
-                    break
+                    sTaylor.append(VarDbl(-math.sin(x) * n))
                 case 3:
-                    sTaylor[i] = -math.cos(x) * n 
-                    break
+                    sTaylor.append(VarDbl(-math.cos(x) * n))
         return sTaylor
     
     def power(self, exponent:float) -> list[float]:

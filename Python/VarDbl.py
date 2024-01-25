@@ -158,8 +158,13 @@ class VarDbl:
         return self.value() > other.value()
   
 
-def validate(self, var:VarDbl, value:float, uncertainty:float=None):
-    self.assertAlmostEqual(value, var.value(), delta=math.ulp(value))
+def validate(self, var:VarDbl, value:float, uncertainty:float=None,
+             deltaValue=None, deltaUncertainty=None):
+    if deltaValue is None:
+        deltaValue = delta=math.ulp(var.value())
+    self.assertAlmostEqual(value, var.value(), delta=deltaValue)
     if uncertainty is None:
-         uncertainty = math.ulp(value)
-    self.assertAlmostEqual(uncertainty, var.uncertainty(), delta=math.ulp(value))
+         uncertainty = math.ulp(var.value())
+    if deltaUncertainty is None:
+         deltaUncertainty = math.ulp(var.uncertainty())
+    self.assertAlmostEqual(uncertainty, var.uncertainty(), delta=deltaUncertainty)

@@ -246,11 +246,10 @@ public class VarDbl implements IReal {
      * @param name:         the name of the Taylor expansion, for exception logging.
      * @param s1dTaylor:    the Taylor expansion coefficent, with f(x) as s1dTaylor[0].  
      *                      It should already contains /n!.
-     * @param inPrec:       if to expand by input precision
+     * @param inPrec:       If to expand by input precision
      * @param outPrec:      if the variance result needs to be multiplied by s1dTaylor[0]
-     * @param bounding:     the bounding factor. 
      * 
-     * @return:  
+     * @return:              
      */
     VarDbl taylor(final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec) 
             throws ValueException, UncertaintyException {

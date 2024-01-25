@@ -6,7 +6,7 @@ from varDbl import UncertaintyException, validate
 class TestMomuntum (unittest.TestCase):
     momentum = Momentum()
 
-    def testMaxOrder(self):
+    def test_max_order(self):
         try:
             Momentum(maxOrder=Momentum.MAX_ORDER+1)
         except UncertaintyException:
@@ -14,7 +14,7 @@ class TestMomuntum (unittest.TestCase):
         except BaseException as ex:
             raise ex
 
-    def testEven(self):
+    def test_even(self):
         validate(self, TestMomuntum.momentum.factor(0),    1 * 0.99999947194737793)
         validate(self, TestMomuntum.momentum.factor(2),    1 * 0.99998569318184616)
         validate(self, TestMomuntum.momentum.factor(4),    3 * 0.99987013368935596)
@@ -22,7 +22,7 @@ class TestMomuntum (unittest.TestCase):
         validate(self, TestMomuntum.momentum.factor(8),  105 * 0.99719860134891214)
         validate(self, TestMomuntum.momentum.factor(10), 945 * 0.99135593485973217) 
 
-    def testOdd(self):
+    def test_odd(self):
         validate(self, TestMomuntum.momentum.factor(1), 0)
         validate(self, TestMomuntum.momentum.factor(3), 0)
         validate(self, TestMomuntum.momentum.factor(5), 0)
