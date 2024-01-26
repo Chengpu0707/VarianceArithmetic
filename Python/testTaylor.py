@@ -82,7 +82,7 @@ class TestExp (unittest.TestCase):
             var = VarDbl(exp, uncertainty)
             res = taylor.taylor1d(var, "exp", s1dTaylor, False, True)
             prec = res * math.exp(-exp)
-            if exception:
+            if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of exp({var}) = {res} not throw {exception}')
             self.assertAlmostEqual(prec.value(),
                     1 + math.pow(uncertainty, 2)/2 + math.pow(uncertainty, 4)/8 +\
@@ -225,6 +225,71 @@ class TestSin (unittest.TestCase):
         validate(self, sTaylor[4], 1/24, uncertainty=1.6442942874387492*math.ulp(1/24))
         validate(self, sTaylor[5], 0, uncertainty=1.4294378989955562e-34, deltaValue=5.102694996447305e-19)
        
+    def testCoeff_half_pi_negative(self):
+        sTaylor = taylor.sin(-math.pi/2)
+        validate(self, sTaylor[0], -1, uncertainty=0.57735026918962581*math.ulp(1))
+        validate(self, sTaylor[1], 0, uncertainty=1.059541960031773e-32, deltaValue=6.123233995736766e-17)
+        validate(self, sTaylor[2], 1/2)
+        validate(self, sTaylor[3], 0, uncertainty=2.4068420546318608e-33, deltaValue=1.020538999289461e-17)
+        validate(self, sTaylor[4], -1/24, uncertainty=1.6442942874387492*math.ulp(1/24))
+        validate(self, sTaylor[5], 0, uncertainty=1.4294378989955562e-34, deltaValue=5.102694996447305e-19)
+       
+    def validate(self, x, uncertainty, exception=None, 
+                 valueDelta=5e-7, uncertaintyDelta=1e-6) -> VarDbl:
+        try:
+            s1dTaylor = taylor.sin(x)
+            s1dTaylor[0] = math.sin(x)
+            var = VarDbl(x, uncertainty)
+            res = taylor.taylor1d(var, "sin", s1dTaylor, False, False)
+            prec = res - s1dTaylor[0]
+            if (exception is not None) and (exception != AssertionError):
+                self.fail(f'precision {prec} of sin({var}) = {res} not throw {exception}')
+            self.assertAlmostEqual(prec.value(),
+                    math.sin(x) * (-math.pow(uncertainty, 2)/2 + math.pow(uncertainty, 4)/8 +\
+                        -math.pow(uncertainty, 6)/48 + math.pow(uncertainty, 8)/384),
+                    delta=valueDelta)
+            cos2 = math.cos(x) * math.cos(x)
+            self.assertAlmostEqual(prec.variance(),
+                    math.pow(uncertainty, 2) * cos2 - math.pow(uncertainty, 4)*(3/2 * cos2 - 1/2) +\
+                        math.pow(uncertainty, 6)*(7/6 * cos2 - 1/2),
+                    delta=uncertaintyDelta)
+            return res
+        except BaseException as ex:
+            if (exception is None) or (type(ex) != exception): 
+                raise ex
+            return res
+        
+    def testSin(self):
+        self.validate(0, 0)
+        self.validate(0, 1e-3)
+        self.validate(0, 1e-2)
+        self.validate(0, 1e-1)
+
+        self.validate(math.pi/2, 0)
+        self.validate(math.pi/2, 1e-3)
+        self.validate(math.pi/2, 1e-2)
+        self.validate(math.pi/2, 1e-1)
+
+        self.validate(-math.pi/2, 0)
+        self.validate(-math.pi/2, 1e-3)
+        self.validate(-math.pi/2, 1e-2)
+        self.validate(-math.pi/2, 1e-1)
+
+    @staticmethod
+    def func(x):
+        return math.sin(x)
+
+    @staticmethod
+    def npfunc(x, sNoise):
+        return np.sin(sNoise + x)
+ 
+    def test(self):
+        writeTest(self, 'sin', TestSin.func, TestSin.npfunc,
+                  np.array([i/16 for i in range(-16, 17)]) * math.pi,
+                  ignoreAssertError=True)
+
+
+
 
 
 if __name__ == '__main__':

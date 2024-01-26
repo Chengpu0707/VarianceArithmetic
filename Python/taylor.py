@@ -62,7 +62,7 @@ class Taylor:
                             varn
             value += newValue
             variance += newVariance
-            if variance.variance() >= variance.value() * self._variance_threshold:
+            if variance.variance() > variance.value() * self._variance_threshold:
                 raise LossUncertaintyException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             varn *= var
