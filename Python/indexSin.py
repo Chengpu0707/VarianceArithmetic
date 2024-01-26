@@ -1,6 +1,5 @@
+import bisect
 import math
-
-from varDbl import VarDbl
 
 class IndexSin:
     '''
@@ -55,6 +54,18 @@ class IndexSin:
 
     def tan(self, freq:int) -> float:
         return self.sin(freq) / self.cos(freq)
+    
+    def arc_sin(self, value:float) -> float:
+        if not -1 <= value <= 1:
+            raise ValueError(f'Invalid sine value {value}')
+        sign = 1 if value >=0 else -1
+        value = abs(value)
+        idx = bisect.bisect_left(self._sSin, value)
+        if idx == len(self._sSin) - 1:
+            return sign * idx 
+        return sign * (idx + (value - self._sSin[idx]) / (self._sSin[idx + 1] - self._sSin[idx]))
+        
+
 
 
     

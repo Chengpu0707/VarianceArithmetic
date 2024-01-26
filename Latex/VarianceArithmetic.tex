@@ -953,6 +953,26 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
 It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
 
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
+\begin{align}
+\label{eqn: Taylor 2d}
+&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; 
+\end{align}
+\begin{align}
+\label{eqn: Taylor 2d mean}
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
+&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
+&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
+&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
+      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
+&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
+\end{align}
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
 
 \subsubsection{Binding Factor}
 
@@ -994,24 +1014,6 @@ $\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisi
 When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \leq 16$, which makes Formula \eqref{eqn: Taylor 1d variance} quite insensitive to the actual value of $\sigma$.
 
 Thus, $\sigma = 5$ in variance arithmetic.
-
-
-\subsubsection{Termination of Taylor Expansion}
-
-Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using the variance arithmetic as well.
-\begin{itemize}
-\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
-
-\item The conventional floating-point representation has limited bit resolution.
-If the new terms for both formula start to be smaller than the corresponding least significant values, the sums can be stopped.
-
-\item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
-If the precision of the uncertainty becomes coarser than $1/\sigma$, the result should be invalidated.
-
-\item If within the range of $(x - \sigma \delta x, x + \sigma \delta x)$ an analytic function is monotonic, each term in either Formula \eqref{eqn: Taylor 1d mean} or \eqref{eqn: Taylor 1d variance} should be smaller than its corresponding previous term,
-Otherwise, the corresponding sum will diverge, and the result should be invalidated.
-
-\end{itemize}
 
 
 \subsubsection{One-dimensional Examples}
@@ -1079,25 +1081,24 @@ Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
 
 
-\subsubsection{Two-dimensional Expansion}
+\subsubsection{Convergence and Termination of Taylor Expansion}
 
-Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
-\begin{align}
-\label{eqn: Taylor 2d}
-&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
-\label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
-\label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
-&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
-&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
-&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
-      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
-&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
-\end{align}
-Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
+
+Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using the variance arithmetic.
+\begin{itemize}
+\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
+
+\item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
+If the precision of the uncertainty becomes coarser than $1/\sigma$, the result should be invalidated.
+
+\item If within the range of $(x - \sigma \delta x, x + \sigma \delta x)$ an analytic function is monotonic, each term in either Formula \eqref{eqn: Taylor 1d mean} or \eqref{eqn: Taylor 1d variance} should be smaller than its corresponding previous term.
+Otherwise, the corresponding sum will diverge, and the result should be invalidated.
+On the other hand, if the new terms for both formula start to be smaller than the corresponding least significant values, the sums can be stopped.
+
+\end{itemize}
+
+
 
 
 
@@ -1154,7 +1155,14 @@ When $(f g)^{(n)} = f^{(n)} g^{(n)}$, $\overline{f^n g^n} = \overline{f^n} \over
 When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to trace dependency between uncertainties.
 For example:
 \begin{itemize}
-\item Formula \eqref{eqn: sum variance} shows $\delta^2 (f + g)$, whose dependence tracing can be demonstrated by $\delta^2 (f - f) = 0$  and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter case corresponding to Formula \eqref{eqn: addition and subtraction}.  
+\item Formula \eqref{eqn: sum variance} shows $\delta^2 (f + g)$, whose dependence tracing can be demonstrated by $\delta^2 (f - f) = 0$  and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter case corresponding to Formula \eqref{eqn: addition and subtraction}.   
+Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Taylor 1d variance} uses Formula \eqref{eqn: sum variance} between any two terms in the Taylor expansion of Formula \eqref{eqn: Taylor 1d}.
+\begin{align}
+\label{eqn: Taylor inner dependency}
+\delta^2 & \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) = 
+    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) + \nonumber \\
+  & 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);
+\end{align}
 
 \item Formula \eqref{eqn: prod variance} shows  $\delta^2 (f g)$, whose dependence tracing can be demonstrated by $\delta^2 (f/f) = 0$  and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter case corresponding to Formula \eqref{eqn: multiplication}.  
 
@@ -1674,6 +1682,88 @@ The major source of the calculation error for \emph{Linear} signals is the calcu
 \end{itemize}
 
 
+\subsection{Ideal Coverage}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means using Sin/Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_SinCos_vs_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_vs_Noise.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_Linear_vs_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_1e-12_vs_Order.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means using Sin/Cos signals with $10^{12}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_SinCos_1e-12_vs_Order}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_1e-5_vs_Order.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means using Lienar signals with $10^{5}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_Linear_1e-5_vs_Order}
+\end{figure}
+
+
+Figure \ref{fig:  FFT_SinCos_vs_Noise}  shows the result error deviations and uncertainty means vs. different input uncertainties using Sin/Cos signals of order 18.  
+When the deviation of the input noise is more than $10^{-12}$, the input uncertainties become ideal coverage:
+\begin{itemize}
+\item As expected, the normalized errors for the forward and the reverse transformations are normal distributed, even when the input noise is no longer Gaussian.
+The normalized errors for the roundtrip transformations are delta distributed at $0$.
+
+\item As expected, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties perfectly. 
+The result uncertainty means for both the forward and the reverse transformations are linear to the input uncertainties, respectively, because FFT transformations are linear.
+
+\item For the roundtrip transformations, the result is compared with the original input for value errors, which are virtually $0$.
+The corresponding error deviations are also $0$, and the normalized errors are delta distributed at $0$.
+
+\end{itemize}
+Figure \ref{fig: FFT_Linear_vs_Noise} is identical to Figure \ref{fig: FFT_SinCos_vs_Noise} except that the ideal coverage is reached when the input noise deviation is $10^{-3}$ or more.
+
+Figure \ref{fig:  FFT_SinCos_1e-12_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Sin/Cos signals with $10^{-12}$ noise, when the input uncertainties start to have idea coverage over the input errors.
+\begin{itemize}
+\item The result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$, as expected.
+
+\item The result uncertainty means for the reverse transformations decrease with the FFT order $L$ as $\sqrt{1/2}^L$, as expected.
+
+\item The result uncertainty means for the roundtrip transformations always equal the corresponding input uncertainties, as expected.
+
+\item The result error deviations for the the forward and the reverse transformations are exactly constant $1$ when the FFT order is more than $10$.
+Smaller FFT order probably means not enough samples for the error deviations to reach stable values.
+\end{itemize}
+Such trends of uncertainty means are observed for all cases of ideal coverage.
+
+Figure \ref{fig:  FFT_Linear_1e-5_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Linear signals with $10^{-5}$ noises, when the input uncertainties are below the ideal coverage of $10^{-3}$.
+The result uncertainty means have the behaviors as if the ideal coverage has been reached.
+The result error deviations reach exactly constant $1$ between the FFT order $12$ and $16$ but deviate from $1$ when the FFT order is more than $16$, because more calculations bring more numerical errors from the $\tan$ library functions.
+This means a test calculation of smaller scale may behaves quite different from a real calculation in term of result error characteristics.
+
+For both signals, FFT transformations are validated for ideal coverage.
+Both error response and calculation response have the expected behaviors, the result normalized errors are normal distributed, and the error deviations are exactly $1$.
+
+
+
+
 \subsection{Non Ideal Coverage}
 
 \begin{figure}[p]
@@ -1782,82 +1872,7 @@ The result normalized errors are not normal distributed, and the error deviation
 
 
 
-\subsection{Ideal Coverage}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Sin/Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_SinCos_vs_Noise}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_vs_Noise.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_Linear_vs_Noise}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_1e-12_vs_Order.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Sin/Cos signals with $10^{12}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_SinCos_1e-12_vs_Order}
-\end{figure}
-
-Figure \ref{fig:  FFT_SinCos_vs_Noise}  shows the result error deviations and uncertainty means vs. different input uncertainties using Sin/Cos signals of order 18.  
-When the deviation of the input noise is more than $10^{-12}$, the input uncertainties become ideal coverage of the input errors.
-\begin{itemize}
-\item As expected, the result error deviations for the forward and the reverse transformations are constant $1$.
-The result error deviations for the roundtrip transformations are virtually  $0$.
-
-\item As expected, the normalized errors for the forward and the reverse transformations are normal distributed, even when the input noise is no longer Gaussian.
-The normalized errors for the roundtrip transformations are delta distributed at $0$.
-
-\item As expected, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties perfectly. 
-The result uncertainty means for both the forward and the reverse transformations are linear to the input uncertainties, respectively, because FFT transformations are linear.
-
-\end{itemize}
-Figure \ref{fig: FFT_Linear_vs_Noise} is identical to Figure \ref{fig: FFT_SinCos_vs_Noise} except that the ideal coverage is reached when the input noise deviation is $10^{-3}$ or more.
-
-Figure \ref{fig:  FFT_SinCos_1e-12_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Sin/Cos signals with $10^{-12}$ noise, when the input uncertainties start to have idea coverage over the input errors.
-\begin{itemize}
-\item The result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$, as expected.
-
-\item The result uncertainty means for the reverse transformations decrease with the FFT order $L$ as $\sqrt{1/2}^L$, as expected.
-
-\item The result uncertainty means for the roundtrip transformations always equal the corresponding input uncertainties, as expected.
-
-\item The result error deviations for the the forward and the reverse transformations are exactly constant $1$ when the FFT order is more than $10$.
-Smaller FFT order probably means not enough samples for the error deviations to reach stable values.
-\end{itemize}
-
-For both signals, FFT transformations are validated for ideal coverage.
-Both error response and calculation response have the expected behaviors, the result normalized errors are normal distributed, and the error deviations are exactly $1$.
-
-
-
-
 \subsection{The Need for Ideal Coverage}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_1e-5_vs_Order.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Lienar signals with $10^{5}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_Linear_1e-5_vs_Order}
-\end{figure}
 
 \begin{figure}[p]
 \centering
@@ -1902,11 +1917,6 @@ A Slope signal is constructed by replacing $\tan(n \frac{\pi}{N})$ in Formula \e
 \end{figure}
 
 
-
-Figure \ref{fig:  FFT_Linear_1e-5_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Linear signals with $10^{-5}$ noises, when the input uncertainties are below the ideal coverage of $10^{-3}$.
-The result uncertainty means have the behaviors as if the ideal coverage has been reached.
-The result error deviations reach exactly constant $1$ between the FFT order $12$ and $16$ but deviate from $1$ when the FFT order is more than $16$, because more calculations bring more numerical errors from the $\tan$ library functions.
-This means a test calculation of smaller scale may behaves quite different from a real calculation in term of result error characteristics.
 
 Figure \ref{fig: FFT_Linear_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Reverse_ErrorDev_vs_Noise_Order} show the overall dependency of error deviations to both input uncertainties and FFT orders for either the forward or the reverse transform of Linear signals, respectively.
 Figure \ref{fig: FFT_Linear_1e-5_vs_Order} is the cross sections along the FFT orders at $10^{-5}$ noise, while Figure \ref{fig: FFT_Linear_vs_Noise} is the cross sections along the input uncertainties at FFT order of $18$.

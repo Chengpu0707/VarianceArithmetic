@@ -71,8 +71,8 @@ class VarDbl:
             raise ValueException(value, "__init__")
         if not math.isfinite(variance):
             raise UncertaintyException(value, uncertainty, "__init__")
-        self._value = value
-        self._variance = variance
+        self._value = float(value)
+        self._variance = float(variance)
     
 
     def __str__(self) -> str:
@@ -160,11 +160,14 @@ class VarDbl:
 
 def validate(self, var:VarDbl, value:float, uncertainty:float=None,
              deltaValue=None, deltaUncertainty=None):
+    '''
+    "self" should refer to a unittest.TestCase instance
+    '''
     if deltaValue is None:
         deltaValue = delta=math.ulp(var.value())
     self.assertAlmostEqual(value, var.value(), delta=deltaValue)
     if uncertainty is None:
          uncertainty = math.ulp(var.value())
     if deltaUncertainty is None:
-         deltaUncertainty = math.ulp(var.uncertainty())
+         deltaUncertainty = math.ulp(max(uncertainty, var.uncertainty()))
     self.assertAlmostEqual(uncertainty, var.uncertainty(), delta=deltaUncertainty)

@@ -25,7 +25,7 @@ class TestInit (unittest.TestCase):
 
         # lost resolution
         f = float((1 << 53) + 1)
-        validate(self, VarDbl((1 << 53) + 1), f, VarDbl.ulp(f))
+        validate(self, VarDbl((1 << 53) + 1), f, VarDbl.DEVIATION_OF_LSB * math.ulp(f))
         # no lost of resolution
         f = float(1 << 54)
         validate(self, VarDbl(1 << 54), f, 0)
@@ -63,10 +63,10 @@ class TestInit (unittest.TestCase):
             
     def testUncertaintyRange(self):
         maxU = math.sqrt(sys.float_info.max)
-        self.failUncertaintyException(0, maxU + VarDbl.ulp(maxU))
+        self.failUncertaintyException(0, maxU + VarDbl.DEVIATION_OF_LSB * math.ulp(maxU))
         validate(self, VarDbl(0, maxU), 0, maxU) 
         
-        minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
+        minU = math.sqrt(VarDbl.DEVIATION_OF_LSB * math.ulp(sys.float_info.min))
         validate(self, VarDbl(0, minU), 0, minU) 
         validate(self, VarDbl(0, minU*0.5), 0, 0) 
 
@@ -125,10 +125,11 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, 3, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        validate(self, v2 + 2.0, 3, VarDbl.ulp(1) * math.sqrt(5)) 
-        validate(self, 2.0 + v2, 3, VarDbl.ulp(1) * math.sqrt(5)) 
+        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(1) * math.sqrt(5)
+        validate(self, v2 + 2.0, 3, uncertainty) 
+        validate(self, 2.0 + v2, 3, uncertainty) 
         v2 += 2.0
-        validate(self, v2, 3, VarDbl.ulp(1) * math.sqrt(5)) 
+        validate(self, v2, 3, uncertainty) 
 
     def testSubFloat(self):
         v1 = VarDbl(1, math.sqrt(2))
@@ -139,10 +140,11 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, -1, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        validate(self, v2 - 2.0, -1, VarDbl.ulp(1) * math.sqrt(5)) 
-        validate(self, 2.0 - v2, 1, VarDbl.ulp(1) * math.sqrt(5)) 
+        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(1) * math.sqrt(5)
+        validate(self, v2 - 2.0, -1,  uncertainty) 
+        validate(self, 2.0 - v2, 1,  uncertainty) 
         v2 -= 2.0
-        validate(self, v2, -1, VarDbl.ulp(1) * math.sqrt(5)) 
+        validate(self, v2, -1,  uncertainty) 
 
     def testAddSubException(self):
         maxV = sys.float_info.max
@@ -193,11 +195,12 @@ class TestMultiply (unittest.TestCase):
         validate(self, VarDbl(-1) * 2, -2, 0)
         validate(self, 2 * VarDbl(-1), -2, 0)
 
-        validate(self, VarDbl(-1.0) * VarDbl(2), -2, VarDbl.ulp(2.0))
-        validate(self, VarDbl(-1.0) * 2, -2, VarDbl.ulp(2.0))
-        validate(self, 2 * VarDbl(-1.0), -2, VarDbl.ulp(2.0))
+        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(2.0)
+        validate(self, VarDbl(-1.0) * VarDbl(2), -2, uncertainty)
+        validate(self, VarDbl(-1.0) * 2, -2, uncertainty)
+        validate(self, 2 * VarDbl(-1.0), -2, uncertainty)
 
-        validate(self, VarDbl(-1.0) * VarDbl(2.0), -2, math.sqrt(2)*VarDbl.ulp(2.0))
+        validate(self, VarDbl(-1.0) * VarDbl(2.0), -2, math.sqrt(2)*uncertainty)
         validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3)
         validate(self, VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3)
         validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, math.sqrt(5 + 1e-6) * 1e-3)
