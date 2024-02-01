@@ -3,12 +3,8 @@ import pickle
 import unittest
 import sys
 
-from varDbl import VarDbl, ValueException, UncertaintyException
-
-def validate(self, res, value, uncertainty):
-    self.assertAlmostEqual(value, res.value(), delta=math.ulp(res.value()))
-    self.assertAlmostEqual(uncertainty, res.uncertainty(), delta=math.ulp(res.uncertainty()))
-
+from varDbl import VarDbl, ValueException, UncertaintyException, validate
+from taylor import LossUncertaintyException
 
 
 class TestInit (unittest.TestCase):
@@ -165,6 +161,7 @@ class TestAddSub (unittest.TestCase):
         except BaseException as ex:
             self.fail(ex)
 
+
 class TestMultiply (unittest.TestCase):
 
     def testZero(self):
@@ -222,6 +219,101 @@ class TestMultiply (unittest.TestCase):
         except UncertaintyException:
             pass
         except BaseException as ex:
+            self.fail(ex)
+
+
+class TestDivideBy (unittest.TestCase):
+
+    def testVarDblByVarDblOne(self):
+        validate(self, VarDbl(0) / VarDbl(1), 0, 0)
+        validate(self, VarDbl(1) / VarDbl(1), 1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(-1) / VarDbl(1), -1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(1) / VarDbl(-1), -1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(-1) / VarDbl(-1), 1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(2) / VarDbl(1), 2, math.ulp(2)/math.sqrt(3))
+        validate(self, VarDbl(1/2) / VarDbl(1), 1/2, math.ulp(1/2)/math.sqrt(3/2))
+
+        validate(self, VarDbl(0, 0.001) / VarDbl(1), 0, 0.001)
+        validate(self, VarDbl(1, 0.001) / VarDbl(1), 1, 0.001)
+        validate(self, VarDbl(-1, 0.001) / VarDbl(1), -1, 0.001)
+        validate(self, VarDbl(1, 0.001) / VarDbl(-1), -1, 0.001)
+        validate(self, VarDbl(-1, 0.001) / VarDbl(-1), 1, 0.001)
+        validate(self, VarDbl(2, 0.001) / VarDbl(1), 2, 0.001)
+        validate(self, VarDbl(1/2, 0.001) / VarDbl(1), 1/2, 0.001)
+
+        validate(self, VarDbl(0) / VarDbl(1, 0.001), 0, 0)
+        validate(self, VarDbl(1) / VarDbl(1, 0.001), 1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, VarDbl(-1) / VarDbl(1, 0.001), -1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, VarDbl(1) / VarDbl(-1, 0.001), -1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, VarDbl(-1) / VarDbl(-1, 0.001), 1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, VarDbl(2) / VarDbl(1, 0.001), 2, 0.002, deltaValue=2e-6, deltaUncertainty=6.4e-9)
+        validate(self, VarDbl(1/2) / VarDbl(1, 0.001), 1/2, 0.0005, deltaValue=5e-7, deltaUncertainty=4.0e-9)
+
+        validate(self, VarDbl(0, 0.001) / VarDbl(1, 0.001), 0, 0.001, deltaUncertainty=1.5e-9)
+        validate(self, VarDbl(1, 0.001) / VarDbl(1, 0.001), 1, 0.001*math.sqrt(2), deltaValue=1e-6, deltaUncertainty=1.2e-9)
+        validate(self, VarDbl(-1, 0.001) / VarDbl(1, 0.001), -1, 0.001*math.sqrt(2), deltaValue=1e-6, deltaUncertainty=1.2e-9)
+        validate(self, VarDbl(1, 0.001) / VarDbl(-1, 0.001), -1, 0.001*math.sqrt(2), deltaValue=1e-6, deltaUncertainty=1.2e-9)
+        validate(self, VarDbl(-1, 0.001) / VarDbl(-1, 0.001), 1, 0.001*math.sqrt(2), deltaValue=1e-6, deltaUncertainty=1.2e-9)
+        validate(self, VarDbl(2, 0.001) / VarDbl(1, 0.001), 2, 0.001*math.sqrt(5), deltaValue=2e-6, deltaUncertainty=5.0e-9)
+        validate(self, VarDbl(1/2, 0.001) / VarDbl(1, 0.001), 1/2, 0.0005*math.sqrt(5), deltaValue=5e-7, deltaUncertainty=1.2e-9)
+
+    def testVarDblByFloatOne(self):
+        validate(self, VarDbl(0)/ 1.0, 0, 0)
+        validate(self, VarDbl(1)/ 1.0, 1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(-1)/ 1.0, -1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(1)/ -1.0, -1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(-1)/ -1.0, 1, math.ulp(1)/math.sqrt(3))
+        validate(self, VarDbl(2)/ 1.0, 2, math.ulp(2)/math.sqrt(3))
+        validate(self, VarDbl(1/2)/ 1.0, 1/2, math.ulp(1/2)/math.sqrt(3/2))
+
+        validate(self, VarDbl(0, 0.001)/ 1.0, 0, 0.001)
+        validate(self, VarDbl(1, 0.001)/ 1.0, 1, 0.001)
+        validate(self, VarDbl(-1, 0.001)/ 1.0, -1, 0.001)
+        validate(self, VarDbl(1, 0.001)/ -1.0, -1, 0.001)
+        validate(self, VarDbl(-1, 0.001)/ -1.0, 1, 0.001)
+        validate(self, VarDbl(2, 0.001)/ 1.0, 2, 0.001)
+        validate(self, VarDbl(1/2, 0.001)/ 1.0, 1/2, 0.001)
+
+    def testFloatByVarDblOne(self):
+        validate(self, 0 / VarDbl(1), 0, 0)
+        validate(self, 1 / VarDbl(1), 1, math.ulp(1)/math.sqrt(3))
+        validate(self, -1 / VarDbl(1), -1, math.ulp(1)/math.sqrt(3))
+        validate(self, 1 / VarDbl(-1), -1, math.ulp(1)/math.sqrt(3))
+        validate(self, -1 / VarDbl(-1), 1, math.ulp(1)/math.sqrt(3))
+        validate(self, 2 / VarDbl(1), 2, math.ulp(2)/math.sqrt(3))
+        validate(self, 0.5 / VarDbl(1), 1/2, math.ulp(1/2)/math.sqrt(3/2))
+
+        validate(self, 0 / VarDbl(1, 0.001), 0, 0)
+        validate(self, 1 / VarDbl(1, 0.001), 1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, -1 / VarDbl(1, 0.001), -1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, 1 / VarDbl(-1, 0.001), -1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, -1 / VarDbl(-1, 0.001), 1, 0.001, deltaValue=1e-6, deltaUncertainty=4.0e-9)
+        validate(self, 2 / VarDbl(1, 0.001), 2, 0.002, deltaValue=2e-6, deltaUncertainty=6.4e-9)
+        validate(self, 0.5 / VarDbl(1, 0.001), 1/2, 0.0005, deltaValue=5e-7, deltaUncertainty=4.0e-9)
+
+    def testVarDblByVarDblZero(self):
+        try:
+            VarDbl(0) / VarDbl(0)
+            self.fail()
+        except ValueError:
+            pass
+        except Exception as ex:
+            self.fail(ex)
+
+        try:
+            VarDbl(0) / VarDbl(0, 1)
+            self.fail()
+        except ValueError:
+            pass
+        except Exception as ex:
+            self.fail(ex)
+
+        try:
+            VarDbl(0) / VarDbl(0.1, 1)
+            self.fail()
+        except LossUncertaintyException:
+            pass
+        except Exception as ex:
             self.fail(ex)
 
 

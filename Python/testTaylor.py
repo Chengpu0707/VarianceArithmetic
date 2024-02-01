@@ -79,10 +79,8 @@ class TestExp (unittest.TestCase):
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=5e-7, varianceDelta=1e-6) -> VarDbl:
         try:
-            s1dTaylor = TestExp.sTaylor
-            s1dTaylor[0] = math.exp(exp)
             var = VarDbl(exp, uncertainty)
-            res = taylor.taylor1d(var, "exp", s1dTaylor, False, True)
+            res = VarDbl.exp(var)
             prec = res * math.exp(-exp)
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of exp({var}) = {res} not throw {exception}')
@@ -162,11 +160,9 @@ class TestLog (unittest.TestCase):
     def validate(self, x, uncertainty, exception=None, 
                  valueDelta=2e-3, varianceDelta=5e-3) -> VarDbl:
         try:
-            s1dTaylor = TestLog.sTaylor
-            s1dTaylor[0] = math.log(x)
             var = VarDbl(x, uncertainty)
-            res = taylor.taylor1d(var, "log", s1dTaylor, True, False)
-            precOut = res - math.log(x)
+            res = VarDbl.log(var)
+            precOut = res - math.log(var.value())
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {precOut} of log({var}) = {res} not throw {exception}')
             precIn = abs(uncertainty/x)
@@ -249,11 +245,9 @@ class TestSin (unittest.TestCase):
     def validate(self, x, uncertainty, exception=None, 
                  valueDelta=5e-7, varianceDelta=1e-6) -> VarDbl:
         try:
-            s1dTaylor = taylor.sin(x)
-            s1dTaylor[0] = math.sin(x)
             var = VarDbl(x, uncertainty)
-            res = taylor.taylor1d(var, "sin", s1dTaylor, False, False)
-            prec = res - s1dTaylor[0]
+            res = VarDbl.sin(var)
+            prec = res - math.sin(var.value())
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of sin({var}) = {res} not throw {exception}')
             self.assertAlmostEqual(prec.value(),
@@ -361,10 +355,8 @@ class TestPower (unittest.TestCase):
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=1e-3, varianceDelta=5e-3) -> VarDbl:
         try:
-            s1dTaylor = taylor.power(exp)
-            s1dTaylor[0] = VarDbl(1, 0)
             var = VarDbl(1, uncertainty)
-            res = taylor.taylor1d(var, "pow", s1dTaylor, True, True)
+            res = var ** exp
             prec = res
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of exp({var}) = {res} not throw {exception}')

@@ -24,8 +24,8 @@ class VarDbl:
         # z value for 50% probability of equal
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
         # rounding error is uniformly distrubuted within LSB of float
-    BINDING_FOR_TAYLOR = 5
-        # Taylor expansion parameters, to be honored in the class Taylor
+    # Taylor expansion parameters are defined in taylor.Taylor and momentum.Momentum
+    _taylor = None
 
     __slots__ = ('_value', '_variance')
 
@@ -73,7 +73,6 @@ class VarDbl:
             raise UncertaintyException(value, uncertainty, "__init__")
         self._value = float(value)
         self._variance = float(variance)
-    
 
     def __str__(self) -> str:
         return f'{self.value():.6e}~{self.uncertainty():.3e}'
@@ -117,7 +116,51 @@ class VarDbl:
     def __rmul__(self, other):
         return self * other
     
+    def __truediv__(self, other: object):
+        if type(other) != VarDbl:
+            return self * (1.0 / other)
+        return self * (other ** -1)
 
+    def __rtruediv__(self, other: object):
+        other = VarDbl(value=other)
+        return other / self
+
+    @staticmethod
+    def exp(var):
+        if VarDbl._taylor is None:
+            import taylor
+            VarDbl._taylor = taylor.Taylor()  
+        s1dTaylor = VarDbl._taylor.exp()
+        s1dTaylor[0] = math.exp(var.value())
+        return VarDbl._taylor.taylor1d(var, "exp", s1dTaylor, False, True)
+    
+    @staticmethod
+    def log(var):
+        if VarDbl._taylor is None:
+            import taylor
+            VarDbl._taylor = taylor.Taylor()  
+        s1dTaylor = VarDbl._taylor.log()
+        s1dTaylor[0] = math.log(var.value())
+        return VarDbl._taylor.taylor1d(var, f"log({var})", s1dTaylor, True, False)
+    
+    @staticmethod
+    def sin(var):
+        if VarDbl._taylor is None:
+            import taylor
+            VarDbl._taylor = taylor.Taylor()  
+        s1dTaylor = VarDbl._taylor.sin(var.value())
+        s1dTaylor[0] = math.sin(var.value())
+        return VarDbl._taylor.taylor1d(var, f"sin({var})", s1dTaylor, False, False)
+    
+    def __pow__(self, exp):
+        if VarDbl._taylor is None:
+            import taylor
+            VarDbl._taylor = taylor.Taylor()  
+        exp = float(exp)
+        s1dTaylor = VarDbl._taylor.power(exp)
+        s1dTaylor[0] = math.pow(self.value(), exp)
+        return VarDbl._taylor.taylor1d(self, f"{self}**{exp}", s1dTaylor, True, True)
+    
     def __eq__(self, other: object) -> bool:
         if type(other) != VarDbl:
             other = VarDbl(value=other)
@@ -157,6 +200,12 @@ class VarDbl:
             return True
         return self.value() > other.value()
   
+
+
+
+
+
+
 
 def validate(self, var:VarDbl, value:float, uncertainty:float=None,
              deltaValue=None, deltaUncertainty=None):
