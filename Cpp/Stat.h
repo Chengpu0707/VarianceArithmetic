@@ -90,7 +90,7 @@ inline bool calcHisto(Histo& res, InputIt begin, InputIt end, float range, unsig
     int size = std::round(range * divides);
     res.range = (float) size / divides;
     res.sHisto.clear();
-    res.sHisto.reserve(2*size);
+    res.sHisto.reserve(2*size + 1);
     res.sHisto.insert(res.sHisto.end(), 2*size, 0);
     for (auto it = begin; it != end; ++it) {
         int idx = std::floor((*it - res.stat.mean) / res.stat.stddev * divides);

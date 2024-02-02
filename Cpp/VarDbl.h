@@ -1,6 +1,6 @@
 /*
 VarDbl is a class to implement variance arithmetic in C++
-It is cheap to copy or to create, to encourage type conversion by coopying. 
+It is cheap to copy or to create, to encourage type conversion by copying. 
 
 VarDbl.h is intended to be fully inline and deplored along without any making system.
 It relies only on Momentum.h, which is also in the var_dbl namespace.
@@ -127,7 +127,7 @@ public:
     template<typename T> friend bool operator<=(T first, VarDbl second);
     template<typename T> friend bool operator>=(T first, VarDbl second);
 
-    // Taylor expansion
+    // Taylor expansion, may throw LossUncertaintyException
     VarDbl exp() const;
     VarDbl log() const;
     VarDbl sin() const;
@@ -150,7 +150,7 @@ struct LossUncertaintyException : public std::runtime_error
                 const VarDbl& input, bool inPrec, bool outPrec,
                 const VarDbl& value, const VarDbl& variance, 
                 size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
-            runtime_error(what), input(input), inPrec(inPrec), outPrec(outPrec),
+            runtime_error(what + " LossUncertaintyExceptio"), input(input), inPrec(inPrec), outPrec(outPrec),
             value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
     {}
 };
@@ -393,13 +393,12 @@ inline VarDbl VarDbl::taylor1d(std::string name, VarDbl s1dTaylor[], bool inPrec
         VarDbl newValue = s1dTaylor[n] * _momentum.factor(n) * varn;
         VarDbl newVariance = VarDbl();
         for (size_t j = 1; j < n; ++j) {
-            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * _momentum.factor(n);
+            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * _momentum.factor(n) * varn;
         }
         for (size_t j = 2; j < n; j += 2) {
             newVariance -= s1dTaylor[j] * _momentum.factor(j) * \
-                        s1dTaylor[n - j] * _momentum.factor(n - j);
+                        s1dTaylor[n - j] * _momentum.factor(n - j) * varn;
         }
-        newVariance *= varn;
         value += newValue;
         variance += newVariance;
         if (variance.variance() > variance.value() * VARIANCE_THRESHOLD) {
@@ -423,7 +422,7 @@ inline VarDbl VarDbl::exp() const
     sTaylor[0] = VarDbl(std::exp(value()));
     VarDbl n = VarDbl(1, 0);
     for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
-        n *= VarDbl(1.0 / i);
+        n *= 1.0 / i;
         sTaylor[i] = n;
     }
     std::ostringstream os;
@@ -431,6 +430,49 @@ inline VarDbl VarDbl::exp() const
     return taylor1d(os.str(), sTaylor, false, true);
 }
 
+inline VarDbl VarDbl::log() const 
+{
+    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
+    sTaylor[0] = VarDbl(std::log(value()));
+    for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
+        sTaylor[i] = VarDbl((((i%2) == 1)? 1.0 : -1.0) / i);
+    }
+    std::ostringstream os;
+    os << *this << ".log()";
+    return taylor1d(os.str(), sTaylor, true, false);
+}
+
+inline VarDbl VarDbl::sin() const 
+{
+    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
+    sTaylor[0] = VarDbl(std::sin(value()));
+    VarDbl n = VarDbl(1, 0);
+    for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
+        n *= 1.0 / i;
+        switch (i % 4) {
+            case 0:
+                sTaylor[i] = VarDbl(std::sin(value()) * n);
+                break;
+            case 1:
+                sTaylor[i] = VarDbl(std::cos(value()) * n);  
+                break;
+            case 2:
+                sTaylor[i] = VarDbl(-std::sin(value()) * n);
+                break;
+            case 3:
+                sTaylor[i] = VarDbl(-std::cos(value()) * n);
+                break;
+        }
+    }
+    std::ostringstream os;
+    os << *this << ".sin()";
+    return taylor1d(os.str(), sTaylor, false, false);
+}
+
+inline VarDbl VarDbl::pow(double exp) const 
+{
+    
+}
 
 } // namespace var_dbl
 #endif // __ValDbl_h__

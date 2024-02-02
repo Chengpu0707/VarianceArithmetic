@@ -71,7 +71,8 @@
         "fstream": "cpp",
         "algorithm": "cpp",
         "optional": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "numbers": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",
