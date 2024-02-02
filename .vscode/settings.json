@@ -65,7 +65,9 @@
         "functional": "cpp",
         "list": "cpp",
         "unordered_map": "cpp",
-        "xhash": "cpp"
+        "xhash": "cpp",
+        "array": "cpp",
+        "numeric": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",

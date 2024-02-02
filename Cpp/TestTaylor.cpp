@@ -6,8 +6,8 @@ using namespace var_dbl;
 
 void assertEquals(VarDbl var, double value, double uncertainty) 
 {
-    Test::assertEquals(var.value(), value);
-    Test::assertEquals(var.uncertainty(), uncertainty);
+    test::assertEquals(var.value(), value);
+    test::assertEquals(var.uncertainty(), uncertainty);
 }
 
 
@@ -22,11 +22,11 @@ VarDbl validate_exp(double exp, double uncertainty,
     const VarDbl prec = res * std::exp(-exp);
     std::ostringstream os;
     os << var << ".exp()=" << res;
-    Test::assertEquals(prec.value(),
+    test::assertEquals(prec.value(),
             1 + std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 +\
                 std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384,
             valueDelta, os.str());
-    Test::assertEquals(prec.variance(),
+    test::assertEquals(prec.variance(),
             std::pow(uncertainty, 2) + std::pow(uncertainty, 4)*3/2 +\
                 std::pow(uncertainty, 6)*7/6 + std::pow(uncertainty, 8)*5/8,
             varianceDelta, os.str());
@@ -43,7 +43,7 @@ void test_taylor_exp(std::initializer_list<double> sValue, double uncertainty,
     }
     try {
         validate_exp(*(sValue.begin() + 1), uncertainty);
-    } catch (AssertException ex) {
+    } catch (test::AssertException ex) {
     }
     validate_exp(*(sValue.begin() + 2), uncertainty, valueDelta, varianceDelta);
 

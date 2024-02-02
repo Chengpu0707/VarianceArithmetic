@@ -1274,24 +1274,29 @@ Analytic functions each with precisely known results are used to validate the re
 
 \item \emph{calculation response}: as the relation between the amount of calculation and the result uncertainties.
 
+\item \emph{ideal coverage}: When each input uncertainty precisely specifies the corresponding input error deviation
+
 \end{itemize}
-When the underlying value errors are Gaussian distributed, the normalized errors are normal distributed with $1$ as the error distribution.
-The central limit theorem converges any input errors toward Gaussian.
-In the case of \emph{ideal coverage} when each input uncertainty precisely specifies the corresponding input error deviation, the error deviation is $1$, and the normalized errors are normal distributed.
+
+One goal of calculation involving uncertainty is to properly account for all source of errors, to achieve ideal coverage.
+In the case of ideal coverage:
+\begin{enumerate}
+\item The error deviation is exactly $1$.
+
+\item The central limit theorem converges the result error distribution toward normal distribution.
+
+\item The error response fits the function, such as a linear error response is expected for a linear function.
+
+\item The calculation response fits the function, such as more calculations generally results in larger result uncertainties.
+\end{enumerate}
+When the coverage is not ideal, the error deviation should be close to $1$.
 
 When the coverage is not ideal, Gaussian or white noises of specified deviations can be added to the input, until idea coverage is reach.
 The needed minimal noise deviation gives a good estimation of the amount of errors which are not covered by the input uncertainties, such as the numerical errors of library functions using conventional floating-point calculations.
-Gaussian or white noises of specified deviations can also be added to the input to measure the error response of a function.
+The convergence of the normalized errors to normal distribution using white noise as the input noise can demonstrate if a result reaches statistical stability.
 
-Generally, the validation standards for the \emph{tracking power} of the variance arithmetic are the following:
-\begin{enumerate}
-\item If the error deviation is close to $1$.
+Gaussian or white noises of specified deviations can also be added to the input to measure the error responses of a function.
 
-\item If the error response fits the function, such as a linear error response is expected for a linear function.
-
-\item If the calculation response fits the function, such as more calculations generally results in larger result uncertainties.
-
-\end{enumerate}
 
 
 \subsection{Types of Uncertainties \cite{Prev_Precision_Arithmetic}}

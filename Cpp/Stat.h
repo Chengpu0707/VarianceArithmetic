@@ -19,6 +19,24 @@ struct Stat {
 };
 
 template< class InputIt >
+Stat calcStat(InputIt begin, InputIt end);
+
+struct Histo {
+    Stat stat;
+    double range;       // centered at mean and normalized by stddv, may be different from the input
+    unsigned divides;   // per stddev
+    unsigned less;      // less than range count
+    unsigned more;      // more than range count
+    std::vector<std::pair<float, float>> sHisto;    // 2*range*divides buckets around mean
+};
+
+template< class InputIt >
+Histo calcHisto(InputIt begin, InputIt end, double range, unsigned divides, bool normalized=true);
+
+
+
+
+template< class InputIt >
 inline Stat calcStat(InputIt begin, InputIt end) 
 {
     Stat res;
@@ -37,18 +55,9 @@ inline Stat calcStat(InputIt begin, InputIt end)
     return res;
 }
 
-struct Histo {
-    Stat stat;
-    double range;
-    unsigned divides;
-    unsigned less;
-    unsigned more;
-    std::vector<std::pair<float, float>> sHisto;
-};
 
 template< class InputIt >
-inline Histo calcHisto(InputIt begin, InputIt end, double range, unsigned divides,
-                        bool normalized=true) {
+inline Histo calcHisto(InputIt begin, InputIt end, double range, unsigned divides, bool normalized) {
     Histo res;
     res.range = range;
     res.divides = divides;

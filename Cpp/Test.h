@@ -1,3 +1,7 @@
+/*
+A minimal unittest tool box
+*/
+
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -8,7 +12,7 @@
 
 #ifndef __Test_h__
 #define __Test_h__
-namespace var_dbl 
+namespace test 
 {
 
 struct AssertException : public std::runtime_error 
@@ -23,19 +27,16 @@ struct AssertException : public std::runtime_error
 };
 
 
-struct Test 
-{
-    // print current stack trace and exit
-    static void fail(std::string msg = "");
-    static void assertTrue(bool expression, std::string msg = "");
-    static void assertFalse(bool expression, std::string msg = "");
-    static void assertEquals(double x, double y, double delta = 0, std::string msg = "");
-        // ulp comparison when delta == 0
-    template<typename T, typename U> static void assertEqual(const T& x, const U& y, std::string msg = "");
-};
+// throw AssertException, which will print current stack trace and exit if not caught
+static void fail(std::string msg = "");
+static void assertTrue(bool expression, std::string msg = "");
+static void assertFalse(bool expression, std::string msg = "");
+static void assertEquals(double x, double y, double delta = 0, std::string msg = "");
+    // ulp comparison when delta == 0
+template<typename T, typename U> static void assertEqual(const T& x, const U& y, std::string msg = "");
 
 
-inline void Test::fail(std::string msg) {
+inline void fail(std::string msg) {
     if (!msg.empty())
         std::cout << msg << '\n';
     std::ostringstream os;
@@ -44,7 +45,7 @@ inline void Test::fail(std::string msg) {
 }
 
 
-inline void Test::assertTrue(bool expression, std::string msg) 
+inline void assertTrue(bool expression, std::string msg) 
 {
     if (expression) 
         return;
@@ -53,13 +54,13 @@ inline void Test::assertTrue(bool expression, std::string msg)
     throw AssertException(os.str());
 }
 
-inline void Test::assertFalse(bool expression, std::string msg) 
+inline void assertFalse(bool expression, std::string msg) 
 {
     return assertTrue(!expression, msg);
 }
 
 
-inline void Test::assertEquals(double x, double y, double delta, std::string msg)
+inline void assertEquals(double x, double y, double delta, std::string msg)
 {
     if (std::isfinite(x) != std::isfinite(y)) {
         std::ostringstream os;
@@ -72,7 +73,7 @@ inline void Test::assertEquals(double x, double y, double delta, std::string msg
     if (!std::isfinite(x))
         return;
     if (delta == 0)
-        delta = ulp(x);
+        delta = var_dbl::ulp(x);
     if (((x - delta) <= y) && (y <= (x + delta)))
         return;
     std::ostringstream os;
@@ -84,7 +85,7 @@ inline void Test::assertEquals(double x, double y, double delta, std::string msg
 }
 
 template<typename T, typename U> 
-inline void Test::assertEqual(const T& x, const U& y, std::string msg)
+inline void assertEqual(const T& x, const U& y, std::string msg)
 {
     if (x == y)
         return;

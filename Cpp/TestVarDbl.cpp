@@ -8,20 +8,20 @@ using namespace var_dbl;
 
 void assertEquals(VarDbl var, double value, double uncertainty) 
 {
-    Test::assertEquals(var.value(), value);
-    Test::assertEquals(var.uncertainty(), uncertainty);
+    test::assertEquals(var.value(), value);
+    test::assertEquals(var.uncertainty(), uncertainty);
 }
 
 void assertValueError(std::function<void()> func, std::string what ) 
 {
     try {
         func();
-        Test::fail(what + std::string(" value overflow "));
+        test::fail(what + std::string(" value overflow "));
     } catch(ValueException ex) {
     } catch (std::exception ex) {
-        Test::fail(what + std::string(" catch not ValueException but exception ") + ex.what());
+        test::fail(what + std::string(" catch not ValueException but exception ") + ex.what());
     } catch (...) {
-        Test::fail(what + std::string(" catch unknown exception other than ValueException"));
+        test::fail(what + std::string(" catch unknown exception other than ValueException"));
     }
 }
 
@@ -29,12 +29,12 @@ void assertUncertaintyError(std::function<void()> func, std::string what )
 {
     try {
         func();
-        Test::fail(what + std::string(" uncertainty overflow "));
+        test::fail(what + std::string(" uncertainty overflow "));
     } catch(UncertaintyException ex) {
     } catch (std::exception ex) {
-        Test::fail(what + std::string(" catch not UncertaintyException but exception ") + ex.what());
+        test::fail(what + std::string(" catch not UncertaintyException but exception ") + ex.what());
     } catch (...) {
-        Test::fail(what + std::string(" catch unknown exception other than UncertaintyException"));
+        test::fail(what + std::string(" catch unknown exception other than UncertaintyException"));
     }
 }
 
@@ -111,25 +111,25 @@ void testUncertaintyRange() {
 void testRepresentation() 
 {
     const VarDbl v(1e-11, sqrt(2));
-    Test::assertTrue(v.to_string() == "1.000000e-11~1.414214e+00", v.to_string());
+    test::assertTrue(v.to_string() == "1.000000e-11~1.414214e+00", v.to_string());
     std::ostringstream os;
     os.precision(17);
     os << v;
-    Test::assertEqual(os.str(), std::string("9.99999999999999939e-12~1.41421356237309515e+00"), os.str());
+    test::assertEqual(os.str(), std::string("9.99999999999999939e-12~1.41421356237309515e+00"), os.str());
     std::istringstream is(os.str());
     VarDbl vr;
     is >> vr;
-    Test::assertEquals(vr.value(), v.value());
-    Test::assertEquals(vr.uncertainty(), v.uncertainty());
+    test::assertEquals(vr.value(), v.value());
+    test::assertEquals(vr.uncertainty(), v.uncertainty());
     os.str("");
     os << 1 << "+-" << 2;
     std::istringstream is2(os.str());
     try {
         is2 >> vr;
-        Test::fail("Illegal VarDbl stream accepted");
+        test::fail("Illegal VarDbl stream accepted");
     } catch (std::invalid_argument ex) {
     } catch (...) {
-        Test::fail("Illegal VarDbl stream with invalid exception");
+        test::fail("Illegal VarDbl stream with invalid exception");
     }
 }
 
@@ -262,55 +262,55 @@ void testCompareVarDbl()
 {
     const VarDbl v1(1.000, 0.002);
     const VarDbl v2(1.001, 0.001);
-    Test::assertTrue(v1 == v2);
-    Test::assertFalse(v1 != v2);
-    Test::assertFalse(v1 < v2);
-    Test::assertTrue(v1 <= v2);
-    Test::assertFalse(v1 > v2);
-    Test::assertTrue(v1 >= v2);
+    test::assertTrue(v1 == v2);
+    test::assertFalse(v1 != v2);
+    test::assertFalse(v1 < v2);
+    test::assertTrue(v1 <= v2);
+    test::assertFalse(v1 > v2);
+    test::assertTrue(v1 >= v2);
 
     const VarDbl v3(1.002, 0.001);
-    Test::assertFalse(v1 == v3);
-    Test::assertTrue(v1 != v3);
-    Test::assertTrue(v1 < v3);
-    Test::assertTrue(v1 <= v3);
-    Test::assertFalse(v1 > v3);
-    Test::assertFalse(v1 >= v3);
-    Test::assertFalse(v3 < v1);
-    Test::assertFalse(v3 <= v1);
-    Test::assertTrue(v3 > v1);
-    Test::assertTrue(v3 >= v1);
+    test::assertFalse(v1 == v3);
+    test::assertTrue(v1 != v3);
+    test::assertTrue(v1 < v3);
+    test::assertTrue(v1 <= v3);
+    test::assertFalse(v1 > v3);
+    test::assertFalse(v1 >= v3);
+    test::assertFalse(v3 < v1);
+    test::assertFalse(v3 <= v1);
+    test::assertTrue(v3 > v1);
+    test::assertTrue(v3 >= v1);
 }
 
 void testCompareFloat()
 {
     const VarDbl v1(1.000, 0.002);
     const float v2 = 1.001;
-    Test::assertTrue(v1 == v2);
-    Test::assertFalse(v1 != v2);
-    Test::assertFalse(v1 < v2);
-    Test::assertTrue(v1 <= v2);
-    Test::assertFalse(v1 > v2);
-    Test::assertTrue(v1 >= v2);
+    test::assertTrue(v1 == v2);
+    test::assertFalse(v1 != v2);
+    test::assertFalse(v1 < v2);
+    test::assertTrue(v1 <= v2);
+    test::assertFalse(v1 > v2);
+    test::assertTrue(v1 >= v2);
 
-    Test::assertTrue(v2 == v1);
-    Test::assertFalse(v2 != v1);
-    Test::assertFalse(v2 < v1);
-    Test::assertTrue(v2 <= v1);
-    Test::assertFalse(v2 > v1);
-    Test::assertTrue(v2 >= v1);
+    test::assertTrue(v2 == v1);
+    test::assertFalse(v2 != v1);
+    test::assertFalse(v2 < v1);
+    test::assertTrue(v2 <= v1);
+    test::assertFalse(v2 > v1);
+    test::assertTrue(v2 >= v1);
 
     const float v3 = 1.002;
-    Test::assertFalse(v1 == v3);
-    Test::assertTrue(v1 != v3);
-    Test::assertTrue(v1 < v3);
-    Test::assertTrue(v1 <= v3);
-    Test::assertFalse(v1 > v3);
-    Test::assertFalse(v1 >= v3);
-    Test::assertFalse(v3 < v1);
-    Test::assertFalse(v3 <= v1);
-    Test::assertTrue(v3 > v1);
-    Test::assertTrue(v3 >= v1);
+    test::assertFalse(v1 == v3);
+    test::assertTrue(v1 != v3);
+    test::assertTrue(v1 < v3);
+    test::assertTrue(v1 <= v3);
+    test::assertFalse(v1 > v3);
+    test::assertFalse(v1 >= v3);
+    test::assertFalse(v3 < v1);
+    test::assertFalse(v3 <= v1);
+    test::assertTrue(v3 > v1);
+    test::assertTrue(v3 >= v1);
 }
 
 
