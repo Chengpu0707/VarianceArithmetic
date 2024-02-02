@@ -67,7 +67,11 @@
         "unordered_map": "cpp",
         "xhash": "cpp",
         "array": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "fstream": "cpp",
+        "algorithm": "cpp",
+        "optional": "cpp",
+        "random": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",
