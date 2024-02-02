@@ -1,6 +1,9 @@
 /*
 Momentum is needed for Taylor expansion in VarDbl.  
-It is a constexpr class
+It is a constexpr class.
+
+Unlike in the python version, it is in double only, because the uncertainty is close to LSB of significand.
+Also, the double format is more friendly to be incorporated into the C++ headers.
 */
 
 #include <cmath>

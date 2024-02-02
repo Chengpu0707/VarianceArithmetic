@@ -19,42 +19,36 @@ It relies only on Momentum.h, which is also in the var_dbl namespace.
 namespace var_dbl 
 {
 
-class ValueException : public std::exception 
+struct ValueException : public std::runtime_error
 {
-public:
     const double value;
-    const std::string what;
 
     explicit ValueException(double value, const std::string what) : 
-        value(value), what(what)
-    {
-    }
+        runtime_error(what), value(value)
+    {}
 };
 
 
-class UncertaintyException : public std::exception 
+struct UncertaintyException : public std::runtime_error 
 {
-public:
     const double value;
     const double variance;
-    const std::string what;
 
     explicit UncertaintyException(double value, double variance, const std::string what) : 
-        value(value), variance(variance), what(what)
-    {
-    }
+        runtime_error(what), value(value), variance(variance)
+    {}
 };
 
-
-
 struct VarDbl { 
-public:
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
         // assume uniform distribution within ulp()
     constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
         // z for 50% probability of equal
+
+    // Taylor expansion
+    constexpr static const int MAX_ORDER_FOR_TAYLOR = 126;
     constexpr static const int BINDING_FOR_TAYLOR = 5;
-    constexpr static const int MAX_ORDER_FOR_TAYLOR = 200;
+    constexpr static const double VARIANCE_THRESHOLD = 1.0 /BINDING_FOR_TAYLOR /BINDING_FOR_TAYLOR;
 
 private:    
     constexpr static const auto _momentum = Momentum<MAX_ORDER_FOR_TAYLOR, BINDING_FOR_TAYLOR>();
@@ -71,6 +65,7 @@ private:
         _variance = variance;
     }
 
+    VarDbl taylor1d(std::string name, VarDbl sTaylor[], bool inPrec, bool outPrec) const;
 
 public:
     double value() const { return _value; }
@@ -132,6 +127,32 @@ public:
     template<typename T> friend bool operator<=(T first, VarDbl second);
     template<typename T> friend bool operator>=(T first, VarDbl second);
 
+    // Taylor expansion
+    VarDbl exp() const;
+    VarDbl log() const;
+    VarDbl sin() const;
+    VarDbl pow(double exp) const;
+
+};
+
+
+struct LossUncertaintyException : public std::runtime_error 
+{
+    const VarDbl input;
+    const bool inPrec, outPrec;
+    const VarDbl value;
+    const VarDbl variance;
+    const size_t n;
+    const VarDbl newValue;
+    const VarDbl newVariance;
+
+    explicit LossUncertaintyException(const std::string what, 
+                const VarDbl& input, bool inPrec, bool outPrec,
+                const VarDbl& value, const VarDbl& variance, 
+                size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
+            runtime_error(what), input(input), inPrec(inPrec), outPrec(outPrec),
+            value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
+    {}
 };
 
 
@@ -156,8 +177,8 @@ inline VarDbl::VarDbl(double value, double uncertainty)
 inline VarDbl::VarDbl(double value) 
 {
     std::ostringstream ss;
-    ss << "VarDbl(double " << value << ")";
     const double uncertainty = ulp(value) * DEVIATION_OF_LSB; 
+    ss << "VarDbl(double " << value << "): uncertainty=" << uncertainty;
     init(value, uncertainty*uncertainty, ss.str());
 }
 
@@ -359,6 +380,56 @@ inline bool operator>=(T first, VarDbl second)
     return second <= first; 
 }
 
+
+inline VarDbl VarDbl::taylor1d(std::string name, VarDbl s1dTaylor[], bool inPrec, bool outPrec) const
+{
+    VarDbl value = outPrec? VarDbl(1, 0) : s1dTaylor[0];
+    VarDbl variance = VarDbl();
+    VarDbl var = VarDbl(this->variance());
+    if (inPrec)
+        var *= VarDbl( 1.0 /this->value() /this->value() );
+    VarDbl varn = VarDbl(var);
+    for (size_t n = 2; n < MAX_ORDER_FOR_TAYLOR; n += 2) {
+        VarDbl newValue = s1dTaylor[n] * _momentum.factor(n) * varn;
+        VarDbl newVariance = VarDbl();
+        for (size_t j = 1; j < n; ++j) {
+            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * _momentum.factor(n);
+        }
+        for (size_t j = 2; j < n; j += 2) {
+            newVariance -= s1dTaylor[j] * _momentum.factor(j) * \
+                        s1dTaylor[n - j] * _momentum.factor(n - j);
+        }
+        newVariance *= varn;
+        value += newValue;
+        variance += newVariance;
+        if (variance.variance() > variance.value() * VARIANCE_THRESHOLD) {
+            throw LossUncertaintyException(name, *this, inPrec, outPrec,
+                    value, variance, n, newValue, newVariance);
+        }
+        varn *= var;
+    }
+    if (outPrec) {
+        value *= s1dTaylor[0];
+        variance *= s1dTaylor[0] * s1dTaylor[0];
+    }
+    VarDbl res;
+    res.init(value.value(), variance.value() + value.variance(), name);
+    return res;
+}
+
+inline VarDbl VarDbl::exp() const
+{
+    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
+    sTaylor[0] = VarDbl(std::exp(value()));
+    VarDbl n = VarDbl(1, 0);
+    for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
+        n *= VarDbl(1.0 / i);
+        sTaylor[i] = n;
+    }
+    std::ostringstream os;
+    os << *this << ".exp()";
+    return taylor1d(os.str(), sTaylor, false, true);
+}
 
 
 } // namespace var_dbl
