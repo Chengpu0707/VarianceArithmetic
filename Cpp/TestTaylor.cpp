@@ -14,11 +14,14 @@ void assertEquals(VarDbl var, double value, double uncertainty)
 constexpr static const double EXP_VALUE_DELTA = 5e-7;
 constexpr static const double EXP_VARIANCE_DELTA = 1e-6;
 
+constexpr static const double SIN_VALUE_DELTA = 5e-7;
+constexpr static const double SIN_VARIANCE_DELTA = 1e-6;
+
 constexpr static const double LOG_VALUE_DELTA = 2e-3;
 constexpr static const double LOG_VARIANCE_DELTA = 5e-3;
 
-constexpr static const double SIN_VALUE_DELTA = 5e-7;
-constexpr static const double SIN_VARIANCE_DELTA = 1e-6;
+constexpr static const double POW_VALUE_DELTA = 2e-3;
+constexpr static const double POW_VARIANCE_DELTA = 5e-3;
 
 
 
@@ -29,7 +32,7 @@ VarDbl validate_exp(double exp, double uncertainty,
     const VarDbl res = var.exp();
     const VarDbl prec = res * std::exp(-exp);
     std::ostringstream os;
-    os << var << ".exp()=" << res;
+    os << "exp(" << var << ")=" << res;
     test::assertEquals(prec.value(),
             1 + std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 +\
                 std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384,
@@ -77,7 +80,7 @@ VarDbl validate_log(double x, double uncertainty,
     const VarDbl res = var.log();
     const VarDbl prec = res - std::log(x);
     std::ostringstream os;
-    os << var << ".log()=" << res;
+    os << "log(" << var << ")=" << res;
     const double precIn = abs(uncertainty/x);
     test::assertEquals(prec.value(),
             - std::pow(precIn, 2)/2 - std::pow(precIn, 4)/4 \
@@ -120,7 +123,7 @@ VarDbl validate_sin(double x, double uncertainty,
     const VarDbl res = var.sin();
     const VarDbl prec = res - std::sin(x);
     std::ostringstream os;
-    os << var << ".sin()=" << res;
+    os << "sin(" << var << ")=" << res;
     test::assertEquals(prec.value(),
             std::sin(x) * (-std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 +\
                            -std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384),
@@ -153,13 +156,57 @@ void test_taylor_sin()
 }
 
 
+VarDbl validate_pow(double exp, double uncertainty, 
+                    double valueDelta=POW_VALUE_DELTA, double varianceDelta=POW_VARIANCE_DELTA)
+{
+    const VarDbl var(1, uncertainty);
+    const VarDbl res = var.pow(exp);
+    const VarDbl prec = res - VarDbl(1, 0);
+    std::ostringstream os;
+    os << "pow(" << var << ", " << exp << ")=" << res;
+    test::assertEquals(prec.value(),
+	    std::pow(uncertainty, 2) * exp*(exp-1)/2 + \
+	    std::pow(uncertainty, 4) * exp*(exp-1)*(exp-2)*(exp-3)/24 +\
+	    std::pow(uncertainty, 6) * exp*(exp-1)*(exp-2)*(exp-3)*(exp-4)*(exp-5)/720,
+            valueDelta, os.str());
+    test::assertEquals(prec.variance(),
+	    std::pow(uncertainty, 2) * exp*exp + \
+	    std::pow(uncertainty, 4) * exp*exp*(exp-1)*(exp-5./3)*3./2 +\
+	    std::pow(uncertainty, 6) * exp*exp*(exp-1)*(exp-2)*(exp-2)*(exp-16./7)*7./6,
+            varianceDelta, os.str());
+    return res;
+}
+
+
+void test_taylor_pow()
+{
+    validate_pow(0, 0); 
+    validate_pow(0, 0.2); 
+    validate_pow(1e-6, 0);    
+    validate_pow(1e-3, 0);   
+    validate_pow(0.1, 0);   
+
+    validate_pow(1, 0.2);  
+    validate_pow(2, 0.2);    
+    validate_pow(0.5, 0.2);    
+    validate_pow(0.5, 0.205);    
+    validate_pow(0.5, 0.23,    7e-3, 2e-2);    
+    validate_pow(-1, 0.2,      5e-3, 7e-3); 
+    validate_pow(-1, 0.195,    5e-3, 7e-3);  
+    validate_pow(-1.5, 0.205,  2e-2, 0.6); 
+    validate_pow(-1.5, 0.2,    2e-2, 8e-2); 
+    validate_pow(-1.5, 0.195,  2e-2, 3e-2);  
+    validate_pow(-2, 0.2,      3e-2, 1.7);  
+    validate_pow(-2, 0.195,    3e-2, 3e-1);  
+}
+
 
 int main() 
 {
-//    test_taylor_exp();
-//    test_taylor_log();
+    test_taylor_exp();
+    test_taylor_log();
     test_taylor_sin();
-
+    test_taylor_pow();
     std::cout << "All Taylor expansion tests are successful";
     return 0;
 }

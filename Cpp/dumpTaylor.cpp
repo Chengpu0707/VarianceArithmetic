@@ -68,7 +68,7 @@ bool dump_test(const std::string test, const std::vector<double>& sDev, const st
 
     for (auto dev: sDev) {
         for (auto x: sX) {
-            const VarDbl var(x, dev);
+            const VarDbl var((test == "pow")? 1 : x, dev);
             double base;
             VarDbl res;
             try {
@@ -81,6 +81,9 @@ bool dump_test(const std::string test, const std::vector<double>& sDev, const st
                 } else if (test == "sin") {
                     base = std::sin(x);
                     res = var.sin();
+                } else if (test == "pow") {
+                    base = 1;
+                    res = var.pow(x);
                 } else
                     return false;
             } catch (std::runtime_error ex) {
@@ -101,6 +104,8 @@ bool dump_test(const std::string test, const std::vector<double>& sDev, const st
                         sValueError[i] = std::log(x + sNoise[i] * dev) - base;
                     else if (test == "sin")
                         sValueError[i] = std::sin(x + sNoise[i] * dev) - base;
+                    else if (test == "pow")
+                        sValueError[i] = std::pow(1 + sNoise[i] * dev, x) - base;
                     else
                         return false;
                     if (!std::isfinite(sValueError[i])) {
@@ -149,12 +154,25 @@ int main()
     std::vector<double> sDev(DEVS);
     sDev[0] = 1;
 
-//    test::assertTrue( dump_test("exp", sDev, {-100, -50, -20, -10, -5, -2, -1, 0, 1, 2, 5, 10, 20, 50, 100}) );
+    /*
+    */
+    test::assertTrue( dump_test("exp", sDev, 
+            {-100, -50, -20, -10, -5, -2, -1, 0, 1, 2, 5, 10, 20, 50, 100}) );
 
-//    test::assertTrue( dump_test("log", DEVS, {1./32, 1./20, 1./16, 0.1, 1./8, 1./4, 1./2, 1, 2, 4, 8, 16, 32}) );
+    test::assertTrue( dump_test("log", DEVS, 
+            {1./32, 1./20, 1./16, 0.1, 1./8, 1./4, 1./2, 1, 2, 4, 8, 16, 32}) );
+
     const double PI = 3.14159265358979323846;
     std::vector<double> sSinX;
     for (int i = -16; i <= 16; ++i) 
         sSinX.push_back(PI*i/16);
     test::assertTrue( dump_test("sin", sDev, sSinX) );
+
+    sDev[0] = 0.2;
+    sDev.insert(sDev.begin() + 1, 0.195);
+    std::vector<double> sPowX;
+    for (int i = -20; i <= 32; i += 2) 
+        sPowX.push_back(i/10.);
+    sPowX.insert(sPowX.end(), {-1e-1, 1e-1, -1e-2, 1e-2, -1e-3, 1e-3, -1e-6, 1e-6});
+    test::assertTrue( dump_test("pow", sDev, sPowX) );
 }

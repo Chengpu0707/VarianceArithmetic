@@ -426,7 +426,7 @@ inline VarDbl VarDbl::exp() const
         sTaylor[i] = n;
     }
     std::ostringstream os;
-    os << *this << ".exp()";
+    os << "exp(" << *this << ")";
     return taylor1d(os.str(), sTaylor, false, true);
 }
 
@@ -438,7 +438,7 @@ inline VarDbl VarDbl::log() const
         sTaylor[i] = VarDbl((((i%2) == 1)? 1.0 : -1.0) / i);
     }
     std::ostringstream os;
-    os << *this << ".log()";
+    os << "log(" << *this << ")";
     return taylor1d(os.str(), sTaylor, true, false);
 }
 
@@ -465,13 +465,21 @@ inline VarDbl VarDbl::sin() const
         }
     }
     std::ostringstream os;
-    os << *this << ".sin()";
+    os << "sin(" << *this << ")";
     return taylor1d(os.str(), sTaylor, false, false);
 }
 
 inline VarDbl VarDbl::pow(double exp) const 
 {
-    
+    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
+    sTaylor[0] = VarDbl(std::pow(value(), exp));
+    sTaylor[1] = VarDbl(exp);
+    for (size_t i = 2; i < MAX_ORDER_FOR_TAYLOR; ++i) {
+        sTaylor[i] = sTaylor[i - 1] * ((exp + 1)/i - 1);
+    }
+    std::ostringstream os;
+    os << "pow(" << *this << ", " << exp << ")";
+    return taylor1d(os.str(), sTaylor, true, true);
 }
 
 } // namespace var_dbl

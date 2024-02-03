@@ -357,13 +357,13 @@ class TestPower (unittest.TestCase):
         try:
             var = VarDbl(1, uncertainty)
             res = var ** exp
-            prec = res
+            prec = res - VarDbl(1, 0)
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of exp({var}) = {res} not throw {exception}')
             self.assertAlmostEqual(prec.value(),
-                    1 + math.pow(uncertainty, 2) * exp*(exp-1)/2 + \
-                        math.pow(uncertainty, 4) * exp*(exp-1)*(exp-2)*(exp-3)/24 +\
-                        math.pow(uncertainty, 6) * exp*(exp-1)*(exp-2)*(exp-3)*(exp-4)*(exp-5)/720,
+                    math.pow(uncertainty, 2) * exp*(exp-1)/2 + \
+                    math.pow(uncertainty, 4) * exp*(exp-1)*(exp-2)*(exp-3)/24 +\
+                    math.pow(uncertainty, 6) * exp*(exp-1)*(exp-2)*(exp-3)*(exp-4)*(exp-5)/720,
                     delta=valueDelta)
             self.assertAlmostEqual(prec.variance(),
                     math.pow(uncertainty, 2) * exp*exp + \

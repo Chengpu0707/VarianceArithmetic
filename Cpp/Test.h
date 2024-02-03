@@ -97,5 +97,5 @@ inline void assertEqual(const T& x, const U& y, std::string msg)
     throw AssertException(os.str());
 }
 
-} // namespace var_dbl
+} // namespace test
 #endif  // __Test_h__

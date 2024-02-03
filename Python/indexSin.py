@@ -14,7 +14,7 @@ class IndexSin:
     __slots__ = ['_size', '_half', '_sSin']
 
     def __init__(self, order=18, withUncertainty:bool=False) -> None:
-        if order < 2:
+        if order < 3:
             raise ValueError(f'order {order} is less than 4 for IndexSin')
         self._size = 1 << order
         self._half = self._size >> 1
@@ -41,16 +41,12 @@ class IndexSin:
         else:       
             return rem
 
-    def _get_cos_index(self, freq:int) ->int:
-        return self._get_sin_index(freq + self._half)
-    
     def sin(self, freq:int) -> float:
         idx = self._get_sin_index(freq)
         return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
 
     def cos(self, freq:int) -> float:
-        idx = self._get_cos_index(freq)
-        return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
+        return self.sin(freq + self._half)
 
     def tan(self, freq:int) -> float:
         return self.sin(freq) / self.cos(freq)

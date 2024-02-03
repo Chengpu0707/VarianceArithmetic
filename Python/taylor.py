@@ -113,10 +113,8 @@ class Taylor:
         sTaylor = []
         sTaylor.append(VarDbl(0, 0))
         sTaylor.append(VarDbl(exponent))
-        exponent -= 1
         for i in range(2, self._momentum._maxOrder):
-            sTaylor.append( sTaylor[-1] * (exponent / i) )
-            exponent -= 1
+            sTaylor.append( sTaylor[-1] * ((exponent + 1)/i - 1) )
         return sTaylor
     
 
