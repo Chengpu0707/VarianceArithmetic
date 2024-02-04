@@ -118,7 +118,7 @@ class VarDbl:
     
     def __truediv__(self, other: object):
         if type(other) != VarDbl:
-            return self * (1.0 / other)
+            other = VarDbl(other)
         return self * (other ** -1)
 
     def __rtruediv__(self, other: object):

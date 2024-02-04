@@ -113,6 +113,11 @@ public:
     VarDbl operator*=(VarDbl other);
     template<typename T> friend VarDbl operator*(T first, VarDbl second);
 
+    // *
+    VarDbl operator/(VarDbl other) const;
+    VarDbl operator/=(VarDbl other);
+    template<typename T> friend VarDbl operator/(T first, VarDbl second);
+
     // compare
     bool operator==(VarDbl other) const;
     bool operator!=(VarDbl other) const;
@@ -300,6 +305,23 @@ inline VarDbl operator*(T first, VarDbl second) {
 
 
 
+inline VarDbl VarDbl::operator/(VarDbl other) const
+{
+    return *this * other.pow(-1);
+}
+
+inline VarDbl VarDbl::operator/=(VarDbl other) 
+{
+    return *this *= other.pow(-1);
+}
+
+template<typename T> 
+inline VarDbl operator/(T first, VarDbl second) {
+    return VarDbl(first) * second.pow(-1);
+}
+
+
+
 inline bool VarDbl::operator==(VarDbl other) const
 {
     other-= *this;
@@ -308,7 +330,7 @@ inline bool VarDbl::operator==(VarDbl other) const
     const double uncertainty = other.uncertainty();
     if (uncertainty == 0)
         return false;
-    return abs(other.value() / uncertainty) <= VarDbl::BINDING_FOR_EQUAL;
+    return std::abs(other.value() / uncertainty) <= VarDbl::BINDING_FOR_EQUAL;
 }
 
 inline bool VarDbl::operator!=(VarDbl other) const
