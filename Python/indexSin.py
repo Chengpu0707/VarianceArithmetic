@@ -27,7 +27,7 @@ class IndexSin:
     def size(self):
         return self._size
         
-    def _get_sin_index(self, freq:int) ->int:
+    def get_index(self, freq:int) ->int:
         '''
         get index into _sSin, with -index means -sin
         '''
@@ -42,7 +42,7 @@ class IndexSin:
             return rem
 
     def sin(self, freq:int) -> float:
-        idx = self._get_sin_index(freq)
+        idx = self.get_index(freq)
         return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
 
     def cos(self, freq:int) -> float:
