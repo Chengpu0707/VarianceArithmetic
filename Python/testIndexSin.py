@@ -1,4 +1,5 @@
 import math
+import os
 import unittest
 
 from indexSin import IndexSin
@@ -144,6 +145,15 @@ class TestSin (unittest.TestCase):
         self.assertEqual( 2.239966192595619, indexSin.arc_sin( math.sin(math.pi*1/3)))
         self.assertEqual(-2.239966192595619, indexSin.arc_sin(-math.sin(math.pi*1/3)))
 
+    def testWithUncertainty_6(self):
+        sin = IndexSin(6)
+        sin.calc()
+        self.assertIsNone(sin.withUncertainty())
+
+    def testWithUncertainty_19(self):
+        sin = IndexSin(19)
+        sin.calc()
+        self.assertIsNone(sin.withUncertainty())
 
 if __name__ == '__main__':
     unittest.main()
