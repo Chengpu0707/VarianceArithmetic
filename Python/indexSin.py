@@ -28,7 +28,7 @@ class IndexSin:
     
     __slots__ = ['_order', '_size', '_half', '_sSin']
 
-    def __init__(self, order=18) -> None:
+    def __init__(self, order) -> None:
         if order < 3:
             raise ValueError(f'order {order} is less than 4 for IndexSin')
         self._order = order

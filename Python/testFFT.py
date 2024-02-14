@@ -1,7 +1,8 @@
 import math
 import unittest
 
-from fft import FFTBase, FFTIndexSin, FFTLibSin, FFTLimitedSin
+from fft import FFTBase, FFTIndexSin, FFTLibSin, FFTLimitedSin, FFTUncertainSin
+from varDbl import VarDbl
 
 class TestFFTBase (unittest.TestCase):
 
@@ -194,6 +195,58 @@ class TestFFTLimitedSin (unittest.TestCase):
         sRes = TestFFTLimitedSin.fft.transform(sSpec, False)     
         for datum, res in zip(sData, sRes):
             self.assertAlmostEqual(datum, res, delta=math.ulp(2))
+
+class TestFFTUncertainSin (unittest.TestCase):
+    fft = FFTUncertainSin()
+
+    def testOrder3Sin(self):
+        q2 = math.sqrt(0.5)
+        dev = 7.850443574207149e-17
+        self.assertEqual(TestFFTUncertainSin.fft.sin(-1,3), VarDbl(-q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(0,3),  VarDbl(0, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(1,3),  VarDbl(q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(2,3),  VarDbl(1, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(3,3),  VarDbl(q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(4,3),  VarDbl(0, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(5,3),  VarDbl(-q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(6,3),  VarDbl(-1, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(7,3),  VarDbl(-q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.sin(8,3),  VarDbl(0, 0))
+        
+        sData = [0,0, q2,0, 1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0]
+        sSpec = [0,0, 0,4, 0,0, 0,0, 0,0, 0,0, 0,0, 0,-4] 
+        BINDING = 3
+        sRes = TestFFTUncertainSin.fft.transform(sData, True)
+        for spec, res in zip(sSpec, sRes):
+            self.assertAlmostEqual(spec, res.value(), delta=res.uncertainty()*BINDING)     
+        sRes = TestFFTUncertainSin.fft.transform(sSpec, False)     
+        for datum, res in zip(sData, sRes):
+            self.assertAlmostEqual(datum, res.value(), delta=res.uncertainty()*BINDING)
+
+    def testOrder3Cos(self):
+        q2 = math.sqrt(0.5)
+        dev = 7.850443574207149e-17
+        self.assertEqual(TestFFTUncertainSin.fft.cos(-1,3), VarDbl(q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(0,3),  VarDbl(1, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(1,3),  VarDbl(q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(2,3),  VarDbl(0, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(3,3),  VarDbl(-q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(4,3),  VarDbl(-1, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(5,3),  VarDbl(-q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(6,3),  VarDbl(0, 0))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(7,3),  VarDbl(q2, dev))
+        self.assertEqual(TestFFTUncertainSin.fft.cos(8,3),  VarDbl(1, 0))
+        
+        sData = [1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0, 0,0, q2,0]
+        sSpec = [0,0, 4,0, 0,0, 0,0, 0,0, 0,0, 0,0, 4,0] 
+        BINDING = 3
+        sRes = TestFFTUncertainSin.fft.transform(sData, True)
+        for spec, res in zip(sSpec, sRes):
+            self.assertAlmostEqual(spec, res.value(), delta=res.uncertainty()*BINDING)     
+        sRes = TestFFTUncertainSin.fft.transform(sSpec, False)     
+        for datum, res in zip(sData, sRes):
+            self.assertAlmostEqual(datum, res.value(), delta=res.uncertainty()*BINDING)
+
 
 
 if __name__ == '__main__':

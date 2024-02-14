@@ -145,6 +145,11 @@ class TestSin (unittest.TestCase):
         self.assertEqual( 2.239966192595619, indexSin.arc_sin( math.sin(math.pi*1/3)))
         self.assertEqual(-2.239966192595619, indexSin.arc_sin(-math.sin(math.pi*1/3)))
 
+    def testWithUncertainty_4(self):
+        sin = IndexSin(4)
+        sin.calc()
+        self.assertIsNone(sin.withUncertainty())
+
     def testWithUncertainty_6(self):
         sin = IndexSin(6)
         sin.calc()

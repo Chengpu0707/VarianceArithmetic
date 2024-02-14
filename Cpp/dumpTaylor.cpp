@@ -21,8 +21,8 @@ void testGuassian()
     for (int i = 0; i < SAMPLES; ++i)
         sNoise[i] = normal(gen) * 0.2 + 1;
     Stat stat = calcStat(sNoise, sNoise + SAMPLES);
-    test::assertEquals(stat.mean, 1, 1e-2);
-    test::assertEquals(stat.stddev, 0.2, 1e-1);
+    test::assertEqual(stat.mean, 1, 1e-2);
+    test::assertEqual(stat.stddev, 0.2, 1e-1);
 }
 
 void testUniform() 
@@ -33,8 +33,8 @@ void testUniform()
     for (int i = -half; i < half; ++i)
         sUniform[i + half] = std::sqrt(3) *i /half *0.2 + 1;
     Stat stat = calcStat(sUniform, sUniform + SAMPLES);
-    test::assertEquals(stat.mean, 1, 1e-2);
-    test::assertEquals(stat.stddev, 0.2, 1e-1);
+    test::assertEqual(stat.mean, 1, 1e-2);
+    test::assertEqual(stat.stddev, 0.2, 1e-1);
 }
 
 

@@ -15,7 +15,7 @@ class FFTSinSource (enum.Enum):
 
 
 class FFTBase (abc.ABC):
-    MAX_ORDER = 20
+    MAX_ORDER = 18
     _bitReversedIndex = {}
 
     @abc.abstractmethod
@@ -125,6 +125,7 @@ class FFTLibSin (FFTBase):
     def cos(self, freq:int, order:int):
         return math.cos(math.pi *freq /(1 << (order - 1)))
     
+
 class FFTLimitedSin (FFTBase):
     _indexSin = IndexSin(FFTBase.MAX_ORDER - 1)
 
@@ -140,3 +141,24 @@ class FFTLimitedSin (FFTBase):
         idx = FFTLimitedSin._indexSin.get_index(freq)
         return math.cos(math.pi *idx /(1 << (order - 1))) if idx >= 0 else\
               -math.sin(math.pi *idx /(1 << (order - 1)))
+
+
+class FFTUncertainSin (FFTBase):
+    _indexSin = None
+
+    def __init__(self) -> None:
+        super().__init__()
+        if not FFTUncertainSin._indexSin:
+            FFTUncertainSin._indexSin = IndexSin(FFTBase.MAX_ORDER - 1)
+            err = FFTUncertainSin._indexSin.withUncertainty()
+            if err:
+                raise ValueError(err)
+
+    def source(self):
+        return FFTSinSource.UNCERTAIN_SIN
+    
+    def sin(self, freq:int, order:int):
+        return FFTUncertainSin._indexSin.sin(freq *(1 <<(FFTBase.MAX_ORDER - order)))
+    
+    def cos(self, freq:int, order:int):
+        return FFTUncertainSin._indexSin.cos(freq *(1 <<(FFTBase.MAX_ORDER - order)))

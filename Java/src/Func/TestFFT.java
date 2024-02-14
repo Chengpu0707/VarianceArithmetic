@@ -340,6 +340,19 @@ public class TestFFT {
         }
     }
 
+    @Test
+    public void testFFTOrder2Sin() {
+        VarDbl[] sData = new VarDbl[] {new VarDbl(),new VarDbl(), new VarDbl(1),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(-1),new VarDbl()};
+        VarDbl[] sSpec = new VarDbl[] {new VarDbl(),new VarDbl(), new VarDbl(2),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(-2),new VarDbl()}; 
+        try {
+            assertArrayEquals( sSpec, FFT.transform(sData, true));
+            assertArrayEquals( sData, FFT.transform(sSpec, false));
+        } catch (TypeException | ValueException | UncertaintyException e) {
+            fail(e.getMessage());
+        }
+        
+    }
+
     static void dump(final FileWriter fw, final String tag, TestType test, String part, 
                      IReal[] sOut, double[] sIdeal) throws IOException {
         fw.write(String.format("\n%s\t%s\t%s\tValue\tReal", tag, test, part));

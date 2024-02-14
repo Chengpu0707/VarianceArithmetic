@@ -7,6 +7,7 @@ Also, the double format is more friendly to be incorporated into the C++ headers
 */
 
 #include <cmath>
+#include <numbers>
 
 #ifndef __Momentum_h__
 #define __Momentum_h__
@@ -34,7 +35,7 @@ public:
             _sFactor[j] = 0;
         for (int i = -limit ; i <= limit; ++i) {
             const double x2 = i*i / divid2;
-            const double pdf = 1.0/sqrt(2*M_PI) * exp(- x2 * 0.5) / divid;
+            const double pdf = 1.0/sqrt(2*std::numbers::pi) * exp(- x2 * 0.5) / divid;
             double sq = 1;
             for (int j = 0; j < maxOrder; ++j)
             {

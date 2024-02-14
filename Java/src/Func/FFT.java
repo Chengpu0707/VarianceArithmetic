@@ -160,17 +160,17 @@ public class FFT {
             sRes[(i << 1) + 3] = it.minus(sRes[(i << 1) + 3]);
         }
 
-        for (int o = 2, k = 2; o <= order; ++o, k <<= 1) {
-            for (int j = 0; j < k; j++) {
+        for (int o = 2, k = 4; o <= order; ++o, k <<= 1) {
+            for (int j = 0; j < (k >> 1); j++) {
                 final IReal cos = (realType == RealType.Var)
                                     ? new VarDbl(cos( j, o ))
                                     : new IntvDbl(cos( j, o ));
                 final IReal sin = (realType == RealType.Var)
                                     ? new VarDbl(forward? sin( j, o ) : -sin( j, o ))
                                     : new IntvDbl(forward? sin( j, o ) : -sin( j, o ));
-                for (int i = 0; i < sIndex.length; i += (k << 1) ) {
+                for (int i = 0; i < sIndex.length; i += k ) {
                     final int idx0 = (i + j) << 1;
-                    final int idx1 = idx0 + (k << 1);
+                    final int idx1 = idx0 + k;
                     final IReal r1 = sRes[idx1];
                     final IReal i1 = sRes[idx1 + 1];
             

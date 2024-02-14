@@ -12,10 +12,10 @@ void assertEquals(VarDbl var, double value, double uncertainty,
 {
     if (deltaValue == 0)
         deltaValue = std::max(ulp(var.value()), ulp(value));
-    test::assertEquals(var.value(), value, deltaValue);
+    test::assertEqual(var.value(), value, deltaValue);
     if (deltaUncertainty == 0)
         deltaUncertainty = std::max(ulp(var.uncertainty()), ulp(uncertainty));
-    test::assertEquals(var.uncertainty(), uncertainty, deltaUncertainty);
+    test::assertEqual(var.uncertainty(), uncertainty, deltaUncertainty);
 }
 
 void assertValueError(std::function<void()> func, std::string what ) 
@@ -125,8 +125,8 @@ void testRepresentation()
     std::istringstream is(os.str());
     VarDbl vr;
     is >> vr;
-    test::assertEquals(vr.value(), v.value());
-    test::assertEquals(vr.uncertainty(), v.uncertainty());
+    test::assertEqual(vr.value(), v.value());
+    test::assertEqual(vr.uncertainty(), v.uncertainty());
     os.str("");
     os << 1 << "+-" << 2;
     std::istringstream is2(os.str());

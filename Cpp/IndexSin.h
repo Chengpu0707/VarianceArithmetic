@@ -15,8 +15,8 @@ When "withUncertainty"==True, use regression to calculate the sin
 #include <vector>
 
 
-#ifndef __IndexSin__
-#define __IndexSin__
+#ifndef __IndexSin_h__
+#define __IndexSin_h__
 namespace var_dbl 
 {
 
@@ -26,8 +26,6 @@ class IndexSin {
     std::vector<VarDbl> _sSin;
 
 public:
-    constexpr const static double PI = 3.14159265358979323846;
-
     IndexSin(unsigned order, bool withUncertainty);
     size_t size() const { return _size; }
 
@@ -35,7 +33,7 @@ public:
     VarDbl cos(int freq) const;
     VarDbl tan(int freq) const;
 
-    int get_sin_index(int freq) const;
+    int get_index(int freq) const;
         // get index into _sSin, with -index means -sin
 
 };
@@ -49,22 +47,20 @@ inline IndexSin::IndexSin(unsigned order, bool withUncertainty) :
         os << "order=" << order << " < 3 for IndexSin.";
         throw std::invalid_argument(os.str());
     }
-    if (withUncertainty) {
-        std::ostringstream os;
-        os << "withUncertainty=" << withUncertainty<< " not implemented yet for IndexSin.";
-        throw std::invalid_argument(os.str());
-    }
     _sSin.reserve(_size + 1);
     if (! withUncertainty) {
         for (int i = 0; i < _half/2; ++i)
-            _sSin.push_back(std::sin(PI/_size*i));
+            _sSin.push_back(std::sin(std::numbers::pi/_size*i));
         for (int i = 0; i <= _half/2; ++i)
-            _sSin.push_back(std::cos(PI*1/4 - PI*i/_size));
+            _sSin.push_back(std::cos(std::numbers::pi*1/4 - std::numbers::pi*i/_size));
         return;
     }
+    _sSin.insert(_sSin.end(), _half + 1, VarDbl());
+
+
 }
 
-inline int IndexSin::get_sin_index(int freq) const
+inline int IndexSin::get_index(int freq) const
 {
     int div = freq / _half, rem = freq % _half;
     if (div & 1) {
@@ -84,7 +80,7 @@ inline int IndexSin::get_sin_index(int freq) const
 
 inline VarDbl IndexSin::sin(int freq) const
 {
-    const int idx = get_sin_index(freq);
+    const int idx = get_index(freq);
     return (idx >= 0)? _sSin[idx] : -_sSin[-idx];
 }
 
@@ -100,5 +96,5 @@ inline VarDbl IndexSin::tan(int freq) const
 
 
 
-} // namespace testvar_dbl
-#endif  // __IndexSin__
+} // namespace var_dbl
+#endif  // __IndexSin_h__

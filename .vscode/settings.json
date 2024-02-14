@@ -72,7 +72,13 @@
         "algorithm": "cpp",
         "optional": "cpp",
         "random": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "deque": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "xtree": "cpp",
+        "ranges": "cpp",
+        "span": "cpp"
     },
     "python.testing.unittestArgs": [
         "-v",

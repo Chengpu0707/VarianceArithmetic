@@ -4,6 +4,7 @@ A minimal unittest tool box
 
 #include <cassert>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 #include <stacktrace>   // not supported in gcc 13.2.0
 #include <string>
@@ -60,7 +61,7 @@ inline void assertFalse(bool expression, std::string msg)
 }
 
 
-inline void assertEquals(double x, double y, double delta, std::string msg)
+inline void assertEqual(double x, double y, double delta, std::string msg)
 {
     if (std::isfinite(x) != std::isfinite(y)) {
         std::ostringstream os;
@@ -95,6 +96,30 @@ inline void assertEqual(const T& x, const U& y, std::string msg)
         os << ", " << msg;
     os << ")";
     throw AssertException(os.str());
+}
+
+template<typename T, typename U> 
+inline void assertEquals(const T& sX, const U& sY, std::string msg)
+{
+    std::ostringstream os;
+    if (sX.size() != sY.size()) {
+        os << "assertEquals(size: " << sY.size() << " != " << sX.size();
+        if (!msg.empty())
+            os << ", " << msg;
+        os << ")";
+        throw AssertException(os.str());
+    }
+    size_t i = 0;
+    for (auto [x, y]: std::ranges::views::zip(sX, sY)) {
+        if (x != y) {
+            os << "assertEquals(" << i << ": " << sX[i] << " != " << sY[i];
+            if (!msg.empty())
+                os << ", " << msg;
+            os << ")";
+            throw AssertException(os.str());
+        }
+        ++i;
+    }
 }
 
 } // namespace test
