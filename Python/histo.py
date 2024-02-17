@@ -37,7 +37,10 @@ class Stat:
         return self._sum / self._count if self._count else float('nan')
 
     def dev(self):
-        return math.sqrt(self._sum2 / self._count - self.mean()**2) if self._count else float('nan')        
+        if not self._count:
+            return float('nan')
+        var = self._sum2 / self._count - self.mean()**2
+        return math.sqrt(var) if var >= 0 else 0.0        
 
 class Histo:
     __slots__ = ['_stat', '_divids', '_range', '_half', '_less', '_more', '_sHisto']

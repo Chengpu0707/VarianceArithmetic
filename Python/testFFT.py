@@ -2,6 +2,7 @@ import math
 import unittest
 
 from fft import FFTBase, FFTIndexSin, FFTLibSin, FFTLimitedSin, FFTUncertainSin
+from fft import FFTSinSource, SignalType, NoiseType, FFTTest
 from varDbl import VarDbl
 
 class TestFFTBase (unittest.TestCase):
@@ -248,6 +249,14 @@ class TestFFTUncertainSin (unittest.TestCase):
             self.assertAlmostEqual(datum, res.value(), delta=res.uncertainty()*BINDING)
 
 
+class TestSignal (unittest.TestCase):
+    sFreq = [math.pow(10,-n-1) for n in range(16)] + [0]
+
+    def testOrder_4(self):
+        FFTTest.dumpOrders(sOrder=[4])
+
+    def testOrderAll(self):
+        FFTTest.dumpOrders()
 
 if __name__ == '__main__':
     unittest.main()

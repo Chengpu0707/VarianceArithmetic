@@ -155,6 +155,12 @@ class TestSin (unittest.TestCase):
         sin.calc()
         self.assertIsNone(sin.withUncertainty())
 
+    def testWithUncertainty_18(self):
+        sin = IndexSin(18)
+        sin.calc()
+        self.assertIsNone(sin.withUncertainty())
+
+    #@unittest.skip("too slow")
     def testWithUncertainty_19(self):
         sin = IndexSin(19)
         sin.calc()

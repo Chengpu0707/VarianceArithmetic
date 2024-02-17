@@ -1,5 +1,6 @@
 import bisect
 import math
+import os
 import typing
 
 from varDbl import VarDbl
@@ -37,7 +38,7 @@ class IndexSin:
         self._sSin = [0] + [math.sin(i/self._size *math.pi) for i in range(1, self._half >> 1)] + \
                 [math.cos((1/4 - i/self._size)*math.pi) for i in range(self._half >> 1)] + [1] 
         
-    def withUncertainty(self) -> typing.Optional[str]:
+    def withUncertainty(self, incomplete:bool=False) -> typing.Optional[str]:
         '''
         Return None for successfully reading the file which contain sin with uncertainty.
         Otherwise return error string and restore the original float/int values
@@ -94,7 +95,7 @@ class IndexSin:
                     return f'line #{ln} index={idx} error uncertainties disagree: {error} vs {err}'
                 '''
         sMissing = [i for i, e in enumerate(self._sSin) if not isinstance(e, VarDbl)]
-        if sMissing:
+        if sMissing and (not incomplete):
             self._sSin = sSin
             return f'order {self._order} missing {len(sMissing)} indices: {sMissing}'
 
@@ -107,11 +108,17 @@ class IndexSin:
 
         "binding" is for comparing the z-difference between lib sin/cos and the calculated sin/cos
         '''
+        try:
+            self.withUncertainty(incomplete=True)
+        except BaseException as ex:
+            print(f'Fail to read {IndexSin.path(self._order): {ex}}')
         self._sSin[0] = IndexSin.zero
         self._sSin[self._half] = IndexSin.one
-        with open (IndexSin.path(self._order), 'w') as f:
-            f.write(IndexSin.header)
-            f.write('0\t0\t0\t0\t0\t1\t0\t0\t0\t0\t0\n')
+        exist = os.path.isfile(IndexSin.path(self._order))
+        with open (IndexSin.path(self._order), 'a') as f:
+            if not exist:
+                f.write(IndexSin.header)
+                f.write('0\t0\t0\t0\t0\t1\t0\t0\t0\t0\t0\n')
             self._calc(0, self._half, 1, f)
 
     def _calc(self, begin, end, order, file):
@@ -119,19 +126,18 @@ class IndexSin:
             return None
         smid = (begin + end) >> 1
         cmid = self._half - smid
-        if type(self._sSin[smid]) == VarDbl:
-            return None
-        x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
-            - self._sSin[begin] * self._sSin[end]
-        self._sSin[smid] = ((IndexSin.one - x) /IndexSin.two) ** 0.5
-        self._sSin[cmid] = ((IndexSin.one + x) /IndexSin.two) ** 0.5
-        arc = math.pi * smid/self._size
-        err = self._sSin[smid] **2 + self._sSin[cmid] **2 - 1   
-        file.write(f'{order}\t{smid}')
-        file.write(f'\t{self._sSin[smid].value()}\t{self._sSin[smid].uncertainty()}\t{(self._sSin[smid].value() - math.sin(arc))/self._sSin[smid].uncertainty()}')
-        file.write(f'\t{self._sSin[cmid].value()}\t{self._sSin[cmid].uncertainty()}\t{(self._sSin[cmid].value() - math.cos(arc))/self._sSin[cmid].uncertainty()}')
-        file.write(f'\t{err.value()}\t{err.uncertainty()}\t{err.value()/err.uncertainty()}\n')
-        file.flush()
+        if (type(self._sSin[smid]) != VarDbl) or (type(self._sSin[cmid]) != VarDbl):
+            x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
+                - self._sSin[begin] * self._sSin[end]
+            self._sSin[smid] = ((IndexSin.one - x) /IndexSin.two) ** 0.5
+            self._sSin[cmid] = ((IndexSin.one + x) /IndexSin.two) ** 0.5
+            arc = math.pi * smid/self._size
+            err = self._sSin[smid] **2 + self._sSin[cmid] **2 - 1   
+            file.write(f'{order}\t{smid}')
+            file.write(f'\t{self._sSin[smid].value()}\t{self._sSin[smid].uncertainty()}\t{(self._sSin[smid].value() - math.sin(arc))/self._sSin[smid].uncertainty()}')
+            file.write(f'\t{self._sSin[cmid].value()}\t{self._sSin[cmid].uncertainty()}\t{(self._sSin[cmid].value() - math.cos(arc))/self._sSin[cmid].uncertainty()}')
+            file.write(f'\t{err.value()}\t{err.uncertainty()}\t{err.value()/err.uncertainty()}\n')
+            file.flush()
         self._calc(begin, smid, order + 1, file)
         self._calc(smid, end, order + 1, file)
         
