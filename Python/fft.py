@@ -18,7 +18,7 @@ class FFTSinSource (enum.StrEnum):
     UncertainSin = 'UncertainSin',
 
 class FFTBase (abc.ABC):
-    MAX_ORDER = 18
+    MAX_ORDER = 17
     _bitReversedIndex = {}
 
     @abc.abstractmethod
@@ -420,25 +420,25 @@ class FFTTest:
             if not exist:
                 fw.write(FFTTest.title())
             for sinSource in FFTSinSource:
-                for signal in SignalType:
-                    for noiseType in NoiseType:
-                        for noise in sNoise:
-                            for order in sOrder:
-                                if (ssssAggr := sssssAggr.get(sinSource)) and (sssAggr := ssssAggr.get(noiseType)) \
-                                        and (ssAggr := sssAggr.get(noise)) and (sAggr := ssAggr.get(order)) and (len(sAggr) == 3):
-                                    continue
+                for noiseType in NoiseType:
+                    for noise in sNoise:
+                        for order in sOrder:
+                            if (ssssAggr := sssssAggr.get(sinSource)) and (sssAggr := ssssAggr.get(noiseType)) \
+                                    and (ssAggr := sssAggr.get(noise)) and (sAggr := ssAggr.get(order)) and (len(sAggr) == 3):
+                                continue
+                            for signal in SignalType:
                                 if signal in SignalType.Linear:
                                     fftTest = FFTTest(sinSource, noiseType, noise, signal, order, 0)
                                     FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, signal, order, 0, fftTest.measure)
                                     continue
-                                for freq in range(1, 7):
+                                for freq in range(1, 8):
                                     if signal == SignalType.Aggr:
                                         continue
                                     fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
                                     FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, signal, order, freq, fftTest.measure)
-                                aggr = FFTTest.ssssAggr[sinSource][noiseType][noise][order]
-                                FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, SignalType.Aggr, order, 0, aggr)
-                                fw.flush()
+                            aggr = FFTTest.ssssAggr[sinSource][noiseType][noise][order]
+                            FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, SignalType.Aggr, order, 0, aggr)
+                            fw.flush()
 
 
 

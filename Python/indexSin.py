@@ -17,6 +17,7 @@ class IndexSin:
     zero = VarDbl(0,0)
     one = VarDbl(1,0)
     two = VarDbl(2,0)
+    half = VarDbl(1/2,0)
 
     staticmethod
     def path(order:int) ->str:
@@ -111,11 +112,11 @@ class IndexSin:
         try:
             self.withUncertainty(incomplete=True)
         except BaseException as ex:
-            print(f'Fail to read {IndexSin.path(self._order): {ex}}')
+            print(f'Fail to read {IndexSin.path(self._order)}: {ex}')
         self._sSin[0] = IndexSin.zero
         self._sSin[self._half] = IndexSin.one
         exist = os.path.isfile(IndexSin.path(self._order))
-        with open (IndexSin.path(self._order), 'a') as f:
+        with open (IndexSin.path(self._order), 'a' if exist else 'w') as f:
             if not exist:
                 f.write(IndexSin.header)
                 f.write('0\t0\t0\t0\t0\t1\t0\t0\t0\t0\t0\n')
@@ -129,14 +130,14 @@ class IndexSin:
         if (type(self._sSin[smid]) != VarDbl) or (type(self._sSin[cmid]) != VarDbl):
             x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
                 - self._sSin[begin] * self._sSin[end]
-            self._sSin[smid] = ((IndexSin.one - x) /IndexSin.two) ** 0.5
-            self._sSin[cmid] = ((IndexSin.one + x) /IndexSin.two) ** 0.5
+            self._sSin[smid] = ((IndexSin.one - x) *IndexSin.half) ** 0.5
+            self._sSin[cmid] = ((IndexSin.one + x) *IndexSin.half) ** 0.5
             arc = math.pi * smid/self._size
             err = self._sSin[smid] **2 + self._sSin[cmid] **2 - 1   
             file.write(f'{order}\t{smid}')
-            file.write(f'\t{self._sSin[smid].value()}\t{self._sSin[smid].uncertainty()}\t{(self._sSin[smid].value() - math.sin(arc))/self._sSin[smid].uncertainty()}')
-            file.write(f'\t{self._sSin[cmid].value()}\t{self._sSin[cmid].uncertainty()}\t{(self._sSin[cmid].value() - math.cos(arc))/self._sSin[cmid].uncertainty()}')
-            file.write(f'\t{err.value()}\t{err.uncertainty()}\t{err.value()/err.uncertainty()}\n')
+            file.write(f'\t{self._sSin[smid].value():.16e}\t{self._sSin[smid].uncertainty():.16e}\t{(self._sSin[smid].value() - math.sin(arc))/self._sSin[smid].uncertainty():.16e}')
+            file.write(f'\t{self._sSin[cmid].value():.16e}\t{self._sSin[cmid].uncertainty():.16e}\t{(self._sSin[cmid].value() - math.cos(arc))/self._sSin[cmid].uncertainty():.16e}')
+            file.write(f'\t{err.value():.16e}\t{err.uncertainty():.16e}\t{err.value()/err.uncertainty():.16e}\n')
             file.flush()
         self._calc(begin, smid, order + 1, file)
         self._calc(smid, end, order + 1, file)

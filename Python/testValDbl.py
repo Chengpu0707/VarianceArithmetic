@@ -221,6 +221,21 @@ class TestMultiply (unittest.TestCase):
         except BaseException as ex:
             self.fail(ex)
 
+    def testSinUncertainty(self):
+        res = VarDbl(1.1984225887068295e-05, 1.9530084268958033e-12) **2
+        res2 = VarDbl(9.9999999992818911e-01, 9.3621846317751177e-17) **2
+        res += res2
+        res -= 1
+        self.assertEqual(res.uncertainty(), 2.0337047278745187e-16)
+        self.assertEqual(res.value(), -1.1102230246251565e-16)
+
+        res = VarDbl(1.3295362544208494e-01, 2.7534451894481781e-16) **2
+        res2 = VarDbl(9.9112225960363021e-01, 9.7483093233450446e-17) **2
+        res += res2
+        res -= 1
+        self.assertAlmostEqual(res.uncertainty(), 2.1636206136563459e-16, delta=4e-16)
+        self.assertEqual(res.value(), 0)
+
 
 class TestDivideBy (unittest.TestCase):
 

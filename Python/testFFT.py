@@ -2,7 +2,7 @@ import math
 import unittest
 
 from fft import FFTBase, FFTIndexSin, FFTLibSin, FFTLimitedSin, FFTUncertainSin
-from fft import FFTSinSource, SignalType, NoiseType, FFTTest
+from fft import FFTTest
 from varDbl import VarDbl
 
 class TestFFTBase (unittest.TestCase):
