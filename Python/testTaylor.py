@@ -16,7 +16,7 @@ HIST_BINS = 3 * 2 * HIST_DIVIDES
 SAMPLES = 10000
 
 def dump_test(self, test:str, func, npfun, sX:tuple[float],
-              sDev=[0.2] + [math.pow(10,-err) for err in range(1, 17)],
+              sDev=[0.2] + [math.pow(10,-err) for err in range(1, 17)] + [0],
               ignoreAssertError:bool=True ):
     with open(f'./Python/Output/{test}Var.txt', 'w') as f:
         f.write(f"NoiseType\tNoise\tX\t{test}\tError Deviation\tError Minimum\tError Maximum"
@@ -296,7 +296,7 @@ class TestSin (unittest.TestCase):
     def test_dump(self):
         dump_test(self, 'sin', TestSin.func, TestSin.npfunc,
                   np.array([i/16 for i in range(-16, 17)]) * math.pi,
-                  sDev = [math.pow(10,-err) for err in range(0, 17)])
+                  sDev = [math.pow(10,-err) for err in range(0, 17)] + [0])
 
 
 
@@ -421,6 +421,50 @@ class TestPower (unittest.TestCase):
         dump_test(self, 'pow', TestPower.func, TestPower.npfunc,
                   np.array([i/10 for i in range(-20, 31, 2)] +[-0.1, 0.1, -0.01, 0.01, -1e-3, 1e-6]),
                   sDev = [0.2, 0.195] + [math.pow(10,-err) for err in range(1, 17)])
+        
+
+class TestLibError(unittest.TestCase):
+    
+    def testExpLog(self):
+        with open(f'./Python/Output/ExpLogError.txt', 'w') as f:
+            f.write('X\tVarDbl Error\tVarDbl Uncertainty\tLib Error\tLib Uncertainty\n')
+            for i in range(100):
+                x = i / 50
+                var = VarDbl.log(VarDbl.exp(VarDbl(float(-x)))) + x
+                lib = VarDbl(math.log(math.exp(-x))) + x
+                f.write(f'{-x}\t{var.value()}\t{var.uncertainty()}\t{lib.value()}\t{lib.uncertainty()}\n')
+                var = VarDbl.log(VarDbl.exp(VarDbl(float(x)))) - x
+                lib = VarDbl(math.log(math.exp(x))) - x
+                f.write(f'{x}\t{var.value()}\t{var.uncertainty()}\t{lib.value()}\t{lib.uncertainty()}\n')
+
+    def testPower(self):
+        with open(f'./Python/Output/PowerError.txt', 'w') as f:
+            f.write('X\tExp\tVarDbl Error\tVarDbl Uncertainty\tLib Error\tLib Uncertainty\n')
+            for i in range(1, 100):
+                x = VarDbl(i/10)
+                for j in range(-20, 21):
+                    if not j:
+                        continue
+                    try:
+                        exp = j / 10
+                        var = (x **(exp))**(1/exp) - x
+                        lib = VarDbl(math.pow(math.pow(x.value(), exp), 1/exp)) - x.value()
+                        f.write(f'{x.value()}\t{exp}\t{var.value()}\t{var.uncertainty()}\t{lib.value()}\t{lib.uncertainty()}\n')
+                    except BaseException as ex:
+                        print(f'x={x} exp ={exp}: {ex}')
+                        continue
+
+    def testSin(self):
+        dev = 0.01
+        with open(f'./Python/Output/SinError_{dev}.txt', 'w') as f:
+            f.write('Noise\tLib Error\n')
+            x = math.pi/2
+            SAMPLES = 100
+            for i in range(SAMPLES + 1):
+                noise = (i * 2 - SAMPLES) / SAMPLES * dev * math.sqrt(3)
+                f.write(f'{noise}\t{math.sin(x + noise) - math.sin(x)}\n')  
+                
+
 
 
 if __name__ == '__main__':

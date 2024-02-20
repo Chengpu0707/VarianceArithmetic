@@ -153,6 +153,15 @@ class VarDbl:
         return VarDbl._taylor.taylor1d(var, f"sin({var})", s1dTaylor, False, False)
     
     def __pow__(self, exp):
+        match exp:
+            case 0:
+                return VarDbl(1, 0)
+            case 1:
+                return VarDbl(self)
+            case 2:
+                sq = self.value()**2
+                return VarDbl(sq, sq * 4*self.variance() + 2*self.variance()**2, True)
+
         if VarDbl._taylor is None:
             import taylor
             VarDbl._taylor = taylor.Taylor()  

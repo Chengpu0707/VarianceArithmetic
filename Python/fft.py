@@ -14,8 +14,7 @@ from varDbl import VarDbl
 class FFTSinSource (enum.StrEnum):
     IndexSin = 'IndexSin',
     LibSin = 'LibSin',
-    LimitedSin = 'LimitedSin',
-    UncertainSin = 'UncertainSin',
+
 
 class FFTBase (abc.ABC):
     MAX_ORDER = 17
@@ -28,13 +27,13 @@ class FFTBase (abc.ABC):
         '''
 
     @abc.abstractmethod
-    def sin(self, freq:int, order:int) -> None:
+    def sin(self, freq:int, order:int) -> float:
         '''
         sin(Math.pi * freq / (1 << order))
         '''
 
     @abc.abstractmethod
-    def cos(self, freq:int, order:int) -> None:
+    def cos(self, freq:int, order:int) -> float:
         '''
         cos(Math.pi * freq / (1 << order))
         '''
@@ -58,6 +57,7 @@ class FFTBase (abc.ABC):
                 j -= k
                 k >>= 1
             j += k
+        sRes = tuple(sRes)
         FFTBase._bitReversedIndex[order] = sRes
         return sRes
     
@@ -104,7 +104,7 @@ class FFTBase (abc.ABC):
                 sRes[i] *= sz
 
         return sRes
-
+    
 
 class FFTIndexSin (FFTBase):
     _indexSin = IndexSin(FFTBase.MAX_ORDER)
@@ -145,27 +145,6 @@ class FFTLimitedSin (FFTBase):
         idx = FFTLimitedSin._indexSin.get_index(freq)
         return math.cos(math.pi *idx /(1 << (order - 1))) if idx >= 0 else\
               -math.sin(math.pi *idx /(1 << (order - 1)))
-
-
-class FFTUncertainSin (FFTBase):
-    _indexSin = None
-
-    def __init__(self) -> None:
-        super().__init__()
-        if not FFTUncertainSin._indexSin:
-            FFTUncertainSin._indexSin = IndexSin(FFTBase.MAX_ORDER)
-            err = FFTUncertainSin._indexSin.withUncertainty()
-            if err:
-                raise ValueError(err)
-
-    def source(self):
-        return FFTSinSource.UncertainSin
-    
-    def sin(self, freq:int, order:int):
-        return FFTUncertainSin._indexSin.sin(freq *(1 <<(FFTBase.MAX_ORDER - order + 1)))
-    
-    def cos(self, freq:int, order:int):
-        return FFTUncertainSin._indexSin.cos(freq *(1 <<(FFTBase.MAX_ORDER - order + 1)))
 
 
 class SignalType (enum.StrEnum):
@@ -222,10 +201,6 @@ class FFTTest:
                 self.fft = FFTIndexSin()
             case FFTSinSource.LibSin:
                 self.fft = FFTLibSin()
-            case FFTSinSource.LimitedSin:
-                self.fft = FFTLimitedSin()
-            case FFTSinSource.UncertainSin:
-                self.fft = FFTUncertainSin()
             case _:
                 raise ValueError(f'Invalid sinSource={sinSource}')
 
@@ -261,20 +236,12 @@ class FFTTest:
             case _:
                 raise ValueError(f"Unknown signal={signal}")
 
-        if sinSource == FFTSinSource.UncertainSin:
-            if noise == 0:
-                self.sData = [VarDbl(self.sWave[i]) for i in range(self.size << 1)]
-                self.sBack = [VarDbl(self.sFreq[i]) for i in range(self.size << 1)]
-            else:
-                self.sData = [VarDbl(self.sWave[i]) + VarDbl(self.getNoise(), self.noise) for i in range(self.size << 1)]
-                self.sBack = [VarDbl(self.sFreq[i]) + VarDbl(self.getNoise(), self.noise) for i in range(self.size << 1)]
+        if noise == 0:
+            self.sData = [VarDbl(self.sWave[i]) for i in range(self.size << 1)]
+            self.sBack = [VarDbl(self.sFreq[i]) for i in range(self.size << 1)]
         else:
-            if noise == 0:
-                self.sData = [VarDbl(self.sWave[i]) for i in range(self.size << 1)]
-                self.sBack = [VarDbl(self.sFreq[i]) for i in range(self.size << 1)]
-            else:
-                self.sData = [VarDbl(self.sWave[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
-                self.sBack = [VarDbl(self.sFreq[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
+            self.sData = [VarDbl(self.sWave[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
+            self.sBack = [VarDbl(self.sFreq[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
 
         self.sSpec = self.fft.transform(self.sData, True)
         self.sRound = self.fft.transform(self.sSpec, False)

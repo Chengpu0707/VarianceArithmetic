@@ -533,17 +533,16 @@ Thus,
 
 \fi
 
-Two imprecise values can be compared statistically using their difference:
-\begin{itemize}
-\item When the value difference is zero, the two imprecise values are equal.  
+Two imprecise values can be compared statistically using their difference.
+
+When the value difference is zero, the two imprecise values are equal.  
 Such definition of equality deviates from statistics.
 In statistics, such two imprecise value has $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
 
-\item Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal to each other, or less or more than each other.
+Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal to each other, or less or more than each other.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the z-value for the difference is $z = 0.002 / 0.00224$, and the probability for them to be not equal is $\xi(|z|) - \xi(-|z|) = 62.8\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 If the threshold probability of not equality is $50\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
 Instead of using the threshold probability, the bounding range for z can be used, such as $|z| \leq 0.67448975$ for the equivalent threshold probability of $50\%$.
-\end{itemize}
 
 
 
@@ -953,26 +952,6 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
 It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
 
-Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
-\begin{align}
-\label{eqn: Taylor 2d}
-&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; 
-\end{align}
-\begin{align}
-\label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
-\label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
-&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
-&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
-&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
-      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
-&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
-\end{align}
-Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
-
 
 \subsubsection{Binding Factor}
 
@@ -1071,6 +1050,10 @@ P(1/x)^2 &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); \\
 P(1/x^2)^2 &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
 \end{align}
 
+
+\subsubsection{Convergence and Termination of Taylor Expansion}
+
+
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\lambda \sigma)$.
 $\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
 The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-form to converge is defined as the \emph{applicable precision threshold}, which can be estimated as $1/\sigma$ according to Formula \eqref{eqn: momentum factor higher}.
@@ -1079,11 +1062,6 @@ Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when th
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power precision}.
 
 The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
-
-
-\subsubsection{Convergence and Termination of Taylor Expansion}
-
-
 
 Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using the variance arithmetic.
 \begin{itemize}
@@ -1099,7 +1077,26 @@ On the other hand, if the new terms for both formula start to be smaller than th
 \end{itemize}
 
 
+\subsubsection{Multiple Dimensional Expansion}
 
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
+\begin{align}
+\label{eqn: Taylor 2d}
+&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+\label{eqn: Taylor 2d mean}
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\ 
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
+&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
+&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
+&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
+      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
+&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
+\end{align}
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it can be extended to any dimensional.
 
 
 
@@ -1358,7 +1355,7 @@ A test of uncertainty-bearing arithmetic using numerical integration is provided
 
 
 \clearpage
-\section{Verification Using Math Library Functions}
+\section{Math Library Functions}
 \label{sec: Math Library}
 
 \begin{figure}[p]
@@ -1368,6 +1365,7 @@ A test of uncertainty-bearing arithmetic using numerical integration is provided
 The calculated uncertainties vs the measured value deviations and the measured error deviations for $e^{x \pm \delta x}$, for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
 Each color represent a $\delta x$.
+Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Exp_Dev}
 \end{figure}
@@ -1379,6 +1377,7 @@ Each color represent a $\delta x$.
 The calculated uncertainties vs the measured value deviations and the measured error deviations for $\log(x \pm \delta x)$, for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
 Each color represent a $\delta x$.
+Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Log_Dev}
 \end{figure}
@@ -1390,6 +1389,7 @@ Each color represent a $\delta x$.
 The calculated uncertainties vs the measured value deviations and the measured error deviations for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
 Each color represent a $\delta x$.
+Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Sin_Dev}
 \end{figure}
@@ -1401,9 +1401,34 @@ Each color represent a $\delta x$.
 The calculated uncertainties vs the measured value deviations and the measured error deviations for $\sin(x \pm \delta x)$, for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
 Each color represent a $\delta x$.
-Uniform noises are used instead of Gaussian noises to produce $\delta x$.
+Uniform noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Sin_Dev_Uniform}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_X_Dev.png} 
+\captionof{figure}{
+The error deviation for $\sin(x \pm \delta x)$, for $x$ and $\delta$.
+The x-axis is $x$ between $-\pi$ and $+\pi$.
+The y-axis is $\delta$ between $-10^{-16}$ and $1$.
+The z-axis is the error deviation. 
+Gaussian noises are used to produce the input noise $\delta x$.
+}
+\label{fig: Sin_X_Dev}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_Histo.png} 
+\captionof{figure}{
+The histogram of the error deviation for $\sin(x \pm \delta x)$, for $x=-\pi/2, -\pi/4, 0, +\pi/4, +\pi/2$ and $\delta x = 10^{-1}, 10^{-16}$ as shown in the legend.
+The y-axis is the normalized count. 
+Each color represents a different $x$, while each line pattern represents a different $\delta x$.
+Uniform noises are used to produce the input noise $\delta x$.
+}
+\label{fig: Sin_Histo}
 \end{figure}
 
 \begin{figure}[p]
@@ -1429,6 +1454,24 @@ It shows that $(1 \pm 0.2)^{-2}$ and $(1 \pm 0.2)^{-1.5}$ clearly diverge, $(1 \
 \label{fig: Pow_Converge}
 \end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{ExpLog_Error.png} 
+\captionof{figure}{
+The values and uncertainties of $\log(e^x) - x$ vs $x$, as \textit{VarDbl Error} and \textit{VarDbl Uncertainty} in the legend.
+The result of the same calculation using conventional floating-point library functions is shown as \textit{Lib Error} in the legend.
+}
+\label{fig: ExpLog_Error}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Power_Error.png} 
+\captionof{figure}{
+The normalized errors of $(x^p)^{\frac{1}{p}} - x$ vs $x$ and $p$.
+}
+\label{fig: Power_Error}
+\end{figure}
 
 
 Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
@@ -1449,17 +1492,21 @@ The corresponding value deviation is obtained by:
 The deviation of the value errors is defined as the \emph{value deviation}, which the uncertainty should match.
 
 \end{enumerate}
-$\delta x$ is choose to be above  $10^{-3}$, so that the numerical errors of the math library functions will not affect the result.
-This also means that the tests are done under ideal coverage conditions.
+
+\subsection{Exponential}
 
 Figure \ref{fig: Exp_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: exp precision} agree very well with the measured value deviations for $e^{x + \delta x}$.
 As a result, the error deviations are very close to $1$, even both the uncertainties and the value error deviations increase exponentially with $x$ and $\delta x$.
 Such strong tracking power holds for all $x$ of $e^{x + \delta x}$. 
 
-Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\log(x + \delta x)$, so that the result error deviations are very close to $1$, until the uncertainties suddenly diverge when the input precision is coarser than $1/5$.
-After the result uncertainties diverge, the corresponding value deviations still continue on the same trends until the input data to the $\log$ function start to have significant probability to be less than $0$.
+\subsection{Logarithm}
 
-Such divergences of the result uncertainties are expected when the input precision is coarser than the applicable precision threshold of $1/\sigma$, in which $\sigma=5$ is the bonding factor  of the variance arithmetic.
+Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\log(x + \delta x)$, so that the result error deviations are very close to $1$, until the uncertainties suddenly diverge when the input precision is coarser than $1/5$ which is the estimated application precision threshold.
+After the result uncertainties diverge, the corresponding value deviations still continue on the same trends until the input data to the $\log$ function start to have negative values whenthe input noises are uniformly distributed.
+If Gaussian noises are used instead, the cutoffs for both value errors and error deviations are strictly at $1/5$.
+The result probability density function for $\log(x)$ has a pole at $x=0$.
+
+Such divergences of the result uncertainties are expected when the input precision is coarser than the estimated applicable precision threshold of $1/\sigma$, in which $\sigma=5$ is the bonding factor of the variance arithmetic.
 If $\sigma$ is reduced from $5$ to $4$, the measured applicable precision thresholds increase from $1/5$ to $1/4$, allowing more result uncertainties to be valid.
 The reduction of $\sigma$ increases the bounding leakage $\epsilon$ from $5.7 \times 10^{-7}$ to $6.3 \times 10^{-5}$ according to Formula \eqref{eqn: bounding leakage}.
 A large leakage $\epsilon$ raises the logic questions on the validity of the result, because the leakage may mean $x \leq 0$ for $\log(x)$ in this case.
@@ -1477,6 +1524,11 @@ In an extreme approach, in another variance arithmetic representation:
 \end{enumerate}
 For the discussion simplicity, the cases of the bounding factor $\sigma$ other than constant $5$ are avoided in this paper.
 
+
+
+
+\subsection{Sine}
+
 Figure \ref{fig: Sin_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: sin precision} agree very well with the measured value deviations for $\sin(x + \delta x)$.
 Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$:
 \begin{itemize}
@@ -1486,7 +1538,22 @@ Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same period
 
 In Figure \ref{fig: Sin_Dev}, Gaussian noises are used, while in Figure \ref{fig: Sin_Dev_Uniform}, ideal white noises are added for then given sample size of $10000$.
 The difference of Figure \ref{fig: Sin_Dev} and \ref{fig: Sin_Dev_Uniform} shows that the Gaussian noise is more desirable, because of its tail effect, e.g., the error deviation is much closer to $1$ for $\sin(\pm \pi/2 + \delta x)$.
-So only Gaussian noises will be used for other analysis.
+So only Gaussian noises will be used for other analysis by default.
+
+Figure \ref{fig: Sin_X_Dev} shows that the error deviation for $\sin(x + \delta x)$ is $1$ except when $x=\pm \pi/4$ and $\delta x < 10^{-12}$, at where the probability density function has a zero.
+Figure \ref{fig: Sin_Histo} shows the histogram of the error deviation for $\sin(x + \delta x)$ when Gaussian noises are used to produce the input noise $\delta x$:
+\begin{itemize}
+\item When $\delta x=10^{-16}$, the noise is comparable to the numerical calculation error of $\sin(x)$.
+The histogram is highly structured, with peaks near $0$, $\pm 1$, and $\pm 2$, suggesting that the value errors are integer-folds of the least significant value.
+
+\item When $\delta x=10^{-1}$, the noise is much large than the numerical calculation error of $\sin(x)$, so that ideal coverage is achieved.
+When $x=\pm \pi/2$, $\sin(x)^{(1)}_{x} = 0$, so that the result probability density function has a zero.
+The corresponding histogram is distorted from Gaussian, with the peak at $x=\pm \pi/2$, and all other values on one side of the peak only.
+Such distortion of the histogram 
+\end{itemize}
+
+
+\subsection{Power}
 
 Figure \ref{fig: Pow_Dev} shows that the calculated uncertainties of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} agree very well with the measured value deviations for $(1 + \delta x)^c$ except when $\delta x =0.2$ and $c < -1$.
 The reason why Formula \eqref{eqn: power precision} is not applicable exactly at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
@@ -1504,14 +1571,69 @@ As the confirmation, Figure \ref{fig: Pow_Converge} shows reducing $\delta x$ in
 \end{itemize}
 Figure \ref{fig: Pow_Converge} shows that the convergence of an analytic function at each input can be judged numerically and automatically for the given maximum Taylor expansion orders.
 
-Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} shows the validity and strength of the variance arithmetic.
-In each case, the error deviation is very close to 1 in ideal coverage cases.
+
+
+\subsection{Numerical Errors for Library Functions}
+
+The combined numerical error of the library function $e^x$ and $\log(x)$ is calculated as $\log(e^x) - x$ vs $x$.
+Figure \ref{fig: ExpLog_Error} shows that using either the variance arithmetic or the conventional floating-point library functions results in the same value errors.  
+In both cases, the value errors are $0$ when $1 < |x|$.
+The uncertainties of the variance arithmetic bounds the value errors effectively, resulting in an error deviation about $0.409$ when $|x| \leq 1$.
+
+The numerical error of the library function $x^p$ is calculated as $(x^p)^{1/p} - x$ vs $x$.
+Figure \ref{fig: Power_Error} shows that the normalized errors is not specific to either $x$ or $p$, resulting in an error deviation about $0.548$.
+
+When no input noise is added, the error deviation of $\sin(x)^2 + \cos(x)^2 - 1$ is about $0.535$
+
+
+\subsection{Summary}
+
+Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} gives effective uncertainties for the corresponding library functions.
+Generally, when the input precision is above $10^{-15}$, the input uncertainty achieves ideal coverage.
+
+In ideal coverage cases, the error deviation is very close to $1$ except it is $0$ at where:
+\begin{itemize}
+\item when the result probability density function is zero, and $\delta x$ is small enough, the uncertainty mean is finite.
+
+\item when the result probability density function is pole, and $\delta x$ is large enough, the uncertainty mean is infinite.
+\end{itemize}
+In non ideal coverage cases, the error deviation is about $0.5$.
 
 
 
 
 
+\clearpage
+\section{Regressive Generation of Sin/Cos}
+\label{sec: recursion}
 
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Uncertain_Sin.png} 
+\captionof{figure}{
+The error deviations and uncertainty means for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown in the legend.
+}
+\label{fig: Uncertain_Sin}
+\end{figure}
+
+Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the $\sin$ library function.  
+\begin{align}
+\label{eqn: phase boundary}
+& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+\label{eqn: phase sin}
+& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
+\label{eqn: phase cos}
+& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
+\end{align}
+The number of regression is defined as the order.
+For each order $n$, $2^n$ $\sin(\frac{\pi}{2} \frac{i}{2^n})$ and $\cos(\frac{\pi}{2} \frac{i}{2^n})$ values are obtained, so that the result is more statistically stable with increasing $n$.
+
+The errors of the generated $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + \cos(x)^2 - 1$.
+The resulted value errors are very comparable with the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
+Figure \ref{fig: Uncertain_Sin} shows that the result uncertainties remain almost a constant of about $1.2 \time 10^{-16}$, which is consist with uniformly distributed least significant values within the least significant bit of the significand.
+It also shows that the error deviations is close to $0.5$, which is comparable to the value of $0.535$ for the library $\sin(x)$ and $\cos(x)$ functions.
+
+The variance arithmetic is thus effective for this regression algorithm.
 
 
 
@@ -1942,41 +2064,6 @@ With ideal coverage, a result uncertainty is the corresponding deviation of the 
 
 
 
-
-
-\clearpage
-\section{Verification of a Generated Sine Library Function with Uncertainty}
-\label{sec: recursion}
-
-In Section \ref{sec: FFT}, both the $\sin$ library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$ and the $\tan$ library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$ have been demonstrated to have significant numerical errors, and when the $\tan$ library function is replace by the $\sin$ library function as $\sin(x) / \sin(x + \pi/2)$, the numerical errors of the $\tan$ library function can be reduced significantly.
-The question is: What is the effect of replacing the $\sin$ library function in conventional floating-point representation with a corresponding library function with uncertainty for each data?
-
-
-\subsection{Recursive Calculation of Sine Values}
-
-Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the $\sin$ library function.  
-\begin{align}
-\label{eqn: phase boundary}
-& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
-\label{eqn: phase sin}
-& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
-\label{eqn: phase cos}
-& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
-\end{align}
-
-This algorithm is very different from both FFT and matrix inversion in nature because Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} are no longer linear, and the test presents a pure theoretical calculation without input uncertainty.  The recursion iteration count $L$ is a good measurement for the amount of calculations.  Each repeated use of Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} accumulates calculation errors to the next usage so that both value errors and uncertainty are expected to increase with $L$.  Each recursion iteration $L$ corresponds to $2^{L-2}$ outputs, which enables statistical analysis for large $L$.  
-
-Figure \ref{fig: AvgValErr_vs_Regression} shows that both average output value errors and the corresponding average output deviation increase exponentially with the recursion count for all three arithmetics, and Figure \ref{fig: AvgErrSig_MaxBndRat_vs_Regression} shows that in response to the increased amount of calculations:
-\begin{itemize}
-\item The average tracking ratio for variance arithmetic is a constant about 0.25;
-
-\item The maximal output bounding ratio for variance arithmetic increases slowly; 
-
-\item The average tracking ratio for interval arithmetic decreases exponentially; and 
-
-\item The maximal output bounding ratio for interval arithmetic remains roughly a constant.
-\end{itemize}
-Unlike FFT algorithms, the initial precise sine values participate in every stage of the recursion, which results in few small output deviations at each recursion.  Detailed inspection shows that the maximal output bounding ratios for interval arithmetic are all obtained from small output deviations, and bounding ratios using interval arithmetic in general decrease exponentially with the amount of calculations.  Thus, the result uncertainty propagation characteristics of the regressive calculation of sine values are very similar to those of both FFT and the calculating adjugate matrix; even though all these algorithms are quite different in nature.  This may indicate again that the stability of variance arithmetic is generic, regardless of the algorithms used.
 
 
 
@@ -2541,20 +2628,6 @@ matrix vs. input precision and the matrix size.}
 \label{fig: Prec4_Matrix_Rnd_NormDist}
 \end{figure}
 
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{AvgValErr_vs_Regression.png} 
-\captionof{figure}{ The empirical output average value errors and corresponding average output deviations vs. the recursion iteration count of the regressive calculation of sine values using interval arithmetic, variance arithmetic and independent arithmetic.  The x-axis indicates the recursion iteration count L, while the y-axis indicates either the average value errors or average uncertainty deviations.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, and "Prec'' means variance arithmetic.}
-\label{fig: AvgValErr_vs_Regression}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{AvgErrSig_MaxBndRat_vs_Regression.png} 
-\captionof{figure}{ The empirical output maximal bounding ratios and average tracking ratios vs. the recursion iteration count of the regressive calculation of sine values using interval and variance arithmetic.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, and "Prec'' means variance arithmetic.}
-\label{fig: AvgErrSig_MaxBndRat_vs_Regression}
-\end{figure}
 
 
 \begin{figure}

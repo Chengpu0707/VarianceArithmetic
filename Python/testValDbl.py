@@ -237,6 +237,38 @@ class TestMultiply (unittest.TestCase):
         self.assertEqual(res.value(), 0)
 
 
+class TestPower (unittest.TestCase):
+    def test_0(self):
+        res = VarDbl(0, 1/1024) ** 0
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), 0)
+
+        res = VarDbl(1, 1/1024) ** 0
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), 0)
+
+    def test_1(self):
+        res = VarDbl(-1, 1/1024) ** 1
+        self.assertEqual(res.value(), -1)
+        self.assertEqual(res.uncertainty(), 1/1024)
+
+    def test_2(self):
+        res = VarDbl(0, 1/8) ** 2
+        self.assertEqual(res.value(), 0)
+        self.assertEqual(res.uncertainty(), math.sqrt(2)/64)
+
+        res = VarDbl(-1, 1/8) ** 2
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), math.sqrt(((1 << 8) + 2)/(1 << 12)))
+
+        res = VarDbl(-2, 1/8) ** 2
+        self.assertEqual(res.value(), 4)
+        self.assertEqual(res.uncertainty(), math.sqrt(((1 << 10) + 2)/(1 << 12)))
+
+    def test_3(self):
+        pass
+
+
 class TestDivideBy (unittest.TestCase):
 
     def testVarDblByVarDblOne(self):
