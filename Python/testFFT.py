@@ -2,7 +2,7 @@ import math
 import unittest
 
 from fft import FFTBase, FFTIndexSin, FFTLibSin
-from fft import FFTTest
+from fft import FFTTest, FFTSinSource, SignalType, NoiseType, TestType
 from varDbl import VarDbl
 
 class TestFFTBase (unittest.TestCase):
@@ -164,9 +164,32 @@ class CompareSin (unittest.TestCase):
                     raise ex
 
 
+class TestCleanLib (unittest.TestCase):
 
-class TestSignal (unittest.TestCase):
-    sFreq = [math.pow(10,-n-1) for n in range(16)] + [0]
+    def testLinear(self):
+        '''
+        Demonstrate the extent of lib error beyond least significant value
+        '''
+        ORDER = 16
+        DEVS = 3000
+        with open(f'./Python/Output/Lib_Linear_{ORDER}.txt', 'w') as fw:
+            fw.write(FFTTest.title(1, DEVS))
+            test = FFTTest(FFTSinSource.LibSin, NoiseType.Gaussian, 0,
+                           SignalType.Linear, ORDER, 0,
+                           divids=1, devs=DEVS)
+            test.dumpMeasure(fw, FFTSinSource.LibSin, NoiseType.Gaussian, 0,
+                             SignalType.Linear, ORDER, 0, test.measure)
+
+
+class TestDumpFFT (unittest.TestCase):
+
+    def testSpectra(self):
+        '''
+        Demonstrate the reverse has not enough calculation for large enough uncertainty
+        '''
+        with open(f'./Python/Output/FFT_4_6_Spec.txt', 'w') as fw:
+            FFTTest.dumpSpectrumHeader(fw)
+            FFTTest.dumpSpectra(fw, (4,5,6))
 
     def testOrder_4(self):
         FFTTest.dumpOrders(sOrder=[4])

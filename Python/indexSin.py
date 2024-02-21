@@ -10,24 +10,7 @@ class IndexSin:
     A sin() with index frequence as input, with resolution \pi/size()
     size() = 1 << "order".
     When the index "freq" == size, the result is sin(\pi).
-    This function has minimal float error when "withUncertainty"==False.
-
-    When "withUncertainty"==True, use regression to calculate the sin
     '''
-    zero = VarDbl(0,0)
-    one = VarDbl(1,0)
-    two = VarDbl(2,0)
-    half = VarDbl(1/2,0)
-
-    staticmethod
-    def path(order:int) ->str:
-        return f'./Python/Output/UncertainSin_{order}.txt'
-    
-    header = "Order\tIndex"\
-             "\tSin Value\tSin Uncertainty\tSin Normalized Error"\
-             "\tCos Value\tCos Uncertainty\tCos Normalized Error"\
-             "\tError Value\tError Uncertainty\tNormalized Error\n"
-    
     __slots__ = ['_order', '_size', '_half', '_sSin']
 
     def __init__(self, order) -> None:
@@ -39,6 +22,64 @@ class IndexSin:
         self._sSin = [0] + [math.sin(i/self._size *math.pi) for i in range(1, self._half >> 1)] + \
                 [math.cos((1/4 - i/self._size)*math.pi) for i in range(self._half >> 1)] + [1] 
         
+    def size(self):
+        return self._size
+        
+    def get_index(self, freq:int) ->int:
+        '''
+        get index into _sSin, with -index means -sin
+        '''
+        div = freq // self._half
+        rem = freq % self._half
+        if div & 1:
+            div += 1
+            rem -= self._half
+        if div & 2:
+            return -rem
+        else:       
+            return rem
+
+    def sin(self, freq:int) -> float:
+        idx = self.get_index(freq)
+        return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
+
+    def cos(self, freq:int) -> float:
+        return self.sin(freq + self._half)
+
+    def tan(self, freq:int) -> float:
+        return self.sin(freq) / self.cos(freq)
+      
+    def arc_sin(self, value:float) -> float:
+        if not -1 <= value <= 1:
+            raise ValueError(f'Invalid sine value {value}')
+        sign = 1 if value >=0 else -1
+        value = abs(value)
+        idx = bisect.bisect_left(self._sSin, value)
+        if idx == len(self._sSin) - 1:
+            return sign * idx 
+        return sign * (idx + (value - self._sSin[idx]) / (self._sSin[idx + 1] - self._sSin[idx]))
+        
+
+class RegressiveSin (IndexSin):
+    '''
+    Use regression to generate sin(j /(1<<order) *math.pi)
+    '''
+    ZERO = VarDbl(0,0)
+    ONE = VarDbl(1,0)
+    HALF = VarDbl(1/2,0)
+
+    HEADER = "Order\tIndex"\
+             "\tSin Value\tSin Uncertainty\tSin Normalized Error"\
+             "\tCos Value\tCos Uncertainty\tCos Normalized Error"\
+             "\tError Value\tError Uncertainty\tNormalized Error\n"
+    
+    staticmethod
+    def path(order:int) ->str:
+        return f'./Python/Output/UncertainSin_{order}.txt'
+    
+    def __init__(self, order) -> None:
+        super().__init__(order)
+
     def withUncertainty(self, incomplete:bool=False) -> typing.Optional[str]:
         '''
         Return None for successfully reading the file which contain sin with uncertainty.
@@ -47,9 +88,9 @@ class IndexSin:
         "binding" is for comparing the z-difference between lib sin/cos and the calculated sin/cos
         '''
         sSin = self._sSin[:]
-        with open (IndexSin.path(self._order)) as f:
+        with open (RegressiveSin.path(self._order)) as f:
             title = next(f)
-            if title != IndexSin.header:
+            if title != RegressiveSin.HEADER:
                 return f'Wrong header: {title}'
             for ln, line in enumerate(f):
                 sWord = line.strip().split('\t')
@@ -112,13 +153,13 @@ class IndexSin:
         try:
             self.withUncertainty(incomplete=True)
         except BaseException as ex:
-            print(f'Fail to read {IndexSin.path(self._order)}: {ex}')
-        self._sSin[0] = IndexSin.zero
-        self._sSin[self._half] = IndexSin.one
-        exist = os.path.isfile(IndexSin.path(self._order))
-        with open (IndexSin.path(self._order), 'a' if exist else 'w') as f:
+            print(f'Fail to read {RegressiveSin.path(self._order)}: {ex}')
+        self._sSin[0] = RegressiveSin.ZERO
+        self._sSin[self._half] = RegressiveSin.ONE
+        exist = os.path.isfile(RegressiveSin.path(self._order))
+        with open (RegressiveSin.path(self._order), 'a' if exist else 'w') as f:
             if not exist:
-                f.write(IndexSin.header)
+                f.write(RegressiveSin.HEADER)
                 f.write('0\t0\t0\t0\t0\t1\t0\t0\t0\t0\t0\n')
             self._calc(0, self._half, 1, f)
 
@@ -130,8 +171,8 @@ class IndexSin:
         if (type(self._sSin[smid]) != VarDbl) or (type(self._sSin[cmid]) != VarDbl):
             x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
                 - self._sSin[begin] * self._sSin[end]
-            self._sSin[smid] = ((IndexSin.one - x) *IndexSin.half) ** 0.5
-            self._sSin[cmid] = ((IndexSin.one + x) *IndexSin.half) ** 0.5
+            self._sSin[smid] = ((RegressiveSin.ONE - x) *RegressiveSin.HALF) ** 0.5
+            self._sSin[cmid] = ((RegressiveSin.ONE + x) *RegressiveSin.HALF) ** 0.5
             arc = math.pi * smid/self._size
             err = self._sSin[smid] **2 + self._sSin[cmid] **2 - 1   
             file.write(f'{order}\t{smid}')
@@ -142,45 +183,6 @@ class IndexSin:
         self._calc(begin, smid, order + 1, file)
         self._calc(smid, end, order + 1, file)
         
-    def size(self):
-        return self._size
-        
-    def get_index(self, freq:int) ->int:
-        '''
-        get index into _sSin, with -index means -sin
-        '''
-        div = freq // self._half
-        rem = freq % self._half
-        if div & 1:
-            div += 1
-            rem -= self._half
-        if div & 2:
-            return -rem
-        else:       
-            return rem
-
-    def sin(self, freq:int) -> float:
-        idx = self.get_index(freq)
-        return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
-
-    def cos(self, freq:int) -> float:
-        return self.sin(freq + self._half)
-
-    def tan(self, freq:int) -> float:
-        return self.sin(freq) / self.cos(freq)
-      
-    def arc_sin(self, value:float) -> float:
-        if not -1 <= value <= 1:
-            raise ValueError(f'Invalid sine value {value}')
-        sign = 1 if value >=0 else -1
-        value = abs(value)
-        idx = bisect.bisect_left(self._sSin, value)
-        if idx == len(self._sSin) - 1:
-            return sign * idx 
-        return sign * (idx + (value - self._sSin[idx]) / (self._sSin[idx + 1] - self._sSin[idx]))
-        
-
-
 
     
 

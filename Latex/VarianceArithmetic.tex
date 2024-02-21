@@ -1204,7 +1204,7 @@ For example:
 \begin{itemize}
 \item 
 Traditionally, $x^2 - x$ can be calculated equivalently as Formula \eqref{eqn: interval depend 1}, \eqref{eqn: interval depend 2}, and \eqref{eqn: interval depend 3}.
-When applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations, only Formula \eqref{eqn: interval depend 1} gives the correct result, while the other two violate dependency tracing and give wrong results, as shown in Table 1.
+When applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations, only Formula \eqref{eqn: interval depend 1} gives the correct result, while the other two violate dependency tracing and give wrong results, as shown in Table \ref{tbl: dependency example}.
 It shows that the dependency problem of interval arithmetic \cite{Interval_Arithmetic} may be due to the lack of dependency tracing.
 
 \item In Gaussian elimination for linear equation \cite{Numerical_Recipes}, the execution is carried out progressively in the path to minimize rounding errors using conventional floating-point calculations, without any consideration for dependency tracing.
@@ -1218,7 +1218,6 @@ Thus, when the dependency tracing is not applied strictly, variance arithmetic w
 To avoid such dependency problem, all the conventional numerical algorithms need to be reevaluated for variance arithmetic.
 
 \begin{table}
-\label{eqn: dependency example}
 \centering
 \begin{tabular}{|l|l|l|} 
 \hline 
@@ -1231,8 +1230,11 @@ Formula & Result difference & Wrong independence \\
 \eqref{eqn: interval depend 3} & $( - 2 x^2 + 2 x) (\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
 \hline 
 \end{tabular}
-\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
-The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.}
+\captionof{table}{
+The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
+The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
+}
+\label{tbl: dependency example}
 \end{table}
 
 \begin{align}
@@ -1549,7 +1551,7 @@ The histogram is highly structured, with peaks near $0$, $\pm 1$, and $\pm 2$, s
 \item When $\delta x=10^{-1}$, the noise is much large than the numerical calculation error of $\sin(x)$, so that ideal coverage is achieved.
 When $x=\pm \pi/2$, $\sin(x)^{(1)}_{x} = 0$, so that the result probability density function has a zero.
 The corresponding histogram is distorted from Gaussian, with the peak at $x=\pm \pi/2$, and all other values on one side of the peak only.
-Such distortion of the histogram 
+Such distortion of the histogram results in $0$ error deviations at $x=\pm \pi/2$ in Figure \ref{fig: Sin_X_Dev}.
 \end{itemize}
 
 
@@ -1629,11 +1631,14 @@ The number of regression is defined as the order.
 For each order $n$, $2^n$ $\sin(\frac{\pi}{2} \frac{i}{2^n})$ and $\cos(\frac{\pi}{2} \frac{i}{2^n})$ values are obtained, so that the result is more statistically stable with increasing $n$.
 
 The errors of the generated $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + \cos(x)^2 - 1$.
-The resulted value errors are very comparable with the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
+The resulted value errors are comparable with but not identical to the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
 Figure \ref{fig: Uncertain_Sin} shows that the result uncertainties remain almost a constant of about $1.2 \time 10^{-16}$, which is consist with uniformly distributed least significant values within the least significant bit of the significand.
 It also shows that the error deviations is close to $0.5$, which is comparable to the value of $0.535$ for the library $\sin(x)$ and $\cos(x)$ functions.
+The variance arithmetic is thus effective for this regressive generation algorithm.
 
-The variance arithmetic is thus effective for this regression algorithm.
+Using either Taylor expansion or regressive generation of $\sin(x)$ and $\cos(x)$ are equivalent precision-wise for conventional floating-point calculations.
+In contrast, in the variance arithmetic, when $x \rightarrow 0$, Formula \eqref{eqn: phase sin} has very coarse precision for Formula \ref{eqn: square root precision}, which result in very coarse precision for $\sin(x)$. 
+Thus, the variance arithmetic rejects this regressive generation algorithm for $\sin(x)$ and $\cos(x)$.
 
 
 
@@ -1661,13 +1666,14 @@ H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k}
 
 \fi
 
-\begin{figure}%[p]
+\begin{figure}[p]
 \includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 
 \captionof{figure}{An unfaithful Discrete Fourier transformation is demonstrated by the spectra of a few sine signals having amplitude of 1 and slightly different frequencies as shown in legends..  
 This figure is a practical reproduction of a previous theoretical figure \cite{Prev_Precision_Arithmetic}.
 }
 \label{fig: FFT_Unfaithful}
 \end{figure}
+
 
 Each testing algorithm needs to come under careful scrutiny.  
 One important issue is whether the digital implementation of the algorithm is faithful for the original analytic algorithm.  
@@ -1723,14 +1729,13 @@ Thus, the discrete Fourier transformation has an implied assumption that the sig
 For an unfaithful frequency, $h[N-1]$ and $h[N]$ are discontinuous in regard to signal periodicity, resulting in larger peak width, lower peak height, and the wrong phase.  
 
 The unfaithfulness of the discrete Fourier transformation to the Fourier transformation is a very serious example of modeling errors, but this problem has not be addressed seriously enough previously.
-Because the discrete Fourier transformation has widest applications in science and engineering, this problem really need some serious attention.
-
+Because the discrete Fourier transformation has widest applications in science and engineering, this problem need some serious attention.
 
 
 \subsection{Testing Signals}
 
 To avoid the unfaithful representation, the validation of the variance arithmetic using discrete Fourier transformation will not rely on the ideal result from the continuous Fourier transformation counterpart.
-Instead, the analytic result will be calculated using only Formula \eqref{eqn: Fourier}.
+Instead, only Formula \eqref{eqn: Fourier} will be used.
 
 The following signals are used for testing:
 \begin{itemize}
@@ -1799,75 +1804,249 @@ This simplicity avoids introducing numerical errors from Formula \eqref{eqn: Tay
 Because the reverse transformation divides the result by $2^L$, the result uncertainty means decrease with the FFT order $L$ as $\sqrt{1/2}^L$.
 The result uncertainty means for the roundtrip transformations is thus: $\sqrt{2}^L \times \sqrt{1/2}^L = 1$.
 
-\item The major source of the calculation error for Sin/Cos signals is the calculation errors of the library function $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
-The major source of the calculation error for \emph{Linear} signals is the calculation errors of the library function $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$.
-
 \item The forward and reverse transformations are identical except a sign, so they are essentially the same algorithm, and their difference is purely due to input data.  
 
-\item The forward transformation cancels each datum of a Sin/Cos signal into a spectrum of mostly $0$ values, while the reverse transformation spread the spectrum of mostly $0$ values to each datum of a Sin/Cos signal, so their data have contrast nature.
+\item The major source of the calculation error for Sin/Cos signals is the calculation errors of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$.
+The major source of the calculation error for \emph{Linear} signals is the calculation errors of $\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$.
 
 \end{itemize}
+
+
+\subsection{sin(x) and cos(x) to Use}
+
+\begin{figure}[p]
+\includegraphics[width=4.5in,height=2.75in]{Sin_Diff.png} 
+\captionof{figure}{
+The difference Between Library $\sin(x)$ and indexed $\sin(x)$, for $x \in [0, 8 \pi]$.
+The indexed $\sin(x)$ extends $\sin(x), cos(x), x \in [0, \pi/4]$ to other $x$ using index frequency for a given FFT order.
+In the figure, the FFT order is $7$.
+}
+\label{fig: Sin_Diff}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_1_4_Spec_Indexed.png} 
+\captionof{figure}{
+The FFT spectrum of $\sin(j 1/2^4 \pi)$ using the indexed sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the index frequency.
+The y-axis shows the absolute value errors.
+}
+\label{fig: FFT_Sin_Clean_1_4_Spec_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_1_4_Spec_Lib.png} 
+\captionof{figure}{
+The FFT spectrum of $\sin(j 1/2^4 \pi)$ using the library sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the index frequency.
+The y-axis shows the absolute value errors.
+}
+\label{fig: FFT_Sin_Clean_1_4_Spec_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_1_4_Wave_Indexed.png} 
+\captionof{figure}{
+The FFT waveform of $\sin(j 1/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the index frequency.
+The y-axis shows the absolute value errors.
+}
+\label{fig: FFT_Sin_Clean_1_4_Wave_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_4_4_Wave_Lib.png} 
+\captionof{figure}{
+The FFT waveform of $\sin(j 4/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the index frequency.
+The y-axis shows the absolute value errors.
+}
+\label{fig: FFT_Sin_Clean_4_4_Wave_Lib}
+\end{figure}
+
+
+
+Formula \eqref{eqn: Fourier} limits the use of $\sin(x)$ and $\cos(x)$ to $x = j \frac{2 \pi}{N}$.
+To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine functions} can be used instead of the library sine functions:
+\begin{enumerate}
+\item Instead of a floating-point value $x$ for $\sin(x)$ and $\cos(x)$ for the \emph{library sine functions}, the integer $j$ is used to specify the input to $\sin$ and $\cos$, as $\sin(j \frac{2\pi}{N})$ and $\cos(j \frac{2\pi}{N})$, to avoid the floating-point rounding error of $x$.
+
+\item The values of the indexed sine functions is extended from $j = 0,1,...\frac{N}{8}$ to the whole integer region using the periodicity of $\sin$ and $\cos$.
+\end{enumerate}
+Figure \ref{fig: Sin_Diff} shows that the value difference between the library sine and the indexed sine increases with increasing $x$.
+
+Such difference will have a large impact on the result of numerical Fourier transformation.
+For the waveform of $\sin(j f/2^4 \pi)$ in which $f$ is the index frequency, and $j$ is the index time:
+\begin{itemize}
+\item For the forward transformation, Figure \ref{fig: FFT_Sin_Clean_1_4_Spec_Indexed} shows that using the indexed sine functions, the result value errors are comparable to the result uncertainties, while Figure \ref{fig: FFT_Sin_Clean_1_4_Spec_Lib} shows that using the library sine functions, the result value errors are much larger to the result uncertainties.
+Particularly, using the index sin functions, when the result uncertainties are $0$, the corresponding value errors are also $0$, and the error deviation is close to $1$.
+On the other hand, using the library sine functions, such relation between the result uncertainties and the corresponding value errors no longer exists, so that  the error deviations can be as large as $10^{16}$.
+
+\item For the reverse transformation, Figure \ref{fig: FFT_Sin_Clean_1_4_Wave_Indexed} shows that using the indexed sine functions, the result value errors are comparable to the result uncertainties, while Figure \ref{fig: FFT_Sin_Clean_4_4_Wave_Lib} shows that using the library sine functions, the result value errors are much larger to the result uncertainties.
+The increase of the value errors in Figure \ref{fig: FFT_Sin_Clean_4_4_Wave_Lib} is consistent with the increase of the value errors in Figure \ref{fig: Sin_Diff}.
+\end{itemize}
+
+For FFT, it is clear that the indexed sine functions are much better than the library sine functions.
+Sadly. in reality, the library sine functions are used ubiquitously, so that both needs to be evaluated.
+
+
+
+
+\subsection{Numerical Calculation Error}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Indexed.png} 
+\captionof{figure}{
+The histograms of the normalized errors of Sin/Cos signals without input noises using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_SinCos_Clean_Histo_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Lib.png} 
+\captionof{figure}{
+The histograms of the normalized errors of Sin/Cos signals without input noises using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+}
+\label{fig: FFT_SinCos_Clean_Histo_Lib}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Indexed.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means of Sin/Cos signals vs. FFT order using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_SinCos_Clean_vs_Order_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_SinCos_Clean_vs_Order_Lib}
+\end{figure}
+
+
+
+
+
+The forward transformation cancels real imprecise data of a Sin/Cos signal into a spectrum of mostly $0$ values, so that both its value errors and its result uncertainties are expected to grow faster. 
+In contrast, the reverse transformation spread the spectrum of precise $0$ values except at two peaks to data of a Sin/Cos signal, so that both its value errors and its result uncertainties are expected to grow slower. 
+
+
+
+
 
 
 \subsection{Ideal Coverage}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Indexed.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means using Sin/Cos signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
+The result error deviations and uncertainty means for Sin/Cos signals of order 16 using indexed sin/cos functions vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
 The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
-\label{fig: FFT_SinCos_vs_Noise}
+\label{fig: FFT_SinCos_vs_Noise_Indexed}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_vs_Noise.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Lib.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means for Sin/Cos signals of order 16 using library sin/cos functions vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_SinCos_vs_Noise_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Indexed.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
 The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
-\label{fig: FFT_Linear_vs_Noise}
+\label{fig: FFT_Linear_vs_Noise_Indexed}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_1e-12_vs_Order.png} 
+\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Lib.png} 
+\captionof{figure}{
+The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip FFT transformations.
+The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+}
+\label{fig: FFT_Linear_vs_Noise_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_1e-13_vs_Order.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Sin/Cos signals with $10^{12}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
 The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
-\label{fig: FFT_SinCos_1e-12_vs_Order}
+\label{fig: FFT_SinCos_1e-13_vs_Order}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_1e-5_vs_Order.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_1e-13_Histo.png} 
 \captionof{figure}{
 The result error deviations and uncertainty means using Lienar signals with $10^{5}$ noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
 The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
 }
-\label{fig: FFT_Linear_1e-5_vs_Order}
+\label{fig: FFT_SinCos_1e-13_Histo}
 \end{figure}
 
 
-Figure \ref{fig:  FFT_SinCos_vs_Noise}  shows the result error deviations and uncertainty means vs. different input uncertainties using Sin/Cos signals of order 18.  
-When the deviation of the input noise is more than $10^{-12}$, the input uncertainties become ideal coverage:
+
+Figure \ref{fig:  FFT_SinCos_vs_Noise_Indexed} shows the result error deviations and uncertainty means vs. different input uncertainties for Sin/Cos signals of order 16 using the indexed sin/cos functions.  
+When the deviation of the input noise is more than $10^{-13}$, the input uncertainties become ideal coverage:
 \begin{itemize}
+\item As expected, the result uncertainty means for both the forward and the reverse transformations are linear to the input uncertainties, respectively, because FFT transformations are linear.
+As expected, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties perfectly.
+
 \item As expected, the normalized errors for the forward and the reverse transformations are normal distributed, even when the input noise is no longer Gaussian.
-The normalized errors for the roundtrip transformations are delta distributed at $0$.
+The normalized errors for the roundtrip transformations are delta distributed at $0$, meaning the input uncertainties are perfectly recovered.
 
-\item As expected, the result uncertainty means for the roundtrip transformation recover the corresponding input uncertainties perfectly. 
-The result uncertainty means for both the forward and the reverse transformations are linear to the input uncertainties, respectively, because FFT transformations are linear.
-
-\item For the roundtrip transformations, the result is compared with the original input for value errors, which are virtually $0$.
-The corresponding error deviations are also $0$, and the normalized errors are delta distributed at $0$.
+\item As expected, the result error deviations for the forward and reverse transformations are constant $1$, while the result error deviations for the roundtrip transformation approaches $0$ exponentially with the increasing FFT order.
 
 \end{itemize}
-Figure \ref{fig: FFT_Linear_vs_Noise} is identical to Figure \ref{fig: FFT_SinCos_vs_Noise} except that the ideal coverage is reached when the input noise deviation is $10^{-3}$ or more.
 
-Figure \ref{fig:  FFT_SinCos_1e-12_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Sin/Cos signals with $10^{-12}$ noise, when the input uncertainties start to have idea coverage over the input errors.
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|c|c|} 
+\hline 
+Signal & Sin/Cos   & Figure & Lower limit            & Reverse error deviation \\ 
+         & functions &           & for ideal coverage  & without noise \\ 
+\hline 
+Sin/Cos & Indexed & \ref{fig:  FFT_SinCos_vs_Noise_Indexed} & $10^{-13}$ & $0.85$ \\ 
+\hline 
+Sin/Cos & Library & \ref{fig:  FFT_SinCos_vs_Noise_Lib} & $10^{-12}$ & $13$ \\ 
+\hline 
+Sin/Cos & Indexed & \ref{fig:  FFT_Linear_vs_Noise_Indexed} & $10^{-8}$ & $1.25$ \\ 
+\hline 
+Sin/Cos & Library & \ref{fig:  FFT_Linear_vs_Noise_Lib} & $10^{-6}$ & $2.7 \; 10^{3}$ \\ 
+\hline 
+\end{tabular}
+\captionof{table}{
+FFT Ideal Coverage Lower Limit.
+}
+\label{tab: FFT Ideal Coverage Lower Limit}
+\end{table}
+
+Table \ref{tab: FFT Ideal Coverage Lower Limit} shows that the lower limits for the ideal coverage increase with either using library sine and cosine instead of indexed sine and cosine, and with Linear signals instead of sin/cos signals.
+
+Figure \ref{fig:  FFT_SinCos_1e-13_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Sin/Cos signals with $10^{-13}$ noise, when the input uncertainties start to have idea coverage over the input errors.
 \begin{itemize}
 \item The result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$, as expected.
 
@@ -1880,13 +2059,10 @@ Smaller FFT order probably means not enough samples for the error deviations to 
 \end{itemize}
 Such trends of uncertainty means are observed for all cases of ideal coverage.
 
-Figure \ref{fig:  FFT_Linear_1e-5_vs_Order}  shows the result error deviations and uncertainty means vs. FFT order using Linear signals with $10^{-5}$ noises, when the input uncertainties are below the ideal coverage of $10^{-3}$.
-The result uncertainty means have the behaviors as if the ideal coverage has been reached.
-The result error deviations reach exactly constant $1$ between the FFT order $12$ and $16$ but deviate from $1$ when the FFT order is more than $16$, because more calculations bring more numerical errors from the $\tan$ library functions.
-This means a test calculation of smaller scale may behaves quite different from a real calculation in term of result error characteristics.
+Figure \ref{fig:  FFT_SinCos_1e-13_Histo} shows that with $10^{-13}$ input noise, the result normalized errors for the forward and reverse transformations are normal distributed, while the result normalized errors for the roundtrip transformation is delta distributed, regardless of the types of input noises.
+When the input noises are larger than the corresponding lower limits for ideal coverage in Table \ref{tab: FFT Ideal Coverage Lower Limit}, the  the result normalized errors for the forward and reverse transformations are ideally normal distributed.
 
-For both signals, FFT transformations are validated for ideal coverage.
-Both error response and calculation response have the expected behaviors, the result normalized errors are normal distributed, and the error deviations are exactly $1$.
+For both signals using either sin/cos functions, FFT transformations are validated for ideal coverage.
 
 
 
@@ -1895,30 +2071,11 @@ Both error response and calculation response have the expected behaviors, the re
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Sin/Cos signals vs. FFT order for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_SinCos_Clean_vs_Order}
-\end{figure}
-
-\begin{figure}[p]
-\centering
 \includegraphics[height=2.5in]{FFT_Sin_Order7_Freq15_Spec_Clean.png} 
 \captionof{figure}{
 The real and imaginary absolute value errors and uncertainties in the FFT spectrum of a clean Sin signal of order 6 and index frequency 7, as shown in the legend, in which "Error' means value error.
 }
 \label{fig: FFT_Sin_Order7_Freq15_Spec_Clean}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Sin_Error_Histogram.png} 
-\captionof{figure}{
-The histograms of the normalized errors of Sin/Cos signals at FFT with $10^{-15}$ white noises for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-}
-\label{fig: FFT_Sin_Error_Histogram}
 \end{figure}
 
 \begin{figure}[p]

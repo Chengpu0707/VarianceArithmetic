@@ -2,9 +2,10 @@ import math
 import os
 import unittest
 
-from indexSin import IndexSin
+from indexSin import IndexSin, RegressiveSin
+from varDbl import VarDbl
 
-class TestSin (unittest.TestCase):
+class TestIndexSin (unittest.TestCase):
 
     def test_neg_rem(self):
         '''
@@ -145,26 +146,46 @@ class TestSin (unittest.TestCase):
         self.assertEqual( 2.239966192595619, indexSin.arc_sin( math.sin(math.pi*1/3)))
         self.assertEqual(-2.239966192595619, indexSin.arc_sin(-math.sin(math.pi*1/3)))
 
+    def testIndexSinVsLibSin(self):
+        ORDER = 5
+        SIZE = 1 << ORDER
+        sin = IndexSin(ORDER)
+        with open(f'./Python/Output/SinDiff_{ORDER}.txt', 'w') as f:
+            f.write('Freq\tX\tIndex Sin\tDiff\tUncertainty\tError\n')
+            SAMPLES = 1 << 10
+            for i in range(SAMPLES):
+                x = i / SIZE * math.pi
+                err =  VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
+                f.write(f'{i}\t{x}\t{sin.sin(i)}\t{sin.sin(i) - math.sin(x)}\t{err.uncertainty()}\t{err.value()}\n')  
+
+
+
+
+class TestRegressiveSin(unittest.TestCase):
+
     def testWithUncertainty_4(self):
-        sin = IndexSin(4)
+        sin = RegressiveSin(4)
         sin.calc()
         self.assertIsNone(sin.withUncertainty())
 
     def testWithUncertainty_6(self):
-        sin = IndexSin(6)
+        sin = RegressiveSin(6)
         sin.calc()
         self.assertIsNone(sin.withUncertainty())
 
     def testWithUncertainty_18(self):
-        sin = IndexSin(18)
-        sin.calc()
+        sin = RegressiveSin(18)
+        if not os.path.isfile(RegressiveSin.path(18)):
+            sin.calc()
         self.assertIsNone(sin.withUncertainty())
 
-    #@unittest.skip("too slow")
+    @unittest.skip("too slow")
     def testWithUncertainty_19(self):
-        sin = IndexSin(19)
-        sin.calc()
+        sin = RegressiveSin(19)
+        if not os.path.isfile(RegressiveSin.path(19)):
+            sin.calc()
         self.assertIsNone(sin.withUncertainty())
+
 
 if __name__ == '__main__':
     unittest.main()

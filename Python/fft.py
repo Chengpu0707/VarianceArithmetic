@@ -17,7 +17,7 @@ class FFTSinSource (enum.StrEnum):
 
 
 class FFTBase (abc.ABC):
-    MAX_ORDER = 17
+    MAX_ORDER = 18
     _bitReversedIndex = {}
 
     @abc.abstractmethod
@@ -160,30 +160,31 @@ class NoiseType (enum.StrEnum):
 class TestType (enum.StrEnum):
     Forward = 'Forward',
     Reverse = 'Reverse',
-    Roundtrip = 'RoundTrip',
+    Roundtrip = 'Roundtrip',
 
 class Measure:
-    DIVIDS = 5
-    RANGE = 3
-
-    def __init__(self) -> None:
+    def __init__(self, divids=5, devs=3) -> None:
         self.sStat = {
             TestType.Forward: Stat(), 
             TestType.Reverse: Stat(), 
             TestType.Roundtrip: Stat()}
         self.sHisto = {
-            TestType.Forward: Histo(Measure.DIVIDS, Measure.RANGE), 
-            TestType.Reverse: Histo(Measure.DIVIDS, Measure.RANGE), 
-            TestType.Roundtrip: Histo(Measure.DIVIDS, Measure.RANGE)}
+            TestType.Forward: Histo(divids, devs), 
+            TestType.Reverse: Histo(divids, devs), 
+            TestType.Roundtrip: Histo(divids, devs)}
 
    
 
 
 class FFTTest:
+    DIVIDS = 5
+    DEVS = 3
+
     ssssAggr = {}
 
     def __init__(self, sinSource:FFTSinSource, noiseType:NoiseType, noise:float,
-                 signal:SignalType, order:int, freq:int) -> None:
+                 signal:SignalType, order:int, freq:int,
+                 divids=DIVIDS, devs=DEVS) -> None:
         self.sinSource = sinSource
         self.noiseType = noiseType
         self.noise = abs(noise)
@@ -247,7 +248,7 @@ class FFTTest:
         self.sRound = self.fft.transform(self.sSpec, False)
         self.sRev = self.fft.transform(self.sBack, False)
 
-        self.measure = Measure()
+        self.measure = Measure(divids, devs)
         if signal == SignalType.Linear:
             self.aggr = None
         else:
@@ -304,15 +305,53 @@ class FFTTest:
                 return random.uniform(-self.noise*math.sqrt(3), self.noise*math.sqrt(3))
             case _:
                 raise ValueError(f'Invalid noiseType={self.noiseType}')
-            
+    
+    @staticmethod
+    def dumpSpectrumHeader(fw):
+        fw.write('SinSource\tNoiseType\tNoise\tSignal\tOrder\tFreq'
+            '\tIndex\tImag\tWave\tSpec'
+            '\tForward Error\tForward Uncertainty'
+            '\tReverse Error\tReverse Uncertainty'
+            '\tRoundtrip Error\tRoundtrip Uncertainty\n')
+
+    def dumpSpectrum(self, fw):
+        for i in range(self.size << 1):
+            fw.write(f'{self.sinSource}\t{self.noiseType}\t{self.noise}\t{self.signal}\t{self.order}\t{self.freq}')
+            fw.write(f'\t{i >> 1}\t{i % 2}\t{self.sWave[i]}\t{self.sFreq[i]}')
+            if type(self.sFreq[i]) == VarDbl:
+                fw.write(f'\t{self.sSpec[i].value() - self.sFreq[i].value()}\t{self.sSpec[i].uncertainty()}')
+            else:                    
+                fw.write(f'\t{self.sSpec[i].value() - self.sFreq[i]}\t{self.sSpec[i].uncertainty()}')
+            if type(self.sWave[i]) == VarDbl:
+                fw.write(f'\t{self.sRev[i].value() - self.sWave[i].value()}\t{self.sRev[i].uncertainty()}')
+            else:                    
+                fw.write(f'\t{self.sRev[i].value() - self.sWave[i]}\t{self.sRev[i].uncertainty()}')
+            fw.write(f'\t{self.sRound[i].value() - self.sData[i].value()}\t{self.sRound[i].uncertainty()}\n')
+                
+    @staticmethod
+    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=(0,)):
+        for sinSource in FFTSinSource:
+            for noiseType in NoiseType:
+                for noise in sNoise:
+                    for order in sOrder:
+                        for signal in SignalType:
+                            if signal == SignalType.Aggr:
+                                continue
+                            if signal == SignalType.Linear:
+                                fftTest = FFTTest(sinSource, noiseType, noise, signal, order, 0)
+                                fftTest.dumpSpectrum(fw)
+                                continue
+                            for freq in range(1, 8):
+                                fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
+                                fftTest.dumpSpectrum(fw)
+                        fw.flush()
 
     @staticmethod
-    def title():
+    def title(divids, devs):
         return "SinSource\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest"\
                "\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Maximum"\
                "\tError Mean\tError Deviation\tError Minimum\tError Maximum\t"\
-               + '\t'.join([f'{i/Measure.DIVIDS}' for i in 
-                            range(-Measure.RANGE * Measure.DIVIDS, Measure.RANGE * Measure.DIVIDS + 1)])\
+               + '\t'.join([f'{i/divids}' for i in range(-devs * divids, devs * divids + 1)])\
                + '\n' 
 
     @staticmethod
@@ -347,7 +386,7 @@ class FFTTest:
             nonlocal exist
             with open(path) as f:
                 title = next(f)
-                if FFTTest.title() != title:
+                if FFTTest.title(FFTTest.DIVIDS, FFTTest.DEVS) != title:
                     exist = False
                     return
                 for line in f:
@@ -385,7 +424,7 @@ class FFTTest:
 
         with open(path, 'a' if exist else 'w') as fw:
             if not exist:
-                fw.write(FFTTest.title())
+                fw.write(FFTTest.title(FFTTest.DIVIDS, FFTTest.DEVS))
             for sinSource in FFTSinSource:
                 for noiseType in NoiseType:
                     for noise in sNoise:
@@ -394,7 +433,7 @@ class FFTTest:
                                     and (ssAggr := sssAggr.get(noise)) and (sAggr := ssAggr.get(order)) and (len(sAggr) == 3):
                                 continue
                             for signal in SignalType:
-                                if signal in SignalType.Linear:
+                                if signal == SignalType.Linear:
                                     fftTest = FFTTest(sinSource, noiseType, noise, signal, order, 0)
                                     FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, signal, order, 0, fftTest.measure)
                                     continue

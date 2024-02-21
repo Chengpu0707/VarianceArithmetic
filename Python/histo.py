@@ -43,19 +43,24 @@ class Stat:
         return math.sqrt(var) if var >= 0 else 0.0        
 
 class Histo:
-    __slots__ = ['_stat', '_divids', '_range', '_half', '_less', '_more', '_sHisto']
+    '''
+    A histogram container specific for normalized error.
+    The symmetric range is "devs".
+    Within each dev, the bucket count is "divids"
+    '''
+    __slots__ = ['_stat', '_divids', '_devs', '_half', '_less', '_more', '_sHisto']
 
-    def __init__(self, divids:int, range:float) -> None:
+    def __init__(self, divids:int, devs:float) -> None:
         self._stat = Stat()
         self._divids = abs(int(divids))
-        self._half = round(self._divids * abs(range))
-        self._range = self._half / self._divids
+        self._half = round(self._divids * abs(devs))
+        self._devs = self._half / self._divids
         self._less = 0
         self._more = 0
         self._sHisto = [0] *(2*self._half + 1)
 
     def range(self):
-        return self._range
+        return self._devs
     
     def less(self):
         return self._less
@@ -69,9 +74,9 @@ class Histo:
     def accum(self, value:float) ->bool:
         if not self._stat.accum(value):
             return False
-        if value < -self._range:
+        if value < -self._devs:
             self._less += 1
-        elif value > self._range:
+        elif value > self._devs:
             self._more += 1
         else:
             self._sHisto[self._half + round(value*self._divids)] += 1
