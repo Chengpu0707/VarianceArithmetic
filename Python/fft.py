@@ -17,7 +17,7 @@ class FFTSinSource (enum.StrEnum):
 
 
 class FFTBase (abc.ABC):
-    MAX_ORDER = 18
+    MAX_ORDER = 19
     _bitReversedIndex = {}
 
     @abc.abstractmethod
@@ -329,7 +329,7 @@ class FFTTest:
             fw.write(f'\t{self.sRound[i].value() - self.sData[i].value()}\t{self.sRound[i].uncertainty()}\n')
                 
     @staticmethod
-    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=(0,)):
+    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=(0,1e-16,2e-16,3e-16,4e-16,5e-16)):
         for sinSource in FFTSinSource:
             for noiseType in NoiseType:
                 for noise in sNoise:

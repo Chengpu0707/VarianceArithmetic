@@ -66,6 +66,8 @@ class Taylor:
                 raise LossUncertaintyException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             varn *= var
+            if varn.value() == 0:
+                break
         if outPrec:
             value *= s1dTaylor[0]
             variance *= s1dTaylor[0] * s1dTaylor[0]

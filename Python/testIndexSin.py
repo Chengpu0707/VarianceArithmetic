@@ -4,6 +4,7 @@ import unittest
 
 from indexSin import IndexSin, RegressiveSin
 from varDbl import VarDbl
+from histo import Stat
 
 class TestIndexSin (unittest.TestCase):
 
@@ -146,17 +147,75 @@ class TestIndexSin (unittest.TestCase):
         self.assertEqual( 2.239966192595619, indexSin.arc_sin( math.sin(math.pi*1/3)))
         self.assertEqual(-2.239966192595619, indexSin.arc_sin(-math.sin(math.pi*1/3)))
 
-    def testIndexSinVsLibSin(self):
-        ORDER = 5
-        SIZE = 1 << ORDER
-        sin = IndexSin(ORDER)
-        with open(f'./Python/Output/SinDiff_{ORDER}.txt', 'w') as f:
-            f.write('Freq\tX\tIndex Sin\tDiff\tUncertainty\tError\n')
-            SAMPLES = 1 << 10
-            for i in range(SAMPLES):
-                x = i / SIZE * math.pi
-                err =  VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
-                f.write(f'{i}\t{x}\t{sin.sin(i)}\t{sin.sin(i) - math.sin(x)}\t{err.uncertainty()}\t{err.value()}\n')  
+
+class TestIndexSinVsLibSin (unittest.TestCase):
+
+    @unittest.skip('Too slow')
+    def testSin(self):
+        with open(f'./Python/Output/SinDiff.txt', 'w') as f:
+            f.write('Order\tFreq\tX\tIndex Sin\tValue Error\tUncertainty\n')
+            for order in range(4, 8):
+                size = 1 << order
+                sin = IndexSin(order)
+                for i in range(size**2 //2):
+                    x = i / size * math.pi
+                    err = VarDbl(math.sin(x)) - VarDbl(sin.sin(i))
+                    f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')  
+
+        with open(f'./Python/Output/SinDiff_Stat.txt', 'w') as f:
+            f.write('Order\tPart\tCount\tMin\tMax\tAbsMax\tMean\tDev\n')
+            for order in range(4, 17):
+                sin = IndexSin(order)
+                size = 1 << order
+
+                stat = Stat()
+                for i in range(size >> 3):
+                    x = i / size * math.pi
+                    err = VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
+                    stat.accum( err.value() / err.uncertainty() )
+                absMax = max(abs(stat.min()), abs(stat.max()))
+                f.write(f'{order}\tIndexed\t{stat.count()}\t{stat.min()}\t{stat.max()}\t{absMax}\t{stat.mean()}\t{stat.dev()}\n')
+
+                stat = Stat()
+                for i in range(size >> 3, size**2 //2):
+                    x = i / size * math.pi
+                    stat.accum( math.sin(x) - sin.sin(i) )
+                absMax = max(abs(stat.min()), abs(stat.max()))
+                f.write(f'{order}\tLib\t{stat.count()}\t{stat.min()}\t{stat.max()}\t{absMax}\t{stat.mean()}\t{stat.dev()}\n')
+
+                f.flush()
+       
+
+    @unittest.skip('Too slow')
+    def testCtan(self):
+        with open(f'./Python/Output/CotDiff.txt', 'w') as f:
+            f.write('Order\tFreq\tX\tIndex Cot\tValue Error\tUncertainty\n')
+            for order in range(4, 8):
+                size = 1 << order
+                sin = IndexSin(order)
+                for i in range(size):
+                    x = i / size * math.pi
+                    try:
+                        ctan = VarDbl(sin.cos(i)) / VarDbl(sin.sin(i))
+                        err = ctan - 1/math.tan(x)
+                        f.write(f'{order}\t{i}\t{x}\t{ctan.value()}\t{err.value()}\t{err.uncertainty()}\n') 
+                    except BaseException as ex:
+                        print(f'Ignore i={i} order={order}: {ex}')
+                        continue
+
+            for order in range(8, 17):
+                size = 1 << order
+                sin = IndexSin(order)
+                sin = IndexSin(order)
+                for i in range(size *7//8, size):
+                    x = i / size * math.pi
+                    try:
+                        ctan = VarDbl(sin.cos(i)) / VarDbl(sin.sin(i))
+                        err = ctan - 1/math.tan(x)
+                        f.write(f'{order}\t{i}\t{x}\t{ctan.value()}\t{err.uncertainty()}\t{err.value()}\n') 
+                    except BaseException as ex:
+                        print(f'Ignore i={i} order={order}: {ex}')
+                        continue
 
 
 

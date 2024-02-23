@@ -170,15 +170,16 @@ class TestCleanLib (unittest.TestCase):
         '''
         Demonstrate the extent of lib error beyond least significant value
         '''
-        ORDER = 16
-        DEVS = 3000
-        with open(f'./Python/Output/Lib_Linear_{ORDER}.txt', 'w') as fw:
+        ORDER = 18
+        DEVS = 2000
+        with open(f'./Python/Output/FFT_Lib_Linear_{ORDER}.txt', 'w') as fw:
             fw.write(FFTTest.title(1, DEVS))
             test = FFTTest(FFTSinSource.LibSin, NoiseType.Gaussian, 0,
                            SignalType.Linear, ORDER, 0,
                            divids=1, devs=DEVS)
             test.dumpMeasure(fw, FFTSinSource.LibSin, NoiseType.Gaussian, 0,
                              SignalType.Linear, ORDER, 0, test.measure)
+
 
 
 class TestDumpFFT (unittest.TestCase):
@@ -194,7 +195,7 @@ class TestDumpFFT (unittest.TestCase):
     def testOrder_4(self):
         FFTTest.dumpOrders(sOrder=[4])
 
-    #@unittest.skip('Too slow')
+    @unittest.skip('Too slow')
     def testOrderAll(self):
         FFTTest.dumpOrders()
 

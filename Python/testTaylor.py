@@ -465,6 +465,43 @@ class TestLibError(unittest.TestCase):
                 f.write(f'{noise}\t{math.sin(x + noise) - math.sin(x)}\n')  
                 
 
+class TestExpansion (unittest.TestCase):
+
+    def testSin(self):
+        '''
+        A reproduction of the logic in Tayor.taylor1d()
+        '''
+        DIVIDS = 1 << 4
+        with open('./Python/Output/Sin_Taylor.txt', 'w') as fw:
+            fw.write('X\tOrder\tValue\tVariance\tPrecision'
+                     '\tExpansion Value\tExpansion Variance'
+                     '\tNew Value Value\tNew Value Uncertainty'
+                     '\tNew Variance Value\tNew Variance Uncertainty\n')
+            for i in range(1, DIVIDS+1):
+                x = math.pi/4 *i/DIVIDS
+                s1dTaylor = taylor.sin(x)
+                value = s1dTaylor[0]
+                variance = VarDbl()
+                var = VarDbl(VarDbl(x).variance())
+                varn = VarDbl(var)
+                for n in range(2, taylor._momentum._maxOrder, 2):
+                    newValue = s1dTaylor[n] * taylor._momentum.factor(n) * varn
+                    newVariance = VarDbl()
+                    for j in range(1, n):
+                        newVariance += s1dTaylor[j] * s1dTaylor[n - j] * taylor._momentum.factor(n) * varn
+                    for j in range(2, n, 2):
+                        newVariance -= s1dTaylor[j] * taylor._momentum.factor(j) * \
+                                    s1dTaylor[n - j] * taylor._momentum.factor(n - j) * \
+                                    varn
+                    fw.write(f'{x}\t{n}\t{value.value()}\t{variance.value()}\t{math.sqrt(variance.value()) /value.value()}')
+                    fw.write(f'\t{varn.value()}\t{varn.variance()}')
+                    fw.write(f'\t{newValue.value()}\t{newValue.variance()}')
+                    fw.write(f'\t{newVariance.value()}\t{newVariance.variance()}\n')
+                    value += newValue
+                    variance += newVariance
+                    varn *= var
+                    if varn.value() == 0:
+                        break
 
 
 if __name__ == '__main__':
