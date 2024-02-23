@@ -382,11 +382,11 @@ class TestPower (unittest.TestCase):
             
     def test_near_2(self):
         two = self.validate(2, 0.2)
-        validate(self, two, 1.039999427727274, 0.4039766494889215)
+        validate(self, two, 1.04, 0.404, deltaUncertainty=2e-05)
         lower = self.validate(2 - 1e-9, 0.2)
-        validate(self, lower, two.value(), two.uncertainty(), deltaValue=6e-11, deltaUncertainty=3e-10)
+        validate(self, lower, two.value(), two.uncertainty(), deltaValue=6e-7, deltaUncertainty=4e-6)
         upper = self.validate(2 + 1e-9, 0.2)
-        validate(self, upper, two.value(), two.uncertainty(), deltaValue=6e-11, deltaUncertainty=3e-10)
+        validate(self, upper, two.value(), two.uncertainty(), deltaValue=6e-7, deltaUncertainty=4e-6)
 
 
     def test_exception(self):

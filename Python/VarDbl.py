@@ -160,7 +160,7 @@ class VarDbl:
                 return VarDbl(self)
             case 2:
                 sq = self.value()**2
-                return VarDbl(sq, sq * 4*self.variance() + 2*self.variance()**2, True)
+                return VarDbl(sq + self.variance(), sq * 4*self.variance() + 2*self.variance()**2, True)
 
         if VarDbl._taylor is None:
             import taylor

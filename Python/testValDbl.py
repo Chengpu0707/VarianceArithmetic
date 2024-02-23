@@ -226,7 +226,7 @@ class TestMultiply (unittest.TestCase):
         res2 = VarDbl(9.9999999992818911e-01, 9.3621846317751177e-17) **2
         res += res2
         res -= 1
-        self.assertEqual(res.uncertainty(), 2.0337047278745187e-16)
+        self.assertEqual(res.uncertainty(), 1.9300629938741248e-16)
         self.assertEqual(res.value(), -1.1102230246251565e-16)
 
         res = VarDbl(1.3295362544208494e-01, 2.7534451894481781e-16) **2
