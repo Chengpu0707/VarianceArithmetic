@@ -157,7 +157,13 @@ class TestIndexSinVsLibSin (unittest.TestCase):
             for order in range(4, 8):
                 size = 1 << order
                 sin = IndexSin(order)
-                for i in range(size**2 //2):
+                
+                for i in range(size >> 3):
+                    x = i / size * math.pi
+                    err = VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
+                    f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')
+
+                for i in range(size >> 3, size**2 //2):
                     x = i / size * math.pi
                     err = VarDbl(math.sin(x)) - VarDbl(sin.sin(i))
                     f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')  
