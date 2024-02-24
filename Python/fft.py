@@ -329,7 +329,7 @@ class FFTTest:
             fw.write(f'\t{self.sRound[i].value() - self.sData[i].value()}\t{self.sRound[i].uncertainty()}\n')
                 
     @staticmethod
-    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=(0,1e-16,2e-16,3e-16,4e-16,5e-16)):
+    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=[i*1e-16 for i in range(10)]):
         for sinSource in FFTSinSource:
             for noiseType in NoiseType:
                 for noise in sNoise:
@@ -376,7 +376,7 @@ class FFTTest:
                 raise ex
             
     @staticmethod
-    def dumpOrders(sOrder=[o for o in range(4, FFTBase.MAX_ORDER)], 
+    def dumpOrders(sOrder=[o for o in range(5, FFTBase.MAX_ORDER)], 
                    sNoise=[math.pow(10,-n-1) for n in range(16)] + [0]):
         path = f'./Python/Output/FFT_{min(sOrder)}_{max(sOrder)}.txt'
         exist = os.path.isfile(path)
@@ -440,6 +440,8 @@ class FFTTest:
                                 for freq in range(1, 8):
                                     if signal == SignalType.Aggr:
                                         continue
+                                    if freq == (1 << (order - 2)):
+                                        continue    # avoid Nyquist frequency which may cause error resonance
                                     fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
                                     FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, signal, order, freq, fftTest.measure)
                             aggr = FFTTest.ssssAggr[sinSource][noiseType][noise][order]
