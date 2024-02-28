@@ -925,6 +925,11 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \be
 
 \fi
 
+\begin{align*}
+& (x + \tilde{x})^3 = x^3 + 3 x^2 \tilde{x} + 3 x \tilde{x}^2 + \tilde{x}^3 \\
+\overline{x^3} &= x^3 + 3 x (\delta x)^2; \\
+\delta^2 x^3 &= 9 x^4  (\delta x)^2 +  (15 x^2 3 - 9 x^2) (\delta x)^4 + 15 (\delta x)^6;
+\end{align*}
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
@@ -1668,7 +1673,7 @@ H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k}
 \fi
 
 \begin{figure}
-\includegraphics[width=4.5in,height=2.75in]{FFT_Unfaithful.png} 
+\includegraphics[height=2.75in]{FFT_Unfaithful.png} 
 \captionof{figure}{An unfaithful Discrete Fourier transformation is demonstrated by the spectra of a few sine signals having amplitude of 1 and slightly different frequencies as shown in legends..  
 This figure is a practical reproduction of a previous theoretical figure \cite{Prev_Precision_Arithmetic}.
 }
@@ -1826,7 +1831,7 @@ So the results for Sin and Cos signals at all frequencies are pooled together fo
 \subsection{Library Errors}
 
 \begin{figure}
-\includegraphics[width=4.5in,height=2.75in]{Sin_Cot_Diff.png} 
+\includegraphics[height=2.75in]{Sin_Cot_Diff.png} 
 \captionof{figure}{
 Comparing the indexed sine functions and the library sine functions for different FFT orders.
 The dashed line is the error deviations of $\sin(x)^2 + \cos(x)^2 - 1$ for the indexed sine functions.
@@ -1838,7 +1843,7 @@ Their y-axis is on the right.
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{Sin_Diff.png} 
+\includegraphics[height=2.75in]{Sin_Diff.png} 
 \captionof{figure}{
 The difference between the library $\sin(x)$ and the indexed $\sin(x)$, for all integer input to the indexed sine functions used in the FFT transformations of FFT order $4$.
 The uncertainty of the $\sin(x)$ values are also displayed, to mark the periodicity of $\pi$.
@@ -1847,7 +1852,7 @@ The uncertainty of the $\sin(x)$ values are also displayed, to mark the periodic
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{Cot_Diff.png} 
+\includegraphics[height=2.75in]{Cot_Diff.png} 
 \captionof{figure}{
 The difference between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$, for $x \in (0, \pi)$.
 }
@@ -1871,12 +1876,12 @@ Figure \ref{fig: Sin_Diff} shows that the value errors between the library $\sin
 The $x$ range in Figure \ref{fig: Sin_Diff} covers all the input used in the FFT transformations of FFT order $4$.
 The errors are also periodic in $x$ by $\pi$, which may be amplified in the FFT calculations.
 
-Figure \ref{fig: Cot_Diff} shows the value errors between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$ for $x \in (0, \pi)$.
+Figure \ref{fig: Cot_Diff} shows the value errors between the library $1/\tan(x)$ and the indexed $1/\tan(x)$ for $x \in (0, \pi)$.
 It covers all the integer inputs to the indexed cotan functions used for the Linear signal of FFT order $6$ and $7$.
 The value errors near $x = \pi$ increase with the FFT order.
 
-Using the maximal absolute value errors, Figure \ref{fig: Sin_Cot_Diff} compares the value error strengths of the library $\sin(x)$ and $\cos(x)/\sin(x)$ for different FFT orders.
-Numerically, the library $\sin(x)$ and $\cos(x)/\sin(x)$ do not have proper coverage.
+Using the maximal absolute value errors, Figure \ref{fig: Sin_Cot_Diff} compares the value error strengths of the library $\sin(x)$ and $1/\tan(x)$ for different FFT orders.
+Numerically, the library $\sin(x)$ and $1/\tan(x)$ do not have proper coverage.
 
 It is clear that the indexed sine functions are much better than the library sine functions.
 Sadly, in reality, the library sine functions are used ubiquitously, so that both needs to be evaluated.
@@ -1886,23 +1891,23 @@ Sadly, in reality, the library sine functions are used ubiquitously, so that bot
 \subsection{Using the Indexed Sine Functions for Sin/Cos Signals}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_1_4_Spec_Indexed.png} 
+\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Spec_Indexed.png} 
 \captionof{figure}{
-The FFT spectrum of $\sin(j 1/2^4 \pi)$ using the indexed sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
-The x-axis shows the index frequency.
-The y-axis shows the absolute value errors.
+The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the scale for index frequency.
+The y-axis shows the scale for uncertainty and absolute value errors.
 }
-\label{fig: FFT_Sin_Clean_1_4_Spec_Indexed}
+\label{fig: FFT_Sin_Clean_6_3_Spec_Indexed}
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_1_4_Wave_Indexed.png} 
+\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Wave_Indexed.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 1/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
-The x-axis shows the index time.
-The y-axis shows the absolute value errors.
+The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The x-axis shows the scale for index time.
+The y-axis shows the scale for uncertainty and absolute value errors.
 }
-\label{fig: FFT_Sin_Clean_1_4_Wave_Indexed}
+\label{fig: FFT_Sin_Clean_6_3_Wave_Indexed}
 \end{figure}
 
 \begin{figure}[p]
@@ -1926,11 +1931,11 @@ The FFT order is $18$.
 \label{fig: FFT_SinCos_Clean_Histo_Indexed}
 \end{figure}
 
-Using the indexed sine functions, for the waveform of $\sin(2\pi k 1/2^4)$ in which $k$ is the index time:
+Using the indexed sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in which $k$ is the index time:
 \begin{itemize}
-\item Figure \ref{fig: FFT_Sin_Clean_1_4_Spec_Indexed} shows that for the forward transformation,  the result value errors are comparable to the result uncertainties, with an error deviation of $0$ for the real part, and $1.11$ for the imaginary part.
+\item Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Indexed} shows that for the forward transformation,  the result value errors are comparable to the result uncertainties, with an error deviation of $0.37$ for the real part, and $0.93$ for the imaginary part.
 
-\item Figure \ref{fig: FFT_Sin_Clean_1_4_Wave_Indexed} shows that for the reverse transformation, the result value errors are comparable to the result uncertainties, with an error deviation of $0$ for the real part, and $0.474$ for the imaginary part.
+\item Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} shows that for the reverse transformation, the result value errors are comparable to the result uncertainties, with an error deviation of $0.54$ for the real part, and $0.52$ for the imaginary part.
 
 \end{itemize}
 
@@ -1959,24 +1964,50 @@ Thus, proper coverage is achieved using the indexed sine functions for Sin/Cos s
 \subsection{Using the Library Sine Functions for Sin/Cos Signals}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_4_1_Spec_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.png} 
 \captionof{figure}{
-The FFT spectrum of $\sin(j 1/2^4 \pi)$ using the library sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
-The x-axis shows the index frequency.
-The y-axis shows the absolute value errors.
+The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the library sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included is the corresponding result errors using \textit{SciPy}.
+The x-axis shows the scale for index frequency.
+The y-axis shows uncertainties or absolute value errors.
 }
-\label{fig: FFT_Sin_Clean_4_1_Spec_Lib}
+\label{fig: FFT_Sin_Clean_6_3_Spec_Lib}
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_4_1_Wave_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 4/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
-The x-axis shows the index time.
-The y-axis shows the absolute value errors.
+The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included is the corresponding result errors using \textit{SciPy}.
+The x-axis shows the scale for index time.
+The y-axis shows the uncertainties or absolute value errors.
 No input noise is added to the Sin signal.
 }
-\label{fig: FFT_Sin_Clean_4_1_Wave_Lib}
+\label{fig: FFT_Sin_Clean_6_4_Wave_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.png} 
+\captionof{figure}{
+The FFT waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included is the corresponding result errors using \textit{SciPy}.
+The x-axis shows the scale for index time.
+The y-axis shows the uncertainties or absolute value errors.
+No input noise is added to the Sin signal.
+}
+\label{fig: FFT_Sin_Clean_6_4_Wave_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_1_Wave_Lib.png} 
+\captionof{figure}{
+The FFT waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included is the corresponding result errors using \textit{SciPy}.
+The x-axis shows the scale for index time.
+The y-axis shows the uncertainties or absolute value errors.
+No input noise is added to the Sin signal.
+}
+\label{fig: FFT_Sin_Clean_6_1_Wave_Lib}
 \end{figure}
 
 \begin{figure}[p]
@@ -2001,28 +2032,6 @@ $10^{-16}$ input noises are added to the Sin/Cos signals.
 \label{fig: FFT_SinCos_1e-16_vs_Order_Lib}
 \end{figure}
 
-\begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_4_4_Wave_Lib.png} 
-\captionof{figure}{
-The FFT waveform of $\sin(j 4/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
-The x-axis shows the index time.
-The y-axis shows the absolute value errors.
-No input noise is added to the Sin signal.
-}
-\label{fig: FFT_Sin_Clean_4_4_Wave_Lib}
-\end{figure}
-
-\begin{figure}[p]
-\includegraphics[width=4.5in,height=2.75in]{FFT_Sin_Clean_6_16_Wave_Lib.png} 
-\captionof{figure}{
-The FFT waveform of $\sin(j 4/2^4 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
-The x-axis shows the index time.
-The y-axis shows the absolute value errors.
-No input noise is added to the Sin signal.
-}
-\label{fig: FFT_Sin_Clean_6_16_Wave_Lib}
-\end{figure}
-
 
 
 Because the least significant values are the only source of input uncertainties for variance arithmetic, the result uncertainties using either sine functions are almost identical.
@@ -2030,25 +2039,27 @@ Because the least significant values are the only source of input uncertainties 
 The library sine functions contributes to the numerical calculation errors which is not specified by the input uncertainties of the variance arithmetic.
 The question is whether the variance arithmetic can track this large amount of numerical errors effectively or not.
 
-Using the library sine functions:
+Using the library sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in which $k$ is the index time:
 \begin{itemize}
-\item Figure \ref{fig: FFT_Sin_Clean_4_1_Spec_Lib} shows that for the forward transformation of $\sin(2\pi k 1/2^4)$, the result value errors are noticeably larger than the result uncertainties, with an error deviation of $2.61$ for the real part, and $2.51$ for the imaginary part.
-As expected, the error deviations are noticeably larger than their counterparts in Figure \ref{fig: FFT_Sin_Clean_1_4_Spec_Indexed}, with the real part being no longer $0$.
+\item Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} shows that for the forward transformation, the result value errors are noticeably larger than the result uncertainties, with an error deviation of $7.0$ for the real part, and $5.6$ for the imaginary part.
+As expected, the error deviations are noticeably larger than their counterparts in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Indexed}.
 
-\item Figure \ref{fig: FFT_Sin_Clean_4_1_Wave_Lib} shows that for the reverse transformation of $\sin(2\pi k 1/2^4)$, the result value errors are noticeably larger than the result uncertainties, with an error deviation of $2.60$ for the real part, and $	1.87 \; 10^{18}$ for the imaginary part. 
-The surprisingly large imaginary error deviation is caused by the $0$ uncertainty at the index time of $8$, at where the value error is no longer $0$ due to the numerical errors of the library sine functions.
+\item Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib} shows that for the reverse transformation, the result value errors are noticeably larger than the result uncertainties, with an error deviation of $5.7$ for the real part, and $	0.83 \; 10^{15}$ for the imaginary part. 
+The surprisingly large imaginary error deviation is caused by the small uncertainty at the index time where the value error is at a local maximum.
 
 \item As the result of of the huge error deviation, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Lib} shows that the result of the reverse transformation no longer has proper coverage for all FFT orders.
 When a small noise with deviation of $10^{16}$ is added to the input, the result uncertainty of the reverse transformation at the index time of $8$ is no longer near $0$, so that the result error deviations achieve proper coverage again, as show in Figure \ref{fig: FFT_SinCos_1e-16_vs_Order_Lib}.
 
 \end{itemize}
 
-In Figure \ref{fig: FFT_Sin_Clean_4_1_Wave_Lib}, the value errors tend to increase with the indexes. 
-This is actually due to the increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
-The periodicity of such increase in Figure \ref{fig: Sin_Diff} can cause a much bigger problem in rare cases: the \emph{error resonance} between the numerical errors of the library sine functions and the input data.
-Figure \ref{fig: FFT_Sin_Clean_4_4_Wave_Lib} shows an uniform increase of the real value errors of the reverse transformation with the increasing index time at the Nyquist frequency of FFT order $4$.
-Figure \ref{fig: FFT_Sin_Clean_6_16_Wave_Lib} shows an even more elaborated increase pattern  at the Nyquist frequency of FFT order $6$.
-Larger noises is needed to completely break such resonance: empirically, $10^{-15}$ for FFT order $4$.
+To validate the FFT implementation in the variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
+The results are quite comparable, except that in \textit{SciPy}, the data waveform is always real rather than complex.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of the variance arithmetic is indicative.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results matches the corresponding results of the variance arithmetic well.
+
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the value errors tend to increase with the indexes, which is due to the periodic increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
+When the signal frequency increases, the increase of the value errors with the index frequency in the reverse transformation becomes stronger, as shown in Figure \ref{fig: FFT_Sin_Clean_6_1_Wave_Lib}, \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, and \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib}.
+On the other hand, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} show no such increase, because it contains no library errors as described in Figure \ref{fig: Sin_Diff}.
 
 The variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
 How much noises to add to input to achieve proper coverage remains an art.
@@ -2120,7 +2131,7 @@ The additional peaks extend beyond the range of $[-3, +3]$
 
 \end{itemize}
 
-When too much numerical errors are not specified by the input uncertainties, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
+When too much numerical errors are not specified by the input uncertainties, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $1/\tan(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
 The only solution seems to create a new sin library using the variance arithmetic so that all numerical calculation errors are accounted for.
 
 
@@ -2254,11 +2265,12 @@ For Linear signals using the library sine functions, the the added noise vs FFT 
 In other regions, proper coverage is not achievable.
 Because the uncertainties grow slower in the reverse transformation than in the forward transformation, the reverse transformations have smaller ideal coverage region than that of the forward transformation.
 Because the amount of numerical errors increases with the amount of calculations, the input noise range reduces with the increasing FFT order.
-It is quite possible that ideal coverage is not achievable, e.g., visually, when the FFT order is larger than $25$ for the reverse transformation.
+It is possible that ideal coverage is not achievable at all, e.g., visually, when the FFT order is larger than $25$ for the reverse transformation.
+As one of the most robust numerical algorithm that is very insensitive to input errors, FFT breaks down when the FFT order is more than $25$ due to the numerical errors in the library sine functions, and such deterioration of the calculation result is not easily detectable using the conventional floating-point calculation.
 
 In contrast, for Linear signals using the indexed sine functions, the the added noise vs FFT order regions for the ideal coverage are shown as the regions where the error deviations are $1$, by Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} for the forward and reverse transformations, respectively.
 The ideal regions are much larger.
-In other regions, proper coverage are achievable.
+In other regions, proper coverage are achieved.
 
 
 \subsection{Summary}
@@ -2267,11 +2279,11 @@ Compared to its counterpart continuous Fourier Transformation (FT), the discrete
 This modeling error has not been addressed seriously.
 
 The library sine functions using conventional floating-point arithmetic have been shown to contain numerical errors as large as equivalently  $10^{-3}$ of input accuracy for FFT transformations.
-In rare cases the numerical errors in the library function can resonant with the input data, which could make the result meaningless.
-The dependency of the result numerical errors on the amount of calculation and input data means that a small scaled test can not properly qualify the result of a large scaled calculation.
+The library $\sin(x)$ errors increase periodically with $x$, causing noticeable increase of the result errors with the increasing index frequency in the reverse transformation.
+The dependency of the result numerical errors on the amount of calculation and input data means that a small scale test can not properly qualify the result of a large scale calculation.
 The effect of numerical errors inside math library has not been addressed seriously.
 
-The variance arithmetic should be used, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
+The variance arithmetic should be used, whose values largely reproduce the corresponding results using conventional floating-point arithmetic, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
 If the library functions also have proper coverage, the calculation result will probably have proper coverage as well.
 
 
@@ -2680,14 +2692,14 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Indp_Sin_NormDist.png} 
+\includegraphics[height=2.75in]{Indp_Sin_NormDist.png} 
 \captionof{figure}{ The measured tracking ratio distributions using independence arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.98.}
 \label{fig: Indp_Sin_NormDist}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Sin_NormDist.png} 
+\includegraphics[height=2.75in]{Prec4_Sin_NormDist.png} 
 \captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.97. }
 \label{fig: Prec4_Sin_NormDist}
 \end{figure}
@@ -2724,14 +2736,14 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Indp_PropBase_AvgSig.png} 
+\includegraphics[height=2.75in]{Indp_PropBase_AvgSig.png} 
 \captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using independence arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
 \label{fig: Indp_PropBase_AvgSig}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_PropBase_AvgSig.png} 
+\includegraphics[height=2.75in]{Prec4_PropBase_AvgSig.png} 
 \captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using variance arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
 \label{fig: Prec4_PropBase_AvgSig}
 \end{figure}
@@ -2739,14 +2751,14 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Intv_PropBase_AvgSig.png} 
+\includegraphics[height=2.75in]{Intv_PropBase_AvgSig.png} 
 \captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using interval arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
 \label{fig: Intv_PropBase_AvgSig}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{All_For_AvgSig_vs_FFTOrder.png} 
+\includegraphics[height=2.75in]{All_For_AvgSig_vs_FFTOrder.png} 
 \captionof{figure}{ The empirical output average tracking ratios vs. the FFT order of the forward FFT for all three arithmetics when the input uncertainty deviation is $10^{-3}$.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
 \label{fig: All_For_AvgSig_vs_FFTOrder}
 \end{figure}
@@ -2768,7 +2780,7 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{All_For_MaxBnd_vs_FFTOrder.png} 
+\includegraphics[height=2.75in]{All_For_MaxBnd_vs_FFTOrder.png} 
 \captionof{figure}{ The empirical maximal output bounding ratios vs. the FFT order of the forward FFT for all three arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
 \label{fig: All_For_MaxBnd_vs_FFTOrder}
 \end{figure}
@@ -2783,14 +2795,14 @@ As an independent researcher, the author of this paper feels indebted to encoura
 \clearpage
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Inv_AvgErr_vs_DetSig_MatSize.png} 
+\includegraphics[height=2.75in]{Prec4_Inv_AvgErr_vs_DetSig_MatSize.png} 
 \captionof{figure}{ The empirical average value errors of the inverted matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
 \label{fig: Prec4_Inv_AvgErr_vs_DetSig_MatSize}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Adj_AvgErr_vs_DetSig_MatSize.png} 
+\includegraphics[height=2.75in]{Prec4_Adj_AvgErr_vs_DetSig_MatSize.png} 
 \captionof{figure}{ The empirical average value errors of the adjugate matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
 \label{fig: Prec4_Adj_AvgErr_vs_DetSig_MatSize}
 \end{figure}
@@ -2798,7 +2810,7 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Adj_RelErr_vs_DetSig_MatSize.png} 
+\includegraphics[height=2.75in]{Prec4_Adj_RelErr_vs_DetSig_MatSize.png} 
 \captionof{figure}{ Empirical relative value errors of the adjugate matrix using conventional floating-point arithmetic vs. corresponding sub-matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
 \label{fig: Prec4_Adj_RelErr_vs_DetSig_MatSize}
 \end{figure}
@@ -2820,7 +2832,7 @@ matrix vs. input precision and the matrix size.}
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Matrix9_NormDist.png} 
+\includegraphics[height=2.75in]{Prec4_Matrix9_NormDist.png} 
 \captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
 \label{fig: Prec4_Matrix9_NormDist}
 \end{figure}
@@ -2834,7 +2846,7 @@ matrix vs. input precision and the matrix size.}
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in,height=2.75in]{Prec4_Matrix_Rnd_NormDist.png} 
+\includegraphics[height=2.75in]{Prec4_Matrix_Rnd_NormDist.png} 
 \captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
 \label{fig: Prec4_Matrix_Rnd_NormDist}
 \end{figure}
