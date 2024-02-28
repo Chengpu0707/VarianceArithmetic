@@ -923,13 +923,14 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \be
  &\simeq c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6;
 \end{align*}
 
-\fi
-
 \begin{align*}
 & (x + \tilde{x})^3 = x^3 + 3 x^2 \tilde{x} + 3 x \tilde{x}^2 + \tilde{x}^3 \\
 \overline{x^3} &= x^3 + 3 x (\delta x)^2; \\
 \delta^2 x^3 &= 9 x^4  (\delta x)^2 +  (15 x^2 3 - 9 x^2) (\delta x)^4 + 15 (\delta x)^6;
 \end{align*}
+
+\fi
+
 
 Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
 However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
@@ -1672,14 +1673,6 @@ H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k}
 
 \fi
 
-\begin{figure}
-\includegraphics[height=2.75in]{FFT_Unfaithful.png} 
-\captionof{figure}{An unfaithful Discrete Fourier transformation is demonstrated by the spectra of a few sine signals having amplitude of 1 and slightly different frequencies as shown in legends..  
-This figure is a practical reproduction of a previous theoretical figure \cite{Prev_Precision_Arithmetic}.
-}
-\label{fig: FFT_Unfaithful}
-\end{figure}
-
 
 Each testing algorithm needs to come under careful scrutiny.  
 One important issue is whether the digital implementation of the algorithm is faithful for the original analytic algorithm.  
@@ -1713,6 +1706,16 @@ H[n] &=\sum_{k=0}^{N-1} \sin(2\pi n k/N) \; e^{i 2\pi n k/N} =
   \frac{1}{2} \frac{\sin(2\pi f - 2\pi \frac{f}{N}) + \sin(2\pi \frac{f}{N})-\sin(2\pi f) e^{-i 2\pi \frac{n}{N}}}{\cos(2\pi \frac{n}{N})-\cos(2\pi \frac{f}{N})} & \text{otherwise}
 \end{cases}
 \end{align}
+
+\begin{figure}
+\includegraphics[height=2.5in]{FFT_Unfaithful.png} 
+\captionof{figure}{An unfaithful Discrete Fourier transformation is demonstrated by the spectra of a few sine signals having amplitude of 1 and slightly different frequencies as shown in legends.
+The x-axis shows the scale for the index frequency.  
+The y-axis shows the scale for the intensity, while the y-axis of the embedded picture shows the scale for the phase.
+This figure is a practical reproduction of a previous theoretical figure \cite{Prev_Precision_Arithmetic}.
+}
+\label{fig: FFT_Unfaithful}
+\end{figure}
 
 Due to its width, a frequency component in an unfaithful transformation may interact with other frequency components of the Discrete Fourier spectrum, thus sabotaging the whole idea of using the Fourier Transformation to decompose a signal into independent frequency components.  
 Because the reverse discrete Fourier transformation mathematically restores the original $\{h[k]\}$ for any $\{H[n]\}$, it exaggerates and narrows all unfaithful signal components correspondingly.  
