@@ -158,9 +158,6 @@ class VarDbl:
                 return VarDbl(1, 0)
             case 1:
                 return VarDbl(self)
-            case 2:
-                sq = self.value()**2
-                return VarDbl(sq + self.variance(), sq * 4*self.variance() + 2*self.variance()**2, True)
 
         if VarDbl._taylor is None:
             import taylor
@@ -168,6 +165,8 @@ class VarDbl:
         exp = float(exp)
         s1dTaylor = VarDbl._taylor.power(exp)
         s1dTaylor[0] = math.pow(self.value(), exp)
+        if (exp > 0) and (math.ceil(exp) == math.floor(exp)):
+            return VarDbl._taylor.power1d(self, int(exp), s1dTaylor)
         return VarDbl._taylor.taylor1d(self, f"{self}**{exp}", s1dTaylor, True, True)
     
     def __eq__(self, other: object) -> bool:

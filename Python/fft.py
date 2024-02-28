@@ -217,12 +217,26 @@ class FFTTest:
         match signal:
             case SignalType.Sin:
                 for i in range(self.size):
-                    self.sWave[i << 1] = self.fft.sin(freq * i, order)
+                    if freq == (self.size // 4):
+                        match (i % 4):
+                            case 1:
+                                self.sWave[i << 1] = 1.0
+                            case 3:
+                                self.sWave[i << 1] = -1.0
+                    else:
+                        self.sWave[i << 1] = self.fft.sin(freq * i, order)
                 self.sFreq[(freq << 1) + 1] = peak
                 self.sFreq[((self.size - freq) << 1) + 1] = - peak
             case SignalType.Cos:
                 for i in range(self.size):
-                    self.sWave[i << 1] = self.fft.cos(freq * i, order)
+                    if freq == (self.size // 4):
+                        match (i % 4):
+                            case 0:
+                                self.sWave[i << 1] = 1.0
+                            case 2:
+                                self.sWave[i << 1] = -1.0
+                    else:
+                        self.sWave[i << 1] = self.fft.cos(freq * i, order)
                 self.sFreq[freq << 1] = peak
                 self.sFreq[(self.size - freq) << 1] = peak
             case SignalType.Linear:
@@ -329,7 +343,7 @@ class FFTTest:
             fw.write(f'\t{self.sRound[i].value() - self.sData[i].value()}\t{self.sRound[i].uncertainty()}\n')
                 
     @staticmethod
-    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=[i*1e-16 for i in range(10)]):
+    def dumpSpectra(fw, sOrder:tuple[int], sNoise:tuple[int]=[i*1e-16 for i in range(10)], sFreq=range(1, 8)):
         for sinSource in FFTSinSource:
             for noiseType in NoiseType:
                 for noise in sNoise:
@@ -341,7 +355,12 @@ class FFTTest:
                                 fftTest = FFTTest(sinSource, noiseType, noise, signal, order, 0)
                                 fftTest.dumpSpectrum(fw)
                                 continue
-                            for freq in range(1, 8):
+                            freq = 1 << (order - 2)
+                            fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
+                            fftTest.dumpSpectrum(fw)
+                            for freq in sFreq:
+                                if freq == 1 << (order - 2):
+                                    continue
                                 fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
                                 fftTest.dumpSpectrum(fw)
                         fw.flush()
@@ -440,8 +459,6 @@ class FFTTest:
                                 for freq in range(1, 8):
                                     if signal == SignalType.Aggr:
                                         continue
-                                    if freq == (1 << (order - 2)):
-                                        continue    # avoid Nyquist frequency which may cause error resonance
                                     fftTest = FFTTest(sinSource, noiseType, noise, signal, order, freq)
                                     FFTTest.dumpMeasure(fw, sinSource, noiseType, noise, signal, order, freq, fftTest.measure)
                             aggr = FFTTest.ssssAggr[sinSource][noiseType][noise][order]

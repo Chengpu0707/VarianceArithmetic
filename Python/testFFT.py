@@ -190,7 +190,7 @@ class TestDumpFFT (unittest.TestCase):
         '''
         with open(f'./Python/Output/FFT_4_6_Spec.txt', 'w') as fw:
             FFTTest.dumpSpectrumHeader(fw)
-            FFTTest.dumpSpectra(fw, (4,5,6))
+            FFTTest.dumpSpectra(fw, range(4,8))
 
     def testOrder_4(self):
         FFTTest.dumpOrders(sOrder=[4])

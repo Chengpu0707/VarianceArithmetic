@@ -51,17 +51,16 @@ class Taylor:
         if inPrec:
             var *= VarDbl( 1 /input.value() /input.value() )
         varn = VarDbl(var)
-        for n in range(2, self._momentum._maxOrder, 2):
-            newValue = s1dTaylor[n] * self._momentum.factor(n) * varn
+        for n in range(2, len(s1dTaylor), 2):
+            newValue = s1dTaylor[n] * self._momentum.factor(n)
             newVariance = VarDbl()
             for j in range(1, n):
-                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n) * varn
+                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
             for j in range(2, n, 2):
                 newVariance -= s1dTaylor[j] * self._momentum.factor(j) * \
-                            s1dTaylor[n - j] * self._momentum.factor(n - j) * \
-                            varn
-            value += newValue
-            variance += newVariance
+                               s1dTaylor[n - j] * self._momentum.factor(n - j)
+            value += newValue * varn
+            variance += newVariance * varn
             if variance.variance() > variance.value() * self._variance_threshold:
                 raise LossUncertaintyException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
@@ -73,6 +72,41 @@ class Taylor:
             variance *= s1dTaylor[0] * s1dTaylor[0]
         return VarDbl(value.value(), variance.value() + value.variance(), True)
 
+    def power1d(self, input:VarDbl, exp:int, s1dTaylor:list[VarDbl]):
+        '''
+        1d Taylor expansion for positive integer power.
+        @return:            The output VarDbl using Taylor expansion
+        
+        @param input:       The input VarDbl    
+        @param s1dTaylor:   The Taylor expansion coefficent, with f(x) as s1dTaylor[0].  
+                            It should already contains /n!.
+
+        Without any otptimization, or judgement of the convergence of the result.           
+        '''
+        def pow(p:int):
+            return 1 if p <= 0 else math.pow(input.value(), p)
+        value = s1dTaylor[0]
+        variance = VarDbl()
+        var = VarDbl(input.variance())
+        varn = VarDbl(var)
+        for n in range(2, 2*exp + 1, 2):
+            newValue = s1dTaylor[n] * self._momentum.factor(n) * pow(exp - n)
+            newVariance = VarDbl()
+            for j in range(1, n):
+                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
+            newVariance *= pow(2*exp - n)
+            for j in range(2, n, 2):
+                newVariance -= s1dTaylor[j] * self._momentum.factor(j) * pow(exp - j) * \
+                               s1dTaylor[n - j] * self._momentum.factor(n - j) *pow(exp - (n - j))
+            value += newValue * varn
+            variance += newVariance * varn
+            if variance.variance() > variance.value() * self._variance_threshold:
+                raise LossUncertaintyException(input, f'{input}^{exp}', s1dTaylor, False, False,
+                        value, variance, n, newValue, newVariance)
+            varn *= var
+            if varn.value() == 0:
+                break
+        return VarDbl(value.value(), variance.value() + value.variance(), True)
     
     def exp(self) -> list[VarDbl]:
         '''

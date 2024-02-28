@@ -226,8 +226,8 @@ class TestMultiply (unittest.TestCase):
         res2 = VarDbl(9.9999999992818911e-01, 9.3621846317751177e-17) **2
         res += res2
         res -= 1
-        self.assertEqual(res.uncertainty(), 1.9300629938741248e-16)
-        self.assertEqual(res.value(), -1.1102230246251565e-16)
+        self.assertAlmostEqual(res.uncertainty(), 2.0337047278745187e-16, delta=4e-16)
+        self.assertAlmostEqual(res.value(), -1.1102230246251565e-16, delta=4e-16)
 
         res = VarDbl(1.3295362544208494e-01, 2.7534451894481781e-16) **2
         res2 = VarDbl(9.9112225960363021e-01, 9.7483093233450446e-17) **2
@@ -254,19 +254,79 @@ class TestPower (unittest.TestCase):
 
     def test_2(self):
         res = VarDbl(0, 1/8) ** 2
-        self.assertEqual(res.value(), 0)
-        self.assertEqual(res.uncertainty(), math.sqrt(2)/64)
+        self.assertAlmostEqual(res.value(), 1/8**2, delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(2)/(8**2), delta=2e-6)
+        try:
+            res = VarDbl(0, 1/8) ** (2 - 1e-9)
+        except ZeroDivisionError:
+            pass
 
         res = VarDbl(-1, 1/8) ** 2
-        self.assertEqual(res.value(), 1)
-        self.assertEqual(res.uncertainty(), math.sqrt(((1 << 8) + 2)/(1 << 12)))
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        try:
+            res = VarDbl(-1, 1/8) ** (2 - 1e-9)
+        except ValueError:
+            pass
 
-        res = VarDbl(-2, 1/8) ** 2
-        self.assertEqual(res.value(), 4)
-        self.assertEqual(res.uncertainty(), math.sqrt(((1 << 10) + 2)/(1 << 12)))
+        res = VarDbl(1, 1/8) ** 2
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        res = VarDbl(1, 1/8) ** (2 - 1e-9)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        res = VarDbl(1, 1/8) ** (2 + 1e-9)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+
+        res = VarDbl(2, 1/8) ** 2
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
+        res = VarDbl(2, 1/8) ** (2 - 1e-9)
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
+        res = VarDbl(2, 1/8) ** (2 - 1e-9)
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
 
     def test_3(self):
-        pass
+        res = VarDbl(0, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), 0)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(15)/8**3, delta=3e-6)
+        try:
+            res = VarDbl(0, 1/8) ** (2 - 1e-9)
+        except ZeroDivisionError:
+            pass
+
+        res = VarDbl(-1, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), -1 - 3/8**2, delta=7e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        res = VarDbl(1, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        res = VarDbl(1, 1/8) ** (3 - 1e-9)
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        res = VarDbl(1, 1/8) ** (3 + 1e-9)
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        try:
+            res = VarDbl(-1, 1/8) ** (3 - 1e-9)
+        except ValueError:
+            pass
+
+        res = VarDbl(-2, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), (-2**3) - 3*2/8**2, delta=2e-6)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        res = VarDbl(2, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        res = VarDbl(2, 1/8) ** (3 - 1e-9)
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        res = VarDbl(2, 1/8) ** (3 + 1e-9)
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
 
 
 class TestDivideBy (unittest.TestCase):

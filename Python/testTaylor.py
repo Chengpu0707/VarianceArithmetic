@@ -187,13 +187,13 @@ class TestLog (unittest.TestCase):
     def test_exception(self):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
-        self.validate(1/4, 0.2, LossUncertaintyException)
-        self.validate(1/2, 0.2, AssertionError)
+        self.validate(1/2, 0.2, LossUncertaintyException)
+        self.validate(3/4, 0.2, AssertionError)
         self.validate(1, 0.2)
 
-        self.validate(1/8, 0.1, LossUncertaintyException)
-        self.validate(1/4, 0.1, AssertionError)
-        self.validate(1/2, 0.1)
+        self.validate(1/4, 0.1, LossUncertaintyException)
+        self.validate(1/2, 0.1, AssertionError)
+        self.validate(1, 0.1)
 
         self.validate(1/64, 0.01, LossUncertaintyException)
         self.validate(1/32, 0.01, AssertionError)
@@ -380,17 +380,6 @@ class TestPower (unittest.TestCase):
             if (exception is None) or (not isinstance(ex, exception)): 
                 raise ex
             
-    def test_near_2(self):
-        two = self.validate(2, 0.2)
-        validate(self, two, 1.04, 0.404, deltaUncertainty=2e-5)
-        two = self.validate(2.0, 0.2)
-        validate(self, two, 1.04, 0.404, deltaUncertainty=2e-5)
-        lower = self.validate(2 - 1e-9, 0.2)
-        validate(self, lower, two.value(), two.uncertainty(), deltaValue=6e-7, deltaUncertainty=4e-6)
-        upper = self.validate(2 + 1e-9, 0.2)
-        validate(self, upper, two.value(), two.uncertainty(), deltaValue=6e-7, deltaUncertainty=4e-6)
-
- 
     def test_exception(self):
         self.validate(0, 0) 
         self.validate(0, 0.2) 
@@ -468,42 +457,60 @@ class TestLibError(unittest.TestCase):
                 
 
 class TestExpansion (unittest.TestCase):
+    HEADER= 'Name\tX\tOrder\tValue\tVariance'\
+            '\tExpansion Value\tExpansion Variance'\
+            '\tNew Value Value\tNew Value Uncertainty'\
+            '\tNew Variance Value\tNew Variance Uncertainty\n'
+
+    def dumpExpansion(self, fw, name:str, x: float, value:VarDbl, s1dTaylor:list[float]):
+        variance = VarDbl()
+        var = VarDbl(VarDbl(x).variance())
+        varn = VarDbl(var)
+        for n in range(2, taylor._momentum._maxOrder, 2):
+            newValue = s1dTaylor[n] * taylor._momentum.factor(n) * varn
+            newVariance = VarDbl()
+            for j in range(1, n):
+                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * taylor._momentum.factor(n) * varn
+            for j in range(2, n, 2):
+                newVariance -= s1dTaylor[j] * taylor._momentum.factor(j) * \
+                            s1dTaylor[n - j] * taylor._momentum.factor(n - j) * \
+                            varn
+            fw.write(f'{name}\t{x}\t{n}\t{value.value()}\t{variance.value()}')
+            fw.write(f'\t{varn.value()}\t{varn.variance()}')
+            fw.write(f'\t{newValue.value()}\t{newValue.variance()}')
+            fw.write(f'\t{newVariance.value()}\t{newVariance.variance()}\n')
+            value += newValue
+            variance += newVariance
+            varn *= var
+            if varn.value() == 0:
+                break
+        return VarDbl(value.value(), variance.value() + value.variance(), True)
+
 
     def testSin(self):
         '''
         A reproduction of the logic in Tayor.taylor1d()
         '''
-        DIVIDS = 1 << 4
         with open('./Python/Output/Sin_Taylor.txt', 'w') as fw:
-            fw.write('X\tOrder\tValue\tVariance\tPrecision'
-                     '\tExpansion Value\tExpansion Variance'
-                     '\tNew Value Value\tNew Value Uncertainty'
-                     '\tNew Variance Value\tNew Variance Uncertainty\n')
-            for i in range(1, DIVIDS+1):
-                x = math.pi/4 *i/DIVIDS
-                s1dTaylor = taylor.sin(x)
-                value = s1dTaylor[0]
-                variance = VarDbl()
-                var = VarDbl(VarDbl(x).variance())
-                varn = VarDbl(var)
-                for n in range(2, taylor._momentum._maxOrder, 2):
-                    newValue = s1dTaylor[n] * taylor._momentum.factor(n) * varn
-                    newVariance = VarDbl()
-                    for j in range(1, n):
-                        newVariance += s1dTaylor[j] * s1dTaylor[n - j] * taylor._momentum.factor(n) * varn
-                    for j in range(2, n, 2):
-                        newVariance -= s1dTaylor[j] * taylor._momentum.factor(j) * \
-                                    s1dTaylor[n - j] * taylor._momentum.factor(n - j) * \
-                                    varn
-                    fw.write(f'{x}\t{n}\t{value.value()}\t{variance.value()}\t{math.sqrt(variance.value()) /value.value()}')
-                    fw.write(f'\t{varn.value()}\t{varn.variance()}')
-                    fw.write(f'\t{newValue.value()}\t{newValue.variance()}')
-                    fw.write(f'\t{newVariance.value()}\t{newVariance.variance()}\n')
-                    value += newValue
-                    variance += newVariance
-                    varn *= var
-                    if varn.value() == 0:
-                        break
+            fw.write(TestExpansion.HEADER)
+            for i in range(1, 10):
+                x = math.pi/4 *i
+                value = VarDbl(math.sin(x))
+                s1dTaylor = taylor.sin(value.value())
+                res = self.dumpExpansion(fw, 'sin', x, value, s1dTaylor)
+                self.assertAlmostEqual(math.sin(x), res.value(), delta=res.uncertainty())
+
+    def testInversionNearZero(self):
+        '''
+        A reproduction of the logic in Tayor.taylor1d()
+        '''
+        with open('./Python/Output/NearOne_Taylor.txt', 'w') as fw:
+            fw.write(TestExpansion.HEADER)
+            for i in range(1, 16):
+                x = math.pow(10, -i)
+                s1dTaylor = taylor.power(-1)
+                res = self.dumpExpansion(fw, '1/x', x, VarDbl(1, 0), s1dTaylor)
+                self.assertAlmostEqual(1, res.value(), delta=res.uncertainty())
 
 
 if __name__ == '__main__':
