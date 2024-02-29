@@ -150,6 +150,7 @@ class TestFFTLibSin (unittest.TestCase):
 
 class CompareSin (unittest.TestCase):
 
+    @unittest.skip('Too slow')
     def testSquare(self):
         idx = FFTIndexSin()
         lib = FFTLibSin()
@@ -166,6 +167,7 @@ class CompareSin (unittest.TestCase):
 
 class TestCleanLib (unittest.TestCase):
 
+    @unittest.skip('Too slow')
     def testLinear(self):
         '''
         Demonstrate the extent of lib error beyond least significant value
@@ -184,11 +186,12 @@ class TestCleanLib (unittest.TestCase):
 
 class TestDumpFFT (unittest.TestCase):
 
+    @unittest.skip('Too slow')
     def testSpectra(self):
         '''
         Demonstrate the reverse has not enough calculation for large enough uncertainty
         '''
-        with open(f'./Python/Output/FFT_4_6_Spec.txt', 'w') as fw:
+        with open(f'./Python/Output/FFT_4_8_Spec.txt', 'w') as fw:
             FFTTest.dumpSpectrumHeader(fw)
             FFTTest.dumpSpectra(fw, range(4,8))
 

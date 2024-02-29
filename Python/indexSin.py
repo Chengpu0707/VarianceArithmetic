@@ -3,7 +3,7 @@ import math
 import os
 import typing
 
-from varDbl import VarDbl
+import varDbl
 
 class IndexSin:
     '''
@@ -64,9 +64,9 @@ class RegressiveSin (IndexSin):
     '''
     Use regression to generate sin(j /(1<<order) *math.pi)
     '''
-    ZERO = VarDbl(0,0)
-    ONE = VarDbl(1,0)
-    HALF = VarDbl(1/2,0)
+    ZERO = varDbl.VarDbl(0,0)
+    ONE = varDbl.VarDbl(1,0)
+    HALF = varDbl.VarDbl(1/2,0)
 
     HEADER = "Order\tIndex"\
              "\tSin Value\tSin Uncertainty\tSin Normalized Error"\
@@ -118,9 +118,9 @@ class RegressiveSin (IndexSin):
                         math.ulp(sValue[8]) < abs(sValue[6] / sValue[7] - sValue[8]):
                     self._sSin = sSin
                     return f'line #{ln} index={idx} error values disagree: {sValue[8]} vs {sValue[6]}~{sValue[7]}'
-                self._sSin[idx] = VarDbl(sValue[0], sValue[1])
-                self._sSin[self._half - idx] = VarDbl(sValue[3], sValue[4])
-                error = VarDbl(sValue[6], sValue[7])
+                self._sSin[idx] = varDbl.VarDbl(sValue[0], sValue[1])
+                self._sSin[self._half - idx] = varDbl.VarDbl(sValue[3], sValue[4])
+                error = varDbl.VarDbl(sValue[6], sValue[7])
                 err = self._sSin[idx] * self._sSin[idx] + \
                         self._sSin[self._half - idx] * self._sSin[self._half - idx] - 1
                 if error.uncertainty() < math.ulp(sValue[6]) < abs(error.value() - err.value()):
@@ -136,7 +136,7 @@ class RegressiveSin (IndexSin):
                     self._sSin = sSin
                     return f'line #{ln} index={idx} error uncertainties disagree: {error} vs {err}'
                 '''
-        sMissing = [i for i, e in enumerate(self._sSin) if not isinstance(e, VarDbl)]
+        sMissing = [i for i, e in enumerate(self._sSin) if not isinstance(e, varDbl.VarDbl)]
         if sMissing and (not incomplete):
             self._sSin = sSin
             return f'order {self._order} missing {len(sMissing)} indices: {sMissing}'
@@ -168,7 +168,7 @@ class RegressiveSin (IndexSin):
             return None
         smid = (begin + end) >> 1
         cmid = self._half - smid
-        if (type(self._sSin[smid]) != VarDbl) or (type(self._sSin[cmid]) != VarDbl):
+        if (type(self._sSin[smid]) != varDbl.VarDbl) or (type(self._sSin[cmid]) != varDbl.VarDbl):
             x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
                 - self._sSin[begin] * self._sSin[end]
             self._sSin[smid] = ((RegressiveSin.ONE - x) *RegressiveSin.HALF) ** 0.5

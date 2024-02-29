@@ -1,5 +1,5 @@
 import math
-from typing import Optional, Union
+import typing
 
 
 class ValueException (Exception):
@@ -38,8 +38,8 @@ class VarDbl:
     def variance(self):
         return self._variance
         
-    def __init__(self, value: Union[float, int]=0, 
-                 uncertainty: Optional[float]=None,
+    def __init__(self, value: typing.Union[float, int]=0, 
+                 uncertainty: typing.Optional[float]=None,
                  bUncertaintyAsVariance=False) -> None:
         '''
         Intialize with "value" and "uncertainty".

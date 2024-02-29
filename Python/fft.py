@@ -6,9 +6,9 @@ import os
 import random
 import traceback
 
-from indexSin import IndexSin
-from histo import Stat, Histo
-from varDbl import VarDbl
+import indexSin
+import histo
+import varDbl
 
 
 class FFTSinSource (enum.StrEnum):
@@ -107,7 +107,7 @@ class FFTBase (abc.ABC):
     
 
 class FFTIndexSin (FFTBase):
-    _indexSin = IndexSin(FFTBase.MAX_ORDER)
+    _indexSin = indexSin.IndexSin(FFTBase.MAX_ORDER)
 
     def source(self):
         return FFTSinSource.IndexSin
@@ -131,7 +131,7 @@ class FFTLibSin (FFTBase):
     
 
 class FFTLimitedSin (FFTBase):
-    _indexSin = IndexSin(FFTBase.MAX_ORDER - 1)
+    _indexSin = indexSin.IndexSin(FFTBase.MAX_ORDER - 1)
 
     def source(self):
         return FFTSinSource.LimitedSin
@@ -165,13 +165,13 @@ class TestType (enum.StrEnum):
 class Measure:
     def __init__(self, divids=5, devs=3) -> None:
         self.sStat = {
-            TestType.Forward: Stat(), 
-            TestType.Reverse: Stat(), 
-            TestType.Roundtrip: Stat()}
+            TestType.Forward: histo.Stat(), 
+            TestType.Reverse: histo.Stat(), 
+            TestType.Roundtrip: histo.Stat()}
         self.sHisto = {
-            TestType.Forward: Histo(divids, devs), 
-            TestType.Reverse: Histo(divids, devs), 
-            TestType.Roundtrip: Histo(divids, devs)}
+            TestType.Forward: histo.Histo(divids, devs), 
+            TestType.Reverse: histo.Histo(divids, devs), 
+            TestType.Roundtrip: histo.Histo(divids, devs)}
 
    
 
@@ -252,11 +252,11 @@ class FFTTest:
                 raise ValueError(f"Unknown signal={signal}")
 
         if noise == 0:
-            self.sData = [VarDbl(self.sWave[i]) for i in range(self.size << 1)]
-            self.sBack = [VarDbl(self.sFreq[i]) for i in range(self.size << 1)]
+            self.sData = [varDbl.VarDbl(self.sWave[i]) for i in range(self.size << 1)]
+            self.sBack = [varDbl.VarDbl(self.sFreq[i]) for i in range(self.size << 1)]
         else:
-            self.sData = [VarDbl(self.sWave[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
-            self.sBack = [VarDbl(self.sFreq[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
+            self.sData = [varDbl.VarDbl(self.sWave[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
+            self.sBack = [varDbl.VarDbl(self.sFreq[i] + self.getNoise(), self.noise) for i in range(self.size << 1)]
 
         self.sSpec = self.fft.transform(self.sData, True)
         self.sRound = self.fft.transform(self.sSpec, False)
@@ -276,7 +276,7 @@ class FFTTest:
                 if self.aggr:
                     self.aggr.sStat[TestType.Forward].accum(unc1)
                 if unc1 > 0:
-                    if type(self.sFreq[i]) == VarDbl:
+                    if type(self.sFreq[i]) == varDbl.VarDbl:
                         self.measure.sHisto[TestType.Forward].accum((self.sSpec[i].value() - self.sFreq[i].value())/unc1)
                         if self.aggr:
                             self.aggr.sHisto[TestType.Forward].accum((self.sSpec[i].value() - self.sFreq[i].value())/unc1)
@@ -299,7 +299,7 @@ class FFTTest:
                 if self.aggr:
                     self.aggr.sStat.get(TestType.Reverse).accum(unc3)
                 if unc3 > 0:
-                    if type(self.sWave[i]) == VarDbl:
+                    if type(self.sWave[i]) == varDbl.VarDbl:
                         self.measure.sHisto.get(TestType.Reverse).accum((self.sRev[i].value() - self.sWave[i].value())/unc3)
                         if self.aggr:
                             self.aggr.sHisto.get(TestType.Reverse).accum((self.sRev[i].value() - self.sWave[i].value())/unc3)
@@ -332,11 +332,11 @@ class FFTTest:
         for i in range(self.size << 1):
             fw.write(f'{self.sinSource}\t{self.noiseType}\t{self.noise}\t{self.signal}\t{self.order}\t{self.freq}')
             fw.write(f'\t{i >> 1}\t{i % 2}\t{self.sWave[i]}\t{self.sFreq[i]}')
-            if type(self.sFreq[i]) == VarDbl:
+            if type(self.sFreq[i]) == varDbl.VarDbl:
                 fw.write(f'\t{self.sSpec[i].value() - self.sFreq[i].value()}\t{self.sSpec[i].uncertainty()}')
             else:                    
                 fw.write(f'\t{self.sSpec[i].value() - self.sFreq[i]}\t{self.sSpec[i].uncertainty()}')
-            if type(self.sWave[i]) == VarDbl:
+            if type(self.sWave[i]) == varDbl.VarDbl:
                 fw.write(f'\t{self.sRev[i].value() - self.sWave[i].value()}\t{self.sRev[i].uncertainty()}')
             else:                    
                 fw.write(f'\t{self.sRev[i].value() - self.sWave[i]}\t{self.sRev[i].uncertainty()}')

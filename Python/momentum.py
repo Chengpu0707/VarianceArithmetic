@@ -1,6 +1,6 @@
 import math
 
-from varDbl import VarDbl
+import varDbl
 
 class Momentum:
     '''
@@ -22,22 +22,22 @@ class Momentum:
         self._maxOrder = maxOrder
         self._sFactor = []
         for j in range(maxOrder):
-            self._sFactor.append(VarDbl())
+            self._sFactor.append(varDbl.VarDbl())
 
         divid = 32
         divid2 = divid * divid
         limit = int(math.ceil(divid * binding))
         for i in range(-limit, limit + 1):
-            x2 = VarDbl(i*i / divid2, 0)
-            pdf = VarDbl( 1.0 / math.sqrt(2*math.pi)) * VarDbl( math.exp(- x2.value() * 0.5) / divid )
-            sq = VarDbl( 1, 0 )
+            x2 = varDbl.VarDbl(i*i / divid2, 0)
+            pdf = varDbl.VarDbl( 1.0 / math.sqrt(2*math.pi)) * varDbl.VarDbl( math.exp(- x2.value() * 0.5) / divid )
+            sq = varDbl.VarDbl( 1, 0 )
             for j in range(maxOrder):
                 self._sFactor[j] += pdf * sq
                 sq *= x2
 
-    def factor(self, n:int) -> VarDbl:
+    def factor(self, n:int) -> varDbl.VarDbl:
         if (n % 2) == 1:
-            return VarDbl( 0, 0 )
+            return varDbl.VarDbl( 0, 0 )
         n //= 2
         if n > self._maxOrder:
             return IndexError()
