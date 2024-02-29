@@ -154,12 +154,13 @@ class CompareSin (unittest.TestCase):
     def testSquare(self):
         idx = FFTIndexSin()
         lib = FFTLibSin()
-        with open(f'./Python/Output/SinError_{FFTBase.MAX_ORDER - 1}.txt', 'w') as f:
+        MAX_ORDER = 12
+        with open(f'./Python/Output/SinError_{MAX_ORDER - 1}.txt', 'w') as f:
             f.write('Freq\tIndexSin Error\tIndexSin Uncertainty\tLibSin Error\tLibSin Uncertainty\n')
-            for i in range(1, 1 << (FFTBase.MAX_ORDER - 1)):
+            for i in range(1, 1 << (MAX_ORDER - 1)):
                 try:
-                    idxErr = VarDbl(idx.sin(i, FFTBase.MAX_ORDER))**2 + VarDbl(idx.cos(i, FFTBase.MAX_ORDER))**2 - 1
-                    libErr = VarDbl(lib.sin(i, FFTBase.MAX_ORDER))**2 + VarDbl(lib.cos(i, FFTBase.MAX_ORDER))**2 - 1
+                    idxErr = VarDbl(idx.sin(i, MAX_ORDER))**2 + VarDbl(idx.cos(i, MAX_ORDER))**2 - 1
+                    libErr = VarDbl(lib.sin(i, MAX_ORDER))**2 + VarDbl(lib.cos(i, MAX_ORDER))**2 - 1
                     f.write(f'{i}\t{idxErr.value()}\t{idxErr.uncertainty()}\t{libErr.value()}\t{libErr.uncertainty()}\n')
                 except BaseException as ex:
                     raise ex

@@ -1,6 +1,13 @@
 import math
 import typing
 
+'''
+VarDbl uses Taylor which import VarDbl, causing a circular dependency, 
+because of ** operator, and VarDbl.<func>().
+
+The current solution is to import Taylor within VarDbl.taylor()
+
+'''
 
 class ValueException (Exception):
     def __init__(self, value: float, *args: object) -> None:
@@ -26,6 +33,13 @@ class VarDbl:
         # rounding error is uniformly distrubuted within LSB of float
     # Taylor expansion parameters are defined in taylor.Taylor and momentum.Momentum
     _taylor = None
+    @staticmethod
+    def taylor():
+        if VarDbl._taylor is None:
+            import taylor
+            VarDbl._taylor = taylor.Taylor()
+        return VarDbl._taylor
+
 
     __slots__ = ('_value', '_variance')
 
@@ -127,30 +141,21 @@ class VarDbl:
 
     @staticmethod
     def exp(var):
-        if VarDbl._taylor is None:
-            import taylor
-            VarDbl._taylor = taylor.Taylor()  
-        s1dTaylor = VarDbl._taylor.exp()
+        s1dTaylor = VarDbl.taylor().exp()
         s1dTaylor[0] = math.exp(var.value())
-        return VarDbl._taylor.taylor1d(var, "exp", s1dTaylor, False, True)
+        return VarDbl.taylor().taylor1d(var, "exp", s1dTaylor, False, True)
     
     @staticmethod
     def log(var):
-        if VarDbl._taylor is None:
-            import taylor
-            VarDbl._taylor = taylor.Taylor()  
-        s1dTaylor = VarDbl._taylor.log()
+        s1dTaylor = VarDbl.taylor().log()
         s1dTaylor[0] = math.log(var.value())
-        return VarDbl._taylor.taylor1d(var, f"log({var})", s1dTaylor, True, False)
+        return VarDbl.taylor().taylor1d(var, f"log({var})", s1dTaylor, True, False)
     
     @staticmethod
     def sin(var):
-        if VarDbl._taylor is None:
-            import taylor
-            VarDbl._taylor = taylor.Taylor()  
-        s1dTaylor = VarDbl._taylor.sin(var.value())
+        s1dTaylor = VarDbl.taylor().sin(var.value())
         s1dTaylor[0] = math.sin(var.value())
-        return VarDbl._taylor.taylor1d(var, f"sin({var})", s1dTaylor, False, False)
+        return VarDbl.taylor().taylor1d(var, f"sin({var})", s1dTaylor, False, False)
     
     def __pow__(self, exp):
         match exp:
@@ -158,16 +163,12 @@ class VarDbl:
                 return VarDbl(1, 0)
             case 1:
                 return VarDbl(self)
-
-        if VarDbl._taylor is None:
-            import taylor
-            VarDbl._taylor = taylor.Taylor()  
         exp = float(exp)
-        s1dTaylor = VarDbl._taylor.power(exp)
+        s1dTaylor = VarDbl.taylor().power(exp)
         s1dTaylor[0] = math.pow(self.value(), exp)
         if (exp > 0) and (math.ceil(exp) == math.floor(exp)):
-            return VarDbl._taylor.power1d(self, int(exp), s1dTaylor)
-        return VarDbl._taylor.taylor1d(self, f"{self}**{exp}", s1dTaylor, True, True)
+            return VarDbl.taylor().power1d(self, int(exp), s1dTaylor)
+        return VarDbl.taylor().taylor1d(self, f"{self}**{exp}", s1dTaylor, True, True)
     
     def __eq__(self, other: object) -> bool:
         if type(other) != VarDbl:

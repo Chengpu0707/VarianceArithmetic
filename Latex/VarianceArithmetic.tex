@@ -1833,6 +1833,32 @@ So the results for Sin and Cos signals at all frequencies are pooled together fo
 
 \subsection{Library Errors}
 
+\begin{figure}[p]
+\includegraphics[height=2.75in]{Sin_Diff.png} 
+\captionof{figure}{
+The difference between the library $\sin(x)$ and the indexed $\sin(x)$, for all integer input to the indexed sine functions used in the FFT transformations of FFT order $4$.
+The uncertainty of the $\sin(x)$ values are also displayed, to mark the periodicity of $\pi$.
+}
+\label{fig: Sin_Diff}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=2.75in]{Sin_Error.png} 
+\captionof{figure}{
+The difference between the library $\sin(x)$ and $\sin(j 2\pi 2^4/2^6)$.   
+$\sin(j 2\pi 2^4/2^6)$ has precise values $[0,1,0,-1,\dots]$, so that the corresponding least significant values are $[\;0,2.2 \; 10^{-16},\;0,2.2 \; 10^{-16},\dots]$.
+}
+\label{fig: Sin_Error}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=2.75in]{Cot_Diff.png} 
+\captionof{figure}{
+The difference between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$, for $x \in (0, \pi)$.
+}
+\label{fig: Cot_Diff}
+\end{figure}
+
 \begin{figure}
 \includegraphics[height=2.75in]{Sin_Cot_Diff.png} 
 \captionof{figure}{
@@ -1845,23 +1871,6 @@ Their y-axis is on the right.
 \label{fig: Sin_Cot_Diff}
 \end{figure}
 
-\begin{figure}[p]
-\includegraphics[height=2.75in]{Sin_Diff.png} 
-\captionof{figure}{
-The difference between the library $\sin(x)$ and the indexed $\sin(x)$, for all integer input to the indexed sine functions used in the FFT transformations of FFT order $4$.
-The uncertainty of the $\sin(x)$ values are also displayed, to mark the periodicity of $\pi$.
-}
-\label{fig: Sin_Diff}
-\end{figure}
-
-\begin{figure}[p]
-\includegraphics[height=2.75in]{Cot_Diff.png} 
-\captionof{figure}{
-The difference between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$, for $x \in (0, \pi)$.
-}
-\label{fig: Cot_Diff}
-\end{figure}
-
 
 Formula \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} limit the use of $\sin(x)$ and $\cos(x)$ to $x = 2\pi j/N$.
 To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine functions} can be used instead of the library sine functions:
@@ -1870,12 +1879,10 @@ To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine 
 
 \item The values of the indexed sine functions is extended from $j = 0,1,\dots N/8$ to the whole integer region using the periodicity of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
 
-\item The obtained indexed sine functions is checked by $\sin(x)^2 + \cos(x)^2 - 1$.
-Figure \ref{fig: Sin_Cot_Diff} shows that the indexed sine functions have proper coverage for different FFT orders.
-
 \end{enumerate}
 
-Figure \ref{fig: Sin_Diff} shows that the value errors between the library $\sin(x)$ and the indexed  $\sin(x)$ increases with increasing $x$ for FFT order $4$.
+Figure \ref{fig: Sin_Diff} shows that the value errors between the library $\sin(x)$ and the indexed $\sin(x)$ increases with increasing $x$ for FFT order $4$.
+To confirm Figure \ref{fig: Sin_Diff}, Figure \ref{fig: Sin_Error} shows that the value errors of the library $\sin(x)$ for $\sin(j 2\pi 2^4/2^6)$ increases with increasing $j$. 
 The $x$ range in Figure \ref{fig: Sin_Diff} covers all the input used in the FFT transformations of FFT order $4$.
 The errors are also periodic in $x$ by $\pi$, which may be amplified in the FFT calculations.
 
@@ -1883,13 +1890,12 @@ Figure \ref{fig: Cot_Diff} shows the value errors between the library $1/\tan(x)
 It covers all the integer inputs to the indexed cotan functions used for the Linear signal of FFT order $6$ and $7$.
 The value errors near $x = \pi$ increase with the FFT order.
 
-Using the maximal absolute value errors, Figure \ref{fig: Sin_Cot_Diff} compares the value error strengths of the library $\sin(x)$ and $1/\tan(x)$ for different FFT orders.
-Numerically, the library $\sin(x)$ and $1/\tan(x)$ do not have proper coverage.
+Using the maximal absolute value errors, Figure \ref{fig: Sin_Cot_Diff} compares the value error strengths of the library $\sin(x)$ and $1/\tan(x)$ for increasing FFT orders.
+Figure \ref{fig: Sin_Cot_Diff} also shows that when checked by $\sin(x)^2 + \cos(x)^2 - 1$, the obtained indexed sine functions have proper coverage.
+In contrast, Figure \ref{fig: Sin_Diff}, \ref{fig: Sin_Error}, and \ref{fig: Cot_Diff} all show that the library $\sin(x)$ and $1/\tan(x)$ do not have proper coverage.
 
 It is clear that the indexed sine functions are much better than the library sine functions.
 Sadly, in reality, the library sine functions are used ubiquitously, so that both needs to be evaluated.
-
-
 
 \subsection{Using the Indexed Sine Functions for Sin/Cos Signals}
 
