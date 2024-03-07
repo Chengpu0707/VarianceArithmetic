@@ -21,7 +21,7 @@ class TestInit (unittest.TestCase):
 
         # lost resolution
         f = float((1 << 53) + 1)
-        validate(self, VarDbl((1 << 53) + 1), f, VarDbl.DEVIATION_OF_LSB * math.ulp(f))
+        validate(self, VarDbl((1 << 53) + 1), f, VarDbl.ulp(f))
         # no lost of resolution
         f = float(1 << 54)
         validate(self, VarDbl(1 << 54), f, 0)
@@ -59,10 +59,10 @@ class TestInit (unittest.TestCase):
             
     def testUncertaintyRange(self):
         maxU = math.sqrt(sys.float_info.max)
-        self.failUncertaintyException(0, maxU + VarDbl.DEVIATION_OF_LSB * math.ulp(maxU))
+        self.failUncertaintyException(0, maxU + VarDbl.ulp(maxU))
         validate(self, VarDbl(0, maxU), 0, maxU) 
         
-        minU = math.sqrt(VarDbl.DEVIATION_OF_LSB * math.ulp(sys.float_info.min))
+        minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
         validate(self, VarDbl(0, minU), 0, minU) 
         validate(self, VarDbl(0, minU*0.5), 0, 0) 
 
@@ -79,6 +79,11 @@ class TestRepresentation (unittest.TestCase):
         with open('./Java/Output/data.pickle', 'rb') as f:
             vr = pickle.load(f)
         validate(self, vr, v.value(), v.uncertainty())
+
+    def testBool(self):
+        self.assertTrue(VarDbl(1))
+        self.assertTrue(VarDbl(0, 1))
+        self.assertFalse(VarDbl())
  
 
 class TestAddSub (unittest.TestCase):
@@ -121,7 +126,7 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, 3, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(1) * math.sqrt(5)
+        uncertainty = VarDbl.ulp(1) * math.sqrt(5)
         validate(self, v2 + 2.0, 3, uncertainty) 
         validate(self, 2.0 + v2, 3, uncertainty) 
         v2 += 2.0
@@ -136,7 +141,7 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, -1, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(1) * math.sqrt(5)
+        uncertainty = VarDbl.ulp(1) * math.sqrt(5)
         validate(self, v2 - 2.0, -1,  uncertainty) 
         validate(self, 2.0 - v2, 1,  uncertainty) 
         v2 -= 2.0
@@ -192,7 +197,7 @@ class TestMultiply (unittest.TestCase):
         validate(self, VarDbl(-1) * 2, -2, 0)
         validate(self, 2 * VarDbl(-1), -2, 0)
 
-        uncertainty = VarDbl.DEVIATION_OF_LSB * math.ulp(2.0)
+        uncertainty = VarDbl.ulp(2.0)
         validate(self, VarDbl(-1.0) * VarDbl(2), -2, uncertainty)
         validate(self, VarDbl(-1.0) * 2, -2, uncertainty)
         validate(self, 2 * VarDbl(-1.0), -2, uncertainty)
@@ -252,44 +257,62 @@ class TestPower (unittest.TestCase):
         self.assertEqual(res.value(), -1)
         self.assertEqual(res.uncertainty(), 1/1024)
 
+
     def test_2(self):
+        DELTA_VALUE = 3e-7
+        DELTA_UNCERTAINTY = 2e-6
+        
         res = VarDbl(0, 1/8) ** 2
-        self.assertAlmostEqual(res.value(), 1/8**2, delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(2)/(8**2), delta=2e-6)
+        self.assertAlmostEqual(res.value(), 1/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(2)/(8**2), delta=DELTA_UNCERTAINTY*4)
         try:
             res = VarDbl(0, 1/8) ** (2 - 1e-9)
         except ZeroDivisionError:
             pass
 
         res = VarDbl(-1, 1/8) ** 2
-        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
         try:
             res = VarDbl(-1, 1/8) ** (2 - 1e-9)
         except ValueError:
             pass
 
         res = VarDbl(1, 1/8) ** 2
-        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(1**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
         res = VarDbl(1, 1/8) ** (2 - 1e-9)
-        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(1**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
         res = VarDbl(1, 1/8) ** (2 + 1e-9)
-        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=2e-6)
+        self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(1**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
 
         res = VarDbl(2, 1/8) ** 2
-        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(2**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4*2)
         res = VarDbl(2, 1/8) ** (2 - 1e-9)
-        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
-        res = VarDbl(2, 1/8) ** (2 - 1e-9)
-        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=3e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(16 + 2/(8**2))/8, delta=4e-6)
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(2**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4*2)
+        res = VarDbl(2, 1/8) ** (2 + 1e-9)
+        self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(2**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4*2)
+
+        res = VarDbl(0.5, 1/8) ** 2
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
+        res = VarDbl(0.5, 1/8) ** (2 - 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
+        res = VarDbl(0.5, 1/8) ** (2 + 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
+
 
     def test_3(self):
+        DELTA_VALUE = 7e-7
+        DELTA_UNCERTAINTY = 5e-6
+
         res = VarDbl(0, 1/8) ** 3
         self.assertAlmostEqual(res.value(), 0)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(15)/8**3, delta=3e-6)
@@ -299,53 +322,68 @@ class TestPower (unittest.TestCase):
             pass
 
         res = VarDbl(-1, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), -1 - 3/8**2, delta=7e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        self.assertAlmostEqual(res.value(), -1 - 3/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
         res = VarDbl(1, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
         res = VarDbl(1, 1/8) ** (3 - 1e-9)
-        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
         res = VarDbl(1, 1/8) ** (3 + 1e-9)
-        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=7e-7)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=5e-6)
+        self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
         try:
             res = VarDbl(-1, 1/8) ** (3 - 1e-9)
         except ValueError:
             pass
 
         res = VarDbl(-2, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), (-2**3) - 3*2/8**2, delta=2e-6)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        self.assertAlmostEqual(res.value(), (-2**3) - 3*2/8**2, delta=DELTA_VALUE*2)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY*4)
         res = VarDbl(2, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=DELTA_VALUE*2)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY*4)
         res = VarDbl(2, 1/8) ** (3 - 1e-9)
-        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=DELTA_VALUE*2)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY*4)
         res = VarDbl(2, 1/8) ** (3 + 1e-9)
-        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=2e-6)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=2e-5)
+        self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=DELTA_VALUE*2)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY*4)
+
+        res = VarDbl(-0.5, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), (-0.5**3) - 3*0.5/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/8) ** 3
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/8) ** (3 - 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/8) ** (3 + 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
+
+
 
 
 class TestDivideBy (unittest.TestCase):
 
     def testVarDblByVarDblOne(self):
         validate(self, VarDbl(0) / VarDbl(1), 0, 0)
-        validate(self, VarDbl(1) / VarDbl(1), 1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(-1) / VarDbl(1), -1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(1) / VarDbl(-1), -1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(-1) / VarDbl(-1), 1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(2) / VarDbl(1), 2, math.ulp(2)*VarDbl.DEVIATION_OF_LSB)
+        validate(self, VarDbl(1) / VarDbl(1), 1, VarDbl.ulp(1))
+        validate(self, VarDbl(-1) / VarDbl(1), -1, VarDbl.ulp(1))
+        validate(self, VarDbl(1) / VarDbl(-1), -1, VarDbl.ulp(1))
+        validate(self, VarDbl(-1) / VarDbl(-1), 1, VarDbl.ulp(1))
+        validate(self, VarDbl(2) / VarDbl(1), 2, VarDbl.ulp(2))
 
-        validate(self, VarDbl(1.0) / VarDbl(1), 1, math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(2.0) / VarDbl(1), 2, math.sqrt(2)*math.ulp(2)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(0.5) / VarDbl(1), 0.5, math.sqrt(2)*math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB)
+        validate(self, VarDbl(1.0) / VarDbl(1), 1, math.sqrt(2)*VarDbl.ulp(1))
+        validate(self, VarDbl(2.0) / VarDbl(1), 2, math.sqrt(2)*VarDbl.ulp(2))
+        validate(self, VarDbl(0.5) / VarDbl(1), 0.5, math.sqrt(2)*VarDbl.ulp(0.5))
 
-        validate(self, VarDbl(1.0) / VarDbl(1.0), 1, math.sqrt(3)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=5.30e-22)
-        validate(self, VarDbl(2.0) / VarDbl(1.0), 2, math.sqrt(3)*math.ulp(2)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=1.06e-21)
-        validate(self, VarDbl(0.5) / VarDbl(1.0), 0.5, math.sqrt(3)*math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=2.65e-21)
+        validate(self, VarDbl(1.0) / VarDbl(1.0), 1, math.sqrt(3)*VarDbl.ulp(1), deltaUncertainty=5.30e-22)
+        validate(self, VarDbl(2.0) / VarDbl(1.0), 2, math.sqrt(3)*VarDbl.ulp(2), deltaUncertainty=1.06e-21)
+        validate(self, VarDbl(0.5) / VarDbl(1.0), 0.5, math.sqrt(3)*VarDbl.ulp(0.5), deltaUncertainty=2.65e-21)
 
         validate(self, VarDbl(0, 1e-3) / VarDbl(1), 0, 1e-3)
         validate(self, VarDbl(1, 1e-3) / VarDbl(1), 1, 1e-3)
@@ -373,15 +411,15 @@ class TestDivideBy (unittest.TestCase):
 
     def testVarDblByFloatOne(self):
         validate(self, VarDbl(0)/ 1.0, 0, 0)
-        validate(self, VarDbl(1)/ 1.0,   1, math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(-1)/ 1.0, -1, math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(1)/ -1.0, -1, math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(-1)/ -1.0, 1, math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(2)/ 1.0, 2,   2*math.sqrt(2)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=1.3e-21)
+        validate(self, VarDbl(1)/ 1.0,   1, math.sqrt(2)*VarDbl.ulp(1), deltaUncertainty=6.5e-22)
+        validate(self, VarDbl(-1)/ 1.0, -1, math.sqrt(2)*VarDbl.ulp(1), deltaUncertainty=6.5e-22)
+        validate(self, VarDbl(1)/ -1.0, -1, math.sqrt(2)*VarDbl.ulp(1), deltaUncertainty=6.5e-22)
+        validate(self, VarDbl(-1)/ -1.0, 1, math.sqrt(2)*VarDbl.ulp(1), deltaUncertainty=6.5e-22)
+        validate(self, VarDbl(2)/ 1.0, 2,   2*math.sqrt(2)*VarDbl.ulp(1), deltaUncertainty=1.3e-21)
 
-        validate(self, VarDbl(1.0)/ 1.0, 1,   math.sqrt(3)*math.ulp(1)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=1.3e-21)
-        validate(self, VarDbl(2.0)/ 1.0, 2,   math.sqrt(3)*math.ulp(2)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=1.3e-21)
-        validate(self, VarDbl(0.5)/ 1.0, 0.5, math.sqrt(3)*math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB, deltaUncertainty=2.7e-22)
+        validate(self, VarDbl(1.0)/ 1.0, 1,   math.sqrt(3)*VarDbl.ulp(1), deltaUncertainty=1.3e-21)
+        validate(self, VarDbl(2.0)/ 1.0, 2,   math.sqrt(3)*VarDbl.ulp(2), deltaUncertainty=1.3e-21)
+        validate(self, VarDbl(0.5)/ 1.0, 0.5, math.sqrt(3)*VarDbl.ulp(0.5), deltaUncertainty=2.7e-22)
 
         validate(self, VarDbl(0, 1e-3)/ 1.0, 0, 1e-3)
         validate(self, VarDbl(1, 1e-3)/ 1.0, 1, 1e-3)
@@ -393,11 +431,11 @@ class TestDivideBy (unittest.TestCase):
 
     def testFloatByVarDblOne(self):
         validate(self, 0 / VarDbl(1), 0, 0)
-        validate(self, 1 / VarDbl(1), 1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, -1 / VarDbl(1), -1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, 1 / VarDbl(-1), -1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, -1 / VarDbl(-1), 1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, 2 / VarDbl(1), 2, math.ulp(2)*VarDbl.DEVIATION_OF_LSB)
+        validate(self, 1 / VarDbl(1), 1, VarDbl.ulp(1))
+        validate(self, -1 / VarDbl(1), -1, VarDbl.ulp(1))
+        validate(self, 1 / VarDbl(-1), -1, VarDbl.ulp(1))
+        validate(self, -1 / VarDbl(-1), 1, VarDbl.ulp(1))
+        validate(self, 2 / VarDbl(1), 2, VarDbl.ulp(2))
         validate(self, 0.5 / VarDbl(1), 0.5, math.ulp(0.5)/math.sqrt(3/2))
 
         validate(self, 0 / VarDbl(1, 1e-3), 0, 0)
@@ -435,12 +473,12 @@ class TestDivideBy (unittest.TestCase):
 
     def testVarDblByVarDblTwo(self):
         validate(self, VarDbl(0) / VarDbl(2), 0, 0)
-        validate(self, VarDbl(1) / VarDbl(2), 0.5, math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(-1) / VarDbl(2), -0.5, math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(1) / VarDbl(-2), -0.5, math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(-1) / VarDbl(-2), 0.5, math.ulp(0.5)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(2) / VarDbl(2), 1, math.ulp(1)*VarDbl.DEVIATION_OF_LSB)
-        validate(self, VarDbl(0.5) / VarDbl(2), 0.25, math.sqrt(2)*math.ulp(0.25)*VarDbl.DEVIATION_OF_LSB)
+        validate(self, VarDbl(1) / VarDbl(2), 0.5, VarDbl.ulp(0.5))
+        validate(self, VarDbl(-1) / VarDbl(2), -0.5, VarDbl.ulp(0.5))
+        validate(self, VarDbl(1) / VarDbl(-2), -0.5, VarDbl.ulp(0.5))
+        validate(self, VarDbl(-1) / VarDbl(-2), 0.5, VarDbl.ulp(0.5))
+        validate(self, VarDbl(2) / VarDbl(2), 1, VarDbl.ulp(1))
+        validate(self, VarDbl(0.5) / VarDbl(2), 0.25, math.sqrt(2)*VarDbl.ulp(0.25))
 
         validate(self, VarDbl(0, 1e-3) / VarDbl(2), 0, 5e-4)
         validate(self, VarDbl(1, 1e-3) / VarDbl(2), 0.5, 5e-4)

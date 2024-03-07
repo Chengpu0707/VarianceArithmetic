@@ -870,6 +870,79 @@ N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!}
 
 \fi
 
+
+Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
+However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
+Using Taylor expansion is one way to get the simple statistics when the result uncertainty distribution is nearly Gaussian.
+
+\subsubsection{Uncertainty of Taylor Expansion}
+
+An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
+Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} \cite{Prev_Precision_Arithmetic} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
+\begin{align}
+\label{eqn: Taylor 1d} 
+\tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
+\label{eqn: variance momentum}
+& \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
+\label{eqn: Taylor 1d mean}
+\overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
+  = f(x) + \sum_{n=1}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
+\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
+\label{eqn: Taylor 1d variance}
+&\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
+ 	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right); \\
+  &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
+  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
+\end{align}
+$\overline{f(x)} - f(x)$ is defined as the \emph{bias} which is the effect of the input uncertainty to the result.
+When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
+It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
+
+
+\subsubsection{Binding Factor}
+
+The choice of the bounding factor $\sigma$ needs careful considerations.
+If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
+When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula \eqref{eqn: momentum factor}:
+\begin{itemize}
+\item For $2n < 10$ when $5 \leq \sigma$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
+
+\item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
+
+\item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
+$\lambda$ is always slightly smaller than $\sigma$ empirically, as expected.
+%When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
+\end{itemize}
+\begin{align}
+\label{eqn: momentum factor} 
+\zeta(2n) &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
+\label{eqn: momentum factor lower} 
+ &= (2n - 1) \zeta(\sigma, 2n - 2) - 2 N(\sigma) \sigma^{2n - 1}; \\
+\label{eqn: momentum factor higher} 
+&\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq 2 N(\sigma) \frac{\sigma^{2n+1}}{2n+1};
+\end{align}
+
+The property of $\zeta(2n)$ when $\sigma^2 \ll 2n$ is not sensitive to the underlying uncertainty distribution.  If the normal distribution $N(\tilde{z)}$ in Formula \eqref{eqn: variance momentum} is replaced by a uniform distribution between $[-\sigma, +\sigma]$,  Formula \eqref{eqn: variance momentum UN} is similar to Formula \eqref{eqn: momentum factor higher}:
+\begin{align}
+\label{eqn: variance momentum UN}
+\zeta(2n) &\equiv \int_{-\sigma}^{+\sigma} \frac{1}{2 \sigma} \tilde{z}^{2n} d \tilde{z} = 2 \frac{1}{2 \sigma} \frac{{\sigma}^{2n+1}}{2n + 1}; 
+\end{align}
+
+The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
+When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
+$\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisions_Physical_Measurements}.
+\begin{equation}
+\label{eqn: bounding leakage}
+\epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma);
+\end{equation}
+
+When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \leq 16$, which makes Formula \eqref{eqn: Taylor 1d variance} quite insensitive to the actual value of $\sigma$.
+
+Thus, $\sigma = 5$ in variance arithmetic.
+
+
+\subsubsection{One-dimensional Examples}
+
 \iffalse
 
 \begin{align*}
@@ -932,91 +1005,33 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \be
 \fi
 
 
-Formula \eqref{eqn: function distribution} gives the uncertainty distribution of an analytic function.
-However, normal scientific and engineering calculations usually do not care about the result distribution, but just some simple statistics of the result, such as the result deviation \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.
-Using Taylor expansion is one way to get the simple statistics when the result uncertainty distribution is nearly Gaussian.
-
-\subsubsection{Uncertainty of Taylor Expansion}
-
-An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
-Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} \cite{Prev_Precision_Arithmetic} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
-\begin{align}
-\label{eqn: Taylor 1d} 
-\tilde{y} &= f(x + \tilde{x}) = f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
-\label{eqn: variance momentum}
-& \zeta(n) \equiv \int_{-\sigma}^{+\sigma} \tilde{z}^n N(\tilde{z}) d \tilde{z};\eqspace \zeta(2n+1) = 0; \\
-\label{eqn: Taylor 1d mean}
-\overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
-  = \sum_{n=0}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
-\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
-\label{eqn: Taylor 1d variance}
-&\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
- 	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right); \\
-  &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
-  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
-\end{align}
-When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
-It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
-
-
-\subsubsection{Binding Factor}
-
-The choice of the bounding factor $\sigma$ needs careful considerations.
-If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
-When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula \eqref{eqn: momentum factor}:
-\begin{itemize}
-\item For $2n < 10$ when $5 \leq \sigma$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
-
-\item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
-
-\item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
-$\lambda$ is always slightly smaller than $\sigma$ empirically, as expected.
-%When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
-\end{itemize}
-\begin{align}
-\label{eqn: momentum factor} 
-\zeta(2n) &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
-\label{eqn: momentum factor lower} 
- &= (2n - 1) \zeta(\sigma, 2n - 2) - 2 N(\sigma) \sigma^{2n - 1}; \\
-\label{eqn: momentum factor higher} 
-&\sigma^2 \ll 2n:\eqspace \zeta(2n) \simeq 2 N(\sigma) \frac{\sigma^{2n+1}}{2n+1};
-\end{align}
-
-The property of $\zeta(2n)$ when $\sigma^2 \ll 2n$ is not sensitive to the underlying uncertainty distribution.  If the normal distribution $N(\tilde{z)}$ in Formula \eqref{eqn: variance momentum} is replaced by a uniform distribution between $[-\sigma, +\sigma]$,  Formula \eqref{eqn: variance momentum UN} is similar to Formula \eqref{eqn: momentum factor higher}:
-\begin{align}
-\label{eqn: variance momentum UN}
-\zeta(2n) &\equiv \int_{-\sigma}^{+\sigma} \frac{1}{2 \sigma} \tilde{z}^{2n} d \tilde{z} = 2 \frac{1}{2 \sigma} \frac{{\sigma}^{2n+1}}{2n + 1}; 
-\end{align}
-
-The limited range of $\tilde{x} \in (-\sigma \delta x, +\sigma \delta x)$ causes a bounding leakage $\epsilon$ according to Formula \eqref{eqn: bounding leakage}, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
-When $\sigma = 5$, $\epsilon = 2 \times 10^{-7}$, which is small enough for most applications.
-$\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisions_Physical_Measurements}.
-\begin{equation}
-\label{eqn: bounding leakage}
-\epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma);
-\end{equation}
-
-When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \leq 16$, which makes Formula \eqref{eqn: Taylor 1d variance} quite insensitive to the actual value of $\sigma$.
-
-Thus, $\sigma = 5$ in variance arithmetic.
-
-
-\subsubsection{One-dimensional Examples}
-
 Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which always converge:
 \begin{align}
 \label{eqn: exp Taylor}
 & e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
+\overline{e^x} &= e^x + e^x \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!}; \\
 \label{eqn: exp precision}
 \frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
  -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
 \end{align}
 
+Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
+\begin{align}
+\label{eqn: log Taylor}
+& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
+\overline{\ln(x)}  &= \ln(x) -\sum_{n=1}^{+\infty} P(x)^{2n} \frac{\zeta(2n)}{2n}; \\
+\label{eqn: log precision}
+\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
+   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
+ &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
+\end{align}
+
 Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, which converge when $\delta x < 1$:
 \begin{align}
 \label{eqn: sin Taylor}
 & \sin(x + \tilde{x}) = \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
+\overline{\sin(x)} &= \sin(x) + \sin(x) \sum_{n=0}^{\infty} (\delta x)^{2n} (-1)^{n} \frac{\zeta(2n)}{(2n)!}; \\
 \label{eqn: sin precision}
 \delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1} \nonumber \\
  & \left( \cos(x)^2 \sum_{j=0}^{n-1} \frac{\zeta(2n)}{(2j+1)!(2n-2j-1)!}
@@ -1024,20 +1039,11 @@ Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, whic
  &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  + o((\delta x)^8);
 \end{align}
 
-Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
-\begin{align}
-\label{eqn: log Taylor}
-& \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
-\label{eqn: log precision}
-\delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
-   - \sum_{j=1}^{n-1} \frac{\zeta(2j)}{2j} \frac{\zeta(2n - 2j)}{2n - 2j} \right) \\
- &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
-\end{align}
-
 Formula \eqref{eqn: power precision} gives the result variance for $x^c$, in which $\begin{pmatrix} c \\ n \end{pmatrix} = \frac{\prod_{j=0}^{n-1} (c -j)}{n!}$:
 \begin{align}
 \label{eqn: power Taylor}
-&(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+&(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c + x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
+\overline{x^c} &= x^c + x^c \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \begin{pmatrix} c \\ 2 n \end{pmatrix}; \\
 \label{eqn: power precision}
 \frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=1}^{\infty} P(x)^{2n} 
  \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
@@ -1166,6 +1172,7 @@ Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Tayl
     (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) + \nonumber \\
   & 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);
 \end{align}
+
 
 \item Formula \eqref{eqn: prod variance} shows  $\delta^2 (f g)$, whose dependence tracing can be demonstrated by $\delta^2 (f/f) = 0$  and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter case corresponding to Formula \eqref{eqn: multiplication}.  
 
@@ -1607,6 +1614,117 @@ In ideal coverage cases, the error deviation is very close to $1$ except it is $
 \item when the result probability density function is pole, and $\delta x$ is large enough, the uncertainty mean is infinite.
 \end{itemize}
 In non ideal coverage cases, the error deviation is about $0.5$ so that proper coverage is achieved.
+
+
+
+\clearpage
+\section{Polynomial and Taylor Extension}
+\label{sec: polynomial}
+
+\iffalse
+
+\begin{align*}
+(x + \tilde{x})^n &= \sum_{j=0}^{n} \tilde{x}^j x^{n - j}  \begin{pmatrix} n \\ j \end{pmatrix}; \\
+f(x + \tilde{x}) &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 )  + ( c_1 + c_2 2 x + c_3 3 x^2 ) \tilde{x} +  ( c_2 + c_3 3 x ) \tilde{x}^2 
+   + c_3 \tilde{x}^3; \\
+f(x + \tilde{x}) &= \sum_{j=0}^{N} c_j (x + \tilde{x})^j 
+     = \sum_{j=0}^{N} c_j  \sum_{k=0}^{j} \begin{pmatrix} j \\ k \end{pmatrix} x^{j-k}  \tilde{x}^k
+     = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=j}^{N} x^{k - j} c_k \begin{pmatrix} k \\ j \end{pmatrix} \\
+ & = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N - j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} \\   
+ &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 ) + \tilde{x} (c_1 + c_2 2 x + c_3 3 x^2 ) + \tilde{x}^2 ( c_2 + c_3 3 x ) + \tilde{x}^3 c_3 \\
+\overline{f(x)} - f(x) &= \sum_{j=1}^{[N/2]} (\delta x)^{2j} \eta(2j) \sum_{k=0}^{N - 2j} x^{k} c_{k + 2j} \begin{pmatrix} k + 2j \\ 2j \end{pmatrix}
+  = (\delta x)^2 ( c_2  + x c_3 3 ); \\
+(f(x + \tilde{x}) - f(x))^2 &=
+ \sum_{j=1}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} 
+ \sum_{m=1}^{N} \tilde{x}^{m} \sum_{n=0}^{N-m} x^{n} c_{n + m} \begin{pmatrix} m + n \\ m \end{pmatrix} \\
+    &\eqspace = \sum_{j=1}^{N} \sum_{m=1}^{N} \tilde{x}^{j+m} \sum_{k=0}^{N - j} x^k c_{k+j} \begin{pmatrix} j + k \\ j \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix}; \\
+\delta^2 f(x)  & = \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) \sum_{m=1}^{j - 1} \sum_{k=0}^{N - 2j + m} x^k c_{k+2j - m} \begin{pmatrix} 2j - m + k \\ 2j - m \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix} \\
+		&\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+			\sum_{k=0}^{[N/2] - j + m} x^{2k} c_{2k+2j - 2m} \begin{pmatrix} 2k + 2j - 2m \\ 2j - 2m \end{pmatrix}
+			\sum_{n=0}^{[N/2]-m} x^{2n} c_{2n+2m} \begin{pmatrix} 2n + 2m \\ 2n \end{pmatrix};
+\end{align*} 
+
+\begin{align*}
+c_k &= \begin{pmatrix} k \\ N \end{pmatrix}: \eqspace f(x) = (x + 1)^N; \\
+  & c_{n+m} \begin{pmatrix} n \\ n + m \end{pmatrix} = \frac{N!}{(n+m)! (N-n-m)!} \frac{(n+m)!}{n! m!} 
+	= \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} = \begin{pmatrix} N \\ n \end{pmatrix} \begin{pmatrix} N - n \\ m \end{pmatrix}; \\
+\delta^2 f(x)  &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \sum_{k=0}^{N - 2j + m} x^k \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N - (2j - m) \\ k \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\sum_{k=0}^{[N/2] - j + m} x^{2k} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N - (2j - 2m) \\ 2k \end{pmatrix}
+		\sum_{n=0}^{[N/2]-m} x^{2n} \begin{pmatrix} N \\ 2m \end{pmatrix} \begin{pmatrix} N - 2m \\ 2n \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} (x + 1)^{N - 2j + m} \begin{pmatrix} N \\ m \end{pmatrix} (x + 1)^{N-m} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		(x + 1)^{N - 2j + 2m} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} (x + 1)^{N - 2m} \begin{pmatrix} N \\ 2m \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) (x + 1)^{2N - 2j}
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N \\ m \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j}  (x + 1)^{2N - 2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N \\ 2m \end{pmatrix};
+\end{align*}
+
+\begin{align*}
+\frac{\delta^2 x^c}{x^{2c}} &= \sum_{n=1}^{\infty} P(x)^{2n} 
+ \left( \zeta(2n) \sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \sum_{j=1}^{n-1} \zeta(2j) \zeta(2n - 2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right);
+\end{align*}
+
+\fi
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Taylor_Expansion.png} 
+\captionof{figure}{
+The Taylor expansion for $\frac{1}{1 + x} = \sum_{n = 0}^{N} x^n$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The y-axis shows either the uncertainty and the reminder value error.
+}
+\label{fig: Taylor_Expansion}
+\end{figure}
+
+
+For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polynomial Taylor} gives the corresponding Taylor expansion:
+\begin{equation}
+\label{eqn: polynomial Taylor}
+f(x + \tilde{x}) \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
+\end{equation}
+When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $x = ax + b$. 
+Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold.
+
+A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
+\begin{itemize}
+\item Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
+
+\item Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
+The question is: Is such stability temporarily?
+\end{itemize}
+
+Formula \eqref{eqn: Taylor inner dependency} suggests that a Taylor expansion is also a polynomial with $n \rightarrow \infty$ in the variance arithmetic.
+Using Formula \eqref{eqn: polynomial Taylor}, the calculated uncertainty increases with the increasing Taylor expansion order.
+For an evaluation with an known result, at a given Taylor expansion order, the reminder value error can be used instead of the estimated reminders. 
+For example, for $\frac{1}{1 - x}$, the remainder value error is calculated as $\sum_{n = 0}^{N} x^n - \frac{1}{1 - x}$ in which $N$ is the Taylor expansion order.
+The calculated uncertainty should be comparable to the value errors when the Taylor expansion order is reached.
+Figure \ref{fig: Taylor_Expansion} shows the reminder and the corresponding uncertainty of $\frac{1}{1 - x} =\lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$:
+\begin{itemize}
+\item The Taylor expansion order can be obtained when the reminder value errors stabilize at a fixed value.
+Except the initial changes, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
+
+\item At the Taylor expansion orders, the reminder value errors are comparable with the corresponding uncertainties.
+In the worst case, when $x=-0.7$, the reminder value errors of $\frac{1}{1 - |x|}$ stabilize at $2.75$-fold of the corresponding uncertainty.
+
+\item In all cases, the reminder value errors reach the corresponding least significant values but do not vanish, so the Taylor expansion order should be as small as possible.
+One particular concern is that for $\frac{1}{1 + |x|}$, the reminder value errors oscillate near the Taylor expansion order, which means difficulty in obtaining a reliable estimator.
+The reminder estimators tend to over-estimate the reminder errors thus over-estimate Taylor expansion order so that they are less favorable that the stability method.
+\end{itemize}
+
+Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
+
+
+
+
+
 
 
 

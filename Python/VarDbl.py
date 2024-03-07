@@ -29,8 +29,13 @@ class VarDbl:
     '''
     BINDING_FOR_EQUAL = 0.67448975
         # z value for 50% probability of equal
+    
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
         # rounding error is uniformly distrubuted within LSB of float
+    @staticmethod
+    def ulp(value:float) -> float:
+        return math.ulp(value) * VarDbl.DEVIATION_OF_LSB
+
     # Taylor expansion parameters are defined in taylor.Taylor and momentum.Momentum
     _taylor = None
     @staticmethod
@@ -79,7 +84,7 @@ class VarDbl:
                     self._variance = 0.0
                     return
                 value = float(value)
-            uncertainty = math.ulp(value) * VarDbl.DEVIATION_OF_LSB
+            uncertainty = VarDbl.ulp(value)
         variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
         if not math.isfinite(value):
             raise ValueException(value, "__init__")
@@ -94,6 +99,8 @@ class VarDbl:
     def __repr__(self) -> str:
         return f'{repr(self.value())}~{repr(self.variance())}'
     
+    def __bool__(self) -> bool:
+        return (self._value != 0) or (self._variance != 0)
 
     def __add__(self, other):
         if type(other) != VarDbl:
@@ -163,11 +170,12 @@ class VarDbl:
                 return VarDbl(1, 0)
             case 1:
                 return VarDbl(self)
-        exp = float(exp)
+        if (exp > 0) and ((type(exp) == int) or (math.ceil(exp) == math.floor(exp))):
+            sCoeff = [0] * int(exp)
+            sCoeff.append(1)
+            return VarDbl.taylor().polynominal(self, sCoeff)
         s1dTaylor = VarDbl.taylor().power(exp)
         s1dTaylor[0] = math.pow(self.value(), exp)
-        if (exp > 0) and (math.ceil(exp) == math.floor(exp)):
-            return VarDbl.taylor().power1d(self, int(exp), s1dTaylor)
         return VarDbl.taylor().taylor1d(self, f"{self}**{exp}", s1dTaylor, True, True)
     
     def __eq__(self, other: object) -> bool:

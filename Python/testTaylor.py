@@ -316,8 +316,25 @@ class TestPower (unittest.TestCase):
     def test_taylor_2(self):
         sTaylor = taylor.power(2)
         validate(self, sTaylor[1], 2, 0)
-        validate(self, sTaylor[2], 1, 1.2819751242557095e-16)
+        validate(self, sTaylor[2], 1, VarDbl.ulp(1))
         for coeff in sTaylor[3:]:
+            validate(self, coeff, 0, 0)
+
+    def test_taylor_3(self):
+        sTaylor = taylor.power(3)
+        validate(self, sTaylor[1], 3, 0)
+        validate(self, sTaylor[2], 3, VarDbl.ulp(3)*1.5)
+        validate(self, sTaylor[3], 1, VarDbl.ulp(1)*1.25, deltaValue=2.23e-16)
+        for coeff in sTaylor[4:]:
+            validate(self, coeff, 0, 0)
+
+    def test_taylor_4(self):
+        sTaylor = taylor.power(4)
+        validate(self, sTaylor[1], 4, 0)
+        validate(self, sTaylor[2], 6, VarDbl.ulp(6))
+        validate(self, sTaylor[3], 4, VarDbl.ulp(4)*1.003466214899358)
+        validate(self, sTaylor[4], 1, VarDbl.ulp(1)*1.4166666666666667)
+        for coeff in sTaylor[5:]:
             validate(self, coeff, 0, 0)
 
     def test_taylor_sqrt(self):
@@ -412,9 +429,135 @@ class TestPower (unittest.TestCase):
         dump_test(self, 'pow', TestPower.func, TestPower.npfunc,
                   np.array([i/10 for i in range(-20, 31, 2)] +[-0.1, 0.1, -0.01, 0.01, -1e-3, 1e-6]),
                   sDev = [0.2, 0.195] + [math.pow(10,-err) for err in range(1, 17)])
+
+
+class TestPolynominial (unittest.TestCase):
+
+    def test_poly_0(self):
+        res = taylor.polynominal(VarDbl(), (1,))
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), 0)
+
+        res = taylor.polynominal(VarDbl(1), (1,))
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), 0)
+
+        res = taylor.polynominal(VarDbl(1), (-2,))
+        self.assertEqual(res.value(), -2)
+        self.assertEqual(res.uncertainty(), 0)
+
+        res = taylor.polynominal(VarDbl(2), (VarDbl(1.0),))
+        self.assertEqual(res.value(), 1)
+        self.assertEqual(res.uncertainty(), VarDbl.ulp(1))
+
+    def test_poly_1(self):
+        res = taylor.polynominal(VarDbl(0, 1/8), (0,1))
+        self.assertEqual(res.value(), 0)
+        self.assertAlmostEqual(res.uncertainty(), 1/8, delta=1e-6)
+
+        res = taylor.polynominal(VarDbl(0, 1/8), (1,1))
+        self.assertEqual(res.value(), 1)
+        self.assertAlmostEqual(res.uncertainty(), 1/8, delta=1e-6)
+
+        res = taylor.polynominal(VarDbl(-2, 1/8), (1,1))
+        self.assertEqual(res.value(), -1)
+        self.assertAlmostEqual(res.uncertainty(), 1/8, delta=1e-6)
+
+    def test_poly_2(self):
+        for value in (0, 1, -1, 2, -2, 0.25, -0.25):
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (0,0,1))
+                res2 = VarDbl(value, 0.5)**2
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (1,2,1))
+                res2 = VarDbl(1 + value, 0.5)**2
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (1,-2,1))
+                res2 = VarDbl(1 - value, 0.5)**2
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+
+    def test_poly_3(self):
+        for value in (0, 1, -1, 2, -2, 0.25, -0.25):
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (0,0,0,1))
+                res2 = VarDbl(value, 0.5)**3
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (1,3,3,1))
+                res2 = VarDbl(1 + value, 0.5)**3
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+            try:
+                res = taylor.polynominal(VarDbl(value, 0.5), (1,-3,3,-1))
+                res2 = VarDbl(1 - value, 0.5)**3
+                self.assertEqual(res.value(), res2.value())
+                self.assertEqual(res.uncertainty(), res2.uncertainty())
+            except BaseException as ex:
+                raise ex
+            
+    def varify_near_one(self, epsilon, order):
+        sPlus = [1, -1] * ((order // 2) + 1)
+        if len(sPlus) > (order + 1):
+            sPlus.pop(-1)
+        self.assertEqual(len(sPlus), order + 1)
+        for i in range(order):
+            self.assertEqual(sPlus[i], -1 if i % 2 else 1)
+        sMinus = [1] * (order + 1)
+        
+        plus = 0
+        minus = 0
+        pow = 1
+        for i in range(order + 1):
+            plus += sPlus[i] * pow
+            minus += sMinus[i] * pow
+            pow *= 1 - epsilon
+        resPlus = taylor.polynominal(VarDbl(1 - epsilon), sPlus)
+        self.assertAlmostEqual(resPlus.value(), plus)
+        resMinus = taylor.polynominal(VarDbl(1 - epsilon), sMinus)
+        self.assertAlmostEqual(resMinus.value(), minus)
+        return resPlus, resMinus
+
+            
+    def test_near_one(self):
+        self.varify_near_one(0.5, 2)
+        self.varify_near_one(0.5, 20)
+        self.varify_near_one(0.5, 100)
         
 
-class TestLibError(unittest.TestCase):
+        with open(f'./Python/Output/PolyNearOne.txt', 'w') as f:
+            f.write('Type\tEpsilon\tOrder\tValue Error\tUncertainty\n')
+            for epsilon in (0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1):
+                plus = 1/(2 - epsilon)
+                minus = 1/epsilon
+                for order in range(0, taylor._momentum._maxOrder - 1):
+                    plusRes, minusRes = self.varify_near_one(epsilon, order)
+                    res = plusRes - plus
+                    f.write(f'Plus\t{epsilon}\t{order}\t{abs(res.value())}\t{res.uncertainty()}\n')
+                    res = minusRes - minus
+                    f.write(f'Minus\t{epsilon}\t{order}\t{abs(res.value())}\t{res.uncertainty()}\n')
+                    f.flush()
+
+
+
+
+
+class TestLibError (unittest.TestCase):
     
     def testExpLog(self):
         with open(f'./Python/Output/ExpLogError.txt', 'w') as f:
@@ -454,7 +597,7 @@ class TestLibError(unittest.TestCase):
             for i in range(SAMPLES + 1):
                 noise = (i * 2 - SAMPLES) / SAMPLES * dev * math.sqrt(3)
                 f.write(f'{noise}\t{math.sin(x + noise) - math.sin(x)}\n')  
-                
+
 
 class TestExpansion (unittest.TestCase):
     HEADER= 'Name\tX\tOrder\tValue\tVariance'\
