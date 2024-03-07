@@ -1371,6 +1371,121 @@ A test of uncertainty-bearing arithmetic using numerical integration is provided
 
 
 \clearpage
+\section{Polynomial and Taylor Expansion}
+\label{sec: polynomial}
+
+\iffalse
+
+\begin{align*}
+(x + \tilde{x})^n &= \sum_{j=0}^{n} \tilde{x}^j x^{n - j}  \begin{pmatrix} n \\ j \end{pmatrix}; \\
+f(x + \tilde{x}) &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 )  + ( c_1 + c_2 2 x + c_3 3 x^2 ) \tilde{x} +  ( c_2 + c_3 3 x ) \tilde{x}^2 
+   + c_3 \tilde{x}^3; \\
+f(x + \tilde{x}) &= \sum_{j=0}^{N} c_j (x + \tilde{x})^j 
+     = \sum_{j=0}^{N} c_j  \sum_{k=0}^{j} \begin{pmatrix} j \\ k \end{pmatrix} x^{j-k}  \tilde{x}^k
+     = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=j}^{N} x^{k - j} c_k \begin{pmatrix} k \\ j \end{pmatrix} \\
+ & = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N - j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} \\   
+ &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 ) + \tilde{x} (c_1 + c_2 2 x + c_3 3 x^2 ) + \tilde{x}^2 ( c_2 + c_3 3 x ) + \tilde{x}^3 c_3 \\
+\overline{f(x)} - f(x) &= \sum_{j=1}^{[N/2]} (\delta x)^{2j} \eta(2j) \sum_{k=0}^{N - 2j} x^{k} c_{k + 2j} \begin{pmatrix} k + 2j \\ 2j \end{pmatrix}
+  = (\delta x)^2 ( c_2  + x c_3 3 ); \\
+(f(x + \tilde{x}) - f(x))^2 &=
+ \sum_{j=1}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} 
+ \sum_{m=1}^{N} \tilde{x}^{m} \sum_{n=0}^{N-m} x^{n} c_{n + m} \begin{pmatrix} m + n \\ m \end{pmatrix} \\
+    &\eqspace = \sum_{j=1}^{N} \sum_{m=1}^{N} \tilde{x}^{j+m} \sum_{k=0}^{N - j} x^k c_{k+j} \begin{pmatrix} j + k \\ j \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix}; \\
+\delta^2 f(x)  & = \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) \sum_{m=1}^{j - 1} \sum_{k=0}^{N - 2j + m} x^k c_{k+2j - m} \begin{pmatrix} 2j - m + k \\ 2j - m \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix} \\
+		&\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+			\sum_{k=0}^{[N/2] - j + m} x^{2k} c_{2k+2j - 2m} \begin{pmatrix} 2k + 2j - 2m \\ 2j - 2m \end{pmatrix}
+			\sum_{n=0}^{[N/2]-m} x^{2n} c_{2n+2m} \begin{pmatrix} 2n + 2m \\ 2n \end{pmatrix};
+\end{align*} 
+
+\begin{align*}
+c_k &= \begin{pmatrix} k \\ N \end{pmatrix}: \eqspace f(x) = (x + 1)^N; \\
+  & c_{n+m} \begin{pmatrix} n \\ n + m \end{pmatrix} = \frac{N!}{(n+m)! (N-n-m)!} \frac{(n+m)!}{n! m!} 
+	= \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} = \begin{pmatrix} N \\ n \end{pmatrix} \begin{pmatrix} N - n \\ m \end{pmatrix}; \\
+\delta^2 f(x)  &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \sum_{k=0}^{N - 2j + m} x^k \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N - (2j - m) \\ k \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\sum_{k=0}^{[N/2] - j + m} x^{2k} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N - (2j - 2m) \\ 2k \end{pmatrix}
+		\sum_{n=0}^{[N/2]-m} x^{2n} \begin{pmatrix} N \\ 2m \end{pmatrix} \begin{pmatrix} N - 2m \\ 2n \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} (x + 1)^{N - 2j + m} \begin{pmatrix} N \\ m \end{pmatrix} (x + 1)^{N-m} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		(x + 1)^{N - 2j + 2m} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} (x + 1)^{N - 2m} \begin{pmatrix} N \\ 2m \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) (x + 1)^{2N - 2j}
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N \\ m \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j}  (x + 1)^{2N - 2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N \\ 2m \end{pmatrix};
+\end{align*}
+
+\begin{align*}
+\frac{\delta^2 x^c}{x^{2c}} &= \sum_{n=1}^{\infty} P(x)^{2n} 
+ \left( \zeta(2n) \sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \sum_{j=1}^{n-1} \zeta(2j) \zeta(2n - 2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right);
+\end{align*}
+
+\fi
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Taylor_Expansion.png} 
+\captionof{figure}{
+The Taylor expansion for $\frac{1}{1 - x} = \lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The y-axis shows either the uncertainty or the absolute reminder value error.
+}
+\label{fig: Taylor_Expansion}
+\end{figure}
+
+
+For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polynomial Taylor} gives the corresponding Taylor expansion:
+\begin{equation}
+\label{eqn: polynomial Taylor}
+f(x + \tilde{x}) = \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
+\end{equation}
+When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $c=N$ and $x = ax + b$. 
+Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold, because the exponent for power is limited to positive integers.
+
+A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
+\begin{itemize}
+\item \emph{reminder estimation}: Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
+
+\item \emph{stability test}: Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
+\end{itemize}
+
+Formula \eqref{eqn: Taylor inner dependency} suggests that a Taylor expansion is also a polynomial with $N \rightarrow \infty$ in the variance arithmetic.
+Using Formula \eqref{eqn: polynomial Taylor}, the calculated uncertainty increases with the increasing Taylor expansion order.
+For an evaluation with an known result, at a given Taylor expansion order, the reminder value error can be used instead of the estimated reminders. 
+For example, for $\frac{1}{1 - x}$, the remainder value error is calculated as $\sum_{n = 0}^{N} x^n - \frac{1}{1 - x}$ in which $N$ is the Taylor expansion order.
+The calculated uncertainty should be comparable to the value errors when the Taylor expansion order is reached.
+Figure \ref{fig: Taylor_Expansion} shows the reminder and the corresponding uncertainty of $\frac{1}{1 - x} =\lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$, in which $N$ is the Taylor expansion order:
+\begin{itemize}
+\item The Taylor expansion order can be obtained by the stability test, such as $N=73$ when $x = +0.6$.
+Except at very low Taylor expansion orders, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
+
+\item In all cases, the reminder value errors stabilize at exactly the corresponding least significant values.
+The variance arithmetic tracks the reminder value error properly.
+In the worst case, when $x=-0.7$, the normalized error is $2.75$.
+
+\item When $x$ is positive, the reminder value errors approach the least significant values gradually.
+ When $x$ is negative, the reminder value errors oscillate near the Taylor expansion order.
+This means difficulty in obtaining an accurate reliable reminder estimator.
+On the other hand, the statistical tracking by the variance arithmetic using Formula \eqref{eqn: polynomial Taylor} is straight-forward.
+
+\end{itemize}
+
+Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
+The stability test method can be used for numerical calculation of Taylor expansion, as well as the calculation of the mean and the variance of the Taylor expansion.
+If the stability test can not be applied, the convergence of the mean and the variance can be judged numerically according to Section \ref{sec: Math Library}, and the reminder estimation method can be used to terminate the expansion.
+
+
+
+
+
+
+
+
+\clearpage
 \section{Math Library Functions}
 \label{sec: Math Library}
 
@@ -1615,120 +1730,7 @@ In ideal coverage cases, the error deviation is very close to $1$ except it is $
 \end{itemize}
 In non ideal coverage cases, the error deviation is about $0.5$ so that proper coverage is achieved.
 
-
-
-\clearpage
-\section{Polynomial and Taylor Extension}
-\label{sec: polynomial}
-
-\iffalse
-
-\begin{align*}
-(x + \tilde{x})^n &= \sum_{j=0}^{n} \tilde{x}^j x^{n - j}  \begin{pmatrix} n \\ j \end{pmatrix}; \\
-f(x + \tilde{x}) &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 )  + ( c_1 + c_2 2 x + c_3 3 x^2 ) \tilde{x} +  ( c_2 + c_3 3 x ) \tilde{x}^2 
-   + c_3 \tilde{x}^3; \\
-f(x + \tilde{x}) &= \sum_{j=0}^{N} c_j (x + \tilde{x})^j 
-     = \sum_{j=0}^{N} c_j  \sum_{k=0}^{j} \begin{pmatrix} j \\ k \end{pmatrix} x^{j-k}  \tilde{x}^k
-     = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=j}^{N} x^{k - j} c_k \begin{pmatrix} k \\ j \end{pmatrix} \\
- & = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N - j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} \\   
- &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 ) + \tilde{x} (c_1 + c_2 2 x + c_3 3 x^2 ) + \tilde{x}^2 ( c_2 + c_3 3 x ) + \tilde{x}^3 c_3 \\
-\overline{f(x)} - f(x) &= \sum_{j=1}^{[N/2]} (\delta x)^{2j} \eta(2j) \sum_{k=0}^{N - 2j} x^{k} c_{k + 2j} \begin{pmatrix} k + 2j \\ 2j \end{pmatrix}
-  = (\delta x)^2 ( c_2  + x c_3 3 ); \\
-(f(x + \tilde{x}) - f(x))^2 &=
- \sum_{j=1}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} 
- \sum_{m=1}^{N} \tilde{x}^{m} \sum_{n=0}^{N-m} x^{n} c_{n + m} \begin{pmatrix} m + n \\ m \end{pmatrix} \\
-    &\eqspace = \sum_{j=1}^{N} \sum_{m=1}^{N} \tilde{x}^{j+m} \sum_{k=0}^{N - j} x^k c_{k+j} \begin{pmatrix} j + k \\ j \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix}; \\
-\delta^2 f(x)  & = \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) \sum_{m=1}^{j - 1} \sum_{k=0}^{N - 2j + m} x^k c_{k+2j - m} \begin{pmatrix} 2j - m + k \\ 2j - m \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix} \\
-		&\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-			\sum_{k=0}^{[N/2] - j + m} x^{2k} c_{2k+2j - 2m} \begin{pmatrix} 2k + 2j - 2m \\ 2j - 2m \end{pmatrix}
-			\sum_{n=0}^{[N/2]-m} x^{2n} c_{2n+2m} \begin{pmatrix} 2n + 2m \\ 2n \end{pmatrix};
-\end{align*} 
-
-\begin{align*}
-c_k &= \begin{pmatrix} k \\ N \end{pmatrix}: \eqspace f(x) = (x + 1)^N; \\
-  & c_{n+m} \begin{pmatrix} n \\ n + m \end{pmatrix} = \frac{N!}{(n+m)! (N-n-m)!} \frac{(n+m)!}{n! m!} 
-	= \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} = \begin{pmatrix} N \\ n \end{pmatrix} \begin{pmatrix} N - n \\ m \end{pmatrix}; \\
-\delta^2 f(x)  &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
-        \sum_{m=1}^{2j - 1} \sum_{k=0}^{N - 2j + m} x^k \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N - (2j - m) \\ k \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		\sum_{k=0}^{[N/2] - j + m} x^{2k} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N - (2j - 2m) \\ 2k \end{pmatrix}
-		\sum_{n=0}^{[N/2]-m} x^{2n} \begin{pmatrix} N \\ 2m \end{pmatrix} \begin{pmatrix} N - 2m \\ 2n \end{pmatrix} \\
- &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
-        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} (x + 1)^{N - 2j + m} \begin{pmatrix} N \\ m \end{pmatrix} (x + 1)^{N-m} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		(x + 1)^{N - 2j + 2m} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} (x + 1)^{N - 2m} \begin{pmatrix} N \\ 2m \end{pmatrix} \\
- &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) (x + 1)^{2N - 2j}
-        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N \\ m \end{pmatrix} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j}  (x + 1)^{2N - 2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		\begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N \\ 2m \end{pmatrix};
-\end{align*}
-
-\begin{align*}
-\frac{\delta^2 x^c}{x^{2c}} &= \sum_{n=1}^{\infty} P(x)^{2n} 
- \left( \zeta(2n) \sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \sum_{j=1}^{n-1} \zeta(2j) \zeta(2n - 2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right);
-\end{align*}
-
-\fi
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Taylor_Expansion.png} 
-\captionof{figure}{
-The Taylor expansion for $\frac{1}{1 + x} = \sum_{n = 0}^{N} x^n$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
-The y-axis shows either the uncertainty and the reminder value error.
-}
-\label{fig: Taylor_Expansion}
-\end{figure}
-
-
-For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polynomial Taylor} gives the corresponding Taylor expansion:
-\begin{equation}
-\label{eqn: polynomial Taylor}
-f(x + \tilde{x}) \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
-\end{equation}
-When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $x = ax + b$. 
-Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold.
-
-A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
-\begin{itemize}
-\item \emph{reminder estimation}: Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
-
-\item \emph{stability test}: Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
-The question is: Is such stability temporarily?
-\end{itemize}
-
-Formula \eqref{eqn: Taylor inner dependency} suggests that a Taylor expansion is also a polynomial with $n \rightarrow \infty$ in the variance arithmetic.
-Using Formula \eqref{eqn: polynomial Taylor}, the calculated uncertainty increases with the increasing Taylor expansion order.
-For an evaluation with an known result, at a given Taylor expansion order, the reminder value error can be used instead of the estimated reminders. 
-For example, for $\frac{1}{1 - x}$, the remainder value error is calculated as $\sum_{n = 0}^{N} x^n - \frac{1}{1 - x}$ in which $N$ is the Taylor expansion order.
-The calculated uncertainty should be comparable to the value errors when the Taylor expansion order is reached.
-Figure \ref{fig: Taylor_Expansion} shows the reminder and the corresponding uncertainty of $\frac{1}{1 - x} =\lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$:
-\begin{itemize}
-\item The Taylor expansion order can be obtained when the reminder value errors stabilize at a fixed value.
-Except at very low Taylor expansion orders, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
-
-\item In all cases, the reminder value errors reach the corresponding least significant values but they do not vanish.
-The variance arithmetic tracks the reminder value error properly.
-In the worst case, when $x=-0.7$, the reminder value errors of $\frac{1}{1 - |x|}$ stabilize at $2.75$-fold of the corresponding uncertainty.
-
-\item For $\frac{1}{1 + |x|}$, the reminder value errors oscillate near the Taylor expansion order, which means difficulty in obtaining a reliable estimator.
-On the other hand, the statistical tracking by variance arithmetic using Formula \eqref{eqn: polynomial Taylor} is straight-forward.
-
-\end{itemize}
-
-Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
-The stability of the uncertainties adds an affirmation for the stability test method to obtain the Taylor expansion order.
-
-
-
-
-
-
-
+The convergence of the result variance calculation can be judged numerically, such as requiring variance terms of Formula \eqref{eqn: power precision} at $2n$ to decrease faster than $1/P(x)^{2n}$ for the $x^c$.
 
 
 
