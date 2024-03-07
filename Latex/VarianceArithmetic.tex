@@ -1695,9 +1695,9 @@ Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polyno
 
 A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
 \begin{itemize}
-\item Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
+\item \emph{reminder estimation}: Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
 
-\item Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
+\item \emph{stability test}: Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
 The question is: Is such stability temporarily?
 \end{itemize}
 
@@ -1709,17 +1709,19 @@ The calculated uncertainty should be comparable to the value errors when the Tay
 Figure \ref{fig: Taylor_Expansion} shows the reminder and the corresponding uncertainty of $\frac{1}{1 - x} =\lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$:
 \begin{itemize}
 \item The Taylor expansion order can be obtained when the reminder value errors stabilize at a fixed value.
-Except the initial changes, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
+Except at very low Taylor expansion orders, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
 
-\item At the Taylor expansion orders, the reminder value errors are comparable with the corresponding uncertainties.
+\item In all cases, the reminder value errors reach the corresponding least significant values but they do not vanish.
+The variance arithmetic tracks the reminder value error properly.
 In the worst case, when $x=-0.7$, the reminder value errors of $\frac{1}{1 - |x|}$ stabilize at $2.75$-fold of the corresponding uncertainty.
 
-\item In all cases, the reminder value errors reach the corresponding least significant values but do not vanish, so the Taylor expansion order should be as small as possible.
-One particular concern is that for $\frac{1}{1 + |x|}$, the reminder value errors oscillate near the Taylor expansion order, which means difficulty in obtaining a reliable estimator.
-The reminder estimators tend to over-estimate the reminder errors thus over-estimate Taylor expansion order so that they are less favorable that the stability method.
+\item For $\frac{1}{1 + |x|}$, the reminder value errors oscillate near the Taylor expansion order, which means difficulty in obtaining a reliable estimator.
+On the other hand, the statistical tracking by variance arithmetic using Formula \eqref{eqn: polynomial Taylor} is straight-forward.
+
 \end{itemize}
 
 Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
+The stability of the uncertainties adds an affirmation for the stability test method to obtain the Taylor expansion order.
 
 
 
@@ -2534,118 +2536,6 @@ Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} shows that the average outp
 Because \textbf{$|M_{j,i}|$} and \textbf{$|M|$} are not independent of each other, \textbf{$M^{-1}$} calculated by Formula \eqref{eqn: invert matrix} contains the dependency problem. Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the tracking ratios for the adjugate matrix and the inverted matrix are both standard distributed, while they are exponentially distributed when the inverted matrix is inverted again.  Because the inverted matrix has the same tracking ratio distribution as that of the adjugated matrix, which has no dependency problem, the inverted matrix contains hardly any dependency problem.  In contrast, Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the double inverted matrix is severely affected by the dependency problem, such that its tracking ratio increases with matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.  Figure \ref{fig: Prec4_Matrix_Rnd_NormDist} shows that average tracking ratios for different matrix sizes follows a same exponential distribution, but with different extend, e.g., the distribution for matrix size 4 has yet reaches stable distribution beyond 2.5, which causes the increase of the average tracking ratio with the matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.
 
 Applying the same algorithms twice results in so much differences, which shows that the dependency problem has been embedded in the data, and which shows the importance of calibration.
-
-
-
-\clearpage
-\section{Validation Using Taylor Expansion}
-\label{sec: taylor expansion}
-
-When a Taylor expansion is implemented using conventional floating-point arithmetic, the rounding errors are ignored, so that the result of a higher order of expansion is assumed to be more precise, because the Cauchy estimator of the expansion, which gives an upper bound for the remainder of the expansion, decreases with the order of the expansion for analytic expressions.  A subjective upper limit is chosen for the Cauchy estimator, to stop the expansion at limited order \cite{Numerical_Recipes}.  However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually gives a false expansion precision.   
-
-Using variance arithmetic, the rounding errors as well as the input uncertainties are all accounted for, so that the maximal expansion order when applying a Taylor expansion of Formula \eqref{eqn: Taylor 1d} or Formula \eqref{eqn: Taylor 2d}  is no longer subjective.  Formula \eqref{eqn: polynomial uncertainty} is decomposed into the contribution of each successive term for Tylor expansion, as Formula \eqref{eqn: polynomial uncertainty for Taylor expansion}:
-\begin{multline}
-\label{eqn: polynomial uncertainty for Taylor expansion}
-(\delta \sum_{j=0}^{J+1} a_j x^j)^2 
-= \int (\sum_{j=0}^{J} a_j (x + \widetilde{y})^j - \sum_{j=0}^{J} a_j x^j + a_{J+1} (x + \widetilde{y})^{J+1} - a_{J+1} x^{J+1})^2 \rho(\widetilde{y}) d \widetilde{y} \\
-= \int (\sum_{j=0}^{J} a_j (x + \widetilde{y})^j - \sum_{j=0}^{J} a_j x^j)^2 \rho(\widetilde{y}) d \widetilde{y} +
-    a_{J+1}^2 \int (\sum_{k=1}^{J+1} C_{J+1}^{k} \widetilde{y}^k x^{J+1-k})^2 \rho(\widetilde{y}) d \widetilde{y} \\
-+2 \int (\sum_{j=0}^{J} a_j \sum_{k=1}^{j} 
-   C_{j}^{k} \widetilde{y}^k x^{j-k})(a_{J+1} \sum_{k=1}^{J+1} C_{J+1}^{k} \widetilde{y}^k x^{J+1-k})
-   \rho(\widetilde{y}) d \widetilde{y} \\
-(\delta \sum_{j=0}^{J+1} a_j x^j)^2 - (\delta \sum_{j=0}^{J} a_j x^j)^2 = 
-\sum_{k_1=1}^{J+1} \sum_{k_2=1}^{J+1} a_{J+1}^2 C_{J+1}^{k_1} C_{J+1}^{k_2} M(k_1+k_2) (\delta x)^{k_1+k_2} x^{2J+2-k_1-k_2} \\
-+ 2 \sum_{k_1=1}^{J+1} \sum_{j=0}^{J} \sum_{k_2=1}^{j} a_j a_{J+1} C_{J+1}^{k_1} C_{j}^{k_2} 
-   M(k_1+k_2) (\delta x)^{k_1+k_2} x^{J+1+j - k_1 -k_2};
-\end{multline} 
-Applying Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} to Taylor expansion:
-\begin{enumerate}
-\item Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} provides the deviation at $n$-th expansion order, which becomes stabilized when the \emph{delta deviation} at $n$-th expansion order (which is the contribution of the $n$-th expansion order to the deviation) is much less than the deviation at $n$-th expansion order. 
-
-\item The \emph{resolution} of variance arithmetic is the deviation divided by $2^\chi$, in which $\chi$ is the constant bits calculated inside uncertainty.
-
-\item The maximal expansion order of a Taylor expansion is reached when the Cauchy estimator is less than the resolution of variance arithmetic, after which the changes in Cauchy estimator is no longer detectable.  Ideally, the Taylor expansion reminder should also become zero when the expansion order is larger than the maximal expansion order.
-\end{enumerate}
-
-Formula \eqref{eqn: polynomial uncertainty for Taylor expansion} also shows that the deviation of Taylor expansion may decrease at certain expansion order.  For example, at $x = 1 \pm \delta x$, $1 - 2x + x^2$ is equivalent to $y^2$ at $y = 0 \pm \delta x$, thus it has smaller result variance than $1 - 2x$ at $x = 1 \pm \delta x$.  
-
-Formula \eqref{eqn: Taylor expansion test} provides an example test in Taylor expansion, in which $n$ is a positive integer.  
-\begin{equation}
-\begin{split}
-\label{eqn: Taylor expansion test}
-f_n(x) = \sum_{j=0}^{n} (-x)^j; & \eqspace \lim _{n \to \infty} f_n(x) = 1/(1+x);
-\end{split}
-\end{equation}
-In Formula \eqref{eqn: Taylor expansion test}, the absolute value of $(n+1)$th term in the expansion is the Cauchy remainder estimator of the $n$th order expansion.  Formula \eqref{eqn: Taylor expansion test} is analytic when $|x|$ is less than 1, and a smaller value $|x|$ means faster convergence to the correct value $1/(1 + x)$. 
-
-Using Formula \eqref{eqn: Taylor expansion test} as a test case, Figure \ref{fig: Prec0_Taylor_1E-3} confirms the above Taylor expansion process using variance arithmetic with 0-bit calculated inside uncertainty and with input uncertainty at $10^{-3}$.  For smaller $|x|$, in addition to faster decrease of both reminder and Cauchy estimator, delta deviation also decreases faster, thus deviation reaches its stable values faster.  Once the maximal expansion order is reached, the reminder also becomes to zero.  Figure \ref{fig: Prec0_Taylor_1E-3} repeats the above process with 4-bit calculated inside uncertainty, which only differs from Figure \ref{fig: Prec0_Taylor_1E-3} by having resolution smaller than deviation and larger maximal expansion order.
-
-When input has larger uncertainty, deviation reaches to its stable value much slower, which is show in Figure \ref{fig: Prec0_Taylor_1E-2} for 0-bit calculated inside uncertainty: 
-\begin{itemize} 
-\item When $x=0.75$, deviation barely reaches its stable value when the Cauchy estimator reaches resolution.
-\item When $x=0.875$, deviation has not reaches its stable value when the Cauchy estimator reaches resolution, and reminder does not become zero at the maximal expansion order but a few orders beyond.
-\item When $x=0.9375$, deviation has no stable value and becomes imaginative eventually. Nevertheless, reminder becomes zero beyond the maximal expansion order.
-\end{itemize}
-In contrast, with 4-bit calculated inside uncertainty as shown in Figure \ref{fig: Prec4_Taylor_1E-2}:
-\begin{itemize} 
-\item When $x=0.75$, the maximal expansion order is reached later when the resolution is stabilized.
-\item When $x=0.875$, the maximal expansion order is reached later when the resolution is stabilized, however reminder still does not become zero at the maximal expansion order but a few orders beyond.
-\item When $x=0.9375$, resolution has no stable value and becomes negative eventually, after which the variance representation becomes undefined.  Because Cauchy estimator never reaches resolution, the maximal expansion order is not defined either.
-\end{itemize}
-Judged from the above simple cases of Taylor expansion, calculating inside uncertainty brings no clear-cut benefit.
-
-
-\clearpage
-\section{Validation of Precision Arithmetic Using Numerical Integration}
-\label{sec: integration}
-
-In numerical integration over the variable $x$ using conventional floating-point arithmetic, a finer sampling of the function to be integrated $f(x)$ is associated with a better result \cite{Numerical_Recipes}, and it is assumed that $f(x)$ can be sampled at infinitive fine intervals of $x$.  In reality, floating-point arithmetic has limited significant bits, so that rounding errors will increase with finer sampling of $f(x)$.  However, such limitation of numerical integration due to rounding errors is seldom studied seriously. In this paper:
-\begin{enumerate}
-\item The function to be integrated is treated as a black-box function.
-\item The numerical integration is carried out using the rectangular rule \cite{Numerical_Recipes}.
-\item The residual error is estimated locally as the difference between using the rectangular rule and using the trapezoidal rule \cite{Numerical_Recipes}.
-\item The sampling is localized using simplest depth-first binary-tree search algorithm.
-\item The sampling stops when the residual error is no longer significant.
-\end{enumerate}
-
-Specifically, for each integration interval $[x_{start}, x_{end}]$, define:
-\begin{align}
-& x_{mid} \equiv (x_{start} + x_{end})/2; \\
-& f_{err} \equiv (f(x_{start}) + f(x_{end}))/2 - f(x_{mid}); \\
-\label{eqn: integration delta}
-& f_{\Delta} \equiv f(x_{mid}) (x_{end} - x_{start});
-\end{align}
-If $f_{err}$ becomes insignificant, the interval $[x_{start}, x_{end}]$ is considered to be fine enough, and $f_{\Delta}$ is added to the total integration.  Otherwise, the search continues on the intervals $[x_{start}, x_{mid}]$ and $[x_{mid}, x_{end}]$, which is the next depth for searching.  This searching algorithm is very adaptive, with the local search depth depending only on how $f(x)$ changes locally.  However, such adaptation to the local change of $f(x)$ brings one weakness to this searching algorithm: when $f(0)=f'(0)=0$, the algorithm spends the majority of the execution time around $x=0$, searching in tiny intervals of great depth, and adding tiny significant values to the result each time.  This weakness is called zero trap here.  It cannot be removed by simply offsetting $f(x)$ by a constant because doing so will change the precision of each sampling of $f(x)$, and increase the output uncertainty deviation.  For a proof-of-principle demonstration, zero trap is avoided in this paper.
-
-Formula \eqref{eqn: integration of power} provides an example test for the above simple algorithm, in which $n$ is a positive integer.  
-\begin{equation}
-\label{eqn: integration of power}
-\frac{4^{n+1} - 10^{-6(n+1)}}{n+1} = \int _{10^{-6}}^{4} x^{n} dx;
-\end{equation}
-Table \ref{tab: numerical integration} shows that the result of numerical integration is very comparable to the expected value.  It shows that the above integration algorithm introduces no broadening of result uncertainty, so the above algorithm always selects optimal integration intervals when calculating the best possible result for a numerical integration.  Tests of integration using different polynomials with different integration ranges all confirm the above result.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{|c|c|c|c|} 
-\hline 
-Power n & Search Depth & $\delta \left( \int _{10^{-6} }^{4}x^{n} dx \right) $ & $\int _{10^{-6} }^{4}x^{n} dx -\frac{4^{n+1} -10^{-6(n+1)} }{n+1} $ \\ 
-\hline 
-2 & [25, 47] & 1.32x10${}^{-14}$ & -0.705x10${}^{-14}$ \\ 
-\hline 
-3 & [25, 47] & 2.52x10${}^{-14}$  & -1.42x10${}^{-14}$ \\ 
-\hline 
-4 & [26, 47] & 1.16x10${}^{-13}$ & -1.13x10${}^{-13}$ \\ 
-\hline 
-5 & [26, 48] & 5.08x10${}^{-13}$ & -6.82x10${}^{-13}$ \\ 
-\hline 
-6 & [26, 48] & 1.92x10${}^{-12}$ & -2.72x10${}^{-12}$ \\ 
-\hline 
-\end{tabular}
-\captionof{table}{Uncertainty deviation and value error of numerical integration vs. expected results using variance arithmetic for different power function.  The search range is deepest near $10^{-6}$.}
-\label{tab: numerical integration}
-\end{table}
-
-One thing worth noticing in Table \ref{tab: numerical integration} is that even though Formula \eqref{eqn: integration delta} consistently underestimates integration for each integration interval $[x_{start}, x_{end}]$, the final underestimation is quite small and comparable to the uncertainty deviation.  This example shows that the bias inside the uncertainty range has insignificant contribution to the final result using variance arithmetic.
 
 
 
