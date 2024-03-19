@@ -193,13 +193,18 @@ C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 \newblock Numerical 'health' check for scientific codes: the cadna approach.
 \newblock {\em Computer Physics Communications}, 176(8):501--527, 2007.
 
-\bibitem{Prev_Precision_Arithmetic}
+\bibitem{First_Precision_Arithmetic}
 C.~P. Wang.
 \newblock Error estimation of floating-point calculations by a new
   floating-point type that tracks the errors.
 \newblock In H.~R. Arabnia and I.~A. Ajwa, editors, {\em Proceedings of the
   2005 International Conference on Algorithmic Mathematics and Computer
   Science, AMCS 2005}, pages 84--92, 2005.
+
+\bibitem{Prev_Precision_Arithmetic}
+C.~P. Wang.
+\newblock A New Uncertainty-Bearing Floating-Point Arithmetic.
+\newblock {\em Reliable Computing}, 16:308-361, 2012
 
 \bibitem{Digit_Value_Distribution}
 A.~Feldstein and R.~Goodman.

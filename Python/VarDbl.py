@@ -80,7 +80,7 @@ class VarDbl:
                 return
             if type(value) == int:
                 if value == int(float(value)):
-                    self._value = float(value)
+                    self._value = value
                     self._variance = 0.0
                     return
                 value = float(value)
@@ -90,7 +90,7 @@ class VarDbl:
             raise ValueException(value, "__init__")
         if not math.isfinite(variance):
             raise UncertaintyException(value, uncertainty, "__init__")
-        self._value = float(value)
+        self._value = value
         self._variance = float(variance)
 
     def __str__(self) -> str:
