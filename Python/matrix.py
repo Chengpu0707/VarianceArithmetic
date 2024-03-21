@@ -1,13 +1,19 @@
 import fractions
+import functools
 import itertools
 import math
+import operator
 import random
 import typing
 
 import histo
 import varDbl
 
+ElementTypes = (int, float, fractions.Fraction, varDbl.VarDbl)
+#TODO: ElementType = typing.Union[*ElementTypes] # Unpack is not allowed in this context
 ElementType = typing.Union[int, float, fractions.Fraction, varDbl.VarDbl]
+
+
 
 
 def permutSign(sPermut:tuple[int]) -> int:
@@ -25,8 +31,7 @@ def permutSign(sPermut:tuple[int]) -> int:
     return -1 if (cnt % 2) else 1
 
 
-def isSquareMatrix(ssMatrix:tuple[tuple[ElementType]], 
-            sType=(varDbl.VarDbl, fractions.Fraction, int, float)) ->bool:
+def isSquareMatrix(ssMatrix:tuple[tuple[ElementType]], sType=ElementTypes) ->bool:
     '''
     Not using numpy for a matrix to avoid coercing int to int32.
     Use tuple to avoid changing of the matrix size.
@@ -44,7 +49,7 @@ def isSquareMatrix(ssMatrix:tuple[tuple[ElementType]],
 
 ELEMENT_RANGE = 1 << 16
 
-def createIntMatrix(size:int) ->tuple[tuple[varDbl.VarDbl]]:
+def createIntMatrix(size:int) ->tuple[tuple[int]]:
     '''
     Create an int matrix of size "size" with each element uniformly distributed between [-"ELEMENT_RANGE", +"ELEMENT_RANGE"]
     '''
@@ -68,34 +73,58 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int, float]]], noise:float,
                     for col in range(size)]) for row in range(size)])
 
 
-def determinant(ssMatrix:tuple[tuple[ElementType]]) -> ElementType:
+def linear(ssMatrix:tuple[tuple[ElementType]], scale:ElementType=1, offset:ElementType=0) -> tuple[tuple[ElementType]]:
+    if not isSquareMatrix(ssMatrix):
+        raise ValueError(f'The input square matrix is illegal for linear(): {ssMatrix}')
+    if type(scale) not in ElementTypes:
+        raise ValueError(f'The input scale {scale} is illegal type {type(scale)} for linear()')
+    size = len(ssMatrix)
+    return tuple([tuple([ssMatrix[i][j] * scale + offset for j in range(size)]) 
+                  for i in range(size)])
+            
+
+def multiply(ssMatrix1:tuple[tuple[ElementType]], ssMatrix2:tuple[tuple[ElementType]]) -> tuple[tuple[ElementType]]:
+    if not isSquareMatrix(ssMatrix1):
+        raise ValueError(f'The input square matrix 1 is illegal for multiply(): {ssMatrix1}')
+    if not isSquareMatrix(ssMatrix2):
+        raise ValueError(f'The input square matrix 1 is illegal for multiply(): {ssMatrix2}')
+    size = len(ssMatrix1)
+    if size != len(ssMatrix2):
+        raise ValueError(f'The input square matrix 1 and 2 has different size {size} vs {len(ssMatrix2)}')
+    return tuple([tuple([sum([ssMatrix1[i][k] * ssMatrix2[k][j] for k in range(size)]) for j in range(size)]) 
+                  for i in range(size)])
+            
+
+def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tuple[ElementType]]]:
     '''
     Calculate determinant and the adjugate matrix for "ssMatrix".
     If the ElementType contains  The result promotion is int -> Fraction -> float.
     '''
-    isVar = isSquareMatrix(ssMatrix, sType=(varDbl.VarDbl,))
-    if (not isSquareMatrix(ssMatrix, sType=(int, float, fractions.Fraction))) and (not isVar):
+    if not isSquareMatrix(ssMatrix):
         raise ValueError(f'The input square matrix is illegal for determinant(): {ssMatrix}')
     size = len(ssMatrix)
     sPermut = {permut: permutSign(permut) for permut in itertools.permutations(range(size), size)}
 
     value = 0
     variance = 0
+    sCofVar = {(i,j):0 for i in range(size) for j in range(size)}
     for permut, sign in sPermut.items():
         val = sign
-        if isVar:
-            var = 1
-            for x, y in enumerate(permut):
+        var = 1
+        for x, y in enumerate(permut):
+            if type(ssMatrix[x][y]) == varDbl.VarDbl:
                 val *= ssMatrix[x][y].value()
                 var *= ssMatrix[x][y].variance()
-            variance += var
-        else:
-            for x, y in enumerate(permut):
+            else:
                 val *= ssMatrix[x][y]
+                var = 0
         value += val
-    if not isVar:
-        return value
+        variance += var
+        for x, y in sCofVar:
+            if permut[x] == y:
+                sCofVar[(x,y)] += var
     
+    sCofVal = {}
     for m in range(1, size):
         sVal = {}
         sVar = {}
@@ -106,9 +135,9 @@ def determinant(ssMatrix:tuple[tuple[ElementType]]) -> ElementType:
                 sY = tuple([(x,permut[x]) for x in sX])
                 for x, y in enumerate(permut):
                     if x in sX:
-                        var *= ssMatrix[x][y].variance()
+                        var *= ssMatrix[x][y].variance() if type(ssMatrix[x][y]) == varDbl.VarDbl else 0
                     else:
-                        val *= ssMatrix[x][y].value()
+                        val *= ssMatrix[x][y].value() if type(ssMatrix[x][y]) == varDbl.VarDbl else ssMatrix[x][y]
                 if sY in sVal:
                     sVal[sY] += val
                     assert sVar[sY] == var
@@ -116,9 +145,18 @@ def determinant(ssMatrix:tuple[tuple[ElementType]]) -> ElementType:
                     sVal[sY] = val
                     sVar[sY] = var
         for sY, var in sVar.items():
-            variance += (sVal[sY] ** 2) * var
-
-    return varDbl.VarDbl(value, variance, True)
+            var *= sVal[sY] ** 2
+            variance += var
+            for sub in sY:
+                sCofVar[sub] += var
+        if m == 1:
+            for k,v in sVal.items():
+                sCofVal[k[0]] = v
+ 
+    return varDbl.VarDbl(value, variance, True) if variance > 0 else value, \
+           tuple([tuple([varDbl.VarDbl(sCofVal[(i,j)], sCofVar[(i,j)], True) if sCofVar[(i,j)] else sCofVal[(i,j)] 
+                         for i in range(size)]) 
+                  for j in range(size)])
 
 
 
