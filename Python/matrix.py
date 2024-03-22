@@ -1,8 +1,6 @@
 import fractions
-import functools
 import itertools
 import math
-import operator
 import random
 import typing
 
@@ -69,8 +67,8 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int, float]]], noise:float,
     size = len(ssMatrix)
     noise *= ELEMENT_RANGE / math.sqrt(3)
     return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + 
-                                (int(noise * random.normalvariate()) if retainIntValue else noise * random.normalvariate()), noise) 
-                    for col in range(size)]) for row in range(size)])
+                    (int(noise * random.normalvariate()) if retainIntValue else noise * random.normalvariate()), noise) 
+                for col in range(size)]) for row in range(size)])
 
 
 def linear(ssMatrix:tuple[tuple[ElementType]], scale:ElementType=1, offset:ElementType=0) -> tuple[tuple[ElementType]]:
@@ -98,7 +96,7 @@ def multiply(ssMatrix1:tuple[tuple[ElementType]], ssMatrix2:tuple[tuple[ElementT
 def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tuple[ElementType]]]:
     '''
     Calculate determinant and the adjugate matrix for "ssMatrix".
-    If the ElementType contains  The result promotion is int -> Fraction -> float.
+    If the ElementType contains mixed types, the result promotion is int -> Fraction -> float.
     '''
     if not isSquareMatrix(ssMatrix):
         raise ValueError(f'The input square matrix is illegal for determinant(): {ssMatrix}')

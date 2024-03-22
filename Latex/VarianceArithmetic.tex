@@ -1482,6 +1482,259 @@ If the stability test can not be applied, the convergence of the mean and the va
 
 
 
+\clearpage
+\section{Matrix Inversion}
+\label{sec: matrix}
+
+
+\subsection{Uncertainty Propagation in Matrix Determinant}
+
+%\iffalse
+
+\begin{align*}
+|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
+|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &\equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{1 \dots m \}: p_{i_k}=j_k} \$ [p_1\dots p_n]_n 
+	\prod _{k = 1 \dots n }^{i_k \not\in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
+|M_{<1 \dots n>_n, [p_1 \dots p_n]_n}| &= \$ [p_1\dots p_n]_n; \\
+|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
+|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &= \sum_{j \in \{j_1 \dots j_m\}} |M_{<i_1 \dots i \dots i_m>_n, [j_1 \dots j \dots j_m]_n}| \;x_{i, j};
+\end{align*}
+
+\begin{align*}
+|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1 \dots n} (x_{i,p_i} + \tilde{x}_{i,p_{i}}) \\
+	&= \sum_{[p_1 \dots p_{n}]_n} \$[p_1 \dots p_{n}]_n \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n}
+		\prod_{i=1 \dots n}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}} \prod_{k = 1 \dots n }^{i_k \not \in \{i_1 \dots i_m\}} x_{k, p_{k}} \\
+	&= \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_{m}]_n} 
+		M_{<i_1 \dots i_m>_n, [j_1 \dots j_{m}]_n} \prod_{i=1 \dots m}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}}
+\end{align*}
+One example for $|\widetilde{M}|$:
+\begin{align*}
+|\tilde{M}| &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} + \tilde{x}_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} + \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} + \tilde{x}_{2,2} \end{matrix} \right|
+	= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, \tilde{x}_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+ &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+ &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ 
+			x_{1,0}, x_{1,1}, x_{1,2} \\ 
+			x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
+			\tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
+			\tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|	
+	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+      + \left| \begin{matrix} x_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			x_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+	  &\eqspace + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			\tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			\tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			\tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			\tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			x_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			\tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			\tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| 
+\end{align*}
+
+\begin{align*}
+\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
+  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
+	& m = 1:\eqspace \sum_{i=1}^{n} \sum_{j=1}^{n} |M_{i, j}|^2 (\delta x_{i, j})^2; \\
+	& m = 2:\eqspace 	\sum_{<i_1, i_2>_n} \sum_{[j_1, j_2]_n} |M _{<i_1, i_2>_n, [j_1, j_2]_n}|^2 (\delta x_{i_1, j_1})^2 (\delta x_{i_2, j_2})^2; \\
+	& m = n:\eqspace \sum_{[j_1 \dots j_n]_n} \prod_{k=1 \dots n} (\delta x_{i_k, j_k})^2; \\
+\delta^2 |M_{i,j}| &= \sum_{m=1 \dots n-1} \sum_{<i_1 \dots i \dots i_m>_n} \sum_{[j_1 \dots j \dots j_m]_n}
+  	|M _{<i_1 \dots i \dots i_m>_n{[j_1 \dots j \dots j_m]}_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
+	& m = 2:\eqspace \sum_{i_1=1 \dots n}^{i_1\ne i} \sum_{j_1 = 1 \dots n}^{j_1 \ne j} |M _{<i_1, i>_n, [j_1, j]_n}|^2 (\delta x_{i_1, j_1})^2; \\
+	& m = n - 1:\eqspace \sum_{[j_1 \dots j \dots n]_n} \prod_{k=1 \dots n}^{i_k \ne i} (\delta x_{i_k, j_k})^2;
+\end{align*}
+
+To evaluate $\delta^2 |M|$ as a function of $(|M_{i, j}|^2, \delta x_{i, j})^2, \delta^2 |M_{i,j}|)$:
+\begin{enumerate}
+\item $\delta^2 |M|: m - 1$ has the same $|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \not \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2$ term as $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$.
+
+\item $\delta^2 |M|: m - 1$ has $\frac{n!}{(m - 1)! (n - m + 1)!} \times (m - 1)! = \frac{n!}{(n + 1 - m)!}$ terms to sum.
+
+\item $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ has $\frac{(n - 1)!}{m! (n - m - 1)!} \times m! = \frac{(n - 1)!}{(n - 1 - m)!}$ terms to sum.
+
+\item For different $m$, different counts of $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ are needed to sum to $\delta^2 |M|: m - 1$.
+\end{enumerate}
+Thus, the following relation in the previous paper is wrong:
+\begin{equation*}
+\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
+\end{equation*}
+The above relation only holds when $n=2$:
+\begin{align*}
+|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1} \\ x_{1,0}, x_{1,1} \end{matrix} \right| = x_{0,0} x_{1,1} - x_{0,1} x_{1,0};  \\
+|\tilde{M}| - |M| &= \tilde{x}_{0,0} x_{1,1} + x_{0,0} \tilde{x}_{1,1} + \tilde{x}_{0,0} \tilde{x}_{1,1}
+	 - \tilde{x}_{0,1} x_{1,0} - x_{0,1} \tilde{x}_{1,0} - \tilde{x}_{0,1} \tilde{x}_{1,0}; \\
+\delta^2 |M| &= (\delta x_{0,0})^2 (x_{1,1})^2 + (x_{0,0})^2 (\delta x_{1,1})^2 +  (\delta x_{0,1})^2 (x_{1,0})^2 + (x_{0,1})^2 (\delta x_{1,0})^2 \\
+		&+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2;
+\end{align*}
+But it does not hold when $n=3$:
+\begin{align*}
+|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ x_{1,0}, x_{1,1}, x_{1,2} \\ x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right| \\
+&= x_{0,0} x_{1,1} x_{2,2} - x_{0,0} x_{1,2} x_{2,1} 
+   	+ x_{0,1} x_{1,2} x_{2,0} - x_{0,1} x_{1,0} x_{2,2}
+    + x_{0,2} x_{1,0} x_{2,1} -  x_{0,2} x_{1,1} x_{2,0}; \\
+& |M|_{0,1} = x_{1,2} x_{2,0} - x_{1,0} x_{2,2};\\
+& |M|_{<0,2>,[1,0]} = x_{1,2} = -|M|_{<0,2>,[0,1]};\\
+\delta^2 |M| &= (\delta x_{0,0})^2 |M_{0,0}|^2 + (\delta x_{0,1})^2 |M_{0,1}|^2 + (\delta x_{0,2})^2 |M_{0,2}|^2 \\
+  &+ (\delta x_{1,0})^2 |M_{1,0}|^2 + (\delta x_{1,1})^2 |M_{1,1}|^2 + (\delta x_{1,2})^2 |M_{1,2}|^2 \\
+  &+ (\delta x_{2,0})^2 |M_{2,0}|^2 + (\delta x_{2,1})^2 |M_{2,1}|^2 + (\delta x_{2,2})^2 |M_{2,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 |x_{2,2}|^2 + (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 |x_{2,1}|^2 + (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 |x_{2,0}|^2 + (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 |x_{2,2}|^2 + (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,2})^2 (\delta x_{1,0})^2 |x_{2,1}|^2 + (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,2})^2 (\delta x_{1,1})^2 |x_{2,0}|^2 + (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2 + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;\\
+(\delta x_{2,2})^2 \delta^2 |M_{2,2}| &= (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
+  &+  (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2; \\
+(\delta x_{2,1})^2 \delta^2 |M_{2,1}| &= (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
+  &+  (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2  + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2; \\
+(\delta x_{2,0})^2 \delta^2 |M_{2,0}| &= (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
+  &+  (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;
+\end{align*}
+
+Compare $\delta^2 |M|$ with multiplication:
+\begin{align*}
+\delta^2 x_1 x_2 &= x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \\
+\delta^2 x_1 x_2 x_3 &= \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) x_3^2 + x_1^2 x_2^2 (\delta x_3^2) 
+		+ \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) (\delta x_3^2); \\
+	&= (\delta x_1)^2 x_2^2 x_3^2 + x_1^2 (\delta x_2)^2 x_3^2 + x_1^2 x_2^2 (\delta x_3)^2 \\
+	&+  x_1^2 (\delta x_2)^2 (\delta x_3)^2 + (\delta x_1)^2 x_2^2 (\delta x_3)^2 + (\delta x_1)^2 (\delta x_2)^2 x_3^2 + (\delta x_1)^2 (\delta x_2)^2 (\delta x_3)^2; \\
+\delta^2 \prod_{k=1}^{n} x_k &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \prod_{i \in <i_1 \dots i_m>_n} (\delta x_i)^2 \prod_{j \not \in <i_1 \dots i_m>_n} {x_j}^2;
+\end{align*}
+
+
+%\fi
+
+Let vector $[p_1, p_{2} \dots p_n]_n$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  
+Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}.  
+For a $n$-by-$n$ square matrix M with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Numerical_Recipes} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
+$(-1)^{i+j} |M_{(i,j)}|$ is the determinant of the $(n-1)$-by-$(n-1)$ matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Numerical_Recipes}.  
+Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Numerical_Recipes}.
+\begin{align}
+\label{eqn: determinant}
+|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
+\label{eqn: sub-determinant}
+|M|_{i,j} &\equiv \sum_{[p_1\dots p_n]_n}^{p_{i} = j} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n}^{k \ne i} x_{k,p_{k}}; \\
+\label{eqn: determinant sum 1}
+|M| &=\sum_{j=1 \dots n} |M_{i,j}| x_{i,j} = \sum_{i=1 \dots n} |M_{i,j}| x_{i,j};
+\end{align}
+
+Assuming $p_1, p_{2} \in \{1\dots n\}$, let $[p_1, p_{2}]_n$ denote the length-2 unordered permutation which satisfies $p_1 \neq p_{2}$, and let $<p_1,p_{2}>_n$ denote the length-2 ordered permutation which satisfies $p_1 < p_{2}$.  
+Letting ${<i_1,i_2>}_n$ be an arbitrary ordered permutation, Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
+\begin{align}
+&|M_{<i_1 ,i_{2}>_n, [j_1 ,j_{2}]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{p_{i_1}=j_1, p_{i_{2}}=j_{2}} 
+    \$ [p_1\dots p_n]_n \prod _{k=1 \dots n}^{k \not \in \{i_1, i_2\}} x_{k,p_{k}}; \\
+\label{eqn: determinant sum 2}
+|M| &= \sum_{j_1 = 1 \dots n} x_{i_1, j_1} |M_{i_1, j_1}| = 
+\sum_{j_1=1 \dots n} \sum_{j_{2}=1 \dots n}^{ j_{2} \ne j_1} |M _{<i_1, i_{2}>_n,  [j_1, j_{2}]_n}| x_{i_1, j_1} x_{i_{2}, j_{2}};
+\end{align}
+The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m \in \{1,2...n\}$.  
+Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $<i_1 \dots i_m>_n$ is an arbitrary ordered permutation. 
+The $(n-m)$-by-$(n-m)$ matrix in $|M_{<i_1 \dots i_m>_n[j_1 \dots j_m]_n}|$ is obtained by deleting the rows in $\{i_1 \dots i_m\}$ and the columns in $\{j_1 \dots j_m\}$.
+This leads to Formula \eqref{eqn: sub-determinant equivalence}.
+\begin{align}
+\label{eqn: sub-determinant generic}
+&|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{i_1 \dots i_m\}: p_k=j_k} \$ [p_1\dots p_n]_n 
+	\prod_{k = 1 \dots n }^{k \not \in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
+\label{eqn: determinant sum}
+|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
+\label{eqn: sub-determinant equivalence}
+&||M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|| = ||M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}||  ;
+\end{align}
+
+Let $ \widetilde{x}_{i,j}$ denote a random variable at the index $(i, j)$ with the uncertainty deviation $\delta x_{i,j}$.
+If all the element of the matrix satisfy the uncorrelated uncertainty assumption, Formula \eqref{eqn: determinant Taylor expansion} is the Taylor expansion of the determinant of the square matrix, and Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant uncertainty expansion} are the result mean and variance, respectively.
+\footnote{The previous paper \cite{Prev_Precision_Arithmetic} also contains the wrong formula:
+\begin{equation}
+\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
+\end{equation}
+}
+\begin{align}
+\label{eqn: determinant Taylor expansion}
+|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1}^{n} (x_{i,p_i} + \tilde{x}_{i,p_{i}})  \\
+	&= \sum_{m=0}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
+  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}}  \tilde{x}_{i_k, j_k}; \nonumber \\
+\label{eqn: determinant mean}
+\overline{|M|} &= |M|; \\
+\label{eqn: determinant uncertainty expansion}
+\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
+  	|M _{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}|^2 \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; 
+\end{align}
+
+A major use of the determinant is to calculate the inverse matrix whose element is given by Formula \eqref{eqn: invert matrix} \cite{Linear_Algebra}:
+\begin{equation}
+\label{eqn: invert matrix}
+z_{i,j} = \frac{|M_{j,i}|}{|M|};
+\end{equation}
+The square matrix whose element is $|M_{j,i}|$ is defined as the adjugate matrix \cite{Linear_Algebra} $M^A$ to the original matrix $M$.
+The inverse matrix to the original matrix $M$ is denoted as $M^{-1}$.
+
+When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
+\begin{itemize}
+\item The input uncertainties and the calculation rounding errors can not be accounted for.
+
+\item One path is chosen out of many possible paths, such as using different $i$ for summing by $j$ in Formula \eqref{eqn: determinant sum 1}. 
+
+\item The result is path dependent.
+When calculating the inverse matrix, such dependency is so strong that Formula \eqref{eqn: invert matrix} is avoided, and the path which is deemed to have smallest rounding error is chosen in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
+Even so, the result uncertainty is not clear.
+\end{itemize}
+In contrast, Formula \eqref{eqn: determinant uncertainty expansion} is no longer path dependent, and it accounts for all input uncertainties and calculation rounding errors.
+
+
+\subsection{Test Matrix Inversion Calculations}
+
+A matrix $M$ is constructed using random integers uniformly distributed in the range of $[-16384$, $+16384]$.
+A matrix $\tilde{M}$ is constructed from $M$ in two different ways:
+\begin{itemize}
+\item \emph{rounding}: If each element of $M$ is converted to a conventional 64-bit floating-point value to construct $\tilde{M}$, the result errors are due to the rounding errors of the conventional 64-bit floating-point calculations.
+
+\item \emph{noise}: If either Gaussian noise or white noise of a particular level is added to each element of $M$ to construct $\tilde{M}$, the result errors are mainly due to the input noise unless the input noise level is $10^{-16}$ or less.
+For example, if the noise-level is $10^{-3}$, because the distribution deviation of the elements of $M$ is $16384 /\sqrt{3} = 9459$, the Gaussian noise is generated with the deviation of $9459 \times 10{-3}$. 
+
+\item For simplicity, a same noise-level is used for every element of $M$.
+\end{itemize}
+
+The calculation results using $\tilde{M}$ can be compared with those of $M$ in different tests:
+\begin{itemize}
+\item \emph{determinant}: to compare $|M|$ and $|\tilde{M}|$.
+
+\item \emph{adjugate}: to compare $M^A$ and $\tilde{M}^A$.
+
+\item \emph{inverse}: to compare $M^A M = |M| \I$ and $\tilde{M}^A \tilde{M}$, in which $\I$ is the identity matrix \cite{Linear_Algebra} for $M$.
+\end{itemize}
+
+
+
+
 
 
 
@@ -2424,278 +2677,6 @@ If the library functions also have proper coverage, the calculation result will 
 
 
 
-\clearpage
-\section{Matrix Inversion}
-\label{sec: matrix}
-
-
-\subsection{Uncertainty Propagation in Matrix Determinant}
-
-%\iffalse
-
-\begin{align*}
-|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
-|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &\equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{1 \dots m \}: p_{i_k}=j_k} \$ [p_1\dots p_n]_n 
-	\prod _{k = 1 \dots n }^{i_k \not\in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
-|M_{<1 \dots n>_n, [p_1 \dots p_n]_n}| &= \$ [p_1\dots p_n]_n; \\
-|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
-|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &= \sum_{j \in \{j_1 \dots j_m\}} |M_{<i_1 \dots i \dots i_m>_n, [j_1 \dots j \dots j_m]_n}| \;x_{i, j};
-\end{align*}
-
-\begin{align*}
-|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1 \dots n} (x_{i,p_i} + \tilde{x}_{i,p_{i}}) \\
-	&= \sum_{[p_1 \dots p_{n}]_n} \$[p_1 \dots p_{n}]_n \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n}
-		\prod_{i=1 \dots n}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}} \prod_{k = 1 \dots n }^{i_k \not \in \{i_1 \dots i_m\}} x_{k, p_{k}} \\
-	&= \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_{m}]_n} 
-		M_{<i_1 \dots i_m>_n, [j_1 \dots j_{m}]_n} \prod_{i=1 \dots m}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}}
-\end{align*}
-One example for $|\widetilde{M}|$:
-\begin{align*}
-|\tilde{M}| &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} + \tilde{x}_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} + \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} + \tilde{x}_{2,2} \end{matrix} \right|
-	= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, \tilde{x}_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
- &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
- &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ 
-			x_{1,0}, x_{1,1}, x_{1,2} \\ 
-			x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
-			\tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
-			\tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|	
-	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-      + \left| \begin{matrix} x_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			x_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
-	  &\eqspace + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			\tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			\tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			\tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			\tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			x_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			\tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			\tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| 
-\end{align*}
-
-\begin{align*}
-\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
-	& m = 1:\eqspace \sum_{i=1}^{n} \sum_{j=1}^{n} |M_{i, j}|^2 (\delta x_{i, j})^2; \\
-	& m = 2:\eqspace 	\sum_{<i_1, i_2>_n} \sum_{[j_1, j_2]_n} |M _{<i_1, i_2>_n, [j_1, j_2]_n}|^2 (\delta x_{i_1, j_1})^2 (\delta x_{i_2, j_2})^2; \\
-	& m = n:\eqspace \sum_{[j_1 \dots j_n]_n} \prod_{k=1 \dots n} (\delta x_{i_k, j_k})^2; \\
-\delta^2 |M_{i,j}| &= \sum_{m=1 \dots n-1} \sum_{<i_1 \dots i \dots i_m>_n} \sum_{[j_1 \dots j \dots j_m]_n}
-  	|M _{<i_1 \dots i \dots i_m>_n{[j_1 \dots j \dots j_m]}_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
-	& m = 2:\eqspace \sum_{i_1=1 \dots n}^{i_1\ne i} \sum_{j_1 = 1 \dots n}^{j_1 \ne j} |M _{<i_1, i>_n, [j_1, j]_n}|^2 (\delta x_{i_1, j_1})^2; \\
-	& m = n - 1:\eqspace \sum_{[j_1 \dots j \dots n]_n} \prod_{k=1 \dots n}^{i_k \ne i} (\delta x_{i_k, j_k})^2;
-\end{align*}
-
-To evaluate $\delta^2 |M|$ as a function of $(|M_{i, j}|^2, \delta x_{i, j})^2, \delta^2 |M_{i,j}|)$:
-\begin{enumerate}
-\item $\delta^2 |M|: m - 1$ has the same $|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \not \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2$ term as $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$.
-
-\item $\delta^2 |M|: m - 1$ has $\frac{n!}{(m - 1)! (n - m + 1)!} \times (m - 1)! = \frac{n!}{(n + 1 - m)!}$ terms to sum.
-
-\item $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ has $\frac{(n - 1)!}{m! (n - m - 1)!} \times m! = \frac{(n - 1)!}{(n - 1 - m)!}$ terms to sum.
-
-\item For different $m$, different counts of $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ are needed to sum to $\delta^2 |M|: m - 1$.
-\end{enumerate}
-Thus, the following relation in the previous paper is wrong:
-\begin{equation*}
-\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
-\end{equation*}
-The above relation only holds when $n=2$:
-\begin{align*}
-|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1} \\ x_{1,0}, x_{1,1} \end{matrix} \right| = x_{0,0} x_{1,1} - x_{0,1} x_{1,0};  \\
-|\tilde{M}| - |M| &= \tilde{x}_{0,0} x_{1,1} + x_{0,0} \tilde{x}_{1,1} + \tilde{x}_{0,0} \tilde{x}_{1,1}
-	 - \tilde{x}_{0,1} x_{1,0} - x_{0,1} \tilde{x}_{1,0} - \tilde{x}_{0,1} \tilde{x}_{1,0}; \\
-\delta^2 |M| &= (\delta x_{0,0})^2 (x_{1,1})^2 + (x_{0,0})^2 (\delta x_{1,1})^2 +  (\delta x_{0,1})^2 (x_{1,0})^2 + (x_{0,1})^2 (\delta x_{1,0})^2 \\
-		&+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2;
-\end{align*}
-But it does not hold when $n=3$:
-\begin{align*}
-|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ x_{1,0}, x_{1,1}, x_{1,2} \\ x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right| \\
-&= x_{0,0} x_{1,1} x_{2,2} - x_{0,0} x_{1,2} x_{2,1} 
-   	+ x_{0,1} x_{1,2} x_{2,0} - x_{0,1} x_{1,0} x_{2,2}
-    + x_{0,2} x_{1,0} x_{2,1} -  x_{0,2} x_{1,1} x_{2,0}; \\
-& |M|_{0,1} = x_{1,2} x_{2,0} - x_{1,0} x_{2,2};\\
-& |M|_{<0,2>,[1,0]} = x_{1,2} = -|M|_{<0,2>,[0,1]};\\
-\delta^2 |M| &= (\delta x_{0,0})^2 |M_{0,0}|^2 + (\delta x_{0,1})^2 |M_{0,1}|^2 + (\delta x_{0,2})^2 |M_{0,2}|^2 \\
-  &+ (\delta x_{1,0})^2 |M_{1,0}|^2 + (\delta x_{1,1})^2 |M_{1,1}|^2 + (\delta x_{1,2})^2 |M_{1,2}|^2 \\
-  &+ (\delta x_{2,0})^2 |M_{2,0}|^2 + (\delta x_{2,1})^2 |M_{2,1}|^2 + (\delta x_{2,2})^2 |M_{2,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 |x_{2,2}|^2 + (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 |x_{2,1}|^2 + (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 |x_{2,0}|^2 + (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 |x_{2,2}|^2 + (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,2})^2 (\delta x_{1,0})^2 |x_{2,1}|^2 + (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,2})^2 (\delta x_{1,1})^2 |x_{2,0}|^2 + (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2 + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;\\
-(\delta x_{2,2})^2 \delta^2 |M_{2,2}| &= (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
-  &+  (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2; \\
-(\delta x_{2,1})^2 \delta^2 |M_{2,1}| &= (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
-  &+  (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2  + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2; \\
-(\delta x_{2,0})^2 \delta^2 |M_{2,0}| &= (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
-  &+  (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;
-\end{align*}
-
-Compare $\delta^2 |M|$ with multiplication:
-\begin{align*}
-\delta^2 x_1 x_2 &= x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \\
-\delta^2 x_1 x_2 x_3 &= \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) x_3^2 + x_1^2 x_2^2 (\delta x_3^2) 
-		+ \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) (\delta x_3^2); \\
-	&= (\delta x_1)^2 x_2^2 x_3^2 + x_1^2 (\delta x_2)^2 x_3^2 + x_1^2 x_2^2 (\delta x_3)^2 \\
-	&+  x_1^2 (\delta x_2)^2 (\delta x_3)^2 + (\delta x_1)^2 x_2^2 (\delta x_3)^2 + (\delta x_1)^2 (\delta x_2)^2 x_3^2 + (\delta x_1)^2 (\delta x_2)^2 (\delta x_3)^2; \\
-\delta^2 \prod_{k=1}^{n} x_k &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \prod_{i \in <i_1 \dots i_m>_n} (\delta x_i)^2 \prod_{j \not \in <i_1 \dots i_m>_n} {x_j}^2;
-\end{align*}
-
-
-%\fi
-
-Let vector $[p_1, p_{2} \dots p_n]_n$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  
-Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}.  
-For a $n$-by-$n$ square matrix M with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Numerical_Recipes} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
-$(-1)^{i+j} |M_{(i,j)}|$ is the determinant of the $(n-1)$-by-$(n-1)$ matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Numerical_Recipes}.  
-Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Numerical_Recipes}.
-\begin{align}
-\label{eqn: determinant}
-|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
-\label{eqn: sub-determinant}
-|M|_{i,j} &\equiv \sum_{[p_1\dots p_n]_n}^{p_{i} = j} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n}^{k \ne i} x_{k,p_{k}}; \\
-\label{eqn: determinant sum 1}
-|M| &=\sum_{j=1 \dots n} |M_{i,j}| x_{i,j} = \sum_{i=1 \dots n} |M_{i,j}| x_{i,j};
-\end{align}
-
-Assuming $p_1, p_{2} \in \{1\dots n\}$, let $[p_1, p_{2}]_n$ denote the length-2 unordered permutation which satisfies $p_1 \neq p_{2}$, and let $<p_1,p_{2}>_n$ denote the length-2 ordered permutation which satisfies $p_1 < p_{2}$.  
-Letting ${<i_1,i_2>}_n$ be an arbitrary ordered permutation, Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
-\begin{align}
-&|M_{<i_1 ,i_{2}>_n, [j_1 ,j_{2}]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{p_{i_1}=j_1, p_{i_{2}}=j_{2}} 
-    \$ [p_1\dots p_n]_n \prod _{k=1 \dots n}^{k \not \in \{i_1, i_2\}} x_{k,p_{k}}; \\
-\label{eqn: determinant sum 2}
-|M| &= \sum_{j_1 = 1 \dots n} x_{i_1, j_1} |M_{i_1, j_1}| = 
-\sum_{j_1=1 \dots n} \sum_{j_{2}=1 \dots n}^{ j_{2} \ne j_1} |M _{<i_1, i_{2}>_n,  [j_1, j_{2}]_n}| x_{i_1, j_1} x_{i_{2}, j_{2}};
-\end{align}
-The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m \in \{1,2...n\}$.  
-Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $<i_1 \dots i_m>_n$ is an arbitrary ordered permutation. 
-The $(n-m)$-by-$(n-m)$ matrix in $|M_{<i_1 \dots i_m>_n[j_1 \dots j_m]_n}|$ is obtained by deleting the rows in $\{i_1 \dots i_m\}$ and the columns in $\{j_1 \dots j_m\}$.
-This leads to Formula \eqref{eqn: sub-determinant equivalence}.
-\begin{align}
-\label{eqn: sub-determinant generic}
-&|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{i_1 \dots i_m\}: p_k=j_k} \$ [p_1\dots p_n]_n 
-	\prod_{k = 1 \dots n }^{k \not \in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
-\label{eqn: determinant sum}
-|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
-\label{eqn: sub-determinant equivalence}
-&||M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|| = ||M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}||  ;
-\end{align}
-
-Let $ \widetilde{x}_{i,j}$ denote a random variable at the index $(i, j)$ with the uncertainty deviation $\delta x_{i,j}$.
-If all the element of the matrix satisfy the uncorrelated uncertainty assumption, Formula \eqref{eqn: determinant Taylor expansion} is the Taylor expansion of the determinant of the square matrix, and Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant uncertainty expansion} are the result mean and variance, respectively.
-\footnote{The previous paper \cite{Prev_Precision_Arithmetic} also contains the wrong formula:
-\begin{equation}
-\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
-\end{equation}
-}
-\begin{align}
-\label{eqn: determinant Taylor expansion}
-|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1}^{n} (x_{i,p_i} + \tilde{x}_{i,p_{i}})  \\
-	&= \sum_{m=0}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}}  \tilde{x}_{i_k, j_k}; \nonumber \\
-\label{eqn: determinant mean}
-\overline{|M|} &= |M|; \\
-\label{eqn: determinant uncertainty expansion}
-\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  	|M _{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}|^2 \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; 
-\end{align}
-
-A major use of the determinant is to calculate the inverse matrix whose element is given by Formula \eqref{eqn: invert matrix} \cite{Linear_Algebra}:
-\begin{equation}
-\label{eqn: invert matrix}
-z_{i,j} = \frac{|M_{j,i}|}{|M|};
-\end{equation}
-The square matrix whose element is $|M_{j,i}|$ is defined as the adjugate matrix \cite{Linear_Algebra} $M^A$ to the original matrix $M$.
-The inverse matrix to the original matrix $M$ is denoted as $M^{-1}$.
-
-When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
-\begin{itemize}
-\item The input uncertainties and the calculation rounding errors can not be accounted for.
-
-\item One path is chosen out of many possible paths, such as using different $i$ for summing by $j$ in Formula \eqref{eqn: determinant sum 1}. 
-
-\item The result is path dependent.
-When calculating the inverse matrix, such dependency is so strong that Formula \eqref{eqn: invert matrix} is avoided, and the path which is deemed to have smallest rounding error is chosen in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
-Even so, the result uncertainty is not clear.
-\end{itemize}
-In contrast, Formula \eqref{eqn: determinant uncertainty expansion} is no longer path dependent, and it accounts for all input uncertainties and calculation rounding errors.
-
-
-\subsection{Test Determinant Calculations}
-
-A matrix $M$ is constructed using random integers uniformly distributed between $[-16384$, $+16384]$, whose $M^A$ can be calculated precisely using integer arithmetic and Formula \eqref{eqn: determinant}.
-A matrix $\widehat{M}$ is constructed from $M$, whose $\widehat{M}^A$ is compared with $M^A$ for the following tests:
-\begin{itemize}
-\item \emph{adjugate rounding}: If each element of $M$ is converted to a conventional 64-bit floating-point value to construct $\widehat{M}$, the result errors are due to the rounding errors of the conventional 64-bit floating-point calculations.
-
-\item \emph{adjugate noise}: If either Gaussian noise or white noise of a particular level is added to each element of $M$ to construct $\widehat{M}$, the result errors are mainly due to the input noise unless the input noise level is $10^{-16}$ or less.
-For example, if the noise-level is $10^{-3}$, because the distribution deviation of the elements of $M$ is $16384 /\sqrt{3} = 9459$, the Gaussian noise is generated with the deviation of $9459 \times 10{-3}$. 
-
-\item For simplicity, a same noise-level is used for every element of $M$.
-\end{itemize}
-
-$M^{-1}$ can also be calculated accurately using fractional arithmetic and Formula \eqref{eqn: invert matrix}.
-When using Formula \eqref{eqn: invert matrix} to calculate each element of $\widehat{M}^{-1}$, the dependence tracing between $|M_{j,i}|$ and $|M|$ is ignored, so that the result $\delta^2 \widehat{M}^{-1}$ is not precise, whose effect can be quantified by \emph{inverse rounding} and \emph{inverse noise} tests separately.
-
-$\widehat{M} \times \widehat{M}^{-1}$ can be checked against identity matrix for \emph{roundtrip rounding} and \emph{roundtrip noise} tests separately.
-
-
-\subsection{Testing Matrix Stability}
-
-Each matrix has a different stability \cite{Condition_Number}, which means how stable the inverted matrix is in regard to small value changes of the original matrix elements.  It is well known that more mutual cancellations in Formula \eqref{eqn: determinant} mean less stability of the matrix \cite{Arithmetic_Digital_Computers}\cite{Numerical_Recipes}, with the Hilbert matrix \cite{Hilbert_Matrix} being the most famous unstable matrix.  The condition number has been defined to quantify the stability of a matrix \cite{Condition_Number}.  Even though the definition of the condition number excludes the effects of rounding errors, in reality most calculations are done numerically using conventional floating-point arithmetic so that the combination effect of rounding errors and matrix instability cannot be avoided in practice.  When a matrix is unstable, the result is more error prone due to rounding errors of conventional floating-point arithmetic \cite{Arithmetic_Digital_Computers}.  Consequently, there are no general means to avoid the mysterious and nasty ``numerical instability'' in numerical applications due to rounding errors \cite{Arithmetic_Digital_Computers}.  For example, the numerical value of the calculated condition number of a matrix may have already been a victim of ``numerical instability'', and there is no sure way to judge this suspicion, so this value may not be very useful in judging the stability of the matrix in practice.  On the other hand, the rounding errors of conventional floating-point arithmetic can be used to test the stability of a matrix.  Rounding errors effectively change the item values of a matrix, so they produce a larger effect on a less stable matrix.  If the inverted matrix and the adjugate matrix are calculated using conventional floating-point arithmetic, larger value errors indicate that the matrix is less stable.
-
-variance arithmetic accounts for all rounding error with stable characterization of result uncertainties.  More mutual cancellations in Formula \eqref{eqn: determinant} will result in a smaller absolute value related to the uncertainty deviation of the determinant.  Thus, the precision of the determinant $|M|$ of a matrix $M$ calculated using variance arithmetic measures the amount of mutual cancellations, and it may measure the stability of a matrix.  Particularly, if $|M|$ is of coarser precision, then each element of $M^{-1}$ should tend to have a larger value error, according to Formula \eqref{eqn: invert matrix}.  This hypothesis is confirmed by Figure \ref{fig: Prec4_Inv_AvgErr_vs_DetSig_MatSize}, which shows a good linear relation between the precision of $|M|$ and the average value error of its inverted matrix $M^{-1}$, regardless of the matrix size.  The maximal output values errors are related to the precision of $|M|$ in the same fashion.  In contrast, Figure \ref{fig: Prec4_Adj_AvgErr_vs_DetSig_MatSize} shows that the value errors of the adjugate matrix $M^{A}$ do not depend noticeably on the precision of $|M|$.  Thus, the precision of the denominator in Formula \eqref{eqn: invert matrix} determines the overall stability in matrix inversion, confirming the validity of common advice to avoid matrix inversion operations in general \cite{Numerical_Recipes}.
-
-Such a linear relation between the precision and the value error also extends to the calculation of the adjugate matrix.  Let the relative value error be defined as the ratio of the value error divided by the expected value.  The relative error is expected to correspond to the result precision linearly.  Figure \ref{fig: Prec4_Adj_RelErr_vs_DetSig_MatSize} compares each precision of the sub-matrix determinant $|M_{j,i}|$ with the corresponding relative error of the element at the index $(i, j)$ of the adjugate matrix $M^{A}$ of the clean matrix of different sizes.  It shows that larger relative errors of adjugate matrix elements indeed correspond to coarser precisions of the sub-matrix determinant.   
-
-While each condition number \cite{Condition_Number} only gives the result sensitivity to one matrix element, Formula \eqref{eqn: determinant uncertainty expansion} contains the result sensitivity to any matrix element, any combination of matrix elements, as well as the aggregated result uncertainty deviation.  Therefore, Formula \eqref{eqn: determinant uncertainty expansion} and Formula \eqref{eqn: determinant uncertainty recursion} may be better than the condition numbers for describing matrix stability. 
-
-
-\subsection{Testing Uncertainty Propagation in Adjugate Matrix}
-
-When the adjugate matrix is calculated using variance arithmetic, Figure \ref{fig: Prec4_AvgErr_vs_MatSize_InPrec} shows that the average output deviations for the adjugate matrix increase linearly with the input deviation, which is in good agreement with Formula \eqref{eqn: fitting error}.  Such relation is also true for maximal and average output values errors.  Formula \eqref{eqn: fitting error} is expected to describe the general value error propagation for linear algorithms in which $L$ is the amount of calculations \cite{Chaotic_Dynamics}.  The question is what value $L$ should be when calculating the adjugate matrix of a square matrix of size $N$.  Figure \ref{fig: Prec4_AvgErr_vs_MatSize_InPrec} suggests that $L$ increases with $N^{2}$ for the average output precision and average output error\footnote{The amount of calculation $L$ does not mean the calculation complexity using the Big O notation \cite{Big_O_Notation}.  It is just a measurement of how output uncertainty increases with a dimension of calculation according to \eqref{eqn: fitting error} \cite{Chaotic_Dynamics}. For example, any sorting algorithm will not change the uncertainty distribution, so that $L$ is always 0 regardless the calculation complexity for the sorting algorithm. The measured calculation time suggests calculation complexity of $O(2^N)$ for using Formula \eqref{eqn: determinant uncertainty recursion} to calculate the matrix determinant.}. 
-
-Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} shows that the average output tracking ratio of the adjugate matrix using variance arithmetic is approximately a constant of 0.8.  Figure \ref{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec} is very similar to Figure \ref{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}.  Similar to the maximal output bounding ratios of FFT algorithms, the maximal output bounding ratios for the adjugate matrix using precision also obey Formula \eqref{eqn: fitting significand} well, with $\beta$ of 1.005, meaning a slow increase with the matrix size.  Added to the similarity is the normalized uncertainty distribution shown in Figure \ref{fig: Prec4_Matrix9_NormDist}, which is very similar to Figure \ref{fig: Prec4_Sin_NormDist}.  Even though FFT and the calculating adjugate matrix are two very different sets of linear transformational algorithms, their uncertainty propagation characteristics are remarkably similar even in quantitative details.  This similarity indicates that variance arithmetic is a generic arithmetic for linear algorithms.
-
-
-\subsection{Calibration}
-\label{sec: calibration}
-
-Because \textbf{$|M_{j,i}|$} and \textbf{$|M|$} are not independent of each other, \textbf{$M^{-1}$} calculated by Formula \eqref{eqn: invert matrix} contains the dependency problem. Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the tracking ratios for the adjugate matrix and the inverted matrix are both standard distributed, while they are exponentially distributed when the inverted matrix is inverted again.  Because the inverted matrix has the same tracking ratio distribution as that of the adjugated matrix, which has no dependency problem, the inverted matrix contains hardly any dependency problem.  In contrast, Figure \ref{fig: Prec4_Matrix9_NormDist} shows that the double inverted matrix is severely affected by the dependency problem, such that its tracking ratio increases with matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.  Figure \ref{fig: Prec4_Matrix_Rnd_NormDist} shows that average tracking ratios for different matrix sizes follows a same exponential distribution, but with different extend, e.g., the distribution for matrix size 4 has yet reaches stable distribution beyond 2.5, which causes the increase of the average tracking ratio with the matrix size as shown in Figure \ref{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}.
-
-Applying the same algorithms twice results in so much differences, which shows that the dependency problem has been embedded in the data, and which shows the importance of calibration.
-
 
 
 \clearpage
@@ -2845,323 +2826,6 @@ As an independent researcher, the author of this paper feels indebted to encoura
 
 
 
-\section{Figures}
-
-
-
-\clearpage
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=4.5in,height=2.4in]{Prec4_FFT_Sin_Profile_Freq1.png} 
-\captionof{figure}{The output deviations and value errors of the forward FFT on a noisy sine signal of FFT order 4, index frequency 1 and input deviation $10^{-2}$.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Dev'' means output uncertainty deviations, ``Error'' means output value errors, ``Real'' means real part, and ``Imag'' means imaginary part.  Because both interval arithmetic and independence arithmetic using conventional floating arithmetic for underlying calculations, they have the same value errors.}
-\label{fig: Prec4_FFT_Sin_Profile_Freq1}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=4.5in,height=2.4in]{Precx_FFT_Sin_Profile_Freq1.png} 
-\captionof{figure}{The output value errors of the forward FFT on a noisy sine signal of index frequency 1 and input deviation $10^{-2}$ using variance arithmetic with different bit inside uncertainty.  In the legend, ``Prec0'' means variance arithmetic with 0-bit calculated inside uncertainty, ``Prec2'' means variance arithmetic with 2-bit calculated inside uncertainty, and "Prec4'' means variance arithmetic with 4-bit calculated inside uncertainty.}
-\label{fig: Precx_FFT_Sin_Profile_Freq1}
-\end{figure}
-
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.75in]{Indp_Sin_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions using independence arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.98.}
-\label{fig: Indp_Sin_NormDist}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.75in]{Prec4_Sin_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for FFT algorithms (as shown in legend).  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.97. }
-\label{fig: Prec4_Sin_NormDist}
-\end{figure}
-
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{All_For_AvgDev_vs_FFTOrder.png} 
-\captionof{figure}{ For the same input deviation of $10^{-3}$, the empirical average output deviations of the forward FFT increase exponentially with the FFT order for all uncertainty-bearing arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: All_For_AvgDev_vs_FFTOrder}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{All_For_AvgDev_vs_InDev.png} 
-\captionof{figure}{ For the same order of the FFT calculation of 15, the empirical average output deviations of the forward FFT increases linearly with the input deviation for all uncertainty-bearing arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: All_For_AvgDev_vs_InDev}
-\end{figure}
-
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Prec4_For_AvgErr_vs_FFTOrder_InDev.png} 
-\captionof{figure}{ The empirical average output value errors using variance arithmetic increase exponentially with the FFT order and linearly with the input deviation, respectively.}
-\label{fig: Prec4_For_AvgErr_vs_FFTOrder_InDev}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Prec4_For_AvgSig_vs_FFTOrder_InDev.png} 
-\captionof{figure}{ The empirical average output tracking ratios using variance arithmetic is a constant when the input deviation is larger than $10^{-14}$ and the FFT order is more than 5 for forward FFT algorithms.  Because the precision of conventional floating-point representation is at $10^{-16}$, adding Gaussian noises with the deviation of $10^{-17}$ should have little effect on the input data.  For the same reason, the output tracking ratios are stable only when the input deviation is more than $10^{-14}$.  When the FFT order is $2$, a FFT calculation actually involves no arithmetic calculation between input data.  For the same reason, when the FFT order is less than 5, there is not enough arithmetic calculation for the result tracking ratios to reach equilibrium.}
-\label{fig: Prec4_For_AvgSig_vs_FFTOrder_InDev}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Indp_PropBase_AvgSig.png} 
-\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using independence arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: Indp_PropBase_AvgSig}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_PropBase_AvgSig.png} 
-\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using variance arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: Prec4_PropBase_AvgSig}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Intv_PropBase_AvgSig.png} 
-\captionof{figure}{ Empirical and theoretical $\beta$ for fitting average output deviations, value errors and tracking ratios for forward, reverse and roundtrip FFT using interval arithmetic on noisy sine signals.  In the chart, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: Intv_PropBase_AvgSig}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{All_For_AvgSig_vs_FFTOrder.png} 
-\captionof{figure}{ The empirical output average tracking ratios vs. the FFT order of the forward FFT for all three arithmetics when the input uncertainty deviation is $10^{-3}$.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: All_For_AvgSig_vs_FFTOrder}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=3.00in]{Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec.png} 
-\captionof{figure}{The empirical average output deviations vs. the FFT order and input deviations using variance arithmetic for the round-trip FFT algorithm.}
-\label{fig: Prec4_Rnd_AvgErr_vs_FFTOrder_InPrec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=3.00in]{Intv_Rnd_AvgErr_vs_FFTOrder_InPrec.png} 
-\captionof{figure}{ The empirical average output deviations vs. the FFT order and input deviations using interval arithmetic for the round-trip FFT algorithm.}
-\label{fig: Intv_Rnd_AvgErr_vs_FFTOrder_InPrec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{All_For_MaxBnd_vs_FFTOrder.png} 
-\captionof{figure}{ The empirical maximal output bounding ratios vs. the FFT order of the forward FFT for all three arithmetics.  In the legend, "Intv" means interval arithmetic, "Indp" means independence arithmetic, "Prec'' means variance arithmetic, ``Real'' means real part, and ``Imag'' means imaginary part.}
-\label{fig: All_For_MaxBnd_vs_FFTOrder}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=3.0in]{Prec4_DevLeak_vs_FFTOrder_InPrec.png} 
-\captionof{figure}{ The empirical deviation leakages vs. the FFT order and input deviations using variance arithmetic for the forward FFT algorithm.}
-\label{fig: Prec4_DevLeak_vs_FFTOrder_InPrec}
-\end{figure}
-
-\clearpage
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_Inv_AvgErr_vs_DetSig_MatSize.png} 
-\captionof{figure}{ The empirical average value errors of the inverted matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
-\label{fig: Prec4_Inv_AvgErr_vs_DetSig_MatSize}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_Adj_AvgErr_vs_DetSig_MatSize.png} 
-\captionof{figure}{ The empirical average value errors of the adjugate matrix using conventional floating-point arithmetic vs. matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
-\label{fig: Prec4_Adj_AvgErr_vs_DetSig_MatSize}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_Adj_RelErr_vs_DetSig_MatSize.png} 
-\captionof{figure}{ Empirical relative value errors of the adjugate matrix using conventional floating-point arithmetic vs. corresponding sub-matrix determinant precision using variance arithmetic for clean matrices of different sizes (as shown in legend).}
-\label{fig: Prec4_Adj_RelErr_vs_DetSig_MatSize}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=3.0in]{Prec4_AvgErr_vs_MatSize_InPrec.png} 
-\captionof{figure}{Using variance arithmetic, the average output deviations of the adjugate
-matrix vs. input precision and the matrix size.}
-\label{fig: Prec4_AvgErr_vs_MatSize_InPrec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=3.0in]{Prec4_Inv_AvgSig_vs_MatSize_InPrec.png} 
-\captionof{figure}{ Using variance arithmetic, the average output tracking ratios of the adjugate matrix vs. input precision and the matrix size.}
-\label{fig: Prec4_Inv_AvgSig_vs_MatSize_InPrec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_Matrix9_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
-\label{fig: Prec4_Matrix9_NormDist}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=3.0in]{Prec4_Rnd_AvgSig_vs_MatSize_InPrec.png} 
-\captionof{figure}{ Using variance arithmetic, the average output tracking ratios of the double inverted matrix vs. input precision and the matrix size.}
-\label{fig: Prec4_Rnd_AvgSig_vs_MatSize_InPrec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.75in]{Prec4_Matrix_Rnd_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions using variance arithmetic for matrix calculations of matrix size 9.  They are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.96.  In the legend, "Adj" means calculating adjugate $M^{A}$, "Inv" means calculating inverted $M^{-1}$, and "Rnd" means calculating double inverted ($M^{-1})^{-1}$. }
-\label{fig: Prec4_Matrix_Rnd_NormDist}
-\end{figure}
-
-
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{Prec0_Taylor_1E-3.png} 
-\captionof{figure}{ The delta deviation, deviations, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-3}$ input uncertainty using variance arithmetic with 0-bit calculated inside uncertainty. Different inputs are displayed using different color. }
-\label{fig: Prec0_Taylor_1E-3}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{Prec4_Taylor_1E-3.png} 
-\captionof{figure}{ The deviations, resolutions, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-3}$ input uncertainty using variance arithmetic with 4-bit calculated inside uncertainty. Different inputs are displayed using different color. }
-\label{fig: Prec4_Taylor_1E-3}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{Prec0_Taylor_1E-2.png} 
-\captionof{figure}{ The delta deviation, deviations, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-2}$ input uncertainty using variance arithmetic with 0-bit calculated inside uncertainty. Different inputs are displayed using different color. }
-\label{fig: Prec0_Taylor_1E-2}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in,height=2.5in]{Prec4_Taylor_1E-2.png} 
-\captionof{figure}{ The deviations, resolutions, Cauchy estimator and remainders of a Taylor expansion vs. the expansion orders for different input value with $10^{-2}$ input uncertainty using variance arithmetic with 4-bit calculated inside uncertainty. Different inputs are displayed using different color. }
-\label{fig: Prec4_Taylor_1E-2}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Moving_Window_Linear_Fit.png} 
-\captionof{figure}{ Coefficients of X in \eqref{eqn: time-series linear regression} at current and next position in a time series of the least square linear regression. Except the two end points at $X=-H$ and $X=H+1$, respectively, the coefficient difference between the current and then next position in a time series are all by 1 in the overlapping region from $X=-H+1$ to $X=H$, which results in \eqref{eqn: moving-window linear regression}. }
-\label{fig: Moving_Window_Linear_Fit}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Simple_Prec4_AvgErrSig_vs_InDev_Time.png} 
-\captionof{figure}{ The average tracking ratio vs. time and the input uncertainty deviations for the progressive moving-window linear regression of a straight line using variance arithmetic with 4-bit calculated inside uncertainty.  }
-\label{fig: Simple_Prec4_AvgErrSig_vs_InDev_Time}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Simple_Err_Dev_vs_Time.png} 
-\captionof{figure}{ The output uncertainty deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line.  In the legend,  "Indp" means independent arithmetic, "Intv" means interval arithmetic, "Prec4" and "Prec2" means the variance arithmetic with 4-bit and 2-bit calculated inside uncertainty, respectively. }
-\label{fig: Simple_Err_Dev_vs_Time}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Simple_AvgErrSig_MaxBndRat_vs_Time.png} 
-\captionof{figure}{ The average tracking ratios and the max bounding ratios vs. time for the progressive moving-window linear regression of a straight line.  In the legend, "Indp" means independence arithmetic, "Intv" means interval arithmetic, "Prec4" and "Prec2" means the variance arithmetic with 4-bit and 2-bit calculated inside uncertainty, respectively.  "Max Bnd Ratio" is the abbreviation for the maximal bounding ratio, and "Avg Trk Ratio" is the abbreviation for the average tracking ratios. }
-\label{fig: Simple_AvgErrSig_MaxBndRat_vs_Time}
-\end{figure}
-
-
-\clearpage
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Simple_ErrSig_vs_Time_Prec.png} 
-\captionof{figure}{ The average tracking ratios vs. time and the bits calculated inside uncertainty using variance arithmetic for the progressive moving-window linear regression of a straight line.  In the legend, "Indp" means independence arithmetic, "PrecX" means the variance arithmetic with X-bit calculated inside uncertainty. }
-\label{fig: Simple_ErrSig_vs_Time_Prec}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Simple_ErrSig_vs_Time_Prec2.png} 
-\captionof{figure}{ The average tracking ratios vs. time and the input precision using variance arithmetic with 2-bit calculated inside uncertainty for the progressive moving-window linear regression of a straight line for different input uncertainty deviations.  }
-\label{fig: Simple_ErrSig_vs_Time_Prec2}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Changed_Err_Dev_vs_Time.png} 
-\captionof{figure}{ The output deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle. }
-\label{fig: Changed_Err_Dev_vs_Time}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Noiser_Err_Dev_vs_Time.png} 
-\captionof{figure}{ The output deviations and the value errors vs. time for the progressive moving-window linear regression of a straight line with only 10-fold increase of both input noise in the middle. }
-\label{fig: Noiser_Err_Dev_vs_Time}
-\end{figure}
-
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Changed_AvgErrSig_MaxBndRat_vs_Time.png} 
-\captionof{figure}{ The average tracking ratios and the max bounding ratio vs. time for the progressive moving-window linear regression of a straight line with 10-fold larger input noise and deviation in the middle, to simulate larger noise following the straight line.  }
-\label{fig: Changed_AvgErrSig_MaxBndRat_vs_Time}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Noiser_AvgErrSig_MaxBndRat_vs_Time.png} 
-\captionof{figure}{ The average tracking ratios and the max bounding ratio vs. time for the progressive moving-window linear regression of a straight line with 10-fold larger input noise but same input deviation in middle, to simulate defects in obtaining the corresponding uncertainty deviations. }
-\label{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{ChangedDirect_Err_Dev_vs_Time.png} 
-\captionof{figure}{ The output deviations and the value errors vs. time for the expressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle using variance arithmetic with 4-bit calculated inside uncertainty. }
-\label{fig: ChangedDirect_Err_Dev_vs_Time}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{ChangedDirect_Prec4_AvgErrSig_vs_InDev_Time.png} 
-\captionof{figure}{ The average tracking ratio vs. time and the input uncertainty deviations for the expressive moving-window linear regression of a straight line with 10-fold increase of both input noise and input uncertainty in the middle using variance arithmetic with 4-bit calculated inside uncertainty.  }
-\label{fig: ChangeDirect_Prec4_AvgErrSig_vs_InDev_Time}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Prec4_LineFit_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions of the progressive moving-window linear regression for different cases (as shown in legend) using variance arithmetic with 4-bit calculated inside uncertainty.  The case of "Changed" is best fitted by a exponential distribution with the mean of 0 and deviation of 0.25. }
-\label{fig: Prec4_LineFit_NormDist}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Prec4_LineFitDirect_NormDist.png} 
-\captionof{figure}{ The measured tracking ratio distributions of the expressive moving-window linear regression using Formula \eqref{eqn: moving-window linear regression} for different cases (as shown in legend) using variance arithmetic with 4-bit calculated inside uncertainty.  The cases of "Simple" and "Changed" are best fitted by a Gaussian distribution with the mean of 0.06 and deviation of 0.97.  }
-\label{fig: Prec4_LineFitDirect_NormDist}
-\end{figure}
 
 
 \end{document}
