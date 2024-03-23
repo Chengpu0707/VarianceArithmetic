@@ -21,6 +21,9 @@ class LossUncertaintyException (Exception):
         self.newValue = newValue
         self.newVariance = newVariance
 
+    def __str__(self) -> str:
+        return f'LossUncertaintyException: {self.name} for {self.input} at {self.n}'
+
 
 class Taylor:
     __slots__ = ('_variance_threshold', '_momentum')

@@ -4,7 +4,6 @@ import math
 import random
 import typing
 
-import histo
 import varDbl
 
 ElementTypes = (int, float, fractions.Fraction, varDbl.VarDbl)
@@ -45,30 +44,27 @@ def isSquareMatrix(ssMatrix:tuple[tuple[ElementType]], sType=ElementTypes) ->boo
     return True
 
 
-ELEMENT_RANGE = 1 << 16
-
-def createIntMatrix(size:int) ->tuple[tuple[int]]:
+def createIntMatrix(size:int, randRange) ->tuple[tuple[int]]:
     '''
     Create an int matrix of size "size" with each element uniformly distributed between [-"ELEMENT_RANGE", +"ELEMENT_RANGE"]
     '''
     size = abs(size)
-    return tuple([tuple([random.randint(-ELEMENT_RANGE, +ELEMENT_RANGE) for col in range(size)]) 
+    return tuple([tuple([random.randint(-randRange, +randRange) for col in range(size)]) 
                   for row in range(size)])
 
-def addNoise(ssMatrix:tuple[tuple[typing.Union[int, float]]], noise:float,
-             retainIntValue:bool=True) -> tuple[tuple[varDbl.VarDbl]]:
+def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tuple[varDbl.VarDbl]]:
     '''
-    Add Gaussian noise of level "noise" to "ssMatrix", with the actual noise is adjusted by ELEMENT_RANGE.
-
-    When "retainIntValue" is true, VarDbl.value() is int; Otherwise it is float.
+    Add Gaussian "noise" to "ssMatrix", with the actual noise is adjusted by ELEMENT_RANGE.
     '''
-    if not isSquareMatrix(ssMatrix, sType=(int, float)):
+    if not isSquareMatrix(ssMatrix, sType=(int,)):
         raise ValueError(f'Invalid int or float')
     size = len(ssMatrix)
-    noise *= ELEMENT_RANGE / math.sqrt(3)
-    return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + 
-                    (int(noise * random.normalvariate()) if retainIntValue else noise * random.normalvariate()), noise) 
-                for col in range(size)]) for row in range(size)])
+    if noise <= 0:
+        return tuple([tuple([varDbl.VarDbl(float(ssMatrix[row][col])) for col in range(size)]) 
+                      for row in range(size)])
+    return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), noise) 
+                         for col in range(size)]) 
+                  for row in range(size)])
 
 
 def linear(ssMatrix:tuple[tuple[ElementType]], scale:ElementType=1, offset:ElementType=0) -> tuple[tuple[ElementType]]:
@@ -101,6 +97,12 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
     if not isSquareMatrix(ssMatrix):
         raise ValueError(f'The input square matrix is illegal for determinant(): {ssMatrix}')
     size = len(ssMatrix)
+    if size == 1:
+        return ssMatrix[0][0], ssMatrix
+    elif size == 2:
+        return ssMatrix[0][0]*ssMatrix[1][1] - ssMatrix[0][1]*ssMatrix[1][0], \
+               tuple([tuple([ssMatrix[1][1], -ssMatrix[0][1]]), tuple([-ssMatrix[1][0], ssMatrix[0][0]])])
+
     sPermut = {permut: permutSign(permut) for permut in itertools.permutations(range(size), size)}
 
     value = 0
@@ -119,8 +121,8 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
         value += val
         variance += var
         for x, y in sCofVar:
-            if permut[x] == y:
-                sCofVar[(x,y)] += var
+            if (permut[x] == y) and (var > 0):
+                sCofVar[(x,y)] += var / ssMatrix[x][y].variance()
     
     sCofVal = {}
     for m in range(1, size):
@@ -145,14 +147,16 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
         for sY, var in sVar.items():
             var *= sVal[sY] ** 2
             variance += var
-            for sub in sY:
-                sCofVar[sub] += var
+            if var > 0:
+                for x, y in sY:
+                    sCofVar[(x, y)] += var / ssMatrix[x][y].variance()
         if m == 1:
-            for k,v in sVal.items():
+            for k, v in sVal.items():
                 sCofVal[k[0]] = v
+                sCofVar[k[0]] -= v**2
  
     return varDbl.VarDbl(value, variance, True) if variance > 0 else value, \
-           tuple([tuple([varDbl.VarDbl(sCofVal[(i,j)], sCofVar[(i,j)], True) if sCofVar[(i,j)] else sCofVal[(i,j)] 
+           tuple([tuple([varDbl.VarDbl(sCofVal[(i,j)], sCofVar[(i,j)], True) if 0 < sCofVar[(i,j)] else sCofVal[(i,j)] 
                          for i in range(size)]) 
                   for j in range(size)])
 
