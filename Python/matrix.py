@@ -1,6 +1,6 @@
 import fractions
-import itertools
 import math
+import itertools
 import random
 import typing
 
@@ -46,10 +46,18 @@ def isSquareMatrix(ssMatrix:tuple[tuple[ElementType]], sType=ElementTypes) ->boo
 
 def createIntMatrix(size:int, randRange) ->tuple[tuple[int]]:
     '''
-    Create an int matrix of size "size" with each element uniformly distributed between [-"ELEMENT_RANGE", +"ELEMENT_RANGE"]
+    Create an int matrix of size "size" with each element uniformly distributed between [-"randRange", +"randRange"]
     '''
     size = abs(size)
     return tuple([tuple([random.randint(-randRange, +randRange) for col in range(size)]) 
+                  for row in range(size)])
+
+def createHilbertMatrix(size:int) ->tuple[tuple[fractions.Fraction]]:
+    '''
+    https://en.wikipedia.org/wiki/Hilbert_matrix
+    '''
+    size = abs(size)
+    return tuple([tuple([fractions.Fraction(1, row + col + 1) for col in range(size)]) 
                   for row in range(size)])
 
 def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tuple[varDbl.VarDbl]]:
@@ -59,10 +67,8 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tup
     if not isSquareMatrix(ssMatrix, sType=(int,)):
         raise ValueError(f'Invalid int or float')
     size = len(ssMatrix)
-    if noise <= 0:
-        return tuple([tuple([varDbl.VarDbl(float(ssMatrix[row][col])) for col in range(size)]) 
-                      for row in range(size)])
-    return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), noise) 
+    return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), 
+                                       noise**2 + math.ulp(ssMatrix[row][col])**2, True) 
                          for col in range(size)]) 
                   for row in range(size)])
 
@@ -145,8 +151,12 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
                     sVal[sY] = val
                     sVar[sY] = var
         for sY, var in sVar.items():
-            var *= sVal[sY] ** 2
-            variance += var
+            try:
+                var *= sVal[sY] ** 2
+                variance += var
+            except OverflowError as ex:
+                print(f'adjugate(): size={size}, m={m}, max_element={max([max(abs(val) for val in row) for row in ssMatrix])}')
+                raise ex
             if var > 0:
                 for x, y in sY:
                     sCofVar[(x, y)] += var / ssMatrix[x][y].variance()

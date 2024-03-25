@@ -11,6 +11,15 @@ class Stat:
         self._sum = 0.0
         self._sum2 = 0.0
 
+    def __str__(self) -> str:
+        match self._count:
+            case 0:
+                return '"Stat: 0"'
+            case 1:
+                return f'"Stat: 1, {self._sum}"'
+            case _:
+                return f'"Stat: {self._count}, {self.mean()}+/-{self.dev()}"'
+
     def accum(self, value:float) ->bool:
         value = float(value)
         if not math.isfinite(value):
@@ -59,6 +68,9 @@ class Histo:
         self._more = 0
         self._sHisto = [0] *(2*self._half + 1)
 
+    def __str__(self) -> str:
+        return str(self._stat)
+    
     def range(self):
         return self._devs
     

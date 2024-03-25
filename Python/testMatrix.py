@@ -7,7 +7,8 @@ import unittest
 
 from histo import Histo, Stat
 from matrix import ElementType, permutSign, isSquareMatrix, createIntMatrix, addNoise, linear, multiply, adjugate
-from varDbl import VarDbl
+from taylor import LossUncertaintyException
+from varDbl import VarDbl, UncertaintyException
 
 
 class TestPermumation (unittest.TestCase):
@@ -152,10 +153,9 @@ class TestLinear (unittest.TestCase):
         self.verifyValue(ssRes[1][1], VarDbl(-7, 0.2))
 
 
+NOISES = tuple([math.pow(10, nexp) for nexp in range(-17, 0)])
 HIST_DIVIDES = 5
 HIST_RANGE = 3
-HIST_BINS = 2 * HIST_RANGE * HIST_DIVIDES
-NOISES = tuple([math.pow(10, -nexp) for nexp in range(1, 17)])
 
 
 class Adjugate:
@@ -164,14 +164,18 @@ class Adjugate:
     A precise matrix has all int elements.
     ELEMENT_RANGE and ROUND_RANGE so that the calculated variance does not overflow
     '''
-    MAX_SIZE = 10
-    ELEMENT_RANGE = 1 << 9
-    ROUND_RANGE = 1 << 9
+    MAX_SIZE = 11
+    ELEMENT_RANGE = 1 << 8
+
+    @staticmethod
+    def noise(noiseLevel:float) ->float:
+        return Adjugate.ELEMENT_RANGE/math.sqrt(3) * noiseLevel
+
     sLossVar = {(size, noise): 0 for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
-    sDetStat = {(size, noise): Stat() for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
     sAdjStat = {(size, noise): Stat() for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
     sAdjHisto = {(size, noise): Histo(HIST_DIVIDES, HIST_RANGE) 
                  for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
+    sFwdStat = {(size, noise): Stat() for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
     sRndStat = {(size, noise): Stat() for size in range(MAX_SIZE) for noise in (list(NOISES) + [0])}
 
     __slots__ = ('size', 'randRange', 'ssOrg', 'ssAdj', 'detAdj')
@@ -313,53 +317,66 @@ class TestAdjugate (unittest.TestCase):
         self.verify(ssMat3, VarDbl(val3, var3, True), ssAdj)
 
 
-    def roundtrip(self, adj:Adjugate, noise:float, ssOrg:tuple[tuple[ElementType]]):
+    def roundtrip(self, adj:Adjugate, noise:float, ssOrg:tuple[tuple[ElementType]],
+                  verify:bool=False):
         detAdj, ssAdj = adjugate(ssOrg)
-        self.verifyIdentity(detAdj, multiply(ssOrg, ssAdj))
+        ssId = multiply(ssOrg, ssAdj)
         detRnd, ssRnd = adjugate(ssAdj)
-        self.verifyIdentity(detRnd, multiply(ssAdj, ssRnd), places=5)
+            
+        if verify:
+            self.verifyIdentity(detAdj, multiply(ssOrg, ssAdj))
+            self.verifyIdentity(detRnd, multiply(ssAdj, ssRnd), places=5)
 
-        def accum(value, expected, adjStat:Stat, adjHisto:Histo, detStat:Stat=None):
+        def accum(value, expected, adjStat:Stat, adjHisto:Histo):
             if type(value) == VarDbl:
                 adjUnc = value.uncertainty()
                 adjStat.accum(adjUnc)
                 adjHisto.accum((value.value() - expected)/adjUnc)
-                if detStat and value.value():
-                    detStat.accum(adjUnc/abs(value.value()))
+                return True
             else:
-                Adjugate.sLossVar[(adj.size - 1, noise)] += 1
+                Adjugate.sLossVar[(adj.size, noise)] += 1
+                return False
 
-        detStat = Adjugate.sDetStat[(adj.size, noise)]
         adjStat = Adjugate.sAdjStat[(adj.size, noise)]
         adjHisto = Adjugate.sAdjHisto[(adj.size, noise)]
-        accum(detAdj, adj.detAdj, adjStat, adjHisto, detStat)
+        accum(detAdj, adj.detAdj, adjStat, adjHisto)
 
-        detStat = Adjugate.sDetStat[(adj.size - 1, noise)]
-        adjStat = Adjugate.sAdjStat[(adj.size - 1, noise)]
-        adjHisto = Adjugate.sAdjHisto[(adj.size - 1, noise)]
-        rndStat = Adjugate.sRndStat[(adj.size - 1, noise)]
+        precStat = Stat()
+        adjStat = Adjugate.sAdjStat[(adj.size, noise)]
+        adjHisto = Adjugate.sAdjHisto[(adj.size, noise)]
+        fwdStat = Adjugate.sFwdStat[(adj.size, noise)]
+        rndStat = Adjugate.sRndStat[(adj.size, noise)]
         for i in range(adj.size):
             for j in range(adj.size):
-                accum(ssAdj[i][j], adj.ssAdj[i][j], adjStat, adjHisto, detStat)
+                if accum(ssAdj[i][j], adj.ssAdj[i][j], adjStat, adjHisto) and ssAdj[i][j].value():
+                    precStat.accum(ssAdj[i][j].uncertainty() / abs(ssAdj[i][j].value()))
+
+                diff = ssId[i][j] - detAdj if i == j else ssId[i][j]
+                if type(diff) == VarDbl:
+                    fwdStat.accum(diff.value()/ diff.uncertainty())
+                else:
+                    Adjugate.sLossVar[(adj.size, noise)] += 1
 
                 diff = detAdj * ssRnd[i][j] - detRnd * ssOrg[i][j]
                 if type(diff) == VarDbl:
-                    rndUnc =diff.uncertainty()
-                    rndStat.accum(diff.value()/rndUnc)
+                    rndStat.accum(diff.value()/diff.uncertainty())
                 else:
-                    Adjugate.sLossVar[(adj.size - 1, noise)] += 1
+                    Adjugate.sLossVar[(adj.size, noise)] += 1
+
+        return detAdj, detRnd, precStat
 
 
     def testRoundtrip(self):
-        for size in range(3, 7):
+        for size in range(4, 7):
             now = datetime.datetime.now()
             adj = Adjugate(size)
             for noise in (1e-3, 1e-9):
                 for repeat in range(Adjugate.MAX_SIZE - size):
-                    ssVarOrg = addNoise(adj.ssOrg, noise * Adjugate.ELEMENT_RANGE/math.sqrt(3))
-                    self.roundtrip(adj, noise, ssVarOrg)
-                adjHisto = Adjugate.sAdjHisto[(adj.size - 1, noise)]
-                rndStat = Adjugate.sRndStat[(adj.size - 1, noise)]
+                    ssVarOrg = addNoise(adj.ssOrg, Adjugate.noise(noise))
+                    self.roundtrip(adj, noise, ssVarOrg, verify=True)
+
+                adjHisto = Adjugate.sAdjHisto[(adj.size, noise)]
+                rndStat = Adjugate.sRndStat[(adj.size, noise)]
                 try:
                     self.assertGreater(adjHisto.stat().dev(), 0.5)
                     self.assertLess(adjHisto.stat().dev(), 2)
@@ -368,11 +385,12 @@ class TestAdjugate (unittest.TestCase):
                     self.assertLess(rndStat.mean(), 0.1)
                 except BaseException as ex:
                     raise ex
+                
             adj = Adjugate(size, randRange=(1 << 14))
             for repeat in range(Adjugate.MAX_SIZE - size):
                 ssVarOrg = addNoise(adj.ssOrg, 0)
                 self.roundtrip(adj, 0, ssVarOrg)
-            adjHisto = Adjugate.sAdjHisto[(adj.size - 1, 0)]
+            adjHisto = Adjugate.sAdjHisto[(adj.size, 0)]
             if adjHisto.stat().dev():
                 try:
                     self.assertGreater(adjHisto.stat().dev(), 0.1)
@@ -381,31 +399,74 @@ class TestAdjugate (unittest.TestCase):
                     raise ex
             print(f'{size}: {(datetime.datetime.now() - now).total_seconds()}')
 
-    #@unittest.skip('Too slow')
+    def testException(self):
+        '''
+        The adjugate matrix has order of magnitude of 2^{18*6} == 10^{31}.  
+        The actual measured is 10^{28}~10^{26}.
+        The roundtrip matrix has order of magnitude of 10^{28*6} == 10^{206}.  
+        The square of the value is 10^{412}. The product of the variance 10^{26*6}=10^{105}.
+        Thus the result variance becomes overflow.
+        '''
+        adj = Adjugate(6, randRange=(1 << 17))
+        ssVarOrg = addNoise(adj.ssOrg, 0)
+        self.roundtrip(adj, 0, ssVarOrg)
+
+        adj = Adjugate(6, randRange=(1 << 18))
+        ssVarOrg = addNoise(adj.ssOrg, 0)
+        with self.assertRaises((OverflowError, UncertaintyException)):
+            self.roundtrip(adj, 0, ssVarOrg)
+
+
+    def testConditionalNumber(self):
+        '''
+        detAdj = 10^{20}~10^{12}
+        detRnd = 10^{102}~10^{176}
+        '''
+        adj = Adjugate(6, randRange=(1 << 12))
+        ssVarOrg = addNoise(adj.ssOrg, 0)
+        detAdj, detRnd, precStat = self.roundtrip(adj, 0, ssVarOrg)
+        with self.assertRaises(LossUncertaintyException):
+            detRnd / (detAdj**(5-1))
+
+
+    @unittest.skip('Too slow')
     def testDump(self):
         '''
+        Time to take with     
+                MAX_SIZE = 10
+                ELEMENT_RANGE = 1 << 9
+                ROUND_RANGE = 1 << 9
+            size=5, repeat=5, success: 0.083042
+            size=6, repeat=4, success: 0.966857
+            size=7, repeat=3, success: 12.42007
+            size=8, repeat=0, fail: 95.956827
+            size=4, repeat= 7, noise=1e-16: 0.195862
+            size=5, repeat= 6, noise=1e-16: 1.473194
+            size=6, repeat= 5, noise=1e-16: 19.911286
+            size=7, repeat= 4, noise=1e-16: 255.788484
+            size=8, repeat= 3, noise=1e-16: 3659.943234
         '''
-        with open('./Python/Output/AdjMatrix.txt', 'w') as f:
-            f.write(f"NoiseType\tNoise\tSize\tRepeat\tLoss Uncertainty"
+        with open('./Python/Output/AdjMatrix.txt', 'w') as f, open('./Python/Output/DetMatrix.txt', 'w') as fc:
+            f.write("NoiseType\tNoise\tSize\tRepeat\tLoss Uncertainty"
                     "\tError Deviation\tError Mean\tError Minimum\tError Maximum"
-                    "\tDeterminant Deviation\tDeterminant Mean\tDeterminant Minimum\tDeterminant Maximum"
-                    "\tRoundtip Deviation\tRoundtip Mean\tRoundtip Minimum\tRoundtip Maximum"
+                    "\tForward Deviation\tForward Mean\tForward Minimum\tForward Maximum"
+                    "\tRoundtrip Deviation\tRoundtrip Mean\tRoundtrip Minimum\tRoundtrip Maximum"
                     "\tUncertainty Deviation\tUncertainty Mean\tUncertainty Minimum\tUncertainty Maximum")
-            for i in range(HIST_BINS):
-                f.write(f'\t{(i - HIST_BINS//2 + 0.5) /HIST_DIVIDES:.1f}')
+            for bucket in Adjugate.sAdjHisto[(Adjugate.MAX_SIZE - 1, 0)].buckets():
+                f.write(f'\t{bucket:.1f}')
             f.write('\n')
 
             def write(adj, noise, repeat):
-                f.write(f'Gaussian\t{noise}\t{adj.size - 1}\t{repeat}')
-                f.write(f'\t{Adjugate.sLossVar[(adj.size - 1, noise)]/adj.size**2/repeat}')
-                histo = Adjugate.sAdjHisto[(adj.size - 1, noise)]
+                f.write(f'Gaussian\t{noise}\t{adj.size}\t{repeat}')
+                f.write(f'\t{Adjugate.sLossVar[(adj.size, noise)]/adj.size**2/2/(repeat + 1)}')
+                histo = Adjugate.sAdjHisto[(adj.size, noise)]
                 stat = histo.stat()
                 f.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}')
-                stat = Adjugate.sDetStat[(adj.size - 1, noise)]
+                stat = Adjugate.sFwdStat[(adj.size, noise)]
                 f.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}')
-                stat = Adjugate.sRndStat[(adj.size - 1, noise)]
+                stat = Adjugate.sRndStat[(adj.size, noise)]
                 f.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}')
-                stat = Adjugate.sAdjStat[(adj.size - 1, noise)]
+                stat = Adjugate.sAdjStat[(adj.size, noise)]
                 f.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}')
                 count = sum([c for c in histo.histogram()])
                 for c in histo.histogram():
@@ -416,30 +477,59 @@ class TestAdjugate (unittest.TestCase):
                 f.write('\n')
                 f.flush()
 
-            for size in range(4, Adjugate.MAX_SIZE):
-                now = datetime.datetime.now()
-                adj = Adjugate(size)
-                ssDblOrg = addNoise(adj.ssOrg, 0)
-                self.roundtrip(adj, 0, ssDblOrg)
-                for noise in NOISES:
-                    for repeat in range(Adjugate.MAX_SIZE - size + 1):
-                        ssVarOrg = addNoise(adj.ssOrg, noise)
-                        try:
-                            self.roundtrip(adj, noise, ssVarOrg)
-                        except BaseException as ex:
-                            self.roundtrip(adj, noise, ssVarOrg)
-                    write(adj, noise, repeat)
+            fc.write("NoiseType\tNoise\tSize\tRepeat"
+                    "\tMatrix Value\tMatrix Uncertainty\tMatrix Precision"
+                    "\tAdjugate Value\tAdjugate Uncertainty\tAdjugate Precision"
+                    "\tPrecision Deviation\tPrecision Mean\tPrecision Minimum\tPrecision Maximum\n")
 
-                adj = Adjugate(size, randRange=Adjugate.ROUND_RANGE)
+            def writeCond(adj, noise, repeat, detAdj, detRnd, stat):
+                fc.write(f'Gaussian\t{noise}\t{adj.size}\t{repeat}')
+                adjUnc = detAdj.uncertainty()
+                fc.write(f'\t{detAdj.value()}\t{adjUnc}\t{adjUnc/abs(detAdj.value())}')
+                rndUnc = detRnd.uncertainty()
+                fc.write(f'\t{detRnd.value()}\t{rndUnc}\t{rndUnc/abs(detRnd.value())}')
+                fc.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}\n')
+                fc.flush()
+
+            for size in range(5, Adjugate.MAX_SIZE):
+                now = datetime.datetime.now()
+                adj = Adjugate(size, randRange=(1 << 11))
                 for repeat in range(Adjugate.MAX_SIZE - size):
                     ssVarOrg = addNoise(adj.ssOrg, 0)
                     try:
-                        self.roundtrip(adj, noise, ssVarOrg)
+                        detAdj, detRnd, precStat = self.roundtrip(adj, 0, ssVarOrg)
                     except BaseException as ex:
-                        self.roundtrip(adj, noise, ssVarOrg)
-                write(adj, 0, repeat)
+                        try:
+                            detAdj, detRnd, precStat = self.roundtrip(adj, 0, ssVarOrg)
+                        except BaseException as ex:
+                            print(f'Fail at size={size}: {ex}')
+                            break
+                    writeCond(adj, 0, repeat, detAdj, detRnd, precStat)
+                else:
+                    write(adj, 0, repeat)
+                    print(f'size={size}, repeat={repeat}, success: {(datetime.datetime.now() - now).total_seconds()}')
+                    continue
+                print(f'size={size}, repeat={repeat}, fail: {(datetime.datetime.now() - now).total_seconds()}')
+                break
+
+            for size in range(4, Adjugate.MAX_SIZE):
+                now = datetime.datetime.now()
+                adj = Adjugate(size)
+                for noise in NOISES:
+                    for repeat in range(Adjugate.MAX_SIZE - size + 1):
+                        ssVarOrg = addNoise(adj.ssOrg, Adjugate.noise(noise))
+                        try:
+                            detAdj, detRnd, precStat = self.roundtrip(adj, noise, ssVarOrg)
+                        except BaseException as ex:
+                            try:
+                                detAdj, detRnd, precStat = self.roundtrip(adj, noise, ssVarOrg)
+                            except BaseException as ex:
+                                print(f'Fail at size={size} and noise={noise}: {ex}')
+                                raise ex    
+                        writeCond(adj, noise, repeat, detAdj, detRnd, precStat)
+                    write(adj, noise, repeat)
                 
-                print(f'size={size}, repeat= {repeat}: {(datetime.datetime.now() - now).total_seconds()}')
+                print(f'size={size}, repeat= {repeat}, noise={noise}: {(datetime.datetime.now() - now).total_seconds()}')
 
  
 

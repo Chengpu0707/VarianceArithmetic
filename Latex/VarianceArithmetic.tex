@@ -1307,6 +1307,8 @@ In case of proper coverage, the error deviation should be close to $1$: to be in
 
 When the input contains uncertainties whose deviation is not precisely known, such as he numerical errors of library functions using conventional floating-point calculations, Gaussian or white noises of increasing deviations can be added to the input, until idea coverage is reach.
 The needed minimal noise deviation gives a good estimation of the amount of the unspecified input uncertainties.
+The existence of ideal coverage is a necessary verification if the variance arithmetic correctly tracks the result uncertainty.
+The input noise range for the idea coverage defines the ideal application range of input uncertainties.
 
 Gaussian or white noises of specified deviations can also be added to the input to measure the error responses of a function.
 
@@ -1367,6 +1369,448 @@ Some information of the data is lost while other information is extracted during
 Conventional wisdom is that a reducing algorithm generally benefits from a larger input data set \cite{Probability_Statistics}.  
 Such a notion needs to be re-evaluated when uncertainty accumulates during calculation.  
 A test of uncertainty-bearing arithmetic using numerical integration is provided in Section \ref{sec: integration}.
+
+
+
+\clearpage
+\section{Matrix Inversion}
+\label{sec: matrix}
+
+
+\subsection{Uncertainty Propagation in Matrix Determinant}
+
+\iffalse
+
+\begin{align*}
+|\M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
+|\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &\equiv \sum_{[p_1 \dots p_n]_n}^{k =1 \dots m:\; p_{i_k}=j_k} \$ [p_1\dots p_n]_n 
+	\prod _{k = 1 \dots n }^{i_k \not\in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
+|\M_{<1 \dots n>_n, [j_1 \dots j_n]_n}| &= \$ [j_1\dots j_n]_n; \\
+|\M| &= \sum_{{[j_1 \dots j_m]}_n} |\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1 \dots m} x_{i_k, j_k}; \\
+|\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &= \sum_{j \in \{j_1 \dots j_m\}} |\M_{<i_1 \dots i \dots i_m>_n, [j_1 \dots j \dots j_m]_n}| \;x_{i, j};
+\end{align*}
+
+\begin{align*}
+|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1 \dots n} (x_{i,p_i} + \tilde{x}_{i,p_{i}}) \\
+	&= \sum_{[p_1 \dots p_{n}]_n} \$[p_1 \dots p_{n}]_n \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n}
+		\prod_{i=i_1 \dots i_m} \tilde{x}_{i,p_{i}} \prod_{k = 1 \dots n }^{i_k \not \in \{i_1 \dots i_m\}} x_{k, p_{k}} \\
+	&= \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_{m}]_n} 
+		M_{<i_1 \dots i_m>_n, [j_1 \dots j_{m}]_n} \prod_{i=1 \dots m}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}}
+\end{align*}
+Examples for $|\widetilde{M}|$:
+\begin{align*}
+|\tilde{M}| &= x_{0,0} + \tilde{x}_{0,0}; \\
+|\tilde{M}| &= \left| \begin{matrix} 
+            x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1} \end{matrix} \right| 
+	= (x_{0,0} + \tilde{x}_{0,0})(x_{1,1} + \tilde{x}_{1,1}) - (x_{0,1} + \tilde{x}_{0,1})(x_{1,0} + \tilde{x}_{1,0}) \\
+	&= \left| \begin{matrix}  x_{0,0}, x_{0,1} \\  x_{1,0},  x_{1,1} \end{matrix} \right| 
+	  + \left| \begin{matrix}  x_{0,0}, \tilde{x}_{0,1} \\  x_{1,0},  \tilde{x}_{1,1} \end{matrix} \right|
+	  + \left| \begin{matrix}  \tilde{x}_{0,0}, x_{0,1} \\  \tilde{x}_{1,0},  x_{1,1} \end{matrix} \right|
+	  + \left| \begin{matrix}  \tilde{x}_{0,0}, \tilde{x}_{0,1} \\  \tilde{x}_{1,0}, \tilde{x}_{1,1} \end{matrix} \right| \\
+|\tilde{M}| &= \left| \begin{matrix} 
+            x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} + \tilde{x}_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} + \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} + \tilde{x}_{2,2} \end{matrix} \right|
+	= \left| \begin{matrix} 
+	        x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, \tilde{x}_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+ &= \left| \begin{matrix} 
+ 		    x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	        x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	        x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	        x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+ &= \left| \begin{matrix} 
+        	x_{0,0}, x_{0,1}, x_{0,2} \\ 
+			x_{1,0}, x_{1,1}, x_{1,2} \\ 
+			x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	  		\tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
+			\tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
+			\tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|	
+	  + \left| \begin{matrix} 
+	  		x_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			x_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			x_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+      + \left| \begin{matrix} 
+      		x_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			x_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+	  &\eqspace + \left| \begin{matrix} 
+	  		\tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
+			\tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
+			\tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	  		\tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
+			\tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
+			\tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	  		x_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			x_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			x_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
+	  + \left| \begin{matrix} 
+	  		\tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
+			\tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
+			\tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
+ &= |\M| + \sum_{i = 0}^{2} \sum_{j = 0}^{2} |\M_{i,j}| \tilde{x}_{i,j} 
+ 		+ \sum_{<j_1,j_2>} \sum_{[i_1,i_2]} |\M_{[i_1,i_2], <j_1,j_2>}| \tilde{x}_{i_1,j_1} \tilde{x}_{i_2,j_2} \\
+ &+ \sum_{<j_1,j_2,j_3>} \sum_{[i_1,i_2,i_3]} \tilde{x}_{i_1,j_1} \tilde{x}_{i_2,j_2} \tilde{x}_{i_3,j_3};
+\end{align*}
+
+\begin{align*}
+\delta^2 |\M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
+  		|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
+	& m = 1:\eqspace \sum_{i=1}^{n} \sum_{j=1}^{n} |\M_{i, j}|^2 (\delta x_{i, j})^2; \\
+	& m = 2:\eqspace 	\sum_{<i_1, i_2>_n} \sum_{[j_1, j_2]_n} |\M _{<i_1, i_2>_n, [j_1, j_2]_n}|^2 (\delta x_{i_1, j_1})^2 (\delta x_{i_2, j_2})^2; \\
+	& m = n:\eqspace \sum_{[j_1 \dots j_n]_n} \prod_{k=1 \dots n} (\delta x_{i_k, j_k})^2; \\
+\delta^2 |\M_{i,j}| &= \sum_{m=2 \dots n} \sum_{<i_1 \dots i_m>_n}^{i \in \{i_1 \dots i_m\}} \sum_{[j_1 \dots j_m]_n}^{j \in \{j_1 \dots j_m\}}
+  	|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i_m\}, i_k \ne i} (\delta x_{i_k, j_k})^2; \\
+	& m = 2:\eqspace \sum_{i_1=1 \dots n}^{i_1\ne i} \sum_{j_1 = 1 \dots n}^{j_1 \ne j} |\M _{<i_1, i>_n, [j_1, j]_n}|^2 (\delta x_{i_1, j_1})^2; \\
+	& m = n - 1:\eqspace \sum_{[j_1 \dots j \dots n]_n} \prod_{k=1 \dots n}^{i_k \ne i} (\delta x_{i_k, j_k})^2;
+\end{align*}
+
+To evaluate $\delta^2 |\M|$ as a function of $(|\M_{i, j}|^2, \delta x_{i, j})^2, \delta^2 |\M_{i,j}|)$:
+\begin{enumerate}
+\item $\delta^2 |\M|: m - 1$ has the same $|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \not \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2$ term as $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$.
+
+\item $\delta^2 |\M|: m - 1$ has $\frac{n!}{(m - 1)! (n - m + 1)!} \times (m - 1)! = \frac{n!}{(n + 1 - m)!}$ terms to sum.
+
+\item $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$ has $\frac{(n - 1)!}{m! (n - m - 1)!} \times m! = \frac{(n - 1)!}{(n - 1 - m)!}$ terms to sum.
+
+\item For different $m$, different counts of $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$ are needed to sum to $\delta^2 |\M|: m - 1$.
+\end{enumerate}
+Thus, the following relation in the previous paper is wrong:
+\begin{equation*}
+\delta^2 |\M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|\M_{i, j}|^2 + \delta^2 |\M_{i,j}| \right);
+\end{equation*}
+The above relation only holds when $n=2$:
+\begin{align*}
+|\M| &= \left| \begin{matrix} x_{0,0}, x_{0,1} \\ x_{1,0}, x_{1,1} \end{matrix} \right| = x_{0,0} x_{1,1} - x_{0,1} x_{1,0};  \\
+|\tilde{M}| - |\M| &= \tilde{x}_{0,0} x_{1,1} + x_{0,0} \tilde{x}_{1,1} + \tilde{x}_{0,0} \tilde{x}_{1,1}
+	 - \tilde{x}_{0,1} x_{1,0} - x_{0,1} \tilde{x}_{1,0} - \tilde{x}_{0,1} \tilde{x}_{1,0}; \\
+\delta^2 |\M| &= (\delta x_{0,0})^2 (x_{1,1})^2 + (x_{0,0})^2 (\delta x_{1,1})^2 +  (\delta x_{0,1})^2 (x_{1,0})^2 + (x_{0,1})^2 (\delta x_{1,0})^2 \\
+		&+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2; \\
+	&= \delta^2 \left( (x_{0,0} \pm \delta x_{0,0}) (x_{1,1} \pm \delta x_{0,0}) -  (x_{0,1} \pm \delta x_{0,1}) (x_{1,0} \pm \delta x_{0,0}) \right);
+\end{align*}
+But it does not hold when $n=3$:
+\begin{align*}
+|\M| &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ x_{1,0}, x_{1,1}, x_{1,2} \\ x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right| \\
+&= x_{0,0} x_{1,1} x_{2,2} - x_{0,0} x_{1,2} x_{2,1} 
+   	+ x_{0,1} x_{1,2} x_{2,0} - x_{0,1} x_{1,0} x_{2,2}
+    + x_{0,2} x_{1,0} x_{2,1} -  x_{0,2} x_{1,1} x_{2,0}; \\
+\delta^2 |\M| &= (\delta x_{0,0})^2 |\M_{0,0}|^2 + (\delta x_{0,1})^2 |\M_{0,1}|^2 + (\delta x_{0,2})^2 |\M_{0,2}|^2 \\
+  &+ (\delta x_{1,0})^2 |\M_{1,0}|^2 + (\delta x_{1,1})^2 |\M_{1,1}|^2 + (\delta x_{1,2})^2 |\M_{1,2}|^2 \\
+  &+ (\delta x_{2,0})^2 |\M_{2,0}|^2 + (\delta x_{2,1})^2 |\M_{2,1}|^2 + (\delta x_{2,2})^2 |\M_{2,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 |x_{2,2}|^2 + (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 |x_{2,1}|^2 + (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 |x_{2,0}|^2 + (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 |x_{2,2}|^2 + (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,2})^2 (\delta x_{1,0})^2 |x_{2,1}|^2 + (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,2})^2 (\delta x_{1,1})^2 |x_{2,0}|^2 + (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2 + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;\\
+\end{align*}
+\begin{align*}
+& (\delta x_{2,2})^2 \delta^2 |\M_{2,2}| = (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
+  &+  (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2; \\
+& (\delta x_{2,1})^2 \delta^2 |\M_{2,1}| = (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
+  &+  (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2  + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2; \\
+& (\delta x_{2,0})^2 \delta^2 |\M_{2,0}| = (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
+  &+  (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2; \\
+\delta^2 |\M| & - \sum_{i=0}^{2} \sum_{j=0}^{2} (\delta x_{i,j})^2 |\M_{i,j}| - \sum_{j=0}^{2} (\delta x_{2,j})^2 \delta^2 |\M_{2,j}| \\
+  &= (\delta x_{0,0})^2 (\delta x_{1,1})^2 |x_{2,2}|^2 + (\delta x_{0,0})^2 (\delta x_{1,2})^2 |x_{2,1}|^2 \\
+  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 |x_{2,0}|^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2 |x_{2,2}|^2 + \\
+  &+ (\delta x_{0,2})^2 (\delta x_{1,0})^2 |x_{2,1}|^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 |x_{2,0}|^2;
+\end{align*}
+
+\begin{align*}
+|\M| &= x_{0,0} x_{1,1} x_{2,2} - x_{0,0} x_{1,2} x_{2,1} 
+	&+ x_{0,1} x_{1,2} x_{2,0} - x_{0,1} x_{1,0} x_{2,2}
+    &+ x_{0,2} x_{1,0} x_{2,1} -  x_{0,2} x_{1,1} x_{2,0}; \\
+\end{align*}
+
+
+Compare $\delta^2 |\M|$ with multiplication:
+\begin{align*}
+\delta^2 x_1 x_2 &= x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \\
+\delta^2 x_1 x_2 x_3 &= \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) x_3^2 + x_1^2 x_2^2 (\delta x_3^2) 
+		+ \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) (\delta x_3^2); \\
+	&= (\delta x_1)^2 x_2^2 x_3^2 + x_1^2 (\delta x_2)^2 x_3^2 + x_1^2 x_2^2 (\delta x_3)^2 \\
+	&+  x_1^2 (\delta x_2)^2 (\delta x_3)^2 + (\delta x_1)^2 x_2^2 (\delta x_3)^2 + (\delta x_1)^2 (\delta x_2)^2 x_3^2 + (\delta x_1)^2 (\delta x_2)^2 (\delta x_3)^2; \\
+\delta^2 \prod_{k=1}^{n} x_k &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \prod_{i \in <i_1 \dots i_m>_n} (\delta x_i)^2 \prod_{j \not \in <i_1 \dots i_m>_n} {x_j}^2;
+\end{align*}
+
+\fi
+
+
+
+
+Let vector $[p_1, p_{2} \dots p_n]_n$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  
+Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}.  
+For a $n$-by-$n$ square matrix $\M$ with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Linear_Algebra} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
+$M_{i,j}$ is the matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Linear_Algebra}.  
+Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Linear_Algebra}.
+\begin{align}
+\label{eqn: determinant}
+|\M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
+\label{eqn: sub-determinant}
+|\M|_{i,j} &\equiv \sum_{[p_1\dots p_n]_n}^{p_{i} = j} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n}^{k \ne i} x_{k,p_{k}}; \\
+\label{eqn: determinant sum 1}
+|\M| &=\sum_{j=1 \dots n} |\M_{i,j}| x_{i,j} = \sum_{i=1 \dots n} |\M_{i,j}| x_{i,j};
+\end{align}
+
+Assuming $p_1, p_{2} \in \{1\dots n\}$, let $[p_1, p_{2}]_n$ denote the length-2 unordered permutation which satisfies $p_1 \neq p_{2}$, and let $<p_1,p_{2}>_n$ denote the length-2 ordered permutation which satisfies $p_1 < p_{2}$, and let ${<i_1,i_2>}_n$ be an arbitrary ordered permutation \footnote{An ordered permutation is a sorted combination.}. 
+Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
+\begin{align}
+&|\M_{<i_1 ,i_{2}>_n, [j_1 ,j_{2}]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{p_{i_1}=j_1, p_{i_{2}}=j_{2}} 
+    \$ [p_1\dots p_n]_n \prod _{k=1 \dots n}^{k \not \in \{i_1, i_2\}} x_{k,p_{k}}; \\
+\label{eqn: determinant sum 2}
+|\M| &= \sum_{j_1 = 1 \dots n} x_{i_1, j_1} |\M_{i_1, j_1}| = 
+\sum_{j_1=1 \dots n} \sum_{j_{2}=1 \dots n}^{ j_{2} \ne j_1} |\M _{<i_1, i_{2}>_n,  [j_1, j_{2}]_n}| x_{i_1, j_1} x_{i_{2}, j_{2}};
+\end{align}
+The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m =1...n$.  
+Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $<i_1 \dots i_m>_n$ is an arbitrary ordered permutation. 
+The $(n-m)$-by-$(n-m)$ matrix in $|\M_{<i_1 \dots i_m>_n[j_1 \dots j_m]_n}|$ is obtained by deleting the rows in $\{i_1 \dots i_m\}$ and the columns in $\{j_1 \dots j_m\}$.
+This leads to Formula \eqref{eqn: sub-determinant equivalence}.
+\begin{align}
+\label{eqn: sub-determinant generic}
+&|\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{i_1 \dots i_m\}: p_k=j_k} \$ [p_1\dots p_n]_n 
+	\prod_{k = 1 \dots n }^{k \not \in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
+\label{eqn: determinant sum}
+|\M| &= \sum_{{[j_1 \dots j_m]}_n} |\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
+\label{eqn: sub-determinant equivalence}
+&||\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|| = ||\M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}||  ;
+\end{align}
+
+If all the element of the matrix satisfy the uncorrelated uncertainty assumption, after applying Formula \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance}, Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} are the result mean and variance, respectively.
+\footnote{The previous paper \cite{Prev_Precision_Arithmetic} also contains the wrong formula:
+\begin{equation}
+\delta^2 |\M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|\M_{i, j}|^2 + \delta^2 |\M_{i,j}| \right);
+\end{equation}
+}
+\begin{align}
+\label{eqn: determinant mean}
+\overline{|\M|} &= |\M|; \\
+\label{eqn: determinant variance}
+\delta^2 |\M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
+  	|\M _{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}|^2 \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; 
+\end{align}
+Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} assume that the uncertainties of matrix elements are independent to each other.
+In contrast, for the special matrix in Formula \eqref{eqn: special determinant}, after applying Formula \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance}, Formula \eqref{eqn: special determinant mean} and \eqref{eqn: special determinant variance} give the result mean and variance, respectively. 
+\begin{align}
+\label{eqn: special determinant}
+|\M| &= \left| \begin{matrix} x, z, y \\ z, y, x \\ y, x, z \end{matrix} \right| = 3 x y z - x^3 - y^3 - z^3; \\
+\label{eqn: special determinant mean}
+\overline{|\M|} &= - 3 x (\delta x)^2 - 3 y (\delta y)^2 - 3 z (\delta z)^2; \\
+\label{eqn: special determinant variance}
+\delta^2 |\M| &= 3 (5 x^4 - 12 x^2 y z + 2 x y^3 + 2 x z^3 + 3 y^2 z^2)(\delta x)^2 \\
+ 	&+ 3 (5 y^4 - 12 y^2 x z + 2 y x^3 + 2 y z^3 + 3 x^2 z^2)(\delta y)^2 \nonumber \\
+ 	&+ 3 (5 z^4 - 12 z^2 x y + 2 z x^3 + 2 z y^3 + 3 x^2 y^2)(\delta z)^2 \nonumber \\
+ 	&+ 9 (z^2 + 2 x y)(\delta x)^2 (\delta y)^2 + 9 (y^2 + x z) (\delta x)^2 (\delta z)^2 + 9 (x^2 +2 y x) (\delta y)^2 (\delta z)^2 \nonumber \\
+ 	&+ 9 (5 x^2 - 2 y z) (\delta x)^4 + 9 (5 y^2 - 2 x z) (\delta y)^4 + 9 (5z^4 - 2 x y) (\delta z)^4 \nonumber \\
+    &+ 15 (\delta x)^6 + 15 (\delta x)^6 + 15 (\delta x)^6 \nonumber;
+\end{align}
+
+
+
+
+\subsection{Adjugate Matrix}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Adjugate_Uncertainty_vs_Size_Noise.png} 
+\captionof{figure}{
+The result uncertainty means vs. input uncertainties and matrix sizefor the difference between $\widehat{\M}^A$ and $\M^A$.
+The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+}
+\label{fig: Adjugate_Uncertainty_vs_Size_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Adjugate_Error_vs_Size_Noise.png} 
+\captionof{figure}{
+The result error deviations vs. input uncertainties and matrix size for the difference between $\widehat{\M}^A$ and $\M^A$.
+The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+}
+\label{fig: Adjugate_Error_vs_Size_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Forward_Error_vs_Size_Noise.png} 
+\captionof{figure}{
+The result error deviations vs. input uncertainties and matrix size for the difference of Formula \eqref{eqn: adjugate matrix}.
+The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+}
+\label{fig: Forward_Error_vs_Size_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Roundtrip_Error_vs_Size_Noise.png} 
+\captionof{figure}{
+The result error deviations vs. input uncertainties and matrix size for the difference of Formula \eqref{eqn: roundtrip}.
+The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+}
+\label{fig: Roundtrip_Error_vs_Size_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Adjugate_Histogram_Size_6.png} 
+\captionof{figure}{
+The result histograms for the normalized errors for the same matrix size $6$ different input uncertainties as shown in the legend.
+$\M$ is generated by random integers in the range of $[-2^8, +2^8]$.
+}
+\label{fig: Adjugate_Histogram_Size_6}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Adjugate_Histogram_Noise_0.png} 
+\captionof{figure}{
+The result histograms for the normalized errors for different matrix size and the input uncertainty $0$ as shown in the legend.
+$\M$ is generated by random integers in the range of $[-2^{11}, +2^{11}]$.
+}
+\label{fig: Adjugate_Histogram_Noise_0}
+\end{figure}
+
+
+
+The square matrix whose element is $(-1)^{i+j}|\M_{j,i}|$ is defined as the \emph{adjugate matrix} \cite{Linear_Algebra} $\M^A$ to the original square matrix $\M$.
+Let $\I$ be the identical matrix for $\M$.
+Formula \eqref{eqn: adjugate matrix} and \eqref{eqn: roundtrip matrix} show the relation of $\M^A$ and $\M$, which only involve addition, subtraction and multiplication.
+\begin{align}
+\label{eqn: adjugate matrix}
+\M \times \M^A &= \M^A \times \M = |\M| \I; \\
+\label{eqn: roundtrip matrix}
+|\M| \M^A &=|\M^A| \M; 
+\end{align}
+
+To test Formula \eqref{eqn: determinant variance}:
+\begin{enumerate}
+\item A matrix $\M$ is constructed using random integers uniformly distributed in the range of $[-2^8, +2^8]$.
+The integer arithmetic grantees that $|\M|$, $\M^A$, and $|\M^A|$ are precise.
+
+\item Gaussian noises of predefined levels are added to $\M$, to construct $\widehat{\M}$ which contains imprecise values.
+The variance arithmetic is used to calculate $|\widehat{\M}|$, $\widehat{\M}^A$, and $|\widehat{\M}^A|$.
+
+\item The difference between $|\widehat{\M}|$ and $\M^A$ defines the \emph{Adjugate} Test.
+Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise} shows that the result uncertainties increase exponentially with both the input noises and the matrix size, while Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the ideal coverage is achieved for the input noises greater than $10^{-16}$.
+
+\item Formula \eqref{eqn: adjugate matrix} defines the \emph{Forward} Test.
+Figure \ref{fig: Forward_Error_vs_Size_Noise} shows that Formula \eqref{eqn: adjugate matrix} is strictly observed for idea coverage because the difference is delta-distributed with zero distribution deviation.
+
+\item Formula \eqref{eqn: roundtrip  matrix} defines the \emph{Roundtrip} Test.
+Figure \ref{fig: Roundtrip_Error_vs_Size_Noise} shows that Formula \eqref{eqn: roundtrip matrix} is strictly observed for idea coverage because the difference is delta-distributed with zero distribution deviation.
+
+\end{enumerate}
+
+The significand of the conventional floating-point representation \cite{Floating_Point_Standard} has $53$-bit resolution, or $\epsilon = 10^{-16}$.
+Adding noise at or below this level will not change the value of a conventional floating-point value, which is the lower bound for the ideal coverage.
+Figure \ref{fig: Adjugate_Histogram_Size_6} shows that the histograms of the normalized errors are normal distributed in ideal coverage.
+Below the lower bound for idea coverage, floating-point rounding errors dominate the result uncertainties.
+When $\M$ is generated by random integers in the range of $[-2^8, +2^8]$, for the input uncertainty $10^{-17}$:
+\begin{itemize}
+\item In Figure \ref{fig: Adjugate_Histogram_Size_6}, the adjugate matrix calculation involves about $8 \times 5 = 40$ significand bits for a matrix size $6$, so there is no rounding errors.
+
+\item The histogram for matrix size $7$ is very similar to Figure \ref{fig: Adjugate_Histogram_Size_6}, because the adjugate matrix calculation involves about $8 \times 6 = 48$ significand bits.
+
+\item The histogram for matrix size $8$ is quite different to Figure \ref{fig: Adjugate_Histogram_Size_6}, because the adjugate matrix calculation involves about $8 \times 6 = 56$ significand bits.
+\end{itemize}
+In Figure \ref{fig: Adjugate_Histogram_Noise_0}, when $\M$ is generated by random integers in the range of $[-2^{11}, +2^{11}]$ without added noises:
+\begin{itemize}
+\item For matrix size $5$, $11 \times 4 = 44$ significand bits are involved, so there is no rounding errors.
+
+\item For matrix size $6$, $11 \times 5 = 55$ significand bits are involved, so there starts to have rounding errors but the overall distribution is still delta-like.
+
+\item For matrix size $7$, $11 \times 6 = 66$ significand bits are involved, so there are significant rounding errors, and the distribution is no longer delta-like.
+
+\end{itemize}
+As shown in Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, \ref{fig: Forward_Error_vs_Size_Noise}, and \ref{fig: Roundtrip_Error_vs_Size_Noise}, the variance arithmetic can only provide proper coverage for the conventional floating-point rounding errors.
+
+For both ideal coverages and proper coverages, the result uncertainties provided by the variance arithmetic trace the result value errors closely, even in the huge range of the value errors as suggested by Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise}.
+This validates using variance arithmetic to calculate adjugate matrix.
+
+
+\subsection{Matrix Stability}
+
+\begin{align}
+\label{eqn: inverse matrix}
+\M^{-1} &\equiv \M^A / |\M|; \\
+\label{eqn: matrix condition number}
+\left| |\M^{-1}| |\M| \right| &= \frac{|\M^A|}{|\M|^{n-1}};
+\end{align}
+When all values in $\M$ are precise:
+\begin{itemize}
+\item The inverse matrix \cite{Linear_Algebra} $\M^{-1}$ defined by Formula \eqref{eqn: inverse matrix} is functionally equivalent to $\M^A$.
+
+\item Formula \eqref{eqn: determinant sum 1} contains different paths, all of which are equivalent.
+\end{itemize} 
+When the rounding errors of the conventional floating-point arithmetic are no longer ignored, Formula \eqref{eqn: inverse matrix} is avoided, and the different paths of Formula \eqref{eqn: determinant sum 1} is explored to calculate $\M^{-1}$ in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
+When the input uncertainties are no longer ignored, the stability of $\M^{-1}$ is measured by the conditional number \cite{Linear_Algebra} as defined in Formula \eqref{eqn: matrix condition number}.
+In contrast, the variance arithmetic provides direct quantification of uncertainty, so that the effect of $|\M|$ in Formula \eqref{eqn: inverse matrix} to $\M^{-1}$ can be qualified by the precision of $|\M|$ using Formula \eqref{eqn: inversion precision}.
+
+
+
+
+
+
+However, when $|\M|$ is imprecise, it introduce globally uncertainties to $\M^{-1}$, and the stability of $\M^{-1}$ is measured by the conditional number  \cite{Linear_Algebra} as defined in Formula \eqref{eqn: matrix condition number}.
+
+When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
+\begin{itemize}
+\item The input uncertainties and the calculation rounding errors can not be accounted for in the results.
+
+\item One path is chosen out of many possible paths, such as using different $i$ for summing by $j$ in Formula \eqref{eqn: determinant sum 1}. 
+
+\item The result is path dependent.
+When calculating the inverse matrix, such dependency is so strong that Formula \eqref{eqn: inverse matrix} is avoided, and the path which is deemed to have smallest rounding error is chosen in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
+Even so, the result uncertainty is not clear.
+\end{itemize}
+In contrast, Formula \eqref{eqn: determinant variance} is no longer path dependent, and it accounts for all input uncertainties and calculation rounding errors.
+
+A matrix $\tilde{M}$ is constructed from $M$ in two different ways:
+\begin{itemize}
+\item \emph{rounding}: If each element of $M$ is converted to a conventional 64-bit floating-point value to construct $\tilde{M}$, the result errors are due to the rounding errors of the conventional 64-bit floating-point calculations.
+
+\item \emph{noise}: If either Gaussian noise or white noise of a particular level is added to each element of $M$ to construct $\tilde{M}$, the result errors are mainly due to the input noise unless the input noise level is $10^{-16}$ or less.
+For example, if the noise-level is $10^{-3}$, because the distribution deviation of the elements of $M$ is $16384 /\sqrt{3} = 9459$, the Gaussian noise is generated with the deviation of $9459 \times 10{-3}$. 
+
+\item For simplicity, a same noise-level is used for every element of $M$.
+\end{itemize}
+
+The calculation results using $\tilde{M}$ can be compared with those of $M$ in different tests:
+\begin{itemize}
+\item \emph{determinant}: to compare $|\M|$ and $|\tilde{M}|$.
+
+\item \emph{adjugate}: to compare $M^A$ and $\tilde{M}^A$.
+
+\item \emph{inverse}: to compare $M^A M = |\M| \I$ and $\tilde{M}^A \tilde{M}$, in which $\I$ is the identity matrix \cite{Linear_Algebra} for $M$.
+\end{itemize}
+
+
+
+
 
 
 
@@ -1477,262 +1921,6 @@ On the other hand, the statistical tracking by the variance arithmetic using For
 Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
 The stability test method can be used for numerical calculation of Taylor expansion, as well as the calculation of the mean and the variance of the Taylor expansion.
 If the stability test can not be applied, the convergence of the mean and the variance can be judged numerically according to Section \ref{sec: Math Library}, and the reminder estimation method can be used to terminate the expansion.
-
-
-
-
-
-\clearpage
-\section{Matrix Inversion}
-\label{sec: matrix}
-
-
-\subsection{Uncertainty Propagation in Matrix Determinant}
-
-%\iffalse
-
-\begin{align*}
-|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
-|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &\equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{1 \dots m \}: p_{i_k}=j_k} \$ [p_1\dots p_n]_n 
-	\prod _{k = 1 \dots n }^{i_k \not\in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
-|M_{<1 \dots n>_n, [p_1 \dots p_n]_n}| &= \$ [p_1\dots p_n]_n; \\
-|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
-|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| &= \sum_{j \in \{j_1 \dots j_m\}} |M_{<i_1 \dots i \dots i_m>_n, [j_1 \dots j \dots j_m]_n}| \;x_{i, j};
-\end{align*}
-
-\begin{align*}
-|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1 \dots n} (x_{i,p_i} + \tilde{x}_{i,p_{i}}) \\
-	&= \sum_{[p_1 \dots p_{n}]_n} \$[p_1 \dots p_{n}]_n \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n}
-		\prod_{i=1 \dots n}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}} \prod_{k = 1 \dots n }^{i_k \not \in \{i_1 \dots i_m\}} x_{k, p_{k}} \\
-	&= \sum_{m=0 \dots n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_{m}]_n} 
-		M_{<i_1 \dots i_m>_n, [j_1 \dots j_{m}]_n} \prod_{i=1 \dots m}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}}
-\end{align*}
-One example for $|\widetilde{M}|$:
-\begin{align*}
-|\tilde{M}| &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} + \tilde{x}_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} + \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} + \tilde{x}_{2,2} \end{matrix} \right|
-	= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1} + \tilde{x}_{0,1}, \tilde{x}_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1} + \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1} + \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
- &= \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			x_{1,0} + \tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0} + \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			x_{1,0} + \tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0} + \tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
- &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ 
-			x_{1,0}, x_{1,1}, x_{1,2} \\ 
-			x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, x_{0,2} \\ 
-			\tilde{x}_{1,0}, x_{1,1}, x_{1,2} \\ 
-			\tilde{x}_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right|	
-	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			x_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			x_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-      + \left| \begin{matrix} x_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			x_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| \\
-	  &\eqspace + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, x_{0,2} \\ 
-			\tilde{x}_{1,0}, \tilde{x}_{1,1}, x_{1,2} \\ 
-			\tilde{x}_{2,0}, \tilde{x}_{2,1}, x_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, x_{0,1}, \tilde{x}_{0,2}  \\
-			\tilde{x}_{1,0}, x_{1,1}, \tilde{x}_{1,2} \\ 
-			\tilde{x}_{2,0}, x_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} x_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			x_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			x_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right|
-	  + \left| \begin{matrix} \tilde{x}_{0,0}, \tilde{x}_{0,1}, \tilde{x}_{0,2} \\
-			\tilde{x}_{1,0}, \tilde{x}_{1,1}, \tilde{x}_{1,2} \\ 
-			\tilde{x}_{2,0}, \tilde{x}_{2,1}, \tilde{x}_{2,2} \end{matrix} \right| 
-\end{align*}
-
-\begin{align*}
-\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
-	& m = 1:\eqspace \sum_{i=1}^{n} \sum_{j=1}^{n} |M_{i, j}|^2 (\delta x_{i, j})^2; \\
-	& m = 2:\eqspace 	\sum_{<i_1, i_2>_n} \sum_{[j_1, j_2]_n} |M _{<i_1, i_2>_n, [j_1, j_2]_n}|^2 (\delta x_{i_1, j_1})^2 (\delta x_{i_2, j_2})^2; \\
-	& m = n:\eqspace \sum_{[j_1 \dots j_n]_n} \prod_{k=1 \dots n} (\delta x_{i_k, j_k})^2; \\
-\delta^2 |M_{i,j}| &= \sum_{m=1 \dots n-1} \sum_{<i_1 \dots i \dots i_m>_n} \sum_{[j_1 \dots j \dots j_m]_n}
-  	|M _{<i_1 \dots i \dots i_m>_n{[j_1 \dots j \dots j_m]}_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
-	& m = 2:\eqspace \sum_{i_1=1 \dots n}^{i_1\ne i} \sum_{j_1 = 1 \dots n}^{j_1 \ne j} |M _{<i_1, i>_n, [j_1, j]_n}|^2 (\delta x_{i_1, j_1})^2; \\
-	& m = n - 1:\eqspace \sum_{[j_1 \dots j \dots n]_n} \prod_{k=1 \dots n}^{i_k \ne i} (\delta x_{i_k, j_k})^2;
-\end{align*}
-
-To evaluate $\delta^2 |M|$ as a function of $(|M_{i, j}|^2, \delta x_{i, j})^2, \delta^2 |M_{i,j}|)$:
-\begin{enumerate}
-\item $\delta^2 |M|: m - 1$ has the same $|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \not \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2$ term as $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$.
-
-\item $\delta^2 |M|: m - 1$ has $\frac{n!}{(m - 1)! (n - m + 1)!} \times (m - 1)! = \frac{n!}{(n + 1 - m)!}$ terms to sum.
-
-\item $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ has $\frac{(n - 1)!}{m! (n - m - 1)!} \times m! = \frac{(n - 1)!}{(n - 1 - m)!}$ terms to sum.
-
-\item For different $m$, different counts of $\delta^2 |M_{i,j}| (\delta x_{i, j})^2: m$ are needed to sum to $\delta^2 |M|: m - 1$.
-\end{enumerate}
-Thus, the following relation in the previous paper is wrong:
-\begin{equation*}
-\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
-\end{equation*}
-The above relation only holds when $n=2$:
-\begin{align*}
-|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1} \\ x_{1,0}, x_{1,1} \end{matrix} \right| = x_{0,0} x_{1,1} - x_{0,1} x_{1,0};  \\
-|\tilde{M}| - |M| &= \tilde{x}_{0,0} x_{1,1} + x_{0,0} \tilde{x}_{1,1} + \tilde{x}_{0,0} \tilde{x}_{1,1}
-	 - \tilde{x}_{0,1} x_{1,0} - x_{0,1} \tilde{x}_{1,0} - \tilde{x}_{0,1} \tilde{x}_{1,0}; \\
-\delta^2 |M| &= (\delta x_{0,0})^2 (x_{1,1})^2 + (x_{0,0})^2 (\delta x_{1,1})^2 +  (\delta x_{0,1})^2 (x_{1,0})^2 + (x_{0,1})^2 (\delta x_{1,0})^2 \\
-		&+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2;
-\end{align*}
-But it does not hold when $n=3$:
-\begin{align*}
-|M| &= \left| \begin{matrix} x_{0,0}, x_{0,1}, x_{0,2} \\ x_{1,0}, x_{1,1}, x_{1,2} \\ x_{2,0}, x_{2,1}, x_{2,2} \end{matrix} \right| \\
-&= x_{0,0} x_{1,1} x_{2,2} - x_{0,0} x_{1,2} x_{2,1} 
-   	+ x_{0,1} x_{1,2} x_{2,0} - x_{0,1} x_{1,0} x_{2,2}
-    + x_{0,2} x_{1,0} x_{2,1} -  x_{0,2} x_{1,1} x_{2,0}; \\
-& |M|_{0,1} = x_{1,2} x_{2,0} - x_{1,0} x_{2,2};\\
-& |M|_{<0,2>,[1,0]} = x_{1,2} = -|M|_{<0,2>,[0,1]};\\
-\delta^2 |M| &= (\delta x_{0,0})^2 |M_{0,0}|^2 + (\delta x_{0,1})^2 |M_{0,1}|^2 + (\delta x_{0,2})^2 |M_{0,2}|^2 \\
-  &+ (\delta x_{1,0})^2 |M_{1,0}|^2 + (\delta x_{1,1})^2 |M_{1,1}|^2 + (\delta x_{1,2})^2 |M_{1,2}|^2 \\
-  &+ (\delta x_{2,0})^2 |M_{2,0}|^2 + (\delta x_{2,1})^2 |M_{2,1}|^2 + (\delta x_{2,2})^2 |M_{2,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 |x_{2,2}|^2 + (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 |x_{2,1}|^2 + (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 |x_{2,0}|^2 + (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 |x_{2,2}|^2 + (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,2})^2 (\delta x_{1,0})^2 |x_{2,1}|^2 + (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,2})^2 (\delta x_{1,1})^2 |x_{2,0}|^2 + (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2 + (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2 + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;\\
-(\delta x_{2,2})^2 \delta^2 |M_{2,2}| &= (\delta x_{0,0})^2 (\delta x_{2,2})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,2})^2 |x_{0,0}|^2 \\
-  &+  (\delta x_{0,1})^2 (\delta x_{2,2})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,2})^2 |x_{0,1}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,1})^2 (\delta x_{2,2})^2 + (\delta x_{0,1})^2 (\delta x_{1,0})^2 (\delta x_{2,2})^2; \\
-(\delta x_{2,1})^2 \delta^2 |M_{2,1}| &= (\delta x_{0,0})^2 (\delta x_{2,1})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,1})^2 |x_{0,0}|^2 \\
-  &+  (\delta x_{0,2})^2 (\delta x_{2,1})^2 |x_{1,0}|^2 + (\delta x_{1,0})^2 (\delta x_{2,1})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,0})^2 (\delta x_{1,2})^2 (\delta x_{2,1})^2  + (\delta x_{0,2})^2 (\delta x_{1,0})^2 (\delta x_{2,1})^2; \\
-(\delta x_{2,0})^2 \delta^2 |M_{2,0}| &= (\delta x_{0,1})^2 (\delta x_{2,0})^2 |x_{1,2}|^2 + (\delta x_{1,2})^2 (\delta x_{2,0})^2 |x_{0,1}|^2 \\
-  &+  (\delta x_{0,2})^2 (\delta x_{2,0})^2 |x_{1,1}|^2 + (\delta x_{1,1})^2 (\delta x_{2,0})^2 |x_{0,2}|^2 \\
-  &+ (\delta x_{0,1})^2 (\delta x_{1,2})^2 (\delta x_{2,0})^2 + (\delta x_{0,2})^2 (\delta x_{1,1})^2 (\delta x_{2,0})^2;
-\end{align*}
-
-Compare $\delta^2 |M|$ with multiplication:
-\begin{align*}
-\delta^2 x_1 x_2 &= x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \\
-\delta^2 x_1 x_2 x_3 &= \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) x_3^2 + x_1^2 x_2^2 (\delta x_3^2) 
-		+ \left( x_2^2 (\delta x_1)^2 + x_1^2 (\delta x_2)^2 + (\delta x_1)^2 (\delta x_2)^2 \right) (\delta x_3^2); \\
-	&= (\delta x_1)^2 x_2^2 x_3^2 + x_1^2 (\delta x_2)^2 x_3^2 + x_1^2 x_2^2 (\delta x_3)^2 \\
-	&+  x_1^2 (\delta x_2)^2 (\delta x_3)^2 + (\delta x_1)^2 x_2^2 (\delta x_3)^2 + (\delta x_1)^2 (\delta x_2)^2 x_3^2 + (\delta x_1)^2 (\delta x_2)^2 (\delta x_3)^2; \\
-\delta^2 \prod_{k=1}^{n} x_k &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \prod_{i \in <i_1 \dots i_m>_n} (\delta x_i)^2 \prod_{j \not \in <i_1 \dots i_m>_n} {x_j}^2;
-\end{align*}
-
-
-%\fi
-
-Let vector $[p_1, p_{2} \dots p_n]_n$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  
-Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}.  
-For a $n$-by-$n$ square matrix M with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Numerical_Recipes} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
-$(-1)^{i+j} |M_{(i,j)}|$ is the determinant of the $(n-1)$-by-$(n-1)$ matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Numerical_Recipes}.  
-Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Numerical_Recipes}.
-\begin{align}
-\label{eqn: determinant}
-|M| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} x_{k,p_{k}}; \\
-\label{eqn: sub-determinant}
-|M|_{i,j} &\equiv \sum_{[p_1\dots p_n]_n}^{p_{i} = j} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n}^{k \ne i} x_{k,p_{k}}; \\
-\label{eqn: determinant sum 1}
-|M| &=\sum_{j=1 \dots n} |M_{i,j}| x_{i,j} = \sum_{i=1 \dots n} |M_{i,j}| x_{i,j};
-\end{align}
-
-Assuming $p_1, p_{2} \in \{1\dots n\}$, let $[p_1, p_{2}]_n$ denote the length-2 unordered permutation which satisfies $p_1 \neq p_{2}$, and let $<p_1,p_{2}>_n$ denote the length-2 ordered permutation which satisfies $p_1 < p_{2}$.  
-Letting ${<i_1,i_2>}_n$ be an arbitrary ordered permutation, Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
-\begin{align}
-&|M_{<i_1 ,i_{2}>_n, [j_1 ,j_{2}]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{p_{i_1}=j_1, p_{i_{2}}=j_{2}} 
-    \$ [p_1\dots p_n]_n \prod _{k=1 \dots n}^{k \not \in \{i_1, i_2\}} x_{k,p_{k}}; \\
-\label{eqn: determinant sum 2}
-|M| &= \sum_{j_1 = 1 \dots n} x_{i_1, j_1} |M_{i_1, j_1}| = 
-\sum_{j_1=1 \dots n} \sum_{j_{2}=1 \dots n}^{ j_{2} \ne j_1} |M _{<i_1, i_{2}>_n,  [j_1, j_{2}]_n}| x_{i_1, j_1} x_{i_{2}, j_{2}};
-\end{align}
-The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m \in \{1,2...n\}$.  
-Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $<i_1 \dots i_m>_n$ is an arbitrary ordered permutation. 
-The $(n-m)$-by-$(n-m)$ matrix in $|M_{<i_1 \dots i_m>_n[j_1 \dots j_m]_n}|$ is obtained by deleting the rows in $\{i_1 \dots i_m\}$ and the columns in $\{j_1 \dots j_m\}$.
-This leads to Formula \eqref{eqn: sub-determinant equivalence}.
-\begin{align}
-\label{eqn: sub-determinant generic}
-&|M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{i_1 \dots i_m\}: p_k=j_k} \$ [p_1\dots p_n]_n 
-	\prod_{k = 1 \dots n }^{k \not \in \{i_1 \dots i_m\}} x_{k,p_{k}}; \\
-\label{eqn: determinant sum}
-|M| &= \sum_{{[j_1 \dots j_m]}_n} |M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
-\label{eqn: sub-determinant equivalence}
-&||M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|| = ||M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}||  ;
-\end{align}
-
-Let $ \widetilde{x}_{i,j}$ denote a random variable at the index $(i, j)$ with the uncertainty deviation $\delta x_{i,j}$.
-If all the element of the matrix satisfy the uncorrelated uncertainty assumption, Formula \eqref{eqn: determinant Taylor expansion} is the Taylor expansion of the determinant of the square matrix, and Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant uncertainty expansion} are the result mean and variance, respectively.
-\footnote{The previous paper \cite{Prev_Precision_Arithmetic} also contains the wrong formula:
-\begin{equation}
-\delta^2 |M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|M_{i, j}|^2 + \delta^2 |M_{i,j}| \right);
-\end{equation}
-}
-\begin{align}
-\label{eqn: determinant Taylor expansion}
-|\widetilde{M}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1}^{n} (x_{i,p_i} + \tilde{x}_{i,p_{i}})  \\
-	&= \sum_{m=0}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  		|M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}}  \tilde{x}_{i_k, j_k}; \nonumber \\
-\label{eqn: determinant mean}
-\overline{|M|} &= |M|; \\
-\label{eqn: determinant uncertainty expansion}
-\delta^2 |M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  	|M _{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}|^2 \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; 
-\end{align}
-
-A major use of the determinant is to calculate the inverse matrix whose element is given by Formula \eqref{eqn: invert matrix} \cite{Linear_Algebra}:
-\begin{equation}
-\label{eqn: invert matrix}
-z_{i,j} = \frac{|M_{j,i}|}{|M|};
-\end{equation}
-The square matrix whose element is $|M_{j,i}|$ is defined as the adjugate matrix \cite{Linear_Algebra} $M^A$ to the original matrix $M$.
-The inverse matrix to the original matrix $M$ is denoted as $M^{-1}$.
-
-When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
-\begin{itemize}
-\item The input uncertainties and the calculation rounding errors can not be accounted for.
-
-\item One path is chosen out of many possible paths, such as using different $i$ for summing by $j$ in Formula \eqref{eqn: determinant sum 1}. 
-
-\item The result is path dependent.
-When calculating the inverse matrix, such dependency is so strong that Formula \eqref{eqn: invert matrix} is avoided, and the path which is deemed to have smallest rounding error is chosen in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
-Even so, the result uncertainty is not clear.
-\end{itemize}
-In contrast, Formula \eqref{eqn: determinant uncertainty expansion} is no longer path dependent, and it accounts for all input uncertainties and calculation rounding errors.
-
-
-\subsection{Test Matrix Inversion Calculations}
-
-A matrix $M$ is constructed using random integers uniformly distributed in the range of $[-16384$, $+16384]$.
-A matrix $\tilde{M}$ is constructed from $M$ in two different ways:
-\begin{itemize}
-\item \emph{rounding}: If each element of $M$ is converted to a conventional 64-bit floating-point value to construct $\tilde{M}$, the result errors are due to the rounding errors of the conventional 64-bit floating-point calculations.
-
-\item \emph{noise}: If either Gaussian noise or white noise of a particular level is added to each element of $M$ to construct $\tilde{M}$, the result errors are mainly due to the input noise unless the input noise level is $10^{-16}$ or less.
-For example, if the noise-level is $10^{-3}$, because the distribution deviation of the elements of $M$ is $16384 /\sqrt{3} = 9459$, the Gaussian noise is generated with the deviation of $9459 \times 10{-3}$. 
-
-\item For simplicity, a same noise-level is used for every element of $M$.
-\end{itemize}
-
-The calculation results using $\tilde{M}$ can be compared with those of $M$ in different tests:
-\begin{itemize}
-\item \emph{determinant}: to compare $|M|$ and $|\tilde{M}|$.
-
-\item \emph{adjugate}: to compare $M^A$ and $\tilde{M}^A$.
-
-\item \emph{inverse}: to compare $M^A M = |M| \I$ and $\tilde{M}^A \tilde{M}$, in which $\I$ is the identity matrix \cite{Linear_Algebra} for $M$.
-\end{itemize}
-
-
 
 
 
@@ -2026,7 +2214,7 @@ Thus, the variance arithmetic rejects this regressive generation algorithm for $
 
 
 \clearpage
-\section{Verification Using FFT}
+\section{Fast Fourier Transformation}
 \label{sec: FFT}
 
 

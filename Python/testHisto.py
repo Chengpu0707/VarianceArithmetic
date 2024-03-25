@@ -33,6 +33,7 @@ class TestStat (unittest.TestCase):
         self.assertEqual(0, stat.max())
         self.assertEqual(0, stat.mean())
         self.assertEqual(0, stat.dev())   # not stddev
+        self.assertEqual('"Stat: 1, 0.0"', str(stat))
 
         self.assertTrue(stat.accum(1))
         self.assertTrue(stat.accum(-1))
@@ -41,6 +42,7 @@ class TestStat (unittest.TestCase):
         self.assertEqual(+1, stat.max())
         self.assertEqual(0, stat.mean())
         self.assertEqual(math.sqrt(2/3), stat.dev())
+        self.assertEqual('"Stat: 3, 0.0+/-0.816496580927726"', str(stat))
 
 
 class TestHisto (unittest.TestCase):
@@ -66,6 +68,7 @@ class TestHisto (unittest.TestCase):
         self.assertEqual(1,  histo.less())
         self.assertEqual(1,  histo.more())
         self.assertListEqual([1]*7, histo.histogram())
+        self.assertEqual('"Stat: 9, 0.0+/-1.2909944487358056"', str(histo))
 
 
 
