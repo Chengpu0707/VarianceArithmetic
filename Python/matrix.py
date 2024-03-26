@@ -64,7 +64,7 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tup
     '''
     Add Gaussian "noise" to "ssMatrix", with the actual noise is adjusted by ELEMENT_RANGE.
     '''
-    if not isSquareMatrix(ssMatrix, sType=(int,)):
+    if not isSquareMatrix(ssMatrix, sType=(int,fractions.Fraction)):
         raise ValueError(f'Invalid int or float')
     size = len(ssMatrix)
     return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), 
@@ -155,7 +155,7 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
                 var *= sVal[sY] ** 2
                 variance += var
             except OverflowError as ex:
-                print(f'adjugate(): size={size}, m={m}, max_element={max([max(abs(val) for val in row) for row in ssMatrix])}')
+                print(f'adjugate(): size={size}, m={m}, max_element={max([max(abs(val.value()) for val in row) for row in ssMatrix])}')
                 raise ex
             if var > 0:
                 for x, y in sY:
