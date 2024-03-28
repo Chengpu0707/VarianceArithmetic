@@ -299,6 +299,7 @@ When $1 \leq P(x)$:
 
 \item Or $x \pm \delta x$ is a measurement of $0$.
 \end{itemize}
+If during a calculation, if $P(x)$ becomes larger, the value becomes less precise by loosing precision.
 
 The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
 This assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
@@ -309,7 +310,7 @@ Taylor expansion can be used to calculate the result variance of analytic functi
 
 The uncorrelated uncertainty assumption only applies to imprecise inputs.
 When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, the variance arithmetic uses statistics to account for the correlation between uncertainties through their associated variables.
-Thus, the variance arithmetic has no dependency problem.
+Therefore, the variance arithmetic has no dependency problem.
 
 
 \subsection{The Uncorrelated Uncertainty Assumption \cite{Prev_Precision_Arithmetic}}
@@ -566,16 +567,17 @@ Instead of using the threshold probability, the bounding range for z can be used
 But the range needs to be centered at $|x||y|$.
 \fi
 
-To obey the precision scaling principle, the result of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$.
+The result variance of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$ \cite{Probability_Statistics}.
 The result of multiplying $0 \pm \delta x$ by $0 \pm \delta y$ is a normal production distribution \cite{Probability_Statistics}, which is centered at 0 with variance $(\delta x)^2 (\delta y)^2$.
-The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication}  \cite{Prev_Precision_Arithmetic} and \eqref{eqn: multiplication precision}  \cite{Prev_Precision_Arithmetic} for the result variance and precision surrounding the result $xy$, respectively.
+The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication}  \cite{Prev_Precision_Arithmetic}.
+Formula \eqref{eqn: multiplication} can be changed to Formula \ref{eqn: multiplication precision} which is significant statistically: the product becomes less precise.
 \begin{align}
 \label{eqn: multiplication decomposed}
 & (x \pm \delta x) \times (y \pm \delta y) = (x + (0 \pm \delta x)) \times (y + (0 \pm \delta y)); \\
 \label{eqn: multiplication}
 \delta^2 (x y) &= x^2 (\delta^2 y) + y^2 (\delta^2 x) + (\delta^2 x)(\delta^2 y); \\
 \label{eqn: multiplication precision}
-xy \neq 0: P(x y)^2 &= P(x)^2 + P(y)^2 + P(x)^2 P(y)^2;
+P(x y)^2 &= P(x)^2 + P(y)^2 + P(x)^2 P(y)^2;
 \end{align}
 
 Formula \eqref{eqn: multiplication} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
@@ -887,31 +889,57 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= \int_{-\sigma}^{+\sigma} f(x + \tilde{z} \delta x) N(\tilde{z}) d \tilde{z}
   = f(x) + \sum_{n=1}^{\infty}(\delta x)^{2n} \frac{f^{(2n)}_x \zeta(2n)}{(2n)!}; \\
-\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n}  \nonumber \\
 \label{eqn: Taylor 1d variance}
+\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 = \sum_{n=0}^{\infty} (\delta x)^{2n} \\
 &\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
- 	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right); \\
-  &= (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
-  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right) + o((\delta x)^8);
+ 	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right);  \nonumber
 \end{align}
 $\overline{f(x)} - f(x)$ is defined as the \emph{bias} which is the effect of the input uncertainty to the result.
 When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
-It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$
+It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$ when the bias is ignored.
+
+
+\subsubsection{Multiple Dimensional Expansion}
+
+Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
+\begin{align}
+\label{eqn: Taylor 2d}
+&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+\label{eqn: Taylor 2d mean}
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
+&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}
+	\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}); \nonumber
+\end{align}
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it can be extended to any dimensional.
 
 
 \subsubsection{Binding Factor}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Variance_Momentum.png} 
+\captionof{figure}{
+The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
+Also included are: the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
+}
+\label{fig: Variance_Momentum}
+\end{figure}
+
+
 
 The choice of the bounding factor $\sigma$ needs careful considerations.
 If $\sigma = \infty$, $\zeta(2n) = (2n - 1)!!$, which may cause Formula \eqref{eqn: Taylor 1d variance} to diverge in most cases.
 When $\sigma$ is limited, Formula \eqref{eqn: variance momentum} becomes Formula \eqref{eqn: momentum factor}:
 \begin{itemize}
-\item For $2n < 10$ when $5 \leq \sigma$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
+\item For small $2n$, $\zeta(2n)$ can be approximated by $\zeta(2n) = (2n-1)!!$ according to Formula \eqref{eqn: momentum factor lower}.  
 
 \item For large $2n$, Formula \eqref{eqn: momentum factor} reduces to Formula \eqref{eqn: momentum factor higher}, which shows that $\zeta(2n)$ increases slower than $\sigma^{2n}$ for increasing $2n$.
 
-\item For $20 < 2n \leq 200$, when $3 \leq \sigma \leq 6$, $\zeta(2n)$ is well fitted by $\lambda^{2n}$ numerically, in which $\lambda$ is a fitting parameter. 
-$\lambda$ is always slightly smaller than $\sigma$ empirically, as expected.
-%When $7 < \sigma$, $\zeta(2n)$ increases slight faster than $\lambda^{2n}$ between $20 < 2n \leq 200$.
 \end{itemize}
 \begin{align}
 \label{eqn: momentum factor} 
@@ -936,9 +964,20 @@ $\sigma = 5$ is also a golden standard to assert a negative result \cite{Precisi
 \epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma);
 \end{equation}
 
-When $\sigma \geq 5$, $\zeta(2n)$ is almost identical to $(2n -1)!!$ when $2n \leq 16$, which makes Formula \eqref{eqn: Taylor 1d variance} quite insensitive to the actual value of $\sigma$.
-
-Thus, $\sigma = 5$ in variance arithmetic.
+Thus, $\sigma = 5$ in variance arithmetic.  
+Figure \ref{fig: Variance_Momentum} shows the value and uncertainties of the corresponding $\zeta(2n)$.
+When $2n < 20$, $\zeta(2n)$ can be well approximated by $(2n -1)!!$.  
+Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 1d variance} can be approximated as Formula \eqref{eqn: Taylor 1d variance approx} and \eqref{eqn: Taylor 1d variance approx}, respectively.
+\begin{align}
+\delta^2 f(x) &\simeq (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
+\label{eqn: Taylor 1d variance approx}
+  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right); \\
+\delta^2 f(x, y)&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
+&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
+      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
+\label{eqn: Taylor 2d variance approx}
+&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
+\end{align}
 
 
 \subsubsection{One-dimensional Examples}
@@ -1089,28 +1128,6 @@ On the other hand, if the new terms for both formula start to be smaller than th
 \end{itemize}
 
 
-\subsubsection{Multiple Dimensional Expansion}
-
-Due to the uncorrelated uncertainty assumption, the Taylor expansion can be applied to multiple inputs, such as Formula \eqref{eqn: Taylor 2d variance} \cite{Prev_Precision_Arithmetic} .
-\begin{align}
-\label{eqn: Taylor 2d}
-&f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
-\label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\ 
-\label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \nonumber \\
-&\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}) \\
-&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
-&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
-      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
-&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
-\end{align}
-Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
-Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it can be extended to any dimensional.
-
-
 
 
 \subsection{Dependency Tracing}
@@ -1252,13 +1269,13 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 
 \begin{align}
 \label{eqn: composite variance 1d}
-\delta^2 f(g(x)) &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4
-    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \nonumber \\
-  &\eqspace + f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x) + o((\delta x)^6); \\
+\delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + \nonumber \\
+  &\eqspace (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) + \nonumber \\
+  &\eqspace (\delta x)^4 \left( f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x \right) + o((\delta x)^6); \\
 \label{eqn: progressive variance}
-\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &= (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + (\delta x)^4 
-    ((f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \nonumber \\
-  &\eqspace + f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4) + o((\delta x)^6) ; 
+\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + \nonumber \\
+  &\eqspace (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) + \nonumber \\
+  &\eqspace (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6) ; 
 \end{align}
 
 
@@ -1475,25 +1492,10 @@ Examples for $|\widetilde{M}|$:
 \begin{align*}
 \delta^2 |\M| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
   		|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; \\
-	& m = 1:\eqspace \sum_{i=1}^{n} \sum_{j=1}^{n} |\M_{i, j}|^2 (\delta x_{i, j})^2; \\
-	& m = 2:\eqspace 	\sum_{<i_1, i_2>_n} \sum_{[j_1, j_2]_n} |\M _{<i_1, i_2>_n, [j_1, j_2]_n}|^2 (\delta x_{i_1, j_1})^2 (\delta x_{i_2, j_2})^2; \\
-	& m = n:\eqspace \sum_{[j_1 \dots j_n]_n} \prod_{k=1 \dots n} (\delta x_{i_k, j_k})^2; \\
 \delta^2 |\M_{i,j}| &= \sum_{m=2 \dots n} \sum_{<i_1 \dots i_m>_n}^{i \in \{i_1 \dots i_m\}} \sum_{[j_1 \dots j_m]_n}^{j \in \{j_1 \dots j_m\}}
-  	|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i_m\}, i_k \ne i} (\delta x_{i_k, j_k})^2; \\
-	& m = 2:\eqspace \sum_{i_1=1 \dots n}^{i_1\ne i} \sum_{j_1 = 1 \dots n}^{j_1 \ne j} |\M _{<i_1, i>_n, [j_1, j]_n}|^2 (\delta x_{i_1, j_1})^2; \\
-	& m = n - 1:\eqspace \sum_{[j_1 \dots j \dots n]_n} \prod_{k=1 \dots n}^{i_k \ne i} (\delta x_{i_k, j_k})^2;
+  	|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots m}^{i_k \in \{i_1 \dots i_m\}, i_k \ne i} (\delta x_{i_k, j_k})^2;
 \end{align*}
-
-To evaluate $\delta^2 |\M|$ as a function of $(|\M_{i, j}|^2, \delta x_{i, j})^2, \delta^2 |\M_{i,j}|)$:
-\begin{enumerate}
-\item $\delta^2 |\M|: m - 1$ has the same $|\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2  \prod_{k=1 \dots n}^{i_k \not \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2$ term as $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$.
-
-\item $\delta^2 |\M|: m - 1$ has $\frac{n!}{(m - 1)! (n - m + 1)!} \times (m - 1)! = \frac{n!}{(n + 1 - m)!}$ terms to sum.
-
-\item $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$ has $\frac{(n - 1)!}{m! (n - m - 1)!} \times m! = \frac{(n - 1)!}{(n - 1 - m)!}$ terms to sum.
-
-\item For different $m$, different counts of $\delta^2 |\M_{i,j}| (\delta x_{i, j})^2: m$ are needed to sum to $\delta^2 |\M|: m - 1$.
-\end{enumerate}
+For each $m$, $\delta^2 |\M|$ has  $\frac{n!}{(n - m)! m!} \frac{n!}{(n - m)!}$ terms, while $\delta^2 |\M_{i,j}|$ has $\frac{(n - 1)!}{(n - m)! (m - 1)!} \frac{(n - 1)!}{(n - m)!}$ terms.  The ratio is $\frac{m^2}{n^2}$.
 Thus, the following relation in the previous paper is wrong:
 \begin{equation*}
 \delta^2 |\M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|\M_{i, j}|^2 + \delta^2 |\M_{i,j}| \right);
@@ -1560,13 +1562,11 @@ Compare $\delta^2 |\M|$ with multiplication:
 
 \fi
 
-
-
-
 Let vector $[p_1, p_{2} \dots p_n]_n$ denote a permutation of the vector $(1,2\dots n)$ \cite{Linear_Algebra}.  
-Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}.  
-For a $n$-by-$n$ square matrix $\M$ with the element $x_{i,j}, i,j=1,2\dots n$, let its determinant be defined as Formula \eqref{eqn: determinant} \cite{Linear_Algebra} and let the sub-determinant at index $(i, j)$ be defined as Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
-$M_{i,j}$ is the matrix that results from deleting the row $i$ and column $j$ of $M$ \cite{Linear_Algebra}.  
+Let $\$[p_1, p_{2} \dots p_n]_n$ denote the permutation sign of $[p_1, p_{2} \dots p_n]_n$ \cite{Linear_Algebra}. 
+Formula \eqref{eqn: determinant} \cite{Linear_Algebra} defines the determinant of a $n$-by-$n$ square matrix $\M$ with the element $x_{i,j}, i,j=1 \dots n$.
+The sub-determinant \cite{Linear_Algebra} $M_{i,j}$ at index $(i, j)$ is formed by deleting the row $i$ and column $j$ of $M$, whose determinant is given by 
+Formula \eqref{eqn: sub-determinant} \cite{Linear_Algebra}.
 Formula \eqref{eqn: determinant sum 1} holds for the arbitrary row index $i$ or the arbitrary column index $j$ \cite{Linear_Algebra}.
 \begin{align}
 \label{eqn: determinant}
@@ -1589,7 +1589,7 @@ Formula \eqref{eqn: determinant sum 1} can be applied to $M_{i,j}$, as:
 The definition of a sub-determinant can be extended to Formula \eqref{eqn: sub-determinant generic}, in which $m =1...n$.  
 Formula \eqref{eqn: determinant sum 2} can be generalized as Formula \eqref{eqn: determinant sum}, in which $<i_1 \dots i_m>_n$ is an arbitrary ordered permutation. 
 The $(n-m)$-by-$(n-m)$ matrix in $|\M_{<i_1 \dots i_m>_n[j_1 \dots j_m]_n}|$ is obtained by deleting the rows in $\{i_1 \dots i_m\}$ and the columns in $\{j_1 \dots j_m\}$.
-This leads to Formula \eqref{eqn: sub-determinant equivalence}.
+This leads to Formula \eqref{eqn: sub-determinant equivalence} \footnote{$\left| |\M| \right|$ in Formula \eqref{eqn: sub-determinant equivalence} means absolute value of determinant.}.
 \begin{align}
 \label{eqn: sub-determinant generic}
 &|\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \equiv \sum_{[p_1 \dots p_n]_n}^{k \in \{i_1 \dots i_m\}: p_k=j_k} \$ [p_1\dots p_n]_n 
@@ -1597,15 +1597,10 @@ This leads to Formula \eqref{eqn: sub-determinant equivalence}.
 \label{eqn: determinant sum}
 |\M| &= \sum_{{[j_1 \dots j_m]}_n} |\M _{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \prod_{k=1}^{m} x_{i_k, j_k}; \\
 \label{eqn: sub-determinant equivalence}
-&||\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|| = ||\M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}||  ;
+&\left| |\M_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}| \right| = \left| |\M_{<i_1 \dots i_m>_n, <j_1 \dots j_m>_n}| \right|;
 \end{align}
 
 If all the element of the matrix satisfy the uncorrelated uncertainty assumption, after applying Formula \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance}, Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} are the result mean and variance, respectively.
-\footnote{The previous paper \cite{Prev_Precision_Arithmetic} also contains the wrong formula:
-\begin{equation}
-\delta^2 |\M| = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta x_{i, j})^2 \left(|\M_{i, j}|^2 + \delta^2 |\M_{i,j}| \right);
-\end{equation}
-}
 \begin{align}
 \label{eqn: determinant mean}
 \overline{|\M|} &= |\M|; \\
@@ -1619,7 +1614,7 @@ In contrast, for the special matrix in Formula \eqref{eqn: special determinant},
 \label{eqn: special determinant}
 |\M| &= \left| \begin{matrix} x, z, y \\ z, y, x \\ y, x, z \end{matrix} \right| = 3 x y z - x^3 - y^3 - z^3; \\
 \label{eqn: special determinant mean}
-\overline{|\M|} &= - 3 x (\delta x)^2 - 3 y (\delta y)^2 - 3 z (\delta z)^2; \\
+\overline{|\M|} &= |\M| - 3 x (\delta x)^2 - 3 y (\delta y)^2 - 3 z (\delta z)^2; \\
 \label{eqn: special determinant variance}
 \delta^2 |\M| &= 3 (5 x^4 - 12 x^2 y z + 2 x y^3 + 2 x z^3 + 3 y^2 z^2)(\delta x)^2 \\
  	&+ 3 (5 y^4 - 12 y^2 x z + 2 y x^3 + 2 y z^3 + 3 x^2 z^2)(\delta y)^2 \nonumber \\
@@ -1638,8 +1633,8 @@ In contrast, for the special matrix in Formula \eqref{eqn: special determinant},
 \centering
 \includegraphics[height=2.5in]{Adjugate_Uncertainty_vs_Size_Noise.png} 
 \captionof{figure}{
-The result uncertainty means vs. input uncertainties and matrix sizefor the difference between $\widehat{\M}^A$ and $\M^A$.
-The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+The result uncertainty means vs. input noise precision and matrix sizefor the difference between $\widehat{\M}^A$ and $\M^A$.
+The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
 }
 \label{fig: Adjugate_Uncertainty_vs_Size_Noise}
 \end{figure}
@@ -1648,8 +1643,8 @@ The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size 
 \centering
 \includegraphics[height=2.5in]{Adjugate_Error_vs_Size_Noise.png} 
 \captionof{figure}{
-The result error deviations vs. input uncertainties and matrix size for the difference between $\widehat{\M}^A$ and $\M^A$.
-The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+The result error deviations vs. input noise precision and matrix size for the difference between $\widehat{\M}^A$ and $\M^A$.
+The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
 }
 \label{fig: Adjugate_Error_vs_Size_Noise}
 \end{figure}
@@ -1658,8 +1653,8 @@ The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size 
 \centering
 \includegraphics[height=2.5in]{Forward_Error_vs_Size_Noise.png} 
 \captionof{figure}{
-The result error deviations vs. input uncertainties and matrix size for the difference of Formula \eqref{eqn: adjugate matrix}.
-The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+The result error deviations vs. input noise precision and matrix size for the difference of Formula \eqref{eqn: adjugate matrix}.
+The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
 }
 \label{fig: Forward_Error_vs_Size_Noise}
 \end{figure}
@@ -1668,146 +1663,180 @@ The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size 
 \centering
 \includegraphics[height=2.5in]{Roundtrip_Error_vs_Size_Noise.png} 
 \captionof{figure}{
-The result error deviations vs. input uncertainties and matrix size for the difference of Formula \eqref{eqn: roundtrip}.
-The input uncertainties run from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
+The result error deviations vs. input noise precision and matrix size for the difference of Formula \eqref{eqn: roundtrip matrix}.
+The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
 }
 \label{fig: Roundtrip_Error_vs_Size_Noise}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Histogram_Size_6.png} 
+\includegraphics[height=2.5in]{Adjugate_Histogram_Size_7.png} 
 \captionof{figure}{
-The result histograms for the normalized errors for the same matrix size $6$ different input uncertainties as shown in the legend.
-$\M$ is generated by random integers in the range of $[-2^8, +2^8]$.
+The result histograms for the normalized errors of the adjugate matrix for the same matrix size $7$ and different input noise precision as shown in the legend.
 }
-\label{fig: Adjugate_Histogram_Size_6}
+\label{fig: Adjugate_Histogram_Size_7}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Histogram_Noise_0.png} 
+\includegraphics[height=2.5in]{Adjugate_Histogram_Size_8.png} 
 \captionof{figure}{
-The result histograms for the normalized errors for different matrix size and the input uncertainty $0$ as shown in the legend.
-$\M$ is generated by random integers in the range of $[-2^{11}, +2^{11}]$.
+The result histograms for the normalized errors of the adjugate matrix for the same matrix size $8$ and different input noise precision as shown in the legend.
 }
-\label{fig: Adjugate_Histogram_Noise_0}
+\label{fig: Adjugate_Histogram_Size_8}
 \end{figure}
-
 
 
 The square matrix whose element is $(-1)^{i+j}|\M_{j,i}|$ is defined as the \emph{adjugate matrix} \cite{Linear_Algebra} $\M^A$ to the original square matrix $\M$.
 Let $\I$ be the identical matrix for $\M$.
-Formula \eqref{eqn: adjugate matrix} and \eqref{eqn: roundtrip matrix} show the relation of $\M^A$ and $\M$, which only involve addition, subtraction and multiplication.
+Formula \eqref{eqn: adjugate matrix} and \eqref{eqn: roundtrip matrix} show the relation of $\M^A$ and $\M$ \cite{Linear_Algebra}, which only involve addition, subtraction and multiplication.
 \begin{align}
 \label{eqn: adjugate matrix}
 \M \times \M^A &= \M^A \times \M = |\M| \I; \\
 \label{eqn: roundtrip matrix}
-|\M| \M^A &=|\M^A| \M; 
+|\M| \M^A &=|\M^A| \M;
 \end{align}
 
 To test Formula \eqref{eqn: determinant variance}:
 \begin{enumerate}
-\item A matrix $\M$ is constructed using random integers uniformly distributed in the range of $[-2^8, +2^8]$.
+\item A matrix $\M$ is constructed using random integers uniformly distributed in the range of $[-2^8, +2^8]$, which has a distribution deviation of $2^8/\sqrt{3}$.
 The integer arithmetic grantees that $|\M|$, $\M^A$, and $|\M^A|$ are precise.
 
 \item Gaussian noises of predefined levels are added to $\M$, to construct $\widehat{\M}$ which contains imprecise values.
 The variance arithmetic is used to calculate $|\widehat{\M}|$, $\widehat{\M}^A$, and $|\widehat{\M}^A|$.
+For example, to construct a $\widehat{\M}$ with $10^{-3}$ input noise precision, the Gaussian noise amplitude is $10^{-3} \times 2^8/\sqrt{3}$.
 
 \item The difference between $|\widehat{\M}|$ and $\M^A$ defines the \emph{Adjugate} Test.
-Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise} shows that the result uncertainties increase exponentially with both the input noises and the matrix size, while Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the ideal coverage is achieved for the input noises greater than $10^{-16}$.
+Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise} shows that the result uncertainties increase exponentially with both the input noises and the matrix size, while Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the ideal coverage is achieved for the input precision greater than $10^{-16}$.
 
 \item Formula \eqref{eqn: adjugate matrix} defines the \emph{Forward} Test.
-Figure \ref{fig: Forward_Error_vs_Size_Noise} shows that Formula \eqref{eqn: adjugate matrix} is strictly observed for idea coverage because the difference is delta-distributed with zero distribution deviation.
+Figure \ref{fig: Forward_Error_vs_Size_Noise} shows that Formula \eqref{eqn: adjugate matrix} is strictly observed for the idea coverage.
 
 \item Formula \eqref{eqn: roundtrip  matrix} defines the \emph{Roundtrip} Test.
-Figure \ref{fig: Roundtrip_Error_vs_Size_Noise} shows that Formula \eqref{eqn: roundtrip matrix} is strictly observed for idea coverage because the difference is delta-distributed with zero distribution deviation.
+Figure \ref{fig: Roundtrip_Error_vs_Size_Noise} shows that Formula \eqref{eqn: roundtrip matrix} is strictly observed for the idea coverage.
 
 \end{enumerate}
 
-The significand of the conventional floating-point representation \cite{Floating_Point_Standard} has $53$-bit resolution, or $\epsilon = 10^{-16}$.
-Adding noise at or below this level will not change the value of a conventional floating-point value, which is the lower bound for the ideal coverage.
-Figure \ref{fig: Adjugate_Histogram_Size_6} shows that the histograms of the normalized errors are normal distributed in ideal coverage.
-Below the lower bound for idea coverage, floating-point rounding errors dominate the result uncertainties.
-When $\M$ is generated by random integers in the range of $[-2^8, +2^8]$, for the input uncertainty $10^{-17}$:
-\begin{itemize}
-\item In Figure \ref{fig: Adjugate_Histogram_Size_6}, the adjugate matrix calculation involves about $8 \times 5 = 40$ significand bits for a matrix size $6$, so there is no rounding errors.
+Figure \ref{fig: Adjugate_Histogram_Size_7} and \ref{fig: Adjugate_Histogram_Size_8} shows that the error values are normal distributed for the input noise precision of  $10^{-10}$, as a typical example of the histograms for ideal coverage.
 
-\item The histogram for matrix size $7$ is very similar to Figure \ref{fig: Adjugate_Histogram_Size_6}, because the adjugate matrix calculation involves about $8 \times 6 = 48$ significand bits.
-
-\item The histogram for matrix size $8$ is quite different to Figure \ref{fig: Adjugate_Histogram_Size_6}, because the adjugate matrix calculation involves about $8 \times 6 = 56$ significand bits.
-\end{itemize}
-In Figure \ref{fig: Adjugate_Histogram_Noise_0}, when $\M$ is generated by random integers in the range of $[-2^{11}, +2^{11}]$ without added noises:
-\begin{itemize}
-\item For matrix size $5$, $11 \times 4 = 44$ significand bits are involved, so there is no rounding errors.
-
-\item For matrix size $6$, $11 \times 5 = 55$ significand bits are involved, so there starts to have rounding errors but the overall distribution is still delta-like.
-
-\item For matrix size $7$, $11 \times 6 = 66$ significand bits are involved, so there are significant rounding errors, and the distribution is no longer delta-like.
-
-\end{itemize}
-As shown in Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, \ref{fig: Forward_Error_vs_Size_Noise}, and \ref{fig: Roundtrip_Error_vs_Size_Noise}, the variance arithmetic can only provide proper coverage for the conventional floating-point rounding errors.
-
-For both ideal coverages and proper coverages, the result uncertainties provided by the variance arithmetic trace the result value errors closely, even in the huge range of the value errors as suggested by Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise}.
-This validates using variance arithmetic to calculate adjugate matrix.
+The existence of ideal coverage validates Formula \eqref{eqn: determinant variance}.
 
 
-\subsection{Matrix Stability}
+\subsection{Floating Point Rounding Errors}
 
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|} 
+\hline 
+Error Deviation & \multicolumn{4}{|c|}{Input Noise Precision}  \\ 
+\hline 
+Matrix Size & $0$ & $10^{-17}$ & $10^{-16}$ & $10^{-15}$ \\ 
+\hline 
+$4$ & $0$     &       $0$ & $0.68$ & $1.03$ \\
+\hline 
+$5$ & $0$     & $0.003$ & $0.60$ & $0.96$ \\
+\hline 
+$6$ & $0$     & $0.006$ & $0.80$ & $1.04$ \\
+\hline 
+$7$ & $0$     & $0.083$ & $1.05$ & $1.05$ \\
+\hline 
+$8$ & $4.62$ & $3.91$  & $3.01$ & $1.01$ \\
+\hline 
+\end{tabular}
+\captionof{table}{
+The error deviation as a function of matrix size and input noise precision for $\M^A$ in which $\M$ is generated by random integers between $[-2^8, +2^8]$.
+The measured error deviations change slightly for different runs.
+}
+\label{tbl: matrix rounding errors}
+\end{table}
+
+
+The significand of the conventional floating-point representation \cite{Floating_Point_Standard} has $53$-bit resolution, which is equivalent to $10^{-16}$.
+Adding noise below this level will not change the value of a conventional floating-point value, so the result uncertainties are caused by the round errors in the floating-point calculations.
+
+Figure \ref{fig: Adjugate_Histogram_Size_7} shows that the histograms of the normalized errors is delta-distributed for the input uncertainty $10^{-17}$, because the adjugate matrix calculation involves about $8 \times 7 = 56$ significand bits for a matrix size $7$.
+Such delta distribution also hold when the matrix size is less than $7$, or when the input noise precision is $0$.
+When the matrix size is $8$, $8 \times 8 = 64$ significand bits are needed so rounding occurs.
+As a result, in Figure \ref{fig: Adjugate_Histogram_Size_8}, the distribution becomes Gaussian with a hint of delta distribution.
+Such delta-like distribution persists until the input noise precision reaches $10^{10}$, which is also the transition of the two trends in Figure \ref{fig: Adjugate_Uncertainty_vs_Size_Noise}.
+
+The distribution when the input noise is $0$ is the measured distribution of the conventional floating-point rounding errors.
+
+When the input noise precision increases from $10^{-17}$ to  $10^{-10}$, the distributions become less delta-like and more Gaussian, as shown in both Figure \ref{fig: Adjugate_Histogram_Size_7} and Figure \ref{fig: Adjugate_Histogram_Size_8}. 
+The non-ideal behaviors in Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, \ref{fig: Forward_Error_vs_Size_Noise}, and \ref{fig: Roundtrip_Error_vs_Size_Noise} are all attributed to the rounding errors.
+Table \ref{tbl: matrix rounding errors} shows that the variance arithmetic achieves proper coverage for the calculation rounding errors for adjugate matrix.
+
+
+
+\subsection{Matrix Inversion}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Matrix_Determinant_Prec_vs_Condition.png} 
+\captionof{figure}{
+The linear correlation between the precision of a matrix determinant to its condition number.
+The x-axis shows the condition number, while the y axis shows the precision of the determinant.
+The legend shows the size of the matrix, and the type of the matrix as \textit{Random} for randomly generated matrix, and \textit{Hilbert} as the Hilbert matrix.
+}
+\label{fig: Matrix_Determinant_Prec_vs_Condition}
+\end{figure}
+
+A major usage of $|\M|$ and $\M^A$ is to define $\M^{-1}$ in Formula \eqref{eqn: inverse matrix} which satisfies Formula \eqref{eqn: double inverse matrix}.
+When $\M$ contains imprecise elements, Formula \eqref{eqn: inverse matrix mean} shows that the direct application of Formula \eqref{eqn: inverse matrix} numerically is wrong, which agrees with the common practice to avoid using Formula \eqref{eqn: inverse matrix} directly \cite{Numerical_Recipes}.
+Another reason why not to use Formula \eqref{eqn: inverse matrix} is that according Formula \eqref{eqn: inversion precision}, the denominator uncertainty makes the result precision worse quickly.
 \begin{align}
 \label{eqn: inverse matrix}
 \M^{-1} &\equiv \M^A / |\M|; \\
-\label{eqn: matrix condition number}
-\left| |\M^{-1}| |\M| \right| &= \frac{|\M^A|}{|\M|^{n-1}};
+\label{eqn: double inverse matrix}
+(\M^{-1})^{-1} &= \M; \\
+\label{eqn: inverse matrix mean}
+\overline{\M_{i,j}^{-1}} &\ne |\M_{j,i}| /|\M|;
 \end{align}
-When all values in $\M$ are precise:
-\begin{itemize}
-\item The inverse matrix \cite{Linear_Algebra} $\M^{-1}$ defined by Formula \eqref{eqn: inverse matrix} is functionally equivalent to $\M^A$.
 
-\item Formula \eqref{eqn: determinant sum 1} contains different paths, all of which are equivalent.
-\end{itemize} 
-When the rounding errors of the conventional floating-point arithmetic are no longer ignored, Formula \eqref{eqn: inverse matrix} is avoided, and the different paths of Formula \eqref{eqn: determinant sum 1} is explored to calculate $\M^{-1}$ in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
-When the input uncertainties are no longer ignored, the stability of $\M^{-1}$ is measured by the conditional number \cite{Linear_Algebra} as defined in Formula \eqref{eqn: matrix condition number}.
-In contrast, the variance arithmetic provides direct quantification of uncertainty, so that the effect of $|\M|$ in Formula \eqref{eqn: inverse matrix} to $\M^{-1}$ can be qualified by the precision of $|\M|$ using Formula \eqref{eqn: inversion precision}.
+Traditionally, the effect of uncertainty of  $\M$ to $\M^{-1}$ is quantified by the matrix condition number \cite{Linear_Algebra}.
+In Formula \eqref{eqn: inverse matrix}, $\M^{-1}$ is dominated by $1/|\M|$, suggesting that the precision of $\M^{-1}$ is determined by the precision of $|\M|$.
+Variance arithmetic treats the least significant value of a floating-point value to be imprecise, so it can use Formula \eqref{eqn: special determinant variance} to calculate the determinant variance for a matrix containing floating-point elements, including a randomly generated matrix, or a Hilbert matrix \cite{Linear_Algebra} after it is converted to a floating-point matrix.
+Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that there is a strong linear correlation between the conditional number and the determinant precision of matrices, so that the determinant precision can replace the condition number, which is much more difficult to calculate, and which is somewhat vague for the choices of matrix norms.
+
+In fact, the condition number may not be the best tool to describe the response to input uncertainties of a matrix.
+Figure \eqref{eqn: example inverted matrix} shows an example matrix inversion using variance arithmetic representation, in the formation of Formula \eqref{eqn: inverse matrix}.
+It clearly shows the overall precision dominance by the value of $72 \pm 87.1$ on the denominator, as well as the the worst element precision $3 \pm 0.5$.
+\begin{align}
+\label{eqn: example inverted matrix}
+\left( \begin{matrix}
+	 1 \pm 10^{-1},  &2 \pm 10^{-2},  &3 \pm 10^{-3} \\
+	-4 \pm 10^{-4}, &-5 \pm 10^{-5},  &6 \pm 10^{-6} \\
+	 7 \pm 10^{-7},  &8 \pm 10^{-8},  &9 \pm 10^{-9}
+\end{matrix} \right)^{-1} = \frac{ \left( \begin{matrix}
+	&-93 \pm 0.00009,  &6 \pm 0.09,  &27 \pm 0.006 \\
+	&78 \pm 0.0009, &-12 \pm 0.9,  &-18 \pm 0.6 \\
+	&3 \pm 0.0008,  &6 \pm 0.8,  &3 \pm 0.5
+\end{matrix} \right) }{72 \pm 87.1}
+\end{align}
 
 
 
+\subsection{First Approximation}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Multiply_Error_vs_Size_Noise.png} 
+\captionof{figure}{
+The deviation of the first approximation calculation of $|\M|$ vs. input noise precision and matrix size.
+}
+\label{fig: Multiply_Error_vs_Size_Noise}
+\end{figure}
 
-
-However, when $|\M|$ is imprecise, it introduce globally uncertainties to $\M^{-1}$, and the stability of $\M^{-1}$ is measured by the conditional number  \cite{Linear_Algebra} as defined in Formula \eqref{eqn: matrix condition number}.
-
-When using Formula \eqref{eqn: determinant sum 1} to calculate determinant in conventional floating-point arithmetic:
-\begin{itemize}
-\item The input uncertainties and the calculation rounding errors can not be accounted for in the results.
-
-\item One path is chosen out of many possible paths, such as using different $i$ for summing by $j$ in Formula \eqref{eqn: determinant sum 1}. 
-
-\item The result is path dependent.
-When calculating the inverse matrix, such dependency is so strong that Formula \eqref{eqn: inverse matrix} is avoided, and the path which is deemed to have smallest rounding error is chosen in the Gaussian elimination algorithm \cite{Numerical_Recipes}.
-Even so, the result uncertainty is not clear.
-\end{itemize}
-In contrast, Formula \eqref{eqn: determinant variance} is no longer path dependent, and it accounts for all input uncertainties and calculation rounding errors.
-
-A matrix $\tilde{M}$ is constructed from $M$ in two different ways:
-\begin{itemize}
-\item \emph{rounding}: If each element of $M$ is converted to a conventional 64-bit floating-point value to construct $\tilde{M}$, the result errors are due to the rounding errors of the conventional 64-bit floating-point calculations.
-
-\item \emph{noise}: If either Gaussian noise or white noise of a particular level is added to each element of $M$ to construct $\tilde{M}$, the result errors are mainly due to the input noise unless the input noise level is $10^{-16}$ or less.
-For example, if the noise-level is $10^{-3}$, because the distribution deviation of the elements of $M$ is $16384 /\sqrt{3} = 9459$, the Gaussian noise is generated with the deviation of $9459 \times 10{-3}$. 
-
-\item For simplicity, a same noise-level is used for every element of $M$.
-\end{itemize}
-
-The calculation results using $\tilde{M}$ can be compared with those of $M$ in different tests:
-\begin{itemize}
-\item \emph{determinant}: to compare $|\M|$ and $|\tilde{M}|$.
-
-\item \emph{adjugate}: to compare $M^A$ and $\tilde{M}^A$.
-
-\item \emph{inverse}: to compare $M^A M = |\M| \I$ and $\tilde{M}^A \tilde{M}$, in which $\I$ is the identity matrix \cite{Linear_Algebra} for $M$.
-\end{itemize}
-
+Formula \eqref{eqn: determinant variance approx} gives the first approximation of Formula \eqref{eqn: determinant variance}, in which $\tilde{x}_{i,j}$ is an imprecise element.
+It essentially states that when the input precision is much less than $1$, the determinant $|\M|$ of an imprecise matrix $\M$ can be calculated using Formula \eqref{eqn: determinant} directly.
+\begin{equation}
+\label{eqn: determinant variance approx}
+\delta^2 |\M| \simeq \sum_{i}^{n} \sum_{j}^{n} M_{i,j} (\delta x_{i,j})^2
+ = \left( \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n \prod_{k=1 \dots n} \tilde{x}_{k,p_{k}} \right)^2 - |\M|^2;
+\end{equation}
+Figure \ref{fig: Multiply_Error_vs_Size_Noise} contains the result of applying Formula \eqref{eqn: determinant variance approx}.
+It is very similar to Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, validating Formula \eqref{eqn: determinant variance approx}.
 
 
 
@@ -2868,13 +2897,20 @@ If the library functions also have proper coverage, the calculation result will 
 
 
 \clearpage
-\section{Comparison Using Progressive Moving-Window Linear Regression}
+\section{Moving-Window Linear Regression}
 \label{sec: Comparison Using Progressive Moving-Window Linear Regression}
 
-\subsection{Progressive Moving-Window Linear Regression Algorithm}
+\subsection{Moving-Window Linear Regression Algorithm}
+
+\begin{figure}
+\centering
+\includegraphics[height=2in]{Moving_Window_Linear_Fit.png} 
+\captionof{figure}{ Coefficients of X in Formula \eqref{eqn: time-series linear regression} at current and next position in a time series of the least square linear regression. Except the two end points at $X=-H$ and $X=H+1$, respectively, the coefficient difference between the current and then next position in a time series are all by 1 in the overlapping region from $X=-H+1$ to $X=H$, which results in \eqref{eqn: moving-window linear regression}. }
+\label{fig: Moving_Window_Linear_Fit}
+\end{figure}
+
 
 Formula \eqref{eqn: linear regression} gives the result of the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, in which $j$ is an integer index to identify $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
-
 \begin{equation}
 \begin{split}
 \label{eqn: linear regression}
@@ -2884,8 +2920,7 @@ Formula \eqref{eqn: linear regression} gives the result of the least-square line
 \end{split}
 \end{equation}
 
-In many applications data set ${Y_j}$ is an input data stream collected with fixed rate in time, such as a data stream collected by an ADC (Analogue-to-Digital Converter) \cite{Electronics}.  ${Y_j}$ is called a time-series input, in which $j$ indicates time.  A moving window algorithm \cite{Numerical_Recipes} is performed in a small time-window around each $j$.  For each window of calculation, ${X_j}$ can be chosen to be integers in the range of $[-H, +H]$ in which $H$ is an integer constant specifying window’s half width so that $\sum_{j} X_{j} = 0$, to reduce \eqref{eqn: linear regression} into \eqref{eqn: time-series linear regression}:
-
+In many applications data set ${Y_j}$ is an input data stream collected with fixed rate in time, such as a data stream collected by an ADC (Analogue-to-Digital Converter) \cite{Electronics}.  ${Y_j}$ is called a time-series input, in which $j$ indicates time.  A moving window algorithm \cite{Numerical_Recipes} is performed in a small time-window around each $j$.  For each window of calculation, ${X_j}$ can be chosen to be integers in the range of $[-H, +H]$ in which $H$ is an integer constant specifying window’s half width so that $\sum_{j} X_{j} = 0$, to reduce Formula \eqref{eqn: linear regression} into Formula \eqref{eqn: time-series linear regression}:
 \begin{equation}
 \begin{split}
 \label{eqn: time-series linear regression}
@@ -2894,8 +2929,7 @@ In many applications data set ${Y_j}$ is an input data stream collected with fix
 \end{split}
 \end{equation}
 
-According to Figure \ref{fig: Moving_Window_Linear_Fit}, in which $H$ takes an example value of 4, the calculation of $(\alpha _{j}, \beta _{j})$ can be obtained from the previous values of $(\alpha _{j-1}, \beta _{j-1})$, to reduce the calculation of \eqref{eqn: time-series linear regression} into a progressive moving-window calculation of \eqref{eqn: moving-window linear regression}:
-
+According to Figure \ref{fig: Moving_Window_Linear_Fit}, in which $H$ takes an example value of 4, the calculation of $(\alpha _{j}, \beta _{j})$ can be obtained from the previous values of $(\alpha _{j-1}, \beta _{j-1})$, to reduce the calculation of Formula \eqref{eqn: time-series linear regression} into a progressive moving-window calculation of Formula \eqref{eqn: moving-window linear regression}:
 \begin{equation}
 \begin{split}
 \label{eqn: moving-window linear regression}
@@ -2907,7 +2941,7 @@ According to Figure \ref{fig: Moving_Window_Linear_Fit}, in which $H$ takes an e
 
 \subsection{Dependency Problem in a Progressive Algorithm} 
 
-\eqref{eqn: moving-window linear regression} uses each input multiple times, so it will have dependency problem for all the three uncertainty-bearing arithmetic.  The question is how the overestimation of uncertainty evolves with time. 
+Formula \eqref{eqn: moving-window linear regression} uses each input multiple times, so it will have dependency problem for all the three uncertainty-bearing arithmetic.  The question is how the overestimation of uncertainty evolves with time. 
 
 The moving-window linear regression is done on a straight line with a constant slope of exactly $1/1024$ for each advance of time, with a full window width of 9 data points, or $H=4$.  Both average output value errors and deviations of all three arithmetic increases linearly with input deviations, and increase monotonically with time.  Thus both the average output tracking ratio and the maximal output bounding ratio are largely independent of input precisions, e.g., Figure \ref{fig: Simple_Prec4_AvgErrSig_vs_InDev_Time} shows such trend for the average output tracking ratio using variance arithmetic.  Such independence to input precision is expected for linear algorithms in general \cite{Numerical_Recipes}.  Therefore, only results with the input deviation of $10^{-3}$ are shown for the remaining discussions unless otherwise specified.  Figure \ref{fig: Simple_Err_Dev_vs_Time} shows the output deviation and the value errors vs. time while Figure \ref{fig: Simple_AvgErrSig_MaxBndRat_vs_Time} shows the output average tracking ratios and the maximal bounding ratios vs. time for all three arithmetics.  
 

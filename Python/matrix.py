@@ -1,6 +1,8 @@
 import fractions
-import math
+import functools
 import itertools
+import math
+import operator
 import random
 import typing
 
@@ -64,7 +66,7 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tup
     '''
     Add Gaussian "noise" to "ssMatrix", with the actual noise is adjusted by ELEMENT_RANGE.
     '''
-    if not isSquareMatrix(ssMatrix, sType=(int,fractions.Fraction)):
+    if not isSquareMatrix(ssMatrix, sType=(int,float,fractions.Fraction)):
         raise ValueError(f'Invalid int or float')
     size = len(ssMatrix)
     return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), 
@@ -98,10 +100,10 @@ def multiply(ssMatrix1:tuple[tuple[ElementType]], ssMatrix2:tuple[tuple[ElementT
 def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tuple[ElementType]]]:
     '''
     Calculate determinant and the adjugate matrix for "ssMatrix".
-    If the ElementType contains mixed types, the result promotion is int -> Fraction -> float.
+    If the ElementType contains mixed types, the result promotion is int -> Fraction -> float -> VarDbl.
     '''
     if not isSquareMatrix(ssMatrix):
-        raise ValueError(f'The input square matrix is illegal for determinant(): {ssMatrix}')
+        raise ValueError(f'The input square matrix is illegal for adjugate(): {ssMatrix}')
     size = len(ssMatrix)
     if size == 1:
         return ssMatrix[0][0], ssMatrix
@@ -171,4 +173,22 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
                   for j in range(size)])
 
 
-
+def adjugate_mul(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tuple[ElementType]]]:
+    '''
+    Calculate determinant and the adjugate matrix for "ssMatrix" by direct multiply.
+    If the ElementType contains mixed types, the result promotion is int -> Fraction -> float -> VarDbl.
+    '''
+    if not isSquareMatrix(ssMatrix):
+        raise ValueError(f'The input square matrix is illegal for adjugate_mul(): {ssMatrix}')
+    size = len(ssMatrix)
+    det = 0
+    sCof = {(i,j): 0 for i in range(size) for j in range(size)}
+    sPermut = {permut: permutSign(permut) for permut in itertools.permutations(range(size), size)}
+    for permut, sign in sPermut.items():
+        det += sign * functools.reduce(operator.mul, [ssMatrix[x][y] for x, y in enumerate(permut)])
+        sVal = {(i,j): sign * functools.reduce(operator.mul, 
+                        [ssMatrix[x][y] for x, y in enumerate(permut) if x != i]) 
+                for i in range(size) for j in range(size) if permut[i] == j}
+        for k, v in sVal.items():
+            sCof[k] += v
+    return det, tuple([tuple([sCof[(i,j)] for i in range(size)]) for j in range(size)])    
