@@ -64,7 +64,7 @@ def createHilbertMatrix(size:int) ->tuple[tuple[fractions.Fraction]]:
 
 def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tuple[varDbl.VarDbl]]:
     '''
-    Add Gaussian "noise" to "ssMatrix", with the actual noise is adjusted by ELEMENT_RANGE.
+    Add Gaussian "noise" to "ssMatrix".
     '''
     if not isSquareMatrix(ssMatrix, sType=(int,float,fractions.Fraction)):
         raise ValueError(f'Invalid int or float')

@@ -906,12 +906,12 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 \label{eqn: Taylor 2d}
 &f(x + \tilde{x}, y + \tilde{y}) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
 \label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
-&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \\
+\overline{f(x,y)} &= \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n}  \frac{\zeta(2m) \zeta(2n) f^{(2m,2n)}_{(x,y)}}{(2m)! (2n)!}; \nonumber \\
 \label{eqn: Taylor 2d variance}
 \delta^2 f(x, y) &= \overline{f(x, y)^2} - \overline{f(x, y)}^2 = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
 &\eqspace (\zeta(2m) \zeta(2n) \sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \nonumber \\
-&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}
+&\eqspace\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}
 	\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}); \nonumber
 \end{align}
 Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
@@ -969,14 +969,14 @@ Figure \ref{fig: Variance_Momentum} shows the value and uncertainties of the cor
 When $2n < 20$, $\zeta(2n)$ can be well approximated by $(2n -1)!!$.  
 Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 1d variance} can be approximated as Formula \eqref{eqn: Taylor 1d variance approx} and \eqref{eqn: Taylor 1d variance approx}, respectively.
 \begin{align}
-\delta^2 f(x) &\simeq (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \nonumber \\
 \label{eqn: Taylor 1d variance approx}
-  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right); \\
-\delta^2 f(x, y)&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2  \nonumber \\
+\delta^2 f(x) &\simeq (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \\
+  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right); \nonumber \\
+\label{eqn: Taylor 2d variance approx}
+\delta^2 f(x, y)&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2 \\
 &\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
       + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
-\label{eqn: Taylor 2d variance approx}
-&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)});
+&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)}); \nonumber
 \end{align}
 
 
@@ -1072,9 +1072,9 @@ Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$, whic
 & \sin(x + \tilde{x}) = \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
 \overline{\sin(x)} &= \sin(x) + \sin(x) \sum_{n=0}^{\infty} (\delta x)^{2n} (-1)^{n} \frac{\zeta(2n)}{(2n)!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1} \nonumber \\
+\delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1} \\
  & \left( \cos(x)^2 \sum_{j=0}^{n-1} \frac{\zeta(2n)}{(2j+1)!(2n-2j-1)!}
-      - \sin(x)^2 \sum_{j=1}^{n-1} \frac{\zeta(2n) - \zeta(2j) \zeta(2n-2j)}{(2j)!(2n-2j)!} \right) \\ 
+      - \sin(x)^2 \sum_{j=1}^{n-1} \frac{\zeta(2n) - \zeta(2j) \zeta(2n-2j)}{(2j)!(2n-2j)!} \right) \nonumber \\ 
  &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  + o((\delta x)^8);
 \end{align}
 
@@ -1182,14 +1182,6 @@ When the inputs obeys the uncorrelated uncertainty assumption, variance arithmet
 For example:
 \begin{itemize}
 \item Formula \eqref{eqn: sum variance} shows $\delta^2 (f + g)$, whose dependence tracing can be demonstrated by $\delta^2 (f - f) = 0$  and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter case corresponding to Formula \eqref{eqn: addition and subtraction}.   
-Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Taylor 1d variance} uses Formula \eqref{eqn: sum variance} between any two terms in the Taylor expansion of Formula \eqref{eqn: Taylor 1d}.
-\begin{align}
-\label{eqn: Taylor inner dependency}
-\delta^2 & \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) = 
-    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) + \nonumber \\
-  & 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);
-\end{align}
-
 
 \item Formula \eqref{eqn: prod variance} shows  $\delta^2 (f g)$, whose dependence tracing can be demonstrated by $\delta^2 (f/f) = 0$  and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter case corresponding to Formula \eqref{eqn: multiplication}.  
 
@@ -1237,15 +1229,12 @@ Traditionally, $x^2 - x$ can be calculated equivalently as Formula \eqref{eqn: i
 When applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations, only Formula \eqref{eqn: interval depend 1} gives the correct result, while the other two violate dependency tracing and give wrong results, as shown in Table \ref{tbl: dependency example}.
 It shows that the dependency problem of interval arithmetic \cite{Interval_Arithmetic} may be due to the lack of dependency tracing.
 
-\item In Gaussian elimination for linear equation \cite{Numerical_Recipes}, the execution is carried out progressively in the path to minimize rounding errors using conventional floating-point calculations, without any consideration for dependency tracing.
-The existence of different execution paths suggests that the solution itself is designed with dependency problem.
-Instead, in Section \ref{sec: matrix}, variance arithmetic uses the matrix inversion formula by the determinants of sub-matrices, which is advised against by traditional numerical algorithm \cite{Numerical_Recipes}.
-
 \item Formula \eqref{eqn: composite variance 1d} is the single-variable version of Formula \eqref{eqn: composite variance}.
 If instead, $\delta^2 f(g(x))$ is calculated as $\delta^2 f(x)$ with $\delta^2 x = \delta^2 g(x)$, the result Formula \eqref{eqn: progressive variance} depends on the sequence of the composite functions, such as $P(\sqrt{x}^2)^2 \simeq P(x)^2 + \frac{9}{2} P(x)^4$ v.s. $P(\sqrt{x^2})^2 \simeq P(x)^2 + \frac{9}{8} P(x)^4$.
+However, it is possible that for special application the first order approximation of Formula \eqref{eqn: composite variance 1d} is used, so that Formula \eqref{eqn: progressive variance} is permissible as an alternative.
 \end{itemize}
 Thus, when the dependency tracing is not applied strictly, variance arithmetic will have dependency problem.
-To avoid such dependency problem, all the conventional numerical algorithms need to be reevaluated for variance arithmetic.
+To avoid such dependency problem, all the conventional numerical algorithms need to be reexamined for variance arithmetic.
 
 \begin{table}
 \centering
@@ -1269,13 +1258,13 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 
 \begin{align}
 \label{eqn: composite variance 1d}
-\delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + \nonumber \\
-  &\eqspace (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) + \nonumber \\
-  &\eqspace (\delta x)^4 \left( f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x \right) + o((\delta x)^6); \\
+\delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
+  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
+  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x \right) + o((\delta x)^6);  \nonumber\\
 \label{eqn: progressive variance}
-\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + \nonumber \\
-  &\eqspace (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) + \nonumber \\
-  &\eqspace (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6) ; 
+\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
+  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
+  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6);  \nonumber
 \end{align}
 
 
@@ -1621,7 +1610,7 @@ In contrast, for the special matrix in Formula \eqref{eqn: special determinant},
  	&+ 3 (5 z^4 - 12 z^2 x y + 2 z x^3 + 2 z y^3 + 3 x^2 y^2)(\delta z)^2 \nonumber \\
  	&+ 9 (z^2 + 2 x y)(\delta x)^2 (\delta y)^2 + 9 (y^2 + x z) (\delta x)^2 (\delta z)^2 + 9 (x^2 +2 y x) (\delta y)^2 (\delta z)^2 \nonumber \\
  	&+ 9 (5 x^2 - 2 y z) (\delta x)^4 + 9 (5 y^2 - 2 x z) (\delta y)^4 + 9 (5z^4 - 2 x y) (\delta z)^4 \nonumber \\
-    &+ 15 (\delta x)^6 + 15 (\delta x)^6 + 15 (\delta x)^6 \nonumber;
+    &+ 15 (\delta x)^6 + 15 (\delta y)^6 + 15 (\delta z)^6 \nonumber;
 \end{align}
 
 
@@ -1795,7 +1784,7 @@ Another reason why not to use Formula \eqref{eqn: inverse matrix} is that accord
 \end{align}
 
 Traditionally, the effect of uncertainty of  $\M$ to $\M^{-1}$ is quantified by the matrix condition number \cite{Linear_Algebra}.
-In Formula \eqref{eqn: inverse matrix}, $\M^{-1}$ is dominated by $1/|\M|$, suggesting that the precision of $\M^{-1}$ is determined by the precision of $|\M|$.
+In Formula \eqref{eqn: inverse matrix}, $\M^{-1}$ is dominated by $1/|\M|$, suggesting that the precision of $\M^{-1}$ is largely determined by the precision of $|\M|$.
 Variance arithmetic treats the least significant value of a floating-point value to be imprecise, so it can use Formula \eqref{eqn: special determinant variance} to calculate the determinant variance for a matrix containing floating-point elements, including a randomly generated matrix, or a Hilbert matrix \cite{Linear_Algebra} after it is converted to a floating-point matrix.
 Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that there is a strong linear correlation between the conditional number and the determinant precision of matrices, so that the determinant precision can replace the condition number, which is much more difficult to calculate, and which is somewhat vague for the choices of matrix norms.
 
@@ -1817,7 +1806,7 @@ It clearly shows the overall precision dominance by the value of $72 \pm 87.1$ o
 
 
 
-\subsection{First Approximation}
+\subsection{First Order Approximation}
 
 \begin{figure}[p]
 \centering
@@ -1828,7 +1817,7 @@ The deviation of the first approximation calculation of $|\M|$ vs. input noise p
 \label{fig: Multiply_Error_vs_Size_Noise}
 \end{figure}
 
-Formula \eqref{eqn: determinant variance approx} gives the first approximation of Formula \eqref{eqn: determinant variance}, in which $\tilde{x}_{i,j}$ is an imprecise element.
+Formula \eqref{eqn: determinant variance approx} gives the first order approximation of Formula \eqref{eqn: determinant variance}, in which $\tilde{x}_{i,j}$ is an imprecise element.
 It essentially states that when the input precision is much less than $1$, the determinant $|\M|$ of an imprecise matrix $\M$ can be calculated using Formula \eqref{eqn: determinant} directly.
 \begin{equation}
 \label{eqn: determinant variance approx}
@@ -1843,6 +1832,116 @@ It is very similar to Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, validating
 
 
 
+\clearpage
+\section{Moving-Window Linear Regression}
+\label{sec: Comparison Using Progressive Moving-Window Linear Regression}
+
+\subsection{Moving-Window Linear Regression Algorithm}
+
+\begin{figure}
+\centering
+\includegraphics[height=1.75in]{Moving_Linear_Fit_Coeff.png} 
+\captionof{figure}{ 
+Coefficients of X in Formula \eqref{eqn: time-series linear regression 1} and \eqref{eqn: moving-window linear regression variance 1} at a current and the next position in a time series of the $\alpha + \beta\; Y$ fit. 
+It shows that the $\beta_{j+1}$ in Formula \eqref{eqn: time-series linear regression 1} can be calculated progressively from $\beta_j$, as Formula \eqref{eqn: moving-window linear regression 1} and {eqn: moving-window linear regression 0} in order.
+It also shows that the $\delta^2 \beta_{j+1}$ in Formula \eqref{eqn: moving-window linear regression variance 1} can not be calculated easily from $\delta^2 \beta_{j}$.
+}
+\label{fig: Moving_Linear_Fit_Coeff}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Moving_Linear_Fit_Value.png} 
+\captionof{figure}{ 
+The input values, fit values, and fit uncertainties of the $\alpha + \beta\; Y$ fit vs time index. 
+The x-axis marks the time index.
+The y-axis on the left marks the value, while The y-axis on the left marks the uncertainty.
+The legend marks different curves.
+}
+\label{fig: Moving_Linear_Fit_Value}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Moving_Linear_Fit_Error.png} 
+\captionof{figure}{ 
+The error deviations of the $\alpha + \beta\; Y$ fit vs time index. 
+The x-axis marks the time index.
+The y-axis on the left marks the error deviation.
+The legend marks different curves.
+}
+\label{fig: Moving_Linear_Fit_Error}
+\end{figure}
+
+
+
+Formula \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} give the result of the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, in which $j$ is an integer index to identify $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
+\begin{align}
+\label{eqn: linear regression 0}
+\alpha &= \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
+\label{eqn: linear regression 1}
+\beta &= \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
+    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
+\end{align}
+
+In many applications data set ${Y_j}$ is an input data stream collected with fixed rate in time, such as a data stream collected by an ADC (Analogue-to-Digital Converter) \cite{Electronics}.  ${Y_j}$ is called a time-series input, in which $j$ indicates time.  A moving window algorithm \cite{Numerical_Recipes} is performed in a small time-window around each $j$.  For each window of calculation, ${X_j}$ can be chosen to be integers in the range of $[-H, +H]$ in which $H$ is an integer constant specifying window’s half width so that $\sum_{j} X_{j} = 0$, to reduce Formula \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} into Formula \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1}, respectively:
+\begin{align}
+\label{eqn: time-series linear regression 0}
+\alpha _{j} &= \alpha \; 2 H = \sum_{X=-H+1}^{H} Y_{j-H+X}; \\
+\label{eqn: time-series linear regression 1}
+\beta _{j} &= \beta \; \frac{H (H+1)(2H+1)}{3} = \sum_{X=-H}^{H} X Y_{j-H+X}; 
+\end{align}
+According to Figure \ref{fig: Moving_Linear_Fit_Coeff}, in which $H$ takes an example value of 4, the calculation of $(\alpha _{j}, \beta _{j})$ can be obtained from the previous values of $(\alpha _{j-1}, \beta _{j-1})$, to reduce the calculation of Formula \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} into a progressive moving-window calculation of Formula \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1}, respectively:
+\begin{align}
+\label{eqn: moving-window linear regression 0}
+\beta _{j} &= \beta _{j-1} - \alpha _{j-1} + H \left(Y_{j-2H-1} + Y_{j} \right); \\
+\label{eqn: moving-window linear regression 1}
+\alpha_{j} &= \alpha _{j-1} - Y_{j-2H-1} + Y_{j};
+\end{align}
+
+
+\subsection{Variance Adjustment} 
+
+When the time series contain uncertainty, the direct application of Formula \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1} will result in loss of precision, because both formulas use an same input multiple times and accumulate the variance of the input each time.
+In fact, Formula \eqref{eqn: time-series linear regression 1} is better than Formula \eqref{eqn: linear regression 1} because $Y_j$ appears only once in  Formula \eqref{eqn: time-series linear regression 1}.
+The value of $\beta_j$ and $\alpha_j$ are given by Formula \eqref{eqn: moving-window linear regression 1} and \eqref{eqn: moving-window linear regression 0}, respectively, while the variance are given by Formula \eqref{eqn: moving-window linear regression variance 0} and \eqref{eqn: moving-window linear regression variance 1}, respectively.
+Only Formula \eqref{eqn: moving-window linear regression variance 0} can easily be calculated progressively.
+\begin{align}
+\label{eqn: moving-window linear regression variance 0}
+\delta^2 \alpha_{j} &= \sum_{X=-H+1}^{H} (\delta Y_{j-H+X})^2 = \delta^2 \alpha_{j-1} + (\delta Y_{j})^2 - (\delta Y_{j-2H})^2; \\
+\label{eqn: moving-window linear regression variance 1}
+\delta^2 \beta_{j} &= \sum_{X=-H+1}^{H} X^2 (\delta Y_{j-H+X})^2;
+\end{align}
+
+Figure \ref{fig: Moving_Linear_Fit_Value} shows the input values, fit values, and fit uncertainties of the $\alpha + \beta\; Y$ fit vs time index $j$.
+In Figure \ref{fig: Moving_Linear_Fit_Value}, the input signal $Y_j$ is:
+\begin{enumerate}
+\item An increasing slope for $j = 0 \dots 9$.
+
+\item A decreasing slope for $j = 1 \dots 39$.
+
+\item A sudden jump with an intensity of $+10$ at $j=40$
+
+\item A decreasing slope for $j = 41 \dots 49$.
+\end{enumerate}
+For each increase of $j$, the increasing rate and the decreasing rate are $+1$ and $-1$, respectively.
+The result $\alpha$ and $\beta$ behave correctly with the expected delay in $j$.
+
+Normal noises of $0.2$ intensity are added to the slopes, except Normal noises of $2$ intensity are added to the slope for $j = 10 \dots 19$.
+The input uncertainty is always $0.2$.
+With the window half size as $H=2$ and the input uncertainty $\delta Y=0.2$, the result uncertainty of $\alpha$ is $\sqrt{\frac{1}{2H+1}} \delta Y$, and the  result uncertainty of $\beta$ is $\sqrt{\frac{3}{H (H+1)(2H+1)}} \delta Y$, both of which are less than the input uncertainty $\delta Y$, due to the averaging effect of the moving window.
+Figure \ref{fig: Moving_Linear_Fit_Value} shows that without the variance adjustment, the result uncertainties of $\alpha$ and $\beta$ both increase exponentially with the index time $j$.
+
+
+\subsection{Unspecified Input Error}
+
+Figure \ref{fig: Moving_Linear_Fit_Error} shows the corresponding error deviation vs index time $j$, which are $1$ except near $10$ for $j = 10 \dots 19$ when the actual noise is $10$-fold of the specified one.
+It demonstrates that a larger than $1$ error deviation may probably indicate unspecified additional input errors other than rounding errors, such as the numerical errors from math libraries.
+
+
+
+
+  
 \clearpage
 \section{Polynomial and Taylor Expansion}
 \label{sec: polynomial}
@@ -1919,14 +2018,21 @@ f(x + \tilde{x}) = \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{
 When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $c=N$ and $x = ax + b$. 
 Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold, because the exponent for power is limited to positive integers.
 
+Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Taylor 1d variance} uses Formula \eqref{eqn: sum variance} between any two terms in the Taylor expansion of Formula \eqref{eqn: Taylor 1d}.
+It suggests that a Taylor expansion is also a polynomial of Formula \eqref{eqn: polynomial Taylor} with $N \rightarrow \infty$ in the variance arithmetic.
+\begin{align}
+\label{eqn: Taylor inner dependency}
+\delta^2 & \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) = 
+    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) \\
+  &+ 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber
+\end{align}
+
 A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
 \begin{itemize}
 \item \emph{reminder estimation}: Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
 
 \item \emph{stability test}: Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
 \end{itemize}
-
-Formula \eqref{eqn: Taylor inner dependency} suggests that a Taylor expansion is also a polynomial with $N \rightarrow \infty$ in the variance arithmetic.
 Using Formula \eqref{eqn: polynomial Taylor}, the calculated uncertainty increases with the increasing Taylor expansion order.
 For an evaluation with an known result, at a given Taylor expansion order, the reminder value error can be used instead of the estimated reminders. 
 For example, for $\frac{1}{1 - x}$, the remainder value error is calculated as $\sum_{n = 0}^{N} x^n - \frac{1}{1 - x}$ in which $N$ is the Taylor expansion order.
@@ -1956,12 +2062,50 @@ If the stability test can not be applied, the convergence of the mean and the va
 
 
 \clearpage
+\section{Regressive Generation of Sin/Cos}
+\label{sec: recursion}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Uncertain_Sin.png}
+\captionof{figure}{
+The error deviations and uncertainty means for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown in the legend.
+}
+\label{fig: Uncertain_Sin}
+\end{figure}
+
+Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the $\sin$ library function.  
+\begin{align}
+\label{eqn: phase boundary}
+& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+\label{eqn: phase sin}
+& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
+\label{eqn: phase cos}
+& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
+\end{align}
+The number of regression is defined as the order.
+For each order $n$, $2^n$ $\sin(\frac{\pi}{2} \frac{i}{2^n})$ and $\cos(\frac{\pi}{2} \frac{i}{2^n})$ values are obtained, so that the result is more statistically stable with increasing $n$.
+
+The errors of the generated $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + \cos(x)^2 - 1$.
+The resulted value errors are comparable with but not identical to the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
+Figure \ref{fig: Uncertain_Sin} shows that the result uncertainties remain almost a constant of about $1.2 \time 10^{-16}$, which is consist with uniformly distributed least significant values within the least significant bit of the significand.
+It also shows that the error deviations is close to $0.5$, which is comparable to the value of $0.535$ for the library $\sin(x)$ and $\cos(x)$ functions.
+The variance arithmetic is thus effective for this regressive generation algorithm.
+
+Using either Taylor expansion or regressive generation of $\sin(x)$ and $\cos(x)$ are equivalent precision-wise for conventional floating-point calculations.
+In contrast, in the variance arithmetic, when $x \rightarrow 0$, Formula \eqref{eqn: phase sin} has very coarse precision for Formula \ref{eqn: square root precision}, which result in very coarse precision for $\sin(x)$. 
+Thus, the variance arithmetic rejects this regressive generation algorithm for $\sin(x)$ and $\cos(x)$.
+
+
+
+
+\clearpage
 \section{Math Library Functions}
 \label{sec: Math Library}
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Exp_Dev.png} 
+\includegraphics[height=2in]{Exp_Dev.png} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations and the measured error deviations for $e^{x \pm \delta x}$, for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2201,44 +2345,6 @@ In ideal coverage cases, the error deviation is very close to $1$ except it is $
 In non ideal coverage cases, the error deviation is about $0.5$ so that proper coverage is achieved.
 
 The convergence of the result variance calculation can be judged numerically.
-
-
-
-\clearpage
-\section{Regressive Generation of Sin/Cos}
-\label{sec: recursion}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Uncertain_Sin.png} 
-\captionof{figure}{
-The error deviations and uncertainty means for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown in the legend.
-}
-\label{fig: Uncertain_Sin}
-\end{figure}
-
-Starting from Formula \eqref{eqn: phase boundary}, Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} can be used recursively to calculate the $\sin$ library function.  
-\begin{align}
-\label{eqn: phase boundary}
-& \sin(0) = \cos(\frac{\pi}{2}) = 0; & \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
-\label{eqn: phase sin}
-& \sin \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 - \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 - \cos(\alpha) \cos \left(\beta) + \sin(\alpha \right) \sin(\beta)}{2}}; \\
-\label{eqn: phase cos}
-& \cos \left(\frac{\alpha + \beta}{2} \right) = \sqrt{\frac{1 + \cos \left(\alpha + \beta \right)}{2}} = & \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}};
-\end{align}
-The number of regression is defined as the order.
-For each order $n$, $2^n$ $\sin(\frac{\pi}{2} \frac{i}{2^n})$ and $\cos(\frac{\pi}{2} \frac{i}{2^n})$ values are obtained, so that the result is more statistically stable with increasing $n$.
-
-The errors of the generated $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + \cos(x)^2 - 1$.
-The resulted value errors are comparable with but not identical to the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
-Figure \ref{fig: Uncertain_Sin} shows that the result uncertainties remain almost a constant of about $1.2 \time 10^{-16}$, which is consist with uniformly distributed least significant values within the least significant bit of the significand.
-It also shows that the error deviations is close to $0.5$, which is comparable to the value of $0.535$ for the library $\sin(x)$ and $\cos(x)$ functions.
-The variance arithmetic is thus effective for this regressive generation algorithm.
-
-Using either Taylor expansion or regressive generation of $\sin(x)$ and $\cos(x)$ are equivalent precision-wise for conventional floating-point calculations.
-In contrast, in the variance arithmetic, when $x \rightarrow 0$, Formula \eqref{eqn: phase sin} has very coarse precision for Formula \ref{eqn: square root precision}, which result in very coarse precision for $\sin(x)$. 
-Thus, the variance arithmetic rejects this regressive generation algorithm for $\sin(x)$ and $\cos(x)$.
-
 
 
 
@@ -2896,81 +3002,6 @@ If the library functions also have proper coverage, the calculation result will 
 
 
 
-\clearpage
-\section{Moving-Window Linear Regression}
-\label{sec: Comparison Using Progressive Moving-Window Linear Regression}
-
-\subsection{Moving-Window Linear Regression Algorithm}
-
-\begin{figure}
-\centering
-\includegraphics[height=2in]{Moving_Window_Linear_Fit.png} 
-\captionof{figure}{ Coefficients of X in Formula \eqref{eqn: time-series linear regression} at current and next position in a time series of the least square linear regression. Except the two end points at $X=-H$ and $X=H+1$, respectively, the coefficient difference between the current and then next position in a time series are all by 1 in the overlapping region from $X=-H+1$ to $X=H$, which results in \eqref{eqn: moving-window linear regression}. }
-\label{fig: Moving_Window_Linear_Fit}
-\end{figure}
-
-
-Formula \eqref{eqn: linear regression} gives the result of the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, in which $j$ is an integer index to identify $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
-\begin{equation}
-\begin{split}
-\label{eqn: linear regression}
-& \alpha = \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
-& \beta = \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
-    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
-\end{split}
-\end{equation}
-
-In many applications data set ${Y_j}$ is an input data stream collected with fixed rate in time, such as a data stream collected by an ADC (Analogue-to-Digital Converter) \cite{Electronics}.  ${Y_j}$ is called a time-series input, in which $j$ indicates time.  A moving window algorithm \cite{Numerical_Recipes} is performed in a small time-window around each $j$.  For each window of calculation, ${X_j}$ can be chosen to be integers in the range of $[-H, +H]$ in which $H$ is an integer constant specifying window’s half width so that $\sum_{j} X_{j} = 0$, to reduce Formula \eqref{eqn: linear regression} into Formula \eqref{eqn: time-series linear regression}:
-\begin{equation}
-\begin{split}
-\label{eqn: time-series linear regression}
-& \alpha _{j} = \alpha \; 2 H = \sum_{X=-H+1}^{H} Y_{j-H+X}; \\
-& \beta _{j} = \beta \; \frac{H (H+1)(2H+1)}{3} = \sum_{X=-H}^{H} X Y_{j-H+X}; \\
-\end{split}
-\end{equation}
-
-According to Figure \ref{fig: Moving_Window_Linear_Fit}, in which $H$ takes an example value of 4, the calculation of $(\alpha _{j}, \beta _{j})$ can be obtained from the previous values of $(\alpha _{j-1}, \beta _{j-1})$, to reduce the calculation of Formula \eqref{eqn: time-series linear regression} into a progressive moving-window calculation of Formula \eqref{eqn: moving-window linear regression}:
-\begin{equation}
-\begin{split}
-\label{eqn: moving-window linear regression}
-& \beta _{j} = \beta _{j-1} - \alpha _{j-1} + H(Y_{j-2H-1} + Y_{j}); \\
-& \alpha _{j} = \alpha _{j-1} - Y_{j-2H-1} + Y_{j};
-\end{split}
-\end{equation}
-
-
-\subsection{Dependency Problem in a Progressive Algorithm} 
-
-Formula \eqref{eqn: moving-window linear regression} uses each input multiple times, so it will have dependency problem for all the three uncertainty-bearing arithmetic.  The question is how the overestimation of uncertainty evolves with time. 
-
-The moving-window linear regression is done on a straight line with a constant slope of exactly $1/1024$ for each advance of time, with a full window width of 9 data points, or $H=4$.  Both average output value errors and deviations of all three arithmetic increases linearly with input deviations, and increase monotonically with time.  Thus both the average output tracking ratio and the maximal output bounding ratio are largely independent of input precisions, e.g., Figure \ref{fig: Simple_Prec4_AvgErrSig_vs_InDev_Time} shows such trend for the average output tracking ratio using variance arithmetic.  Such independence to input precision is expected for linear algorithms in general \cite{Numerical_Recipes}.  Therefore, only results with the input deviation of $10^{-3}$ are shown for the remaining discussions unless otherwise specified.  Figure \ref{fig: Simple_Err_Dev_vs_Time} shows the output deviation and the value errors vs. time while Figure \ref{fig: Simple_AvgErrSig_MaxBndRat_vs_Time} shows the output average tracking ratios and the maximal bounding ratios vs. time for all three arithmetics.  
-
-For interval arithmetic and independence arithmetic, the output value errors remain on a constant level, while the output deviations increase with time, so that both output average tracking ratios and maximal bounding ratios decrease with time.  The stable linear increase of output deviation with time using either interval arithmetic or independence arithmetic in Figure \ref{fig: Simple_Err_Dev_vs_Time} suggests that the progressive linear regression calculation has accumulated every input uncertainty, which results in the monotonic decrease of both the maximal bounding ratios and the average output tracking ratios with time using both arithmetics in Figure \ref{fig: Simple_AvgErrSig_MaxBndRat_vs_Time}.
-
-In contrast, while variance arithmetic has slightly larger output deviations than those of independence arithmetic, its output value errors follows its output deviations, so that both its tracking ratios and bounding ratios remain between 0.1 and 0.9.  The reason for such increase of output value errors with time is due to the fact that variance arithmetic calculates only limited bits inside uncertainty, and uses larger granularity of values in calculation for larger uncertainty deviation. Such granularity of calculation is evident when comparing 2-bit or 4-bit calculation inside uncertainty using variance arithmetic in Figure \ref{fig: Simple_Err_Dev_vs_Time}.  This mechanism of error tracking in variance arithmetic is also demonstrated in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} and Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2}.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} shows that for fewer bits calculated inside uncertainty, the output value errors follow the output deviation closer in time, but such usage of larger granularity of values in calculation causes the result to become insignificant sooner, while for more bits calculated inside uncertainty, the average tracking ratios initially follow the result using independence arithmetic longer, and then follow the output deviation for longer duration.  The similarity in patterns of the average tracking ratios for different bits calculated inside uncertainty using variance arithmetic in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} suggests that they are all driven by a same mechanism but on different time scale, which is expected when smaller granularity of error needs more time to accumulate to a same level.  From the definition of tracking ratio, the granularity of error is actually measured in term of granularity of precision, e.g., Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} shows that for same bits calculated inside uncertainty, smaller input uncertainty deviations results in longer tracking of the output value errors to the output deviations.  The similar pattern of average tracking ratios is repeated on slower time scale for smaller input uncertainty deviations in Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2}, revealing similar underline error-tracking mechanism in both cases.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} also shows that for the same bits calculated inside uncertainty, the average tracking ratios deviate from independence at exactly the same time.  Figure \ref{fig: Simple_ErrSig_vs_Time_Prec} and Figure \ref{fig: Simple_ErrSig_vs_Time_Prec2} thus demonstrate a uniform and granular error tracking mechanism of the variance arithmetic for different bits calculated inside uncertainty.  
-
-Is such increase of the value errors with the increase of uncertainty deviation using variance arithmetic desired?  First, in real calculations the correct answer is not known, and the reliability of a result depends statistically on the uncertainty of the result, so that there is no reason to assume that calculating more bits inside uncertainty is any better.  Conceptually, when the uncertainty of a calculation increases, the value error of the calculation is also expected to increase, which agrees with the trend shown by variance arithmetic.  Second, the stability of the average output tracking ratios and the maximal bounding ratios of variance arithmetic is quite valuable in interpretation results.  For example, even the output deviation may have unexpectedly changed, as in this case if dependency problem were not known and expected, such stability still gives a good estimation of the value errors in the result using variance arithmetic.  Third, such stability ensures that the result of algorithm at each window does not depend strongly on the usage history of the algorithm, which makes variance arithmetic the only practically usable uncertainty-bearing arithmetic for this progressive algorithm.  To test the effect of usage history on each uncertainty-bearing arithmetic, noise is increased by 10-fold at the middle 1/3 duration of the straight line, to result in additional two test cases:
-\begin{itemize}
-\item \emph{Changed}: In Figure \ref{fig: Changed_Err_Dev_vs_Time} and \ref{fig: Changed_AvgErrSig_MaxBndRat_vs_Time}, the input deviation is also increased by 10-fold to simulate an increase in measured uncertainty.
-\item \emph{Defective}: In Figure \ref{fig: Noiser_Err_Dev_vs_Time} and \ref{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}, the input deviation remains the same to simulate the defect in obtaining the uncertainty deviations.  
-\end{itemize}  
-Accordingly, the original case of linear regression on a line with fixed slope is named as \emph{Simple}.
-
-The question is how each uncertainty-bearing arithmetic responses to this change of data in the last 1/3 duration of calculation.  Using either independence or interval arithmetic, both the average output tracking ratios and the maximal output bounding ratios are decrease by about 10-fold in Figure \ref{fig: Changed_AvgErrSig_MaxBndRat_vs_Time} while they are not affected at all in Figure \ref{fig: Noiser_AvgErrSig_MaxBndRat_vs_Time}.  They show extreme sensitivity to the usage history.  Because the real input data are neither controllable nor predictable, the result uncertainty for this progressive algorithm using either interval arithmetic or independence arithmetic may no longer be interpretable.  In contrast, using variance arithmetic, both the average output tracking ratios and the maximal output bounding ratios are relatively stable, while the output deviations and value errors are sensitivity to usage history, so that the result using variance arithmetic is still interpretable.
-
-
-\subsection{ Choosing a Better Algorithm for Imprecise Inputs }
-
-Formula \eqref{eqn: moving-window linear regression} has much less calculations than Formula \eqref{eqn: time-series linear regression}, and it seems a highly efficient and optimized algorithm according to conventional criterion \cite{Numerical_Recipes}.  However, from the perspective of uncertainty-bearing arithmetic, Formula \eqref{eqn: moving-window linear regression} is progressive while Formula \eqref{eqn: time-series linear regression} is expressive, so that Formula \eqref{eqn: time-series linear regression} should be better.  Figure \ref{fig: Changed_Err_Dev_vs_Time} and Figure \ref{fig: ChangedDirect_Err_Dev_vs_Time} respectively show the output deviations and the value errors vs. time for using either Formula \eqref{eqn: moving-window linear regression} or Formula \eqref{eqn: time-series linear regression} of a straight line with 10-fold increase of input uncertainty in the middle 1/3 duration.  They show that while the progressive algorithm carries all the historical calculation uncertainty into future, the expressive algorithm is clean from any previous results.  For example, at the last 1/3 duration when the moving window is already out of the area for the larger input uncertainty, the progressive algorithm still gives large result uncertainty, while the expressive algorithm gives output result only relevant to the input uncertainty within the moving window.  So instead of Formula \eqref{eqn: moving-window linear regression}, Formula \eqref{eqn: time-series linear regression} is confirmed to be a better solution for this linear regression problem.  
-
-\subsection{ Modelling Dependency Problem }
-
-However, the majority algorithms used today are progressive.  Most practical problems are not even mathematical and analytical in nature, so that they may have no expressive solutions.  Expressive algorithms are simply just not always avoidable in practice.  With known expressive counterpart, the progressive moving-window linear regression algorithm can serve as a model for studying progressive algorithms.  For example:
-\begin{itemize}
-\item The progressive moving-window linear regression shows that the dependency problem of independence and interval arithmetic can manifest as dependency on the usage history of an algorithm.  Because of its stability, variance arithmetic should be used generally in progressive algorithms.  
-\item Figure \ref{fig: Prec4_LineFit_NormDist} shows that the result tracking ratios of the progressive linear regression is exponentially distributed, while Figure \ref{fig: Prec4_LineFitDirect_NormDist} shows that the result tracking ratios of the expressive linear regression is Gaussian distributed only when the uncertainty deviation is characterized correctly, e.g., the result is Gaussian distributed for the "Changed" case but not for the "noisier" case.  Thus, the exponentially distributed tracking ratios does not necessarily imply dependency problem.
-\end{itemize}
-  
 
 \clearpage
 \section{Conclusion and Discussion}
