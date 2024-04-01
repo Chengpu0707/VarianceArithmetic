@@ -511,7 +511,7 @@ class TestPolynominial (unittest.TestCase):
             except BaseException as ex:
                 raise ex
             
-    def varify_near_one(self, epsilon, order):
+    def varify_near_one(self, x, order):
         sPlus = [1, -1] * ((order // 2) + 1)
         if len(sPlus) > (order + 1):
             sPlus.pop(-1)
@@ -526,32 +526,67 @@ class TestPolynominial (unittest.TestCase):
         for i in range(order + 1):
             plus += sPlus[i] * pow
             minus += sMinus[i] * pow
-            pow *= 1 - epsilon
-        resPlus = taylor.polynominal(VarDbl(1 - epsilon), sPlus)
+            pow *= x
+            if pow < max(math.ulp(plus), math.ulp(minus)):
+                break
+        resPlus = taylor.polynominal(VarDbl(x), sPlus)
         self.assertAlmostEqual(resPlus.value(), plus)
-        resMinus = taylor.polynominal(VarDbl(1 - epsilon), sMinus)
+        resMinus = taylor.polynominal(VarDbl(x), sMinus)
         self.assertAlmostEqual(resMinus.value(), minus)
         return resPlus, resMinus
 
             
     def test_near_one(self):
-        self.varify_near_one(0.5, 2)
-        self.varify_near_one(0.5, 20)
-        self.varify_near_one(0.5, 100)
-        
+        self.varify_near_one(0.7, 100)
 
         with open(f'./Python/Output/PolyNearOne.txt', 'w') as f:
-            f.write('Type\tEpsilon\tOrder\tValue Error\tUncertainty\n')
-            for epsilon in (0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1):
-                plus = 1/(2 - epsilon)
-                minus = 1/epsilon
-                for order in range(0, taylor._momentum._maxOrder - 1):
-                    plusRes, minusRes = self.varify_near_one(epsilon, order)
-                    res = plusRes - plus
-                    f.write(f'Plus\t{epsilon}\t{order}\t{abs(res.value())}\t{res.uncertainty()}\n')
-                    res = minusRes - minus
-                    f.write(f'Minus\t{epsilon}\t{order}\t{abs(res.value())}\t{res.uncertainty()}\n')
+            f.write('X\tOrder\tValue Error\tUncertainty'
+                    '\tPower\tReminder\tRouding Error\tAccumulated Rounding Error'
+                    '\tResult ULP\tULP Power\tDecrease\tULP Reminder\n')
+            
+            def calc(x):
+                plusVal = 1/(1 + x)
+                minusVal = 1/(1 - x)
+
+                plus = 1
+                minus = 1
+                pow = x
+                remPlus = 1 - plusVal
+                remMinus = 1 - minusVal
+                acmPlus = 0
+                acmMinus = 0
+                for order in range(1, taylor._momentum._maxOrder - 1):
+                    plus += (-1 if (order % 2) else 1) * pow
+                    minus += pow
+                    plusRes, minusRes = self.varify_near_one(x, order)
+
+                    res = plusRes - plusVal
+                    rem = plus - plusVal
+                    rounding = rem - remPlus
+                    acmPlus += (pow - abs(rounding)) if (order % 2) else (abs(rounding) - pow)
+                    ulp = math.ulp(plus)
+                    f.write(f'{+x}\t{order}\t{res.value()}\t{res.uncertainty()}'
+                            f'\t{pow}\t{rem}\t{rounding}\t{acmPlus}'
+                            f'\t{ulp}\t{ulp*round(pow/ulp)}\t{rem - remPlus}\t{ulp*round(rem/ulp)}'
+                            '\n')
+                    remPlus = rem
+                    
+                    res = minusRes - minusVal
+                    rem = minus - minusVal
+                    rounding = remMinus - rem
+                    acmMinus += abs(rounding) - pow
+                    ulp = math.ulp(minus)
+                    f.write(f'{-x}\t{order}\t{res.value()}\t{res.uncertainty()}'
+                            f'\t{pow}\t{rem}\t{rounding}\t{acmMinus}'
+                            f'\t{ulp}\t{ulp*round(pow/ulp)}\t{rem - remPlus}\t{ulp*round(rem/ulp)}'
+                            '\n')
+                    remMinus = rem                    
+
                     f.flush()
+                    pow *= x
+
+            for i in range(50, 75):
+                calc(i / 100)
 
 
 

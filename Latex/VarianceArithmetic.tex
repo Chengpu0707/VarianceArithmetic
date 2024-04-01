@@ -23,8 +23,7 @@
 \newcommand{\institution}[1]{\\ \parbox{3.0in}{\small{#1}}}
 \newcommand{\keywords}[1]{\small\textbf{Keywords: }#1}
 \newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
-\newcommand\whenaccepted{Submitted: May 20, 2006;
-                         Revised: November 10, 2010; July 18, 2011; September 1, 2012; Match 27, 2014; }
+\newcommand\whenaccepted{}
 \newcommand{\tilt}{\!\!\sim\!\!}
 \newcommand{\eqspace}{\;\;\;}
 
@@ -47,32 +46,27 @@
 % Put a short running title within the first argument to
 % this command.  Do not alter the second argument
 \markboth{CP Wang, \textit{Variance Arithmetic}}
-         {\textit{arXiv.org, 2014}}
+         {\textit{arXiv.org, 2024}}
 
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-A new deterministic uncertainty-bearing floating-point arithmetic called \emph{variance arithmetic} is developed to track the uncertainty for arithmetic calculations statistically.  
-It uses a novel rounding scheme to avoid the excessive rounding error propagation in conventional floating-point arithmetic. 
-Unlike interval arithmetic, its uncertainty tracking is based on statistics and the central limit theorem, with a much tighter bounding range based on a truncated Gaussian distribution. 
-The variance arithmetic is found to be superior to interval arithmetic in both uncertainty-tracking and uncertainty-bounding for normal usages.
 
-Let $\delta x$ be the uncertainty distribution deviation for a value $x$.
-Define define $\delta x /|x|$ as precision, which represents the information content of the value with uncertainty.
-The variance arithmetic has precision requirements on the inputs.
-When the precision requirements are satisfied:
-\begin{itemize}
-\item The output values are identical to the result if there were no uncertainties in the inputs.
+A new deterministic uncertainty-bearing floating-point arithmetic called \emph{variance arithmetic} is developed to predict the result uncertainty variance. 
+For floating-point rounding errors, it predict the result uncertainty variance numerically within $100$-fold of the actual result uncertainty variance.
+For an analytic function, it uses the corresponding Taylor expansion to predict the result uncertainty variance due to input uncertainty variances, and such prediction is precise if the input uncertainty variances are all precise.
+Regardless of input uncertainty distribution, if the expected result is a check of zero, the result uncertainty distribution is delta; otherwise it is Gaussian due to central limit theorem.
 
-\item The precision is preserved for unitary operations such as inversion, square and square-root.
+The statistical requirements for the variance arithmetic is that any input uncertainty correlate with neither any input value nor other input uncertainty. 
+Variance arithmetic tracks the correlations of input within analytic expression using standard statistics, and rejects certain calculations such as inverting an input near zero on the mathematical ground of the divergence of the result uncertainty variance.
+Except approximation, variance arithmetic allows no execution freedom and it has no dependency on such freedoms.
 
-\item The variance arithmetic provides ideal approach when the analytic solution is available, to avoid the dependency problem completely.
+Variance arithmetic has been shown to be widely applicable, so as for analytic calculations, progressive calculation, regressive generalization, polynomial expansion, statistical sampling, and transformations.
 
-\item For a round-trip calculation without the dependency problem such as after forward and backward FFT, the original input uncertainties can be recovered.
-\end{itemize}
-When the precision requirements are not satisfied, the bias of the outputs can be expressed in terms of input precisions.
+It seems necessary to reexamine traditional numerical executions to adopt variance arithmetic.
+It seems necessary to recalculate all math library function to attach the uncertainty variance to each corresponding result value.
 
 \end{abstract}
 % Put keywords appropriate to your paper here, as shown
@@ -106,7 +100,7 @@ The precision of measured values ranges from an order-of-magnitude estimation of
 
 \subsection{Problem of Conventional Floating-Point Arithmetic}
 
-The \emph{conventional floating-point arithmetic} \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} assumes a constant and best-possible precision for each value all the time, and constantly generates artificial information during the calculation \cite{Arithmetic_Digital_Computers}.  
+The \emph{conventional floating-point arithmetic} \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} assumes a constant and best possible precision for each value all the time, and constantly generates artificial information during the calculation \cite{Arithmetic_Digital_Computers}.  
 For example, the following calculation is carried out precisely in integer format:
 \begin{multline}
 \label{eqn: int num calc}
@@ -140,10 +134,11 @@ However, such analysis is both rare and generally very difficult to carry out in
 
 Today most experimental data are collected by an ADC (Analog-to-Digital Converter) \cite{Electronics}.  
 The result obtained from an ADC is an integer with fixed uncertainty; thus, a smaller signal value has a coarser precision.  
-When a waveform containing raw digitalized signals from ADC is converted into conventional floating-point representation, the information content of the digitalized waveform is distorted to favour small signals since all converted data now have the same and best possible precision.  
+When a waveform containing raw digitalized signals from ADC is converted into conventional floating-point representation, the information content of the digitalized waveform is distorted to favor small signals since all converted data now have the same and best possible precision.  
 However, the effects of such distortion in signal processing are generally not clear.
 
-What is needed is a floating-point arithmetic that tracks precision automatically.  When the calculation is improper or becomes excessive, the results become insignificant.  
+What is needed is a floating-point arithmetic that tracks precision automatically.  
+When the calculation is improper or becomes excessive, the results become insignificant.  
 All existing uncertainty-bearing arithmetics are reviewed below. 
 
 
@@ -175,7 +170,7 @@ Because this attempt seems to rely heavily on 1) specific properties of the unce
 Anyway, this attempt seems to be outside the main course of interval arithmetic, which has no statistics in mind.
 }.  
 
-Another problem is that interval arithmetic only provides the worst case of uncertainty propagation, so that it tends to over-estimate uncertainty in reality.  
+Another problem is that interval arithmetic only provides the worst case of uncertainty propagation, so that it tends to over-estimate uncertainty.  
 For instance, in addition and subtraction, it gives the result when the two operands are +1 and -1 correlated respectively \cite{Affine_Arithmetic}.  
 However, if the two operands are -1 and +1 correlated respectively instead, the actual bounding range after addition and subtraction reduces, which is called the best case in random interval arithmetic \cite{Random_Interval_Arithmetic}.  
 The vast overestimation of bounding ranges in these two worst cases prompts the development of affine arithmetic \cite{Affine_Arithmetic}\cite{Affine_Arithmetic_book}, which traces error sources using a first-order model.  
@@ -197,10 +192,10 @@ f(x) = (x - 1) x;
 
 Interval arithmetic has very coarse and algorithm-specific precision but constant zero bounding leakage.  
 It represents the other extreme from conventional floating-point arithmetic.  
-To meet practical needs, a better uncertainty-bearing arithmetic should be based on statistical propagation of the rounding error, while also allowing reasonable bounding leakage for normal usages, which is achieved in the variance arithmetic, as show later in this paper.
+To meet practical needs, a better uncertainty-bearing arithmetic should be based on statistical propagation of the rounding error, while also allowing reasonable bounding leakage for normal usages, which is achieved in variance arithmetic, as show later in this paper.
 
 As shown previously \cite{Prev_Precision_Arithmetic}, interval arithmetic grossly exaggerates calculation uncertainty, e.g., for $f^{-1}(f(x))$ the result uncertainty is much larger than the original uncertainty.
-On the other hand, as shown later in this paper, the variance arithmetic provides stable bounding for a given bounding leakage, e.g., $\pm 3.1$-fold of the result deviation from the mean for a bounding leakage of $2 \times 10^{-7}$.
+On the other hand, as shown later in this paper, variance arithmetic provides stable bounding for a given bounding leakage, e.g., $\pm 3.1$-fold of the result deviation from the mean for a bounding leakage of $2 \times 10^{-7}$.
 
 
 \subsection{Statistical Propagation of Uncertainty}
@@ -220,7 +215,7 @@ If each operand is regarded as a random variable, and the statistical correlatio
 
 Tracking uncertainty propagation statistically seems a better solution.  
 However, in practice, the correlation between two operands is generally not precisely known, so the direct use of statistical propagation of uncertainty is very limited.  
-As show later in this paper, the variance arithmetic is based on a statistical assumption much more lenient than knowing the correlation between imprecise values.
+As show later in this paper, variance arithmetic is based on a statistical assumption much more lenient than knowing the correlation between imprecise values.
 
 In this paper, as a proxy for statistical propagation of uncertainty, an \emph{independence arithmetic} always assumes that no correlation exists between any two operands, whose arithmetic equations are Formula \eqref{eqn: stat +}, Formula \eqref{eqn: stat -}, Formula \eqref{eqn: stat *} and Formula \eqref{eqn: stat /}, where $\gamma=0$.  
 Independence arithmetic is actually de facto arithmetic in engineering data processing, such as in the common belief that uncertainty after averaging reduces by the square root of number of measurements \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, or the ubiquitous Monte Carlo method\footnote{Most but not all applications of Monte Carlo methods assume independence between any two random variables.  
@@ -232,7 +227,7 @@ Perhaps, it is reasonable to assume the uncertainties of experimental measuremen
 
 \emph{Significance arithmetic} \cite{Significance_Arithmetic} tries to track reliable bits in an imprecise value during the calculation.  
 In the two early attempts \cite{Digital_Significance_Arithmetic}\cite{Unnormalized_Arithmetic}, the implementations of significance arithmetic are based on simple operating rules upon reliable bit counts, rather than on formal statistical approaches.  
-They both treat the reliable bit counts as integers when applying their rules, while in reality a reliable bit count could be a fractional number \cite{Mathematica_Significance_Arithmetic}, so they both can cause artificial quantum reduction of significance.  
+They both treat the reliable bit counts as integers when applying their rules, while in reality, a reliable bit count could be a fractional number \cite{Mathematica_Significance_Arithmetic}, so they both can cause artificial quantum reduction of significance.  
 The significance arithmetic marketed by Mathematica \cite{Mathematica_Significance_Arithmetic} uses a linear error model that is consistent with a first-order approximation of interval arithmetic \cite{Precise_Numerical_Methods}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}, and further provides an arbitrary precision representation which is in the framework of  conventional floating-point arithmetic. 
 It is definitely not a statistical approach. 
 
@@ -242,9 +237,9 @@ Its sampling approach may be more time-consuming and less accurate than direct s
 It is based on modeling rounding errors in conventional floating-point arithmetic, which is quite complicated.  
 A better approach may be to define arithmetic rules that make error tracking by probability easier.
 
-One problem of significance arithmetic is that itself can not properly specifies the uncertainty \cite{Prev_Precision_Arithmetic}.
-For example, if the least significand bit of significand is used to specify uncertainty, then the representation have very coarse precision, such as $1 \pm 10^{-3} = 1024 \times 2^{-10}$  \cite{Prev_Precision_Arithmetic}.
-Introducing limited bits calculated inside uncertainty can not avoid this problem completely.
+One problem of significance arithmetic is that itself can not properly specify the uncertainty \cite{Prev_Precision_Arithmetic}.
+For example, if the least significand bit of significand is used to specify uncertainty, then the representation has very coarse precision, such as $1 \pm 10^{-3} = 1024 \times 2^{-10}$  \cite{Prev_Precision_Arithmetic}.
+Introducing limited bits calculated inside uncertainty cannot avoid this problem completely.
 Thus, the resolution of the conventional floating-point representation is desired.
 This is the reason why variance arithmetic abandoned the significance arithmetic nature of its predecessor \cite{Prev_Precision_Arithmetic}.
 
@@ -257,39 +252,63 @@ Compare to its predecessor \cite{Prev_Precision_Arithmetic}:
  \begin{itemize}
 \item The introduction section \ref{sec: introduction} remains almost unchanged, except it quotes the negative results from \cite{Prev_Precision_Arithmetic} for interval arithmetic and significance arithmetic.
 
-\item The theoretical foundation section \ref{sec: variance arithmetic} has the following significant differences:
+\item variance arithmetic also has uncorrelated uncertainty assumption as its foundation.
+The theoretical foundation section \ref{sec: variance arithmetic} has the following significant differences:
 
 \begin{enumerate}
-\item Both have identical uncorrelated uncertainty assumption.
+\item variance arithmetic no longer requires the precision principle.  
+Instead, it has a more solid statistical foundation. 
 
-\item The variance arithmetic has different digital presentation.
+\item By abandoning significance arithmetic, variance arithmetic has different digital presentation, and it is completely compatible with conventional floating-point arithmetic for precise floating-point values.
 
-\item The variance arithmetic has similar Taylor expansion formulas, but the variance is centered around statistical means instead of the calculation results assuming no uncertainty, so variance arithmetic agrees with statistics strictly.
+\item The Taylor expansion in variance arithmetic is centered around statistical means instead of the calculation results assuming no uncertainty, so variance arithmetic is strict statistically, and when the input uncertainties are specified precisely, the result uncertainties cover the result errors precisely.
 
-\item The theoretical  convergence and statistical binding leakage of the result uncertainties of the variance arithmetic are provided.
+\item The theoretical convergence and statistical binding leakage of the result uncertainties of variance arithmetic are provided.
+Zeros and pole of the analytic functions for uncertainty calculations are identified.
+When the calculation is too close to a pole or zero, the result will diverge, such as an inversion near $0$.
 
-\item The variance arithmetic has no dependency problem for analytic questions.
-Instead, the variance arithmetic uses statistics to trace dependency.
+\item Variance arithmetic has no dependency problem for analytic questions.
+Instead, variance arithmetic uses statistics to trace dependency.
 \end{enumerate}
 
-\item Section \ref{sec: validation} remains largely unchanged, except major improvement on the descriptions of validation methods and standards.
+\item Variance arithmetic improves validation methods greatly, to result in a new and much simpler analysis. 
+It introduces ideal coverage and proper coverage, to quantify its applicable ranges and result reliability.
+The existence of ideal coverage is a necessary condition for the result to be statistically correct.
+External errors as a new import source of errors is identified.
+The sub section which categorizes algorithms is unchanged.
 
-\item Section \ref{sec: Math Library} is new, to provide a statistical test of variance arithmetic in using the common math library functions.
+\item Section \ref{sec: matrix} is completely different except the deduction of the equations for the determinant variance.
+The new analysis is used.
+For the stability of matrix inversion, the determinant precision is shown to be equivalent to the condition number of a matrix.
 
-\item Section \ref{sec: FFT} reproduces the previous result for the input data with added noises.  
-It added a new signal for test.
-It also evaluates the calculation errors of the library $\sin$ and $\tan$ functions.
+\item Section \ref{sec: Moving-Window Linear Regression} is completely different, except the deduction of the equations for the progressive linear fit. 
+Previously, it showed the effect of the embedded significance arithmetic.
+Now, with the embedded significance arithmetic removed, it shows the effect of having unspecified input uncertainty in addition to the new analysis.
+
+\item Section \ref{sec: polynomial} is different by using the new analysis.
+It shows the application of variance arithmetic to a polynomial expansion problem.
+
+\item Section \ref{sec: recursion} is different by using the new analysis.
+It shows the application of variance arithmetic to a regression problem.
+
+\item Section \ref{sec: Math Library} is new, to apply variance arithmetic to the most common math library functions.
+
+\item Section \ref{sec: FFT} is completely different, provided the section for the modeling errors.  
+It now focuses on the effect of numerical library errors of $\sin$ and $\tan$, and shows that such library errors can be very significant.
+
+\item Section \ref{sec: conclusion and discussion} is completely different.
+It provides a summary and some discussion for variance arithmetic.
 
 \end{itemize}
 
 
 
 \clearpage
-\section{The Variance Arithmetic}
+\section{Variance arithmetic}
 \label{sec: variance arithmetic}
 
 
-\subsection{Foundation for the Variance Arithmetic}
+\subsection{Foundation for variance arithmetic}
 
 The statistical precision $P(x) = \delta x/|x|$ represents the reliable information content of a measurement statistically, with finer or smaller statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
 $P(x)$ has an upper bound of $1$.
@@ -301,7 +320,7 @@ When $1 \leq P(x)$:
 \end{itemize}
 If during a calculation, if $P(x)$ becomes larger, the value becomes less precise by loosing precision.
 
-The inputs to variance arithmetic should obeys the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
+The inputs to variance arithmetic should obey the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
 This assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
 It is much weaker than requiring any two different inputs to be independent of each other.
 It can be turned into a realistic and simple statistical requirement or test between two inputs.
@@ -309,8 +328,8 @@ It can be turned into a realistic and simple statistical requirement or test bet
 Taylor expansion can be used to calculate the result variance of analytic functions.
 
 The uncorrelated uncertainty assumption only applies to imprecise inputs.
-When the inputs obeys the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, the variance arithmetic uses statistics to account for the correlation between uncertainties through their associated variables.
-Therefore, the variance arithmetic has no dependency problem.
+When the inputs obey the \emph{uncorrelated uncertainty assumption}, in the intermediate steps, variance arithmetic uses statistics to account for the correlation between uncertainties through their associated variables.
+Therefore, variance arithmetic has no dependency problem.
 
 
 \subsection{The Uncorrelated Uncertainty Assumption \cite{Prev_Precision_Arithmetic}}
@@ -374,7 +393,7 @@ Quantitatively, according to Formula \eqref{eqn: uncertainty correlation}:
 \end{enumerate}
 The above conclusion agrees with the common experiences that, below the noise level of measured signals, noises rather than true signals dominate each digit.  
 
-Similarly, while the correlated portion between two values has exactly the same value at each bit of the two values, the ratio of the uncorrelated portion to the correlated portion increases by 2-fold for each bit down from MSB of the two values. 
+Similarly, while the correlated portion between two values has the same value at each bit of the two values, the ratio of the uncorrelated portion to the correlated portion increases by 2-fold for each bit down from MSB of the two values. 
 Quantitatively, let $P$ denote the precision of an imprecise value, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at level of uncertainty; then $\eta_{P}$ increases with decreased $P$ according to Formula \eqref{eqn: uncertainty level}. 
 According to Formula \eqref{eqn: uncertainty correlation}, if two significant values are overall correlated with $\gamma$, at the level of uncertainty the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: uncertainty correlation}.
 \begin{align}
@@ -385,9 +404,9 @@ According to Formula \eqref{eqn: uncertainty correlation}, if two significant va
 \end{align}
 
 Figure \ref{fig: Independent_Uncertainty_Assumption} plots the relation of $\gamma$ vs. $P$ for each given $\gamma_{P}$ in Formula \eqref{eqn: uncertainty correlation}.  
-When $\gamma_{P}$ is less than a predefined maximal threshold (e.g., 2\%, 5\% or 10\%), the two values can be deemed virtually uncorrelated of each other at the level of uncertainty.  
+When $\gamma_{P}$ is less than a predefined maximal threshold (e.g., 2\%, 5\% or 10\%), the two values can be deemed uncorrelated to each other at the level of uncertainty.  
 %If the two values are independent of each other at their uncertainty levels, their uncertainties are uncorrelated of each other.  
-Thus for each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of variance arithmetic holds.  
+For each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of variance arithmetic holds.  
 The maximal allowed correlation is a function of the larger precision of the two values according to Formula \eqref{eqn: uncertainty correlation}.  
 Figure \ref{fig: Independent_Uncertainty_Assumption} shows that for two precisely measured values, their correlation $\gamma$ is allowed to be quite high.  
 Thus, the uncertainty assumption uncertainty assumption has much weaker statistical requirement than the assumption for independence arithmetic, which requires the two values to be independent of each other.
@@ -395,12 +414,12 @@ Thus, the uncertainty assumption uncertainty assumption has much weaker statisti
 It is tempting to add noise to otherwise unqualified values to make them satisfy the uncertainties uncertainty assumption.  
 As an extreme case of this approach, if two values are constructed by adding noise to the same signal, they are 50\% correlated at the uncertainty level so that they will not satisfy the uncorrelated uncertainty assumption, which defines the upper bound for $\gamma_{P}$. 
 \footnote{
-The 50\% curve in Figure \ref{fig: Independent_Uncertainty_Assumption} thus defines the maximal possible correlations between any two measured signals. 
-This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sense because the measurable correlation between two measurements should be limited by the precision of their measurements..
+The $50\%$ curve in Figure \ref{fig: Independent_Uncertainty_Assumption} defines the maximal possible correlations between any two measured signals. 
+This other conclusion of Formula \eqref{eqn: uncertainty correlation} makes sense because the measurable correlation between two measurements should be limited by the precision of their measurements.
 }
 
 
-\subsection{Result Uncertainty For Pure Rounding  \cite{Prev_Precision_Arithmetic}}
+\subsection{Pure Rounding}
 
 Empirically, the pure rounding error due to round-off is shown to be uniformly distributed between the half bit of the least significant bit of the siginficand \cite{Prev_Precision_Arithmetic}, whose probability density function is shown in Formula \eqref{eqn: rounding error 1/2 distribution}:
 \begin{equation}
@@ -410,7 +429,7 @@ P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2;
 
 
 
-\subsection{Result Uncertainty For Addition and Subtraction  \cite{Prev_Precision_Arithmetic}}
+\subsection{Addition and Subtraction  \cite{Prev_Precision_Arithmetic}}
 
 \begin{figure}
 \centering
@@ -446,7 +465,7 @@ Also due to the center-limit theorem, uncertainty in general is expected to be G
 The rounding error distribution is extended to describe uncertainty distribution in general.
 
 For simplicity, define operator $\delta^2 f(x) \equiv (\delta f(x))^2$. 
-Formula \eqref{eqn: addition and subtraction} give the result variance of addition and subtraction surrounding $x \pm y$.
+Formula \eqref{eqn: addition and subtraction} gives the result variance of addition and subtraction surrounding $x \pm y$.
 Formula \eqref{eqn: central limit theorem} gives the probability density function for $x \pm \delta x$ in general, in which $N()$ is the density function of the  normal distribution \cite{Probability_Statistics}.
 Formula \eqref{eqn: central limit theorem} can be normalized as Formula \eqref{eqn: normalized distribution}.
 \begin{align}
@@ -465,12 +484,11 @@ It may show that Formula \eqref{eqn: stat +} and \eqref{eqn: stat -} are wrong s
 
 \subsection{A Variance Representation}
 
-A variance arithmetic representation uses a pair of conventional floating-point numbers to represent the value and the variance of an imprecise value.
-The square root of a variance is defined as an \emph{uncertainty}.  
-When the uncertainty is not specified:
+A variance arithmetic representation uses a pair of conventional floating-point numbers to represent the value $x$ and the variance $(\delta x)^2$ of an imprecise value $x \pm \delta x$.
+When the uncertainty $\delta x$ is not specified initially:
 \begin{itemize}
-\item A conventional floating-point value has $1/\sqrt{3}$-fold of its least significant value as its uncertainty, in which the \emph{least significant value} is defined as the equivalent value of the least significant bit of the significand of the conventional floating-point value, e.g., the least significant value of $1.0$ is $2^{-52}$.
-Essentially, the floating value is regarded as containing a rounding error uniformly distributed within the least significant bit of its significand.
+\item A conventional floating-point value is assumed to be imprecise in the least significant bit of its significand, and the error is assumed uniformly distributed within the bit.
+The equivalent value of the bit is defined as the \emph{least significant value} \footnote{Together with least significant bit, it is a more indicative name for unit in the last place.}, so that the uncertainty is $1/\sqrt{3}$-fold of the least significant value.
 
 \item An integer value within the range of $(-2^{53}, +2^{53})$ has 0 as its uncertainty.
 
@@ -536,11 +554,13 @@ Thus,
 
 Two imprecise values can be compared statistically using their difference.
 
-When the value difference is zero, the two imprecise values are equal.  
+When the value difference is zero, the two imprecise values are equal
+\footnote{
 Such definition of equality deviates from statistics.
-In statistics, such two imprecise value has $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
+In statistics, such two imprecise values has $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
+}.  
 
-Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal to each other, or less or more than each other.
+Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal, or less or more than each other.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the z-value for the difference is $z = 0.002 / 0.00224$, and the probability for them to be not equal is $\xi(|z|) - \xi(-|z|) = 62.8\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 If the threshold probability of not equality is $50\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
 Instead of using the threshold probability, the bounding range for z can be used, such as $|z| \leq 0.67448975$ for the equivalent threshold probability of $50\%$.
@@ -570,18 +590,15 @@ But the range needs to be centered at $|x||y|$.
 The result variance of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$ \cite{Probability_Statistics}.
 The result of multiplying $0 \pm \delta x$ by $0 \pm \delta y$ is a normal production distribution \cite{Probability_Statistics}, which is centered at 0 with variance $(\delta x)^2 (\delta y)^2$.
 The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication}  \cite{Prev_Precision_Arithmetic}.
-Formula \eqref{eqn: multiplication} can be changed to Formula \ref{eqn: multiplication precision} which is significant statistically: the product becomes less precise.
 \begin{align}
 \label{eqn: multiplication decomposed}
 & (x \pm \delta x) \times (y \pm \delta y) = (x + (0 \pm \delta x)) \times (y + (0 \pm \delta y)); \\
 \label{eqn: multiplication}
-\delta^2 (x y) &= x^2 (\delta^2 y) + y^2 (\delta^2 x) + (\delta^2 x)(\delta^2 y); \\
-\label{eqn: multiplication precision}
-P(x y)^2 &= P(x)^2 + P(y)^2 + P(x)^2 P(y)^2;
+\delta^2 (x y) &= x^2 (\delta^2 y) + y^2 (\delta^2 x) + (\delta^2 x)(\delta^2 y);
 \end{align}
 
 Formula \eqref{eqn: multiplication} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
-Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for the interval arithmetic multiplication.  
+Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for interval arithmetic multiplication.  
 The result of Formula \eqref{eqn: float num calc} calculated by variance arithmetic is $2 \pm 2\sqrt{5}$.
 It is $2 \pm 9$ for interval arithmetic \cite{Worst_Case_Error_Bounds}.
 
@@ -762,7 +779,7 @@ A \emph{zero} of the uncertainty distribution happens when $f^{(1)}_x=\infty \ri
 Zeros and poles have different impacts on the properties of of the uncertainty distributions.
 
 If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
-From another prospective, a linear transformation generates neither zero nor pole according Formula \eqref{eqn: function distribution}.
+From another perspective, a linear transformation generates neither zero nor pole according to Formula \eqref{eqn: function distribution}.
 
 Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a normal distribution $\varrho(\tilde{x})$ of the same mode in dash line of the same color.
@@ -772,8 +789,8 @@ Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 
 
 Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a pole at $x=0$.
 The uncertainty distributions for $(0 \pm 1)^2$ and $(1 \pm 1)^2$ deviate significantly from Gaussian, while the uncertainty distributions for $(4 \pm 1)^2$ and $(5 \pm 1)^2$ look Gaussian but each still with an infinitive but narrower peak at $\tilde{y} = 0$.
-According to Formula \eqref{eqn: power mode}, $(0 \pm 1)^2$ and $(1 \pm 1)^2$ has no mode.
-$(0 \pm 1)^2$ is actually the $\chi^2$ distribution \cite{Statistical_Methods}.
+According to Formula \eqref{eqn: power mode}, both $(0 \pm 1)^2$ and $(1 \pm 1)^2$ have no mode.
+$(0 \pm 1)^2$ is the $\chi^2$ distribution \cite{Statistical_Methods}.
 
 Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a zero at $x=0$.
 Figure \ref{fig: Inverse_Square_Distribution} looks more like Figure \ref{fig: Square_Root_Distribution} than Figure \ref{fig: Square_Distribution}, showing that pole or zero determines the properties of uncertainty distributions.
@@ -879,7 +896,7 @@ Using Taylor expansion is one way to get the simple statistics when the result u
 
 \subsubsection{Uncertainty of Taylor Expansion}
 
-An analytic function $f(x)$ can be accurately given in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
+An analytic function $f(x)$ can be precisely calculated in a range by the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
 Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} \cite{Prev_Precision_Arithmetic} gives the mean $\overline{f(x)}$ and the variance $\delta^2 f(x)$, respectively, in which $\zeta(n)$ is the \emph{variance momentum} defined by Formula \eqref{eqn: variance momentum}, and $\sigma$ is defined as the \emph{bounding factor}.
 \begin{align}
 \label{eqn: Taylor 1d} 
@@ -894,9 +911,8 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
 &\eqspace \left( \zeta(2n) \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} - 
  	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right);  \nonumber
 \end{align}
-$\overline{f(x)} - f(x)$ is defined as the \emph{bias} which is the effect of the input uncertainty to the result.
-When $f(x) \neq 0$, $\frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty} of $f(x)$.  
-It is an approximation to the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$ when the bias is ignored.
+$\overline{f(x)} - f(x)$ is defined as the \emph{uncertainty bias} which is the effect of the input uncertainty to the result.
+When $f(x) \neq 0$, $\widehat{P(f(x))} \equiv \frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty}, which approximates the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$ when the uncertainty bias is ignored.
 
 
 \subsubsection{Multiple Dimensional Expansion}
@@ -914,8 +930,9 @@ Due to the uncorrelated uncertainty assumption, the Taylor expansion can be appl
 &\eqspace\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{\zeta(2i) \zeta(2j) f^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!}
 	\frac{\zeta(2m-2i) \zeta(2n-2j) f^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}); \nonumber
 \end{align}
-Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are two special cases of Formula \eqref{eqn: Taylor 2d variance}.
 Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it can be extended to any dimensional.
+
 
 
 \subsubsection{Binding Factor}
@@ -925,7 +942,7 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it c
 \includegraphics[height=2.5in]{Variance_Momentum.png} 
 \captionof{figure}{
 The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
-Also included are: the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
+Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
 }
 \label{fig: Variance_Momentum}
 \end{figure}
@@ -974,9 +991,9 @@ Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 1d variance} can 
   &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right); \nonumber \\
 \label{eqn: Taylor 2d variance approx}
 \delta^2 f(x, y)&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2 \\
-&\eqspace + (\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)})
-      + (\delta y)^4 (\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}) \nonumber \\
-&\eqspace + (\delta x)^2 (\delta y)^2 ((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)}); \nonumber
+&\eqspace + \left(\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)}\right)
+      + (\delta y)^4 \left(\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}\right) \nonumber \\
+&\eqspace + (\delta x)^2 (\delta y)^2 \left((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)}\right); \nonumber
 \end{align}
 
 
@@ -1050,7 +1067,7 @@ Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which al
 & e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
 \overline{e^x} &= e^x + e^x \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!}; \\
 \label{eqn: exp precision}
-\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
+\widehat{P(e^x)}^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
  -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
 \end{align}
@@ -1084,21 +1101,21 @@ Formula \eqref{eqn: power precision} gives the result variance for $x^c$, in whi
 &(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c + x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
 \overline{x^c} &= x^c + x^c \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \begin{pmatrix} c \\ 2 n \end{pmatrix}; \\
 \label{eqn: power precision}
-\frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=1}^{\infty} P(x)^{2n} 
+\widehat{P(x^c)}^2 &= \sum_{n=1}^{\infty} P(x)^{2n} 
  \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \sum_{j=1}^{n-1} \zeta(2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \zeta(2n - 2j) \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right)\\
  &= c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6 + o(P(x)^8);
 \end{align}
-As the special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$, and Formula \eqref{eqn: inversion square precision} gives the result variance for $1/x^2$: 
+As some special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision} gives the result variance for $x^2$, Formula \eqref{eqn: square root precision} gives the result variance for $\sqrt{x}$, Formula \eqref{eqn: inversion precision} gives the result variance for $1/x$, and Formula \eqref{eqn: inversion square precision} gives the result variance for $1/x^2$: 
 \begin{align}
 \label{eqn: square precision}
-P(x^2)^2 &= 4 P(x)^2 + 2 P(x)^4; \\
+\widehat{P(x^2)}^2 &= 4 P(x)^2 + 2 P(x)^4; \\
 \label{eqn: square root precision}
-P(\sqrt{x})^2 &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8); \\
+\widehat{P(\sqrt{x})}^2 &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion precision}
-P(1/x)^2 &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); \\
+\widehat{P(1/x)}^2 &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion square precision}
-P(1/x^2)^2 &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
+\widehat{P(1/x^2)}^2 &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
 \end{align}
 
 
@@ -1112,9 +1129,9 @@ The maximal $P(x)$ for Formula \eqref{eqn: Taylor 1d variance} in the $P(x)$-for
 Formula \eqref{eqn: Taylor 1d variance} breaks down near a zero or pole, when the underlying uncertainty distribution deviates significantly from Gaussian, which is the case for $x^c$ at $x=0$, as shown in Figure \ref{fig: Square_Root_Distribution}, \ref{fig: Cubic_Root_Distribution}, \ref{fig: Square_Distribution}, and \ref{fig: Inverse_Square_Distribution}.
 Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|$ in Formula \eqref{eqn: power precision}.
 
-The variance formula using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
+The variance formulas using Taylor expansion shows the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
 
-Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using the variance arithmetic.
+Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using variance arithmetic.
 \begin{itemize}
 \item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
 
@@ -1123,10 +1140,9 @@ If the precision of the uncertainty becomes coarser than $1/\sigma$, the result 
 
 \item If within the range of $(x - \sigma \delta x, x + \sigma \delta x)$ an analytic function is monotonic, each term in either Formula \eqref{eqn: Taylor 1d mean} or \eqref{eqn: Taylor 1d variance} should be smaller than its corresponding previous term.
 Otherwise, the corresponding sum will diverge, and the result should be invalidated.
-On the other hand, if the new terms for both formula start to be smaller than the corresponding least significant values, the sums can be stopped.
 
 \end{itemize}
-
+Variance arithmetic may reject an calculation near a zero or a pole when the variance calculation diverges or becomes uncertain.
 
 
 
@@ -1177,8 +1193,8 @@ When $(f g)^{(n)} = f^{(n)} g^{(n)}$, $\overline{f^n g^n} = \overline{f^n} \over
 \delta^2 (c_1 f + c_0) &= c_1^2 \delta^2f; 
 \end{align}
 
-%By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
-When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to trace dependency between uncertainties.
+When all the inputs obey the uncorrelated uncertainty assumption, variance arithmetic uses statistics to trace dependency in the intermediate steps.
+By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
 For example:
 \begin{itemize}
 \item Formula \eqref{eqn: sum variance} shows $\delta^2 (f + g)$, whose dependence tracing can be demonstrated by $\delta^2 (f - f) = 0$  and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter case corresponding to Formula \eqref{eqn: addition and subtraction}.   
@@ -1189,11 +1205,10 @@ For example:
 
 \item Formula \eqref{eqn: linear variance} shows the variance of linear transformation of a function, which can be applied to Formula \eqref{eqn: sum variance} and \eqref{eqn: prod variance} for more generic dependency tracing.
 \end{itemize}
-Because of dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plagued interval arithmetic.
+Dependency trading comes with a price: the variance calculation is generally much more complex than the value calculation.
 
 
-
-\subsection{Progressive Execution and Dependency Problem}
+\subsection{Traditional Execution and Dependency Problem}
 
 \iffalse
 
@@ -1220,22 +1235,6 @@ f(g)^{(4)} &= f^{(4)} (g^{(1)})^4 + 6 f^{(3)} (g^{(1)})^2 g^{(2)} + 3 f^{(2)} (g
 
 \fi
 
-Dependency tracing requires final analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
-It conflicts with traditional numerical algorithms which execute progressively.
-For example:
-\begin{itemize}
-\item 
-Traditionally, $x^2 - x$ can be calculated equivalently as Formula \eqref{eqn: interval depend 1}, \eqref{eqn: interval depend 2}, and \eqref{eqn: interval depend 3}.
-When applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations, only Formula \eqref{eqn: interval depend 1} gives the correct result, while the other two violate dependency tracing and give wrong results, as shown in Table \ref{tbl: dependency example}.
-It shows that the dependency problem of interval arithmetic \cite{Interval_Arithmetic} may be due to the lack of dependency tracing.
-
-\item Formula \eqref{eqn: composite variance 1d} is the single-variable version of Formula \eqref{eqn: composite variance}.
-If instead, $\delta^2 f(g(x))$ is calculated as $\delta^2 f(x)$ with $\delta^2 x = \delta^2 g(x)$, the result Formula \eqref{eqn: progressive variance} depends on the sequence of the composite functions, such as $P(\sqrt{x}^2)^2 \simeq P(x)^2 + \frac{9}{2} P(x)^4$ v.s. $P(\sqrt{x^2})^2 \simeq P(x)^2 + \frac{9}{8} P(x)^4$.
-However, it is possible that for special application the first order approximation of Formula \eqref{eqn: composite variance 1d} is used, so that Formula \eqref{eqn: progressive variance} is permissible as an alternative.
-\end{itemize}
-Thus, when the dependency tracing is not applied strictly, variance arithmetic will have dependency problem.
-To avoid such dependency problem, all the conventional numerical algorithms need to be reexamined for variance arithmetic.
-
 \begin{table}
 \centering
 \begin{tabular}{|l|l|l|} 
@@ -1256,6 +1255,43 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 \label{tbl: dependency example}
 \end{table}
 
+Dependency tracing requires final analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
+It conflicts with traditional numerical executions on analytic functions:
+\begin{itemize}
+
+\item
+Traditionally, using intermediate variables is a common practice.
+But it upsets dependency tracing.
+
+\item 
+Traditionally, different analytic expressions of a same function give the same result.
+But this is no longer true in variance arithmetic if Taylor expansion is not used.
+For example $x^2 - x$ can be calculated equivalently as Formula \eqref{eqn: interval depend 1}, \eqref{eqn: interval depend 2}, and \eqref{eqn: interval depend 3} when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations.
+Only Formula \eqref{eqn: interval depend 1} gives the correct result because the input variable $x$ appears only once, while the other two give wrong results for wrong independence assumptions, respectively, as shown in Table \ref{tbl: dependency example}.
+
+\item
+Traditionally, conditional executions are used to optimize executions, such as the Gaussian elimination to minimize floating-point rounding errors for matrix inversion \cite{Linear_Algebra}.  
+Unless required by mathematics such as for the definition of identity matrix, conditional executions are generally incorrect for dependency tracing, and need to be removed, e.g., Gaussian elimination needs to be replaced by the analytic equations as describe in Section \ref{sec: matrix}.
+
+\item 
+Traditionally, approximations on the result values are carried out during executions.
+Using variance arithmetic, Formula \eqref{eqn: Taylor 1d variance} shows that the variance converges much slower than that of the value in Taylor expansion, so that the target of approximation should be more on the variance.
+Section \ref{sec: matrix} provides an example of first order approximation on calculating matrix determinant.
+
+\item
+Traditionally, floating point rounding errors, and numerical errors from library functions work largely in dark.
+Variance arithmetic can now illuminates these sources of result uncertainties.
+Section \ref{sec: polynomial} and Section \ref{sec: FFT} show that the current traditional floating-point representation is deficient for both traditional Taylor expansion and for variance arithmetic, respectively.
+
+\item
+Traditionally, a large calculation may be broken into independent steps, such as calculating $f(g(x))$ as $f(g(x)) = f(y)|_{y = g(x)}$.
+But this is no longer true in variance arithmetic due to dependency tracing of $g(x)$ inside $f(g(x))$. 
+$\delta^2 f(g(x))$ is calculated as Formula \eqref{eqn: composite variance 1d}, which is different from Formula \eqref{eqn: progressive variance} for $\delta^2 f(x)$ with $\delta^2 x = \delta^2 g(x)$.
+The result of Formula \eqref{eqn: progressive variance} depends on the sequence of the composite functions, such as  the difference between Formula \eqref{eqn: square of square root} and \eqref{eqn: square root of square}.
+In contrast, the result of Formula \eqref{eqn: composite variance 1d} is not sequence dependent, as shown in Formula \eqref{eqn: square root of square and square of square root}.
+
+\end{itemize}
+
 \begin{align}
 \label{eqn: composite variance 1d}
 \delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
@@ -1264,13 +1300,33 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 \label{eqn: progressive variance}
 \delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
   &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
-  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6);  \nonumber
+  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6);  \nonumber \\
+\label{eqn: square of square root}
+\widehat{P(y^2|_{y=\sqrt{x}})}^2 & \simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
+\label{eqn: square root of square}
+\widehat{P(\sqrt{y}|_{y=x^2})}^2 & \simeq P(x)^2 + \frac{9}{8} P(x)^4; \\
+\label{eqn: square root of square and square of square root}
+\widehat{P(\sqrt{x}^2)}^2 &= 1 = \widehat{P(\sqrt{x^2})}^2;
 \end{align}
+
+Many traditional numerical algorithms are pure numerical, such as numerical equation root finding and Monte Carlo simulation.
+Although they cannot be described analytically, their results usually have clear uncertainties, such as the uncertainty for the root.
+Variance arithmetic can not apply to them, but can ingest their results.
+
+When the dependency tracing is not applied strictly, variance arithmetic will have dependency problem.
+Dependency tracing gets rid of almost all freedoms in the traditional numerical executions, as well as the associated dependence problems.
+Because of dependency tracing, variance arithmetic does not suffer from the dependency problem \cite{Interval_Arithmetic} which has plagued interval arithmetic.
+All traditional numerical algorithms need to be reexamined or reinvented for variance arithmetic.
+
+
+
+
+
 
 
 
 \clearpage
-\section{Verification of the Variance Arithmetic}
+\section{Verification of variance arithmetic}
 \label{sec: validation}
 
 \subsection{Verification Methods and Standards}
@@ -1278,7 +1334,7 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 Analytic functions each with precisely known results are used to validate the result uncertainties from variance arithmetic using the following statistical properties: 
 \begin{itemize}
 
-\item \emph{value error}: as the difference between the result using conventional floating-point calculation and the corresponding known analytic result.
+\item \emph{value error}: as the difference between the numerical result and the corresponding known precise analytic result.
 
 \item \emph{normalized error}: as the ratio of a value error to the corresponding uncertainty.
 
@@ -1286,10 +1342,9 @@ Analytic functions each with precisely known results are used to validate the re
 
 \item \emph{error distribution}: as the histogram of the normalized errors.
 
-\item \emph{uncertainty mean}: as the mean deviation of the result uncertainties.
+\item \emph{uncertainty mean}: as the mean of the result uncertainties.
 
 \item \emph{uncertainty deviation}: as the deviation of the result uncertainties.
-When the uncertainty deviation is much smaller than the corresponding uncertainty mean, the result uncertainties are almost a constant.
 
 \item \emph{error response}: as the relation between the input uncertainties and the result uncertainties.
 
@@ -1297,7 +1352,7 @@ When the uncertainty deviation is much smaller than the corresponding uncertaint
 
 \end{itemize}
 
-One goal of calculation involving uncertainty is to precisely account for all source of input errors, to achieve \emph{ideal coverage}.
+One goal of calculation involving uncertainty is to precisely account for all input errors from all sources, to achieve \emph{ideal coverage}.
 In the case of ideal coverage:
 \begin{enumerate}
 \item The error deviation is exactly $1$.
@@ -1306,37 +1361,41 @@ In the case of ideal coverage:
 
 \item The error response fits the function, such as a linear error response is expected for a linear function.
 
-\item The calculation response fits the function, such as more calculations generally results in larger result uncertainties.
-\end{enumerate}
-If instead, the input uncertainty is only correct for the input errors on the order of magnitude, the \emph{proper coverage} is achieved.
-In case of proper coverage, the error deviation should be close to $1$: to be in the range of $[0.1, 10]$.
+\item The calculation response fits the function, such as more calculations generally result in larger result uncertainties.
 
-When the input contains uncertainties whose deviation is not precisely known, such as he numerical errors of library functions using conventional floating-point calculations, Gaussian or white noises of increasing deviations can be added to the input, until idea coverage is reach.
+\end{enumerate}
+If instead, the input uncertainty is only correct for the input errors on the order of magnitude, the \emph{proper coverage} is achieved when the error deviations are in the range of $[0.1, 10]$.
+
+When the input contains uncertainties whose deviation is not precisely known, such as the numerical errors of library functions, Gaussian or white noises of increasing deviations can be added to the input, until idea coverage is reach.
 The needed minimal noise deviation gives a good estimation of the amount of the unspecified input uncertainties.
-The existence of ideal coverage is a necessary verification if the variance arithmetic correctly tracks the result uncertainty.
+The existence of ideal coverage is a necessary verification if variance arithmetic correctly tracks the result uncertainty.
 The input noise range for the idea coverage defines the ideal application range of input uncertainties.
 
 Gaussian or white noises of specified deviations can also be added to the input to measure the error responses of a function.
 
 
 
-\subsection{Types of Uncertainties \cite{Prev_Precision_Arithmetic}}
+\subsection{Types of Uncertainties}
 
-There are four sources of result uncertainty for a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
+There are five sources of result uncertainty for a calculation \cite{Statistical_Methods}\cite{Numerical_Recipes}:
 \begin{itemize}
-\item input uncertainties
-\item rounding errors
-\item truncation errors
-\item modelling errors
+\item input uncertainties,
+\item rounding errors,
+\item truncation errors,
+\item external errors,
+\item modeling errors.
 \end{itemize}
 
-As described previously, both \emph{input uncertainties} and \emph{rounding errors} are included in the uncertainty specification of variance arithmetic.
+The examples in this paper shows that when the input uncertainty precision is $10^{-15}$ or larger, variance arithmetic provides ideal coverage for input uncertainties.
 
-In many cases, because a numerical algorithm approaches its analytic counterpart only after infinitive execution, a good numerical algorithm should have an estimator of the \emph{truncation error} toward its analytic counterpart, such as the Cauchy reminder estimator for Taylor expansion \cite{Numerical_Recipes}, or the residual error for numerical integration \cite{Numerical_Recipes}.  
-Using conventional floating-point arithmetic, a subjective upper limit is chosen for the truncation error, to stop the numerical algorithm at limited execution \cite{Numerical_Recipes}. 
-However, such arbitrary upper limit may not be achievable with the amount of rounding errors accumulated during calculation, so that such upper limit may actually give a falsely small result precision. 
-Because variance arithmetic tracks rounding errors of a calculation efficiently, it can be used to search for the optimal execution termination point for the numerical algorithm when the truncation error is no longer significant, which is named as the \emph{truncation rule} in this paper. In other words, using variance arithmetic, the result precision of a calculation is determined by the inputs and the calculation itself.  
-Section \ref{sec: taylor expansion} and \ref{sec: integration} will provide such cases of applying truncation rule to Taylor expansion and numerical integration, respectively.
+Section \ref{sec: polynomial} shows that variance arithmetic provides proper coverage for floating-point rounding errors.
+
+When the analytic expression is a sum of infinitive diminishing terms, such as a Taylor expression, its numerical implementation needs to truncate the sum to finite terms, possibly causing \emph{truncation errors}.
+This process needs to be reevaluated for variance arithmetic. 
+
+The \emph{external errors} are the value errors which are not specified by the input uncertainties, such as the numerical errors in the library math functions.
+Section \ref{sec: FFT} studies the effect of $\sin$ and $\tan$ numerical errors, and demonstrates that when the external errors is large enough, neither ideal coverage nor proper coverage can be achieved.
+It shows that the library functions need to be recalculated to have corresponding uncertainty attached to each value.
 
 The \emph{modelling errors} arise when an approximate analytic solution is used, or when a real problem is simplified to obtain the solution.  
 For example, Section \ref{sec: FFT} demonstrates that the discrete Fourier transformation is only an approximation for the mathematically defined Fourier transformation.  
@@ -1345,36 +1404,197 @@ Conceptually, modelling errors originate from mathematics, so they are outside t
 
 \subsection{Types of Calculations to Verify \cite{Prev_Precision_Arithmetic}}
 
-Algorithms of completely different nature with each representative for its category are needed to test the generic applicability of uncertainty-bearing arithmetic.  
+Algorithms of completely different nature with each representative for its category are needed to test the generic applicability of variance arithmetic.  
 An algorithm can be categorized by comparing the amount of its input and output data:
 \begin{itemize}
+\item application
 \item transformation
 \item generation
 \item reduction
 \end{itemize}
 
+A \emph{application} algorithm calculate numerical values from an analytic formula. 
+Section \ref{sec: polynomial} and \ref{sec: Math Library} show two applications.
+In addition to the specified input uncertainty, floating-point rounding errors are hidden input uncertainties.
+
 A \emph{transformation} algorithm has about equal amounts of input and output data.  
 The information contained in the data remains about the same after transforming.  
-The Discrete Fourier Transformation is a typical transforming algorithm, which contains exactly the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
-Matrix inversion is another such reversible algorithm.  
-For reversible transformations, a unique requirement for uncertainty-bearing arithmetic is to introduce the least amount of additional uncertainty after a \emph{round-trip} transformation which is a \emph{forward} followed by a \emph{reverse} transformation.  
-The errors after the roundtrip transformation are $0$ ideally \footnote{When noises are added to the original input signal, the value errors should be the results minus the overall input data. The previous approaches \cite{Prev_Precision_Arithmetic} used the original input data wrongly.}, so both the error deviation and the error maximums should be $0$.
-A test of uncertainty-bearing arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}, and a test of matrix inversion is provided in Section \ref{sec: matrix}.
+The Discrete Fourier Transformation is a typical transforming algorithm, which contains the same amount of input and output data, and its output data can be transformed back to the input data using essentially the same algorithm.  
+For reversible transformations, a unique requirement for variance arithmetic is to introduce the least amount of additional uncertainty after a \emph{round-trip} transformation which is a \emph{forward} followed by a \emph{reverse} transformation.  
+The errors after the roundtrip transformation should be delta distributed with $0$ error deviation \footnote{When noises are added to the original input signal, the value errors should be the results minus the overall input data. The previous approaches \cite{Prev_Precision_Arithmetic} used the original input data wrongly.}.
+A test of variance arithmetic using FFT algorithms is provided in Section \ref{sec: FFT}.
 
 A \emph{generation} algorithm has much more output data than input data.  
 Solving differential equations numerically and generating a numerical table of a specific function are two typical generating algorithms.  
 The generating algorithm codes mathematical knowledge into data, so there is an increase of information in the output data.  
-From the perspective of encoding information into data, Taylor expansion is also a generating algorithm. 
-In generating algorithms, input uncertainty should also be considered when deciding if the result is good enough so that the calculation can stop.  
 Some generating algorithms are theoretical calculations which involve no imprecise input so that all result uncertainty is due to rounding errors.  
 Section \ref{sec: recursion} demonstrates such an algorithm, which calculates a table of the sine function using trigonometric relations and two precise input data, $sin(0)=0$ and $sin(\pi/2)=1$.  
-The generated data have different precision.
 
 A \emph{reduction} algorithm has much less output data than input data such as numerical integration and statistical characterization of a data set.  
 Some information of the data is lost while other information is extracted during reducing.  
 Conventional wisdom is that a reducing algorithm generally benefits from a larger input data set \cite{Probability_Statistics}.  
-Such a notion needs to be re-evaluated when uncertainty accumulates during calculation.  
-A test of uncertainty-bearing arithmetic using numerical integration is provided in Section \ref{sec: integration}.
+A test of statistical characterization through sampling is provided in Section \ref{sec: Math Library}.
+
+
+
+\clearpage
+\section{Polynomial and Taylor Expansion}
+\label{sec: polynomial}
+
+\iffalse
+
+\begin{align*}
+(x + \tilde{x})^n &= \sum_{j=0}^{n} \tilde{x}^j x^{n - j}  \begin{pmatrix} n \\ j \end{pmatrix}; \\
+f(x + \tilde{x}) &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 )  + ( c_1 + c_2 2 x + c_3 3 x^2 ) \tilde{x} +  ( c_2 + c_3 3 x ) \tilde{x}^2 
+   + c_3 \tilde{x}^3; \\
+f(x + \tilde{x}) &= \sum_{j=0}^{N} c_j (x + \tilde{x})^j 
+     = \sum_{j=0}^{N} c_j  \sum_{k=0}^{j} \begin{pmatrix} j \\ k \end{pmatrix} x^{j-k}  \tilde{x}^k
+     = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=j}^{N} x^{k - j} c_k \begin{pmatrix} k \\ j \end{pmatrix} \\
+ & = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N - j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} \\   
+ &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 ) + \tilde{x} (c_1 + c_2 2 x + c_3 3 x^2 ) + \tilde{x}^2 ( c_2 + c_3 3 x ) + \tilde{x}^3 c_3 \\
+\overline{f(x)} - f(x) &= \sum_{j=1}^{[N/2]} (\delta x)^{2j} \eta(2j) \sum_{k=0}^{N - 2j} x^{k} c_{k + 2j} \begin{pmatrix} k + 2j \\ 2j \end{pmatrix}
+  = (\delta x)^2 ( c_2  + x c_3 3 ); \\
+(f(x + \tilde{x}) - f(x))^2 &=
+ \sum_{j=1}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} 
+ \sum_{m=1}^{N} \tilde{x}^{m} \sum_{n=0}^{N-m} x^{n} c_{n + m} \begin{pmatrix} m + n \\ m \end{pmatrix} \\
+    &\eqspace = \sum_{j=1}^{N} \sum_{m=1}^{N} \tilde{x}^{j+m} \sum_{k=0}^{N - j} x^k c_{k+j} \begin{pmatrix} j + k \\ j \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix}; \\
+\delta^2 f(x)  & = \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) \sum_{m=1}^{j - 1} \sum_{k=0}^{N - 2j + m} x^k c_{k+2j - m} \begin{pmatrix} 2j - m + k \\ 2j - m \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix} \\
+		&\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+			\sum_{k=0}^{[N/2] - j + m} x^{2k} c_{2k+2j - 2m} \begin{pmatrix} 2k + 2j - 2m \\ 2j - 2m \end{pmatrix}
+			\sum_{n=0}^{[N/2]-m} x^{2n} c_{2n+2m} \begin{pmatrix} 2n + 2m \\ 2n \end{pmatrix};
+\end{align*} 
+
+\begin{align*}
+c_k &= \begin{pmatrix} k \\ N \end{pmatrix}: \eqspace f(x) = (x + 1)^N; \\
+  & c_{n+m} \begin{pmatrix} n \\ n + m \end{pmatrix} = \frac{N!}{(n+m)! (N-n-m)!} \frac{(n+m)!}{n! m!} 
+	= \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} = \begin{pmatrix} N \\ n \end{pmatrix} \begin{pmatrix} N - n \\ m \end{pmatrix}; \\
+\delta^2 f(x)  &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \sum_{k=0}^{N - 2j + m} x^k \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N - (2j - m) \\ k \end{pmatrix}
+		\sum_{n=0}^{N-m} x^n \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\sum_{k=0}^{[N/2] - j + m} x^{2k} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N - (2j - 2m) \\ 2k \end{pmatrix}
+		\sum_{n=0}^{[N/2]-m} x^{2n} \begin{pmatrix} N \\ 2m \end{pmatrix} \begin{pmatrix} N - 2m \\ 2n \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} (x + 1)^{N - 2j + m} \begin{pmatrix} N \\ m \end{pmatrix} (x + 1)^{N-m} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		(x + 1)^{N - 2j + 2m} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} (x + 1)^{N - 2m} \begin{pmatrix} N \\ 2m \end{pmatrix} \\
+ &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) (x + 1)^{2N - 2j}
+        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N \\ m \end{pmatrix} \\
+   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j}  (x + 1)^{2N - 2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
+		\begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N \\ 2m \end{pmatrix};
+\end{align*}
+
+\begin{align*}
+\frac{\delta^2 x^c}{x^{2c}} &= \sum_{n=1}^{\infty} P(x)^{2n} 
+ \left( \zeta(2n) \sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
+ - \sum_{j=1}^{n-1} \zeta(2j) \zeta(2n - 2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right);
+\end{align*}
+
+\fi
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Taylor_Expansion_Uncertainty.png} 
+\captionof{figure}{
+The absolute reminders and result uncertainties for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The y-axis is scaled by the absolute reminder.
+In the legend,  
+\textit{Absolute Reminder} is the reminder calculated by Formula \eqref{eqn: Taylor expansion reminder}, 
+\textit{Uncertainty} is the reminder uncertainty calculated by variance arithmetic,
+and \textit{Result LSV} is the least significant value for $1/(1-x)$.
+}
+\label{fig: Taylor_Expansion_Uncertainty}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Taylor_Expansion.png} 
+\captionof{figure}{
+The absolute reminders for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The y-axis is scaled by the absolute reminder.
+In the legend,  
+\textit{Absolute Reminder} is the reminder calculated by Formula \eqref{eqn: Taylor expansion reminder}, 
+$x^N$ is the expansion term at Taylor expansion order $N$,
+\textit{Result LSV} is the least significant value for $1/(1-x)$,
+\textit{Result Half LSV} is half of \textit{Result LSV}, and 
+\textit{Accumulated Rounding Error} is the sum of rounding errors of $x^N$.
+}
+\label{fig: Taylor_Expansion}
+\end{figure}
+
+
+For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polynomial Taylor} gives the corresponding Taylor expansion:
+\begin{equation}
+\label{eqn: polynomial Taylor}
+f(x + \tilde{x}) = \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
+\end{equation}
+When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $c=N$ and $x = ax + b$. 
+Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold, because the exponent for power is limited to positive integers.
+
+Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Taylor 1d variance} uses Formula \eqref{eqn: sum variance} between any two terms in the Taylor expansion of Formula \eqref{eqn: Taylor 1d}.
+It suggests that a Taylor expansion is also a polynomial of Formula \eqref{eqn: polynomial Taylor} with $N \rightarrow \infty$ in variance arithmetic.
+\begin{align}
+\label{eqn: Taylor inner dependency}
+\delta^2 & \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) = 
+    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) \\
+  &+ 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber
+\end{align}
+
+A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}.
+The needed Taylor expansion order can be obtained by theoretical reminder estimation: If the estimation is less than the least significant value of the current expansion, the Taylor expansion can stop \cite{Numerical_Recipes}.
+However, this method does not consider neither floating-point the digital limitation of rounding representation nor floating-point rounding errors, so that it can not guarantee that the result is correct for all significant bits.
+
+Floating-point rounding errors serves as input errors to floating-point calculations, to be a major source of truncation errors.
+Taylor expansion for $1/(1-x)$ is used to test the ability of variance arithmetic to predict the effect of floating-point rounding errors.
+In Formula \eqref{eqn: Taylor expansion +} and \eqref{eqn: Taylor expansion -}, each $|x|^n$ generates the same rounding error, but the difference in sign means that the same rounding error will have different effects for the summation. 
+\begin{align}
+\label{eqn: Taylor expansion +}
+\frac{1}{1 - |x|} &= 1 + |x| + |x|^2 + |x|^3 + \dots; \\
+\label{eqn: Taylor expansion -}
+\frac{1}{1 + |x|} &= 1 - |x| + |x|^2 - |x|^3 + \dots; \\
+\label{eqn: Taylor expansion reminder}
+r(N) & = \left| \lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n - \frac{1}{1-x} \right|;
+\end{align}
+Instead of a reminder estimator, the absolute reminder $r(N)$ is calculated as Formula \eqref{eqn: Taylor expansion reminder} and it is precise.
+
+Figure \ref{fig: Taylor_Expansion_Uncertainty} shows $r(N)$ and the corresponding uncertainties for $x = \pm 0.6, \pm 0.7$.
+For $x = \pm 0.6, +0.7$, $r(N)$ reach the least significant values of the precise results, respectively, and the result absolute value errors equal the corresponding result uncertainties, respectively. 
+For $x = -0.7$, $r(N)$ does not reach the least significant values of the precise result, leaving the least two significant bits incorrect.
+Although the result uncertainty has the correct trend, it does not reach $r(N)$ at the end.
+
+The reason why Formula \eqref{eqn: Taylor 1d variance} does not succeed completely for $x = -0.7$ is due to floating-point rounding errors.
+In addition to  the absolute reminder $r(N)$, Figure \ref{fig: Taylor_Expansion} shows the expansion term $x^N$ and the accumulated rounding errors.
+\begin{enumerate}
+\item When $x^N$ reaches below half of the least significant value of the sum for Formula \eqref{eqn: Taylor expansion +} or \eqref{eqn: Taylor expansion -}, it vanishes so that the corresponding sums stop.
+
+\item When $x^N$ is added to the sum for Formula \eqref{eqn: Taylor expansion +} or \eqref{eqn: Taylor expansion -}, it is digitized by the least significant values $LSV$ of the corresponding sums, to generate rounding error at $n$.
+For example, $0.7^{100}=3.23\; 10^{-16}$ is digitized as $4.44\; 10^{-16} = LSV(1/(1 - 0.7))$.
+Such digitization is observed to be round to the nearest.
+
+\item The accumulated rounding errors when the sum stop determines the result error.
+
+\item The sign difference in Formula \eqref{eqn: Taylor expansion +} or \eqref{eqn: Taylor expansion -} determines that the accumulated rounding errors for $x = -0.6, -0.7$ are smaller than those for $x = +0.6, +0.7$.
+
+\item When $LSV \ll x^N$, the rounding errors are uniformly distributed, so that the accumulated round errors are close to $0$.
+When $x^N$ is close to $LSV$, the accumulated round errors become significant.
+
+\item $x^N$ approaches $LSV$ slower for $x = 0.7$ than that for $x = 0.6$, so the accumulated round errors is larger.
+
+\end{enumerate}
+Theoretically, the Taylor convergence range for $\frac{1}{1 - |x|}$ is $|x| < 1$.
+To guarantee the Taylor expansion result to be precise, $|x|$ can not be equal or larger than $0.7$.
+
+The reason why Formula \eqref{eqn: Taylor 1d variance} does not succeed completely for $x = -0.7$ is due to the digital limitation of the conventional floating-point representation.
+The smallest positive floating-point value is about $5\; 10^{-324}$. 
+The least significant value for $0.7$ is about $1\; 10^{-16}$.
+At $n=100$, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} has $100$ terms in total, but only first $10$ terms can be calculated before $(\delta x)^2$ vanishes.
+Thus, variance arithmetic can only provide proper coverage to floating-point rounding errors. 
+
+
+
+
 
 
 
@@ -1693,7 +1913,7 @@ To test Formula \eqref{eqn: determinant variance}:
 The integer arithmetic grantees that $|\M|$, $\M^A$, and $|\M^A|$ are precise.
 
 \item Gaussian noises of predefined levels are added to $\M$, to construct $\widehat{\M}$ which contains imprecise values.
-The variance arithmetic is used to calculate $|\widehat{\M}|$, $\widehat{\M}^A$, and $|\widehat{\M}^A|$.
+variance arithmetic is used to calculate $|\widehat{\M}|$, $\widehat{\M}^A$, and $|\widehat{\M}^A|$.
 For example, to construct a $\widehat{\M}$ with $10^{-3}$ input noise precision, the Gaussian noise amplitude is $10^{-3} \times 2^8/\sqrt{3}$.
 
 \item The difference between $|\widehat{\M}|$ and $\M^A$ defines the \emph{Adjugate} Test.
@@ -1754,7 +1974,7 @@ The distribution when the input noise is $0$ is the measured distribution of the
 
 When the input noise precision increases from $10^{-17}$ to  $10^{-10}$, the distributions become less delta-like and more Gaussian, as shown in both Figure \ref{fig: Adjugate_Histogram_Size_7} and Figure \ref{fig: Adjugate_Histogram_Size_8}. 
 The non-ideal behaviors in Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, \ref{fig: Forward_Error_vs_Size_Noise}, and \ref{fig: Roundtrip_Error_vs_Size_Noise} are all attributed to the rounding errors.
-Table \ref{tbl: matrix rounding errors} shows that the variance arithmetic achieves proper coverage for the calculation rounding errors for adjugate matrix.
+Table \ref{tbl: matrix rounding errors} shows that variance arithmetic achieves proper coverage for the calculation rounding errors for adjugate matrix.
 
 
 
@@ -1834,7 +2054,7 @@ It is very similar to Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, validating
 
 \clearpage
 \section{Moving-Window Linear Regression}
-\label{sec: Comparison Using Progressive Moving-Window Linear Regression}
+\label{sec: Moving-Window Linear Regression}
 
 \subsection{Moving-Window Linear Regression Algorithm}
 
@@ -1942,123 +2162,6 @@ It demonstrates that a larger than $1$ error deviation may probably indicate uns
 
 
   
-\clearpage
-\section{Polynomial and Taylor Expansion}
-\label{sec: polynomial}
-
-\iffalse
-
-\begin{align*}
-(x + \tilde{x})^n &= \sum_{j=0}^{n} \tilde{x}^j x^{n - j}  \begin{pmatrix} n \\ j \end{pmatrix}; \\
-f(x + \tilde{x}) &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 )  + ( c_1 + c_2 2 x + c_3 3 x^2 ) \tilde{x} +  ( c_2 + c_3 3 x ) \tilde{x}^2 
-   + c_3 \tilde{x}^3; \\
-f(x + \tilde{x}) &= \sum_{j=0}^{N} c_j (x + \tilde{x})^j 
-     = \sum_{j=0}^{N} c_j  \sum_{k=0}^{j} \begin{pmatrix} j \\ k \end{pmatrix} x^{j-k}  \tilde{x}^k
-     = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=j}^{N} x^{k - j} c_k \begin{pmatrix} k \\ j \end{pmatrix} \\
- & = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N - j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} \\   
- &= ( c_0 + c_1 x + c_2 x^2 + c_3 x^3 ) + \tilde{x} (c_1 + c_2 2 x + c_3 3 x^2 ) + \tilde{x}^2 ( c_2 + c_3 3 x ) + \tilde{x}^3 c_3 \\
-\overline{f(x)} - f(x) &= \sum_{j=1}^{[N/2]} (\delta x)^{2j} \eta(2j) \sum_{k=0}^{N - 2j} x^{k} c_{k + 2j} \begin{pmatrix} k + 2j \\ 2j \end{pmatrix}
-  = (\delta x)^2 ( c_2  + x c_3 3 ); \\
-(f(x + \tilde{x}) - f(x))^2 &=
- \sum_{j=1}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k} c_{k + j} \begin{pmatrix} j + k \\ j \end{pmatrix} 
- \sum_{m=1}^{N} \tilde{x}^{m} \sum_{n=0}^{N-m} x^{n} c_{n + m} \begin{pmatrix} m + n \\ m \end{pmatrix} \\
-    &\eqspace = \sum_{j=1}^{N} \sum_{m=1}^{N} \tilde{x}^{j+m} \sum_{k=0}^{N - j} x^k c_{k+j} \begin{pmatrix} j + k \\ j \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix}; \\
-\delta^2 f(x)  & = \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) \sum_{m=1}^{j - 1} \sum_{k=0}^{N - 2j + m} x^k c_{k+2j - m} \begin{pmatrix} 2j - m + k \\ 2j - m \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n c_{n+m} \begin{pmatrix} n + m \\ n \end{pmatrix} \\
-		&\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-			\sum_{k=0}^{[N/2] - j + m} x^{2k} c_{2k+2j - 2m} \begin{pmatrix} 2k + 2j - 2m \\ 2j - 2m \end{pmatrix}
-			\sum_{n=0}^{[N/2]-m} x^{2n} c_{2n+2m} \begin{pmatrix} 2n + 2m \\ 2n \end{pmatrix};
-\end{align*} 
-
-\begin{align*}
-c_k &= \begin{pmatrix} k \\ N \end{pmatrix}: \eqspace f(x) = (x + 1)^N; \\
-  & c_{n+m} \begin{pmatrix} n \\ n + m \end{pmatrix} = \frac{N!}{(n+m)! (N-n-m)!} \frac{(n+m)!}{n! m!} 
-	= \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} = \begin{pmatrix} N \\ n \end{pmatrix} \begin{pmatrix} N - n \\ m \end{pmatrix}; \\
-\delta^2 f(x)  &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
-        \sum_{m=1}^{2j - 1} \sum_{k=0}^{N - 2j + m} x^k \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N - (2j - m) \\ k \end{pmatrix}
-		\sum_{n=0}^{N-m} x^n \begin{pmatrix} N \\ m \end{pmatrix} \begin{pmatrix} N - m \\ n \end{pmatrix} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		\sum_{k=0}^{[N/2] - j + m} x^{2k} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N - (2j - 2m) \\ 2k \end{pmatrix}
-		\sum_{n=0}^{[N/2]-m} x^{2n} \begin{pmatrix} N \\ 2m \end{pmatrix} \begin{pmatrix} N - 2m \\ 2n \end{pmatrix} \\
- &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) 
-        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} (x + 1)^{N - 2j + m} \begin{pmatrix} N \\ m \end{pmatrix} (x + 1)^{N-m} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		(x + 1)^{N - 2j + 2m} \begin{pmatrix} N \\ 2j - 2m \end{pmatrix} (x + 1)^{N - 2m} \begin{pmatrix} N \\ 2m \end{pmatrix} \\
- &= \sum_{j=1}^{N} (\delta x)^{2j} \eta(2j) (x + 1)^{2N - 2j}
-        \sum_{m=1}^{2j - 1} \begin{pmatrix} N \\ 2j - m \end{pmatrix} \begin{pmatrix} N \\ m \end{pmatrix} \\
-   &\eqspace -  \sum_{j=1}^{[N/2]} (\delta x)^{2j}  (x + 1)^{2N - 2j} \sum_{m=1}^{j - 1} \eta(2j - 2m) \eta(2m) 
-		\begin{pmatrix} N \\ 2j - 2m \end{pmatrix} \begin{pmatrix} N \\ 2m \end{pmatrix};
-\end{align*}
-
-\begin{align*}
-\frac{\delta^2 x^c}{x^{2c}} &= \sum_{n=1}^{\infty} P(x)^{2n} 
- \left( \zeta(2n) \sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
- - \sum_{j=1}^{n-1} \zeta(2j) \zeta(2n - 2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right);
-\end{align*}
-
-\fi
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Taylor_Expansion.png} 
-\captionof{figure}{
-The Taylor expansion for $\frac{1}{1 - x} = \lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
-The y-axis shows either the uncertainty or the absolute reminder value error.
-}
-\label{fig: Taylor_Expansion}
-\end{figure}
-
-
-For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polynomial Taylor} gives the corresponding Taylor expansion:
-\begin{equation}
-\label{eqn: polynomial Taylor}
-f(x + \tilde{x}) = \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
-\end{equation}
-When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $c=N$ and $x = ax + b$. 
-Unlike Formula \eqref{eqn: power precision}, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is no longer limited by the applicable precision threshold, because the exponent for power is limited to positive integers.
-
-Formula \eqref{eqn: Taylor inner dependency} shows that Formula \eqref{eqn: Taylor 1d variance} uses Formula \eqref{eqn: sum variance} between any two terms in the Taylor expansion of Formula \eqref{eqn: Taylor 1d}.
-It suggests that a Taylor expansion is also a polynomial of Formula \eqref{eqn: polynomial Taylor} with $N \rightarrow \infty$ in the variance arithmetic.
-\begin{align}
-\label{eqn: Taylor inner dependency}
-\delta^2 & \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) = 
-    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) \\
-  &+ 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber
-\end{align}
-
-A numerical calculation can only calculate limited terms in a Taylor expansion, and the count of terms of the Taylor expansion is needed to approximate a function $f(x)$ is defined as the \emph{Taylor expansion order}, which can be obtained by either of the two methods \cite{Numerical_Recipes}:
-\begin{itemize}
-\item \emph{reminder estimation}: Theoretically, a Taylor expansion order is reached when the estimated reminder is less than the least significant value of the target result.
-
-\item \emph{stability test}: Numerically, a Taylor expansion order is reached when the value change is less than the least significant value the current result.
-\end{itemize}
-Using Formula \eqref{eqn: polynomial Taylor}, the calculated uncertainty increases with the increasing Taylor expansion order.
-For an evaluation with an known result, at a given Taylor expansion order, the reminder value error can be used instead of the estimated reminders. 
-For example, for $\frac{1}{1 - x}$, the remainder value error is calculated as $\sum_{n = 0}^{N} x^n - \frac{1}{1 - x}$ in which $N$ is the Taylor expansion order.
-The calculated uncertainty should be comparable to the value errors when the Taylor expansion order is reached.
-Figure \ref{fig: Taylor_Expansion} shows the reminder and the corresponding uncertainty of $\frac{1}{1 - x} =\lim_{N \rightarrow \infty} \sum_{n = 0}^{N} x^n$, in which $N$ is the Taylor expansion order:
-\begin{itemize}
-\item The Taylor expansion order can be obtained by the stability test, such as $N=73$ when $x = +0.6$.
-Except at very low Taylor expansion orders, the calculated uncertainties are quite stable, so that they can used to affirm that the result is stable.
-
-\item In all cases, the reminder value errors stabilize at exactly the corresponding least significant values.
-The variance arithmetic tracks the reminder value error properly.
-In the worst case, when $x=-0.7$, the normalized error is $2.75$.
-
-\item When $x$ is positive, the reminder value errors approach the least significant values gradually.
- When $x$ is negative, the reminder value errors oscillate near the Taylor expansion order.
-This means difficulty in obtaining an accurate reliable reminder estimator.
-On the other hand, the statistical tracking by the variance arithmetic using Formula \eqref{eqn: polynomial Taylor} is straight-forward.
-
-\end{itemize}
-
-Using variance arithmetic for Taylor expansion, the result uncertainty tracks the reminder value error properly.
-The stability test method can be used for numerical calculation of Taylor expansion, as well as the calculation of the mean and the variance of the Taylor expansion.
-If the stability test can not be applied, the convergence of the mean and the variance can be judged numerically according to Section \ref{sec: Math Library}, and the reminder estimation method can be used to terminate the expansion.
-
-
-
 
 
 \clearpage
@@ -2090,11 +2193,11 @@ The errors of the generated $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + 
 The resulted value errors are comparable with but not identical to the value errors using floating-point library $\sin(x)$ and $\cos(x)$.
 Figure \ref{fig: Uncertain_Sin} shows that the result uncertainties remain almost a constant of about $1.2 \time 10^{-16}$, which is consist with uniformly distributed least significant values within the least significant bit of the significand.
 It also shows that the error deviations is close to $0.5$, which is comparable to the value of $0.535$ for the library $\sin(x)$ and $\cos(x)$ functions.
-The variance arithmetic is thus effective for this regressive generation algorithm.
+variance arithmetic is thus effective for this regressive generation algorithm.
 
 Using either Taylor expansion or regressive generation of $\sin(x)$ and $\cos(x)$ are equivalent precision-wise for conventional floating-point calculations.
-In contrast, in the variance arithmetic, when $x \rightarrow 0$, Formula \eqref{eqn: phase sin} has very coarse precision for Formula \ref{eqn: square root precision}, which result in very coarse precision for $\sin(x)$. 
-Thus, the variance arithmetic rejects this regressive generation algorithm for $\sin(x)$ and $\cos(x)$.
+In contrast, in variance arithmetic, when $x \rightarrow 0$, Formula \eqref{eqn: phase sin} has very coarse precision for Formula \ref{eqn: square root precision}, which result in very coarse precision for $\sin(x)$. 
+Thus, variance arithmetic rejects this regressive generation algorithm for $\sin(x)$ and $\cos(x)$.
 
 
 
@@ -2221,7 +2324,7 @@ The normalized errors of $(x^p)^{\frac{1}{p}} - x$ vs $x$ and $p$.
 
 Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} are tested by the corresponding math library functions \textit{exp}, \textit{log}, \textit{sin}, and \textit{pow}, respectively.
 
-At each point $x$ for an input uncertainty $\delta x$, the result uncertainty is calculated by the variance arithmetic.
+At each point $x$ for an input uncertainty $\delta x$, the result uncertainty is calculated by variance arithmetic.
 The corresponding value deviation is obtained by:
 \begin{enumerate}
 
@@ -2251,7 +2354,7 @@ After the result uncertainties diverge, the corresponding value deviations still
 If Gaussian noises are used instead, the cutoffs for both value errors and error deviations are strictly at $1/5$.
 The result probability density function for $\log(x)$ has a pole at $x=0$.
 
-Such divergences of the result uncertainties are expected when the input precision is coarser than the estimated applicable precision threshold of $1/\sigma$, in which $\sigma=5$ is the bonding factor of the variance arithmetic.
+Such divergences of the result uncertainties are expected when the input precision is coarser than the estimated applicable precision threshold of $1/\sigma$, in which $\sigma=5$ is the bonding factor of variance arithmetic.
 If $\sigma$ is reduced from $5$ to $4$, the measured applicable precision thresholds increase from $1/5$ to $1/4$, allowing more result uncertainties to be valid.
 The reduction of $\sigma$ increases the bounding leakage $\epsilon$ from $5.7 \times 10^{-7}$ to $6.3 \times 10^{-5}$ according to Formula \eqref{eqn: bounding leakage}.
 A large leakage $\epsilon$ raises the logic questions on the validity of the result, because the leakage may mean $x \leq 0$ for $\log(x)$ in this case.
@@ -2321,9 +2424,9 @@ Figure \ref{fig: Pow_Converge} shows that the convergence of an analytic functio
 \subsection{Numerical Errors for Library Functions}
 
 The combined numerical error of the library function $e^x$ and $\log(x)$ is calculated as $\log(e^x) - x$ vs $x$.
-Figure \ref{fig: ExpLog_Error} shows that using either the variance arithmetic or the conventional floating-point library functions results in the same value errors.  
+Figure \ref{fig: ExpLog_Error} shows that using either variance arithmetic or the conventional floating-point library functions results in the same value errors.  
 In both cases, the value errors are $0$ when $1 < |x|$.
-The uncertainties of the variance arithmetic bounds the value errors effectively, resulting in an error deviation about $0.409$ when $|x| \leq 1$.
+The uncertainties of variance arithmetic bounds the value errors effectively, resulting in an error deviation about $0.409$ when $|x| \leq 1$.
 
 The numerical error of the library function $x^p$ is calculated as $(x^p)^{1/p} - x$ vs $x$.
 Figure \ref{fig: Power_Error} shows that the normalized errors is not specific to either $x$ or $p$, resulting in an error deviation about $0.548$.
@@ -2489,7 +2592,7 @@ The result uncertainty means for the roundtrip transformations is thus: $\sqrt{2
 
 \end{itemize}
 
-A major question for the variance arithmetic is that whether the uncertainties can track the the corresponding value errors effectively or not.
+A major question for variance arithmetic is that whether the uncertainties can track the the corresponding value errors effectively or not.
 FFT transformations provide an ideal test for this statistical property: To test if the error deviations can be close to 1 with the increasing FFT order:
 \begin{itemize}
 \item The forward transformation cancels real imprecise data of a Sin/Cos signal into a spectrum of mostly $0$ values, so that both its value errors and its result uncertainties are expected to grow faster. 
@@ -2600,7 +2703,7 @@ Sadly, in reality, the library sine functions are used ubiquitously, so that bot
 \begin{figure}[p]
 \includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Spec_Indexed.png} 
 \captionof{figure}{
-The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the forward transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis shows the scale for index frequency.
 The y-axis shows the scale for uncertainty and absolute value errors.
 }
@@ -2610,7 +2713,7 @@ The y-axis shows the scale for uncertainty and absolute value errors.
 \begin{figure}[p]
 \includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Wave_Indexed.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainty and the value errors shown in the legend.
+The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis shows the scale for index time.
 The y-axis shows the scale for uncertainty and absolute value errors.
 }
@@ -2673,7 +2776,7 @@ Thus, proper coverage is achieved using the indexed sine functions for Sin/Cos s
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.png} 
 \captionof{figure}{
-The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the library sine functions after the forward transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the library sine functions after the forward transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included is the corresponding result errors using \textit{SciPy}.
 The x-axis shows the scale for index frequency.
 The y-axis shows uncertainties or absolute value errors.
@@ -2684,19 +2787,19 @@ The y-axis shows uncertainties or absolute value errors.
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included is the corresponding result errors using \textit{SciPy}.
 The x-axis shows the scale for index time.
 The y-axis shows the uncertainties or absolute value errors.
 No input noise is added to the Sin signal.
 }
-\label{fig: FFT_Sin_Clean_6_4_Wave_Lib}
+\label{fig: FFT_Sin_Clean_6_3_Wave_Lib}
 \end{figure}
 
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+The FFT waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included is the corresponding result errors using \textit{SciPy}.
 The x-axis shows the scale for index time.
 The y-axis shows the uncertainties or absolute value errors.
@@ -2708,7 +2811,7 @@ No input noise is added to the Sin signal.
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_1_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by the variance arithmetic, with the uncertainties and the value errors shown in the legend.
+The FFT waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included is the corresponding result errors using \textit{SciPy}.
 The x-axis shows the scale for index time.
 The y-axis shows the uncertainties or absolute value errors.
@@ -2743,8 +2846,8 @@ $10^{-16}$ input noises are added to the Sin/Cos signals.
 
 Because the least significant values are the only source of input uncertainties for variance arithmetic, the result uncertainties using either sine functions are almost identical.
 
-The library sine functions contributes to the numerical calculation errors which is not specified by the input uncertainties of the variance arithmetic.
-The question is whether the variance arithmetic can track this large amount of numerical errors effectively or not.
+The library sine functions contributes to the numerical calculation errors which is not specified by the input uncertainties of variance arithmetic.
+The question is whether variance arithmetic can track this large amount of numerical errors effectively or not.
 
 Using the library sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in which $k$ is the index time:
 \begin{itemize}
@@ -2759,18 +2862,18 @@ When a small noise with deviation of $10^{16}$ is added to the input, the result
 
 \end{itemize}
 
-To validate the FFT implementation in the variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
+To validate the FFT implementation in variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
 The results are quite comparable, except that in \textit{SciPy}, the data waveform is always real rather than complex.
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of the variance arithmetic is indicative.
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results matches the corresponding results of the variance arithmetic well.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of variance arithmetic is indicative.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results matches the corresponding results of variance arithmetic well.
 
 In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the value errors tend to increase with the indexes, which is due to the periodic increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
 When the signal frequency increases, the increase of the value errors with the index frequency in the reverse transformation becomes stronger, as shown in Figure \ref{fig: FFT_Sin_Clean_6_1_Wave_Lib}, \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, and \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib}.
 On the other hand, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} show no such increase, because it contains no library errors as described in Figure \ref{fig: Sin_Diff}.
 
-The variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
+variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
 How much noises to add to input to achieve proper coverage remains an art.
-When the proper tracking of the variance arithmetic is not achieved, the result may contain large amount of errors.
+When the proper tracking of variance arithmetic is not achieved, the result may contain large amount of errors.
 
 
 \subsection{Linear Signal}
@@ -2818,7 +2921,7 @@ No input noise is added to the Linear signal.
 \end{figure}
 
 In addition to the  numerical errors of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$, Linear signals introduce the numerical errors of $1/\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$ to the result.
-The question is whether the variance arithmetic can track this additional numerical errors or not.
+The question is whether variance arithmetic can track this additional numerical errors or not.
 
 Using the indexed sine functions:
 \begin{itemize}
@@ -2839,7 +2942,7 @@ The additional peaks extend beyond the range of $[-3, +3]$
 \end{itemize}
 
 When too much numerical errors are not specified by the input uncertainties, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $1/\tan(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
-The only solution seems to create a new sin library using the variance arithmetic so that all numerical calculation errors are accounted for.
+The only solution seems to create a new sin library using variance arithmetic so that all numerical calculation errors are accounted for.
 
 
 
@@ -2990,7 +3093,7 @@ The library $\sin(x)$ errors increase periodically with $x$, causing noticeable 
 The dependency of the result numerical errors on the amount of calculation and input data means that a small scale test can not properly qualify the result of a large scale calculation.
 The effect of numerical errors inside math library has not been addressed seriously.
 
-The variance arithmetic should be used, whose values largely reproduce the corresponding results using conventional floating-point arithmetic, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
+variance arithmetic should be used, whose values largely reproduce the corresponding results using conventional floating-point arithmetic, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
 If the library functions also have proper coverage, the calculation result will probably have proper coverage as well.
 
 
@@ -3007,69 +3110,74 @@ If the library functions also have proper coverage, the calculation result will 
 \section{Conclusion and Discussion}
 \label{sec: conclusion and discussion}
 
-\subsection{Summary}
+\subsection{Summary of Variance Arithmetic}
 
-The starting point of variance arithmetic is the uncorrelated uncertainty assumption, which requires input data to have decent precision for each or small overall correlation among them, as shown in Figure \ref{fig: Independent_Uncertainty_Assumption}, which quantifies the statistical requirements for input data to variance arithmetic.  In addition, it requires that the systematic errors is not the major source of uncertainty, and all of its input data do not have confused identities.    
+The starting point of variance arithmetic is the uncorrelated uncertainty assumption, which requires input data to have small enough precision as shown in Figure \ref{fig: Independent_Uncertainty_Assumption}.  In addition, it requires that the systematic errors is not the major source of uncertainty.
 
-Due to the uncorrelated uncertainty assumption and central limit theorem, the rounding errors of variance arithmetic are shown to be bounded by a Gaussian distribution with a truncated range.  The rounding error distribution is extended to describe the uncertainty distribution in general, with the uncertainty deviation of a single precision value given by Formula \eqref{eqn: uncertainty distribution}, and the result uncertainty deviation of a function given by Formula \eqref{eqn: Taylor 1d variance} and its multi-dimension extensions such as Formula \eqref{eqn: Taylor 2d uncertainty}.  
+Once the uncorrelated uncertainty assumption is satisfied, variance arithmetic quantifies uncertainty as the deviation of the value errors.
+It can trace the variable dependency in the intermediate steps using standard statistics.
+Taylor expansion can be used to obtain the result mean and uncertainty of analytic functions, as Formula \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, \eqref{eqn: Taylor 2d variance}, and etc.
+The convergence requirement of variance arithmetic also reject calculations based on input precision, such as inversion of an input which has a high probability of containing zero. 
 
-Formula \eqref{eqn: fitting error} is shown to describe the general uncertainty deviation propagation in variance arithmetic.  The average tracking ratios and the maximal bounding ratio using variance arithmetic are shown to be independent of input precision, and stable for the amount of calculations for a few very different applications.  In contrast, both average tracking ratios and the maximal bounding ratio using interval arithmetic are shown to decrease exponentially with the amount of calculations in all tests.  Such stability is the major reason why variance arithmetic is better than interval arithmetic in all tests done so far.  
-
-The statistical nature of variance arithmetic provides not only quantitative explanation for the dependency problem, but also solutions to the dependency problem, which is in form of either Taylor expansion or calibration.  The treatment of dependency problem is another major advantage of variance arithmetic over interval arithmetic.
-
-variance has a central role in variance arithmetic:
+The ability of variance arithmetic to trace value errors using calculated uncertainties is shown to be very effective:
 \begin{itemize}
-\item Precision is regarded as information content of a uncertainty-bearing value, which is in par with information entropy in information theory.  Because of this, precision needs to be preserved when the uncertainty-bearing value is multiplied or divided by a constant, which results in the scaling principle.   
-\item variance arithmetic itself can be deduced from the scaling principle and the uncorrelated uncertainty assumption.
-\item The convergence property of the result deviation using Taylor expansion method is determined by input precisions, such as for inversions and square roots.
+\item When zero result is expected, the normalized value errors of variance arithmetic is delta distributed.
+
+\item Due to the uncorrelated uncertainty assumption and central limit theorem, the normalized value errors of variance arithmetic are normal distributed.
+In the ideal coverage cases when the input uncertainties precisely quantify the corresponding errors, the deviations of the normalized value errors are shown to be $1$.
+The ideal coverage defines the ideal applicable range of variance arithmetic.
+It is also the necessary condition for any particular application of variance arithmetic to be correct.
+
+\item The floating-point rounding errors are generated in the process of floating-point calculations, so they are not subjected to central limit theorem.
+It has been shown that the deviation of the normalized value errors of variance arithmetic are in the range of $[0.25, 4]$, which fails in the range of proper coverage.
+
+\item Another reason of proper coverage is that the input uncertainties do not precisely specify the input errors.
+
+\item When the input uncertainties are two different from the corresponding value errors which they specify, variance arithmetic will not work properly.
+Such situation can be detected by the values of the normalized error deviations outside the range of $[0.1, 10]$.
 \end{itemize}
 
-\subsection{Efficiency of Precision Arithmetic}
-
-variance arithmetic tries to solve a different mathematical problem from conventional floating-point arithmetic. For example, to calculate the determinant of a matrix:
-\begin{itemize}
-\item Conventional floating-point arithmetic may use a Laplace method \cite{Numerical_Recipes}, namely, to randomly choose a row or a column, and then to sum up the products of each element within the chosen row or the column with the corresponding sub-determinant of the element. Each sub-determinant is calculated in the same fashion.  Depending on the choices of the row or the column in each stage, there are many paths to calculate the determinant of a matrix.  Because conventional floating-point arithmetic has unbounded rounding errors, each path may give a different result, and the spread of all the results depends on the stability of the matrix and each sub-matrix \cite{Condition_Number}.  In this perspective, by taking a random path and assuming to get the only correct result, conventional floating-point arithmetic can be viewed as a leap-of-faith approach.
-
-\item In contrast, variance arithmetic also needs to calculate the spread of the result due to rounding error or input uncertainties, so it effectively has to cover all paths of the calculation.  For example, using Formula \eqref{eqn: determinant uncertainty recursion}, variance arithmetic starts from each elements of the matrix, and treat it as a 1x1 sub-determinant, then grow it to all possible 2x2 sub-determinants containing it, etc, until reach the determinant of the matrix.  Thus, variance arithmetic takes order-of-magnitude more time than a single leap-of-faith calculation.  
-\end{itemize}   
-
-However, it is wrong to conclude that variance arithmetic is less efficient than conventional floating-point arithmetic, because in most cases rounding errors and input uncertainty can not be ignored.  Because conventional floating-point arithmetic can not contain uncertainty in its value, it has to use another value to specify uncertainty, such as an interval of $[min, max]$ or a common statistical pair $value \pm deviation$, which may brings the following drawbacks:
-\begin{itemize}
-\item The most common way to calculate result spread using conventional floating-point arithmetic is sampling \cite{Stochastic_Arithmetic} \cite{Numerical_Recipes}.  Assuming the matrix size is $N \times N$, and a minimal 3-point sampling is performed on each matrix element, then the spread calculation of matrix determinant requires $N^6$ leap-of-faith calculations, which is still a lot.  In contrast, using Formula \eqref{eqn: determinant uncertainty recursion}, variance arithmetic only need one calculation.  Thus, conventional floating-point arithmetic may be less efficient than variance arithmetic in this context. 
-
-\item During to unbounded rounding errors, a conventional floating-point value losses its precision gradually and silently, so that a interval or a statistical pair itself can become unknowingly invalid.  At least, it is not clear at what precision the interval or the statistical pair specifies.
-\end{itemize}
+variance arithmetic has been shown to be widely applicable, so as for analytic calculations, progressive calculation, regressive generalization, polynomial expansion, statistical sampling, and transformations.
 
 
-\subsection{Choose a better algorithm}
+\subsection{The Need for Recalculating Library Math Functions}
 
-Because variance arithmetic tries to solve a different problem than conventional floating-point arithmetic, it has completely different criterion when choosing algorithms or implementations of algorithms.  For example, for matrix inversion, because conventional floating-point arithmetic has unbounded rounding errors, it will choose certain flavour of LU-decomposition over Gaussian elimination and determinant division \cite{Numerical_Recipes}. The result difference of LU-decomposition, Gaussian elimination and determinant division shows that conventional floating-point arithmetic has strong dependency problem, which has been a way of life when using conventional floating-point arithmetic, e.g., different algorithms or different implementation of the same algorithm are expected to give different results, of which a best algorithm or implementation is always chosen for each usage context \cite{Numerical_Recipes}, even though they may be mathematically equivalent. In contrast, rounding errors are bounded in both variance arithmetic and interval arithmetic \cite{Worst_Case_Error_Bounds}, so they are no longer needed to be considered.  When interval arithmetic reformat a numerical question as "Given each input to be an interval, what the output would be?", it effectively states that the results for most numerical questions to be solved should be \emph{unique} to be either one or a few intervals that tightest bounds the results, \emph{regardless} of the algorithm to be used, \emph{unless} dependency problem is introduced in the implementation of an algorithm.  Same concept is true for variance arithmetic, which converges all input uncertainty distribution to \emph{ubiquitously Gaussian} at the outputs, and which further \emph{quantifies} the source of the dependency problem.  Using variance arithmetic instead of conventional floating-point arithmetic, the focus has shifted from minimizing rounding errors to minimizing dependency problem.  Of the three algorithms for matrix inversion, both LU-decomposition and Gaussian elimination are progressive, which means that each input may appear multiple times in different branch at different time, whose dependency problem is difficult to quantified.  On the other hand, a determinant of a $N \times N$ matrix can be treated as a $N$-order polynomial with $N^2$ variables, to be readily for the Taylor expansion, which results in Formula \eqref{eqn: determinant uncertainty recursion}, so that the determinant division method is chosen in this paper for matrix inversion.  For the same reason, in the moving-window linear regression, the worse method in conventional floating-point arithmetic, Formula \eqref{eqn: time-series linear regression}, becomes the better method in variance arithmetic, and vice versa.  
+The library math functions need to be calculated using variance arithmetic, so that each output value has its corresponding uncertainty.
+Otherwise, the effect of the existing value errors in the library function can have unpredictable and large effects.
+For example, this paper shows that the periodic numerical errors in the $\sin$ and $\tan$ library functions causes resonant-like large result value errors for the FFT calculations.
 
-Due to the requirement of minimizing dependence problem, variance arithmetic has much less operational freedom than conventional arithmetic and may require extensive symbolic calculations, following practices in affine arithmetic \cite{Symbolic_Affine_Arithmetic}.  Also, the comparison relation in conventional arithmetic needs to be re-evaluated in variance arithmetic, which brings about another reason for different algorithm selection.
 
 
-\subsection{Improving Precision Arithmetic}
+\subsection{The Need for New Numerical Approaches}
 
-Figure \ref{fig: Independent_Uncertainty_Assumption} uses a cut-off for the test of the uncorrelated uncertainty assumption among two uncertainty-bearing values.  A better approach is to associate the amount of the dependence problem with the amount of correlation between the uncertainties of the two values.  
+To properly account for the result uncertainties, analytic expressions are favored over the corresponding numerical approaches, because the convergence of the result uncertainties are generally slower than those of the result values.
 
-There are actually three different ways to round up $(2S+1)?4R\; 2^E$:
-\begin{enumerate}
-\item always round up $(2S+1)?4R\; 2^E$ to $(S+1)-R\; 2^{E+1}$;
-\item always round up $(2S+1)?4R\; 2^E$ to $S+R\; 2^{E+1}$;
-\item randomly round up $(2S+1)?4R\; 2^E$ to either $(S+1)-R\; 2^{E+1}$ or $S+R\; 2^{E+1}$.
-\end{enumerate}
-The first method results in slightly slower loss of significand than the second method, while the third method changes variance arithmetic from deterministic to stochastic.  Because no empirical difference has been detected among these three different rounding up methods, the first method is chosen in this paper. Further study is required to distinguish the different rounding up methods.
+The conventional numerical approaches focus primarily on the result values, and they need to be reexamined or even revamped for the result uncertainties.
+The input uncertainties cause large uncertainty biases on the corresponding result values in the case of matrix inversion,  and the result precision is generally much worse than the input precision.
+One such example is matrix inversion.
 
-The objectives of variance arithmetic need to be studied further.  For example, Formula \eqref{eqn: uncertainty variance} has rejected the effect of uncertainty on the expected value by incorporating the value shift due to uncertainty as increase of variance, such as in the case of calculating $f(x) = x^{2}$.  The effect of such asymmetrical broadening is unclear.  
+Using Taylor expansion approach, it is generally an order-of-magnitude more complicated to calculate the result uncertainties than the result values.
+However, modern software programs for analytic calculation can be great help.
+Also, the calculation of the result uncertainty is highly paralleliziable, so that modern parallel computing can be great help. 
 
-The number of bits to be calculated inside uncertainty also needs to be studied further.  For example, when limited bits are calculated inside uncertainty, adding insignificant higher order term of a Taylor expansion may decrease the value error while increasing the uncertainty deviation, which may call for an optimal bits to be calculated inside uncertainty for the truncation rule.  
 
-Because variance arithmetic is based on generic concepts, it is targeted to be a generic arithmetic for both uncertainty-tracking and uncertainty-bounding.  However, it seems a worthwhile alternative to interval arithmetic and the de facto independence arithmetic.  Before applying it generally, variance arithmetic still needs more groundwork and testing.  It should be tested further in other problems such as improper integrations, solutions to linear equations, and solutions to differential equations.    
+\subsection{The Need for Different Floating-Point Representation for Variance}
+
+In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated and stored.
+This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation $\pm\; 2^{52} \; 2^{\pm 1024}$, such as when applying Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} to floating-point rounding errors in Section \ref{sec: polynomial}.
+Ideally, $(\delta x)^2$ should be calculated and stored in an different 64-bit floating-point representation with the range at least $2^{51} \; 2^{\pm 4096}$ in which  the sign is no longer needed, and the bit count for the significand needs not more than $52$ because $(\delta x)^2$ does not need to be as accurate as $x$.
+
+
+\subsection{Hardware Implementation}
+
+Because variance arithmetic has neither execution freedoms nor the associated dependency problems, it can be implemented in hardware in CPU or GPU.
+
 
 
 \subsection{Acknowledgements}
 
-As an independent researcher, the author of this paper feels indebted to encouragements and valuable discussions with Dr. Zhong Zhong from Brookhaven National Laboratory, Prof. Hui Cao from Yale University, Dr. Anthony Begley from \emph{Physics Reviews B}, the organizers of \emph{AMCS 2005}, with Prof. Hamid R. Arabnia from University of Georgia in particular, and the organizers of \emph{NKS Mathematica Forum 2007}, with Dr. Stephen Wolfram in particular. Finally, the author of this paper is very grateful for the editors and reviewers of \emph{Reliable Computing} for their tremendous help in shaping this unusual paper from unusual source, with managing editor, Prof. Rolph Baker Kearfott in particular.
+As an independent researcher, the author of this paper feels indebted to encouragements and valuable discussions with Dr. Zhong Zhong from Brookhaven National Laboratory, Dr. Anthony Begley from \emph{Physics Reviews B}, the organizers of \emph{AMCS 2005}, with Prof. Hamid R. Arabnia from University of Georgia in particular, and the organizers of \emph{NKS Mathematica Forum 2007}, with Dr. Stephen Wolfram in particular. 
+The author of this paper is very grateful for the editors and reviewers of \emph{Reliable Computing} for their tremendous help in shaping and accepting the previous version of this paper from unusual source, with managing editor, Prof. Rolph Baker Kearfott in particular.
 
 
 
