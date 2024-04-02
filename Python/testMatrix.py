@@ -290,11 +290,11 @@ class TestAdjugate (unittest.TestCase):
         self.verify(((1,2.0), (3,Fraction(1/2))), -11/2, ((Fraction(1/2),-2.0), (-3,1)))
 
     def testVarDblSize2(self):
-        ssMat = ((VarDbl(1,1e-3), VarDbl(2, 1e-2)), 
-                 (3,              VarDbl(4, 1e-1)))
-        det = VarDbl(1,1e-3)*VarDbl(4, 0.1) - VarDbl(2, 1e-2)*VarDbl(3)
-        ssAdj = ((VarDbl(4,1e-1),  VarDbl(-2,1e-2)), 
-                 (-3,              VarDbl( 1,1e-3)))
+        ssMat = ((VarDbl(1,1e-1), VarDbl(2, 1e-2)), 
+                 (VarDbl(3,1e-3), VarDbl(4, 1e-4)))
+        det = VarDbl(1,1e-1)*VarDbl(4,1e-4) - VarDbl(2,1e-2)*VarDbl(3,1e-3)
+        ssAdj = ((VarDbl( 4,1e-4), VarDbl(-2,1e-2)), 
+                 (VarDbl(-3,1e-3), VarDbl( 1,1e-1)))
         self.verify(ssMat, det, ssAdj)
 
 

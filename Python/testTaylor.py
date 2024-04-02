@@ -1,12 +1,14 @@
 import math
-import os
+import logging
 import numpy as np
+import os
 import unittest
 import sys
 
 from taylor import Taylor, LossUncertaintyException
 from varDbl import VarDbl, UncertaintyException, validate
 
+logger = logging.getLogger(__name__)
 
 taylor = Taylor()
 
@@ -585,11 +587,69 @@ class TestPolynominial (unittest.TestCase):
                     f.flush()
                     pow *= x
 
-            for i in range(50, 75):
+            for i in range(50, 75, 5):
                 calc(i / 100)
 
+    #@unittest.skip('Too slow')
+    def test_near_one_uncertainty(self):
+        LOG_PATH = './Python/Output/UncertaintyNearOne.log'
+        if os.path.isfile(LOG_PATH):
+            os.remove(LOG_PATH)
+        logging.basicConfig(filename=LOG_PATH, encoding='utf-8', level=logging.DEBUG,
+                            format='%(asctime)s:%(levelname)s:%(message)s')
+        
+        with open(f'./Python/Output/UncertaintyNearOne.txt', 'w') as f:
+            f.write('X\tInput Uncertainty\tOrder\tExpansion Value\tExpansion Uncertainty'
+                    '\tExpansion ULP\tError Value\tError Uncertainty\n')
 
+            def calc(x, noise):
+                try:
+                    val = 1/(1 - x)
+                except LossUncertaintyException as ex:
+                    logger.warning(f'At x={x} noise={noise} encounter LossUncertaintyException={ex}')
+                    return
+                except UncertaintyException as ex:
+                    logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
+                    return
+                
+                for order in range(1, taylor._momentum._maxOrder - 1):
+                    try:
+                        res = taylor.polynominal(x, [1] * (order + 1))
+                    except LossUncertaintyException as ex:
+                        logger.warning(f'At x={x} noise={noise} order={order} encounter LossUncertaintyException={ex}')
+                        break
+                    except UncertaintyException as ex:
+                        logger.warning(f'At x={x} noise={noise} order={order} encounter UncertaintyException={ex}')
+                        break
+                    err = res - val
+                    f.write(f'{x.value()}\t{noise}\t{order}\t{res.value()}\t{res.uncertainty()}'
+                            f'\t{math.ulp(res.value())}\t{err.value()}\t{err.uncertainty()}\n')
+                    f.flush()
+                    if abs(err.value()) <= math.ulp(res.value()):
+                          break                           
 
+            for x in (0.5, 0.6, 0.7):
+                for sign in (-1, 1):
+                    calc(VarDbl(sign*x), 0)
+                    for noise in (1e-3, 1e-2, 5e-2, 6e-2, 7e-2, 8e-2, 9e-2):
+                        calc(VarDbl(sign*x, noise), noise)
+
+    def test_near_one_uncertainty_bias(self):
+        '''
+        1/(1 - 6.000000e-01~1.000e-02)==2.501565e+00~6.266e-02 vs 2.5
+        1/(1 - 6.000000e-01~5.000e-02)==2.541054e+00~3.344e-01 vs 2.5
+        1/(1 - 6.000000e-01~7.000e-02)==2.585001e+00~5.070e-01 vs 2.5
+        1/(1 - 6.000000e-01~9.000e-02)==8.228626e+00~3.997e+01 vs 2.5
+        1/(1 - 6.000000e-01~1.000e-01)==1.478180e+06~2.099e+04 vs 2.5
+        '''
+        for noise in (0.01, 0.05, 0.09, 0.1):
+            for x in (0.6,):
+                res = 1/(1 - VarDbl(x, noise))
+                try:
+                    self.assertAlmostEqual(res.value(), 1/(1 - x))
+                    self.fail(f'x={x}: {res}=={1/(1 - x)}')
+                except AssertionError:
+                    print(f'1/(1 - {VarDbl(x, noise)})=={res} vs {1/(1 - x)}')
 
 
 class TestLibError (unittest.TestCase):
