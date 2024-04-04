@@ -56,15 +56,15 @@ class Taylor:
             var *= varDbl.VarDbl( 1 /input.value() /input.value() )
         varn = varDbl.VarDbl(var)
         for n in range(2, len(s1dTaylor), 2):
-            newValue = s1dTaylor[n] * self._momentum.factor(n)
+            newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
             newVariance = varDbl.VarDbl()
             for j in range(1, n):
-                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
+                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
             for j in range(2, n, 2):
-                newVariance -= s1dTaylor[j] * self._momentum.factor(j) * \
+                newVariance -= varn * s1dTaylor[j] * self._momentum.factor(j) * \
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
-            value += newValue * varn
-            variance += newVariance * varn
+            value += newValue
+            variance += newVariance
             if variance.variance() > variance.value() * self._variance_threshold:
                 raise LossUncertaintyException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
@@ -111,15 +111,17 @@ class Taylor:
         var = varDbl.VarDbl(input.variance())
         varn = varDbl.VarDbl(var)
         for n in range(2, 2*exp + 1, 2):
-            newValue = s1dTaylor[n] * self._momentum.factor(n)
+            newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
             newVariance = varDbl.VarDbl()
             for j in range(1, n):
-                newVariance += s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
+                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
             for j in range(2, n, 2):
-                newVariance -= s1dTaylor[j] * self._momentum.factor(j) * \
+                newVariance -= varn * s1dTaylor[j] * self._momentum.factor(j) * \
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
-            value += newValue * varn
-            variance += newVariance * varn
+            value += newValue
+            variance += newVariance
+            if (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
+                raise varDbl.UncertaintyException(value, variance)
             varn *= var
             if varn.value() == 0:
                 break

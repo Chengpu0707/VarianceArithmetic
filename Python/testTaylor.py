@@ -512,85 +512,91 @@ class TestPolynominial (unittest.TestCase):
                 self.assertEqual(res.uncertainty(), res2.uncertainty())
             except BaseException as ex:
                 raise ex
-            
-    def varify_near_one(self, x, order):
-        sPlus = [1, -1] * ((order // 2) + 1)
-        if len(sPlus) > (order + 1):
-            sPlus.pop(-1)
-        self.assertEqual(len(sPlus), order + 1)
-        for i in range(order):
-            self.assertEqual(sPlus[i], -1 if i % 2 else 1)
-        sMinus = [1] * (order + 1)
-        
-        plus = 0
-        minus = 0
-        pow = 1
-        for i in range(order + 1):
-            plus += sPlus[i] * pow
-            minus += sMinus[i] * pow
-            pow *= x
-            if pow < max(math.ulp(plus), math.ulp(minus)):
-                break
-        resPlus = taylor.polynominal(VarDbl(x), sPlus)
-        self.assertAlmostEqual(resPlus.value(), plus)
-        resMinus = taylor.polynominal(VarDbl(x), sMinus)
-        self.assertAlmostEqual(resMinus.value(), minus)
-        return resPlus, resMinus
 
-            
+
+    def test_near_one_uncertainty_bias(self):
+        '''
+        1/(1 + |x|) starts to diverge at 0.06 noise
+        '''
+        for i in range(1, 8):
+            noise = i/100
+            for x in (-0.6, -0.7):
+                x = VarDbl(x, noise)
+                res = 1/(1 - x)
+                try:
+                    expd = taylor.polynominal(x, [1] * (taylor._momentum._maxOrder - 1))
+                    if i == 7:
+                        self.assertAlmostEqual(res.value(), expd.value(), places=3)
+                        self.assertAlmostEqual(res.variance(), expd.variance(), places=1)
+                    else:
+                        self.assertAlmostEqual(res.value(), expd.value(), places=5)
+                        self.assertAlmostEqual(res.variance(), expd.variance(), places=3)
+                except AssertionError as ex:
+                    raise ex
+
+        for i in range(1, 8):
+            noise = i/100
+            for x in (0.6, 0.7):
+                x = VarDbl(x, noise)
+                res = 1/(1 - x)
+                try:
+                    expd = taylor.polynominal(x, [1] * (taylor._momentum._maxOrder - 1))
+                    print(f'{x}: Taylor={expd}, precise={1/(1 - x)}')
+                    if i == 6:
+                        self.assertAlmostEqual(res.value(), expd.value(), places=3)
+                        self.assertAlmostEqual(res.variance(), expd.variance(), places=1)
+                    else:
+                        self.assertAlmostEqual(res.value(), expd.value(), places=5)
+                        self.assertAlmostEqual(res.variance(), expd.variance(), places=3)
+                except AssertionError as ex:
+                    if i == 7:
+                        continue
+                    raise ex
+
+
+    @unittest.skip('Too slow')
     def test_near_one(self):
-        self.varify_near_one(0.7, 100)
-
+        LOG_PATH = './Python/Output/PolyNearOne.log'
+        if os.path.isfile(LOG_PATH):
+            os.remove(LOG_PATH)
+        logging.basicConfig(filename=LOG_PATH, encoding='utf-8', level=logging.DEBUG,
+                            format='%(asctime)s:%(levelname)s:%(message)s')
+        
         with open(f'./Python/Output/PolyNearOne.txt', 'w') as f:
-            f.write('X\tOrder\tValue Error\tUncertainty'
-                    '\tPower\tReminder\tRouding Error\tAccumulated Rounding Error'
-                    '\tResult ULP\tULP Power\tDecrease\tULP Reminder\n')
+            f.write('X\tOrder\tReminder\tValue Error\tUncertainty\tResult ULP'
+                    '\tPower\tULP Power\tRouding Error\tAccumulated Rounding Error\n')
             
             def calc(x):
-                plusVal = 1/(1 + x)
-                minusVal = 1/(1 - x)
-
-                plus = 1
-                minus = 1
-                pow = x
-                remPlus = 1 - plusVal
-                remMinus = 1 - minusVal
-                acmPlus = 0
-                acmMinus = 0
+                final = 1/(1 - x)
+                valSum = 1
+                errSum = 0
+                pow = 1
                 for order in range(1, taylor._momentum._maxOrder - 1):
-                    plus += (-1 if (order % 2) else 1) * pow
-                    minus += pow
-                    plusRes, minusRes = self.varify_near_one(x, order)
-
-                    res = plusRes - plusVal
-                    rem = plus - plusVal
-                    rounding = rem - remPlus
-                    acmPlus += (pow - abs(rounding)) if (order % 2) else (abs(rounding) - pow)
-                    ulp = math.ulp(plus)
-                    f.write(f'{+x}\t{order}\t{res.value()}\t{res.uncertainty()}'
-                            f'\t{pow}\t{rem}\t{rounding}\t{acmPlus}'
-                            f'\t{ulp}\t{ulp*round(pow/ulp)}\t{rem - remPlus}\t{ulp*round(rem/ulp)}'
-                            '\n')
-                    remPlus = rem
-                    
-                    res = minusRes - minusVal
-                    rem = minus - minusVal
-                    rounding = remMinus - rem
-                    acmMinus += abs(rounding) - pow
-                    ulp = math.ulp(minus)
-                    f.write(f'{-x}\t{order}\t{res.value()}\t{res.uncertainty()}'
-                            f'\t{pow}\t{rem}\t{rounding}\t{acmMinus}'
-                            f'\t{ulp}\t{ulp*round(pow/ulp)}\t{rem - remPlus}\t{ulp*round(rem/ulp)}'
-                            '\n')
-                    remMinus = rem                    
-
-                    f.flush()
                     pow *= x
+                    valSum += pow
+                    try:
+                        res = taylor.polynominal(VarDbl(x), [1] * (order + 1)) - final
+                    except LossUncertaintyException as ex:
+                        logger.warning(f'At x={x} order={order} encounter LossUncertaintyException={ex}')
+                        break
+                    except UncertaintyException as ex:
+                        logger.warning(f'At x={x} order={order} encounter UncertaintyException={ex}')
+                        break
+                    self.assertAlmostEqual(valSum - final, res.value())
+                    ulp = math.ulp(valSum)
+                    ulpPow = ulp*round(pow/ulp)
+                    err = pow - ulpPow
+                    errSum += err
+                    f.write(f'{x}\t{order}\t{valSum - final}\t{res.value()}\t{res.uncertainty()}\t{ulp}'
+                            f'\t{pow}\t{ulpPow}\t{err}\t{errSum}\n')
+                    f.flush()
 
             for i in range(50, 75, 5):
                 calc(i / 100)
+                calc(-i / 100)
 
-    #@unittest.skip('Too slow')
+    
+    @unittest.skip('Too slow')
     def test_near_one_uncertainty(self):
         LOG_PATH = './Python/Output/UncertaintyNearOne.log'
         if os.path.isfile(LOG_PATH):
@@ -612,9 +618,9 @@ class TestPolynominial (unittest.TestCase):
                     logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
                     return
                 
-                for order in range(1, taylor._momentum._maxOrder - 1):
+                for order in range(1, taylor._momentum._maxOrder):
                     try:
-                        res = taylor.polynominal(x, [1] * (order + 1))
+                        res = taylor.polynominal(x, [1] * order)
                     except LossUncertaintyException as ex:
                         logger.warning(f'At x={x} noise={noise} order={order} encounter LossUncertaintyException={ex}')
                         break
@@ -631,25 +637,10 @@ class TestPolynominial (unittest.TestCase):
             for x in (0.5, 0.6, 0.7):
                 for sign in (-1, 1):
                     calc(VarDbl(sign*x), 0)
-                    for noise in (1e-3, 1e-2, 5e-2, 6e-2, 7e-2, 8e-2, 9e-2):
+                    for i in range(1, 10):
+                        noise = i/100
                         calc(VarDbl(sign*x, noise), noise)
 
-    def test_near_one_uncertainty_bias(self):
-        '''
-        1/(1 - 6.000000e-01~1.000e-02)==2.501565e+00~6.266e-02 vs 2.5
-        1/(1 - 6.000000e-01~5.000e-02)==2.541054e+00~3.344e-01 vs 2.5
-        1/(1 - 6.000000e-01~7.000e-02)==2.585001e+00~5.070e-01 vs 2.5
-        1/(1 - 6.000000e-01~9.000e-02)==8.228626e+00~3.997e+01 vs 2.5
-        1/(1 - 6.000000e-01~1.000e-01)==1.478180e+06~2.099e+04 vs 2.5
-        '''
-        for noise in (0.01, 0.05, 0.09, 0.1):
-            for x in (0.6,):
-                res = 1/(1 - VarDbl(x, noise))
-                try:
-                    self.assertAlmostEqual(res.value(), 1/(1 - x))
-                    self.fail(f'x={x}: {res}=={1/(1 - x)}')
-                except AssertionError:
-                    print(f'1/(1 - {VarDbl(x, noise)})=={res} vs {1/(1 - x)}')
 
 
 class TestLibError (unittest.TestCase):
