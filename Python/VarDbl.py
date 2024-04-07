@@ -59,7 +59,8 @@ class VarDbl:
         
     def __init__(self, value: typing.Union[float, int]=0, 
                  uncertainty: typing.Optional[float]=None,
-                 bUncertaintyAsVariance=False) -> None:
+                 bUncertaintyAsVariance=False,
+                 forceIntValueAsFloat=True) -> None:
         '''
         Intialize with "value" and "uncertainty".
         "uncertainty" will be absolute, and limited between 
@@ -80,7 +81,7 @@ class VarDbl:
                 return
             if type(value) == int:
                 if value == int(float(value)):
-                    self._value = value
+                    self._value = float(value) if forceIntValueAsFloat else value
                     self._variance = 0.0
                     return
                 value = float(value)
@@ -90,7 +91,7 @@ class VarDbl:
             raise ValueException(value, "__init__")
         if not math.isfinite(variance):
             raise UncertaintyException(value, uncertainty, "__init__")
-        self._value = value
+        self._value = float(value) if forceIntValueAsFloat else value
         self._variance = float(variance)
 
     def __str__(self) -> str:
