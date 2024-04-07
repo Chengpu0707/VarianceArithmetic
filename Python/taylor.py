@@ -37,7 +37,8 @@ class Taylor:
         else:
             self._variance_threshold = uncertainty_precision_threshold * uncertainty_precision_threshold
 
-    def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool):
+    def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
+                 enableStabilityTruncation=True):
         '''
         1d Taylor expansion.
         @return:            The output varDbl.VarDbl using Taylor expansion
@@ -73,6 +74,11 @@ class Taylor:
             varn *= var
             if varn.value() == 0:
                 break
+            if enableStabilityTruncation:
+                unc = variance.value()*Taylor.TAU
+                if (math.sqrt(abs(newVariance.value())) < unc) and \
+                        (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
+                    break
         if outPrec:
             value *= s1dTaylor[0]
             variance *= s1dTaylor[0] * s1dTaylor[0]

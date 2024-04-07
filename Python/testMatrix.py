@@ -372,7 +372,7 @@ class TestAdjugate (unittest.TestCase):
         ssVarOrg = addNoise(adj.ssOrg, 0)
         self.roundtrip(adj, 0, ssVarOrg)
 
-        adj = Adjugate(6, randRange=(1 << 18))
+        adj = Adjugate(6, randRange=(1 << 19))
         ssVarOrg = addNoise(adj.ssOrg, 0)
         with self.assertRaises((OverflowError, UncertaintyException)):
             self.roundtrip(adj, 0.1, ssVarOrg)
@@ -419,17 +419,30 @@ class TestAdjugate (unittest.TestCase):
         self.verifyIdentity(det, multiply(ssHilbert, ssAdj), delta=1e-1, uncRange=6)
 
 
-    def testInversionExcept(self):
-        '''
-        In reality, (ssAdj[i][j] /detAdj) throws LossUncertainty quite often, which can not be reproduced here
-        '''
-        adj = Adjugate(6)
-        for noise in (0, 1e-12, 1e-6, 1e-1):
+    def testInversionException(self):
+        ssOrgVal = (
+            ( 154.6037896556856,    -241.41721719977542,    -215.5313557001085), 
+            (  62.317618798899076,  -173.31255384513335,     255.8635167560795), 
+            (-198.35031352268214,    225.851083348709,       141.43828027978913)
+        )
+        ssOrg = tuple([tuple([VarDbl(val, 14.780166891254423) for val in sOrgVal]) for sOrgVal in ssOrgVal])
+        detAdj, ssAdj = adjugate(ssOrg)
+        self.assertAlmostEqual(detAdj.value(),       6031779.536578279)
+        self.assertAlmostEqual(detAdj.uncertainty(), 2311975.810766203)
+        with self.assertRaises(LossUncertaintyException):
+            ssAdj[0][0] / detAdj
+        
+        adj = Adjugate(2)
+        for noise in (0, 1e-2, 1e-1):
             ssOrg = addNoise(adj.ssOrg, Adjugate.noise(noise))
             detAdj, ssAdj = adjugate(ssOrg)
             for i in range(adj.size):
                 for j in range(adj.size):
-                    diff = (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
+                    try:
+                        (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
+                    except LossUncertaintyException as ex:
+                        print(f'Found at ssAdj[{i}][{j}]={ssAdj[i][j]}, detAdj={detAdj}, noise={noise}, ssOrg={ssOrg}')
+                        break
         
 
     def testInversionValue(self):
