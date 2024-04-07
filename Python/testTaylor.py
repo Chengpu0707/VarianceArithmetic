@@ -555,7 +555,7 @@ class TestPolynominial (unittest.TestCase):
 
 
     @unittest.skip('Too slow')
-    def test_near_one(self):
+    def test_near_one_precise(self):
         LOG_PATH = './Python/Output/PolyNearOne.log'
         if os.path.isfile(LOG_PATH):
             os.remove(LOG_PATH)
@@ -595,9 +595,105 @@ class TestPolynominial (unittest.TestCase):
                 calc(i / 100)
                 calc(-i / 100)
 
+
+    def calc_near_one_imprecise(self, x, noise, f=None):
+        try:
+            val = 1/(1 - x)
+        except LossUncertaintyException as ex:
+            logger.warning(f'At x={x} noise={noise} encounter LossUncertaintyException={ex}')
+            return
+        except UncertaintyException as ex:
+            logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
+            return
+        
+        stbUnc = False
+        byInc = False
+        byLSV = False
+        terminated = False
+        byErr = False
+        byRem = False
+
+        prevVal = 0
+        prevUnc = 0
+        prevStbUnc = False
+        prevByInc = False
+        prevByLSV = False
+        prevTerminated = False
+        prevByErr = False
+        prevByRem = False
+        for order in range(1, taylor._momentum._maxOrder):
+            try:
+                res = taylor.polynominal(x, [1] * order)
+            except LossUncertaintyException as ex:
+                logger.warning(f'At x={x} noise={noise} order={order} encounter LossUncertaintyException={ex}')
+                break
+            except UncertaintyException as ex:
+                logger.warning(f'At x={x} noise={noise} order={order} encounter UncertaintyException={ex}')
+                break
+            err = res - val
+
+            unc = res.uncertainty()
+            incVal = res.value() - prevVal 
+            incUnc = unc - prevUnc
+            prevVal = res.value()
+            prevUnc = unc
+
+            unc *= Taylor.TAU
+            uncVal = val.uncertainty()*Taylor.TAU
+            stbUnc = abs(incUnc) < unc
+            byInc = (abs(incVal) < unc)
+            byLSV = (abs(incVal) <= math.ulp(res.value()))
+            terminated = stbUnc and (byInc or byLSV)
+            byErr = (abs(err.value()) < uncVal)
+            byRem = (abs(err.value()) < math.ulp(val.value()))
+            if f:
+                f.write(f'{x.value()}\t{noise}\t{order}\t{res.value()}\t{res.uncertainty()}'
+                        f'\t{math.ulp(res.value())}'
+                        f'\t{incVal}\t{incUnc}\t{err.value()}\t{err.uncertainty()}'
+                        f'\t{stbUnc != prevStbUnc}'
+                        f'\t{byInc != prevByInc}'
+                        f'\t{byLSV != prevByLSV}'
+                        f'\t{terminated != prevTerminated}'
+                        f'\t{byErr != prevByErr}'
+                        f'\t{byRem != prevByRem}'
+                        '\n')
+                f.flush()
+            prevStbUnc = stbUnc
+            prevByInc = byInc
+            prevByLSV = byLSV
+            prevTerminated = terminated
+            prevByErr = byErr
+            prevByRem = byRem
+
+            if stbUnc and byInc and byLSV and byErr and byRem:
+                self.assertAlmostEqual(unc, val.uncertainty()*Taylor.TAU)
+                break  
+        return stbUnc, byErr, byInc, byLSV, byRem 
+        
+    def test_near_one_imprecise_test(self):
+        res = 1/VarDbl(0.4, 0.06)
+        self.assertAlmostEqual(res.value(), 2.5605577330563207)
+        self.assertAlmostEqual(res.uncertainty(), 0.41519016618465204)
+        res = 1/VarDbl(0.3, 0.06)
+        self.assertAlmostEqual(res.value(), 3.4874748968790157)
+        self.assertAlmostEqual(res.uncertainty(), 0.8333325278975393)
+
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(0.7), 0), 
+                              (True, False, True, True, False))
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(0.7, 0.01), 0.01), 
+                              (True, True, True, True, False))
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(0.7, 0.01), 0.04), 
+                              (True, True, True, True, False))
+        
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(-0.7), 0), 
+                              (True, False, True, True, False))
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(-0.7, 0.01), 0.01), 
+                              (True, True, True, True, True))
+        self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(-0.7, 0.01), 0.04), 
+                              (True, True, True, True, True))
     
-    @unittest.skip('Too slow')
-    def test_near_one_uncertainty(self):
+    @unittest.skip('10 minutes slow')
+    def test_near_one_imprecise(self):
         LOG_PATH = './Python/Output/UncertaintyNearOne.log'
         if os.path.isfile(LOG_PATH):
             os.remove(LOG_PATH)
@@ -605,41 +701,18 @@ class TestPolynominial (unittest.TestCase):
                             format='%(asctime)s:%(levelname)s:%(message)s')
         
         with open(f'./Python/Output/UncertaintyNearOne.txt', 'w') as f:
-            f.write('X\tInput Uncertainty\tOrder\tExpansion Value\tExpansion Uncertainty'
-                    '\tExpansion ULP\tError Value\tError Uncertainty\n')
-
-            def calc(x, noise):
-                try:
-                    val = 1/(1 - x)
-                except LossUncertaintyException as ex:
-                    logger.warning(f'At x={x} noise={noise} encounter LossUncertaintyException={ex}')
-                    return
-                except UncertaintyException as ex:
-                    logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
-                    return
-                
-                for order in range(1, taylor._momentum._maxOrder):
-                    try:
-                        res = taylor.polynominal(x, [1] * order)
-                    except LossUncertaintyException as ex:
-                        logger.warning(f'At x={x} noise={noise} order={order} encounter LossUncertaintyException={ex}')
-                        break
-                    except UncertaintyException as ex:
-                        logger.warning(f'At x={x} noise={noise} order={order} encounter UncertaintyException={ex}')
-                        break
-                    err = res - val
-                    f.write(f'{x.value()}\t{noise}\t{order}\t{res.value()}\t{res.uncertainty()}'
-                            f'\t{math.ulp(res.value())}\t{err.value()}\t{err.uncertainty()}\n')
-                    f.flush()
-                    if abs(err.value()) <= math.ulp(res.value()):
-                          break                           
+            f.write('X\tInput Uncertainty\tOrder\tExpansion Value\tExpansion Uncertainty\tExpansion ULP'
+                    '\tValue Increment\tUncertainty Increment\tError Value\tError Uncertainty'
+                    '\tStable Uncertainty\tBy Increment\tBy LSV\tTerminated\tBy Error\tBy Reminder\n')
 
             for x in (0.5, 0.6, 0.7):
                 for sign in (-1, 1):
-                    calc(VarDbl(sign*x), 0)
+                    self.calc_near_one_imprecise(VarDbl(sign*x), 0, f)
                     for i in range(1, 10):
                         noise = i/100
-                        calc(VarDbl(sign*x, noise), noise)
+                        self.calc_near_one_imprecise(VarDbl(sign*x, noise), noise, f)
+                        noise = i/1000
+                        self.calc_near_one_imprecise(VarDbl(sign*x, noise), noise, f)
 
 
 

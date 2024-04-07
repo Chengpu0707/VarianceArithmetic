@@ -26,6 +26,8 @@ class LossUncertaintyException (Exception):
 
 
 class Taylor:
+    TAU = 7.18e-7   # The stability test 
+
     __slots__ = ('_variance_threshold', '_momentum')
 
     def __init__(self, uncertainty_precision_threshold:float=None) -> None:

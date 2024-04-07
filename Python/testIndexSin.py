@@ -6,6 +6,7 @@ from indexSin import IndexSin, RegressiveSin
 from varDbl import VarDbl
 from histo import Stat
 
+
 class TestIndexSin (unittest.TestCase):
 
     def test_neg_rem(self):
@@ -150,8 +151,8 @@ class TestIndexSin (unittest.TestCase):
 
 class TestIndexSinVsLibSin (unittest.TestCase):
 
-    @unittest.skip('Too slow')
-    def testSin(self):
+    @unittest.skip('Too slow and no longer needed')
+    def testSinDiff(self):
         with open(f'./Python/Output/SinDiff.txt', 'w') as f:
             f.write('Order\tFreq\tX\tIndex Sin\tValue Error\tUncertainty\n')
             for order in range(4, 8):
@@ -168,27 +169,56 @@ class TestIndexSinVsLibSin (unittest.TestCase):
                     err = VarDbl(math.sin(x)) - VarDbl(sin.sin(i))
                     f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')  
 
-        with open(f'./Python/Output/SinDiff_Stat.txt', 'w') as f:
-            f.write('Order\tPart\tCount\tMin\tMax\tAbsMax\tMean\tDev\n')
-            for order in range(4, 17):
+    @unittest.skip('One day slow')
+    def testSinDiffStat(self):
+        FILE = './Python/Output/SinDiff_Stat.txt'
+        minOrder = 3
+        if os.path.isfile(FILE):
+            with open(FILE) as f:
+                for line in f:
+                    sWord = line.split('\t')
+                    if (sWord[1] != 'Library') or (sWord[2] != 'Tan'):
+                        continue
+                    minOrder = int(sWord[0])
+
+        with open(FILE, 'a' if minOrder > 3 else 'w') as f:
+            if minOrder == 3:
+                f.write('Order\tPart\tType\tCount\tMin\tMax\tMean\tDev\n')
+            for order in range(minOrder + 1, 16):
                 sin = IndexSin(order)
                 size = 1 << order
 
-                stat = Stat()
-                for i in range(size >> 3):
+                statVal = Stat()
+                statNrm = Stat()
+                for i in range(1, size >> 3):
+                    err = VarDbl(sin.sin(i))**2 + VarDbl(sin.cos(i))**2 - 1
+                    statVal.accum( err.value() )
+                    statNrm.accum( err.value() / err.uncertainty() )
+                f.write(f'{order}\tIndexed\tValue'
+                        f'\t{statVal.count()}\t{statVal.min()}\t{statVal.max()}\t{statVal.mean()}\t{statVal.dev()}\n')
+                f.write(f'{order}\tIndexed\tNormalized'
+                        f'\t{statNrm.count()}\t{statNrm.min()}\t{statNrm.max()}\t{statNrm.mean()}\t{statNrm.dev()}\n')
+
+                statVal = Stat()
+                statNrm = Stat()
+                statSin = Stat()
+                statTan = Stat()
+                for i in range(size**2 //2):
                     x = i / size * math.pi
                     err = VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
-                    stat.accum( err.value() / err.uncertainty() )
-                absMax = max(abs(stat.min()), abs(stat.max()))
-                f.write(f'{order}\tIndexed\t{stat.count()}\t{stat.min()}\t{stat.max()}\t{absMax}\t{stat.mean()}\t{stat.dev()}\n')
-
-                stat = Stat()
-                for i in range(size >> 3, size**2 //2):
-                    x = i / size * math.pi
-                    stat.accum( math.sin(x) - sin.sin(i) )
-                absMax = max(abs(stat.min()), abs(stat.max()))
-                f.write(f'{order}\tLib\t{stat.count()}\t{stat.min()}\t{stat.max()}\t{absMax}\t{stat.mean()}\t{stat.dev()}\n')
-
+                    statVal.accum( err.value() )
+                    statNrm.accum( err.value() / err.uncertainty() )
+                    statSin.accum( math.sin(x) - sin.sin(i) )
+                    if sin.sin(i):
+                        statTan.accum( 1/math.tan(x) - sin.cos(i)/sin.sin(i) )
+                f.write(f'{order}\tLibrary\tValue'
+                        f'\t{statVal.count()}\t{statVal.min()}\t{statVal.max()}\t{statVal.mean()}\t{statVal.dev()}\n')
+                f.write(f'{order}\tLibrary\tNormalized'
+                        f'\t{statNrm.count()}\t{statNrm.min()}\t{statNrm.max()}\t{statNrm.mean()}\t{statNrm.dev()}\n')
+                f.write(f'{order}\tLibrary\tSin'
+                        f'\t{statSin.count()}\t{statSin.min()}\t{statSin.max()}\t{statSin.mean()}\t{statSin.dev()}\n')
+                f.write(f'{order}\tLibrary\tTan'
+                        f'\t{statTan.count()}\t{statTan.min()}\t{statTan.max()}\t{statTan.mean()}\t{statTan.dev()}\n')
                 f.flush()
        
 

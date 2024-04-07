@@ -419,7 +419,7 @@ class TestAdjugate (unittest.TestCase):
         self.verifyIdentity(det, multiply(ssHilbert, ssAdj), delta=1e-1, uncRange=6)
 
 
-    def testInversion(self):
+    def testInversionExcept(self):
         '''
         In reality, (ssAdj[i][j] /detAdj) throws LossUncertainty quite often, which can not be reproduced here
         '''
@@ -430,6 +430,38 @@ class TestAdjugate (unittest.TestCase):
             for i in range(adj.size):
                 for j in range(adj.size):
                     diff = (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
+        
+
+    def testInversionValue(self):
+        '''
+        Calculation for (((1, 1e-1), (2, 1e-2)), ((3, 1e-3), (4, 1e-4)))^-1
+        '''
+        common = ((1**2)*((1e-4)**2) + (4**2)*((1e-1)**2) + (2**2)*((1e-3)**2) + (3**2)*((1e-2)**2))/(2**4)
+        self.assertAlmostEqual(common, 0.010056500625000003)
+
+        sX = [[4/-2 - 1/(2**2)*(1e-4)**2, -2/-2 - -3/(2**2)*(1e-2)**2], 
+              [-3/-2 - -2/(2**2)*(1e-3)**2, 1/-2 - 4/(2**2)*(1e-1)**2]]
+        self.assertAlmostEqual(sX[0][0], -2.0000000025)
+        self.assertAlmostEqual(sX[0][1], 1.000075)
+        self.assertAlmostEqual(sX[1][0], 1.5000005)
+        self.assertAlmostEqual(sX[1][1], -0.51)
+
+        sdX = [
+            [ math.sqrt(((1e-4)**2)*((1/(2**2))+4*1*4/(2**3))+(4**2)*common),
+              math.sqrt(((1e-2)**2)*((1/(2**2))+4*2*3/(2**3))+(2**2)*common) ],
+            [ math.sqrt(((1e-3)**2)*((1/(2**2))+4*2*3/(2**3))+(3**2)*common),
+              math.sqrt(((1e-1)**2)*((1/(2**2))+4*1*4/(2**3))+(1**2)*common) ]
+        ]
+        self.assertAlmostEqual(sdX[0][0], 0.40112844887890964)
+        self.assertAlmostEqual(sdX[0][1], 0.2013727948358467)
+        self.assertAlmostEqual(sdX[1][0], 0.30085171700523833)
+        self.assertAlmostEqual(sdX[1][1], 0.1804342002642515)
+
+        dir = VarDbl(1, 0.1) / VarDbl(-2, 0.161)
+        self.assertAlmostEqual(dir.value(), -0.5033051985276559)
+        self.assertAlmostEqual(dir.uncertainty(), 0.06526322323589419)
+
+
 
 
 
