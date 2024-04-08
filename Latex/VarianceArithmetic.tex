@@ -118,7 +118,7 @@ If Formula \eqref{eqn: int num calc} is carried out using conventional floating-
 13316075197586562. - 13316075197586560. = 2. = 2.0000000000000000;
 \end{multline}
 \begin{enumerate}
-\item  The multiplication results exceed the maximal significance of the 64-bit IEEE floating-point representation; so they are rounded off, generating rounding errors;
+\item  The multiplication results exceed the maximal significance of the 64-bit IEEE floating-point representation. They are rounded off, generating rounding errors;
 \item  The normalization of the subtraction result amplifies the rounding error to most significant bit (MSB) by padding zeros.
 \end{enumerate}
 
@@ -317,13 +317,7 @@ It provides a summary and some discussion for variance arithmetic.
 
 The statistical precision $P(x) = \delta x/|x|$ represents the reliable information content of a measurement statistically, with finer or smaller statistical precision means higher reliability and better reproducibility of the measurement \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
 $P(x)$ has an upper bound of $1$.
-When $1 \leq P(x)$:
-\begin{itemize}
-\item Either $\delta x$ is too coarse to determine the actual value of $x$, 
-
-\item Or $x \pm \delta x$ is a measurement of $0$.
-\end{itemize}
-If during a calculation, if $P(x)$ becomes larger, the value becomes less precise by loosing precision.
+When $1 \leq P(x)$, either $\delta x$ is too coarse to determine the actual value of $x$, or $x \pm \delta x$ is a measurement of $0$.
 
 The inputs to variance arithmetic should obey the \emph{uncorrelated uncertainty assumption} \cite{Prev_Precision_Arithmetic}, which means that the uncertainties of any two different inputs can be regarded as uncorrelated of each other. 
 This assumption is consistent with the common methods in processing experimental data \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, such as the common knowledge or belief that precision improves with the count $n$ as $1 / \sqrt{n}$ during averaging.
@@ -438,7 +432,7 @@ P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2;
 
 \begin{figure}
 \centering
-\includegraphics[height=2.5in]{Prec_Add_ErrDist.png} 
+\includegraphics[height=2.5in]{Prec_Add_ErrDist.png}
 \captionof{figure}{
 The probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
 The legend shows $n$.
@@ -1125,7 +1119,7 @@ As some special cases for Formula \eqref{eqn: power precision}, Formula \eqref{e
 \end{align}
 
 
-\subsubsection{Convergence and Termination of Taylor Expansion}
+\subsubsection{Convergence and Truncation of Taylor Expansion}
 
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\lambda \sigma)$.
@@ -1142,10 +1136,12 @@ Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are
 \item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
 
 \item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
-If the precision of the uncertainty becomes coarser than $1/\sigma$, the result should be invalidated.
+If the precision of the uncertainty becomes worse than $1/\sigma$, the result should be invalidated as \emph{unreliable variance}.
 
-\item If within the range of $(x - \sigma \delta x, x + \sigma \delta x)$ an analytic function is monotonic, each term in either Formula \eqref{eqn: Taylor 1d mean} or \eqref{eqn: Taylor 1d variance} should be smaller than its corresponding previous term.
-Otherwise, the corresponding sum will diverge, and the result should be invalidated.
+\item Due to digital limitation of conventional floating-point representation, $\zeta(2n)$ can only be calculated to limited $2n$.
+If within the limit, the expansion can not be truncated reliably, the result should be invalidated as \emph{practical unstable}.
+
+\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
 
 \end{itemize}
 Variance arithmetic may reject an calculation near a zero or a pole when the variance calculation diverges or becomes uncertain.
@@ -1218,7 +1214,7 @@ For example:
   &+ 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber
 \end{align}
 
-Dependency trading comes with a price: variance calculation is generally much more complex than the value calculation.
+Dependency trading comes with a price: variance calculation is generally much more complex than value calculation.
 
 
 \subsection{Traditional Execution and Dependency Problem}
@@ -1268,7 +1264,7 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 \label{tbl: dependency example}
 \end{table}
 
-Dependency tracing requires analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
+Dependency tracing requires an analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
 It conflicts with traditional numerical executions on analytic functions:
 \begin{itemize}
 
@@ -1539,17 +1535,17 @@ x < 0: & 1 - |x| + |x|^2 - |x|^3 + \dots
 \label{eqn: Taylor expansion reminder}
 r(N) & = \left| e(N) - \frac{1}{1-x} \right|;
 \end{align}
-Instead of a reminder estimator, the precise reminder $r(N)$ is calculated as Formula \eqref{eqn: Taylor expansion reminder}.
+Instead of a reminder estimator, the true reminder $r(N)$ is calculated as Formula \eqref{eqn: Taylor expansion reminder}.
 
 
 
-\subsection{Rounding Errors}
+\subsection{Rounding Error}
 
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.4in]{Taylor_Expansion_Uncertainty.png} 
 \captionof{figure}{
-The absolute reminders and result uncertainties for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The reminders and result uncertainties for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
 The y-axis is for either absolute reminder or expansion uncertainty.
 In the legend,  
 \textit{Reminder Value} is the value of Formula \eqref{eqn: Taylor expansion reminder}, 
@@ -1563,7 +1559,7 @@ and \textit{Expansion LSV} is the $LSV$ of the value of Formula \eqref{eqn: Tayl
 \centering
 \includegraphics[height=2.4in]{Taylor_Expansion.png} 
 \captionof{figure}{
-The absolute reminders for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
+The reminders for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
 The y-axis is for absolute reminder.
 In the legend,  
 \textit{Reminder Value} is the value of Formula \eqref{eqn: Taylor expansion reminder}, 
@@ -1577,8 +1573,8 @@ $|x|^N$ is the absolute expansion term at Taylor expansion order $N$,
 
 
 Figure \ref{fig: Taylor_Expansion_Uncertainty} shows $r(N)$ and the corresponding uncertainties for $x = \pm 0.6, \pm 0.7$.
-For $x = \pm 0.6, 0.7$, after $r(N)$ reach $LSV$ of $1/(1-x)$, the $LSV$ equal the corresponding expansion uncertainties, respectively. 
-For $x = -0.7$, $r(N)$ does not reach $LSV$, leaving the least two significant bits incorrect, which shows that traditional numerical Taylor expansion is less accurate than its theoretical claim.
+For $x = \pm 0.6, 0.7$, after $r(N)$ reaches $LSV$ of $1/(1-x)$, the $LSV$ equals the corresponding expansion uncertainties, respectively. 
+For $x = -0.7$, $r(N)$ does not reach $LSV$, leaving the least two significant bits incorrect, which shows that traditional numerical Taylor expansion can be less accurate than its theoretical claim.
 
 \begin{table}[H]
 \centering
@@ -1627,14 +1623,13 @@ When an integer is repeatedly divided by $2$ and after each division the result 
 
 \item $x^N$ approaches $LSV$ faster for $x = 0.6$ than that for $x = 0.7$, to prevent the pattern in Table \ref{tbl: rounding pattern} from forming, so that the accumulated rounding errors does not cause the result value error beyond the least significant bit of significand.
 
-\item The negative sign in Formula \eqref{eqn: Taylor expansion} for $x =-0.7$ prevents the pattern in Table \ref{tbl: rounding pattern} from forming, and determines that the accumulated rounding error for $x =-0.7$ is smaller than that for $x = +0.7$.
+\item The negative sign in Formula \eqref{eqn: Taylor expansion} for $x =-0.7$ prevents the pattern in Table \ref{tbl: rounding pattern} from forming, so that the accumulated rounding error for $x =-0.7$ is smaller than that for $x = +0.7$.
 
-\item When the $LSV \ll |x|^N$, the value pattern in Table \ref{tbl: rounding pattern} is random.
-It means that rounding errors cannot accumulate steadily before $|x|^N$ reaches near the $LSV$.
+\item When the $LSV \ll |x|^N$, the value pattern in Table \ref{tbl: rounding pattern} is random, so that rounding errors cannot accumulate steadily before $|x|^N$ reaches near the $LSV$.
 
 \end{enumerate}
-Floating-point rounding errors is a major source of value errors for Taylor expansion.
-To be free from such rounding errors, the convergence input range for an expansion has to be smaller than the theoretical input range without considering  floating-point rounding errors, e.g., for $1/(1 -|x|)$, $|x|$ has to be smaller than $0.7$.
+Floating-point rounding error is a major source of value errors for Taylor expansion.
+To be free from such rounding errors, the input range for an expansion has to be smaller than the convergence input range, e.g., for $1/(1 -|x|)$, $|x|$ has to be smaller than $0.7$.
 
 In Figure \ref{fig: Taylor_Expansion_Uncertainty}, although the expansion uncertainty has the correct trend, it does not reach $r(N)$ at the end for $1/(1 -0.7)$.
 The reason is due to the digital limitation of the conventional floating-point representation.
@@ -1650,7 +1645,7 @@ Thus, variance arithmetic can only provide proper coverage to floating-point rou
 \centering
 \includegraphics[height=2.4in]{Taylor_Expansion_0.01.png} 
 \captionof{figure}{
-The absolute reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x \pm \delta x$ as shown in the legend.
+The reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x \pm \delta x$ as shown in the legend.
 In the legend,  
 \textit{Reminder Value} is the value of Formula \eqref{eqn: Taylor expansion reminder}, 
 \textit{Expansion LSV} is the $LSV$ of the value of Formula \eqref{eqn: Taylor expansion},
@@ -1663,7 +1658,7 @@ In the legend,
 \centering
 \includegraphics[height=2.4in]{Taylor_Expansion_0.04.png} 
 \captionof{figure}{
-The absolute reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x  \pm \delta x$ as shown in the legend.
+The reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x  \pm \delta x$ as shown in the legend.
 In the legend,  
 \textit{Reminder Value} is the value of Formula \eqref{eqn: Taylor expansion reminder}, 
 \textit{Expansion LSV} is the $LSV$ of the value of Formula \eqref{eqn: Taylor expansion},
@@ -1689,7 +1684,7 @@ In the legend,
 \centering
 \includegraphics[height=2.4in]{Taylor_Expansion_Error.png} 
 \captionof{figure}{
-The truncation errors order to achieve $3\;10^{-7}$ reminder precision for Taylor expansion of $\frac{1}{1 - x \pm \delta x}$, for different input precision $\delta x$ as shown in the x-axis, and different imprecise $x$ as shown in the legend.
+The truncation errors for Taylor expansion of $\frac{1}{1 - x \pm \delta x}$, for different input uncertainty $\delta x$ as shown in the x-axis, and different input value $x$ and truncation rule as shown in the legend. 
 In the legend,  
 \textit{Reminder Error} means when the absolute value change from $e(N-1)$ to $e(N)$ is less than $\tau$-fold of the uncertainty of $1(1-x)$, 
 \textit{Stability} means to use the stability criterion to decide maximal $N$ for $e(N)$.
@@ -1699,35 +1694,32 @@ In the legend,
 
 
 The input to an expansion can also be imprecise.
-Figure \ref{fig: Taylor_Expansion_0.01} shows that the absolute reminder values decrease exponentially with the increasing expansion order, while the expansion uncertainty stabilizes quickly above the input uncertainty $0.01$.  
+Figure \ref{fig: Taylor_Expansion_0.01} shows that the absolute reminder values decrease exponentially with increasing expansion order, while the expansion uncertainty stabilizes quickly above the input uncertainty $0.01$.  
 The expansion can terminate when the reminder value equals the expansion value $LSV$ for $x=\pm 0.6 \pm 0.01, -0.7 \pm 0.01$, but not for $x=0.7 \pm 0.01$.
 Figure \ref{fig: Taylor_Expansion_0.01} is very similar to Figure \ref{fig: Taylor_Expansion_Uncertainty} except that the expansion uncertainty is much larger.
 
-When input uncertainty increases from $0.01$ to $0.04$, Figure \ref{fig: Taylor_Expansion_0.04} shows that the absolute reminder values decrease slower than exponentially with the increasing expansion order, while the expansion uncertainty remains about the same with the increasing Taylor expansion order.
+When input uncertainty increases from $0.01$ to $0.04$, Figure \ref{fig: Taylor_Expansion_0.04} shows that the absolute reminder value decreases slower than exponentially with increasing expansion order, while the expansion uncertainty remains about the same with increasing Taylor expansion order.
 For example, the expansion of $1/(1 + 0.7 \pm 0.04)$ now terminates at Taylor expansion order $105$ and instead of $70$ in Figure \ref{fig: Taylor_Expansion_0.01}.
 The reason for such changes is due to the increase of uncertainty bias in Formula \eqref{eqn: polynomial Taylor}.
 
 It is questionable to use the expansion truncation standard for precise input to imprecise input.
 Specifically, it is questionable to always calculate the result value to $10^{-16}$ precision while the result precision is only about $0.16$ for the case of $1/(1 + 0.6 \pm 0.04)=2.526 \pm 0.26$.
 Because variance arithmetic allows statistical bounding leakage of $\epsilon = 5.73 \times 10^{-7}$ according to Formula \eqref{eqn: bounding leakage}, the tolerance on the result value should be likewise statistically.
-Formula \eqref{eqn: value precision} gives the required precision of the result value $\tau$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
+Formula \eqref{eqn: value precision} gives the \emph{required value precision} $\tau$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 \begin{equation}
 \label{eqn: value precision}
 2 \xi(\tau) = \epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma):\eqspace \tau \simeq \epsilon \frac{\sqrt{2 \pi}}{2} = 7.18\times 10^{-7};
 \end{equation}
 
-Using $\tau$ as the tolerance, the rule for \emph{stability truncation} for truncating an expansion at the expansion order $N$ is the following:
+Using $\tau$ as the tolerance, the rule for \emph{stability truncation} for truncating an expansion $e(N)$ at the expansion order $N$ is the following:
 \begin{itemize}
 \item The absolute uncertainty change from $e(N-1)$ to $e(N)$ is less than $\tau$-fold of the uncertainty of $e(N)$, and
 
-	\begin{itemize}
-	\item The absolute value change from $e(N-1)$ to $e(N)$ is less than $\tau$-fold of the uncertainty of $e(N)$, or
-	
-	\item The absolute uncertainty change from $e(N-1)$ to $e(N)$ is less than the $LSV$ of the value of $e(N)$.
-	\end{itemize}
+\item The absolute value change from $e(N-1)$ to $e(N)$ is less than either $\tau$-fold of the uncertainty of $e(N)$, or the $LSV$ of the value of $e(N)$.
+
 \end{itemize}
 The stability truncation is free from reminder estimator, and it is based on the stability of $e(N)$ at and after the expansion order $N$.
-Unlike similar traditional stability truncation in practice, the tolerance $\tau$ in stability truncation is on solid statistical ground.
+The true reminder $r(N)$ at the truncation is renamed as the truncation error.
 
 Figure \ref{fig: Taylor_Expansion_Order} shows the stability truncation orders for Taylor expansion of $1/(1 - x \pm \delta x$, while Figure \ref{fig: Taylor_Expansion_Error} shows the corresponding truncation errors.
 To validate stability truncation in this case, the truncation marked as \textit{Reminder Error} is calculated using the same rule for stability truncation but using the uncertainty of $1/(1-x)$ instead of the uncertainty of $e(N)$. 
@@ -1735,13 +1727,18 @@ Figure \ref{fig: Taylor_Expansion_Order} and \ref{fig: Taylor_Expansion_Error} s
 As an comparison, the truncation marked as \textit{Reminder LSV} is the traditional truncation method, whose truncation orders generally double the corresponding stability truncation orders, showing that stability truncation is more efficient.
 
 As expected, Figure \ref{fig: Taylor_Expansion_Error} shows that truncation errors are linearly proportional to input uncertainties.
-
 Figure \ref{fig: Taylor_Expansion_Order} shows that for each case, the truncation order has a global minimum, and on each side, either increases slowly with decreasing input uncertainty, or increases fast with increasing input uncertainty.
-Due to the digital limitation of the 64-bit conventional floating-point representation, $\zeta(2n)$ can only be calculated up to $2n = 252$, so that Formula \eqref{eqn: polynomial Taylor} can only be calculated up to $n = 126$.
-If after $126$ orders of expansion, stability truncation can still not be achieved, the expansion can be deemed divergent practically.
-Figure \ref{fig: Taylor_Expansion_Order} shows that when the input uncertainty is too large, the Taylor expansion practically diverges, such as for $1/(1 - 0.6 \pm 0.06)$.
-However, because $1/(1 - 0.6 \pm 0.06) = 2.561 \m 0.415$, the reason for the practical divergence of Taylor expansion is not clear at this moment.
+Even when the input uncertainty is comparable to the floating-point rounding error, stability truncation still works by comparing the expansion value change with the $LSV$ of the value after the expansion uncertainty has been stable.
 
+Due to the digital limitation of the 64-bit conventional floating-point representation, $\zeta(2n)$ can only be calculated up to $2n = 252$, so that Formula \eqref{eqn: polynomial Taylor} can only be calculated for $n < 126$.
+If after $126$ orders of expansion, stability truncation can still not be achieved, the expansion is deemed to be \emph{practically unstable}.
+Figure \ref{fig: Taylor_Expansion_Order} shows that when the input uncertainty is too large, the Taylor expansion is practically unstable, such as for $1/(1 - 0.6 \pm 0.06)$.
+However, using Formula \eqref{eqn: power precision}, $1/(1 - 0.6 \pm 0.06) = 2.561 \pm 0.415$.
+Because Formula \eqref{eqn: polynomial Taylor} expands by $(\delta x)^2$, it converges slow than Formula \eqref{eqn: power precision} which expands by $P(x)^2$.
+For $1/(1 - 0.6 \pm 0.06)$,  Formula \eqref{eqn: polynomial Taylor} is practically unstable, while  Formula \eqref{eqn: power precision} is not.
+If $\zeta(2n)$ were not limited by $n < 126$, these two formulas should have given identical result.
+
+Stability truncation is applied numerically in variance arithmetic for all Taylor expansion related calculations. 
 
 
 
@@ -2369,7 +2366,7 @@ It shows that a larger than $1$ error deviation may probably indicate unspecifie
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $e^{x \pm \delta x}$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
-Each color represent a $\delta x$.
+Each color represents a $\delta x$.
 Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Exp_Dev}
@@ -2381,7 +2378,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\log(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
-Each color represent a $\delta x$.
+Each color represents a $\delta x$.
 Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Log_Dev}
@@ -2393,7 +2390,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\sin(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
-Each color represent a $\delta x$.
+Each color represents a $\delta x$.
 Gaussian noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Sin_Dev}
@@ -2405,7 +2402,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\sin(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
-Each color represent a $\delta x$.
+Each color represents a $\delta x$.
 Uniform noises are used to produce the input noise $\delta x$.
 }
 \label{fig: Sin_Dev_Uniform}
@@ -2557,7 +2554,7 @@ Both the result uncertainty and the error deviation at the zero become $0$.
 The  corresponding histogram is also distorted from Gaussian, with the peak at $x=\pm \pi/2$, and all other values on one side of the peak only.
 
 \end{itemize}
-At where the function is flat, both the result uncertainty and the error deviation become $0$.
+When the function is flat, both the result uncertainty and the error deviation become $0$.
 
 
 \subsection{Power}
@@ -2591,7 +2588,7 @@ The uncertainties of variance arithmetic bound the value errors effectively, res
 The numerical error of the library function $x^p$ is calculated as $(x^p)^{1/p} - x$ vs $x$.
 Figure \ref{fig: Power_Error} shows that the normalized errors are not specific to either $x$ or $p$, resulting in an error deviation $0.548 \pm 0.8$.
 
-The numerical errors of the library functions $\sin(x)$, $\cos(x)$, and $\tan(x)$ will be studied in details later in Section \ref{sec: FFT}.
+The numerical errors of the library functions $\sin(x)$, $\cos(x)$, and $\tan(x)$ will be studied in detail later in Section \ref{sec: FFT}.
 
 
 \subsection{Summary}
@@ -2603,7 +2600,7 @@ In ideal coverage cases, the error deviation is very close to $1$ except it is $
 \begin{itemize}
 \item When the result probability density function is zero, and $\delta x$ is small enough, the uncertainty mean is finite.
 
-\item WQhen the result probability density function is pole, and $\delta x$ is large enough, the uncertainty mean is infinite.
+\item When the result probability density function is pole, and $\delta x$ is large enough, the uncertainty mean is infinite.
 
 \end{itemize}
 In non-ideal coverage cases, the error deviation is about $0.5$ so that proper coverage is achieved.
@@ -2842,7 +2839,7 @@ To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine 
 
 Figure \ref{fig: Sin_Diff} shows that the value difference between the library $\sin(x)$ and the indexed $\sin(x)$ increases with increasing $x$.
 However, checked by $\sin(x)^2 + \cos(x)^2 - 1$, Figure \ref{fig: Sin_Error} shows that the value errors are quite comparable between  the indexed and library $\sin(x)$ and $\cos(x)$ functions.
-In Figure \ref{fig: Sin_Error}, the deviations for the indexed sine function seem less stable statistically, because the deviations of the index sine function are calculated from much less samples: For the FFT order $N$, the deviations for the indexed sine function contain $2^{N-3}$ data covering $x \in [0, \pi/4]$, while the deviations for the library sine function contain $2^{N+1}$ data.
+In Figure \ref{fig: Sin_Error}, the deviations for the indexed sine function seem less stable statistically, because the deviations of the index sine function are calculated from much less samples: For the FFT order $N$, the deviations for the indexed sine function contain $2^{N-3}$ data covering $x \in [0, \pi/4]$, while the deviations for the library sine function contain $2^{2N-1}$ data covering $x \in [0, \pi 2^{N}]$.
 Figure \ref{fig: Sin_Error} also shows that both $\sin(x)$ functions have proper coverage in variance arithmetic.
 Thus, the difference is just caused by the rounding of $x$ in $\sin(x)$ and $\cos(x)$ library functions.
 
@@ -2870,7 +2867,7 @@ Having identified the nature and the strength of the numerical errors of the lib
 \captionof{figure}{
 The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the forward transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis is for index frequency.
-The y-axis is for uncertainty and absolute value errors.
+The y-axis is for uncertainty and absolute value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Spec_Indexed}
 \end{figure}
@@ -2880,7 +2877,7 @@ The y-axis is for uncertainty and absolute value errors.
 \captionof{figure}{
 The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis is for index time.
-The y-axis is for uncertainty and absolute value errors.
+The y-axis is for uncertainty and absolute value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Wave_Indexed}
 \end{figure}
@@ -2889,8 +2886,8 @@ The y-axis is for uncertainty and absolute value errors.
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Indexed.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means of Sin/Cos signals vs. FFT order using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 }
 \label{fig: FFT_SinCos_Clean_vs_Order_Indexed}
 \end{figure}
@@ -2900,7 +2897,7 @@ The error deviations are scaled to the linear y-axis on the left, while the unce
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Indexed.png} 
 \captionof{figure}{
-The histograms of the normalized errors of Sin/Cos signals without input noises using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The histograms of the normalized errors of Sin/Cos signals using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The FFT order is $18$.
 }
 \label{fig: FFT_SinCos_Clean_Histo_Indexed}
@@ -2915,21 +2912,21 @@ Using the indexed sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in wh
 \end{itemize}
 
 Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} shows both the result uncertainty means and the error deviations vs. FFT order of FFT transformations of Sin/Cos signals using the indexed sine functions.
-Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows the corresponding histograms at FFT order $17$.
+Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows the corresponding histograms at FFT order $18$.
 \begin{itemize}
-\item As expected, the uncertainties grow much faster with the increasing FFT order for the forward transformation than those for the reverse transformation.
+\item As expected, the uncertainties grow much faster with increasing FFT order for the forward transformation than those for the reverse transformation.
 Both are faster enough to achieve proper coverage. 
 
-\item The faster growth of the uncertainties of the forward transformation in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} results in almost Gaussian distribution of the normalized errors for FFT order $18$ in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
+\item The faster growth of the uncertainties of the forward transformation in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} results in almost Gaussian distribution of the normalized errors in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
 Thus, the forward transformation is expected to reach ideal coverage quicker with any added noise, and it is less sensitive to numerical calculation errors.
 
-\item The slower growth of the uncertainties of the reverse transformation in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} results in structured distribution on top of a Gaussian distribution of the normalized errors for FFT order $18$ in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
+\item The slower growth of the uncertainties of the reverse transformation in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} results in structured distribution on top of a Gaussian distribution of the normalized errors in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
 Thus, the reverse transformation is expected to reach ideal coverage slower with added input noises, and it is more sensitive to numerical calculation errors.
 
-\item With the increasing FFT order, all histograms become more Gaussian like, and the error deviations for the real and the imaginary parts become more equal in value.
+\item with increasing FFT order, all histograms become more Gaussian like, and the error deviations for the real and the imaginary parts become more equal in value.
 The error deviations for the forward transformation are relatively stable.
-The error deviations for the reverse transformation increase with the increasing FFT orders until become stable when FFT orders is $12$ or more.
-When the FFT order is about $12$, statistical stability is reach.
+The error deviations for the reverse transformation increase with increasing FFT orders until become stable when FFT orders is $12$ or more.
+When the FFT order is about $12$, statistical stability is reached.
  
 \end{itemize}
 
@@ -2942,7 +2939,7 @@ Thus, proper coverage is achieved using the indexed sine functions for Sin/Cos s
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.png} 
 \captionof{figure}{
 The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the library sine functions after the forward transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
-Also included is the corresponding result errors using \textit{SciPy}.
+Also included are the corresponding result value errors using \textit{SciPy}.
 The x-axis is for index frequency.
 The y-axis is for uncertainties or absolute value errors.
 }
@@ -2953,10 +2950,9 @@ The y-axis is for uncertainties or absolute value errors.
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.png} 
 \captionof{figure}{
 The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
-Also included is the corresponding result errors using \textit{SciPy}.
+Also included are the corresponding result value errors using \textit{SciPy}.
 The x-axis is for index time.
 The y-axis is for uncertainties or absolute value errors.
-No input noise is added to the Sin signal.
 }
 \label{fig: FFT_Sin_Clean_6_3_Wave_Lib}
 \end{figure}
@@ -2964,11 +2960,10 @@ No input noise is added to the Sin signal.
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
-Also included is the corresponding result errors using \textit{SciPy}.
+The waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included are the corresponding result value errors using \textit{SciPy}.
 The x-axis is for index time.
 The y-axis is for uncertainties or absolute value errors.
-No input noise is added to the Sin signal.
 }
 \label{fig: FFT_Sin_Clean_6_4_Wave_Lib}
 \end{figure}
@@ -2976,11 +2971,10 @@ No input noise is added to the Sin signal.
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_1_Wave_Lib.png} 
 \captionof{figure}{
-The FFT waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
-Also included is the corresponding result errors using \textit{SciPy}.
+The waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
+Also included are the corresponding result value errors using \textit{SciPy}.
 The x-axis is for index time.
 The y-axis is for uncertainties or absolute value errors.
-No input noise is added to the Sin signal.
 }
 \label{fig: FFT_Sin_Clean_6_1_Wave_Lib}
 \end{figure}
@@ -2989,9 +2983,8 @@ No input noise is added to the Sin signal.
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-No input noise is added to the Sin signal.
+The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 }
 \label{fig: FFT_SinCos_Clean_vs_Order_Lib}
 \end{figure}
@@ -3000,8 +2993,8 @@ No input noise is added to the Sin signal.
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_1e-16_vs_Order_Lib.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 $10^{-16}$ input noises are added to the Sin/Cos signals.
 }
 \label{fig: FFT_SinCos_1e-16_vs_Order_Lib}
@@ -3010,9 +3003,8 @@ $10^{-16}$ input noises are added to the Sin/Cos signals.
 
 
 Because the least significant values are the only source of input uncertainties for variance arithmetic, the result uncertainties using either sine functions are almost identical.
-
-The library sine functions contributes to the numerical calculation errors which is not specified by the input uncertainties of variance arithmetic.
-The question is whether variance arithmetic can track this large amount of numerical errors effectively or not.
+The library sine functions have numerical calculation errors which is not specified by the input uncertainties of variance arithmetic.
+The question is whether variance arithmetic can track these numerical errors effectively or not.
 
 Using the library sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in which $k$ is the index time:
 \begin{itemize}
@@ -3020,24 +3012,25 @@ Using the library sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in wh
 As expected, the error deviations are noticeably larger than their counterparts in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Indexed}.
 
 \item Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib} shows that for the reverse transformation, the result value errors are noticeably larger than the result uncertainties, with an error deviation of $5.7$ for the real part, and $	0.83 \; 10^{15}$ for the imaginary part. 
-The surprisingly large imaginary error deviation is caused by the small uncertainty at the index time where the value error is at a local maximum.
+The surprisingly large imaginary error deviation is caused by the small uncertainty at the index time of $8$ where the value error is at a local maximum.
 
-\item As the result of of the huge error deviation, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Lib} shows that the result of the reverse transformation no longer has proper coverage for all FFT orders.
-When a small noise with deviation of $10^{16}$ is added to the input, the result uncertainty of the reverse transformation at the index time of $8$ is no longer near $0$, so that the result error deviations achieve proper coverage again, as show in Figure \ref{fig: FFT_SinCos_1e-16_vs_Order_Lib}.
+\item As the result of the huge error deviation, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Lib} shows that the result of the reverse transformation no longer has proper coverage for all FFT orders.
+When a small noise with deviation of $10^{-16}$ is added to the input, the result uncertainty of the reverse transformation at the index time of $8$ is no longer near $0$, so that the result error deviations achieve proper coverage again, as show in Figure \ref{fig: FFT_SinCos_1e-16_vs_Order_Lib}.
 
 \end{itemize}
 
 To validate the FFT implementation in variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
 The results are quite comparable, except that in \textit{SciPy}, the data waveform is always real rather than complex.
 In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of variance arithmetic is indicative.
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results matches the corresponding results of variance arithmetic well.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results match the corresponding results of variance arithmetic well.
 
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the value errors tend to increase with the indexes, which is due to the periodic increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the value errors tend to increase with the index time, which is due to the periodic increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
 When the signal frequency increases, the increase of the value errors with the index frequency in the reverse transformation becomes stronger, as shown in Figure \ref{fig: FFT_Sin_Clean_6_1_Wave_Lib}, \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, and \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib}.
-On the other hand, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} show no such increase, because it contains no library errors as described in Figure \ref{fig: Sin_Diff}.
+In fact, Figure \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib} suggests that the periodic numerical errors in  Figure \ref{fig: Sin_Diff} resonate with the periodicity of the input $Sin$ signal.
+In contrast, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} shows no such increase, because the indexed sine functions contain no library errors as described in Figure \ref{fig: Sin_Diff}.
 
-variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
-How much noises to add to input to achieve proper coverage remains an art.
+Variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
+Variance arithmetic further reveals that the goal to add small noises is to achieve proper coverage.
 When the proper tracking of variance arithmetic is not achieved, the result may contain large amount of errors.
 
 
@@ -3047,19 +3040,17 @@ When the proper tracking of variance arithmetic is not achieved, the result may 
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Indexed.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means of Linear signal vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-No input noise is added to the Linear signal.
+The result error deviation and uncertainty mean of Linear signal vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 }
-\label{fig: FFT_SinCos_Linear_vs_Order_Indexed}
+\label{fig: FFT_Linear_vs_Order_Indexed}
 \end{figure}
 
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Indexed.png} 
 \captionof{figure}{
-The histograms of the normalized errors of Sin/Cos signals without input noises using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-No input noise is added to the Linear signal.
+The histograms of the normalized errors of Linear signal using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
 \label{fig: FFT_Linear_Clean_Histo_Indexed}
 \end{figure}
@@ -3068,45 +3059,43 @@ No input noise is added to the Linear signal.
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Lib.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means of Linear signal vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-No input noise is added to the Linear signal.
+The result error deviation and uncertainty mean of Linear signal vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 }
-\label{fig: FFT_SinCos_Linear_vs_Order_Lib}
+\label{fig: FFT_Linear_vs_Order_Lib}
 \end{figure}
 
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Lib.png} 
 \captionof{figure}{
-The histograms of the normalized errors of Sin/Cos signals without input noises using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-No input noise is added to the Linear signal.
+The histograms of the normalized errors of Linear signal using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
 \label{fig: FFT_Linear_Clean_Histo_Lib}
 \end{figure}
 
-In addition to the  numerical errors of $\sin(\pi j /2^L), j = 0, 1, 2 ... 2^{L-1}$, Linear signals introduce the numerical errors of $1/\tan(\pi (j - 1) /2^L), j = 1, 2 ... 2^{L-1}$ to the result.
-The question is whether variance arithmetic can track this additional numerical errors or not.
+As shown in Figure \ref{fig: Sin_Cot_Diff}, linear signals introduce more numerical errors to the result.
+The question is whether variance arithmetic can track these additional numerical errors or not.
 
 Using the indexed sine functions:
 \begin{itemize}
-\item Figure \ref{fig: FFT_SinCos_Linear_vs_Order_Indexed} shows that proper coverage can be achieved for all the FFT transformations for all FFT orders.
+\item Figure \ref{fig: FFT_Linear_vs_Order_Indexed} shows that proper coverage can be achieved for all FFT transformations for all FFT orders.
 
-\item Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} shows that for each transformation, the histogram of the Linear signal are quite quite similar to the counterpart of the Sin/Cos signals in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}. 
+\item Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} shows that for each transformation, the histogram of the Linear signal is similar to the counterpart of the Sin/Cos signals in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}. 
 
 \end{itemize}
  
 Using the library sine functions:
 \begin{itemize}
-\item Figure \ref{fig: FFT_SinCos_Linear_vs_Order_Lib} shows that proper coverage can not be achieved any FFT transformation for all FFT orders, because the value errors outpace the uncertainties with the increasing FFT order.
-Because of this, adding noise to the input can not achieve proper coverage.
+\item Figure \ref{fig: FFT_Linear_vs_Order_Lib} shows that proper coverage cannot be achieved any FFT transformation for all FFT orders, because the value errors outpace the uncertainties with increasing FFT order.
+Because of this, adding noise to the input cannot achieve proper coverage.
 
-\item Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse histogram contains additional peaks in addition to its counterpart in Figure \ref{fig: FFT_SinCos_Linear_vs_Order_Lib}.
+\item Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse histogram contains additional peaks in addition to its counterpart in Figure \ref{fig: FFT_Linear_vs_Order_Lib}.
 The additional peaks extend beyond the range of $[-3, +3]$
 
 \end{itemize}
 
-When too much numerical errors are not specified by the input uncertainties, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
+When the input uncertainty is too small, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
 The only solution seems to create a new sin library using variance arithmetic so that all numerical calculation errors are accounted for.
 
 
@@ -3115,50 +3104,9 @@ The only solution seems to create a new sin library using variance arithmetic so
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Indexed.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means for Sin/Cos signals of order 16 using indexed sin/cos functions vs. input uncertainties for forward, reverse and roundtrip transformations for FFT order $18$.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_SinCos_vs_Noise_Indexed}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Lib.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means for Sin/Cos signals of order 16 using library sin/cos functions vs. input uncertainties for forward, reverse and roundtrip transformations for FFT order $18$.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_SinCos_vs_Noise_Lib}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Indexed.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip  transformations for FFT order $18$.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_Linear_vs_Noise_Indexed}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Lib.png} 
-\captionof{figure}{
-The result error deviations and uncertainty means using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip  transformations for FFT order $18$.
-The error deviations are scaled to the linear y-axis on the right, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
-}
-\label{fig: FFT_Linear_vs_Noise_Lib}
-\end{figure}
-
-\begin{figure}[p]
-\centering
 \includegraphics[height=2.5in]{FFT_Linear_1e-3_Histo_Lib.png} 
 \captionof{figure}{
-The histograms of the normalized errors of Linear signal without input noises using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-$10^{-3}$ input noises are added to the Sin/Cos signals.
+The histograms of the normalized errors of Linear signal with $10^{-3}$ input noise using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
 \label{fig: FFT_Linear_1e-3_Histo_Lib}
 \end{figure}
@@ -3167,8 +3115,8 @@ $10^{-3}$ input noises are added to the Sin/Cos signals.
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_1e-3_vs_Order_Lib.png} 
 \captionof{figure}{
-The result error deviations and uncertainty means using Linear signal with $10^{-3}$ input noises vs. FFT order for forward, reverse and roundtrip FFT transformations.
-The error deviations are scaled to the linear y-axis on the left, while the uncertainty means are scaled to the logarithmic log y-axis on the right.
+The result error deviation and uncertainty mean of Linear signal with $10^{-3}$ input noise using the library sine functions vs. FFT order for forward, reverse and roundtrip FFT transformations.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
 }
 \label{fig: FFT_Linear_1e-3_vs_Order_Lib}
 \end{figure}
@@ -3213,12 +3161,8 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 \label{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}
 \end{figure}
 
-Even when proper coverage can not be achieved, adding enough noise to the input can overpower the numerical calculation errors, to achieve ideal coverage.
-
-Figure \ref{fig: FFT_Linear_1e-3_Histo_Lib} shows that with $10^{-3}$ input noise, the result normalized errors for the forward and reverse transformations are both normal distributed, while the result normalized errors for the roundtrip transformation is delta distributed, regardless of the types of input noises.
-
-Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} shows the result error deviations and uncertainty means vs. different input uncertainties for Linear signal of order $18$ using the library sin/cos functions.  
-When the deviation of the input noise is more than $10^{-3}$, the input uncertainties become ideal coverage:
+Even when proper coverage cannot be achieved, adding enough noise to the input can overpower the numerical calculation errors, to achieve ideal coverage.
+For Linear signal with $10^{-3}$ input noise, using the library sine functions, Figure \ref{fig: FFT_Linear_1e-3_Histo_Lib} and Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} show characteristics for ideal coverage:  
 \begin{itemize}
 \item As expected, the result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$.
 
@@ -3232,20 +3176,26 @@ As expected, the result uncertainty means for the roundtrip transformation recov
 \item As expected, the normalized errors for the forward and the reverse transformations are normal distributed, even when the input noise is no longer Gaussian.
 The normalized errors for the roundtrip transformations are delta distributed at $0$, meaning the input uncertainties are perfectly recovered.
 
-\item As expected, the result error deviations for the forward and reverse transformations are constant $1$, while the result error deviations for the roundtrip transformation approaches $0$ exponentially with the increasing FFT order.
+\item As expected, the result error deviations for the forward and reverse transformations are constant $1$, while the result error deviations for the roundtrip transformation approaches $0$ exponentially with increasing FFT order.
 
 \end{itemize}
 
-For Linear signals using the library sine functions, the the added noise vs FFT order regions for the ideal coverage are shown as the regions where the error deviations are $1$, by Figure \ref{fig: FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order} for the forward and reverse transformations, respectively.
+However, the range of ideal coverage depends on how well the input uncertainty specifies the input noise.  
+
+For Linear signals using library sine functions, Figure \ref{fig: FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order} show the error deviation vs. the added noise vs. FFT order for the forward and reverse transformations, respectively.
+The ideal coverage is shown as the regions where the error deviations are $1$.
 In other regions, proper coverage is not achievable.
 Because the uncertainties grow slower in the reverse transformation than in the forward transformation, the reverse transformations have smaller ideal coverage region than that of the forward transformation.
-Because the amount of numerical errors increases with the amount of calculations, the input noise range reduces with the increasing FFT order.
+Because numerical errors increase with the amount of calculation, the input noise range reduces with increasing FFT order.
 It is possible that ideal coverage is not achievable at all, e.g., visually, when the FFT order is larger than $25$ for the reverse transformation.
-As one of the most robust numerical algorithm that is very insensitive to input errors, FFT breaks down when the FFT order is more than $25$ due to the numerical errors in the library sine functions, and such deterioration of the calculation result is not easily detectable using the conventional floating-point calculation.
+As one of the most robust numerical algorithms that is very insensitive to input errors, FFT can breaks down due to the numerical errors in the library sine functions, and such deterioration of the calculation result is not easily detectable using the conventional floating-point calculation.
 
-In contrast, for Linear signals using the indexed sine functions, the the added noise vs FFT order regions for the ideal coverage are shown as the regions where the error deviations are $1$, by Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} for the forward and reverse transformations, respectively.
-The ideal regions are much larger.
-In other regions, proper coverage are achieved.
+In contrast, for Linear signals using indexed sine functions, as shown by Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} for the forward and reverse transformations, respectively, the ideal region is much larger, and proper coverage is achieved in other regions.
+Forward FFT transformation still shows larger region of ideal coverage than that of Reverse FFT transformation.
+
+For Sin/Cos using either indexed sine functions or library sine functions, the ideal region is achieved when the added noise is large enough to cover the effect of rounding errors, almost independent of FFT orders. 
+In both cases, forward transformation needs $10^{-15}$ added noise, while reverse transformation needs $10^{-12}$ added noise.
+The difference is that using indexed sine functions, in the proper coverage region, error deviations deviate from $1$ only slightly.
 
 
 \subsection{Summary}
@@ -3254,11 +3204,11 @@ Compared to its counterpart continuous Fourier Transformation (FT), the discrete
 This modeling error has not been addressed seriously.
 
 The library sine functions using conventional floating-point arithmetic have been shown to contain numerical errors as large as equivalently  $10^{-3}$ of input accuracy for FFT transformations.
-The library $\sin(x)$ errors increase periodically with $x$, causing noticeable increase of the result errors with the increasing index frequency in the reverse transformation.
-The dependency of the result numerical errors on the amount of calculation and input data means that a small scale test can not properly qualify the result of a large scale calculation.
+The library $\sin(x)$ errors increase periodically with $x$, causing noticeable increase of the result errors with increasing index frequency in the reverse transformation.
+The dependency of the result numerical errors on the amount of calculation and input data means that a small-scale test can not properly qualify the result of a large-scale calculation.
 The effect of numerical errors inside math library has not been addressed seriously.
 
-variance arithmetic should be used, whose values largely reproduce the corresponding results using conventional floating-point arithmetic, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
+Variance arithmetic should be used, whose values largely reproduce the corresponding results using conventional floating-point arithmetic, whose uncertainties trace all input errors, and whose result error deviations qualify the calculation quality as either ideal, or proper, or suspicious.
 If the library functions also have proper coverage, the calculation result will probably have proper coverage as well.
 
 
@@ -3275,9 +3225,9 @@ If the library functions also have proper coverage, the calculation result will 
 \centering
 \includegraphics[height=2.5in]{Uncertain_Sin.png}
 \captionof{figure}{
-The error deviations and means for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown by the x-axis.
+The error deviation and mean for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown by the x-axis.
 In the legend, \textit{Value Error} means the values of $\sin(x)^2 + \cos(x)^2 - 1$, \textit{Normalized Error} means the value errors normalized by the calculated uncertainty, \textit{Regression} means the $\sin(x)$ and $\cos(x)$ generated by regression, and \textit{Library} means library $\sin(x)$ and $\cos(x)$.
-The y-axis on the left is for normalized errors, while the y-axis on the right is for value errors.
+The y-axis on the left is for normalized error, while the y-axis on the right is for value error.
 }
 \label{fig: Uncertain_Sin}
 \end{figure}
@@ -3301,7 +3251,7 @@ For each order $n$, $2^n$ $\sin(\frac{\pi}{2} \frac{i}{2^n})$ and $\cos(\frac{\p
 
 The value errors of $\sin(x)$ and $\cos(x)$ are checked by $\sin(x)^2 + \cos(x)^2 - 1$.
 Figure \ref{fig: Uncertain_Sin} shows that the value errors of the generated $\sin(x)$ and $\cos(x)$ is comparable to those of library $\sin(x)$ and $\cos(x)$.
-It shows that the result error deviations is close to $0.5$.
+It shows that the result error deviations are close to $0.5$.
 Because floating-point rounding errors are the only source of errors in the regression, as expected, variance arithmetic provides proper coverage for this regression.
 
 
@@ -3317,44 +3267,36 @@ Because floating-point rounding errors are the only source of errors in the regr
 
 \subsection{Summary of Variance Arithmetic}
 
-The starting point of variance arithmetic is the uncorrelated uncertainty assumption, which requires input data to have small enough precision as shown in Figure \ref{fig: Independent_Uncertainty_Assumption}.  In addition, it requires that the systematic errors is not the major source of uncertainty.
+The starting point of variance arithmetic is the uncorrelated uncertainty assumption, which requires input data to have small enough precision as shown in Figure \ref{fig: Independent_Uncertainty_Assumption}.  
+In addition, it requires that systematic errors are not the major source of uncertainty.
 
 Once the uncorrelated uncertainty assumption is satisfied, variance arithmetic quantifies uncertainty as the deviation of the value errors.
 It can trace the variable dependency in the intermediate steps using standard statistics.
-Taylor expansion can be used to obtain the result mean and uncertainty of analytic functions, as Formula \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, \eqref{eqn: Taylor 2d variance}, and etc.
-The convergence requirement of variance arithmetic also reject calculations based on input precision, such as inversion of an input which has a high probability of containing zero. 
+The statistical nature of variance arithmetic is reflected by the bounding leakage $\epsilon=5.73 \;10^{-7}$ and the required value precision $\tau=7.18 \;10^{-7}$, which determine the convergence and truncation when Taylor expansion is used to obtain the result mean and uncertainty of an analytic function.
+In variance arithmetic, ill-formed problems (such as inversion of an input which has a high probability of containing zero) can be invalidated as result divergence, unreliable result variance, or being practically unstable.
 
-The ability of variance arithmetic to trace value errors using calculated uncertainties is shown to be very effective:
-\begin{itemize}
-\item When zero result is expected, the normalized errors of variance arithmetic is delta distributed.
+The presence of ideal coverage is the necessary condition for a numerical algorithm in variance arithmetic to be correct. 
+The ideal coverage also defines the ideal applicable range for the algorithm. 
+In ideal coverage, the calculated uncertainty equal the error deviation, and the result normalized errors is either normal distributed or delta distributed.
 
-\item Due to the uncorrelated uncertainty assumption and central limit theorem, the normalized errors of variance arithmetic are normal distributed.
-In the ideal coverage cases when the input uncertainties precisely quantify the corresponding errors, the deviations of the normalized errors are shown to be $1$.
-The ideal coverage defines the ideal applicable range of variance arithmetic.
-It is also the necessary condition for any particular application of variance arithmetic to be correct.
+Due to digital limitation of 64-bit conventional floating-point representation, variance arithmetic can only provide proper coverage for floating-point rounding errors, with the empirical error deviations in the range of $[1/5, 5]$
 
-\item The floating-point rounding errors are generated in the process of floating-point calculations, so they are not subjected to central limit theorem.
-It has been shown that the deviation of the normalized errors of variance arithmetic are in the range of $[0.25, 4]$, which fails in the range of proper coverage.
-
-\item Another reason of proper coverage is that the input uncertainties do not precisely specify the input errors.
-
-\item When the input uncertainties are two different from the corresponding value errors which they specify, variance arithmetic will not work properly.
-Such situation can be detected by the values of the normalized error deviations outside the range of $[0.1, 10]$.
-\end{itemize}
-
-variance arithmetic has been shown to be widely applicable, so as for analytic calculations, progressive calculation, regressive generalization, polynomial expansion, statistical sampling, and transformations.
+Variance arithmetic has been shown to be widely applicable, so as for analytic calculations, progressive calculation, regressive generalization, polynomial expansion, statistical sampling, and transformations.
 
 
 
 \subsection{New Numerical Approaches}
 
-To properly account for the result uncertainties, analytic expressions are favored over the corresponding numerical approaches, because the convergence of the result uncertainties are generally slower than those of the result values.
+The conventional numerical approaches focus primarily on the result values, and they need to be reexamined or even reinvented in variance arithmetic.
+Due to this dependency tracing, for analytic expressions, variance arithmetic allows no numerical execution freedom, and it has no dependency on such freedoms.
+On the other hand, by using stability truncation, variance arithmetic no longer needs reminder estimator so that it is simpler for truncation problems.
+Also, variance arithmetic can reject ill-formed problems.
 
-The conventional numerical approaches focus primarily on the result values, and they need to be reexamined or even revamped for the result uncertainties.
-The input uncertainties cause large uncertainty biases on the corresponding result values in the case of matrix inversion,  and the result precision is generally much worse than the input precision.
-One such example is matrix inversion.
+How to treat the result difference using variance arithmetic vs. using conventional floating-point arithmetic is also a general question.
+The uncertainty bias can be potentially large near the approximate applicable precision threshold $1/\sigma$, such as $1/(0.3 \pm 0.06) = 527 \pm 458$ while $1/0.3 = 10/3 \pm LSV(10/3)$.  
+Variance arithmetic generally reveals worse results than those of conventional floating-point arithmetic, such as very quick loss of precision in matrix inversion, especially for matrix of large size. 
 
-Using Taylor expansion approach, it is generally an order-of-magnitude more complicated to calculate the result uncertainties than the result values.
+In variance arithmetic, it is generally an order-of-magnitude more complicated to calculate the result uncertainties than the result values.
 However, modern software programs for analytic calculation can be great help.
 Also, the calculation of the result uncertainty bias and uncertainty contains large sums of independent terms, so that it is a excellent candidate for parallel processing.
 
@@ -3363,15 +3305,16 @@ Also, the calculation of the result uncertainty bias and uncertainty contains la
 
 The library math functions need to be calculated using variance arithmetic, so that each output value has its corresponding uncertainty.
 Otherwise, the effect of the existing value errors in the library function can have unpredictable and large effects.
-For example, this paper shows that the periodic numerical errors in the $\sin$ and $\tan$ library functions causes resonant-like large result value errors for the FFT calculations.
+For example, this paper shows that the periodic numerical errors in the sine library functions cause resonant-like large result value errors in a FFT reverse transformation.
 
 
-\subsection{Approximation of Variance Arithmetic}
+\subsection{First Order Approximation}
 
 Most practical calculations are neither pure analytic nor pure numerical, in which the analytic knowledge guides the numerical approaches, such as solving differential equations.
-In these cases, first order approximation of variance arithmetic may be a viable solution.
-This paper already provides examples of first order approximation of variance arithmetic, such as Formula \eqref{eqn: progressive variance} for $\delta^2 f(g(x))$, and Formula \eqref{eqn: determinant variance approx} for $\delta^2 |\M|$.
-However, Formula \eqref{eqn: progressive variance} suggests that the simplification of variance arithmetic may bring back dependency problem, while Section \ref{sec: polynomial} shows that the result uncertainty needs higher order than first order to stabilize.
+In these cases, when input precision is fine enough, first order approximation of variance arithmetic may be a viable solution.
+This paper provides an example of first order approximation of variance arithmetic, as Formula \eqref{eqn: determinant variance approx} for $\delta^2 |\M|$.
+The difference between Formula \eqref{eqn: composite variance 1d} and \eqref{eqn: progressive variance} shows that first order approximation of $f(g(x))$ does not have dependency problem.
+However, Section \ref{sec: polynomial} shows that the result uncertainty needs higher order than first order to stabilize.
 How to effectively apply variance arithmetic to practical calculations remains an open question.
 
 
@@ -3380,7 +3323,7 @@ How to effectively apply variance arithmetic to practical calculations remains a
 
 In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated and stored.
 This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation $\pm\; 2^{52} \; 2^{\pm 1024 - 52}$ \footnote{Including the hidden most significant bit for significand in the IEEE 64-bit floating-point standard.}, such as when applying Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} to floating-point rounding errors in Section \ref{sec: polynomial}.
-Ideally, $(\delta x)^2$ should be calculated and stored in an different 64-bit floating-point representation of $2^{52} \; 2^{\pm 2048 - 52}$ with the sign bit reused for the exponent.
+Ideally, $(\delta x)^2$ should be calculated and stored in a different 64-bit floating-point representation with no sign bit, more exponent bits, and less significant bits.
 
 
 \subsection{Hardware Implementation}
@@ -3392,6 +3335,7 @@ Because variance arithmetic has neither execution freedoms nor the associated de
 \subsection{Acknowledgments}
 
 As an independent researcher, the author of this paper feels indebted to encouragements and valuable discussions with Dr. Zhong Zhong from Brookhaven National Laboratory, Dr. Anthony Begley from \emph{Physics Reviews B}, the organizers of \emph{AMCS 2005}, with Prof. Hamid R. Arabnia from University of Georgia in particular, and the organizers of \emph{NKS Mathematica Forum 2007}, with Dr. Stephen Wolfram in particular. 
+Prof Dongfeng Wu from Louisville University provides valuable guidance and discussions on statistical related topic.
 The author of this paper is very grateful for the editors and reviewers of \emph{Reliable Computing} for their tremendous help in shaping and accepting the previous version of this paper from unusual source, with managing editor, Prof. Rolph Baker Kearfott in particular.
 
 

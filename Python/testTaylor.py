@@ -677,6 +677,13 @@ class TestPolynominial (unittest.TestCase):
         res = 1/VarDbl(0.3, 0.06)
         self.assertAlmostEqual(res.value(), 3.4874748968790157)
         self.assertAlmostEqual(res.uncertainty(), 0.8333325278975393)
+        res = 1/VarDbl(0.3, 0.07)
+        self.assertAlmostEqual(res.value(), 527.564157634998)
+        self.assertAlmostEqual(res.uncertainty(), 452.0300821331497)
+        res = 1/VarDbl(0.3)
+        self.assertAlmostEqual(res.value(), 3.3333333333333335)
+        self.assertAlmostEqual(res.uncertainty(), 4.388015458239491e-16)
+        self.assertAlmostEqual(math.ulp(1/3), 4.388015458239491e-16)
 
         self.assertTupleEqual(self.calc_near_one_imprecise(VarDbl(0.7), 0), 
                               (True, False, True, True, False))

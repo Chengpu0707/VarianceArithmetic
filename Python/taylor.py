@@ -14,6 +14,23 @@ class LossUncertaintyException (Exception):
         self.name = name
         self.s1dTaylor = s1dTaylor
         self.inPrec = inPrec
+        self.outPrec = outPrec
+
+        self.value = value
+        self.variance = variance
+        self.n = n
+        self.newValue = newValue
+        self.newVariance = newVariance
+
+class NotStableException (Exception):
+    def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
+                 value:varDbl.VarDbl, variance:varDbl.VarDbl, n:int, newValue:varDbl.VarDbl, newVariance:varDbl.VarDbl,
+                 *args: object) -> None:
+        super().__init__(*args)
+        self.input = input
+        self.name = name
+        self.s1dTaylor = s1dTaylor
+        self.inPrec = inPrec
 
         self.value = value
         self.variance = variance
@@ -22,7 +39,7 @@ class LossUncertaintyException (Exception):
         self.newVariance = newVariance
 
     def __str__(self) -> str:
-        return f'LossUncertaintyException: {self.name} for {self.input} at {self.n}'
+        return f'NotStableException: {self.name} for {self.input} at {self.n}'
 
 
 class Taylor:
@@ -58,7 +75,7 @@ class Taylor:
         if inPrec:
             var *= varDbl.VarDbl( 1 /input.value() /input.value() )
         varn = varDbl.VarDbl(var)
-        for n in range(2, len(s1dTaylor), 2):
+        for n in range(2, min(len(s1dTaylor), self._momentum._maxOrder*2), 2):
             newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
             newVariance = varDbl.VarDbl()
             for j in range(1, n):
@@ -79,6 +96,9 @@ class Taylor:
                 if (math.sqrt(abs(newVariance.value())) < unc) and \
                         (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
                     break
+        if enableStabilityTruncation and (n >= self._momentum._maxOrder*2):
+            raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
+                    value, variance, n, newValue, newVariance)
         if outPrec:
             value *= s1dTaylor[0]
             variance *= s1dTaylor[0] * s1dTaylor[0]
