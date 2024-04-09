@@ -1,11 +1,15 @@
 
 import math
+import logging
 import typing
 
 import varDbl
 import momentum
 
-class LossUncertaintyException (Exception):
+logger = logging.getLogger(__name__)
+
+
+class NotReliableException (Exception):
     def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
                  value:varDbl.VarDbl, variance:varDbl.VarDbl, n:int, newValue:varDbl.VarDbl, newVariance:varDbl.VarDbl,
                  *args: object) -> None:
@@ -21,6 +25,9 @@ class LossUncertaintyException (Exception):
         self.n = n
         self.newValue = newValue
         self.newVariance = newVariance
+
+    def __str__(self) -> str:
+        return f'NotReliableException: {self.name} for {self.input} at {self.n}'
 
 class NotStableException (Exception):
     def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
@@ -41,9 +48,29 @@ class NotStableException (Exception):
     def __str__(self) -> str:
         return f'NotStableException: {self.name} for {self.input} at {self.n}'
 
+class NotMonotonicException (Exception):
+    def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
+                 value:varDbl.VarDbl, variance:varDbl.VarDbl, n:int, newValue:varDbl.VarDbl, newVariance:varDbl.VarDbl,
+                 *args: object) -> None:
+        super().__init__(*args)
+        self.input = input
+        self.name = name
+        self.s1dTaylor = s1dTaylor
+        self.inPrec = inPrec
+
+        self.value = value
+        self.variance = variance
+        self.n = n
+        self.newValue = newValue
+        self.newVariance = newVariance
+
+    def __str__(self) -> str:
+        return f'NotMonotonicException: {self.name} for {self.input} at {self.n}'
+
 
 class Taylor:
     TAU = 7.18e-7   # The stability test 
+    MONOTONIC_CHECK_ORDER = 20
 
     __slots__ = ('_variance_threshold', '_momentum')
 
@@ -55,7 +82,7 @@ class Taylor:
             self._variance_threshold = uncertainty_precision_threshold * uncertainty_precision_threshold
 
     def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
-                 enableStabilityTruncation=True):
+                 enableStabilityTruncation=True, monotonicCheckOrder=MONOTONIC_CHECK_ORDER):
         '''
         1d Taylor expansion.
         @return:            The output varDbl.VarDbl using Taylor expansion
@@ -67,14 +94,17 @@ class Taylor:
         @param inPrec:      If to expand by input precision
         @param outPrec:     if the variance result needs to be multiplied by s1dTaylor[0]
 
-        Without any otptimization, or judgement of the convergence of the result.           
+        @param enableStabilityTruncation
+        @param monotonicCheckOrder
         '''
+
         value = varDbl.VarDbl(1, 0) if outPrec else s1dTaylor[0]
         variance = varDbl.VarDbl()
         var = varDbl.VarDbl(input.variance())
         if inPrec:
             var *= varDbl.VarDbl( 1 /input.value() /input.value() )
         varn = varDbl.VarDbl(var)
+        prevVariance = None
         for n in range(2, min(len(s1dTaylor), self._momentum._maxOrder*2), 2):
             newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
             newVariance = varDbl.VarDbl()
@@ -85,17 +115,27 @@ class Taylor:
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
             value += newValue
             variance += newVariance
+
+            if monotonicCheckOrder or enableStabilityTruncation:
+                unc = variance.value()*Taylor.TAU
+                stable = (math.sqrt(abs(newVariance.value())) < unc) and prevVariance
+
+            if monotonicCheckOrder:
+                if (stable or (n >= monotonicCheckOrder)) and (prevVariance.value() + unc < newVariance.value()):
+                    raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
+                            value, variance, n, newValue, newVariance)
             if variance.variance() > variance.value() * self._variance_threshold:
-                raise LossUncertaintyException(input, name, s1dTaylor, inPrec, outPrec,
+                raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             varn *= var
             if varn.value() == 0:
                 break
             if enableStabilityTruncation:
-                unc = variance.value()*Taylor.TAU
-                if (math.sqrt(abs(newVariance.value())) < unc) and \
-                        (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
+                if stable and (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
                     break
+
+            prevVariance = newVariance
+
         if enableStabilityTruncation and (n >= self._momentum._maxOrder*2):
             raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance)
@@ -154,7 +194,7 @@ class Taylor:
             if varn.value() == 0:
                 break
         if variance.variance() > variance.value() * self._variance_threshold:
-            raise LossUncertaintyException(input, f'{input}^{exp}', s1dTaylor, False, False,
+            raise NotReliableException(input, f'{input}^{exp}', s1dTaylor, False, False,
                     value, variance, n, newValue, newVariance)
         return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True) if type(value) == varDbl.VarDbl \
                     else varDbl.VarDbl(value, variance.value(), True)

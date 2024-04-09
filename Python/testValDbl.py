@@ -1,10 +1,13 @@
+from contextlib import AbstractContextManager
 import math
 import pickle
 import unittest
+import random
 import sys
 
+from histo import Stat, Histo
 from varDbl import VarDbl, ValueException, UncertaintyException, validate
-from taylor import LossUncertaintyException
+from taylor import NotReliableException, NotMonotonicException
 
 
 class TestInit (unittest.TestCase):
@@ -466,7 +469,9 @@ class TestDivideBy (unittest.TestCase):
         try:
             VarDbl(0) / VarDbl(0.1, 1)
             self.fail()
-        except LossUncertaintyException:
+        except NotReliableException:
+            pass
+        except NotMonotonicException:
             pass
         except Exception as ex:
             self.fail(ex)
@@ -503,6 +508,50 @@ class TestDivideBy (unittest.TestCase):
         validate(self, VarDbl(-1, 1e-3) / VarDbl(-2, 1e-3), 0.5, 2.5e-4*math.sqrt(5), deltaValue=1e-6, deltaUncertainty=1.2e-9)
         validate(self, VarDbl(2, 1e-3) / VarDbl(2, 1e-3), 1, 1e-3*math.sqrt(0.5), deltaValue=2e-6, deltaUncertainty=5.0e-9)
         validate(self, VarDbl(0.5, 1e-3) / VarDbl(2, 1e-3), 0.25, 2.5e-4*math.sqrt(4.25), deltaValue=5e-7, deltaUncertainty=1.2e-9)
+
+
+    def verifyByStat(self, val, unc, pctVal, pctUnc):
+        res = 1/VarDbl(val, unc)
+        stat = Stat()
+        for i in range(10000):
+            stat.accum(1 / random.gauss(val, unc))
+        self.assertAlmostEqual(res.value(), stat.mean(), delta=res.value() *pctVal/100)
+        self.assertAlmostEqual(res.uncertainty(), stat.dev(), delta=res.uncertainty() *pctUnc/100)
+
+
+    def testByStat(self):
+        with self.assertRaises(NotMonotonicException):
+            self.verifyByStat(1, 0.2 - 1e-5, 1, 7.5)
+        self.verifyByStat(1, 0.2 - 2e-5, 25, 4)
+
+        with open('./Python/Output/InversionNearOne.txt', 'w') as f:
+            f.write('Input Uncertainty\tValue\tUncertainty\tDeviation\tMean\tMinimum\tMaximum\tLess\tMore')
+            histo = Histo(5, 3)
+            for bucket in histo.buckets():
+                f.write(f'\t{bucket:.1f}')
+            f.write('\n')
+
+            def calc(unc):
+                CNT = 10000
+                var = 1/VarDbl(1, unc)
+                varUnc = var.uncertainty()
+                histo = Histo(5, 3)
+                for j in range(CNT):
+                    histo.accum( (1 / random.gauss(1, unc) - var.value())/varUnc )
+                stat = histo.stat()
+                f.write(f'{unc}\t{var.value()}\t{var.uncertainty()}'
+                        f'\t{stat.mean()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}\t{histo.less()}\t{histo.more()}')
+                cnt = stat.count() - histo.less() - histo.more()
+                for h in histo.histogram():
+                    f.write(f'\t{h/cnt}')
+                f.write('\n')
+
+            for i in range(2, 10):
+                calc(0.2 - i * 1e-5) 
+            for i in range(-4, 0):
+                calc(0.2 - math.pow(10, i)) 
+            calc(0.01)
+
 
 
 class TestCompare (unittest.TestCase):

@@ -1132,20 +1132,20 @@ Thus, for $(x+a)^c$ in which $a$ is another constant, $P(x) = \delta x / |x - a|
 The variance formulas using Taylor expansion show the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
 
 Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using variance arithmetic.
-\begin{itemize}
-\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
 
+Variance arithmetic may reject an calculation for the following reason:
+\begin{itemize}
 \item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
-If the precision of the uncertainty becomes worse than $1/\sigma$, the result should be invalidated as \emph{unreliable variance}.
+If the precision of the uncertainty becomes worse than $1/\sigma$, the result should be invalidated as \emph{not reliable}.
 
 \item Due to digital limitation of conventional floating-point representation, $\zeta(2n)$ can only be calculated to limited $2n$.
 If within the limit, the expansion can not be truncated reliably, the result should be invalidated as \emph{practical unstable}.
 
-\item  The variance from Formula \eqref{eqn: Taylor 1d mean} can be added to the corresponding result of Formula \eqref{eqn: Taylor 1d variance}.
+\item For the variance to converge, in Formula \eqref{eqn: Taylor 1d variance}, the contribution from expansion order $2n$ should decreases with increasing $2n$. 
+Otherwise, the result should be invalidated as \emph{not monotonic}.
 
 \end{itemize}
-Variance arithmetic may reject an calculation near a zero or a pole when the variance calculation diverges or becomes uncertain.
-
+The rejection usually happens near a zero or a pole, such as when the possibility to calculate $1/0$ become more than $\epsilon$, so that $1/(1 \pm (0.2 - 10^{-5}))$ will be rejected for not monotonic, while $1/(1 \pm (0.2 -2\;10^{-5})) = 1.046 \pm 0.250$.
 
 
 \subsection{Dependency Tracing}
@@ -2505,7 +2505,7 @@ Such strong tracking power holds for all $x$ and $\delta x$ of $e^{x + \delta x}
 
 The probability density function for $\log(x)$ has a pole at $x=0$.
 
-Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\log(x + \delta x)$, so that the result error deviations are very close to $1$, until the uncertainties suddenly diverge when the input precision is worse than $1/5$ which is the estimated application precision threshold.
+Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\log(x + \delta x)$, so that the result error deviations are very close to $1$, until variance arithmetic invalidates the calculation when the input precision is worse than $1/5$ which is the estimated application precision threshold.
 After the result uncertainties diverge, the corresponding value deviations still continue on the same trends until the input data to the $\log$ function start to have negative values.
 In Figure \ref{fig: Log_Dev} the input noises are uniformly distributed.
 If Gaussian noises are used instead, the cutoffs for both value errors and error deviations are strictly at $1/5$.
@@ -2559,22 +2559,12 @@ When the function is flat, both the result uncertainty and the error deviation b
 
 \subsection{Power}
 
-Figure \ref{fig: Pow_Dev} shows that the calculated uncertainties of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} agree very well with the measured value deviations for $(1 + \delta x)^c$ except when $\delta x =0.2$ and $c < -1$.
-The reason why Formula \eqref{eqn: power precision} is not applicable exactly at the estimated applicable precision threshold $1/\sigma$ needs further discussion.
+Figure \ref{fig: Pow_Dev} shows that the calculated uncertainties of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} agree very well with the measured value deviations for $(1 + \delta x)^c$.
+
 Figure \ref{fig: Pow_Converge} shows the individual variance term of $(1 \pm \delta x)^c$ for the different Taylor expansion order $2n$, $c$, and $\delta x$.
-\begin{itemize}
-
-\item Formula \eqref{eqn: inversion precision} and \eqref{eqn: inversion square precision} show that $(1 \pm 0.2)^{-2}$ diverges faster than $(1 \pm 0.2)^{-1}$, which is confirmed by both Figure \ref{fig: Pow_Dev} and \ref{fig: Pow_Converge}.
-
-\item 
-When the deviation is reduced slightly to below $1/\sigma$ from $0.2$ to $0.195$, Figure \ref{fig: Pow_Dev} shows that the error deviations become much closer to $1$.  
-As the confirmation, Figure \ref{fig: Pow_Converge} shows reducing $\delta x$ increases the convergence, e.g., $(1 \pm 0.2)^{-1.5}$ diverges while $(1 \pm 0.195)^{-2}$ converges.
-
-\item Figure \ref{fig: Pow_Dev} and \ref{fig: Pow_Converge} shows that the convergence is more sensitive to $\delta x$ than $c$, so that the applicable precision threshold is relatively hard, which is estimated as $\delta x = 0.196$ for $c=-2$.
-
-\end{itemize}
-The Taylor expansion 
-Figure \ref{fig: Pow_Converge} shows that the convergence of an analytic function at each input can be judged numerically and automatically for the given maximum Taylor expansion orders.
+It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.2)^{-2}$ marginally diverges, so that variance arithmetic invalidate both using the monotonic requirements.
+When $\delta x =0.2$, variance arithmetic limits $c$ above $-0.8$.
+For the same reason, when $\delta x =0.195$, variance arithmetic limits $c$ above $-1.8$.
 
 
 
@@ -3293,7 +3283,7 @@ On the other hand, by using stability truncation, variance arithmetic no longer 
 Also, variance arithmetic can reject ill-formed problems.
 
 How to treat the result difference using variance arithmetic vs. using conventional floating-point arithmetic is also a general question.
-The uncertainty bias can be potentially large near the approximate applicable precision threshold $1/\sigma$, such as $1/(0.3 \pm 0.06) = 527 \pm 458$ while $1/0.3 = 10/3 \pm LSV(10/3)$.  
+The uncertainty bias can be potentially significant near the approximate applicable precision threshold $1/\sigma$, such as $1/(1 \pm (0.2 -2\;10^{-5})) = 1.046 \pm 0.250$.  
 Variance arithmetic generally reveals worse results than those of conventional floating-point arithmetic, such as very quick loss of precision in matrix inversion, especially for matrix of large size. 
 
 In variance arithmetic, it is generally an order-of-magnitude more complicated to calculate the result uncertainties than the result values.

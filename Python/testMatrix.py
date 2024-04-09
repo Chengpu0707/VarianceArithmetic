@@ -12,7 +12,7 @@ import unittest
 from histo import Histo, Stat
 from matrix import ElementType, permutSign, isSquareMatrix, createIntMatrix, createHilbertMatrix, addNoise
 from matrix import linear, multiply, adjugate, adjugate_mul
-from taylor import LossUncertaintyException
+from taylor import NotReliableException, NotMonotonicException
 from varDbl import VarDbl, UncertaintyException
 
 
@@ -429,8 +429,13 @@ class TestAdjugate (unittest.TestCase):
         detAdj, ssAdj = adjugate(ssOrg)
         self.assertAlmostEqual(detAdj.value(),       6031779.536578279)
         self.assertAlmostEqual(detAdj.uncertainty(), 2311975.810766203)
-        with self.assertRaises(LossUncertaintyException):
+        try:
             ssAdj[0][0] / detAdj
+            self.fail()
+        except NotMonotonicException:
+            pass
+        except NotReliableException:
+            pass
         
         adj = Adjugate(2)
         for noise in (0, 1e-2, 1e-1):
@@ -440,7 +445,7 @@ class TestAdjugate (unittest.TestCase):
                 for j in range(adj.size):
                     try:
                         (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
-                    except LossUncertaintyException as ex:
+                    except NotReliableException as ex:
                         print(f'Found at ssAdj[{i}][{j}]={ssAdj[i][j]}, detAdj={detAdj}, noise={noise}, ssOrg={ssOrg}')
                         break
         
