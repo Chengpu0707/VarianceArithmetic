@@ -79,12 +79,13 @@ It seems necessary to recalculate all math library functions to attach the uncer
 \AMSsubj{65-00}
 
 
+\tableofcontents
 
 \clearpage
 \section{Introduction}
 \label{sec: introduction}
 
-\subsection{Measurement Uncertainty}
+\subsection{Measurement Uncertainty \cite{Prev_Precision_Arithmetic}}
 
 Except for the simplest counting, scientific and engineering measurements never give completely precise results \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}. 
 In scientific and engineering measurements, the uncertainty of a measurement $x$ usually is characterized by either the sample deviation $\delta x$ or the uncertainty range $\Delta x$ \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
@@ -100,7 +101,7 @@ The precision of measured values ranges from an order-of-magnitude estimation of
 
 
 
-\subsection{Problem of Conventional Floating-Point Arithmetic}
+\subsection{Conventional Floating-Point Arithmetic \cite{Prev_Precision_Arithmetic}}
 
 The \emph{conventional floating-point arithmetic} \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} assumes a constant and best possible precision for each value all the time, and constantly generates artificial information during the calculation \cite{Arithmetic_Digital_Computers}.  
 For example, the following calculation is carried out precisely in integer format:
@@ -141,10 +142,10 @@ However, the effects of such distortion in signal processing are generally not c
 
 What is needed is a floating-point arithmetic that tracks precision automatically.  
 When the calculation is improper or becomes excessive, the results become insignificant.  
-All existing uncertainty-bearing arithmetics are reviewed below. 
+Each existing uncertainty-bearing arithmetic is reviewed below, \emph{with the improvements by variance arithmetic pointed out}. 
 
 
-\subsection{Interval Arithmetic}
+\subsection{Interval Arithmetic \cite{Prev_Precision_Arithmetic}}
 
 \emph{Interval arithmetic} \cite{Precise_Numerical_Methods}\cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is currently a standard method to track calculation uncertainty.  
 It ensures that the value x is absolutely bounded within its \emph{bounding range} $[x] \equiv [\underbar{x}, \bar{x}]$, in which $\underbar{x}$ and $\bar{x}$ are lower and upper bounds for $x$, respectively. 
@@ -196,11 +197,15 @@ Interval arithmetic has very coarse and algorithm-specific precision but constan
 It represents the other extreme from conventional floating-point arithmetic.  
 To meet practical needs, a better uncertainty-bearing arithmetic should be based on statistical propagation of the rounding error, while also allowing reasonable bounding leakage for normal usages, which is achieved in variance arithmetic, as show later in this paper.
 
+\emph{
 As shown previously \cite{Prev_Precision_Arithmetic}, interval arithmetic grossly exaggerates calculation uncertainty, e.g., for $f^{-1}(f(x))$ the result uncertainty is much larger than the original uncertainty.
-On the other hand, as shown later in this paper, variance arithmetic provides stable bounding for a given bounding leakage, e.g., $\pm 3.1$-fold of the result deviation from the mean for a bounding leakage of $2 \times 10^{-7}$.
+On the other hand, as shown later in this paper, variance arithmetic provides stable bounding for a given bounding leakage, e.g., $\pm 5$-fold of the result deviation from the mean for a bounding leakage of $5.73 \times 10^{-7}$.
+Variance arithmetic is based on statistics.
+It has no dependency problem.
+}
 
 
-\subsection{Statistical Propagation of Uncertainty}
+\subsection{Statistical Propagation of Uncertainty \cite{Prev_Precision_Arithmetic}}
 
 If each operand is regarded as a random variable, and the statistical correlation between the two operands is known, the resulting uncertainty is given by the \emph{statistical propagation of uncertainty} \cite{Statistical_Arithmetic}\cite{Statistical_Analysis}, with the following arithmetic equations, in which $\sigma$ is the deviation of a measured value $x$, $P$ is its precision, and $\gamma$ is the correlation between the two imprecise values:
 
@@ -217,15 +222,10 @@ If each operand is regarded as a random variable, and the statistical correlatio
 
 Tracking uncertainty propagation statistically seems a better solution.  
 However, in practice, the correlation between two operands is generally not precisely known, so the direct use of statistical propagation of uncertainty is very limited.  
-As show later in this paper, variance arithmetic is based on a statistical assumption much more lenient than knowing the correlation between imprecise values.
-
-In this paper, as a proxy for statistical propagation of uncertainty, an \emph{independence arithmetic} always assumes that no correlation exists between any two operands, whose arithmetic equations are Formula \eqref{eqn: stat +}, Formula \eqref{eqn: stat -}, Formula \eqref{eqn: stat *} and Formula \eqref{eqn: stat /}, where $\gamma=0$.  
-Independence arithmetic is actually de facto arithmetic in engineering data processing, such as in the common belief that uncertainty after averaging reduces by the square root of number of measurements \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, or the ubiquitous Monte Carlo method\footnote{Most but not all applications of Monte Carlo methods assume independence between any two random variables.  
-In a minority of applications, a Monte Carlo method can be used to construct specified correlation between two random variables \cite{Monte_Carlo_Statistics}.} \cite{Monte_Carlo_Method}\cite{Monte_Carlo_Statistics}, or calculating the mean and variance of a Taylor expansion \cite{Taylor_Expansion_Uncertainty}.  
-Perhaps, it is reasonable to assume the uncertainties of experimental measurements to be independent of each other, while is it not reasonable to assume the uncertainties of calculations to be independent, which is essentially the approach of variance arithmetic.
+\emph{As show later in this paper, variance arithmetic is based on a statistical assumption much more lenient than knowing the correlation between imprecise values.}
 
 
-\subsection{Significance Arithmetic}
+\subsection{Significance Arithmetic \cite{Prev_Precision_Arithmetic}}
 
 \emph{Significance arithmetic} \cite{Significance_Arithmetic} tries to track reliable bits in an imprecise value during the calculation.  
 In the two early attempts \cite{Digital_Significance_Arithmetic}\cite{Unnormalized_Arithmetic}, the implementations of significance arithmetic are based on simple operating rules upon reliable bit counts, rather than on formal statistical approaches.  
@@ -239,11 +239,13 @@ Its sampling approach may be more time-consuming and less accurate than direct s
 It is based on modeling rounding errors in conventional floating-point arithmetic, which is quite complicated.  
 A better approach may be to define arithmetic rules that make error tracking by probability easier.
 
+\emph{
 One problem of significance arithmetic is that itself can not properly specify the uncertainty \cite{Prev_Precision_Arithmetic}.
 For example, if the least significand bit of significand is used to specify uncertainty, then the representation has very coarse precision, such as $1 \pm 10^{-3} = 1024 \times 2^{-10}$  \cite{Prev_Precision_Arithmetic}.
 Introducing limited bits calculated inside uncertainty cannot avoid this problem completely.
 Thus, the resolution of the conventional floating-point representation is desired.
-This is the reason why variance arithmetic abandoned the significance arithmetic nature of its predecessor \cite{Prev_Precision_Arithmetic}.
+This is the reason why variance arithmetic has abandoned the significance arithmetic nature of its predecessor \cite{Prev_Precision_Arithmetic}.
+}
 
 
 
@@ -254,11 +256,11 @@ Compare to its predecessor \cite{Prev_Precision_Arithmetic}:
  \begin{itemize}
 \item The introduction section \ref{sec: introduction} remains almost unchanged, except it quotes the negative results from \cite{Prev_Precision_Arithmetic} for interval arithmetic and significance arithmetic.
 
-\item variance arithmetic also has uncorrelated uncertainty assumption as its foundation.
+\item Variance arithmetic also has uncorrelated uncertainty assumption as its foundation.
 The theoretical foundation section \ref{sec: variance arithmetic} has the following significant differences:
 
 \begin{enumerate}
-\item variance arithmetic no longer requires the precision principle.  
+\item Variance arithmetic no longer requires the precision principle.  
 Instead, it is a pure statistical approach. 
 
 \item Variance arithmetic has different digital presentation and uses the standard floating-point arithmetic to calculate value and uncertainty, so that it is completely compatible with conventional floating-point arithmetic for precise floating-point values.
@@ -563,7 +565,7 @@ In statistics, such two imprecise values has $50\%$ possibility to be less than 
 Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal, or less or more than each other.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, so that the z-value for the difference is $z = 0.002 / 0.00224$, and the probability for them to be not equal is $\xi(|z|) - \xi(-|z|) = 62.8\%$, in which $\xi(z)$ is the cumulative density function for normal distribution \cite{Probability_Statistics}.
 If the threshold probability of not equality is $50\%$, $1.000 \pm 0.002 < 1.002 \pm 0.001$.
-Instead of using the threshold probability, the bounding range for z can be used, such as $|z| \leq 0.67448975$ for the equivalent threshold probability of $50\%$.
+Instead of using the threshold probability, the equivalent bounding range for z can be used, such as $|z| \leq 0.67448975$ for the equivalent threshold probability of $50\%$.
 
 
 
@@ -937,9 +939,9 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it c
 
 \subsubsection{Bounding Factor and Bounding Leakage}
 
-\begin{figure}
+\begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Variance_Momentum.png} 
+\includegraphics[height=2.5in]{Variance_Momentum.png}
 \captionof{figure}{
 The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
 Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
@@ -1121,6 +1123,17 @@ As some special cases for Formula \eqref{eqn: power precision}, Formula \eqref{e
 
 \subsubsection{Convergence and Truncation of Taylor Expansion}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Inversion_on_Edge.png} 
+\captionof{figure}{
+The histogram for $1/(1 \pm \delta x)$ using Gaussian input noises, with $\delta x$ shown in the legend. 
+The histogram has been normalized by the result mean and uncertainty calculated by variance arithmetic, so that $0$ on the x-axis marks the result mean, and $\pm 1$ on the x-axis marks the result uncertainty.
+The $y$-axis is scaled as the normalized count of the histogram.
+}
+\label{fig: Inversion_on_Edge}
+\end{figure}
+
 
 If Formula \eqref{eqn: Taylor 1d variance} can be expressed as $\sum_{n=1}^{\infty} \upsilon(2n) \zeta(2n) P(x)^{2n}$, such as Formula \eqref{eqn: log precision} and \eqref{eqn: power precision}, and if $|\upsilon(2n)| \sim \lambda^{2n}$, then Formula \eqref{eqn: Taylor 1d variance} converges if $P(x) < 1/(\lambda \sigma)$.
 $\lambda$ depends on $f(x)$, e.g., it is larger for $1/x$ than for $\sqrt{x}$.
@@ -1133,19 +1146,27 @@ The variance formulas using Taylor expansion show the nature of the calculation,
 
 Both Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} are subject to numerical errors and rounding errors such as from $f^{(j)}_x$, $\zeta(2j)$ and $(\delta x)^{2j}$, so both needs to be calculated using variance arithmetic.
 
-Variance arithmetic may reject an calculation for the following reason:
+Variance arithmetic may reject a calculation for the following reasons:
 \begin{itemize}
 \item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
 If the precision of the uncertainty becomes worse than $1/\sigma$, the result should be invalidated as \emph{not reliable}.
 
 \item Due to digital limitation of conventional floating-point representation, $\zeta(2n)$ can only be calculated to limited $2n$.
-If within the limit, the expansion can not be truncated reliably, the result should be invalidated as \emph{practical unstable}.
+If at the limit, the expansion is still not stable, the result should be invalidated as \emph{practical unstable}.
+Section \ref{sec: polynomial} will define the stability standard for truncating an expansion.
 
-\item For the variance to converge, in Formula \eqref{eqn: Taylor 1d variance}, the contribution from expansion order $2n$ should decreases with increasing $2n$. 
+\item For the variance to converge, in Formula \eqref{eqn: Taylor 1d variance}, the contribution from expansion order $2n$ should decrease with increasing $2n$. 
 Otherwise, the result should be invalidated as \emph{not monotonic}.
 
 \end{itemize}
-The rejection usually happens near a zero or a pole, such as when the possibility to calculate $1/0$ become more than $\epsilon$, so that $1/(1 \pm (0.2 - 10^{-5}))$ will be rejected for not monotonic, while $1/(1 \pm (0.2 -2\;10^{-5})) = 1.046 \pm 0.250$.
+The rejection usually happens near a zero or a pole, such as when the possibility to calculate $1/0$ becomes more than $\epsilon$, so that $1/(1 \pm (0.2 - 1\;10^{-5}))$ is rejected for not monotonic, while $1/(1 \pm (0.2 -2\;10^{-5})) = 1.046 \pm 0.250$.
+Figure \ref{fig: Inversion_on_Edge} shows the histograms for $1/(1 \pm \delta x)$ when $\delta x =0.01, 0.1, 0.2 -2\;10^{-5}$.
+When $\delta x =0.01$, the result is normal distributed.
+When $\delta x$ approaches $0.2$, the result distribution deviates from normal more and more.
+The rejection also keeps the result distribution from deviating too much from normal distribution, so that the result value and uncertainty do not deviate too much from those of variance arithmetic.
+For the worst case of $1/(1 \pm (0.2 -2\;10^{-5}))$, the mean is about $0.4\%$ smaller, while the deviation is about $1.3\%$ smaller.
+Such error when the input precision is very close to applicable precision threshold is ignored in variance arithmetic.
+
 
 
 \subsection{Dependency Tracing}
@@ -2735,7 +2756,7 @@ This simplicity avoids introducing numerical errors from Formula \eqref{eqn: Tay
 Because the reverse transformation divides the result by $2^L$, the result uncertainty mean decreases with the FFT order $L$ as $\sqrt{1/2}^L$.
 The result uncertainty means for the roundtrip transformations is thus: $\sqrt{2}^L \times \sqrt{1/2}^L = 1$.
 
-\item Forward and reverse transformations are identical except a sign, so they are essentially the same algorithm, and their difference is purely due to input data.  
+\item Forward and reverse transformations are identical except for a sign, so they are essentially the same algorithm, and their difference is purely due to input data.  
 
 \end{itemize}
 
@@ -3085,7 +3106,7 @@ The additional peaks extend beyond the range of $[-3, +3]$
 
 \end{itemize}
 
-When the input uncertainty is too small, proper coverage can not be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
+When the input uncertainty is too small, proper coverage cannot be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
 The only solution seems to create a new sin library using variance arithmetic so that all numerical calculation errors are accounted for.
 
 
