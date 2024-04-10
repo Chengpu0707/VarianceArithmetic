@@ -282,16 +282,27 @@ class TestSin (unittest.TestCase):
         self.validate(0, 1e-3)
         self.validate(0, 1e-2)
         self.validate(0, 1e-1)
+        self.validate(0, math.pi/32*7, varianceDelta=2e-2)
+        with self.assertRaises(NotMonotonicException):
+            VarDbl.sin(VarDbl(0, math.pi/4))
 
         self.validate(math.pi/2, 0)
         self.validate(math.pi/2, 1e-3)
         self.validate(math.pi/2, 1e-2)
         self.validate(math.pi/2, 1e-1)
+        self.validate(math.pi/2, math.pi/8, valueDelta=8e-7, varianceDelta=2e-4)
+        self.validate(math.pi/2, math.pi/32*5, valueDelta=8e-7, varianceDelta=1e-3)
+        with self.assertRaises(NotMonotonicException):
+            VarDbl.sin(VarDbl(math.pi/2, math.pi/32*6))
 
         self.validate(-math.pi/2, 0)
         self.validate(-math.pi/2, 1e-3)
         self.validate(-math.pi/2, 1e-2)
         self.validate(-math.pi/2, 1e-1)
+        self.validate(-math.pi/2, math.pi/8, valueDelta=8e-7, varianceDelta=2e-4)
+        self.validate(-math.pi/2, math.pi/32*5, valueDelta=8e-7, varianceDelta=1e-3)
+        with self.assertRaises(NotMonotonicException):
+            VarDbl.sin(VarDbl(-math.pi/2, math.pi/32*6))
 
     @staticmethod
     def func(x):

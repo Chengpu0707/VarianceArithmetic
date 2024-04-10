@@ -510,20 +510,14 @@ class TestDivideBy (unittest.TestCase):
         validate(self, VarDbl(0.5, 1e-3) / VarDbl(2, 1e-3), 0.25, 2.5e-4*math.sqrt(4.25), deltaValue=5e-7, deltaUncertainty=1.2e-9)
 
 
-    def verifyByStat(self, val, unc, pctVal, pctUnc):
-        res = 1/VarDbl(val, unc)
-        stat = Stat()
-        for i in range(10000):
-            stat.accum(1 / random.gauss(val, unc))
-        self.assertAlmostEqual(res.value(), stat.mean(), delta=res.value() *pctVal/100)
-        self.assertAlmostEqual(res.uncertainty(), stat.dev(), delta=res.uncertainty() *pctUnc/100)
-
-
-    def testByStat(self):
+    def testEdge(self):
         with self.assertRaises(NotMonotonicException):
-            self.verifyByStat(1, 0.2 - 1e-5, 1, 7.5)
-        self.verifyByStat(1, 0.2 - 2e-5, 25, 4)
+            1/VarDbl(1, 0.2 - 1.28e-5)
+        res = 1/VarDbl(1, 0.2 - 1.29e-5)
+        self.assertAlmostEqual(res.value(), 1.0462353179001609)
+        self.assertAlmostEqual(res.uncertainty(), 0.24996133298478024)
 
+    def testDump(self):
         with open('./Python/Output/InversionNearOne.txt', 'w') as f:
             f.write('Input Uncertainty\tValue\tUncertainty\tDeviation\tMean\tMinimum\tMaximum\tLess\tMore')
             histo = Histo(5, 3)
@@ -532,24 +526,33 @@ class TestDivideBy (unittest.TestCase):
             f.write('\n')
 
             def calc(unc):
+                if unc <= 0:
+                    return
                 CNT = 10000
-                var = 1/VarDbl(1, unc)
+                try:
+                    var = 1/VarDbl(1, unc)
+                except BaseException as ex:
+                    raise ex
                 varUnc = var.uncertainty()
+                stat = Stat()
                 histo = Histo(5, 3)
                 for j in range(CNT):
-                    histo.accum( (1 / random.gauss(1, unc) - var.value())/varUnc )
-                stat = histo.stat()
+                    val = random.gauss(1, unc)
+                    stat.accum( 1 / val )
+                    histo.accum( (1 / val - var.value())/varUnc )
                 f.write(f'{unc}\t{var.value()}\t{var.uncertainty()}'
-                        f'\t{stat.mean()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}\t{histo.less()}\t{histo.more()}')
+                        f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}\t{histo.less()}\t{histo.more()}')
                 cnt = stat.count() - histo.less() - histo.more()
                 for h in histo.histogram():
                     f.write(f'\t{h/cnt}')
                 f.write('\n')
 
-            for i in range(2, 10):
-                calc(0.2 - i * 1e-5) 
+            for j in (1.29, 1.5, 2, 5):
+                calc(0.2 - j * 1e-5) 
             for i in range(-4, 0):
-                calc(0.2 - math.pow(10, i)) 
+                pw = math.pow(10, i)
+                for j in (1, 2, 5):
+                    calc(0.2 - j*pw) 
             calc(0.01)
 
 
