@@ -336,7 +336,7 @@ Therefore, variance arithmetic has no dependency problem.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Signal_and_Noise.png}
+\includegraphics[height=2.5in]{Signal_and_Noise.pdf}
 \captionof{figure}{
 Effect of noise on bit values of a measured value.  The triangular wave signal and the added white noise are shown at top using the thin black line and the grey area, respectively.  The values are measured by a theoretical 4-bit Digital-to-Analog Converter in ideal condition, assuming LSB is the 0th bit.  The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
 This figure has been published previously \cite{Prev_Precision_Arithmetic}.
@@ -346,7 +346,7 @@ This figure has been published previously \cite{Prev_Precision_Arithmetic}.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Independent_Uncertainty_Assumption.png} 
+\includegraphics[height=2.5in]{Independent_Uncertainty_Assumption.pdf} 
 \captionof{figure}{
 Allowed maximal correlation between two values vs. input precisions and independence standard (as shown in legend) for the independence uncertainty assumption of variance arithmetic to be true.
 This figure has been published previously \cite{Prev_Precision_Arithmetic}.
@@ -433,7 +433,7 @@ P_{\frac{1}{2}}(x) \equiv 1, \eqspace  -1/2 \leq x \leq +1/2;
 
 \begin{figure}
 \centering
-\includegraphics[height=2.5in]{Prec_Add_ErrDist.png}
+\includegraphics[height=2.5in]{Prec_Add_ErrDist.pdf}
 \captionof{figure}{
 The probability distribution $P_{\frac{n}{2}}(x)$ of Formula \eqref{eqn:rounding error n/2 distribution}, assuming $P_{\frac{1}{2}}(x)$ is uniformly distributed between $(-1/2, +1/2)$.  
 The legend shows $n$.
@@ -695,7 +695,7 @@ When $f(x)=x^c$:
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
+\includegraphics[height=2.5in]{Square_Root_Distribution.pdf} 
 \captionof{figure}{
 The probability density function for $\tilde{y} = \sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
 The $x$-axis is scaled as $\tilde{y}^2$.
@@ -707,7 +707,7 @@ The legend for the Normal distribution shows the value of Normal difference in p
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Cubic_Root_Distribution.png} 
+\includegraphics[height=2.5in]{Cubic_Root_Distribution.pdf} 
 \captionof{figure}{
 The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\tilde{y}^3$.
@@ -719,7 +719,7 @@ The legend for the Normal distribution shows the value of Normal difference in p
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Square_Distribution.png} 
+\includegraphics[height=2.5in]{Square_Distribution.pdf} 
 \captionof{figure}{
 The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $\sqrt{\tilde{y}}$.
@@ -731,7 +731,7 @@ The legend for the Normal distribution shows the value of Normal difference in p
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Inverse_Square_Distribution.png} 
+\includegraphics[height=2.5in]{Inverse_Square_Distribution.pdf} 
 \captionof{figure}{
 The probability density function for $1/(x \pm 1)^2$, for different $x$ as shown in the legend. 
 The $y$-axis is scaled as $1/\sqrt{\tilde{y}}$.
@@ -939,10 +939,11 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it c
 
 \begin{figure}
 \centering
-\includegraphics[height=2.5in]{Variance_Momentum.png}
+\includegraphics[height=2.5in]{Variance_Momentum.pdf}
 \captionof{figure}{
 The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
 Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
+The linear fit equation is: $8.284726600172205\;10^{-7} \times 4.9405914462757465^{2n}$.
 }
 \label{fig: Variance_Momentum}
 \end{figure}
@@ -1125,7 +1126,7 @@ The variance formulas using Taylor expansion show the nature of the calculation,
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Inversion_on_Edge_Histo.png} 
+\includegraphics[height=2.5in]{Inversion_on_Edge_Histo.pdf} 
 \captionof{figure}{
 The histogram for $1/(1 \pm \delta x)$ using Gaussian input noises, with $\delta x$ shown in the legend. 
 The histogram has been normalized by the result mean and uncertainty calculated by variance arithmetic, so that $0$ on the x-axis marks the result mean, and $\pm 1$ on the x-axis marks the result uncertainty.
@@ -1136,7 +1137,7 @@ The $y$-axis is scaled as the normalized count of the histogram.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Inversion_on_Edge.png} 
+\includegraphics[height=2.5in]{Inversion_on_Edge.pdf} 
 \captionof{figure}{
 The result of variance arithmetic vs the sampled statistics for $1/(1 \pm 0.2 - \delta x)$, for different $\delta x$ as shown in the x-axis.
 In the legend, \textit{value} and \textit{uncertainty} are calculated by variance arithmetic, while \textit{mean} and \textit{deviation} are sampled statistics from $10,000$ floating-point calculation of $1/\tilde{x}$ in which $\tilde{x}$ is Gaussian noise with mean $1$ and deviation $0.2 - \delta x$.
@@ -1240,6 +1241,7 @@ For example:
   &+ 2 (\delta x)^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) 	- \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber
 \end{align}
 
+Variance arithmetic uses dependency tracing to guarantee that the result uncertainty bias and uncertainty fit statistics.
 Dependency trading comes with a price: variance calculation is generally much more complex than value calculation.
 
 
@@ -1566,7 +1568,7 @@ Instead of a reminder estimator, the true reminder $r(N)$ is calculated as Formu
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion_Uncertainty.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion_Uncertainty.pdf} 
 \captionof{figure}{
 The reminders and result uncertainties for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
 The y-axis is for either absolute reminder or expansion uncertainty.
@@ -1580,7 +1582,7 @@ and \textit{Expansion LSV} is the $LSV$ of the value of Formula \eqref{eqn: Tayl
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion.pdf} 
 \captionof{figure}{
 The reminders for Taylor expansion of $1/(1-x)$, for different Taylor expansion order $N$ as shown in the x-axis, and different $x$ as shown in the legend.
 The y-axis is for absolute reminder.
@@ -1666,7 +1668,7 @@ Thus, variance arithmetic can only provide proper coverage to floating-point rou
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion_0.01.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion_0.01.pdf} 
 \captionof{figure}{
 The reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x \pm \delta x$ as shown in the legend.
 In the legend,  
@@ -1679,7 +1681,7 @@ In the legend,
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion_0.04.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion_0.04.pdf} 
 \captionof{figure}{
 The reminder values and the expansion uncertainties for Taylor expansion of $\frac{1}{1 -x  \pm \delta x}$, for different Taylor expansion order $N$ as shown in the x-axis, and different input $x  \pm \delta x$ as shown in the legend.
 In the legend,  
@@ -1692,7 +1694,7 @@ In the legend,
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion_Order.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion_Order.pdf} 
 \captionof{figure}{
 The truncation orders for Taylor expansion of $\frac{1}{1 - x \pm \delta x}$, for different input uncertainty $\delta x$ as shown in the x-axis, and different input value $x$ and truncation rule as shown in the legend. 
 In the legend,  
@@ -1705,7 +1707,7 @@ In the legend,
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Taylor_Expansion_Error.png} 
+\includegraphics[height=2.4in]{Taylor_Expansion_Error.pdf} 
 \captionof{figure}{
 The truncation errors for Taylor expansion of $\frac{1}{1 - x \pm \delta x}$, for different input uncertainty $\delta x$ as shown in the x-axis, and different input value $x$ and truncation rule as shown in the legend. 
 In the legend,  
@@ -2018,7 +2020,7 @@ In contrast, for the special matrix in Formula \eqref{eqn: special determinant},
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Uncertainty_vs_Size_Noise.png} 
+\includegraphics[height=2.5in]{Adjugate_Uncertainty_vs_Size_Noise.pdf} 
 \captionof{figure}{
 The result uncertainty means vs. input noise precision and matrix size for the difference between $\widetilde{\M}^A$ and $\M^A$.
 The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
@@ -2028,7 +2030,7 @@ The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix si
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Error_vs_Size_Noise.png} 
+\includegraphics[height=2.5in]{Adjugate_Error_vs_Size_Noise.pdf} 
 \captionof{figure}{
 The result error deviations vs. input noise precision and matrix size for the difference between $\widetilde{\M}^A$ and $\M^A$.
 The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
@@ -2038,7 +2040,7 @@ The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix si
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Forward_Error_vs_Size_Noise.png} 
+\includegraphics[height=2.5in]{Forward_Error_vs_Size_Noise.pdf} 
 \captionof{figure}{
 The result error deviations vs. input noise precision and matrix size for the difference of Formula \eqref{eqn: adjugate matrix}.
 The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
@@ -2048,7 +2050,7 @@ The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix si
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Roundtrip_Error_vs_Size_Noise.png} 
+\includegraphics[height=2.5in]{Roundtrip_Error_vs_Size_Noise.pdf} 
 \captionof{figure}{
 The result error deviations vs. input noise precision and matrix size for the difference of Formula \eqref{eqn: roundtrip matrix}.
 The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix size runs from $4$ to $8$.
@@ -2058,7 +2060,7 @@ The input noise precision runs from $10^{-17}$ to $10^{-1}$, while the matrix si
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Histogram_Size_7.png} 
+\includegraphics[height=2.5in]{Adjugate_Histogram_Size_7.pdf} 
 \captionof{figure}{
 The result histograms for the normalized errors of the adjugate matrix for the same matrix size $7$ and different input noise precision as shown in the legend.
 }
@@ -2067,7 +2069,7 @@ The result histograms for the normalized errors of the adjugate matrix for the s
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Adjugate_Histogram_Size_8.png} 
+\includegraphics[height=2.5in]{Adjugate_Histogram_Size_8.pdf} 
 \captionof{figure}{
 The result histograms for the normalized errors of the adjugate matrix for the same matrix size $8$ and different input noise precision as shown in the legend.
 }
@@ -2162,7 +2164,7 @@ In case error deviation is not known, a nearly Normal-distributed result histogr
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Matrix_Determinant_Prec_vs_Condition.png} 
+\includegraphics[height=2.5in]{Matrix_Determinant_Prec_vs_Condition.pdf} 
 \captionof{figure}{
 The linear correlation between the precision of a matrix determinant to its condition number.
 The x-axis shows the condition number, while the y axis shows the precision of the determinant.
@@ -2242,7 +2244,7 @@ Formula \eqref{eqn: inverse matrix Taylor expansion} suggests that the precision
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Multiply_Error_vs_Size_Noise.png} 
+\includegraphics[height=2.5in]{Multiply_Error_vs_Size_Noise.pdf} 
 \captionof{figure}{
 The error deviation of the first approximation calculation of $|\M|$ vs. input noise precision and matrix size.
 }
@@ -2272,7 +2274,7 @@ It is very similar to Figure \ref{fig: Adjugate_Error_vs_Size_Noise}, validating
 
 \begin{figure}
 \centering
-\includegraphics[height=2in]{Moving_Linear_Fit_Coeff.png} 
+\includegraphics[height=2in]{Moving_Linear_Fit_Coeff.pdf} 
 \captionof{figure}{ 
 Coefficients of X in Formula \eqref{eqn: time-series linear regression 1} and \eqref{eqn: moving-window linear regression variance 1} at a current and the next position in a time series of the $\alpha + \beta\; Y$ fit. 
 It shows that the $\beta_{j+1}$ in Formula \eqref{eqn: time-series linear regression 1} can be calculated progressively from $\beta_j$, as Formula \eqref{eqn: moving-window linear regression 1} and \eqref{eqn: moving-window linear regression 0} in order.
@@ -2283,7 +2285,7 @@ It also shows that the $\delta^2 \beta_{j+1}$ in Formula \eqref{eqn: moving-wind
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Moving_Linear_Fit_Value.png} 
+\includegraphics[height=2.5in]{Moving_Linear_Fit_Value.pdf} 
 \captionof{figure}{ 
 The result of fitting $\alpha + \beta\; Y$ to a time-series input $Y$ within a moving window of size $2*2 + 1$.
 The x-axis marks the time index.
@@ -2296,7 +2298,7 @@ In the legend, \textit{Unadjusted} means the result of applying Formula \eqref{e
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Moving_Linear_Fit_Error.png} 
+\includegraphics[height=2.5in]{Moving_Linear_Fit_Error.pdf} 
 \captionof{figure}{ 
 The error deviations of the $\alpha + \beta\; Y$ fit vs time index. 
 The x-axis marks the time index.
@@ -2384,7 +2386,7 @@ It shows that a larger than $1$ error deviation may probably indicate unspecifie
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2in]{Exp_Dev.png} 
+\includegraphics[height=2in]{Exp_Dev.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $e^{x \pm \delta x}$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2396,7 +2398,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Log_Dev.png} 
+\includegraphics[height=2.5in]{Log_Dev.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\log(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2408,7 +2410,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Sin_Dev.png} 
+\includegraphics[height=2.4in]{Sin_Dev.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\sin(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2420,7 +2422,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.4in]{Sin_Dev_Uniform.png} 
+\includegraphics[height=2.4in]{Sin_Dev_Uniform.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\sin(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2432,7 +2434,7 @@ Uniform noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Sin_X_Dev.png} 
+\includegraphics[height=2.5in]{Sin_X_Dev.pdf} 
 \captionof{figure}{
 The error deviation for $\sin(x \pm \delta x)$ vs. $x$ and $\delta x$.
 The x-axis is $x$ between $-\pi$ and $+\pi$.
@@ -2445,7 +2447,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Sin_Histo.png} 
+\includegraphics[height=2.5in]{Sin_Histo.pdf} 
 \captionof{figure}{
 The histogram of the error deviation for $\sin(x \pm \delta x)$, for $x=0, +\pi/2$ and $\delta x = 10^{-7}, 10^{-16}$ as shown in the legend.
 The y-axis is for normalized count. 
@@ -2457,7 +2459,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Pow_Dev.png} 
+\includegraphics[height=2.5in]{Pow_Dev.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $(1 \pm \delta x)^c$, for different $c$ as shown by the x-axis, and for different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
@@ -2468,7 +2470,7 @@ Each color represents a $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Pow_Converge.png} 
+\includegraphics[height=2.5in]{Pow_Converge.pdf} 
 \captionof{figure}{
 The individual variance term of $(1 \pm \delta x)^c$ vs the different Taylor expansion order $2n$, for different $c$ and $\delta x$ as shown in the legend. 
 The $x$-axis is Taylor expansion order $2n$ from 1 to 400 in Formula \eqref{eqn: Taylor 1d variance}.
@@ -2480,7 +2482,7 @@ It shows that $(1 \pm 0.2)^{-2}$ and $(1 \pm 0.2)^{-1.5}$ clearly diverge, $(1 \
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{ExpLog_Error.png} 
+\includegraphics[height=2.5in]{ExpLog_Error.pdf} 
 \captionof{figure}{
 The values and uncertainties of $\log(e^x) - x$ vs $x$, as \textit{VarDbl Error} and \textit{VarDbl Uncertainty} in the legend.
 The result of the same calculation using conventional floating-point library functions is shown as \textit{Lib Error} in the legend.
@@ -2490,7 +2492,7 @@ The result of the same calculation using conventional floating-point library fun
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Power_Error.png} 
+\includegraphics[height=2.5in]{Power_Error.pdf} 
 \captionof{figure}{
 The normalized errors of $(x^p)^{\frac{1}{p}} - x$ vs $x$ and $p$.
 }
@@ -2553,7 +2555,7 @@ Figure \ref{fig: Sin_Histo} shows the histogram of the error deviation for $\sin
 \end{itemize}
 
 Variance arithmetic rejects $\sin(0 \pm \delta x), \delta x \ge \pi/4$ and $\sin(\pi/2 \pm \delta x), \delta x \ge 3\pi/16$ for not monotonic, but can calculate smaller $\delta x$ without a problem.
-This case may not be generally applicable to calculations near a distributional pole.
+Because the second derivatives at the distributional pole is not zero, this case may not be generally applicable to calculations near a distributional pole.
 
 
 \subsection{Power}
@@ -2646,7 +2648,7 @@ H[n] &=\sum_{k=0}^{N-1} \sin(2\pi n k/N) \; e^{i 2\pi n k/N} =
 \end{align}
 
 \begin{figure}
-\includegraphics[height=2.5in]{FFT_Unfaithful.png} 
+\includegraphics[height=2.5in]{FFT_Unfaithful.pdf} 
 \captionof{figure}{An unfaithful Discrete Fourier transformation is demonstrated by the spectra of a few sine signals having amplitude of 1 and slightly different frequencies as shown in legends.
 The x-axis is for index frequency.  
 The y-axis is for intensity, while the y-axis of the embedded picture is for phase.
@@ -2770,7 +2772,7 @@ Thus, the results for Sin and Cos signals at all frequencies are pooled together
 \subsection{Library Errors}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{Sin_Diff.png} 
+\includegraphics[height=2.5in]{Sin_Diff.pdf} 
 \captionof{figure}{
 The difference between the library $\sin(x)$ and the indexed $\sin(x)$, for all integer input to the indexed sine functions used in the FFT transformations of FFT order $4$.
 The uncertainties of the $\sin(x)$ values are also displayed, to mark the periodicity of $\pi$.
@@ -2779,7 +2781,7 @@ The uncertainties of the $\sin(x)$ values are also displayed, to mark the period
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{Sin_Error.png} 
+\includegraphics[height=2.5in]{Sin_Error.pdf} 
 \captionof{figure}{
 The value error deviation of $\sin(x)$ and $\cos(x)$ checked by $\sin(x)^2 + \cos(x)^2 - 1$ for different FFT order as shown in the x-axis, and for the indexed and library versions as shown in the legend. 
 Also shown is the corresponding normalized error deviation for the indexed and library $\sin(x)$.
@@ -2789,7 +2791,7 @@ The y-axis on the left is for value error deviation, while the y-axis on the rig
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{Cot_Diff.png} 
+\includegraphics[height=2.5in]{Cot_Diff.pdf} 
 \captionof{figure}{
 The difference between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$, for $x \in (0, \pi)$, for different FFT order as shown in the legend.
 In the legend, \textit{Uncertainty} is the calculated uncertainty assuming that both $\cos(x)$ and $\sin(x)$ are imprecise in their least significant values, and \textit{Value Error} is the difference between the library $\cos(x)/\sin(x)$ and the indexed $\cos(x)/\sin(x)$.
@@ -2798,7 +2800,7 @@ In the legend, \textit{Uncertainty} is the calculated uncertainty assuming that 
 \end{figure}
 
 \begin{figure}
-\includegraphics[height=2.5in]{Sin_Cot_Diff.png} 
+\includegraphics[height=2.5in]{Sin_Cot_Diff.pdf} 
 \captionof{figure}{
 Comparing library $\sin(x)$ and $\cos(x)/\sin(x)$  for different FFT orders as shown by x-axis, and for either value error deviations or normalized error deviations, as shown in the legend.
 The y-axis on the left is for value error deviations, while the y-axis on the right is for normalized error deviations.
@@ -2812,9 +2814,9 @@ To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine 
 \begin{enumerate}
 \item Instead of a floating-point value $x$ for $\sin(x)$ and $\cos(x)$, the integer $j$ is used to specify the input to $\sin(x)$ and $\cos(x)$, as $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$, to avoid the floating-point rounding error of $x$.
 
-\item The values of the indexed sine functions is extended from $j = 0,1,\dots N/8$ to $j = 0,1,\dots N$ using the symmetry of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
+\item The values of the indexed sine functions are extended from $j = 0,1,\dots N/8$ to $j = 0,1,\dots N$ using the symmetry of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
 
-\item The values of the indexed sine functions is extended from $j = 0,1,\dots N$ to the whole integer region using the periodicity of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
+\item The values of the indexed sine functions are extended from $j = 0,1,\dots N$ to the whole integer region using the periodicity of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
 
 \end{enumerate}
 
@@ -2844,7 +2846,7 @@ Having identified the nature and the strength of the numerical errors of the lib
 \subsection{Using the Indexed Sine Functions for Sin/Cos Signals}
 
 \begin{figure}[p]
-\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Spec_Indexed.png} 
+\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Spec_Indexed.pdf} 
 \captionof{figure}{
 The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the forward transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis is for index frequency.
@@ -2854,7 +2856,7 @@ The y-axis is for uncertainty and absolute value error.
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Wave_Indexed.png} 
+\includegraphics[height=2.75in]{FFT_Sin_Clean_6_3_Wave_Indexed.pdf} 
 \captionof{figure}{
 The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainty and the value errors shown in the legend.
 The x-axis is for index time.
@@ -2865,7 +2867,7 @@ The y-axis is for uncertainty and absolute value error.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Indexed.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Indexed.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -2876,7 +2878,7 @@ The y-axis on the left is for error deviation, while the y-axis on the right is 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Indexed.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Indexed.pdf} 
 \captionof{figure}{
 The histograms of the normalized errors of Sin/Cos signals using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The FFT order is $18$.
@@ -2917,7 +2919,7 @@ Thus, proper coverage is achieved using the indexed sine functions for Sin/Cos s
 \subsection{Using the Library Sine Functions for Sin/Cos Signals}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.pdf} 
 \captionof{figure}{
 The FFT spectrum of $\sin(j 3/2^6 \pi)$ using the library sine functions after the forward transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included are the corresponding result value errors using \textit{SciPy}.
@@ -2928,7 +2930,7 @@ The y-axis is for uncertainties or absolute value errors.
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.pdf} 
 \captionof{figure}{
 The FFT waveform of $\sin(j 3/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included are the corresponding result value errors using \textit{SciPy}.
@@ -2939,7 +2941,7 @@ The y-axis is for uncertainties or absolute value errors.
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.pdf} 
 \captionof{figure}{
 The waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included are the corresponding result value errors using \textit{SciPy}.
@@ -2950,7 +2952,7 @@ The y-axis is for uncertainties or absolute value errors.
 \end{figure}
 
 \begin{figure}[p]
-\includegraphics[height=2.5in]{FFT_Sin_Clean_6_1_Wave_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Sin_Clean_6_1_Wave_Lib.pdf} 
 \captionof{figure}{
 The waveform of $\sin(j 1/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
 Also included are the corresponding result value errors using \textit{SciPy}.
@@ -2962,7 +2964,7 @@ The y-axis is for uncertainties or absolute value errors.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -2972,7 +2974,7 @@ The y-axis on the left is for error deviation, while the y-axis on the right is 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_SinCos_1e-16_vs_Order_Lib.png} 
+\includegraphics[height=2.5in]{FFT_SinCos_1e-16_vs_Order_Lib.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -3019,7 +3021,7 @@ Variance arithmetic further reveals that the amount of noise to add small noises
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Indexed.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Indexed.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Linear signal vs. FFT order using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -3029,7 +3031,7 @@ The y-axis on the left is for error deviation, while the y-axis on the right is 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Indexed.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Indexed.pdf} 
 \captionof{figure}{
 The histograms of the normalized errors of Linear signal using the indexed sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
@@ -3038,7 +3040,7 @@ The histograms of the normalized errors of Linear signal using the indexed sine 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Clean_vs_Order_Lib.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Linear signal vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -3048,7 +3050,7 @@ The y-axis on the left is for error deviation, while the y-axis on the right is 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Lib.pdf} 
 \captionof{figure}{
 The histograms of the normalized errors of Linear signal using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
@@ -3085,7 +3087,7 @@ The only solution seems to create a new sin library using variance arithmetic so
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_1e-3_Histo_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Linear_1e-3_Histo_Lib.pdf} 
 \captionof{figure}{
 The histograms of the normalized errors of Linear signal with $10^{-3}$ input noise using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
 }
@@ -3094,7 +3096,7 @@ The histograms of the normalized errors of Linear signal with $10^{-3}$ input no
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_1e-3_vs_Order_Lib.png} 
+\includegraphics[height=2.5in]{FFT_Linear_1e-3_vs_Order_Lib.pdf} 
 \captionof{figure}{
 The result error deviation and uncertainty mean of Linear signal with $10^{-3}$ input noise using the library sine functions vs. FFT order for forward, reverse and roundtrip FFT transformations.
 The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
@@ -3104,7 +3106,7 @@ The y-axis on the left is for error deviation, while the y-axis on the right is 
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order.pdf} 
 \captionof{figure}{
 The result error deviations for Linear signals using library sine functions vs. input uncertainties and FFT orders for the forward transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $6$ to $18$.
@@ -3114,7 +3116,7 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order.pdf} 
 \captionof{figure}{
 The result error deviations for Linear signals using library sine functions vs. input uncertainties and FFT orders for the reverse transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $6$ to $18$.
@@ -3124,7 +3126,7 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order.pdf} 
 \captionof{figure}{
 The result error deviations for Linear signals using indexed sine functions vs. input uncertainties and FFT orders for the forward transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $6$ to $18$.
@@ -3134,7 +3136,7 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order.png} 
+\includegraphics[height=2.5in]{FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order.pdf} 
 \captionof{figure}{
 The result error deviations for Linear signals using indexed sine functions vs. input uncertainties and FFT orders for the reverse transformations.
 The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order runs from $6$ to $18$.
@@ -3204,7 +3206,7 @@ If the library functions also have proper coverage, the calculation result will 
 
 \begin{figure}
 \centering
-\includegraphics[height=2.5in]{Uncertain_Sin.png}
+\includegraphics[height=2.5in]{Uncertain_Sin.pdf}
 \captionof{figure}{
 The error deviation and mean for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$, for different regression order as shown by the x-axis.
 In the legend, \textit{Value Error} means the values of $\sin(x)^2 + \cos(x)^2 - 1$, \textit{Normalized Error} means the value errors normalized by the calculated uncertainty, \textit{Regression} means the $\sin(x)$ and $\cos(x)$ generated by regression, and \textit{Library} means library $\sin(x)$ and $\cos(x)$.
@@ -3300,26 +3302,33 @@ However, Section \ref{sec: polynomial} shows that the result uncertainty needs h
 How to effectively apply variance arithmetic to practical calculations remains an open question.
 
 
+\subsection{Source Tracing}
 
-\subsection{Different Floating-Point Representation for Variance}
+As an enhancement for dependency tracing, source tracing points out the contribution to the result uncertainty bias and uncertainty from each input.
 
-In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated and stored.
-This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation, such as when applying Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} to floating-point rounding errors in Section \ref{sec: polynomial}.
-Ideally, $(\delta x)^2$ should be calculated and stored in a different 64-bit floating-point representation with no sign bit, more exponent bits, and less significant bits.
-
-
-\subsection{Hardware Implementation}
-
-Because variance arithmetic has neither execution freedoms nor the associated dependency problems, it can be implemented in hardware inside CPU or GPU.
 
 
 \subsection{Variable $\sigma$ Variance Arithmetic}
 
 Variance arithmetic rejects a calculation if its distributional pole or distributional zero is in the range of $[x - \sigma \delta x, x + \sigma \delta x]$ with $\sigma = 5$.
 But there are many use cases in which calculations need to be performed at $x$ closer to either a distributional pole or a distributional zero, so variance arithmetic of smaller $\sigma$ may be needed.
-It is even possible in another implementation of variance arithmetic, $\sigma$ is part of a variance representation, so that a calculation closer to a zero or pole can proceed but at the expenses of reducing $\sigma$.
+It is even possible in another implementation of variance arithmetic, $\sigma$ is part of a variance representation, so that a calculation closer to a distributional zero or a distributional pole can proceed but at the expense of reducing $\sigma$.
 The result $\sigma$ for a calculation of imprecise inputs each with different $\sigma$ is found statistically through the corresponding $\epsilon$.
 Such approach needs theoretical foundation in both mathematics and statistics.
+
+
+
+\subsection{Different Floating-Point Representation for Variance}
+
+In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated and stored.
+This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation, such as when applying Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} to floating-point rounding errors in Section \ref{sec: polynomial}.
+Ideally, $(\delta x)^2$ should be calculated and stored in a different 64-bit floating-point representation with no sign bit, more exponent bits, and less significant bits, because  $(\delta x)^2$ needs not to be as accurate as $x$.
+Let the new 
+
+
+\subsection{Hardware Implementation}
+
+Because variance arithmetic has neither execution freedoms nor the associated dependency problems, it can be implemented in hardware inside CPU or GPU.
 
 
 
