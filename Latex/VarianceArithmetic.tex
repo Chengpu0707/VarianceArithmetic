@@ -56,7 +56,7 @@
 \begin{abstract}
 
 A new deterministic uncertainty-bearing floating-point arithmetic called \emph{variance arithmetic} is developed to predict the result uncertainty variance for analytic functions, or for numerical functions with known derivatives. 
-It is based on central limit theorem.
+It is based on the central limit theorem.
 It uses Taylor expansion to predict the result value bias and uncertainty variance due to input uncertainty variances, and such prediction is precise if the input uncertainty variances are all precise.
 For floating-point rounding errors, it predicts the result uncertainty variance numerically within $100$-fold of the actual result uncertainty variance.
 
@@ -75,7 +75,7 @@ It seems necessary to recalculate all math library functions to attach the uncer
 
 % Put your AMS subject classifications into the argument of
 % the following command.
-\AMSsubj{65-00}
+\AMSsubj{G.1.0}
 
 
 \tableofcontents
@@ -167,7 +167,7 @@ Most measured values are well approximated by a Gaussian distribution \cite{Stat
 Let \emph{bounding leakage} be defined as the possibility of the true value to be outside a bounding range.  
 If a bounding range is defined using a statistical rule on bounding leakage, such as the $6\sigma-10^{-9}$ rule for Gaussian distribution \cite{Probability_Statistics} (which says that the bounding leakage is about $10^{-9}$ for a bounding range of mean $\pm$ 6-fold of standard deviations), there is no guarantee that the calculation result will also obey the $6\sigma-10^{-9}$ rule using interval arithmetic, since interval arithmetic has no statistical foundation
 \footnote{
-There is some attempt \cite{Statistics_For_Interval_Arithmetic} to connect intervals in interval arithmetic to confidence interval or the equivalent so called p-box in statistics. 
+There is some attempt \cite{Statistics_For_Interval_Arithmetic} to connect intervals in interval arithmetic to confidence interval or the equivalent so-called p-box in statistics. 
 Because this attempt seems to rely heavily on 1) specific properties of the uncertainty distribution within the interval and/or 2) specific properties of the functions upon which the interval arithmetic is used, this attempt does not seem to be generic. 
 Anyway, this attempt seems to be outside the main course of interval arithmetic, which has no statistics in mind.
 }.  
@@ -253,7 +253,7 @@ This is the reason why variance arithmetic has abandoned the significance arithm
 In this paper, a new floating-point arithmetic called \emph{variance arithmetic} is developed to track uncertainty during floating-point calculations of analytic functions, as described in Section \ref{sec: variance arithmetic}. 
 Compare to its predecessor \cite{Prev_Precision_Arithmetic}:
  \begin{itemize}
-\item The introduction section \ref{sec: introduction} remains almost unchanged, except it quotes the negative results from \cite{Prev_Precision_Arithmetic} for interval arithmetic and significance arithmetic.
+\item The introduction Section \ref{sec: introduction} remains almost unchanged, except it quotes the negative results from \cite{Prev_Precision_Arithmetic} for interval arithmetic and significance arithmetic.
 
 \item Variance arithmetic also has uncorrelated uncertainty assumption as its foundation.
 The theoretical foundation section \ref{sec: variance arithmetic} has the following significant differences:
@@ -265,11 +265,7 @@ Instead, it is a pure statistical approach.
 \item Variance arithmetic has different digital presentation and uses the standard floating-point arithmetic to calculate value and uncertainty, so that it is completely compatible with conventional floating-point arithmetic for precise floating-point values.
 It abandons the embedded significance arithmetic, and the rounding error bit to minimize rounding errors in the precision arithmetic.
 
-\item The Taylor expansion in variance arithmetic is now centered around statistical means instead of the calculation results assuming no uncertainty, so variance arithmetic is strict statistically, and when the input uncertainties specify the input error deviation precisely, the result uncertainties specify the result error deviation precisely.
-
-\item The theoretical convergence and statistical binding leakage of the result uncertainties of variance arithmetic are provided.
-Zeros and pole of the analytic functions for uncertainty calculations are identified.
-When the calculation is too close to a pole or zero, variance arithmetic will reject the result automatically, such as rejecting an inversion near $0$.
+\item The Taylor expansion in variance arithmetic is now centered around statistical mean instead of the calculation result assuming no uncertainty, so variance arithmetic is strict statistically, and when the input uncertainties specify the input error deviations precisely, the result uncertainties specify the result error deviations precisely.
 
 \item Variance arithmetic tracks the correlations of input within analytic expression using standard statistics.
 Due to this dependency tracing, variance arithmetic allows no numerical execution freedom, and it has no dependency on such freedoms.
@@ -296,9 +292,11 @@ The first order approximation for calculating matrix determinant is introduced.
 Previously, it showed the effect of embedded significance arithmetic.
 Now, with the embedded significance arithmetic removed, it shows the effect of having unspecified input uncertainty in addition to the new analysis.
 
+\item Section \ref{sec:Convergence} is new, to associate result convergence in variance arithmetic with distributional pole and distributional zero.
+
 \item Section \ref{sec: Math Library} is new, to apply variance arithmetic to the most common math library functions.
 
-\item Section \ref{sec: FFT} is completely different, provided the section for the modeling errors.  
+\item Section \ref{sec: FFT} is completely different, except for the section for DFT modeling errors.  
 It now focuses on the effect of numerical library errors and shows that such library errors can be very significant, especially when they resonate with input data.
 
 \item Section \ref{sec: recursion} is different by using new analysis.
@@ -555,7 +553,7 @@ Thus,
 Two imprecise values can be compared statistically using their difference.
 
 When the value difference is zero, the two imprecise values are equal.  
-In statistics, such two imprecise values has $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
+In statistics, such two imprecise values have $50\%$ possibility to be less than or greater to each other but no chance to be equal to each other.
 In variance arithmetic, these two imprecise values are neither less nor greater than each other, so they are equal.
 
 Otherwise, the standard z-method \cite{Probability_Statistics} is used to judge whether they are equal, or less or more than each other.
@@ -618,13 +616,13 @@ To solve for mode:
 The exponential function:
 \begin{align*}
 f(x) = e^x:& \eqspace 
-\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \eqspace 
+\tilde{z} = \frac{\ln(\tilde{y}) - x}{\delta x}, \eqspace 
 \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \eqspace \\
 \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
-&= e^{-\log(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2}{2 \delta^2 x}}
- = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2 + 2 \log(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
-& = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
- = N(\frac{\log(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
+&= e^{-\ln(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\ln(\tilde{y}) - x)^2}{2 \delta^2 x}}
+ = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\ln(\tilde{y}) - x)^2 + 2 \ln(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
+& = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\ln(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
+ = N(\frac{\ln(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
 & 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \eqspace
  \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
 \end{align*}
@@ -751,7 +749,7 @@ Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: exp distri
 N(\tilde{z}) d \tilde{z} = \rho(\tilde{x}, x, \delta x) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
 = \rho(\tilde{y}, y, \delta y) d\tilde{y}; \\
 \label{eqn: exp distribution}
-y = e^x: &\; \rho(\tilde{y}, y, \delta y) = \frac{1}{\tilde{y}} \frac{1}{\delta x} N(\frac{\log(\tilde{y}) - x}{\delta x}); \\
+y = e^x: &\; \rho(\tilde{y}, y, \delta y) = \frac{1}{\tilde{y}} \frac{1}{\delta x} N(\frac{\ln(\tilde{y}) - x}{\delta x}); \\
 \label{eqn: log distribution}
 y = \ln(x): &\; \rho(\tilde{y}, y, \delta y) = e^{\tilde{y}} \frac{1}{\delta x} N(\frac{e^{\tilde{y}} - x}{\delta x}); \\
 \label{eqn: power distribution}
@@ -770,16 +768,16 @@ Using Formula \eqref{eqn: function distribution}, Formula \eqref{eqn: distributi
 \end{align}
 
 Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, y, \delta y)$ is Gaussian modulated by $\frac{d\tilde{x}}{d\tilde{y}} = 1/f^{(1)}_x$.
-A \emph{distributional zero} of the uncertainty distribution happens when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, y, \delta y) = 0$, while a \emph{distributional pole} happens when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, y, \delta y) = \infty$.
+A \emph{distributional pole} of the uncertainty distribution happens when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, y, \delta y) = 0$, while a \emph{distributional zero} happens when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, y, \delta y) = \infty$.
 Zeros and poles have different impacts on the properties of of the uncertainty distributions.
 
 If $y=f(x)$ is a linear transform of $x$, $f^{(1)}_x$ is a constant, and $\rho(\tilde{y}, y, \delta y)$ is known to be Gaussian \cite{Probability_Statistics}.
 From another perspective, a linear transformation generates neither distributional zero nor distributional pole according to Formula \eqref{eqn: function distribution}.
 
-Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a distributional zero at $x=0$ that separates the defined region $x \ge 0$ vs the undefined region $x < 0$.
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a distributional pole at $x=0$ that separates the defined region $x \ge 0$ vs the undefined region $x < 0$.
 Each probability density function $\rho(\tilde{x})$ in solid line is compared with a Normal distribution $N(\tilde{x})$ of the same mode in dash line of the same color.
 
-Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which also has a distributional zero at $x=0$ that separates two defined region $x \ge 0$ and $x \leq 0$.
+Figure \ref{fig: Cubic_Root_Distribution} shows the probability density function for $\sqrt[3]{x \pm 1}$ according to Formula \eqref{eqn: power distribution}, which has a distributional zero at $x=0$ that separates two defined region $x \ge 0$ and $x \leq 0$.
 Compared with $\sqrt{x \pm 1}$, $\sqrt[3]{x \pm 1}$ distributes on $\tilde{y} < 0$ also, so that the uncertainty distributions for $\sqrt[3]{0 \pm 1}$ has two equal peaks instead of one larger peak on the positive side only for $\sqrt{x \pm 1}$.
 
 Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a distributional pole at $x=0$ that separates two defined region $x \ge 0$ and $x \leq 0$.
@@ -787,7 +785,7 @@ According to Formula \eqref{eqn: power mode}, both $(0 \pm 1)^2$ and $(1 \pm 1)^
 $(0 \pm 1)^2$ is the $\chi^2$ distribution \cite{Statistical_Methods}.
 A pole resembles a Delta distribution.
 
-Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a distributional zero at $x=0$ that separates two defined region $x > 0$ and $x < 0$.
+Figure \ref{fig: Inverse_Square_Distribution} shows the probability density function for $1/(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}, which has a distributional pole at $x=0$ that separates two defined region $x > 0$ and $x < 0$.
 Figure \ref{fig: Inverse_Square_Distribution} looks more like Figure \ref{fig: Square_Root_Distribution} than Figure \ref{fig: Square_Distribution}, showing that distributional pole or distributional zero determines the properties of uncertainty distributions.
 
 In all the figures, the probability density function in the $\tilde{z}$ representation becomes more Normal-like when the mode of the distributions is further away from either distributional zero or distributional pole.
@@ -912,7 +910,6 @@ Using Formula \eqref{eqn: normalized distribution}, Formula \eqref{eqn: Taylor 1
  	\sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{f^{(2n-2j)}_x \zeta(2n - 2j)}{(2n-2j)!} \right);  \nonumber
 \end{align}
 $\overline{f(x)} - f(x)$ is defined as the \emph{uncertainty bias} which is the effect of the input uncertainty to the result.
-When $f(x) \neq 0$, $\widehat{P(f(x))} \equiv \frac{\delta f(x)}{|f(x)|}$ is defined as the \emph{normalized uncertainty}, which approximates the precision $P(f(x)) =\frac{\delta f(x)}{|\overline{f(x)}|}$ when the uncertainty bias is ignored.
 
 
 \subsubsection{Multiple Dimensional Expansion}
@@ -942,8 +939,8 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only for 2-dimensional, it c
 \includegraphics[height=2.5in]{Variance_Momentum.pdf}
 \captionof{figure}{
 The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
-Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value.
-The linear fit equation is: $8.284726600172205\;10^{-7} \times 4.9405914462757465^{2n}$.
+Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value, which use y-axis on the left.
+The percentage difference between the linear fit and $\zeta(2n)$ also included, which use y-axis on the right.
 }
 \label{fig: Variance_Momentum}
 \end{figure}
@@ -1054,29 +1051,63 @@ P(x^c)^2 &= \sum_{n=1}^{\infty} P(x)^{2n} \left( \sum_{j=1}^{2n-1} \zeta(2n) \be
 \end{align*}
 
 \begin{align*}
+(x + \tilde{x})^2 &= x^2 + 2 x \tilde{x} + \tilde{x}^2; \\
+\overline{x^2} &= x^2 + (\delta x)^2; \\
+(x + \tilde{x})^4 &= x^4 + 6 x^2 \tilde{x}^2 + \tilde{x}^4; \\
+\delta^2 x^2 &= 4 x^2 (\delta x)^2 + 2 (\delta x)^4;
+\end{align*}
+
+\begin{align*}
 & (x + \tilde{x})^3 = x^3 + 3 x^2 \tilde{x} + 3 x \tilde{x}^2 + \tilde{x}^3 \\
 \overline{x^3} &= x^3 + 3 x (\delta x)^2; \\
 \delta^2 x^3 &= 9 x^4  (\delta x)^2 +  (15 x^2 3 - 9 x^2) (\delta x)^4 + 15 (\delta x)^6;
 \end{align*}
 
+\begin{align*}
+\frac{1}{x + \tilde{x}} &= \frac{1}{x} \left(1 - \frac{\tilde{x}}{x} + (\frac{\tilde{x}}{x})^2 - (\frac{\tilde{x}}{x})^3 + (\frac{\tilde{x}}{x})^4 
+		 - (\frac{\tilde{x}}{x})^5 + (\frac{\tilde{x}}{x})^6 + \dots \right); \\
+\frac{\overline{1/x}}{1/x} &= 1 + P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + o(P(x)^8); \\
+\frac{\delta^2 1/x}{(1/x)^2} &= P(x)^2 + 3 P(x)^4 3 - P(x)^4  + 5 P(x)^4 15 - 2 P(x)^6 3 + o(P(x)^8) \\
+	&= P(x)^2 + 8 P(x)^4 + P(x)^4 + 69 P(x)^6 + o(P(x)^8) ;
+\end{align*}
+
+\begin{align*}
+\frac{1/(x + \tilde{x})^2}{1/x^2} &= 1 - 2 (\frac{\tilde{x}}{x}) + 3 (\frac{\tilde{x}}{x})^2 -4  (\frac{\tilde{x}}{x})^3 
+		+5 (\frac{\tilde{x}}{x})^4 - 6 (\frac{\tilde{x}}{x})^5 + 7 (\frac{\tilde{x}}{x})^7; \\
+\frac{\overline{1/x^2}}{1/x^2} &= 3 P(x)^2 + 15 P(x)^4 + 105 P(x)^6 + o(P(x)^8); \\
+\frac{\delta^2 1/x^2}{(1/x^2)^2} &= 4 P(x)^2 + (9 + 16) P(x)^4 3 - 9 P(x)^4 + (16 + 30+ 24) P(x)^6 15 - 90 P(x)^6 + o(P(x)^8)  \\
+	&= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
+\end{align*}
+
+\begin{align*}
+\frac{\sqrt{x + \tilde{x}}}{\sqrt{x}} &= 1 + \frac{1}{2} (\frac{\tilde{x}}{x}) - \frac{1}{8} (\frac{\tilde{x}}{x})^2 + \frac{1}{16} (\frac{\tilde{x}}{x})^3 
+		- \frac{5}{128} (\frac{\tilde{x}}{x})^4 + \frac{7}{256} (\frac{\tilde{x}}{x})^5 - \frac{21}{1024} (\frac{\tilde{x}}{x})^6; \\
+\frac{\overline{\sqrt{x}}}{\sqrt{x}} &= 1 - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6; \\
+\frac{\delta^2 \sqrt{x}}{(\sqrt{x})^2} &= \frac{1}{4} P(x)^2 + (\frac{1}{64} + \frac{1}{16}) P(x)^4 3 - \frac{1}{64} P(x)^4  
+		+ (\frac{1}{256} + \frac{5}{512} + \frac{7}{256}) P(x)^4 15 - \frac{5}{512} P(x)^6 + o(P(x)^8) \\
+	&= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8) ;
+\end{align*}
+
 \fi
 
 
-Formula \eqref{eqn: exp precision} gives the result variance for $e^x$, which always converge:
+Formula \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the uncertainty bias and variance for $e^x$, respectively:
 \begin{align}
 \label{eqn: exp Taylor}
 & e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
-\overline{e^x} &= e^x + e^x \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!}; \\
+\label{eqn: exp mean}
+\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{1}{(2n)!}; \\
 \label{eqn: exp precision}
-\widehat{P(e^x)}^2 &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
+\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=1}^{\infty} (\delta x)^{2n}  \left( \sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j!\;(2n - j)!} 
  -\sum_{j=1}^{n-1} \frac{\zeta(2j)}{(2j)!} \frac{\zeta(2n - 2j)}{(2n - 2j)!} \right) \\
  &= (\delta x)^2 + \frac{3}{2} (\delta x)^4 + \frac{7}{6} (\delta x)^6 + \frac{5}{8} (\delta x)^8 + o((\delta x)^{10});
 \end{align}
 
-Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
+Formula \eqref{eqn: log mean} and \eqref{eqn: log precision} give the uncertainty bias and variance for $\ln(x)$, respectively:
 \begin{align}
 \label{eqn: log Taylor}
 & \ln(x + \tilde{x}) - \ln(x) = \ln(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
+\label{eqn: log mean}
 \overline{\ln(x)}  &= \ln(x) -\sum_{n=1}^{+\infty} P(x)^{2n} \frac{\zeta(2n)}{2n}; \\
 \label{eqn: log precision}
 \delta^2 \ln(x) &= \sum_{n=1}^{+\infty} P(x)^{2n} \left(\sum_{j=1}^{2n-1} \frac{\zeta(2n)}{j (2n-j)}
@@ -1084,10 +1115,11 @@ Formula \eqref{eqn: log precision} gives the result variance for $\ln(x)$:
  &= P(x)^2 + P(x)^4 \frac{9}{8}  + P(x)^6 \frac{119}{24} + P(x)^8 \frac{991}{32} + o(P(x)^{10}); 
 \end{align}
 
-Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$:
+Formula \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the uncertainty bias and variance for $\sin(x)$, respectively:
 \begin{align}
 \label{eqn: sin Taylor}
 & \sin(x + \tilde{x}) = \sum_{n=0}^{\infty} \sin(x) (-1)^{n} \frac{\tilde{x}^{2n}}{(2n)!} + \sum_{n=0}^{\infty} \cos(x) (-1)^n \frac{\tilde{x}^{2n+1}}{(2n + 1)!}; \\
+\label{eqn: sin mean}
 \overline{\sin(x)} &= \sin(x) + \sin(x) \sum_{n=0}^{\infty} (\delta x)^{2n} (-1)^{n} \frac{\zeta(2n)}{(2n)!}; \\
 \label{eqn: sin precision}
 \delta^2 \sin(x) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (-1)^{n - 1} \\
@@ -1096,82 +1128,42 @@ Formula \eqref{eqn: sin precision} gives the result variance for $\sin(x)$:
  &=  (\delta x)^2 \cos(x)^2 - (\delta x)^4 (\cos(x)^2 \frac{3}{2} - \frac{1}{2}) + (\delta x)^6 (\cos(x)^2 \frac{7}{6} - \frac{1}{2})  + o((\delta x)^8);
 \end{align}
 
-Formula \eqref{eqn: power precision} gives the normalized variance for $x^c$, in which $\begin{pmatrix} c \\ n \end{pmatrix} = \frac{\prod_{j=0}^{n-1} (c -j)}{n!}$:
+Formula \eqref{eqn: power mean} and \eqref{eqn: power precision} give the uncertainty bias and variance for $x^c$, respectively, in which $\begin{pmatrix} c \\ n \end{pmatrix} = \frac{\prod_{j=0}^{n-1} (c -j)}{n!}$:
 \begin{align}
 \label{eqn: power Taylor}
 &(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c + x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix}; \\
-\overline{x^c} &= x^c + x^c \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \begin{pmatrix} c \\ 2 n \end{pmatrix}; \\
+\label{eqn: power mean}
+\frac{\overline{x^c}}{x^c}  &= 1 + 1 \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) \begin{pmatrix} c \\ 2 n \end{pmatrix}; \\
 \label{eqn: power precision}
-\widehat{P(x^c)}^2 &= \sum_{n=1}^{\infty} P(x)^{2n} 
+\frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=1}^{\infty} P(x)^{2n} 
  \left( \sum_{j=1}^{2n-1} \zeta(2n) \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
  - \sum_{j=1}^{n-1} \zeta(2j) \begin{pmatrix} c \\ 2j \end{pmatrix} \zeta(2n - 2j) \begin{pmatrix} c \\ 2n -2 j \end{pmatrix}  \right)\\
  &= c^2 P(x)^2 + \frac{3}{2} c^2 (c-1) (c - \frac{5}{3}) P(x)^4 + \frac{7}{6} c^2 (c-1) (c-2)^2 (c - \frac{16}{7}) P(x)^6 + o(P(x)^8);
 \end{align}
-As some special cases for Formula \eqref{eqn: power precision}, Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, \eqref{eqn: square root precision}, and \eqref{eqn: square root precision} give the normalized variance for $x^2$, $\sqrt{x}$, $1/x$, and $1/x^2$, respectively: 
+As special cases for Formula \eqref{eqn: power mean} and \eqref{eqn: power precision}, \eqref{eqn: square mean}, \eqref{eqn: square precision}, \eqref{eqn: square root mean}, \eqref{eqn: square root precision}, \eqref{eqn: inversion mean}, \eqref{eqn: inversion precision}, \eqref{eqn: inversion square mean}, and \eqref{eqn: inversion square precision} give the mean and variance for $x^2$, $\sqrt{x}$, $1/x$, and $1/x^2$, respectively: 
 \begin{align}
+\label{eqn: square mean}
+\overline{x^2} &= x^2 + (\delta x)^2; \\
 \label{eqn: square precision}
-\widehat{P(x^2)}^2 &= 4 P(x)^2 + 2 P(x)^4; \\
+\delta^2 x^2 &= 2 x^2 (\delta x)^2 + 2 (\delta x)^4; \\
+\label{eqn: square root mean}
+\frac{\overline{\sqrt{x}}}{\sqrt{x}} &= 1 - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 + o(P(x)^8); \\
 \label{eqn: square root precision}
-\widehat{P(\sqrt{x})}^2 &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8); \\
+\frac{\delta^2 \sqrt{x}}{(\sqrt{x})^2} &= \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8); \\
+\label{eqn: inversion mean}
+\frac{\overline{1/x}}{1/x} &= 1 + P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion precision}
-\widehat{P(1/x)}^2 &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); \\
+\frac{\delta^2 1/x}{(1/x)^2} &= P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8); 
+\end{align}
+\begin{align}
+\label{eqn: inversion square mean}
+\frac{\overline{1/x^2}}{1/x^2} &= 3 P(x)^2 + 15 P(x)^4 + 105 P(x)^6 + o(P(x)^8); \\
 \label{eqn: inversion square precision}
-\widehat{P(1/x^2)}^2 &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
+\frac{\delta^2 1/x^2}{(1/x^2)^2} &= 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
 \end{align}
 
 The variance formulas using Taylor expansion show the nature of the calculation, such as $\delta x \rightarrow P(e^x)$, $\delta x \rightarrow \delta \sin(x)$, $P(x) \rightarrow P(x^c)$, and $P(x) \rightarrow \delta \ln(x)$, and the difference speed of variance increases of $x^c$ depending on different $c$.
 
-
-\subsubsection{Convergence Condition}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Inversion_on_Edge_Histo.pdf} 
-\captionof{figure}{
-The histogram for $1/(1 \pm \delta x)$ using Gaussian input noises, with $\delta x$ shown in the legend. 
-The histogram has been normalized by the result mean and uncertainty calculated by variance arithmetic, so that $0$ on the x-axis marks the result mean, and $\pm 1$ on the x-axis marks the result uncertainty.
-The $y$-axis is scaled as the normalized count of the histogram.
-}
-\label{fig: Inversion_on_Edge_Histo}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Inversion_on_Edge.pdf} 
-\captionof{figure}{
-The result of variance arithmetic vs the sampled statistics for $1/(1 \pm 0.2 - \delta x)$, for different $\delta x$ as shown in the x-axis.
-In the legend, \textit{value} and \textit{uncertainty} are calculated by variance arithmetic, while \textit{mean} and \textit{deviation} are sampled statistics from $10,000$ floating-point calculation of $1/\tilde{x}$ in which $\tilde{x}$ is Gaussian noise with mean $1$ and deviation $0.2 - \delta x$.
-The y-axis on the left compares value vs mean, while the y-axis on the right compares uncertainty vs standard deviation.
-}
-\label{fig: Inversion_on_Edge}
-\end{figure}
-
-
-When Formula \eqref{eqn: momentum factor higher} contains infinitive expansion terms, the necessary condition for it to converge is $P(x) < 1/\sigma$.
-The sufficient $P(x)$ for or Formula \eqref{eqn: power precision} to converge is defined as \emph{applicable precision threshold}, which can be estimated as $1/\sigma$.
-Through $\zeta(2n)$, the convergence condition also rejects distributional zero or distributional pole inside the range of $[x - \sigma \delta x, x + \sigma \delta x]$, and guarantees that the underlying uncertainty distribution is Normal-like.
-
-Variance arithmetic may reject a calculation for the following reasons:
-\begin{itemize}
-\item For Formula \eqref{eqn: Taylor 1d variance} to converge, the contribution from expansion order $2n$ should decrease with increasing $2n$ when $2n$ is sufficiently large \footnote{The lower limit for $2n$ is set empirically as $20$.}. 
-Otherwise, the result should be invalidated as \emph{not monotonic}.
-Section \ref{sec: Math Library} will describe this mechanism in more detail.
-
-\item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
-If the precision of the uncertainty becomes worse than $1/\sigma$, the result should be invalidated as \emph{not reliable}.
-
-\item Due to digital limitation of conventional floating-point representation, $\zeta(2n)$ can only be calculated to limited $2n$.
-If at the limit, the expansion is still not stable, the result should be invalidated as \emph{practical unstable}.
-Section \ref{sec: polynomial} will define the stability standard for truncating an expansion.
-
-\end{itemize}
-
-For example, $1/(1 \pm (0.2 - 1.28\;10^{-5}))$ is rejected, while $1/(1 \pm (0.2 -1.29\;10^{-5})) = 1.046 \pm 0.250$.
-Figure \ref{fig: Inversion_on_Edge_Histo} shows the histograms for $1/(1 \pm \delta x)$ when $\delta x =0.01, 0.1, 0.2 - 1.29\;10^{-5}$.
-When $\delta x =0.01$, the result is normal distributed.
-When $\delta x$ approaches $0.2$, the result distribution deviates from normal more and more.
-The rejection also keeps the result distribution from deviating too much from Normal distribution, so that the result value and uncertainty do not deviate too much from those of variance arithmetic.
-Figure \ref{fig: Inversion_on_Edge} shows that the result of variance arithmetic fits the result from statistical sampling for $1/(1 \pm (0.2 - \delta x))$ reasonably well when $\delta x \rightarrow 0$.
 
 
 
@@ -1292,6 +1284,22 @@ The correct result variance is $(2 x - 1)^2 (\delta x)^2 + 2 (\delta x)^4$.
 \label{tbl: dependency example}
 \end{table}
 
+\begin{align}
+\label{eqn: composite variance 1d}
+\delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
+  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
+  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x \right) + o((\delta x)^6);  \nonumber\\
+\label{eqn: progressive variance}
+\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
+  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
+  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6);  \nonumber \\
+\label{eqn: square of square root}
+\widehat{P(y^2|_{y=\sqrt{x}})}^2 & \simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
+\label{eqn: square root of square}
+\widehat{P(\sqrt{y}|_{y=x^2})}^2 & \simeq P(x)^2 + \frac{9}{8} P(x)^4;
+\end{align}
+
+
 Dependency tracing requires an analytic solution to apply Taylor expansion for the result mean and variance, such as using Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}.
 It conflicts with traditional numerical executions on analytic functions:
 \begin{itemize}
@@ -1326,21 +1334,6 @@ The result of Formula \eqref{eqn: progressive variance} depends on the sequence 
 In contrast, the result of Formula \eqref{eqn: composite variance 1d} is not sequence dependent.
 
 \end{itemize}
-
-\begin{align}
-\label{eqn: composite variance 1d}
-\delta^2 f(g(x)) &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
-  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
-  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^4 + 4 f^{(1)}_x f^{(2)}_x (g^{(1)}_x)^2 g^{(2)}_x \right) + o((\delta x)^6);  \nonumber\\
-\label{eqn: progressive variance}
-\delta^2 f(x)|_{\delta^2 x = \delta^2 g(x)} &\simeq (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 \\
-  &\eqspace + (\delta x)^4 \left( (f^{(1)}_x)^2 (g^{(1)}_x g^{(3)}_x + \frac{1}{2}(g^{(2)}_x)^2) + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^4 \right) \nonumber \\
-  &\eqspace + (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^4 \right) + o((\delta x)^6);  \nonumber \\
-\label{eqn: square of square root}
-\widehat{P(y^2|_{y=\sqrt{x}})}^2 & \simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
-\label{eqn: square root of square}
-\widehat{P(\sqrt{y}|_{y=x^2})}^2 & \simeq P(x)^2 + \frac{9}{8} P(x)^4;
-\end{align}
 
 Many traditional numerical algorithms are pure numerical, such as numerical equation root finding and Monte Carlo simulation.
 Although they cannot be described analytically, their results usually have clear uncertainties, such as the uncertainty for the root.
@@ -1535,7 +1528,7 @@ For a polynomial $f(x) \equiv \sum_{j=0}^{N} c_j x^j$, Formula \eqref{eqn: polyn
 f(x + \tilde{x}) = \sum_{j=0}^{N} c_j (x + \tilde{x})^j = \sum_{j=0}^{N} \tilde{x}^{j} \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{equation}
 When $f(x) = (ax + b)^N$, the result of applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} is Formula \eqref{eqn: power precision} with $c=N$ and $x = ax + b$. 
-Unlike Formula \eqref{eqn: power precision}, Formula \eqref{eqn: polynomial Taylor} is no longer limited by the applicable precision threshold, because the exponent for power is limited to positive integers.
+Unlike Formula \eqref{eqn: power precision}, Formula \eqref{eqn: polynomial Taylor} is no longer limited by $1/\sigma$, because the exponent for power is limited to positive integers.
 
 
 
@@ -1617,7 +1610,7 @@ $8+$ & $4+$ & $2+$ & $1+$ & $1^-$  & $0+$ \\
 \hline 
 & $6-$ & $3-$ & $1+$ & $1-$ & $0+$ \\
 \hline 
-& $5+$ & $3-$ & $2+$ & $1-$ & $0+$ \\
+& $5+$ & $3-$ & $1+$ & $1-$ & $0+$ \\
 \hline 
 & $5^-$  & $2+$ & $1+$ & $1-$ & $0+$ \\
 \hline 
@@ -1644,7 +1637,7 @@ Such digitization is observed to be round to the nearest.
 \item Figure \ref{fig: Taylor_Expansion_Uncertainty} shows that while the accumulated rounding errors fluctuate around $0$, the last few accumulated rounding errors when $x^N$ approaches $LSV$ of $e(N)$ determine the final value error of $e(N)$, such as the accumulation of 2-bit errors for $1/(1 - 0.7)$.
 
 \item Such accumulation of rounding errors is probably not by chance.
-When an integer is repeatedly divided by $2$ and after each division the result is rounded to the nearest, the value of the integer before it becomes $0$ is not randomly distributed, e.g., it is always $1$ in the last step, predominantly 2 in the step before, and more randomly distributed in the step before, as shown in Table \ref{tbl: rounding pattern}.
+When an integer is repeatedly divided by $2$ and after each division the result is rounded to the nearest, the rounding error before it becomes $0$ is not randomly distributed, e.g., it is always negative in the last step, predominantly cumulatively negative in the step before, and more randomly distributed in the step before, as shown in Table \ref{tbl: rounding pattern}.
 
 \item $x^N$ approaches $LSV$ faster for $x = 0.6$ than that for $x = 0.7$, to prevent the pattern in Table \ref{tbl: rounding pattern} from forming, so that the accumulated rounding errors does not cause the result value error beyond the least significant bit of significand.
 
@@ -1657,11 +1650,8 @@ Floating-point rounding error is a major source of value errors for Taylor expan
 To be free from such rounding errors, the input range for an expansion has to be smaller than the convergence input range, e.g., for $1/(1 -|x|)$, $|x|$ has to be smaller than $0.7$.
 
 In Figure \ref{fig: Taylor_Expansion_Uncertainty}, although the expansion uncertainty has the correct trend, it does not reach $r(N)$ at the end for $1/(1 -0.7)$.
-The reason is due to the digital limitation of the conventional floating-point representation.
-The smallest positive floating-point value is about $5\; 10^{-324}$. 
-The $LSV$ for $0.7$ is about $1\; 10^{-16}$.
-At $n=100$, applying Formula \eqref{eqn: polynomial Taylor} to Formula \eqref{eqn: Taylor 1d variance} has $100$ terms from $\sim (\delta x)^2$ to $\sim (\delta x)^{200}$, but only the first $10$ terms can be calculated before $(\delta x)^{2n}$ becomes $0$.
-Thus, variance arithmetic can only provide proper coverage to floating-point rounding errors. 
+Variance arithmetic tracks the uncertainty of one value statistically, so that it cannot effectively track coherent accumulation of rounding errors as what Table \ref{tbl: rounding pattern} has revealed. 
+Variance arithmetic can only provide proper coverage for rounding errors.
 
 
 \subsection{Stability Truncation}
@@ -1729,7 +1719,7 @@ The reason for such changes is due to the increase of uncertainty bias in Formul
 
 It is questionable to use the expansion truncation standard for precise input to imprecise input.
 Specifically, it is questionable to always calculate the result value to $10^{-16}$ precision while the result precision is only about $0.16$ for the case of $1/(1 + 0.6 \pm 0.04)=2.526 \pm 0.26$.
-Because variance arithmetic allows statistical bounding leakage of $\epsilon = 5.73 \times 10^{-7}$ according to Formula \eqref{eqn: bounding leakage}, the tolerance on the result value should be likewise statistically.
+Because variance arithmetic allows statistical bounding leakage of $\epsilon = 5.73 \times 10^{-7}$ according to Formula \eqref{eqn: bounding leakage}, the precision on the result value should be likewise statistically.
 Formula \eqref{eqn: value precision} gives the \emph{required value precision} $\tau$, in which $\xi(z)$ is the cumulative density function for Normal distribution \cite{Probability_Statistics}.
 \begin{equation}
 \label{eqn: value precision}
@@ -1743,7 +1733,7 @@ Using $\tau$ as the tolerance, the rule for \emph{stability truncation} for trun
 \item The absolute value change from $e(N-1)$ to $e(N)$ is less than either $\tau$-fold of the uncertainty of $e(N)$, or the $LSV$ of the value of $e(N)$.
 
 \end{itemize}
-The stability truncation is free from reminder estimator, and it is based on the stability of $e(N)$ at and after the expansion order $N$.
+The stability truncation is free from reminder estimator, and it is based on the stability of $e(N)$ at the expansion order $N$.
 The true reminder $r(N)$ at the truncation is renamed as the truncation error.
 
 Figure \ref{fig: Taylor_Expansion_Order} shows the stability truncation orders for Taylor expansion of $1/(1 - x \pm \delta x$, while Figure \ref{fig: Taylor_Expansion_Error} shows the corresponding truncation errors.
@@ -1759,12 +1749,11 @@ Due to the digital limitation of the 64-bit standard floating-point representati
 If after $126$ orders of expansion, stability truncation can still not be achieved, the expansion is deemed to be \emph{practically unstable}.
 Figure \ref{fig: Taylor_Expansion_Order} shows that when the input uncertainty is too large, the Taylor expansion is practically unstable, such as for $1/(1 - 0.6 \pm 0.06)$.
 However, using Formula \eqref{eqn: power precision}, $1/(1 - 0.6 \pm 0.06) = 2.561 \pm 0.415$.
-Because Formula \eqref{eqn: polynomial Taylor} expands by $(\delta x)^2$, it converges slow than Formula \eqref{eqn: power precision} which expands by $P(x)^2$.
+Because Formula \eqref{eqn: polynomial Taylor} expands by $(\delta x)^2$, it converges slower than Formula \eqref{eqn: power precision} which expands by $P(x)^2$.
 For $1/(1 - 0.6 \pm 0.06)$,  Formula \eqref{eqn: polynomial Taylor} is practically unstable, while  Formula \eqref{eqn: power precision} is not.
 If $\zeta(2n)$ were not limited by $n < 126$, these two formulas should have given identical result.
 
 Stability truncation is applied numerically in variance arithmetic for all Taylor expansion related calculations. 
-
 
 
 
@@ -2224,7 +2213,7 @@ Formula \eqref{eqn: inverse matrix Taylor expansion} suggests that $\overline{\M
 
 Traditionally, the error response of $\M^{-1}$ is quantified by matrix condition number \cite{Linear_Algebra}.
 In Formula \eqref{eqn: inverse matrix}, $\M^{-1}$ is dominated by $1/|\M|$, suggesting that the precision of $\M^{-1}$ is largely determined by the precision of $|\M|$.
-Variance arithmetic treats the least significant value of a floating-point value to be imprecise, so it can use Formula \eqref{eqn: special determinant variance} to calculate the determinant variance for a matrix containing floating-point elements, including a randomly generated matrix, or a Hilbert matrix \cite{Linear_Algebra} after it is converted to a floating-point matrix.
+Variance arithmetic treats the least significant value of a floating-point value to be imprecise, so it can use Formula \eqref{eqn: special determinant variance} to calculate the determinant variance for a matrix containing floating-point elements, including a randomly generated matrix, or a Hilbert matrix \cite{Linear_Algebra} after it is converted to a floating-point matrix \footnote{Although Hilbert matrix is defined using fractional number, its condition number is also calculated using floating-point arithmetic in math libraries such as \textit{SciPy}.}.
 Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that there is a strong linear correlation between the conditional number and the determinant precision of matrices, so that the determinant precision can replace the condition number, which is much more difficult to calculate.
 
 In fact, condition number may not be the best tool to describe the error response of a matrix.
@@ -2377,7 +2366,202 @@ It shows that a larger than $1$ error deviation may probably indicate unspecifie
 
 
 
-  
+
+
+
+\clearpage
+\section{Convergence and Statistical Bounding}
+\label{sec:Convergence}
+
+\subsection{Convergence Criteria}
+
+Variance arithmetic rejects a calculation result for the following reasons:
+\begin{itemize}
+\item For Formula \eqref{eqn: Taylor 1d variance} to converge, the contribution from expansion order $2n$ should decrease monotonically with increasing $2n$ when $2n$ is sufficiently large \footnote{The lower limit for $2n$ is set empirically as $20$.}. 
+Otherwise, the result is invalidated as \emph{not monotonic}.
+
+\item An uncertainty only needs to be correct on order of magnitude, such as with a precision of $1/\sigma=0.2$ or finer.
+If the precision of the uncertainty becomes worse than $1/\sigma$, the result is invalidated as \emph{not reliable}.
+
+\item Due to digital limitation of conventional floating-point representation, $\zeta(2n)$ can only be calculated to $2n \leq 252$.
+If at the limit, the expansion is still not stable according to stability truncation criterion, the result is invalidated as \emph{practical unstable}.
+
+\end{itemize}
+In reality, ``not monotonic" happens most, ``not reliable" happens sometimes, and ``practical unstable" happens very rarely if any.
+
+\subsection{Exponential}
+
+Because $2n!$ is much larger than $2n!!$, Formula \eqref{eqn: exp precision} for $e^x$ always converges.
+
+\subsection{Logarithm}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Log_Conv_Edge.pdf} 
+\captionof{figure}{
+The largest $\delta x$ for  $\ln{x \pm \delta x}$ for different $x$ as shown by the x-axis, using the y-axis on the left.
+Also shown are the corresponding uncertainty bias and uncertainty for different $x$ as shown by the x-axis, using the y-axis on the right.
+}
+\label{fig: Log_Conv_Edge}
+\end{figure}
+
+Figure \ref{fig: Log_Conv_Edge} shows that Formula \eqref{eqn: log precision} for $\ln(x)$ converges when $P(x) < 1/\sigma$, because $2n$ can be regarded as a constant comparing with $\zeta(2n)$.
+$\ln(x)$ has a distributional pole at $x = 0$.
+Variance arithmetic rejects this pole of $\ln(0)$ inside the range of $[x - \delta x, x + \delta x]$ statistically due to the divergence of Formula \eqref{eqn: log precision} mathematically, with $\zeta(2n)$ as the connection of these two worlds.
+
+
+\subsection{Power}
+
+\iffalse
+
+\begin{align*}
+\frac{\sqrt{(x + \tilde{x})^3}}{\sqrt{x^3}} &= 1 + \frac{3}{2} (\frac{\tilde{x}}{x}) + \frac{3}{8} (\frac{\tilde{x}}{x})^2 - \frac{1}{16} (\frac{\tilde{x}}{x})^3 
+		+ \frac{3}{128} (\frac{\tilde{x}}{x})^4 - \frac{3}{256} (\frac{\tilde{x}}{x})^5 + \frac{7}{1024} (\frac{\tilde{x}}{x})^6 + o((\frac{\tilde{x}}{x})^7); \\
+\frac{\overline{\sqrt{x^3}}}{\sqrt{x^3}} &= 1 + \frac{3}{8} P(x)^2 + \frac{9}{128} P(x)^4 - \frac{105}{1024} P(x)^6  + o(P(x)^8); \\
+\frac{\delta^2 \sqrt{x^3}}{(\sqrt{x^3})^2} &= \frac{9}{4} P(x)^2 + (\frac{9}{64} + \frac{3}{16}) P(x)^4 3 - \frac{9}{64} P(x)^4  \\
+		&\eqspace + (\frac{1}{256} + \frac{9}{512} + \frac{9}{256}) P(x)^6 15 - \frac{27}{512} P(x)^6 + o(P(x)^8) \\
+	&= \frac{9}{4} P(x)^2 + \frac{27}{32} P(x)^4 + \frac{13}{16} P(x)^6 + o(P(x)^8) ; \\
+\frac{\sqrt{(x + \tilde{x})^5}}{\sqrt{x^5}} &= 1 + \frac{5}{2} (\frac{\tilde{x}}{x}) + \frac{15}{8} (\frac{\tilde{x}}{x})^2
+		+ \frac{5}{16} (\frac{\tilde{x}}{x})^3 - \frac{5}{128} (\frac{\tilde{x}}{x})^4 
+		+ \frac{3}{256} (\frac{\tilde{x}}{x})^5 - \frac{5}{1024} (\frac{\tilde{x}}{x})^6 + o((\frac{\tilde{x}}{x})^7); \\
+\frac{\overline{\sqrt{x^5}}}{\sqrt{x^5}} &= 1 + \frac{15}{8} P(x)^2 - \frac{5}{128} P(x)^4 - \frac{5}{1024} P(x)^6  + o(P(x)^8); \\
+\frac{\delta^2 \sqrt{x^5}}{(\sqrt{x^5})^2} &= \frac{25}{4} P(x)^2 + (\frac{175}{64} + \frac{25}{16}) P(x)^4 3 - \frac{175}{64} P(x)^4
+		+ (\frac{25}{256} - \frac{75}{512} + \frac{15}{256}) P(x)^6 15 + \frac{75}{512} P(x)^6  \\
+	&= \frac{25}{4} P(x)^2 + \frac{325}{32} P(x)^4 + 0 P(x)^6 o(P(x)^8)  ;
+\end{align*}
+
+\fi
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Power_Conv_Edge.pdf} 
+\captionof{figure}{
+The largest $\delta x$ for  $\ln(x \pm \delta x)$ for different $x$ as shown by the x-axis, using the y-axis on the left.
+Also shown are the corresponding uncertainty bias and uncertainty for different $x$ as shown by the x-axis, using the y-axis on the right.
+}
+\label{fig: Power_Conv_Edge}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Power_Conv_Expansion.pdf} 
+\captionof{figure}{
+The individual variance term of $1/(1 \pm \delta x)$ vs the different Taylor expansion order $2n$, for different $\delta x$ as shown in the legend. 
+The $x$-axis is Taylor expansion order $2n$ Formula \eqref{eqn: Taylor 1d variance}.
+The $y$-axis is the value and variance contribution to $1/(1 \pm \delta x)$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power mean}, and \eqref{eqn: power precision}, respectively.
+}
+\label{fig: Power_Conv_Expansion}
+\end{figure}
+
+If $c$ is a natural number, Formula \eqref{eqn: power precision} always converges because it only has limited terms, such as Formula \eqref{eqn: square precision} for $c = 2$. 
+Even though the normalized value errors for $(0 + \delta x)^2$ is $\chi^2$ distributed, its error deviation is $1$.
+It shows that the variance arithmetic allows normalized error distributions to deviate from Normal to a large degree, as what Formula \eqref{eqn: variance momentum UN} has suggested.
+
+If $c$ is not a natural number, at $x = 0$, $x^c$ has either a distributional pole when $c < 1$ or a distributional zero when $c > 1$.
+Figure \ref{fig: Power_Conv_Edge} shows that Formula \eqref{eqn: power precision} for $(1 \pm \delta x)^c$ also rejects $0^c$, but such rejection depends on details of Formula \eqref{eqn: power precision}:
+\begin{itemize}
+\item 
+When $c < 1$, according to Formula \eqref{eqn: square root precision}, \eqref{eqn: inversion precision}, and \eqref{eqn: inversion square precision}, the coefficient for $P(x)^{2n}$ increases quickly with both $c$ and $2n$, so that $\delta x$ has to decrease with $c$, which is confirmed by Figure \ref{fig: Power_Conv_Edge}.
+Figure \ref{fig: Power_Conv_Edge} also shows that  when $c < 0$, the uncertainty grows exponentially with decreasing $c$, so that the result precision becomes worse quickly.
+
+\item
+When $c > 1$,  Figure \ref{fig: Power_Conv_Edge} shows up-and-down in the largest $\delta x$ for $(1 \pm \delta x)^c$, and the corresponding down-and-up of the result uncertainty.
+This can be explained by the example difference between $\sqrt{x^3}$ and $\sqrt{x^5}$, as Formula \eqref{eqn: square root^3 Taylor} and \eqref{eqn: square root^5 Taylor}, respectively.
+Both formulas have the alternative $+$ and $-$ sign pattern when the Taylor expansion order $n$ is large enough, but the pattern is offset by $1$.
+The difference of such offset may cancel some terms in higher order expansion, such as the $P(x)^6$ expansion in Formula \eqref{eqn: square root^5 precision} for $\delta^2 \sqrt{x^5}$.
+The lowest expansion for $\delta^2 \sqrt{x^5}$  in Formula \eqref{eqn: square root^5 precision} is still larger than that for $\delta^2 \sqrt{x^3}$  in Formula \eqref{eqn: square root^3 precision}, making $\delta^2 \sqrt{x^5}$ overall larger than $\delta^2 \sqrt{x^3}$ but converges for larger $\delta x$.
+
+\item 
+When $c > 1$,  Figure \ref{fig: Power_Conv_Edge} shows an overall linear growth of the uncertainty but an exponential growth of uncertainty bias with increasing $c$.
+
+\end{itemize}
+\begin{align}
+\label{eqn: square root^3 Taylor}
+\frac{\sqrt{(x + \tilde{x})^3}}{\sqrt{x^3}} &= 1 + \frac{3}{2} (\frac{\tilde{x}}{x}) + \frac{3}{8} (\frac{\tilde{x}}{x})^2 - \frac{1}{16} (\frac{\tilde{x}}{x})^3 
+		+ \frac{3}{128} (\frac{\tilde{x}}{x})^4 - \frac{3}{256} (\frac{\tilde{x}}{x})^5 + o((\frac{\tilde{x}}{x})^7); \\
+\label{eqn: square root^5 Taylor}
+\frac{\sqrt{(x + \tilde{x})^5}}{\sqrt{x^5}} &= 1 + \frac{5}{2} (\frac{\tilde{x}}{x}) + \frac{15}{8} (\frac{\tilde{x}}{x})^2 + \frac{5}{16} (\frac{\tilde{x}}{x})^3 
+		- \frac{5}{128} (\frac{\tilde{x}}{x})^4 + \frac{3}{256} (\frac{\tilde{x}}{x})^5 + o((\frac{\tilde{x}}{x})^7); \\
+\label{eqn: square root^3 precision}
+\frac{\delta^2 \sqrt{x^3}}{(\sqrt{x^3})^2} &=  \frac{9}{4} P(x)^2 + \frac{27}{32} P(x)^4 + \frac{13}{16} P(x)^6 + o(P(x)^8); \\
+\label{eqn: square root^5 precision}
+\frac{\delta^2 \sqrt{x^5}}{(\sqrt{x^5})^2} &= \frac{25}{4} P(x)^2 + \frac{325}{32} P(x)^4 + 0 P(x)^6 + o(P(x)^8);
+\end{align}
+
+Figure \ref{fig: Power_Conv_Expansion} shows that the value converges faster than the variance, due to the difference between Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance}.
+It shows the individual variance term of $1/(1 \pm \delta x)$ for the different Taylor expansion order $2n$, and $\delta x$, in which $1/(1 \pm 0.201)$ clearly diverges, while $1/(1 \pm 0.200)$ marginally diverges, so that variance arithmetic invalidate both as not monotonic.
+Due to the limitation of maximal expansion order of $2n=252$, such determination of convergence is only practical, which may different from theoretical convergence threshold. 
+
+
+
+
+
+\subsection{Sine}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_Histo.pdf} 
+\captionof{figure}{
+The histogram of the error deviation for $\sin(x \pm \delta x)$, for $x=0, +\pi/2, +\pi/4$ and $\delta x = 0.001$ as shown in the legend.
+The x-axis is for normalized value error. 
+The y-axis is for normalized count. 
+Each color represents a different $x$, while each line pattern represents a different $\delta x$.
+Gaussian noises are used to produce the input noise $\delta x$.
+}
+\label{fig: Sin_Histo}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_Conv_Edge_Histo.pdf} 
+\captionof{figure}{
+The histogram for $\sin(\pi/4 \pm \delta x)$ for different $\delta x$ as shown in the legend.
+The x-axis is for normalized value error.
+The y-axis is for normalized count.
+}
+\label{fig: Sin_Conv_Edge_Histo}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Sin_Conv_Edge.pdf} 
+\captionof{figure}{
+The largest $\delta x$ for  $\sin(x \pm \delta x)$ for different $x$ as shown by the x-axis, using the y-axis on the left.
+Also shown are the corresponding uncertainty bias and uncertainty for different $x$ as shown by the x-axis, using the y-axis on the right.
+}
+\label{fig: Sin_Conv_Edge}
+\end{figure}
+
+$\sin(x)$ has distributional zeros at $x=n\pi +\pi/2$, in which $n$ is an integer.
+Figure \ref{fig: Sin_Histo} shows the histogram of the error deviation for $\sin(x + \delta x)$ when Gaussian noises with $x$ as mean and $\delta x$ as deviation are used to produce the input $x \pm \delta x$.
+The distribution is Normal at $x = 0, \pi/4$, but it is a folded Normal at $x = \pi/2$ when the 2nd derivative of $\sin(\pi/2)$ folds all added noises to one side only.
+Because the 2nd derivative of $\sin(-\pi/2)$ has the opposite sign to that of $\sin(\pi/2)$, the 2nd derivative of $\sin(-\pi/2)$ folds the Normal distribution to the opposite side only.
+
+In Figure \ref{fig: Sin_Conv_Edge_Histo}, the noise $\delta x$ is increased from $0.001$:
+\begin{itemize}
+\item When $\delta x = 0.001$, the distribution is Normal.
+
+\item When $\delta x=0.2$, the distribution at $x = \pi/4$ starts to be affected by the closest distribution zero at $x = \pi/2$, so that the distribution starts to deviate from Normal distribution.
+
+\item When $\delta x = 0.5$, the distribution at $x = \pi/4$ is affected strongly by the closest distribution zero at $x = \pi/2$, so that the distribution starts to take shape of the distribution at $x = \pi/2$ Figure \ref{fig: Sin_Histo}. 
+
+\item When $\delta x = 1.024$, the distribution at $x = \pi/4$ starts to be affected by second the closest distribution zero at $x = -\pi/2$, which result in a small peak resembling the distribution at $x = -\pi/2$ Figure \ref{fig: Sin_Histo}.
+
+\item When $\delta x = 1.025$, the result is invalidated as not monotonic, which is quite a pleasant side effect of the convergence criteria of variance arithmetic.
+In a periodic function $\sin(x + \delta x)$, $\delta x$ conceptually should not be larger than the period $2\pi$.
+Variance arithmetic just provides a sensible upper bound for $\delta x$ in this case.
+
+\end{itemize}
+
+Figure \ref{fig: Sin_Conv_Edge} shows the upper bound of $\delta x$ in $\sin(x + \delta x)$ for $-\pi \leq x \leq \pi$, as well as the corresponding uncertainty and uncertainty bias.
+The upper bound is also periodic with $\pi$, with the tightest bounds of $\delta x$ at the distributional zeros $x=n\pi +\pi/2$.
+However, the second tightest bounds of $\delta x$ are at $x=n\pi$, which is the farthest $x$ from the distributional zeros.
+The mechanism for the upper bounding of $\delta x$ in $\sin(x + \delta x)$ needs further understanding.
+
+
+
+
+
 
 
 \clearpage
@@ -2400,7 +2584,7 @@ Gaussian noises are used to produce the input noise $\delta x$.
 \centering
 \includegraphics[height=2.5in]{Log_Dev.pdf} 
 \captionof{figure}{
-The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\log(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
+The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $\ln(x \pm \delta x)$, for different $x$ as shown by the x-axis, and different $\delta x$ as shown in the legend.
 The uncertainties and the value deviations are drawn using the logarithmic y scales on the left side, while the error deviations are drawn using the linear y scales on the right side. 
 Each color represents a $\delta x$.
 Gaussian noises are used to produce the input noise $\delta x$.
@@ -2447,18 +2631,6 @@ Gaussian noises are used to produce the input noise $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Sin_Histo.pdf} 
-\captionof{figure}{
-The histogram of the error deviation for $\sin(x \pm \delta x)$, for $x=0, +\pi/2$ and $\delta x = 10^{-7}, 10^{-16}$ as shown in the legend.
-The y-axis is for normalized count. 
-Each color represents a different $x$, while each line pattern represents a different $\delta x$.
-Gaussian noises are used to produce the input noise $\delta x$.
-}
-\label{fig: Sin_Histo}
-\end{figure}
-
-\begin{figure}[p]
-\centering
 \includegraphics[height=2.5in]{Pow_Dev.pdf} 
 \captionof{figure}{
 The calculated uncertainties vs the measured value deviations as well as the measured error deviations for $(1 \pm \delta x)^c$, for different $c$ as shown by the x-axis, and for different $\delta x$ as shown in the legend.
@@ -2470,21 +2642,9 @@ Each color represents a $\delta x$.
 
 \begin{figure}[p]
 \centering
-\includegraphics[height=2.5in]{Pow_Converge.pdf} 
-\captionof{figure}{
-The individual variance term of $(1 \pm \delta x)^c$ vs the different Taylor expansion order $2n$, for different $c$ and $\delta x$ as shown in the legend. 
-The $x$-axis is Taylor expansion order $2n$ from 1 to 400 in Formula \eqref{eqn: Taylor 1d variance}.
-The $y$-axis is the contribution to $(1 \pm \delta x)^c$ at each Taylor expansion order $2n$ according to Formula \eqref{eqn: power precision}.
-It shows that $(1 \pm 0.2)^{-2}$ and $(1 \pm 0.2)^{-1.5}$ clearly diverge, $(1 \pm 0.2)^{-1}$ likely diverges, and other cases clearly converge.
-}
-\label{fig: Pow_Converge}
-\end{figure}
-
-\begin{figure}[p]
-\centering
 \includegraphics[height=2.5in]{ExpLog_Error.pdf} 
 \captionof{figure}{
-The values and uncertainties of $\log(e^x) - x$ vs $x$, as \textit{VarDbl Error} and \textit{VarDbl Uncertainty} in the legend.
+The values and uncertainties of $\ln(e^x) - x$ vs $x$, as \textit{VarDbl Error} and \textit{VarDbl Uncertainty} in the legend.
 The result of the same calculation using conventional floating-point library functions is shown as \textit{Lib Error} in the legend.
 }
 \label{fig: ExpLog_Error}
@@ -2527,14 +2687,14 @@ Such strong tracking power holds for all $x$ and $\delta x$ of $e^{x + \delta x}
 
 \subsection{Logarithm}
 
-$\log(x)$ has a distributional zero at $x=0$ so that all $log(x \pm \delta x)$ are rejected when $1/5 < P(x)$.
-Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\log(x + \delta x)$, so that the result error deviations are very close to $1$
+$\ln(x)$ has a distributional zero at $x=0$ so that all $log(x \pm \delta x)$ are rejected when $1/5 < P(x)$.
+Figure \ref{fig: Log_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: log precision} agree very well with the measured value deviations for $\ln(x + \delta x)$, and the result error deviations are very close to $1$
 
 
 \subsection{Sine}
 
 Figure \ref{fig: Sin_Dev} shows that the calculated uncertainties using Formula \eqref{eqn: sin precision} agree very well with the measured value deviations for $\sin(x + \delta x)$.
-Figure \ref{fig: Sin_Dev} also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$:
+It also shows that $\delta^2 \sin(x)$ has the same periodicity as $\sin(x)$:
 \begin{itemize}
 \item When $x=0$, $\sin(x) \simeq x$, so that $\delta^2 \sin(x) \simeq (\delta x)^2$.
 \item When $x=\pi/2$, $\sin(x) \simeq 1$, so that $\delta^2 \sin(x) \simeq 0$.
@@ -2544,34 +2704,19 @@ In Figure \ref{fig: Sin_Dev}, Gaussian noises are used, while in Figure \ref{fig
 The difference of Figure \ref{fig: Sin_Dev} and \ref{fig: Sin_Dev_Uniform} shows that the Gaussian noise is more desirable, because of its tail effect, e.g., the error deviation is much closer to $1$ for $\sin(\pm \pi/2 + \delta x)$.
 So only Gaussian noises will be used for other analysis by default.
 
-$\sin(x)$ has a distribution pole at $x = \pm \pi/2$.
-Figure \ref{fig: Sin_X_Dev} shows that the error deviation for $\sin(x + \delta x)$ is $1$ except when $x=\pm \pi/4$ and $\delta x < 10^{-8}$, which agrees with the expected Delta distribution at $x = \pm \pi/2$ without added noise.
-Figure \ref{fig: Sin_Histo} shows the histogram of the error deviation for $\sin(x + \delta x)$ when Gaussian noises are used to produce the input noise $\delta x$:
-\begin{itemize}
-\item When $\delta x=10^{-16}$, the distribution is Normal at $x = 0$, while it is Delta at $x = \pm \pi/2$.
+$\sin(x)$ has distributional zeros at $x=\pm \pi/2$, in which $n$ is an integer.
+Figure \ref{fig: Sin_X_Dev} shows that the error deviation for $\sin(x + \delta x)$ is $1$ except when $x=\pm \pi/2$ and $\delta x < 10^{-8}$, which agrees with the expected Delta distribution at $x = \pm \pi/2$ without added noise.
 
-\item When $\delta x=10^{-7}$, the distribution is Normal at $x = 0$, while it is a folded Normal at $x = \pm \pi/2$ when the 2nd derivative of $\sin(\pi/2)$ folds all added noises to one side only.
-
-\end{itemize}
-
-Variance arithmetic rejects $\sin(0 \pm \delta x), \delta x \ge \pi/4$ and $\sin(\pi/2 \pm \delta x), \delta x \ge 3\pi/16$ for not monotonic, but can calculate smaller $\delta x$ without a problem.
-Because the second derivatives at the distributional pole is not zero, this case may not be generally applicable to calculations near a distributional pole.
 
 
 \subsection{Power}
 
 Figure \ref{fig: Pow_Dev} shows that the calculated uncertainties of $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} agree very well with the measured value deviations for $(1 + \delta x)^c$.
 
-Figure \ref{fig: Pow_Converge} shows the individual variance term of $(1 \pm \delta x)^c$ for the different Taylor expansion order $2n$, $c$, and $\delta x$.
-It shows that $(1 \pm 0.2)^{-2}$ clearly diverges, while $(1 \pm 0.2)^{-1}$ marginally diverges, so that variance arithmetic invalidate both as not monotonic.
-When $\delta x =0.2$, variance arithmetic limits $c$ above $-0.8$.
-For the same reason, when $\delta x = 0.195$, variance arithmetic limits $c$ above $-1.8$.
-
-
 
 \subsection{Numerical Errors for Library Functions}
 
-The combined numerical error of the library function $e^x$ and $\log(x)$ is calculated as $\log(e^x) - x$ vs $x$.
+The combined numerical error of the library function $e^x$ and $\ln(x)$ is calculated as $\ln(e^x) - x$ vs $x$.
 Figure \ref{fig: ExpLog_Error} shows that using either variance arithmetic or the conventional floating-point library functions results in the same value errors.  
 The uncertainties of variance arithmetic bound the value errors effectively, resulting in an error deviation about $0.409$ when $|x| \leq 1$.
 It looks suspicious when $|x| > 1$ the value error is always $0$ in both calculations.
@@ -2814,15 +2959,15 @@ To minimize the numerical errors of $\sin(x)$ and $\cos(x)$, \emph{indexed sine 
 \begin{enumerate}
 \item Instead of a floating-point value $x$ for $\sin(x)$ and $\cos(x)$, the integer $j$ is used to specify the input to $\sin(x)$ and $\cos(x)$, as $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$, to avoid the floating-point rounding error of $x$.
 
-\item The values of the indexed sine functions are extended from $j = 0,1,\dots N/8$ to $j = 0,1,\dots N$ using the symmetry of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
+\item The values of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$ are extended from $j = 0,1,\dots N/8$ to $j = 0,1,\dots N$ using the symmetry of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
 
-\item The values of the indexed sine functions are extended from $j = 0,1,\dots N$ to the whole integer region using the periodicity of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
+\item The values of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$ are extended from $j = 0,1,\dots N$ to the whole integer region using the periodicity of $\sin(2\pi j/N)$ and $\cos(2\pi j/N)$.
 
 \end{enumerate}
 
 Figure \ref{fig: Sin_Diff} shows that the value difference between the library $\sin(x)$ and the indexed $\sin(x)$ increases with increasing $x$.
 However, checked by $\sin(x)^2 + \cos(x)^2 - 1$, Figure \ref{fig: Sin_Error} shows that the value errors are quite comparable between  the indexed and library $\sin(x)$ and $\cos(x)$ functions.
-In Figure \ref{fig: Sin_Error}, the deviations for the indexed sine function seem less stable statistically, because the deviations of the index sine function are calculated from much less samples: For the FFT order $N$, the deviations for the indexed sine function contain $2^{N-3}$ data covering $x \in [0, \pi/4]$, while the deviations for the library sine function contain $2^{2N-1}$ data covering $x \in [0, \pi 2^{N}]$.
+In Figure \ref{fig: Sin_Error}, the deviations of the value errors for the indexed sine function seem less stable statistically, because the deviations of the index sine function are calculated from much less samples: For the FFT order $N$, the deviations for the indexed sine function contain $2^{N-3}$ data covering $x \in [0, \pi/4]$, while the deviations for the library sine function contain $2^{2N-1}$ data covering $x \in [0, \pi 2^{N}]$.
 Figure \ref{fig: Sin_Error} also shows that both $\sin(x)$ functions have proper coverage in variance arithmetic.
 Thus, the difference is just caused by the rounding of $x$ in $\sin(x)$ and $\cos(x)$ library functions.
 
@@ -2834,7 +2979,7 @@ According to Figure \ref{fig: Sin_Cot_Diff}, the library $\cos(x)/\sin(x)$ funct
 
 Using indexed $\sin(x)$ as standard, Figure \ref{fig: Sin_Cot_Diff} compares the value errors of the library $\sin(x)$, $\cos(x)/\sin(x)$, and $1/tan(x)$ for increasing FFT orders.
 It shows that the numerical errors of all these library functions grow exponentially with  increasing FFT order.
-For all the three library functions, $1/tan(x)$ has the largest errors, and it will not be used for FFT transformations.
+$1/tan(x)$ has the largest errors, and it will not be used for FFT transformations.
 $\cos(x)/\sin(x)$ has larger errors than those of $\sin(x)$.
 
 The difference between the indexed and library sine functions shows the inconsistency in the library sine functions, because the indexed sine functions is just the library sine functions in the range of $[0, \pi/4]$, and should be related to other ranges according to precise mathematical relations.
@@ -2889,8 +3034,12 @@ The FFT order is $18$.
 Using the indexed sine functions, for the waveform of $\sin(2\pi k 3/2^6)$ in which $k$ is the index time:
 \begin{itemize}
 \item Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Indexed} shows that for the forward transformation,  the result value errors are comparable to the result uncertainties, with an error deviation of $0.37$ for the real part, and $0.93$ for the imaginary part.
+Both real and imaginary uncertainties peak at the expected peak index of $\pm 3$, but only real value error peak at the frequency.
+Both real and imaginary uncertainties peak at the expected peak index of $\pm 29$, but only real value error has a smaller peak at the frequency.  
+Overall, the uncertainty seems a smoothed version of the value error, and they are comparable in strength.
 
 \item Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} shows that for the reverse transformation, the result value errors are comparable to the result uncertainties, with an error deviation of $0.54$ for the real part, and $0.52$ for the imaginary part.
+The uncertainty captures the periodicity of the value error, as well as bigger strength of the real value error than that of the imaginary value error.
 
 \end{itemize}
 
@@ -2906,7 +3055,7 @@ Thus, the forward transformation is expected to reach ideal coverage quicker wit
 \item The slower growth of the uncertainties of the reverse transformation in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} results in structured distribution on top of a Gaussian distribution of the normalized errors in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
 Thus, the reverse transformation is expected to reach ideal coverage slower with added input noises, and it is more sensitive to numerical calculation errors.
 
-\item with increasing FFT order, all histograms become more Gaussian like, and the error deviations for the real and the imaginary parts become more equal in value.
+\item With increasing FFT order, all histograms become more Gaussian like, and the error deviations for the real and the imaginary parts become more equal in value.
 The error deviations for the forward transformation are relatively stable.
 The error deviations for the reverse transformation increase with increasing FFT orders until become stable when FFT orders is $12$ or more.
 When the FFT order is about $12$, statistical stability is reached.
@@ -2941,6 +3090,27 @@ The y-axis is for uncertainties or absolute value errors.
 \end{figure}
 
 \begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.pdf} 
+\captionof{figure}{
+The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+}
+\label{fig: FFT_SinCos_Clean_vs_Order_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_1e-16_vs_Order_Lib.pdf} 
+\captionof{figure}{
+The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
+The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+$10^{-16}$ input noises are added to the Sin/Cos signals.
+}
+\label{fig: FFT_SinCos_1e-16_vs_Order_Lib}
+\end{figure}
+
+\begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_4_Wave_Lib.pdf} 
 \captionof{figure}{
 The waveform of $\sin(j 4/2^6 \pi)$ using the indexed sine functions after the reverse transformation calculated by variance arithmetic, with the uncertainties and the value errors shown in the legend.
@@ -2962,27 +3132,6 @@ The y-axis is for uncertainties or absolute value errors.
 \label{fig: FFT_Sin_Clean_6_1_Wave_Lib}
 \end{figure}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Lib.pdf} 
-\captionof{figure}{
-The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
-}
-\label{fig: FFT_SinCos_Clean_vs_Order_Lib}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_1e-16_vs_Order_Lib.pdf} 
-\captionof{figure}{
-The result error deviation and uncertainty mean of Sin/Cos signals vs. FFT order using the library sine functions for forward, reverse and roundtrip FFT transformations, as shown in the legend.
-The y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
-$10^{-16}$ input noises are added to the Sin/Cos signals.
-}
-\label{fig: FFT_SinCos_1e-16_vs_Order_Lib}
-\end{figure}
-
 
 
 Because the least significant values are the only source of input uncertainties for variance arithmetic, the result uncertainties using either sine functions are almost identical.
@@ -3000,20 +3149,22 @@ The surprisingly large imaginary error deviation is caused by the small uncertai
 \item As the result of the huge error deviation, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Lib} shows that the result of the reverse transformation no longer has proper coverage for all FFT orders.
 When a small noise with deviation of $10^{-16}$ is added to the input, the result uncertainty of the reverse transformation at the index time of $8$ is no longer near $0$, so that the result error deviations achieve proper coverage again, as show in Figure \ref{fig: FFT_SinCos_1e-16_vs_Order_Lib}.
 
+\item Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed} and Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Lib} confirm that the result uncertainties are identical to all FFT transformations, respectively.
 \end{itemize}
-
-To validate the FFT implementation in variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
-The results are quite comparable, except that in \textit{SciPy}, the data waveform is always real rather than complex.
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of variance arithmetic is indicative.
-In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results match the corresponding results of variance arithmetic well.
+Variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
+It further reveals that the amount of noise needed is to achieve proper coverage.
 
 In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the value errors tend to increase with the index time, which is due to the periodic increase of the numerical errors of $\sin(x)$ with $x$ as shown in Figure \ref{fig: Sin_Diff}.
 When the signal frequency increases, the increase of the value errors with the index frequency in the reverse transformation becomes stronger, as shown in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib}, and \ref{fig: FFT_Sin_Clean_6_1_Wave_Lib}.
 In fact, Figure \ref{fig: FFT_Sin_Clean_6_4_Wave_Lib} suggests that the periodic numerical errors in  Figure \ref{fig: Sin_Diff} resonate with the periodicity of the input $Sin$ signal.
-In contrast, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} shows no such increase, because the indexed sine functions contain no library errors as described in Figure \ref{fig: Sin_Diff}.
+In contrast, Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed} shows no such increase.
+It shows that the library numerical errors may have surprisingly large effect on the numerical results.
 
-Variance arithmetic reveals the reason why to add small noises to the numerically generated input data, which is already a common practice \cite{Numerical_Recipes}.
-Variance arithmetic further reveals that the amount of noise to add small noises is to achieve proper coverage.
+To validate the FFT implementation in variance arithmetic, the results are compared with the corresponding calculations using the python numerical library \textit{SciPy} in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
+The results are quite comparable, except that in \textit{SciPy}, the data waveform is always real rather than complex.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib}, the \textit{SciPy} results have been made identical for the frequency indexes $f$ and $-f$, and the matching to the corresponding results of variance arithmetic is moderate.
+In Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}, the \textit{SciPy} results match the corresponding results of variance arithmetic quite well.
+It shows that the effects of library numerical errors revealed by variance arithmetic exist in real applications.
 
 
 
@@ -3062,7 +3213,8 @@ The question is whether variance arithmetic can track these additional numerical
 
 Using the indexed sine functions:
 \begin{itemize}
-\item Figure \ref{fig: FFT_Linear_vs_Order_Indexed} shows that proper coverage can be achieved for all FFT transformations for all FFT orders.
+\item Figure \ref{fig: FFT_Linear_vs_Order_Indexed} shows that the result uncertainty for each FFT transformation has much larger increase with the increasing FFT order than its counter part in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}.
+It shows that proper coverage can be achieved for all FFT transformations for all FFT orders.
 
 \item Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} shows that for each transformation, the histogram of the Linear signal is similar to the counterpart of the Sin/Cos signals in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}. 
 
@@ -3070,15 +3222,14 @@ Using the indexed sine functions:
  
 Using the library sine functions:
 \begin{itemize}
-\item Figure \ref{fig: FFT_Linear_vs_Order_Lib} shows that proper coverage cannot be achieved for reverse transformation for all FFT orders, because the value errors outpace the uncertainties with increasing FFT order.
-Because of this, adding noise to the input cannot achieve proper coverage.
+\item Figure \ref{fig: FFT_Linear_vs_Order_Lib} shows that proper coverage cannot be achieved for all FFT transformations for all FFT orders, because the value errors outpace the uncertainties with increasing FFT order, to result in worse error deviations for increasing FFT order.
 
-\item Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse histogram contains additional peaks in addition to its counterpart in Figure \ref{fig: FFT_Linear_vs_Order_Lib}.
-The additional peaks extend beyond the range of $[-3, +3]$
+\item Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse histogram contains additional peaks to its counterpart in Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed}.
+The additional peaks extend quite beyond the range of $[-3, +3]$, revealing the reason why variance arithmetic can not cover these value errors.
 
 \end{itemize}
 
-When the input uncertainty is too small compared to the real input error, proper coverage cannot be achieved, which is the case when the $\sin(x)$ numerical errors in Figure \ref{fig: Sin_Diff} is combined with the $\cos(x)/\sin(x)$ numerical errors in Figure \ref{fig: Cot_Diff}.
+The result difference using variance arithmetic for library Sin/Cos signal vs library Linear signal suggests that variance arithmetic can break down when the input contains too much unspecified errors.
 The only solution seems to create a new sin library using variance arithmetic so that all numerical calculation errors are accounted for.
 
 
@@ -3144,7 +3295,9 @@ The input uncertainties run from $10^{-16}$ to $10^{-1}$, while the FFT Order ru
 \label{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}
 \end{figure}
 
-Adding enough noise to the input can overpower the numerical calculation errors, to achieve ideal coverage.
+
+
+Adding enough noise to the input can overpower unspecified input errors, to achieve ideal coverage.
 For Linear signal with $10^{-3}$ input noise, using the library sine functions, Figure \ref{fig: FFT_Linear_1e-3_Histo_Lib} and Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} show characteristics for ideal coverage:  
 \begin{itemize}
 \item As expected, the result uncertainty means for the forward transformations increase with the FFT order $L$ as $\sqrt{2}^L$.
@@ -3163,8 +3316,7 @@ The normalized errors for the roundtrip transformations are Delta distributed at
 
 \end{itemize}
 
-However, the range of ideal coverage depends on how well the input uncertainty specifies the input noise.  
-
+The range of ideal coverage depends on how well the input uncertainty specifies the input noise.  
 For Linear signals using library sine functions, Figure \ref{fig: FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order} show the error deviation vs. the added noise vs. FFT order for the forward and reverse transformations, respectively.
 The ideal coverage is shown as the regions where the error deviations are $1$.
 In other regions, proper coverage is not achievable.
@@ -3187,7 +3339,7 @@ Compared to its counterpart continuous Fourier Transformation (FT), the discrete
 This modeling error has not been addressed seriously.
 
 The library sine functions using conventional floating-point arithmetic have been shown to contain numerical errors as large as equivalently  $10^{-3}$ of input accuracy for FFT transformations.
-The library $\sin(x)$ errors increase periodically with $x$, causing noticeable increase of the result errors with increasing index frequency in the reverse transformation.
+The library $\sin(x)$ errors increase periodically with $x$, causing noticeable increase of the result errors with increasing index frequency in the reverse transformation, even in resonant fashion.
 The dependency of the result numerical errors on the amount of calculation and input data means that a small-scale test can not properly qualify the result of a large-scale calculation.
 The effect of numerical errors inside math library has not been addressed seriously.
 
@@ -3257,28 +3409,31 @@ Once the uncorrelated uncertainty assumption is satisfied, variance arithmetic q
 It can trace the variable dependency in the intermediate steps using standard statistics.
 The statistical nature of variance arithmetic is reflected by the bounding leakage $\epsilon=5.73 \;10^{-7}$ and the required value precision $\tau=7.18 \;10^{-7}$, which determine the convergence and truncation when Taylor expansion is used to obtain the result mean and uncertainty of an analytic function.
 In variance arithmetic, ill-formed problems (such as inversion of an input which has a high probability of containing zero) can be invalidated as result divergence, unreliable result variance, or being practically unstable.
+In variance arithmetic, the best-possible precision to achieve ideal coverage is $10^{-15}$, which is good enough for most applications.
 
 The presence of ideal coverage is the necessary condition for a numerical algorithm in variance arithmetic to be correct. 
 The ideal coverage also defines the ideal applicable range for the algorithm. 
-In ideal coverage, the calculated uncertainty equal the error deviation, and the result normalized errors is either Normal distributed or Delta distributed.
+In ideal coverage, the calculated uncertainty equals the error deviation, and the result normalized errors is either Normal distributed or Delta distributed.
 
-Due to digital limitation of 64-bit standard floating-point representation, variance arithmetic can only provide proper coverage for floating-point rounding errors, with the empirical error deviations in the range of $[1/5, 5]$
+Variance arithmetic can only provide proper coverage for floating-point rounding errors, with the empirical error deviations in the range of $[1/5, 5]$
 
 Variance arithmetic has been shown to be widely applicable, so as for analytic calculations, progressive calculation, regressive generalization, polynomial expansion, statistical sampling, and transformations.
+
+The code and analysis for variance arithmetic are published as an open source project at \url{https://github.com/Chengpu0707/VarianceArithmetic}.
 
 
 
 \subsection{New Numerical Approaches}
 
-The conventional numerical approaches focus primarily on the result values, and they need to be reexamined or even reinvented in variance arithmetic.
-Due to its dependency tracing, variance arithmetic allows no numerical execution freedom, and it has no dependency on such freedoms.
-On the other hand, by using stability truncation, variance arithmetic no longer needs reminder estimator so that it is simpler for truncation problems.
-Also, variance arithmetic can reject ill-formed problems.
+Traditional numerical approaches focus primarily on the result values, and they need to be reexamined or even reinvented in variance arithmetic.
+Most traditional numerical algorithms try to choose one of the best paths, while variance arithmetic rejects conceptually all path-dependent calculations.
 
-How to treat the conceptual difference between variance arithmetic and conventional floating-point arithmetic is a general question.
-The uncertainty bias can be potentially significant near a distributional zero or a distributional pole, such as $1/(1 \pm (0.2 -2\;10^{-5})) = 1.046 \pm 0.250$.  
 Variance arithmetic generally reveals worse results than those of conventional floating-point arithmetic, such as very quick loss of precision in matrix inversion, especially for matrix of large size. 
-A distributional pole may be a problem for variance arithmetic, but it is never a problem in conventional floating-point arithmetic.
+How to reconcile variance arithmetic and traditional numerical approaches could be a big challenge.
+
+By using stability truncation, variance arithmetic no longer needs theoretical reminder estimator so that it is simpler for truncation problems.
+Also, variance arithmetic can reject ill-formed problems.
+Variance arithmetic seems conceptually easier than traditional numerical approaches.
 
 In variance arithmetic, it is generally an order-of-magnitude more complicated to calculate the result uncertainties than the result values.
 However, modern software programs for analytic calculation can be great help.
@@ -3297,7 +3452,7 @@ For example, this paper shows that the periodic numerical errors in the sine lib
 Most practical calculations are neither pure analytic nor pure numerical, in which the analytic knowledge guides the numerical approaches, such as solving differential equations.
 In these cases, when input precision is fine enough, first order approximation of variance arithmetic may be a viable solution because these calculations may only have low-order derivatives for the result.
 This paper provides an example of first order approximation of variance arithmetic, as Formula \eqref{eqn: determinant variance approx} for $\delta^2 |\M|$.
-The difference between Formula \eqref{eqn: composite variance 1d} and \eqref{eqn: progressive variance} shows that first order approximation of $f(g(x))$ does not have dependency problem.
+The difference between Formula \eqref{eqn: composite variance 1d} and \eqref{eqn: progressive variance} shows that the first order approximation of $f(g(x))$ does not have dependency problem.
 However, Section \ref{sec: polynomial} shows that the result uncertainty needs higher order than first order to stabilize.
 How to effectively apply variance arithmetic to practical calculations remains an open question.
 
@@ -3310,20 +3465,21 @@ As an enhancement for dependency tracing, source tracing points out the contribu
 
 \subsection{Variable $\sigma$ Variance Arithmetic}
 
-Variance arithmetic rejects a calculation if its distributional pole or distributional zero is in the range of $[x - \sigma \delta x, x + \sigma \delta x]$ with $\sigma = 5$.
-But there are many use cases in which calculations need to be performed at $x$ closer to either a distributional pole or a distributional zero, so variance arithmetic of smaller $\sigma$ may be needed.
+Variance arithmetic rejects a calculation if its distributional pole or distributional zero is too close to the input ranges.
+But there are many use cases in which such closeness cannot be avoided, so variance arithmetic of smaller $\sigma$ may be needed.
 It is even possible in another implementation of variance arithmetic, $\sigma$ is part of a variance representation, so that a calculation closer to a distributional zero or a distributional pole can proceed but at the expense of reducing $\sigma$.
 The result $\sigma$ for a calculation of imprecise inputs each with different $\sigma$ is found statistically through the corresponding $\epsilon$.
-Such approach needs theoretical foundation in both mathematics and statistics.
+Such approaches need theoretical foundation in both mathematics and statistics.
+
 
 
 
 \subsection{Different Floating-Point Representation for Variance}
 
 In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated and stored.
-This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation, such as when applying Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} to floating-point rounding errors in Section \ref{sec: polynomial}.
-Ideally, $(\delta x)^2$ should be calculated and stored in a different 64-bit floating-point representation with no sign bit, more exponent bits, and less significant bits, because  $(\delta x)^2$ needs not to be as accurate as $x$.
-Let the new 
+This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation.
+Ideally, $(\delta x)^2$ should be calculated and stored in a different 64-bit floating-point representation with the sign bit reused for the exponent, so that $\delta x$ has exactly the same range as the standard 64-bit floating-point representation.  
+
 
 
 \subsection{Hardware Implementation}
@@ -3335,7 +3491,7 @@ Because variance arithmetic has neither execution freedoms nor the associated de
 \subsection{Acknowledgments}
 
 As an independent researcher without any academic association, the author of this paper feels indebted to encouragements and valuable discussions with Dr. Zhong Zhong from Brookhaven National Laboratory, Dr. Anthony Begley from \emph{Physics Reviews B}, the organizers of \emph{AMCS 2005}, with Prof. Hamid R. Arabnia from University of Georgia in particular, and the organizers of \emph{NKS Mathematica Forum 2007}, with Dr. Stephen Wolfram in particular. 
-Prof Dongfeng Wu from Louisville University provides valuable guidance and discussions on statistical related topic.
+Prof Dongfeng Wu from Louisville University provides valuable guidance and discussions on statistical related topics.
 The author of this paper is very grateful for the editors and reviewers of \emph{Reliable Computing} for their tremendous help in shaping and accepting the previous version of this paper from unusual source, with managing editor, Prof. Rolph Baker Kearfott in particular.
 
 

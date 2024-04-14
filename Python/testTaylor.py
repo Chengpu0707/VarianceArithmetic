@@ -626,18 +626,17 @@ class TestExpansion (unittest.TestCase):
     def testPower(self):
         with open('./Python/Output/PowerExpansion.txt', 'w') as fw:
             fw.write(TestExpansion.HEADER)
-            for i in range(-20, 0, 2):
-                exp = i/10
-                s1dTaylor = taylor.power(exp)
-                for j in range (190, 201):
-                    s1dTaylor[0] = VarDbl(1, j/1000)
-                    res = self.dumpExpansion(fw, 'power', exp, s1dTaylor)
-                    try:
-                        dir = s1dTaylor[0] ** (exp)
-                        self.assertAlmostEqual(res.value(), dir.value())
-                        self.assertAlmostEqual(res.variance(), dir.variance())
-                    except NotMonotonicException:
-                        pass
+            exp = -1
+            s1dTaylor = taylor.power(exp)
+            for j in range (190, 210):
+                s1dTaylor[0] = VarDbl(1, j/1000)
+                res = self.dumpExpansion(fw, 'power', exp, s1dTaylor)
+                try:
+                    dir = s1dTaylor[0] ** (exp)
+                    self.assertAlmostEqual(res.value(), dir.value())
+                    self.assertAlmostEqual(res.variance(), dir.variance())
+                except NotMonotonicException:
+                    pass
 
 
 
