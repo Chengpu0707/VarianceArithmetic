@@ -196,7 +196,7 @@ class TestLog (unittest.TestCase):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
         self.validate(1/2, 0.2, NotMonotonicException)
-        self.validate(3/4, 0.2, AssertionError)
+        self.validate(3/4, 0.2, NotMonotonicException)
         self.validate(1, 0.2)
 
         self.validate(1/4, 0.1, NotMonotonicException)
@@ -799,27 +799,37 @@ class TestPolyNearOne (unittest.TestCase):
                 break  
         return stbUnc, byErr, byInc, byLSV, byRem 
         
+    def test_covergence(self):
+        res = 1/VarDbl(0.3, 0.05)
+        self.assertAlmostEqual(res.value(),  3.434995140848915)
+        self.assertAlmostEqual(res.uncertainty(), 0.6330399463775024)
+        res = taylor.polynominal(VarDbl(0.7, 0.05), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(),  3.434995140848915)
+        self.assertAlmostEqual(res.uncertainty(), 0.6330395889085147)
+
+        with self.assertRaises(NotMonotonicException):
+            1/VarDbl(0.3, 0.06)
+        res = taylor.polynominal(VarDbl(0.7, 0.06), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(), 3.487418126933905)
+        self.assertAlmostEqual(res.uncertainty(), 0.8271229892024609)
+
+        with self.assertRaises(NotMonotonicException):
+            1/VarDbl(0.3, 0.07)
+        res = taylor.polynominal(VarDbl(0.7, 0.07), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(), 3.565068933443618)
+        self.assertAlmostEqual(res.uncertainty(), 4.0996817592708785)
+
+        res = taylor.polynominal(VarDbl(0.7, 0.09), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(), 95.88319657855395)
+        self.assertAlmostEqual(res.uncertainty(), 94696.36884449655)
+
+
     def test_imprecise_test(self):
-        res = 1/VarDbl(0.4, 0.06)
-        self.assertAlmostEqual(res.value(), 2.5605577330563207)
-        self.assertAlmostEqual(res.uncertainty(), 0.41519016618465204)
-        try:
-            res = 1/VarDbl(0.3, 0.06)
-            self.assertAlmostEqual(res.value(), 3.4874748968790157)
-            self.assertAlmostEqual(res.uncertainty(), 0.8333325278975393)
-        except NotMonotonicException:
-            return
-        try:
-            res = 1/VarDbl(0.3, 0.07)
-            self.assertAlmostEqual(res.value(), 527.564157634998)
-            self.assertAlmostEqual(res.uncertainty(), 452.0300821331497)
-        except NotMonotonicException:
-            return
+
         res = 1/VarDbl(0.3)
         self.assertAlmostEqual(res.value(), 3.3333333333333335)
         self.assertAlmostEqual(res.uncertainty(), 4.388015458239491e-16)
         self.assertAlmostEqual(math.ulp(1/3), 4.388015458239491e-16)
-
         self.assertTupleEqual(self.calc_imprecise(VarDbl(0.7), 0), 
                               (True, False, True, True, False))
         self.assertTupleEqual(self.calc_imprecise(VarDbl(0.7, 0.01), 0.01), 

@@ -367,6 +367,7 @@ class TestAdjugate (unittest.TestCase):
         The roundtrip matrix has order of magnitude of 10^{28*6} == 10^{206}.  
         The square of the value is 10^{412}. The product of the variance 10^{26*6}=10^{105}.
         Thus the result variance becomes overflow.
+        This test may occationally fail due to how random matrix is generated
         '''
         adj = Adjugate(6, randRange=(1 << 17))
         ssVarOrg = addNoise(adj.ssOrg, 0)
@@ -445,7 +446,7 @@ class TestAdjugate (unittest.TestCase):
                 for j in range(adj.size):
                     try:
                         (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
-                    except NotReliableException as ex:
+                    except (NotMonotonicException, NotReliableException) as ex:
                         print(f'Found at ssAdj[{i}][{j}]={ssAdj[i][j]}, detAdj={detAdj}, noise={noise}, ssOrg={ssOrg}')
                         break
         
