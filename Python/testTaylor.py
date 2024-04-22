@@ -844,7 +844,7 @@ class TestPolyNearOne (unittest.TestCase):
         self.assertTupleEqual(self.calc_imprecise(VarDbl(-0.7, 0.01), 0.04), 
                               (True, True, True, True, True))
     
-    @unittest.skip('10 minutes slow')
+    #@unittest.skip('10 minutes slow')
     def test_imprecise(self):
         LOG_PATH = './Python/Output/UncertaintyNearOne.log'
         if os.path.isfile(LOG_PATH):
@@ -858,6 +858,7 @@ class TestPolyNearOne (unittest.TestCase):
                     '\tStable Uncertainty\tBy Increment\tBy LSV\tTerminated\tBy Error\tBy Reminder\n')
 
             for x in (0.5, 0.6, 0.7):
+                logger.info(f'Start to calculate x={x}')
                 for sign in (-1, 1):
                     self.calc_imprecise(VarDbl(sign*x), 0, f)
                     for i in range(1, 10):

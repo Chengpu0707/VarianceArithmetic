@@ -187,14 +187,13 @@ class TestCleanLib (unittest.TestCase):
 
 class TestDumpFFT (unittest.TestCase):
 
-    @unittest.skip('Too slow')
     def testSpectra(self):
         '''
         Demonstrate the reverse has not enough calculation for large enough uncertainty
         '''
-        with open(f'./Python/Output/FFT_4_8_Spec.txt', 'w') as fw:
+        with open(f'./Python/Output/FFT_4_7_Spec.txt', 'w') as fw:
             FFTTest.dumpSpectrumHeader(fw)
-            FFTTest.dumpSpectra(fw, range(4,8))
+            FFTTest.dumpSpectra(fw, range(4,7))
 
     def testOrder_4(self):
         FFTTest.dumpOrders(sOrder=[4])
