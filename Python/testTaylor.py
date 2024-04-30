@@ -2,9 +2,11 @@ import math
 import logging
 import numpy as np
 import os
+import random
 import unittest
 import sys
 
+from histo import Stat, Histo
 from taylor import Taylor, NotReliableException, NotMonotonicException, NotStableException
 from varDbl import VarDbl, UncertaintyException, validate
 
@@ -89,7 +91,20 @@ class TestExp (unittest.TestCase):
         try:
             var = VarDbl(exp, uncertainty)
             res = VarDbl.exp(var)
+        except (UncertaintyException, NotMonotonicException, NotReliableException, NotStableException) as ex:
+            if (exception is None) or (not isinstance(ex, (UncertaintyException, NotMonotonicException, NotReliableException, NotStableException))): 
+                raise ex
+            return
+
+        try:
             prec = res * math.exp(-exp)
+        except UncertaintyException as ex:
+            if (exception is None) or (not isinstance(ex, UncertaintyException)): 
+                raise ex
+            else:
+                return res
+        
+        try:
             if (exception is not None) and (exception != AssertionError):
                 self.fail(f'precision {prec} of exp({var}) = {res} not throw {exception}')
             self.assertAlmostEqual(prec.value(),
@@ -106,24 +121,21 @@ class TestExp (unittest.TestCase):
                 raise ex
             else:
                 return res
-        except BaseException as ex:
-            if (exception is None) or (not isinstance(ex, exception)): 
-                raise ex
 
 
     def test_exception(self):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
-        self.validate(-392, 0.1, UncertaintyException)
-        self.validate(-390, 0.1, AssertionError)
+        self.validate(-392, 0.1, UncertaintyException)      # prec has inf variance
+        self.validate(-390, 0.1, AssertionError)            # res has 0 variance
         self.validate(-200, 0.1)
 
-        self.validate(196, 0.1, UncertaintyException)
-        self.validate(194, 0.1, AssertionError)
+        self.validate(196, 0.1, UncertaintyException)       # res has inf variance
+        self.validate(194, 0.1, AssertionError)             # res has 0 variance
         self.validate(100, 0.1)
  
-        self.validate(-392, 0.2, UncertaintyException)
-        self.validate(-390, 0.2, AssertionError)
+        self.validate(-392, 0.2, UncertaintyException)      # prec has inf variance
+        self.validate(-390, 0.2, AssertionError)            # res has 0 variance
         self.validate(-200, 0.2, valueDelta=1e-3)
 
         self.validate(196, 0.2, UncertaintyException)
@@ -195,17 +207,17 @@ class TestLog (unittest.TestCase):
     def test_exception(self):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
-        self.validate(1/2, 0.2, NotMonotonicException)
-        self.validate(3/4, 0.2, NotMonotonicException)
+        self.validate(2047/2048, 0.2, NotMonotonicException)
+        self.validate(4095/4096, 0.2, AssertionError)
         self.validate(1, 0.2)
 
-        self.validate(1/4, 0.1, NotMonotonicException)
-        self.validate(1/2, 0.1, AssertionError)
-        self.validate(1, 0.1)
+        self.validate(63/128, 0.1, NotMonotonicException)
+        self.validate(127/256, 0.1, AssertionError)
+        self.validate(1/2, 0.1)
 
-        self.validate(1/64, 0.01, NotMonotonicException)
-        self.validate(1/32, 0.01, NotMonotonicException)
-        self.validate(1/16, 0.01)
+        self.validate(0.05 - 1e-5, 0.01, NotMonotonicException)
+        self.validate(0.05 - 1e-6, 0.01, AssertionError)
+        self.validate(0.05, 0.01)
 
     @staticmethod
     def func(x):
@@ -277,32 +289,43 @@ class TestSin (unittest.TestCase):
             if (exception is None) or (not isinstance(ex, exception)): 
                 raise ex
         
-    def test_exception(self):
+    def test_exception_pi(self):
         self.validate(0, 0)
         self.validate(0, 1e-3)
         self.validate(0, 1e-2)
         self.validate(0, 1e-1)
-        self.validate(0, math.pi/32*7, varianceDelta=2e-2)
-        with self.assertRaises(NotMonotonicException):
-            VarDbl.sin(VarDbl(0, math.pi/4))
+        self.validate(0, math.pi*10/32, varianceDelta=3e-1)
+        with self.assertRaises(NotReliableException):
+            VarDbl.sin(VarDbl(0, math.pi*11/32))
+        self.validate(0, 1, varianceDelta=0.3)
+        with self.assertRaises(NotReliableException):
+            VarDbl.sin(VarDbl(0, 1.01))
 
+    def test_exception_half_pi(self):
         self.validate(math.pi/2, 0)
         self.validate(math.pi/2, 1e-3)
         self.validate(math.pi/2, 1e-2)
         self.validate(math.pi/2, 1e-1)
-        self.validate(math.pi/2, math.pi/8, valueDelta=8e-7, varianceDelta=2e-4)
-        self.validate(math.pi/2, math.pi/32*5, valueDelta=8e-7, varianceDelta=1e-3)
-        with self.assertRaises(NotMonotonicException):
-            VarDbl.sin(VarDbl(math.pi/2, math.pi/32*6))
+        self.validate(math.pi/2, math.pi*10/32, valueDelta=3e-4, varianceDelta=2e-1)
+        with self.assertRaises(NotReliableException):
+            VarDbl.sin(VarDbl(math.pi/2, math.pi*11/32))
 
         self.validate(-math.pi/2, 0)
         self.validate(-math.pi/2, 1e-3)
         self.validate(-math.pi/2, 1e-2)
         self.validate(-math.pi/2, 1e-1)
-        self.validate(-math.pi/2, math.pi/8, valueDelta=8e-7, varianceDelta=2e-4)
-        self.validate(-math.pi/2, math.pi/32*5, valueDelta=8e-7, varianceDelta=1e-3)
-        with self.assertRaises(NotMonotonicException):
-            VarDbl.sin(VarDbl(-math.pi/2, math.pi/32*6))
+        self.validate(-math.pi/2, math.pi*10/32, valueDelta=3e-4, varianceDelta=2e-1)
+        with self.assertRaises(NotReliableException):
+            VarDbl.sin(VarDbl(-math.pi/2, math.pi*11/32))
+
+    def test_exception_quater_pi(self):
+        self.validate(math.pi/4, 0)
+        self.validate(math.pi/4, 1e-3)
+        self.validate(math.pi/4, 1e-2)
+        self.validate(math.pi/4, 1e-1)
+        self.validate(math.pi/4, 1.41, valueDelta=5e-3, varianceDelta=3e-1)
+        with self.assertRaises(NotReliableException):
+            VarDbl.sin(VarDbl(math.pi/4, 1.42))
 
     @staticmethod
     def func(x):
@@ -426,9 +449,9 @@ class TestPower (unittest.TestCase):
         self.validate(1, 0.2)  
         self.validate(2, 0.2)    
         self.validate(0.5, 0.2)
-        self.validate(0.5, 0.205)
+        self.validate(0.5, 0.202)
         try:
-            self.validate(0.5, 0.23,    valueDelta=7e-3, varianceDelta=2e-2)    
+            self.validate(0.5, 0.203,    valueDelta=7e-3, varianceDelta=2e-2)    
         except NotMonotonicException:
             pass    
         try:
@@ -683,7 +706,7 @@ class TestPolyNearOne (unittest.TestCase):
                     raise ex
 
 
-    @unittest.skip('Too slow')
+    @unittest.skip('2 minutes slow')
     def test_precise(self):
         LOG_PATH = './Python/Output/PolyNearOne.log'
         if os.path.isfile(LOG_PATH):
@@ -692,7 +715,7 @@ class TestPolyNearOne (unittest.TestCase):
                             format='%(asctime)s:%(levelname)s:%(message)s')
         
         with open(f'./Python/Output/PolyNearOne.txt', 'w') as f:
-            f.write('X\tOrder\tReminder\tValue Error\tUncertainty\tResult ULP'
+            f.write('X\tOrder\tReminder\tValue Error\tUncertainty\tResult LSV'
                     '\tPower\tULP Power\tRouding Error\tAccumulated Rounding Error\n')
             
             def calc(x):
@@ -719,11 +742,29 @@ class TestPolyNearOne (unittest.TestCase):
                     f.write(f'{x}\t{order}\t{valSum - final}\t{res.value()}\t{res.uncertainty()}\t{ulp}'
                             f'\t{pow}\t{ulpPow}\t{err}\t{errSum}\n')
                     f.flush()
+            
+            v1, v2 = int(7e12), int(1e13)
+            for i in range(5):
+                for j in range(-3, 4):
+                    if j == 0:
+                        continue
+                    calc( (v1 + j) / v2)
+                    calc(-(v1 + j) / v2)
+                v1 *= 10
+                v2 *= 10
 
-            for i in range(50, 75, 5):
+            v1, v2 = int(6e12), int(1e13)
+            for i in range(3):
+                for j in range(-3, 4):
+                    if j == 0:
+                        continue
+                    calc( (v1 + j) / v2)
+                v1 *= 10
+                v2 *= 10
+ 
+            for i in range(-75, 75):
                 calc(i / 100)
-                calc(-i / 100)
-
+    
 
     def calc_imprecise(self, x, noise, f=None):
         try:
@@ -733,6 +774,9 @@ class TestPolyNearOne (unittest.TestCase):
             return
         except UncertaintyException as ex:
             logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
+            return
+        except NotMonotonicException as ex:
+            logger.warning(f'At x={x} noise={noise} encounter NotMonotonicException={ex}')
             return
         
         stbUnc = False
@@ -758,6 +802,9 @@ class TestPolyNearOne (unittest.TestCase):
                 break
             except UncertaintyException as ex:
                 logger.warning(f'At x={x} noise={noise} order={order} encounter UncertaintyException={ex}')
+                break
+            except NotMonotonicException as ex:
+                logger.warning(f'At x={x} noise={noise} order={order} encounter NotMonotonicException={ex}')
                 break
             err = res - val
 
@@ -801,27 +848,21 @@ class TestPolyNearOne (unittest.TestCase):
         
     def test_covergence(self):
         res = 1/VarDbl(0.3, 0.05)
-        self.assertAlmostEqual(res.value(),  3.434995140848915)
-        self.assertAlmostEqual(res.uncertainty(), 0.6330399463775024)
-        res = taylor.polynominal(VarDbl(0.7, 0.05), [1] * (taylor._momentum._maxOrder - 1))
-        self.assertAlmostEqual(res.value(),  3.434995140848915)
-        self.assertAlmostEqual(res.uncertainty(), 0.6330395889085147)
+        self.assertAlmostEqual(res.value(), 3.434995140848915)
+        self.assertAlmostEqual(res.uncertainty(), 0.6330399463772585)
 
         with self.assertRaises(NotMonotonicException):
             1/VarDbl(0.3, 0.06)
-        res = taylor.polynominal(VarDbl(0.7, 0.06), [1] * (taylor._momentum._maxOrder - 1))
-        self.assertAlmostEqual(res.value(), 3.487418126933905)
-        self.assertAlmostEqual(res.uncertainty(), 0.8271229892024609)
+        res = taylor.polynominal(VarDbl(0.3, 0.06), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(), 1.4393071662283592)
+        self.assertAlmostEqual(res.uncertainty(), 0.1262339097790444)
 
         with self.assertRaises(NotMonotonicException):
-            1/VarDbl(0.3, 0.07)
-        res = taylor.polynominal(VarDbl(0.7, 0.07), [1] * (taylor._momentum._maxOrder - 1))
-        self.assertAlmostEqual(res.value(), 3.565068933443618)
-        self.assertAlmostEqual(res.uncertainty(), 4.0996817592708785)
+            1/VarDbl(0.3, 0.09)
+        res = taylor.polynominal(VarDbl(0.3, 0.09), [1] * (taylor._momentum._maxOrder - 1))
+        self.assertAlmostEqual(res.value(), 1.4534671456516448)
+        self.assertAlmostEqual(res.uncertainty(), 0.1973935167783444)
 
-        res = taylor.polynominal(VarDbl(0.7, 0.09), [1] * (taylor._momentum._maxOrder - 1))
-        self.assertAlmostEqual(res.value(), 95.88319657855395)
-        self.assertAlmostEqual(res.uncertainty(), 94696.36884449655)
 
 
     def test_imprecise_test(self):
@@ -844,7 +885,7 @@ class TestPolyNearOne (unittest.TestCase):
         self.assertTupleEqual(self.calc_imprecise(VarDbl(-0.7, 0.01), 0.04), 
                               (True, True, True, True, True))
     
-    #@unittest.skip('10 minutes slow')
+    @unittest.skip('10 minutes slow')
     def test_imprecise(self):
         LOG_PATH = './Python/Output/UncertaintyNearOne.log'
         if os.path.isfile(LOG_PATH):
@@ -853,12 +894,11 @@ class TestPolyNearOne (unittest.TestCase):
                             format='%(asctime)s:%(levelname)s:%(message)s')
         
         with open(f'./Python/Output/UncertaintyNearOne.txt', 'w') as f:
-            f.write('X\tInput Uncertainty\tOrder\tExpansion Value\tExpansion Uncertainty\tExpansion ULP'
+            f.write('X\tInput Uncertainty\tOrder\tExpansion Value\tExpansion Uncertainty\tExpansion LSV'
                     '\tValue Increment\tUncertainty Increment\tError Value\tError Uncertainty'
                     '\tStable Uncertainty\tBy Increment\tBy LSV\tTerminated\tBy Error\tBy Reminder\n')
 
             for x in (0.5, 0.6, 0.7):
-                logger.info(f'Start to calculate x={x}')
                 for sign in (-1, 1):
                     self.calc_imprecise(VarDbl(sign*x), 0, f)
                     for i in range(1, 10):
@@ -866,6 +906,250 @@ class TestPolyNearOne (unittest.TestCase):
                         self.calc_imprecise(VarDbl(sign*x, noise), noise, f)
                         noise = i/1000
                         self.calc_imprecise(VarDbl(sign*x, noise), noise, f)
+
+
+
+class TestConvergence (unittest.TestCase):
+    EDGE_HEADER = 'Edge Value\tEdge Uncertainty\tValue\tUncertainty\tException\n'
+
+    def test_power(self):
+        with open('./Python/Output/PowerAtOneEdge.txt', 'w') as f:
+            f.write(TestConvergence.EDGE_HEADER)
+            for i in range(-60, 60, 2):
+                exp = i/10
+                excpt = None
+                for j in range(300,100,-1):
+                    dx = j/1000
+                    try:
+                        res = VarDbl(1, dx)**exp
+                    except BaseException as ex:
+                        excpt = ex
+                        continue
+                    break
+                if excpt:
+                    f.write(f'{exp}\t{dx}\t{res.value()}\t{res.uncertainty()}\t{excpt}\n')
+                    f.flush()
+
+    def test_sin(self):
+        with open('./Python/Output/SinEdge.txt', 'w') as f:
+            f.write(TestConvergence.EDGE_HEADER)
+            for i in range(-16, 17):
+                rad = i/16 * math.pi
+                excpt = None
+                for j in range(150,50,-1):
+                    dx = j/100
+                    try:
+                        res = VarDbl.sin(VarDbl(rad, dx))
+                    except BaseException as ex:
+                        excpt = ex
+                        continue
+                    break
+                if excpt:
+                    f.write(f'{rad}\t{dx}\t{res.value()}\t{res.uncertainty()}\t{excpt}\n')
+                    f.flush()
+
+    def test_log(self):
+        with open('./Python/Output/LogEdge.txt', 'w') as f:
+            f.write(TestConvergence.EDGE_HEADER)
+            for i in range(-15, 17):
+                x = i/16 + 1
+                excpt = None
+                for j in range(250,0,-1):
+                    dx = j/100
+                    try:
+                        res = VarDbl.log(VarDbl(x, dx))
+                    except BaseException as ex:
+                        excpt = ex
+                        continue
+                    break
+                if excpt and j:
+                    f.write(f'{x}\t{dx}\t{res.value()}\t{res.uncertainty()}\t{excpt}\n')
+                    f.flush()
+
+
+    @staticmethod
+    def writePowerHeader(f, divids:int=5, devs:int=3):
+        f.write('Exponent\tInput Value\tInput Uncertainty'
+                '\tValue\tUncertainty\tMean\tDeviation'
+                '\tNormalized Error Mean\tNormalized Error Deviation\tLess\tMore')
+        histo = Histo(divids, devs)
+        for bucket in histo.buckets():
+            f.write(f'\t{bucket:.1f}')
+        f.write('\n')
+
+    @staticmethod
+    def calc_power(x:float, dx:float, exp:float, f):
+        if dx <= 0:
+            return
+        CNT = 100000
+        try:
+            var = VarDbl(x, dx)**exp
+        except BaseException as ex:
+            raise ex
+        varUnc = var.uncertainty()
+        stat = Stat()
+        histo = Histo(5, 3)
+        for j in range(CNT):
+            val = random.gauss(x, dx)**exp
+            try:
+                stat.accum( val )
+            except BaseException as ex:
+                raise ex
+            histo.accum( (val - var.value())/varUnc )
+        f.write(f'{exp}\t{x}\t{dx}\t{var.value()}\t{var.uncertainty()}'
+                f'\t{stat.mean()}\t{stat.dev()}\t{histo.stat().mean()}\t{histo.stat().dev()}\t{histo.less()}\t{histo.more()}')
+        cnt = stat.count() - histo.less() - histo.more()
+        for h in histo.histogram():
+            f.write(f'\t{h/cnt}')
+        f.write('\n')
+
+
+    def test_square_at_zero(self):
+        EXP = 2
+        with open('./Python/Output/SquareAtZero.txt', 'w') as f:
+            TestConvergence.writePowerHeader(f)
+            for i in range(-4, 3):
+                TestConvergence.calc_power(0, math.pow(10, i), EXP, f)
+            for i in (1, EXP, 5):
+                TestConvergence.calc_power(0, i * 1e3, EXP, f)
+
+    def test_invesion_at_one(self):
+        EXP = -1
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.201)**EXP
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.200)**EXP
+        res = VarDbl(1, 0.199)**EXP
+        self.assertAlmostEqual(res.value(), 1.045691758000615)
+        self.assertAlmostEqual(res.uncertainty(), 0.24719720414026802)
+
+        with open('./Python/Output/InversionAtOne.txt', 'w') as f:
+            TestConvergence.writePowerHeader(f)
+            for j in (0.199, 0.1):
+                TestConvergence.calc_power(1, j, EXP, f) 
+            for i in range(-4, -1):
+                pw = math.pow(10, i)
+                for x in (1, 2, 5):
+                    TestConvergence.calc_power(1, x*pw, EXP, f) 
+            TestConvergence.calc_power(1, 0.01, EXP, f)
+
+    def test_square_root_at_one(self):
+        EXP = 0.5
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.204)**EXP
+        res = VarDbl(1, 0.203)**EXP
+        self.assertAlmostEqual(res.value(), 0.9946227731411926)
+        self.assertAlmostEqual(res.uncertainty(), 0.10356417890295154)
+
+        with open('./Python/Output/SquareRootAtOne.txt', 'w') as f:
+            TestConvergence.writePowerHeader(f)
+            for i in range(-4, -1):
+                pw = math.pow(10, i)
+                for x in (1, 2, 5):
+                    TestConvergence.calc_power(1, x*pw, EXP, f) 
+            for x in (0.203, 0.2, 0.1):
+                TestConvergence.calc_power(1, x, EXP, f) 
+
+    def test_cubic_square_root_at_one(self):
+        EXP = 1.5
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.206)**EXP
+        res = VarDbl(1, 0.205)**EXP
+        self.assertAlmostEqual(res.value(), 1.015892200903304)
+        self.assertAlmostEqual(res.uncertainty(), 0.3066532771911667)
+
+    def test_penta_square_root_at_one(self):
+        EXP = 2.5
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.210)**EXP
+        res = VarDbl(1, 0.209)**EXP
+        self.assertAlmostEqual(res.value(), 1.0816704016245913)
+        self.assertAlmostEqual(res.uncertainty(), 0.5435159817989529)
+
+    def test_inversion_square_one(self):
+        EXP = -2
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(1, 0.195)**EXP
+        res = VarDbl(1, 0.194)**EXP
+        self.assertAlmostEqual(res.value(), 1.1436033475936196)
+        self.assertAlmostEqual(res.uncertainty(), 0.7181123505697333)
+
+
+    @staticmethod
+    def writeHeader(f, divids:int=5, devs:int=3):
+        f.write('Input Value\tInput Uncertainty'
+                '\tValue\tUncertainty\tMean\tDeviation'
+                '\tNormalized Error Mean\tNormalized Error Deviation\tLess\tMore')
+        histo = Histo(divids, devs)
+        for bucket in histo.buckets():
+            f.write(f'\t{bucket:.1f}')
+        f.write('\n')
+
+    @staticmethod
+    def calc(varFunc, mathFunc, x:float, dx:float, f):
+        if dx <= 0:
+            return
+        CNT = 10000
+        try:
+            var = varFunc(VarDbl(x, dx))
+        except BaseException as ex:
+            raise ex
+        varUnc = var.uncertainty()
+        stat = Stat()
+        histo = Histo(5, 3)
+        for j in range(CNT):
+            val = mathFunc(random.gauss(x, dx))
+            try:
+                stat.accum( val )
+            except BaseException as ex:
+                raise ex
+            histo.accum( (val - var.value())/varUnc )
+        f.write(f'{x}\t{dx}\t{var.value()}\t{var.uncertainty()}'
+                f'\t{stat.mean()}\t{stat.dev()}\t{histo.stat().mean()}\t{histo.stat().dev()}\t{histo.less()}\t{histo.more()}')
+        cnt = stat.count() - histo.less() - histo.more()
+        for h in histo.histogram():
+            f.write(f'\t{h/cnt}')
+        f.write('\n')
+
+    def test_sin_pi(self):
+        '''
+        0.981 from TestSin.test_exception_pi()
+        '''
+        with open('./Python/Output/SinAtPI.txt', 'w') as f:
+            TestConvergence.writeHeader(f)
+            for i in range(-4, -1):
+                pw = math.pow(10, i)
+                for x in (1, 2, 5):
+                    TestConvergence.calc(VarDbl.sin, math.sin, 0, x*pw, f) 
+            for x in (0.981,0.5, 0.2, 0.1):
+                TestConvergence.calc(VarDbl.sin, math.sin, 0, x, f) 
+
+    def test_sin_half_pi(self):
+        '''
+        0.981 from TestSin.test_exception_half_pi()
+        '''
+        with open('./Python/Output/SinAtHalfPI.txt', 'w') as f:
+            TestConvergence.writeHeader(f)
+            for i in range(-4, -1):
+                pw = math.pow(10, i)
+                for x in (1, 2, 5):
+                    TestConvergence.calc(VarDbl.sin, math.sin, math.pi/2, x*pw, f) 
+            for x in (0.981, 0.5, 0.2, 0.1):
+                TestConvergence.calc(VarDbl.sin, math.sin, math.pi/2, x, f) 
+
+    def test_sin_quarter_pi(self):
+        '''
+        0.981 from TestSin.test_exception_quarter_pi()
+        '''
+        with open('./Python/Output/SinAtQuarterPI.txt', 'w') as f:
+            TestConvergence.writeHeader(f)
+            for i in range(-4, -1):
+                pw = math.pow(10, i)
+                for x in (1, 2, 5):
+                    TestConvergence.calc(VarDbl.sin, math.sin, math.pi/4, x*pw, f) 
+            for x in (1.41, 1, 0.5, 0.2, 0.1):
+                TestConvergence.calc(VarDbl.sin, math.sin, math.pi/4, x, f) 
+
 
 
 

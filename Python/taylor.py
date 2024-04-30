@@ -116,24 +116,26 @@ class Taylor:
             value += newValue
             variance += newVariance
 
+            if not math.isfinite(variance.value()):
+                raise varDbl.ValueException(value)
+            if not math.isfinite(variance.variance()):
+                raise varDbl.UncertaintyException(value, variance)
             if monotonicCheckOrder or enableStabilityTruncation:
-                unc = variance.value()*Taylor.TAU
-                stable = (math.sqrt(abs(newVariance.value())) < unc) and prevVariance
+                unc = variance.value() *(Taylor.TAU**2)
+                stable = (abs(newVariance.value()) < unc) and (n > 2)
 
-            if monotonicCheckOrder:
-                if (stable or (n >= monotonicCheckOrder)) and (prevVariance.value() + unc < newVariance.value()):
-                    raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
-                            value, variance, n, newValue, newVariance)
+            if monotonicCheckOrder and (stable or (n >= monotonicCheckOrder)) \
+                    and (abs(prevVariance.value()) + unc < abs(newVariance.value())):
+                raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance)
             if variance.variance() > variance.value() * self._variance_threshold:
                 raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             varn *= var
             if varn.value() == 0:
                 break
-            if enableStabilityTruncation:
-                if stable and (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
-                    break
-
+            if enableStabilityTruncation and stable and (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
+                break
             prevVariance = newVariance
 
         if enableStabilityTruncation and (n >= self._momentum._maxOrder*2):
@@ -188,7 +190,9 @@ class Taylor:
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
             value += newValue
             variance += newVariance
-            if (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
+            if not math.isfinite(variance.value()):
+                raise varDbl.ValueException(value)
+            if not math.isfinite(variance.variance()):
                 raise varDbl.UncertaintyException(value, variance)
             varn *= var
             if varn.value() == 0:
