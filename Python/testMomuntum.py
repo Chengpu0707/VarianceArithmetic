@@ -1,7 +1,7 @@
 import unittest
 
 from momentum import Momentum
-from varDbl import UncertaintyException, validate
+from varDbl import VarianceException, validate
 
 class TestMomuntum (unittest.TestCase):
     momentum = Momentum()
@@ -9,7 +9,7 @@ class TestMomuntum (unittest.TestCase):
     def test_max_order(self):
         try:
             Momentum(maxOrder=Momentum.MAX_ORDER+1)
-        except UncertaintyException:
+        except VarianceException:
             pass
         except BaseException as ex:
             raise ex

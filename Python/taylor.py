@@ -119,7 +119,7 @@ class Taylor:
             if not math.isfinite(variance.value()):
                 raise varDbl.ValueException(value)
             if not math.isfinite(variance.variance()):
-                raise varDbl.UncertaintyException(value, variance)
+                raise varDbl.VarianceException(value, variance)
             if monotonicCheckOrder or enableStabilityTruncation:
                 unc = variance.value() *(Taylor.TAU**2)
                 stable = (abs(newVariance.value()) < unc) and (n > 2)
@@ -193,7 +193,7 @@ class Taylor:
             if not math.isfinite(variance.value()):
                 raise varDbl.ValueException(value)
             if not math.isfinite(variance.variance()):
-                raise varDbl.UncertaintyException(value, variance)
+                raise varDbl.VarianceException(value, variance)
             varn *= var
             if varn.value() == 0:
                 break

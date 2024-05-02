@@ -14,7 +14,7 @@ class ValueException (Exception):
         super().__init__(*args)
         self.value = value
 
-class UncertaintyException (Exception):
+class VarianceException (Exception):
     def __init__(self, value: float, uncertainty: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
@@ -70,7 +70,7 @@ class VarDbl:
         If "bForceIntValueAsFloat" is False, keey the value as its original numeric type.
             such as int or Fraction for precise calculations. 
         Both value and variance have to be finite. 
-            Otherwise ValueException or UncertaintyException will throw.
+            Otherwise ValueException or VarianceException will throw.
 
         When "uncertainty" is not specified:
              *) An int is initialized with uncertainty = 0
@@ -92,7 +92,7 @@ class VarDbl:
         if not math.isfinite(value):
             raise ValueException(value, "__init__")
         if not math.isfinite(variance):
-            raise UncertaintyException(value, uncertainty, "__init__")
+            raise VarianceException(value, uncertainty, "__init__")
         self._value = float(value) if bForceIntValueAsFloat else value
         self._variance = float(variance)
 

@@ -13,7 +13,7 @@ from histo import Histo, Stat
 from matrix import ElementType, permutSign, isSquareMatrix, createIntMatrix, createHilbertMatrix, addNoise
 from matrix import linear, multiply, adjugate, adjugate_mul
 from taylor import NotReliableException, NotMonotonicException
-from varDbl import VarDbl, UncertaintyException
+from varDbl import VarDbl, VarianceException
 
 
 logger = logging.getLogger(__name__)
@@ -375,7 +375,7 @@ class TestAdjugate (unittest.TestCase):
 
         adj = Adjugate(6, randRange=(1 << 19))
         ssVarOrg = addNoise(adj.ssOrg, 0)
-        with self.assertRaises((OverflowError, UncertaintyException)):
+        with self.assertRaises((OverflowError, VarianceException)):
             self.roundtrip(adj, 0.1, ssVarOrg)
 
 

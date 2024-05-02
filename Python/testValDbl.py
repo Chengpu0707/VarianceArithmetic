@@ -4,7 +4,7 @@ import pickle
 import unittest
 import sys
 
-from varDbl import VarDbl, ValueException, UncertaintyException, validate
+from varDbl import VarDbl, ValueException, VarianceException, validate
 from taylor import NotReliableException, NotMonotonicException
 
 
@@ -45,22 +45,22 @@ class TestInit (unittest.TestCase):
         self.failValueException(float('nan'))
         self.failValueException(float('inf'))
 
-    def failUncertaintyException(self, value, uncertainty):
+    def failVarianceException(self, value, uncertainty):
         try:
             VarDbl(value, uncertainty)
             self.fail(f'Init ValDbl with {value}~{uncertainty}')
-        except UncertaintyException as ex:
+        except VarianceException as ex:
             self.assertIsNotNone(ex.__traceback__)
         except BaseException as ex:
             self.fail(ex)
 
-    def testUncertaintyException(self):
-        self.failUncertaintyException(0, float('nan'))
-        self.failUncertaintyException(0, float('inf'))
+    def testVarianceException(self):
+        self.failVarianceException(0, float('nan'))
+        self.failVarianceException(0, float('inf'))
             
     def testUncertaintyRange(self):
         maxU = math.sqrt(sys.float_info.max)
-        self.failUncertaintyException(0, maxU + VarDbl.ulp(maxU))
+        self.failVarianceException(0, maxU + VarDbl.ulp(maxU))
         validate(self, VarDbl(0, maxU), 0, maxU) 
         
         minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
@@ -162,7 +162,7 @@ class TestAddSub (unittest.TestCase):
         try:
             VarDbl(maxV, maxU) - VarDbl(maxV, maxU)
             self.fail("variance overflow")
-        except UncertaintyException:
+        except VarianceException:
             pass
         except BaseException as ex:
             self.fail(ex)
@@ -222,7 +222,7 @@ class TestMultiply (unittest.TestCase):
         try:
             VarDbl(1, maxU) * VarDbl(1, maxU)
             self.fail("variance overflow")
-        except UncertaintyException:
+        except VarianceException:
             pass
         except BaseException as ex:
             self.fail(ex)
