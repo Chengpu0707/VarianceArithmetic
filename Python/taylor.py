@@ -68,6 +68,26 @@ class NotMonotonicException (Exception):
         return f'NotMonotonicException: {self.name} for {self.input} at {self.n}'
 
 
+class InfinitiveException (Exception):
+    def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
+                 value:varDbl.VarDbl, variance:varDbl.VarDbl, n:int, newValue:varDbl.VarDbl, newVariance:varDbl.VarDbl,
+                 *args: object) -> None:
+        super().__init__(*args)
+        self.input = input
+        self.name = name
+        self.s1dTaylor = s1dTaylor
+        self.inPrec = inPrec
+
+        self.value = value
+        self.variance = variance
+        self.n = n
+        self.newValue = newValue
+        self.newVariance = newVariance
+
+    def __str__(self) -> str:
+        return f'InfinitiveException: {self.name} for {self.input} at {self.n}'
+
+
 class Taylor:
     TAU = 7.18e-7   # The stability test 
     MONOTONIC_CHECK_ORDER = 20
@@ -116,15 +136,15 @@ class Taylor:
             value += newValue
             variance += newVariance
 
-            if not math.isfinite(variance.value()):
-                raise varDbl.ValueException(value)
-            if not math.isfinite(variance.variance()):
-                raise varDbl.VarianceException(value, variance)
+            if (not math.isfinite(value.value())) or (not math.isfinite(value.variance())) \
+                    or (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
+                raise InfinitiveException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance)
             if monotonicCheckOrder or enableStabilityTruncation:
                 unc = variance.value() *(Taylor.TAU**2)
                 stable = (abs(newVariance.value()) < unc) and (n > 2)
 
-            if monotonicCheckOrder and (stable or (n >= monotonicCheckOrder)) \
+            if monotonicCheckOrder and (n >= monotonicCheckOrder) \
                     and (abs(prevVariance.value()) + unc < abs(newVariance.value())):
                 raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)

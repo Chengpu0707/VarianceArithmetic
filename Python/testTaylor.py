@@ -8,7 +8,7 @@ import sys
 
 from histo import Stat, Histo
 from taylor import Taylor, NotReliableException, NotMonotonicException, NotStableException
-from varDbl import VarDbl, VarianceException, validate
+from varDbl import VarDbl, UncertaintyException, validate
 
 logger = logging.getLogger(__name__)
 
@@ -91,15 +91,15 @@ class TestExp (unittest.TestCase):
         try:
             var = VarDbl(exp, uncertainty)
             res = VarDbl.exp(var)
-        except (VarianceException, NotMonotonicException, NotReliableException, NotStableException) as ex:
-            if (exception is None) or (not isinstance(ex, (VarianceException, NotMonotonicException, NotReliableException, NotStableException))): 
+        except (UncertaintyException, NotMonotonicException, NotReliableException, NotStableException) as ex:
+            if (exception is None) or (not isinstance(ex, (UncertaintyException, NotMonotonicException, NotReliableException, NotStableException))): 
                 raise ex
             return
 
         try:
             prec = res * math.exp(-exp)
-        except VarianceException as ex:
-            if (exception is None) or (not isinstance(ex, VarianceException)): 
+        except UncertaintyException as ex:
+            if (exception is None) or (not isinstance(ex, UncertaintyException)): 
                 raise ex
             else:
                 return res
@@ -126,27 +126,27 @@ class TestExp (unittest.TestCase):
     def test_exception(self):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
-        self.validate(-392, 0.1, VarianceException)      # prec has inf variance
+        self.validate(-392, 0.1, UncertaintyException)      # prec has inf variance
         self.validate(-390, 0.1, AssertionError)            # res has 0 variance
         self.validate(-200, 0.1)
 
-        self.validate(196, 0.1, VarianceException)       # res has inf variance
+        self.validate(196, 0.1, UncertaintyException)       # res has inf variance
         self.validate(194, 0.1, AssertionError)             # res has 0 variance
         self.validate(100, 0.1)
  
-        self.validate(-392, 0.2, VarianceException)      # prec has inf variance
+        self.validate(-392, 0.2, UncertaintyException)      # prec has inf variance
         self.validate(-390, 0.2, AssertionError)            # res has 0 variance
         self.validate(-200, 0.2, valueDelta=1e-3)
 
-        self.validate(196, 0.2, VarianceException)
+        self.validate(196, 0.2, UncertaintyException)
         self.validate(194, 0.2, AssertionError)
         self.validate(100, 0.2, valueDelta=1e-3)
  
-        self.validate(-392, 1, VarianceException)
+        self.validate(-392, 1, UncertaintyException)
         self.validate(-390, 1, AssertionError)
         self.validate(-200, 1, valueDelta=1e-3, varianceDelta=0.5)
 
-        self.validate(196, 1, VarianceException)
+        self.validate(196, 1, UncertaintyException)
         self.validate(194, 1, AssertionError)
         self.validate(100, 1, valueDelta=1e-3, varianceDelta=0.5)
 
@@ -731,8 +731,8 @@ class TestPolyNearOne (unittest.TestCase):
                     except NotReliableException as ex:
                         logger.warning(f'At x={x} order={order} encounter NotReliableException={ex}')
                         break
-                    except VarianceException as ex:
-                        logger.warning(f'At x={x} order={order} encounter VarianceException={ex}')
+                    except UncertaintyException as ex:
+                        logger.warning(f'At x={x} order={order} encounter UncertaintyException={ex}')
                         break
                     self.assertAlmostEqual(valSum - final, res.value())
                     ulp = math.ulp(valSum)
@@ -772,8 +772,8 @@ class TestPolyNearOne (unittest.TestCase):
         except NotReliableException as ex:
             logger.warning(f'At x={x} noise={noise} encounter NotReliableException={ex}')
             return
-        except VarianceException as ex:
-            logger.warning(f'At x={x} noise={noise} encounter VarianceException={ex}')
+        except UncertaintyException as ex:
+            logger.warning(f'At x={x} noise={noise} encounter UncertaintyException={ex}')
             return
         except NotMonotonicException as ex:
             logger.warning(f'At x={x} noise={noise} encounter NotMonotonicException={ex}')
@@ -800,8 +800,8 @@ class TestPolyNearOne (unittest.TestCase):
             except NotReliableException as ex:
                 logger.warning(f'At x={x} noise={noise} order={order} encounter NotReliableException={ex}')
                 break
-            except VarianceException as ex:
-                logger.warning(f'At x={x} noise={noise} order={order} encounter VarianceException={ex}')
+            except UncertaintyException as ex:
+                logger.warning(f'At x={x} noise={noise} order={order} encounter UncertaintyException={ex}')
                 break
             except NotMonotonicException as ex:
                 logger.warning(f'At x={x} noise={noise} order={order} encounter NotMonotonicException={ex}')
