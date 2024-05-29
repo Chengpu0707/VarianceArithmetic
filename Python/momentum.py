@@ -4,10 +4,13 @@ import varDbl
 
 class Momentum:
     '''
-    Calculate variance momentum
+    Calculate variance momentum.
+
+    Value becomes inf when MAX_ORDER=127
+    Variance becomes inf when MAX_ORDER=123
     '''
     BINDING_FACTOR:float = 5.0
-    MAX_ORDER:int = 126
+    MAX_ORDER:int = 122
 
     __slots__ = ('_sFactor', '_maxOrder', '_binding')
 
@@ -34,8 +37,14 @@ class Momentum:
             for j in range(maxOrder):
                 self._sFactor[j] += pdf * sq
                 sq *= x2
+            # print(i, pdf, self._sFactor[0])
 
     def factor(self, n:int) -> varDbl.VarDbl:
+        '''
+        Fetch the variance momentum at "n".
+
+        To be tested by IPyNb/Momentum.ipynb.
+        '''
         if (n % 2) == 1:
             return varDbl.VarDbl( 0, 0 )
         n //= 2

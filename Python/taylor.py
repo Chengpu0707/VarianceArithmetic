@@ -68,7 +68,7 @@ class NotMonotonicException (Exception):
         return f'NotMonotonicException: {self.name} for {self.input} at {self.n}'
 
 
-class InfinitiveException (Exception):
+class DivergentException (Exception):
     def __init__(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
                  value:varDbl.VarDbl, variance:varDbl.VarDbl, n:int, newValue:varDbl.VarDbl, newVariance:varDbl.VarDbl,
                  *args: object) -> None:
@@ -85,12 +85,12 @@ class InfinitiveException (Exception):
         self.newVariance = newVariance
 
     def __str__(self) -> str:
-        return f'InfinitiveException: {self.name} for {self.input} at {self.n}'
+        return f'DivergentException: {self.name} for {self.input} at {self.n}'
 
 
 class Taylor:
     TAU = 7.18e-7   # The stability test 
-    MONOTONIC_CHECK_ORDER = 20
+    MIN_TERMINATE_ORDER = 20
 
     __slots__ = ('_variance_threshold', '_momentum')
 
@@ -101,22 +101,47 @@ class Taylor:
         else:
             self._variance_threshold = uncertainty_precision_threshold * uncertainty_precision_threshold
 
-    def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[varDbl.VarDbl], inPrec:bool, outPrec:bool,
-                 enableStabilityTruncation=True, monotonicCheckOrder=MONOTONIC_CHECK_ORDER):
+    def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[typing.Union[float, varDbl.VarDbl]], 
+                 inPrec:bool, outPrec:bool,
+                 dumpPath=None, enableStabilityTruncation=True):
         '''
         1d Taylor expansion.
-        @return:            The output varDbl.VarDbl using Taylor expansion
         
-        @param input:       The input varDbl.VarDbl    
-        @param name:        The name of the Taylor expansion, for exception logging.
-        @param s1dTaylor:   The Taylor expansion coefficent, with f(x) as s1dTaylor[0].  
-                            It should already contains /n!.
-        @param inPrec:      If to expand by input precision
-        @param outPrec:     if the variance result needs to be multiplied by s1dTaylor[0]
-
-        @param enableStabilityTruncation
-        @param monotonicCheckOrder
+        @see     The paper for Variance Arithmetic on Taylor expansion convergence.
+        
+        @param name          The name of the Taylor expansion, for exception logging.
+        @param s1dTaylor     The Taylor expansion coefficent, with f(x) as s1dTaylor[0]. It should already contains /n!.
+        @param inPrec        If to expand by input precision
+        @param outPrec       If the variance result needs to be multiplied by s1dTaylor[0].
+        @param dumpPath                      If to dump the expansion to a file
+        @param enableStabilityTruncation     If to truncate when the expansion becomes stable.
+        
+        @return  The result of taylor expansion with this as input.
+        
+        @exception InitException         If any item in s1dTaylor is not finite.
+        @exception DivergentException    If the result is not finite.
+        @exception NotReliableException  If the uncertainty of the variance is too large for its value. 
+        @exceptopm NotMonotonicException If the result variance does not decrease monotonically. 
+        @exceptopm NotStableException    If after maximal order expansion, the expansion is still not stable.       
         '''
+        fw = None
+        if dumpPath:
+            fw = open(dumpPath, "w")
+            fw.write("name\tvalue\tuncertainty\tvariance\tinPrec\toutPrec\tenableStabilityTruncation\tBinding\tMaxOrder\n")
+            fw.write(f"{name}\t{input.value()}\t{input.uncertainty()}\t{input.variance()}"
+                     f"\t{inPrec}\t{outPrec}\t{enableStabilityTruncation}"
+                     f"\t{self._momentum._binding}\t{self._momentum._maxOrder}\n")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{n}\t")
+            fw.write("\n")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{s1dTaylor[n].value()}\t")
+            fw.write("\n")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{s1dTaylor[n].uncertainty()}\t")
+            fw.write("\n")
+            fw.write("2n\tExponent Value\tExponent Variance\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty")
+            fw.write("\tlimit\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty\n")
 
         value = varDbl.VarDbl(1, 0) if outPrec else s1dTaylor[0]
         variance = varDbl.VarDbl()
@@ -135,38 +160,59 @@ class Taylor:
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
             value += newValue
             variance += newVariance
+            unc = variance.value() *(Taylor.TAU**2)
+            if fw:
+                fw.write(f"{n}\t{varn.value()}\t{varn.variance()}"
+                         f"\t{value.value()}\t{value.uncertainty()}\t{variance.value()}\t{variance.uncertainty()}"
+                         f"\t{unc}\t{newValue.value()}\t{newValue.variance()}\t{newVariance.value()}\t{newVariance.uncertainty()}\n")
 
             if (not math.isfinite(value.value())) or (not math.isfinite(value.variance())) \
                     or (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
-                raise InfinitiveException(input, name, s1dTaylor, inPrec, outPrec,
-                        value, variance, n, newValue, newVariance)
-            if monotonicCheckOrder or enableStabilityTruncation:
-                unc = variance.value() *(Taylor.TAU**2)
-                stable = (abs(newVariance.value()) < unc) and (n > 2)
-
-            if monotonicCheckOrder and (n >= monotonicCheckOrder) \
-                    and (abs(prevVariance.value()) + unc < abs(newVariance.value())):
-                raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
+                if fw:
+                    fw.write("DivergentException\n")
+                    fw.close()
+                raise DivergentException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             if variance.variance() > variance.value() * self._variance_threshold:
+                if fw:
+                    fw.write("NotReliableException\n")
+                    fw.close()
                 raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance)
+
+            if Taylor.MIN_TERMINATE_ORDER and (n >= Taylor.MIN_TERMINATE_ORDER) \
+                    and (abs(prevVariance.value()) + unc < abs(newVariance.value())):
+                if fw:
+                    fw.write("NotMonotonicException\n")
+                    fw.close()
+                raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
             varn *= var
             if varn.value() == 0:
                 break
-            if enableStabilityTruncation and stable and (abs(newValue.value()) < max(unc, math.ulp(value.value()))):
+            if enableStabilityTruncation and (Taylor.MIN_TERMINATE_ORDER <= n) \
+                    and ((abs(newVariance.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
                 break
             prevVariance = newVariance
 
         if enableStabilityTruncation and (n >= self._momentum._maxOrder*2):
+            if fw:
+                fw.write("NotStableException\n")
+                fw.close()
             raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance)
         if outPrec:
             value *= s1dTaylor[0]
             variance *= s1dTaylor[0] * s1dTaylor[0]
+        if fw:
+            fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n")
+            fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
+            fw.close()
         return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True)
+    
 
-    def polynominal(self, input:varDbl.VarDbl, sCoeff:tuple[typing.Union[float, varDbl.VarDbl]]):
+    def polynominal(self, input:varDbl.VarDbl, sCoeff:tuple[typing.Union[float, varDbl.VarDbl]],
+                    dumpPath=None):
         '''
         1d Taylor expansion for polynominal at "input" with "sCoeff".
         Allow input.value() +- input.uncertainty() to include 0
@@ -210,10 +256,8 @@ class Taylor:
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
             value += newValue
             variance += newVariance
-            if not math.isfinite(variance.value()):
-                raise varDbl.ValueException(value)
-            if not math.isfinite(variance.variance()):
-                raise varDbl.VarianceException(value, variance)
+            if (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
+                raise varDbl.InitException(value, variance)
             varn *= var
             if varn.value() == 0:
                 break

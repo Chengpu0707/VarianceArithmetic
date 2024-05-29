@@ -1,7 +1,7 @@
 import unittest
 
 from momentum import Momentum
-from varDbl import VarianceException, validate
+from varDbl import InitException, validate
 
 class TestMomuntum (unittest.TestCase):
     momentum = Momentum()
@@ -9,7 +9,7 @@ class TestMomuntum (unittest.TestCase):
     def test_max_order(self):
         try:
             Momentum(maxOrder=Momentum.MAX_ORDER+1)
-        except VarianceException:
+        except InitException:
             pass
         except BaseException as ex:
             raise ex
@@ -30,15 +30,18 @@ class TestMomuntum (unittest.TestCase):
         validate(self, TestMomuntum.momentum.factor(9), 0)
 
     def test_dump(self):
+        '''
+        Generate data for IPyNb/Momentum.ipynb.
+        '''
         with open('./Python/Output/Momentum.txt', 'w') as f:
             f.write('2n\t(2n-1)!!\tValue\tUncertainty\n')
             var = TestMomuntum.momentum.factor(0)
             f.write(f'0\t1\t{var.value()}\t{var.uncertainty()}\n')
             fac = 1.0
-            for i in range(2, Momentum.MAX_ORDER, 2):
-                fac *= (i - 1)
-                var = TestMomuntum.momentum.factor(i)
-                f.write(f'{i}\t{fac}\t{var.value()}\t{var.uncertainty()}\n')
+            for i in range(1, Momentum.MAX_ORDER):
+                fac *= (2*i - 1)
+                var = TestMomuntum.momentum.factor(2*i)
+                f.write(f'{2*i}\t{fac}\t{var.value()}\t{var.uncertainty()}\n')
 
 if __name__ == '__main__':
     unittest.main()

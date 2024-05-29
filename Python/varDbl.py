@@ -9,12 +9,7 @@ The current solution is to import Taylor within VarDbl.taylor()
 
 '''
 
-class ValueException (Exception):
-    def __init__(self, value: float, *args: object) -> None:
-        super().__init__(*args)
-        self.value = value
-
-class VarianceException (Exception):
+class InitException (Exception):
     def __init__(self, value: float, uncertainty: float, *args: object) -> None:
         super().__init__(*args)
         self.value = value
@@ -30,11 +25,22 @@ class VarDbl:
     BINDING_FOR_EQUAL = 0.67448975
         # z value for 50% probability of equal
     
+    DOUBLE_MAX_SIGNIFICAND = (1 << 53)
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
         # rounding error is uniformly distrubuted within LSB of float
     @staticmethod
-    def ulp(value:float) -> float:
-        return math.ulp(value) * VarDbl.DEVIATION_OF_LSB
+    def ulp(value:typing.Union[float, int]) -> float:
+        if type(value) == float:
+            return math.ulp(value) * VarDbl.DEVIATION_OF_LSB
+        round = 0.0
+        val = abs(value)
+        while VarDbl.DOUBLE_MAX_SIGNIFICAND <= val:
+            if val & 1:
+                round += 1
+            round *= 0.5
+            val >>= 1
+        return round
+            
 
     # Taylor expansion parameters are defined in taylor.Taylor and momentum.Momentum
     _taylor = None
@@ -70,7 +76,7 @@ class VarDbl:
         If "bForceIntValueAsFloat" is False, keey the value as its original numeric type.
             such as int or Fraction for precise calculations. 
         Both value and variance have to be finite. 
-            Otherwise ValueException or VarianceException will throw.
+            Otherwise InitException will throw.
 
         When "uncertainty" is not specified:
              *) An int is initialized with uncertainty = 0
@@ -81,18 +87,10 @@ class VarDbl:
                 self._value = value._value
                 self._variance = value._variance
                 return
-            if type(value) == int:
-                if value == int(float(value)):
-                    self._value = float(value) if bForceIntValueAsFloat else value
-                    self._variance = 0.0
-                    return
-                value = float(value)
             uncertainty = VarDbl.ulp(value)
         variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
-        if not math.isfinite(value):
-            raise ValueException(value, "__init__")
-        if not math.isfinite(variance):
-            raise VarianceException(value, uncertainty, "__init__")
+        if (not math.isfinite(value)) or (not math.isfinite(variance)):
+            raise InitException(value, uncertainty)
         self._value = float(value) if bForceIntValueAsFloat else value
         self._variance = float(variance)
 
@@ -110,6 +108,12 @@ class VarDbl:
             other = VarDbl(value=other)
         value = self.value() + other.value()
         variance = self.variance() + other.variance()
+        if (not math.isfinite(value)) or (not math.isfinite(variance)):
+            raise InitException(f"{self} + {other} = {value}~{variance}", value, math.sqrt(variance))
+        if (not variance) and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
+                          and (abs(other.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
+                          and (VarDbl.DOUBLE_MAX_SIGNIFICAND <= abs(value)):
+            return VarDbl(int(self.value()) + int(other.value()))
         return VarDbl(value, variance, True)
 
     def __radd__(self, other):
@@ -135,6 +139,12 @@ class VarDbl:
         variance = self.variance() * other.value() * other.value() +\
                     other.variance() *self.value() * self.value() +\
                     self.variance() * other.variance()
+        if (not math.isfinite(value)) or (not math.isfinite(variance)):
+            raise InitException(f"{self} * {other} = {value}~{variance}", value, math.sqrt(variance))
+        if (not variance) and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
+                          and (abs(other.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
+                          and (VarDbl.DOUBLE_MAX_SIGNIFICAND <= abs(value)):
+            return VarDbl(int(self.value()) * int(other.value()))
         return VarDbl(value, variance, True)
     
     def __rmul__(self, other):
@@ -233,7 +243,7 @@ def validate(self, var:VarDbl, value:float, uncertainty:float=None,
     "self" should refer to a unittest.TestCase instance
     '''
     if deltaValue is None:
-        deltaValue = delta=math.ulp(var.value())
+        deltaValue = math.ulp(var.value())
     self.assertAlmostEqual(value, var.value(), delta=deltaValue)
     if uncertainty is None:
          uncertainty = math.ulp(var.value())

@@ -569,6 +569,9 @@ class TestAdjugate (unittest.TestCase):
 
 
     def testIdealCoverage(self):
+        '''
+        May fail occassionally due to statstical stablility
+        '''
         for size in range(4, 7):
             adj = Adjugate(size)
             for noise in (1e-3, 1e-9):

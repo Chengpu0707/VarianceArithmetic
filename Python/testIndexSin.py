@@ -274,7 +274,7 @@ class TestRegressiveSin(unittest.TestCase):
             sin.calc()
         self.assertIsNone(sin.withUncertainty())
 
-    @unittest.skip("too slow")
+    @unittest.skip("1 minute slow")
     def testWithUncertainty_19(self):
         sin = RegressiveSin(19)
         if not os.path.isfile(RegressiveSin.path(19)):
