@@ -1,6 +1,6 @@
 # VarianceArithmetic
 A floating-point arithmetic with value and uncertainty (variance) pair.
-The paper is published at: 
+The arithmetic is described in Latex/VarianceArithmetic
 
 The pyton implementation is under ./Python, containing both source code and test code.
 Run all unit test will generate txt files under ./Python/Output
