@@ -164,27 +164,7 @@ public class VarDbl {
         return compareTo(other, BINDING_FOR_EQUAL);
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (other instanceof VarDbl) {
-            VarDbl o = (VarDbl) other;
-            return  (this.value() <= o.value() + Math.ulp(o.value()) ) && 
-                    (this.value() >= o.value() - Math.ulp(o.value()) ) && 
-                    (this.variance() <= o.variance() + Math.ulp(o.variance())) &&
-                    (this.variance() >= o.variance() - Math.ulp(o.variance()));
-        } else {
-            return false;
-        }
-    }
-    
-    @Override
-    public int hashCode() {
-        return (int) value();
-    }
-    
+   
     public double value() {
         return this.value;
     }
