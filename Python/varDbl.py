@@ -26,20 +26,23 @@ class VarDbl:
         # z value for 50% probability of equal
     
     DOUBLE_MAX_SIGNIFICAND = (1 << 53)
+    DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT = 30
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
         # rounding error is uniformly distrubuted within LSB of float
     @staticmethod
     def ulp(value:typing.Union[float, int]) -> float:
         if type(value) == float:
             return math.ulp(value) * VarDbl.DEVIATION_OF_LSB
-        round = 0.0
-        val = abs(value)
-        while VarDbl.DOUBLE_MAX_SIGNIFICAND <= val:
-            if val & 1:
-                round += 1
-            round *= 0.5
-            val >>= 1
-        return round
+        if type(value) == int:
+            round = 0.0
+            val = abs(value)
+            while VarDbl.DOUBLE_MAX_SIGNIFICAND <= val:
+                if val & 1:
+                    round += 1
+                round *= 0.5
+                val >>= 1
+            return round
+        return VarDbl.ulp(float(value))
             
 
     # Taylor expansion parameters are defined in taylor.Taylor and momentum.Momentum
@@ -65,33 +68,42 @@ class VarDbl:
         
     def __init__(self, value: typing.Union[float, int]=0, 
                  uncertainty: typing.Optional[float]=None,
-                 bUncertaintyAsVariance=False,
-                 bForceIntValueAsFloat=True) -> None:
+                 bUncertaintyAsVariance=False) -> None:
         '''
         Intialize with "value" and "uncertainty".
         "uncertainty" will be absolute, and limited between 
             math.sqrt(sys.float_info.min) and math.sqrt(sys.float_info.max)
         If "bUncertaintyAsVariance" is True, the uncertainty actually means variance, 
             which should only be True during intermediate calculations. 
-        If "bForceIntValueAsFloat" is False, keey the value as its original numeric type.
-            such as int or Fraction for precise calculations. 
         Both value and variance have to be finite. 
             Otherwise InitException will throw.
 
         When "uncertainty" is not specified:
-             *) An int is initialized with uncertainty = 0
-             *) An float is initialized with uncertainty = math.ulp
+             *) An int which is not more than DOUBLE_MAX_SIGNIFICAND, is initialized with uncertainty = 0.
+             *) An int which is more than DOUBLE_MAX_SIGNIFICAND, is initialized with uncertainty = rounding error.
+             *) A float which is 2's fraction larger than 2^{-40}, is initialized with uncertainty = 0.
+             *) Otherwise, a float is initialized with uncertainty = math.ulp.
         '''
         if uncertainty is None:
             if type(value) == VarDbl:
                 self._value = value._value
                 self._variance = value._variance
                 return
-            uncertainty = VarDbl.ulp(value)
+            if type(value) == int:
+                uncertainty = VarDbl.ulp(value)
+            else:
+                value = float(value)
+                if not math.isfinite(value):
+                    raise InitException(value, None)
+                for bit in (0, VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT + 1):
+                    val = value * (1 << (VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT - bit))
+                    if math.isfinite(val):
+                        break
+                uncertainty = 0 if math.floor(val) == math.ceil(val) else VarDbl.ulp(value)
         variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
         if (not math.isfinite(value)) or (not math.isfinite(variance)):
             raise InitException(value, uncertainty)
-        self._value = float(value) if bForceIntValueAsFloat else value
+        self._value = float(value)
         self._variance = float(variance)
 
     def __str__(self) -> str:

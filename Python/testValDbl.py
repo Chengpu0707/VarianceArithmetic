@@ -32,35 +32,22 @@ class TestInit (unittest.TestCase):
         validate(self, VarDbl(-1, 1), -1, 1)
         validate(self, VarDbl(-1, -1), -1, 1)
 
-    def failValueException(self, value):
-        try:
-            VarDbl(value)
-            self.fail(f'Init ValDbl with {value}')
-        except InitException as ex:
-            self.assertIsNotNone(ex.__traceback__)
-        except BaseException as ex:
-            self.fail(ex)
-
     def testValueException(self):
-        self.failValueException(float('nan'))
-        self.failValueException(float('inf'))
-
-    def failVarianceException(self, value, uncertainty):
-        try:
-            VarDbl(value, uncertainty)
-            self.fail(f'Init ValDbl with {value}~{uncertainty}')
-        except InitException as ex:
-            self.assertIsNotNone(ex.__traceback__)
-        except BaseException as ex:
-            self.fail(ex)
+        with self.assertRaises(InitException):
+            VarDbl(float('nan'))
+        with self.assertRaises(InitException):
+            VarDbl(float('inf'))
 
     def testVarianceException(self):
-        self.failVarianceException(0, float('nan'))
-        self.failVarianceException(0, float('inf'))
+        with self.assertRaises(InitException):
+            VarDbl(0, float('nan'))
+        with self.assertRaises(InitException):
+            VarDbl(0, float('inf'))
             
     def testUncertaintyRange(self):
         maxU = math.sqrt(sys.float_info.max)
-        self.failVarianceException(0, maxU + VarDbl.ulp(maxU))
+        with self.assertRaises(InitException):
+            VarDbl(0, maxU + VarDbl.ulp(maxU))
         validate(self, VarDbl(0, maxU), 0, maxU) 
         
         minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
@@ -127,11 +114,10 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, 3, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        uncertainty = VarDbl.ulp(3.) *1.118033988749895
-        validate(self, v2 + 2.0, 3, uncertainty) 
-        validate(self, 2.0 + v2, 3, uncertainty) 
+        validate(self, v2 + 2.0, 3, 0) 
+        validate(self, 2.0 + v2, 3, 0) 
         v2 += 2.0
-        validate(self, v2, 3, uncertainty) 
+        validate(self, v2, 3, 0) 
 
     def testSubFloat(self):
         v1 = VarDbl(1, math.sqrt(2))
@@ -142,11 +128,10 @@ class TestAddSub (unittest.TestCase):
         validate(self, v1, -1, math.sqrt(2)) 
 
         v2 = VarDbl(1.0)
-        uncertainty = VarDbl.ulp(1.) * math.sqrt(5)
-        validate(self, v2 - 2.0, -1,  uncertainty) 
-        validate(self, 2.0 - v2, 1,  uncertainty) 
+        validate(self, v2 - 2.0, -1, 0) 
+        validate(self, 2.0 - v2, 1, 0) 
         v2 -= 2.0
-        validate(self, v2, -1,  uncertainty) 
+        validate(self, v2, -1, 0) 
 
     def testAddSubException(self):
         maxV = sys.float_info.max
@@ -198,21 +183,19 @@ class TestMultiply (unittest.TestCase):
         validate(self, VarDbl(-1) * 2, -2, 0)
         validate(self, 2 * VarDbl(-1), -2, 0)
 
-        uncertainty = VarDbl.ulp(2.0)
-        validate(self, VarDbl(-1.0) * VarDbl(2), -2, uncertainty)
-        validate(self, VarDbl(-1.0) * 2, -2, uncertainty)
-        validate(self, 2 * VarDbl(-1.0), -2, uncertainty)
+        validate(self, VarDbl(-1.0) * VarDbl(2), -2, 0)
+        validate(self, VarDbl(-1.0) * 2, -2, 0)
+        validate(self, 2 * VarDbl(-1.0), -2, 0)
 
-        validate(self, VarDbl(-1.0) * VarDbl(2.0), -2, math.sqrt(2)*uncertainty)
+        validate(self, VarDbl(-1.0) * VarDbl(2.0), -2, 0)
         validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3)
         validate(self, VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3)
         validate(self, VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, math.sqrt(5 + 1e-6) * 1e-3)
 
     def testTwoWithHalf(self):
-        uncertainty = VarDbl.ulp(1.0)
-        validate(self, VarDbl(0.5) * VarDbl(2), 1, uncertainty)
+        validate(self, VarDbl(0.5) * VarDbl(2), 1, 0)
         validate(self, VarDbl(0.5, 0) * 2, 1,  0)
-        validate(self, 0.5 * VarDbl(-2), -1, uncertainty)
+        validate(self, 0.5 * VarDbl(-2), -1, 0)
 
         validate(self, VarDbl(-0.5, 1e-3) * VarDbl(2.0), -1, 2e-3)
         validate(self, VarDbl(-0.5) * VarDbl(2.0, 1e-3), -1, 0.5e-3)
@@ -404,19 +387,19 @@ class TestDivideBy (unittest.TestCase):
 
     def testVarDblByVarDblOne(self):
         validate(self, VarDbl(0) / VarDbl(1), 0, 0)
-        validate(self, VarDbl(1) / VarDbl(1), 1, VarDbl.ulp(1.))
-        validate(self, VarDbl(-1) / VarDbl(1), -1, VarDbl.ulp(1.))
-        validate(self, VarDbl(1) / VarDbl(-1), -1, VarDbl.ulp(1.))
-        validate(self, VarDbl(-1) / VarDbl(-1), 1, VarDbl.ulp(1.))
-        validate(self, VarDbl(2) / VarDbl(1), 2, VarDbl.ulp(2.))
+        validate(self, VarDbl(1) / VarDbl(1), 1, 0)
+        validate(self, VarDbl(-1) / VarDbl(1), -1, 0)
+        validate(self, VarDbl(1) / VarDbl(-1), -1, 0)
+        validate(self, VarDbl(-1) / VarDbl(-1), 1, 0)
+        validate(self, VarDbl(2) / VarDbl(1), 2, 0)
 
-        validate(self, VarDbl(1.0) / VarDbl(1), 1, math.sqrt(2)*VarDbl.ulp(1.))
-        validate(self, VarDbl(2.0) / VarDbl(1), 2, math.sqrt(2)*VarDbl.ulp(2.))
-        validate(self, VarDbl(0.5) / VarDbl(1), 0.5, math.sqrt(2)*VarDbl.ulp(0.5))
+        validate(self, VarDbl(1.0) / VarDbl(1), 1, 0)
+        validate(self, VarDbl(2.0) / VarDbl(1), 2, 0)
+        validate(self, VarDbl(0.5) / VarDbl(1), 0.5, 0)
 
-        validate(self, VarDbl(1.0) / VarDbl(1.0), 1, math.sqrt(3)*VarDbl.ulp(1.), deltaUncertainty=5.30e-22)
-        validate(self, VarDbl(2.0) / VarDbl(1.0), 2, math.sqrt(3)*VarDbl.ulp(2.), deltaUncertainty=1.06e-21)
-        validate(self, VarDbl(0.5) / VarDbl(1.0), 0.5, math.sqrt(3)*VarDbl.ulp(0.5), deltaUncertainty=2.65e-21)
+        validate(self, VarDbl(1.0) / VarDbl(1.0), 1, 0)
+        validate(self, VarDbl(2.0) / VarDbl(1.0), 2, 0)
+        validate(self, VarDbl(0.5) / VarDbl(1.0), 0.5, 0)
 
         validate(self, VarDbl(0, 1e-3) / VarDbl(1), 0, 1e-3)
         validate(self, VarDbl(1, 1e-3) / VarDbl(1), 1, 1e-3)
@@ -444,15 +427,15 @@ class TestDivideBy (unittest.TestCase):
 
     def testVarDblByFloatOne(self):
         validate(self, VarDbl(0)/ 1.0, 0, 0)
-        validate(self, VarDbl(1)/ 1.0,   1, math.sqrt(2)*VarDbl.ulp(1.), deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(-1)/ 1.0, -1, math.sqrt(2)*VarDbl.ulp(1.), deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(1)/ -1.0, -1, math.sqrt(2)*VarDbl.ulp(1.), deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(-1)/ -1.0, 1, math.sqrt(2)*VarDbl.ulp(1.), deltaUncertainty=6.5e-22)
-        validate(self, VarDbl(2)/ 1.0, 2,   2*math.sqrt(2)*VarDbl.ulp(1.), deltaUncertainty=1.3e-21)
+        validate(self, VarDbl(1)/ 1.0,   1, 0)
+        validate(self, VarDbl(-1)/ 1.0, -1, 0)
+        validate(self, VarDbl(1)/ -1.0, -1, 0)
+        validate(self, VarDbl(-1)/ -1.0, 1, 0)
+        validate(self, VarDbl(2)/ 1.0, 2,   0)
 
-        validate(self, VarDbl(1.0)/ 1.0, 1,   math.sqrt(3)*VarDbl.ulp(1.), deltaUncertainty=1.3e-21)
-        validate(self, VarDbl(2.0)/ 1.0, 2,   math.sqrt(3)*VarDbl.ulp(2.), deltaUncertainty=1.3e-21)
-        validate(self, VarDbl(0.5)/ 1.0, 0.5, math.sqrt(3)*VarDbl.ulp(0.5), deltaUncertainty=2.7e-22)
+        validate(self, VarDbl(1.0)/ 1.0, 1,   0)
+        validate(self, VarDbl(2.0)/ 1.0, 2,   0)
+        validate(self, VarDbl(0.5)/ 1.0, 0.5, 0)
 
         validate(self, VarDbl(0, 1e-3)/ 1.0, 0, 1e-3)
         validate(self, VarDbl(1, 1e-3)/ 1.0, 1, 1e-3)
@@ -464,12 +447,12 @@ class TestDivideBy (unittest.TestCase):
 
     def testFloatByVarDblOne(self):
         validate(self, 0 / VarDbl(1), 0, 0)
-        validate(self, 1 / VarDbl(1), 1, VarDbl.ulp(1.))
-        validate(self, -1 / VarDbl(1), -1, VarDbl.ulp(1.))
-        validate(self, 1 / VarDbl(-1), -1, VarDbl.ulp(1.))
-        validate(self, -1 / VarDbl(-1), 1, VarDbl.ulp(1.))
-        validate(self, 2 / VarDbl(1), 2, VarDbl.ulp(2.))
-        validate(self, 0.5 / VarDbl(1), 0.5, math.ulp(0.5)/math.sqrt(3/2))
+        validate(self, 1 / VarDbl(1), 1, 0)
+        validate(self, -1 / VarDbl(1), -1, 0)
+        validate(self, 1 / VarDbl(-1), -1, 0)
+        validate(self, -1 / VarDbl(-1), 1, 0)
+        validate(self, 2 / VarDbl(1), 2, 0)
+        validate(self, 0.5 / VarDbl(1), 0.5, 0)
 
         validate(self, 0 / VarDbl(1, 1e-3), 0, 0)
         validate(self, 1 / VarDbl(1, 1e-3), 1, 1e-3, deltaValue=1e-6, deltaUncertainty=4.0e-9)
@@ -508,12 +491,12 @@ class TestDivideBy (unittest.TestCase):
 
     def testVarDblByVarDblTwo(self):
         validate(self, VarDbl(0) / VarDbl(2), 0, 0)
-        validate(self, VarDbl(1) / VarDbl(2), 0.5, VarDbl.ulp(0.5))
-        validate(self, VarDbl(-1) / VarDbl(2), -0.5, VarDbl.ulp(0.5))
-        validate(self, VarDbl(1) / VarDbl(-2), -0.5, VarDbl.ulp(0.5))
-        validate(self, VarDbl(-1) / VarDbl(-2), 0.5, VarDbl.ulp(0.5))
-        validate(self, VarDbl(2) / VarDbl(2), 1, VarDbl.ulp(1.))
-        validate(self, VarDbl(0.5) / VarDbl(2), 0.25, math.sqrt(2)*VarDbl.ulp(0.25))
+        validate(self, VarDbl(1) / VarDbl(2), 0.5, 0)
+        validate(self, VarDbl(-1) / VarDbl(2), -0.5, 0)
+        validate(self, VarDbl(1) / VarDbl(-2), -0.5, 0)
+        validate(self, VarDbl(-1) / VarDbl(-2), 0.5, 0)
+        validate(self, VarDbl(2) / VarDbl(2), 1, 0)
+        validate(self, VarDbl(0.5) / VarDbl(2), 0.25, 0)
 
         validate(self, VarDbl(0, 1e-3) / VarDbl(2), 0, 5e-4)
         validate(self, VarDbl(1, 1e-3) / VarDbl(2), 0.5, 5e-4)

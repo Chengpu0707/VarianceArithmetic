@@ -187,7 +187,7 @@ class TestCleanLib (unittest.TestCase):
 
 class TestDumpFFT (unittest.TestCase):
 
-    @unittest.skip('Too slow')
+    @unittest.skip('24 seconds slow')
     def testSpectra(self):
         '''
         Demonstrate the reverse has not enough calculation for large enough uncertainty

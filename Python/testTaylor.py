@@ -81,11 +81,11 @@ class TestExp (unittest.TestCase):
     sTaylor = taylor.exp()
 
     def test_taylor(self):
-        validate(self, TestExp.sTaylor[1], 1/1, 1.2819751242557095e-16)
-        validate(self, TestExp.sTaylor[2], 1/2, 9.06493303673679e-17)
-        validate(self, TestExp.sTaylor[3], 1/6, 3.42026916246155e-17)
-        validate(self, TestExp.sTaylor[4], 1/24, 1.008197910236068e-17)
-        validate(self, TestExp.sTaylor[5], 1/120, 2.1240690246726458e-18)
+        validate(self, TestExp.sTaylor[1], 1/1, 0)
+        validate(self, TestExp.sTaylor[2], 1/2, 0)
+        validate(self, TestExp.sTaylor[3], 1/6, 1.6024689053196368e-17)
+        validate(self, TestExp.sTaylor[4], 1/24, 4.006172263299092e-18)
+        validate(self, TestExp.sTaylor[5], 1/120, 1.042973520701932e-18)
 
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=5e-7, varianceDelta=1e-6) -> VarDbl:
@@ -172,10 +172,10 @@ class TestLog (unittest.TestCase):
     sTaylor = taylor.log()
 
     def test_taylor(self):
-        validate(self, TestLog.sTaylor[1], 1/1, 1.2819751242557095e-16)
-        validate(self, TestLog.sTaylor[2], -1/2, 6.409875621278547e-17)
+        validate(self, TestLog.sTaylor[1], 1/1, 0)
+        validate(self, TestLog.sTaylor[2], -1/2, 0)
         validate(self, TestLog.sTaylor[3], 1/3, 3.2049378106392736e-17)
-        validate(self, TestLog.sTaylor[4], -1/4, 3.2049378106392736e-17)
+        validate(self, TestLog.sTaylor[4], -1/4, 0)
         validate(self, TestLog.sTaylor[5], 1/5, 1.6024689053196368e-17)
 
     def validate(self, x, uncertainty, exception=None, 
@@ -239,29 +239,29 @@ class TestSin (unittest.TestCase):
     def test_taylor_0(self):
         sTaylor = taylor.sin(0)
         validate(self, sTaylor[0], 0)
-        validate(self, sTaylor[1], 1/1, 0.8164965809277261*math.ulp(1))
+        validate(self, sTaylor[1], 1/1, 0)
         validate(self, sTaylor[2], 0)
-        validate(self, sTaylor[3], -1/6, 1.4529663145135579*math.ulp(1/6))
+        validate(self, sTaylor[3], -1/6, math.ulp(1/6) *0.5773502691896258) 
         validate(self, sTaylor[4], 0)
-        validate(self, sTaylor[5], 1/120, 1.3705905728986023*math.ulp(1/120))
+        validate(self, sTaylor[5], 1/120, math.ulp(1/120) *0.601233300376386)
 
     def test_taylor_half_pi(self):
         sTaylor = taylor.sin(math.pi/2)
-        validate(self, sTaylor[0], 1, 0.57735026918962581*math.ulp(1))
-        validate(self, sTaylor[1], 0, 1.059541960031773e-32, deltaValue=6.123233995736766e-17)
-        validate(self, sTaylor[2], -1/2)
-        validate(self, sTaylor[3], 0, 2.4068420546318608e-33, deltaValue=1.020538999289461e-17)
-        validate(self, sTaylor[4], 1/24, 1.6442942874387492*math.ulp(1/24))
-        validate(self, sTaylor[5], 0, 1.4294378989955562e-34, deltaValue=5.102694996447305e-19)
+        validate(self, sTaylor[0], 1, 0)
+        validate(self, sTaylor[1], 0, 7.116391499726923e-33, deltaValue=6.123233995736766e-17)
+        validate(self, sTaylor[2], -1/2, 0)
+        validate(self, sTaylor[3], 0, 1.5393380185721571e-33, deltaValue=1.020538999289461e-17)
+        validate(self, sTaylor[4], 1/24, math.ulp(1/24) *0.5773502691896258)
+        validate(self, sTaylor[5], 0, 8.715188061015992e-35, deltaValue=5.102694996447305e-19)
        
     def test_taylor_half_pi_negative(self):
         sTaylor = taylor.sin(-math.pi/2)
-        validate(self, sTaylor[0], -1, 0.57735026918962581*math.ulp(1))
-        validate(self, sTaylor[1], 0, 1.059541960031773e-32, deltaValue=6.123233995736766e-17)
-        validate(self, sTaylor[2], 1/2)
-        validate(self, sTaylor[3], 0, 2.4068420546318608e-33, deltaValue=1.020538999289461e-17)
-        validate(self, sTaylor[4], -1/24, 1.6442942874387492*math.ulp(1/24))
-        validate(self, sTaylor[5], 0, 1.4294378989955562e-34, deltaValue=5.102694996447305e-19)
+        validate(self, sTaylor[0], -1, 0)
+        validate(self, sTaylor[1], 0, 7.116391499726923e-33, deltaValue=6.123233995736766e-17)
+        validate(self, sTaylor[2], 1/2, 0)
+        validate(self, sTaylor[3], 0, 1.5393380185721571e-33, deltaValue=1.020538999289461e-17)
+        validate(self, sTaylor[4], -1/24, math.ulp(1/24) *0.5773502691896258)
+        validate(self, sTaylor[5], 0, 8.715188061015992e-35, deltaValue=5.102694996447305e-19)
        
     def validate(self, x, uncertainty, exception=None, 
                  valueDelta=5e-7, varianceDelta=1e-6) -> VarDbl:
@@ -359,58 +359,58 @@ class TestPower (unittest.TestCase):
     def test_taylor_2(self):
         sTaylor = taylor.power(2)
         validate(self, sTaylor[1], 2, 0)
-        validate(self, sTaylor[2], 1, VarDbl.ulp(1.))
+        validate(self, sTaylor[2], 1, 0)
         for coeff in sTaylor[3:]:
             validate(self, coeff, 0, 0)
 
     def test_taylor_3(self):
         sTaylor = taylor.power(3)
         validate(self, sTaylor[1], 3, 0)
-        validate(self, sTaylor[2], 3, VarDbl.ulp(3.)*1.5)
-        validate(self, sTaylor[3], 1, VarDbl.ulp(1.)*1.25, deltaValue=2.23e-16)
+        validate(self, sTaylor[2], 3, 0)
+        validate(self, sTaylor[3], 1, 0, deltaValue=2.23e-16)
         for coeff in sTaylor[4:]:
             validate(self, coeff, 0, 0)
 
     def test_taylor_4(self):
         sTaylor = taylor.power(4)
         validate(self, sTaylor[1], 4, 0)
-        validate(self, sTaylor[2], 6, VarDbl.ulp(6.))
-        validate(self, sTaylor[3], 4, VarDbl.ulp(4.)*1.003466214899358)
-        validate(self, sTaylor[4], 1, VarDbl.ulp(1.)*1.4166666666666667)
+        validate(self, sTaylor[2], 6, 0)
+        validate(self, sTaylor[3], 4, 0)
+        validate(self, sTaylor[4], 1, 0)
         for coeff in sTaylor[5:]:
             validate(self, coeff, 0, 0)
 
     def test_taylor_sqrt(self):
         sTaylor = taylor.power(0.5)
-        validate(self, sTaylor[1],  1/2,   6.409875621278547e-17)
-        validate(self, sTaylor[2], -1/8,   2.2662332591841976e-17)
-        validate(self, sTaylor[3],  1/16,  1.3877787807814457e-17)
-        validate(self, sTaylor[4], -5/128, 9.554111923975634e-18)
-        validate(self, sTaylor[5],  7/256, 7.141219782764964e-18)
+        validate(self, sTaylor[1],  1/2,   0)
+        validate(self, sTaylor[2], -1/8,   0)
+        validate(self, sTaylor[3],  1/16,  0)
+        validate(self, sTaylor[4], -5/128, 0)
+        validate(self, sTaylor[5],  7/256, 0)
 
     def test_taylor_inv_sqrt(self):
         sTaylor = taylor.power(-0.5)
-        validate(self, sTaylor[1],  -1/2,   6.409875621278547e-17)
-        validate(self, sTaylor[2],   3/8,   5.777783805466599e-17)
-        validate(self, sTaylor[3],  -5/16,  5.381475625187719e-17)
-        validate(self, sTaylor[4],  35/128, 5.117134779608756e-17)
-        validate(self, sTaylor[5], -63/256, 4.9276631313251286e-17)
+        validate(self, sTaylor[1],  -1/2,   0)
+        validate(self, sTaylor[2],   3/8,   0)
+        validate(self, sTaylor[3],  -5/16,  0)
+        validate(self, sTaylor[4],  35/128, 0)
+        validate(self, sTaylor[5], -63/256, 0)
 
     def test_taylor_inv_1(self):
         sTaylor = taylor.power(-1)
         validate(self, sTaylor[1], -1, 0)
-        validate(self, sTaylor[2],  1, 1.2819751242557095e-16)
-        validate(self, sTaylor[3], -1, 1.812986607347358e-16)
-        validate(self, sTaylor[4],  1, 2.220446049250313e-16)
-        validate(self, sTaylor[5], -1, 2.563950248511419e-16)
+        validate(self, sTaylor[2],  1, 0)
+        validate(self, sTaylor[3], -1, 0)
+        validate(self, sTaylor[4],  1, 0)
+        validate(self, sTaylor[5], -1, 0)
 
     def test_taylor_inv_2(self):
         sTaylor = taylor.power(-2)
         validate(self, sTaylor[1], -2, 0)
-        validate(self, sTaylor[2],  3, 2.563950248511419e-16)
-        validate(self, sTaylor[3], -4, 5.145674902128044e-16)
-        validate(self, sTaylor[4],  5, 8.226007047307469e-16)
-        validate(self, sTaylor[5], -6, 1.1769760485126625e-15)
+        validate(self, sTaylor[2],  3, 0)
+        validate(self, sTaylor[3], -4, 0)
+        validate(self, sTaylor[4],  5, 0)
+        validate(self, sTaylor[5], -6, 0)
 
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=1e-3, varianceDelta=5e-3) -> VarDbl:
@@ -506,7 +506,7 @@ class TestPolynominial (unittest.TestCase):
 
         res = taylor.polynominal(VarDbl(2), (VarDbl(1.0),))
         self.assertEqual(res.value(), 1)
-        self.assertEqual(res.uncertainty(), VarDbl.ulp(1.))
+        self.assertEqual(res.uncertainty(), 0)
 
     def test_poly_1(self):
         res = taylor.polynominal(VarDbl(0, 1/8), (0,1))
@@ -525,23 +525,23 @@ class TestPolynominial (unittest.TestCase):
         for value in (0, 1, -1, 2, -2, 0.25, -0.25):
             try:
                 res = taylor.polynominal(VarDbl(value, 0.5), (0,0,1))
-                res2 = VarDbl(value, 0.5)**2
-                self.assertEqual(res.value(), res2.value())
-                self.assertEqual(res.uncertainty(), res2.uncertainty())
+                res2 = VarDbl(value**2 + 0.5**2, 4 *value**2 *0.5**2 + 2 *0.5**4, True)
+                self.assertAlmostEqual(res.value(), res2.value(), delta=1e-5)
+                self.assertAlmostEqual(res.uncertainty(), res2.uncertainty(), delta=5e-5)
             except BaseException as ex:
                 raise ex
             try:
                 res = taylor.polynominal(VarDbl(value, 0.5), (1,2,1))
-                res2 = VarDbl(1 + value, 0.5)**2
-                self.assertEqual(res.value(), res2.value())
-                self.assertEqual(res.uncertainty(), res2.uncertainty())
+                res2 = VarDbl((value + 1)**2 + 0.5**2, 4 *(value + 1)**2 *0.5**2 + 2 *0.5**4, True)
+                self.assertAlmostEqual(res.value(), res2.value(), delta=1e-5)
+                self.assertAlmostEqual(res.uncertainty(), res2.uncertainty(), delta=5e-5)
             except BaseException as ex:
                 raise ex
             try:
                 res = taylor.polynominal(VarDbl(value, 0.5), (1,-2,1))
-                res2 = VarDbl(1 - value, 0.5)**2
-                self.assertEqual(res.value(), res2.value())
-                self.assertEqual(res.uncertainty(), res2.uncertainty())
+                res2 = VarDbl((value - 1)**2 + 0.5**2, 4 *(value - 1)**2 *0.5**2 + 2 *0.5**4, True)
+                self.assertAlmostEqual(res.value(), res2.value(), delta=1e-5)
+                self.assertAlmostEqual(res.uncertainty(), res2.uncertainty(), delta=5e-5)
             except BaseException as ex:
                 raise ex
 
@@ -624,8 +624,10 @@ class TestExpansion (unittest.TestCase):
                         './Python/Output/Power_1_0.2_-1.txt')
         self.assertTrue(os.path.isfile('./Python/Output/Power_1_0.2_-1.txt'))
         with open('./Python/Output/Power_1_0.2_-1.txt') as f:
+            cnt = 0
             for line in f:
-                continue
+                cnt += 1
+            self.assertEqual(57, cnt)
             self.assertEqual('NotMonotonicException\n', line)
 
         s1dTaylor[0] = VarDbl(math.pow(2, -1))
@@ -633,8 +635,37 @@ class TestExpansion (unittest.TestCase):
                     './Python/Output/Power_2_0.2_-1.txt')
         self.assertTrue(os.path.isfile('./Python/Output/Power_2_0.2_-1.txt'))
         with open('./Python/Output/Power_2_0.2_-1.txt') as f:
+            cnt = 0
             for line in f:
-                continue
+                cnt += 1
+            self.assertEqual(25, cnt)
+            sVal = list(map(float, line.strip().split('\t')))
+            self.assertAlmostEqual(res.value(), sVal[0])
+            self.assertAlmostEqual(res.variance(), sVal[1] + sVal[2])
+
+    def testPoly(self):
+        res = taylor.polynominal(VarDbl(2, 0.5), (1,2,1), './Python/Output/Poly_2_0.5_+2.txt')
+        res2 = VarDbl(1 + 2, 0.5)**2
+        self.assertEqual(res.value(), res2.value())
+        self.assertEqual(res.uncertainty(), res2.uncertainty())
+        with open('./Python/Output/Poly_2_0.5_+2.txt') as f:
+            cnt = 0
+            for line in f:
+                cnt += 1
+            self.assertEqual(12, cnt)
+            sVal = list(map(float, line.strip().split('\t')))
+            self.assertAlmostEqual(res.value(), sVal[0])
+            self.assertAlmostEqual(res.variance(), sVal[1] + sVal[2])
+
+        res = taylor.polynominal(VarDbl(2, 0.5), (1,-2,1), './Python/Output/Poly_2_0.5_-2.txt')
+        res2 = VarDbl(1 - 2, 0.5)**2
+        self.assertEqual(res.value(), res2.value())
+        self.assertEqual(res.uncertainty(), res2.uncertainty())
+        with open('./Python/Output/Poly_2_0.5_-2.txt') as f:
+            cnt = 0
+            for line in f:
+                cnt += 1
+            self.assertEqual(12, cnt)
             sVal = list(map(float, line.strip().split('\t')))
             self.assertAlmostEqual(res.value(), sVal[0])
             self.assertAlmostEqual(res.variance(), sVal[1] + sVal[2])

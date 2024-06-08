@@ -19,7 +19,7 @@ public class TestMomentum {
 
      @Test
     public void TestFactor() {
-        validate(Momentum.factor(0), 1, 0.99999947194737793, 1.0631430356312753E-17);
+        validate(Momentum.factor(0), 1, 0.99999947194737793, 1.0510612137199506E-17);
         validate(Momentum.factor(2), 1, 0.99998569318184616, 1.0096418147444105E-17);
         validate(Momentum.factor(4), 3, 0.99987013368935596, 2.998915588392244E-17);
         validate(Momentum.factor(6), 15, 0.99928863789470035, 1.4926804198403977E-16);

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -304,7 +306,7 @@ public class TestTaylor {
 
             sTaylor[0] = new VarDbl(Math.exp(1));
             init(1, 0.1);
-            var = var.taylor("exp", sTaylor, false, true, "./Java/Output/exp1.txt", true);
+            var = var.taylor("exp", sTaylor, false, true);
             assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(1), 1E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6, var.variance() /Math.exp(1)/Math.exp(1), 6E-7);
 
@@ -313,7 +315,7 @@ public class TestTaylor {
             var = var.taylor("exp", sTaylor, false, true);
             assertEquals(1 +1E-2/2 +1E-4/8 +1E-6/48, var.value() /Math.exp(-1), 2E-7);
             assertEquals(1E-2 +1E-4*3/2 + 1E-6*7/6+1E-8*5/8, var.variance() /Math.exp(-1)/Math.exp(-1), 6E-7);
-        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException | IOException e) {
+        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException e) {
             fail();
         }
     }
@@ -357,7 +359,7 @@ public class TestTaylor {
             var = var.taylor("log", sTaylor, true, false);
             assertEquals(Math.log(0.5) -4E-2*1/2 -16E-4*3/4 -64E-6*15/6 -256E-8*105/8, var.value(), 2E-4);
             assertEquals(4E-2 +16E-4*5/2 +64E-6*32/3 + 256E-8*65, var.variance(), 1E-4);
-        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException | IOException e) {
+        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException e) {
             fail();
         }
     }
@@ -389,7 +391,7 @@ public class TestTaylor {
             var = var.taylor("sin", sTaylor, false, false);
             assertEquals(0.5 -1E-2*0.5/2 +1E-4*0.5/24 -1E-6*0.5/720 +1E-8*0.5/264320, var.value(), 5E-5);
             assertEquals(1E-2*3/4 -1E-4*5/8 +1E-6*23/96, var.variance(), 2E-6);
-        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException | IOException e) {
+        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException e) {
             fail();
         }
 
@@ -405,7 +407,7 @@ public class TestTaylor {
             var = var.taylor("sin", sTaylor, false, false);
             assertEquals(0, var.value(), 0);
             assertEquals(1E-2 -1E-4 +1E-6*13/24, var.variance(), 2E-6);
-        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException | IOException e) {
+        } catch (InitException | DivergentException | NotReliableException | NotMonotonicException | NotStableException e) {
             fail();
         }
     }
@@ -423,6 +425,51 @@ public class TestTaylor {
             1.0/2, 1.0/12*7, 1.0/3*2, 1.0/4*3, 1.0/6*5, 1.0/12*11, 1.0};
         final double[] sDev = new double[] {0.2, 0.1, 0.01, 0.001, 1e-4, 1e-5, 1e-6};
         dumpTest("sin", gaussian, sX, sDev);
+    }
+
+
+    @Test
+    public void testExpansion() {
+        try {
+            new VarDbl(1, 0.2).power(-1, "./Java/Output/Power_1_0.2_-1.txt");
+            fail();
+        } catch (InitException | DivergentException | NotReliableException | NotStableException | IOException e) {
+            fail(e.getMessage());
+        } catch (NotMonotonicException e) {
+            assertEquals(102, e.order);
+            try (BufferedReader br = new BufferedReader(new FileReader("./Java/Output/Power_1_0.2_-1.txt"))) {
+                String line, last = null;
+                int cnt = 0;
+                while ((line = br.readLine()) != null) {
+                    ++cnt;
+                    last = line;
+                }
+                assertEquals(58, cnt);
+                assertEquals("NotMonotonicException", last);
+            } catch (IOException ex) {
+                fail(ex.getMessage());
+            }
+        }
+        
+        try {
+            VarDbl res = new VarDbl(2, 0.2).power(-1, "./Java/Output/Power_2_0.2_-1.txt");
+            try (BufferedReader br = new BufferedReader(new FileReader("./Java/Output/Power_2_0.2_-1.txt"))) {
+                String line, last = null;
+                int cnt = 0;
+                while ((line = br.readLine()) != null) {
+                    ++cnt;
+                    last = line;
+                }
+                assertEquals(26, cnt);
+                final String[] sLast = last.split("\t");
+                assertEquals(res.value(), Double.valueOf(sLast[0]), 1e-7);          
+                assertEquals(res.variance(), Double.valueOf(sLast[1]) + Double.valueOf(sLast[2]), 1e-8);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+        } catch (InitException | DivergentException | NotMonotonicException | NotReliableException | NotStableException | IOException e) {
+            fail(e.getMessage());
+        }
     }
 }
 

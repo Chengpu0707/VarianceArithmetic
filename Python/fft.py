@@ -61,11 +61,10 @@ class FFTBase (abc.ABC):
         FFTBase._bitReversedIndex[order] = sRes
         return sRes
     
-    def transform(self, sData:list, forward:bool, useOriginalArray:bool=False):
+    def transform(self, sData:list, forward:bool):
         '''
         "sData": an array of size (2<<order), with each datum contains (real, image)
         "forward": true for forware transformation, false for backward transformation.
-        "useOriginalArray": change sData without allocate a result array
         '''
         for order in range(2, FFTBase.MAX_ORDER):
             if (2 << order) == len(sData):
@@ -73,7 +72,7 @@ class FFTBase (abc.ABC):
         if order > FFTBase.MAX_ORDER:
             raise RuntimeError(f'Invalid input array size {len(sData)} which is not 2^{order}')
 
-        sRes = sData if useOriginalArray else [0] * (2 << order)
+        sRes = [0] * (2 << order)
         
         sIndex = FFTBase.bitReversedIndices(order)
         for i in range(len(sIndex)):

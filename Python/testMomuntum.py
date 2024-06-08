@@ -15,7 +15,7 @@ class TestMomuntum (unittest.TestCase):
             raise ex
 
     def test_even(self):
-        validate(self, TestMomuntum.momentum.factor(0),    1 * 0.99999947194737793, 1.0631430356312753e-17)
+        validate(self, TestMomuntum.momentum.factor(0),    1 * 0.99999947194737793, 1.0510612137199506e-17)
         validate(self, TestMomuntum.momentum.factor(2),    1 * 0.99998569318184616, 1.0096418147444105e-17)
         validate(self, TestMomuntum.momentum.factor(4),    3 * 0.99987013368935596, 2.998915588392244e-17)
         validate(self, TestMomuntum.momentum.factor(6),   15 * 0.99928863789470035, 1.4926804198403977e-16)

@@ -220,29 +220,50 @@ class Taylor:
         if len(sCoeff) >= self._momentum._maxOrder:
             raise ValueError(f'The lenght {len(sCoeff)} of polynominal coefficient is more than {self._momentum._maxOrder}: {sCoeff}')
         exp = len(sCoeff) - 1
-        s1dTaylor = [varDbl.VarDbl() for i in range(2*exp + 1)]
-        sPow:map[int, float] = {1: input.value()}
-
-        def pow(p:int):
-            p = int(p)
-            if p <= 0:
-                return 1
-            if (p not in sPow):
-                maxP = max(sPow)
-                while (maxP < p):
-                    sPow[maxP + 1] = sPow[maxP] * input.value()
-                    maxP += 1
-            return sPow[p]
+        s1dTaylor = [varDbl.VarDbl() if i else varDbl.VarDbl(sCoeff[0]) for i in range(2*exp + 1)]
+        sPow = [1, input.value()]
 
         for j, coeff in enumerate(sCoeff):
-            if not coeff:
+            if not j:
                 continue
             sTaylor = [1, j]
             for k in range(2, j + 1):
                 sTaylor.append( sTaylor[-1] * (j + 1 - k)//k )
+                while k >= len(sPow):
+                    sPow.append(sPow[k-1] * input.value())
             for k in range(j + 1):
-                s1dTaylor[k] += coeff * sTaylor[k] * pow(j - k)
-        value = s1dTaylor[0]
+                s1dTaylor[k] += coeff * sTaylor[k] * sPow[j - k]
+        fw = None
+        if dumpPath:
+            fw = open(dumpPath, "w")
+            fw.write("polynominal\tvalue\tuncertainty\tvariance\tBinding\tMaxOrder\n")
+            fw.write(f"{len(sCoeff)}\t{input.value()}\t{input.uncertainty()}\t{input.variance()}"
+                     f"\t{self._momentum._binding}\t{self._momentum._maxOrder}\nIndex\t")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{n}\t")
+            fw.write("\nCoeff Value\t")
+            for n in range(len(sCoeff)):
+                if type(sCoeff[n]) == varDbl.VarDbl:
+                    fw.write(f"{sCoeff[n].value()}\t")
+                else:
+                    fw.write(f"{sCoeff[n]}\t")
+            fw.write("\nCoeff Uncertainty\t")
+            for n in range(len(sCoeff)):
+                if type(sCoeff[n]) == varDbl.VarDbl:
+                    fw.write(f"{sCoeff[n].uncertainty()}\t")
+                else:
+                    fw.write("0\t")
+            fw.write("\nTaylor Value\t")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{s1dTaylor[n].value()}\t")
+            fw.write("\nTaylor Uncertainty\t")
+            for n in range(len(s1dTaylor)):
+                fw.write(f"{s1dTaylor[n].uncertainty()}\t")
+            fw.write("\n")
+            fw.write("2n\tExponent Value\tExponent Variance\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty")
+            fw.write("\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty\n")
+
+        value = s1dTaylor[0] if type(s1dTaylor[0]) == varDbl.VarDbl else varDbl.VarDbl(s1dTaylor[0])
         variance = varDbl.VarDbl()
         var = varDbl.VarDbl(input.variance())
         varn = varDbl.VarDbl(var)
@@ -256,16 +277,29 @@ class Taylor:
                                s1dTaylor[n - j] * self._momentum.factor(n - j)
             value += newValue
             variance += newVariance
+            if fw:
+                fw.write(f"{n}\t{varn.value()}\t{varn.variance()}"
+                         f"\t{value.value()}\t{value.uncertainty()}\t{variance.value()}\t{variance.uncertainty()}"
+                         f"\t{newValue.value()}\t{newValue.variance()}\t{newVariance.value()}\t{newVariance.uncertainty()}\n")
             if (not math.isfinite(variance.value())) or (not math.isfinite(variance.variance())):
+                if fw:
+                    fw.write("DivergentException\n")
+                    fw.close()
                 raise varDbl.InitException(value, variance)
             varn *= var
             if varn.value() == 0:
                 break
         if variance.variance() > variance.value() * self._variance_threshold:
+            if fw:
+                fw.write("NotStableException\n")
+                fw.close()
             raise NotReliableException(input, f'{input}^{exp}', s1dTaylor, False, False,
                     value, variance, n, newValue, newVariance)
-        return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True) if type(value) == varDbl.VarDbl \
-                    else varDbl.VarDbl(value, variance.value(), True)
+        if fw:
+            fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n")
+            fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
+            fw.close()
+        return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True) 
     
 
     def exp(self) -> list[varDbl.VarDbl]:
@@ -284,7 +318,7 @@ class Taylor:
         sTaylor = []
         sTaylor.append(None)
         for i in range(1, self._momentum._maxOrder):
-            sTaylor.append( varDbl.VarDbl(1 if ((i%2) == 1) else -1, 0) * (1/i) )
+            sTaylor.append( varDbl.VarDbl((1/i) if ((i%2) == 1) else -1/i))
         return sTaylor
 
 
@@ -309,7 +343,10 @@ class Taylor:
     def power(self, exponent:float) -> list[float]:
         sTaylor = [varDbl.VarDbl(0, 0), varDbl.VarDbl(exponent)]
         for i in range(2, self._momentum._maxOrder):
-            sTaylor.append( sTaylor[-1] * ((exponent + 1)/i - 1) )
+            if sTaylor[-1].variance():
+                sTaylor.append( sTaylor[-1] * ((exponent + 1)/i - 1) )
+            else:
+                sTaylor.append( varDbl.VarDbl(sTaylor[-1].value()/i * (exponent + 1 - i)) )
             if not sTaylor[-1]:
                 break
         return sTaylor

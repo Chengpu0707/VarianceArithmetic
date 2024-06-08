@@ -76,7 +76,7 @@ public class TestVarDbl {
         testToString("-1~1.0e+03", -1, 1000);    
         testToString("1.000e-03~1.0e-03", 0.001, 0.001);
         testToString("1.000e-03~1.3e-19", 0.001);
-        testToString("1.341e+154~8.6e+137", Math.sqrt(Double.MAX_VALUE));
+        testToString("1.341e+154", Math.sqrt(Double.MAX_VALUE));
         testToString("2.225e-308", Double.MIN_NORMAL, Double.MIN_VALUE);
         testToString("2.225e-308", Double.MIN_NORMAL);        
     }
@@ -109,16 +109,36 @@ public class TestVarDbl {
         }
     }
  
-     private void testClone() {
+    private void testClone() {
         res = op.clone();
-        assertTrue(op.equals(res));
-        assertTrue(res.equals(op));
+        assertFalse(op.equals(res));
+        assertFalse(res.equals(op));
         assertTrue(op != res);
         assertFalse(op == res);
+        try {
+            assertEquals(0, op.compareTo(res));
+        } catch (InitException e) {
+            fail(e.getMessage());
+        }
+        try {
+            assertEquals(0, res.compareTo(op));
+        } catch (InitException e) {
+            fail(e.getMessage());
+        }
 
         VarDbl clone = res.clone();
-        assertTrue(op.equals(clone));
-        assertTrue(clone.equals(op));
+        assertFalse(op.equals(clone));
+        assertFalse(clone.equals(op));
+        try {
+            assertEquals(0, op.compareTo(clone));
+        } catch (InitException e) {
+            fail(e.getMessage());
+        }
+        try {
+            assertEquals(0, clone.compareTo(op));
+        } catch (InitException e) {
+            fail(e.getMessage());
+        }
     }
     
     private void testNegate() {

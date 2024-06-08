@@ -16,10 +16,17 @@ import Type.VarDbl;
  * <p> Basic arithmetic operations are negate(), add(), sub(), multiply().
  */
 public class VarDbl {
-    static final long DOUBLE_MAX_SIGNIFICAND = 1L << 53;
-    static final double BINDING_FOR_EQUAL = 0.67448975;
+    private double value;
+    private double variance;
 
+    static final long DOUBLE_MAX_SIGNIFICAND = 1L << 53;
+    static final int DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT = 40;
+    static final double BINDING_FOR_EQUAL = 0.67448975;
+    static final double VARIANCE_THRESHOLD = 1.0 /Momentum.BINDING_FOR_TAYLOR/Momentum.BINDING_FOR_TAYLOR;
+    static final double TAU = 7.18e-7;
+    static final int MIN_TERMINATE_ORDER = 20;
     static final double DEVIATION_OF_LSB = 1.0 / Math.sqrt(3);
+
     static public double ulp(double value) {
         return Math.ulp(value) * DEVIATION_OF_LSB;
     }
@@ -51,14 +58,10 @@ public class VarDbl {
         return rounding; 
     }
 
-    static final double variance_threshold = 1.0 /Momentum.BINDING_FOR_TAYLOR/Momentum.BINDING_FOR_TAYLOR;
-
-    static final double TAU = 7.18e-7;
-    static final int MIN_TERMINATE_ORDER = 20;
-
-    private double value;
-    private double variance;
-
+    
+    /*
+     * Constructors
+     */
     public VarDbl(final double value, double dev, boolean devAsVar) 
             throws InitException {
         final double variance = devAsVar? dev : dev * dev;
@@ -79,8 +82,14 @@ public class VarDbl {
             throw new InitException(String.format("VarDbl value=%g", value), 
                                     value, variance);
         }
+        double val = value;
+        for (int bit = 0; bit <= VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT; ++ bit) {
+            val = value * ((double) (1L << (VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT - bit)));
+            if (Double.isFinite(val))
+                break;
+        }
+        final double dev = (Math.ceil(val) == Math.floor(val))? 0 : ulp(value);
         this.value = value;
-        final double dev = ulp(value);
         this.variance = dev * dev;
     }
     public VarDbl(final long value) {
@@ -155,7 +164,27 @@ public class VarDbl {
         return compareTo(other, BINDING_FOR_EQUAL);
     }
 
-
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof VarDbl) {
+            VarDbl o = (VarDbl) other;
+            return  (this.value() <= o.value() + Math.ulp(o.value()) ) && 
+                    (this.value() >= o.value() - Math.ulp(o.value()) ) && 
+                    (this.variance() <= o.variance() + Math.ulp(o.variance())) &&
+                    (this.variance() >= o.variance() - Math.ulp(o.variance()));
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return (int) value();
+    }
+    
     public double value() {
         return this.value;
     }
@@ -271,9 +300,176 @@ public class VarDbl {
     }
 
     /*
+     * 1d polynominal
+     * 
+     * @see     The paper for Variance Arithmetic on Taylor expansion convergence.
+     * 
+     * @return  The result of taylor expansion with this as input.
+     * 
+     * @param dumpPath                      If to dump the expansion to a file
+     * 
+     * @exception InitException         If any item in sCoeff is not finite.
+     * @exception DivergentException    If the result is not finite.
+     * @exception NotReliableException  If the uncertainty of the variance is too large for its value. 
+     * 
+     * @raise IllegalArgumentException  If the length of sCoeff is too long, or if sCoeff contains null
+     */
+    VarDbl polynominal(final VarDbl[] sCoeff, final String dumpPath) 
+            throws InitException, DivergentException, NotReliableException, IOException {
+        if (sCoeff.length >= Momentum.MAX_FACTOR*2) {
+            throw new IllegalArgumentException(String.format("coefficient length %d is too large", 
+                    sCoeff.length));
+        }
+        final int exp = sCoeff.length - 1;
+        final VarDbl[] s1dTaylor = new VarDbl[2*exp + 1];
+        s1dTaylor[0] = new VarDbl(sCoeff[0]);
+        for (int k = 1; k < s1dTaylor.length; ++k)
+            s1dTaylor[k] = new VarDbl();
+        final double[] sPow = new double[exp + 1];
+        sPow[0] = 1;
+        if (exp >= 1)
+            sPow[1] = value();
+        final int[] sTaylor = new int[2*exp + 1];
+        sTaylor[0] = 1;
+
+        for (int j = 1; j < sCoeff.length; ++j) {
+            final VarDbl coeff = sCoeff[j];
+            if (coeff == null) {
+                throw new IllegalArgumentException(String.format("null coefficient at index %d/%d is too large", 
+                        j, sCoeff.length));
+            }
+            if (!Double.isFinite(coeff.value()) || !Double.isFinite(coeff.variance())) {
+                throw new InitException(String.format("polynominal coefficent at %d", j), 
+                        coeff.value(), coeff.variance());
+            }
+            sTaylor[1] = j;
+            for (int k = 2; k <= j; ++k) {
+                sTaylor[k] = sTaylor[k - 1] * (j + 1 - k) / k;
+                if (sPow[k] == 0)
+                    sPow[k] = sPow[k - 1] * value();
+            }
+            for (int k = 0; k <= j; ++k) {
+                s1dTaylor[k].add( coeff.multiply(new VarDbl(sTaylor[k] * sPow[j - k])), true);
+            }
+        }
+        FileWriter fw = (dumpPath == null)? null : new FileWriter(dumpPath);
+        if (fw != null) {
+            fw.write("polynominal\tvalue\tuncertainty\tvariance\tBinding\tMaxOrder\n");
+            fw.write(String.format("%d\t%e\t%e\t%e\t%d\t%d\nIndex\t", 
+                    sCoeff.length, value(), uncertainty(), variance(),
+                    Momentum.BINDING_FOR_TAYLOR, Momentum.MAX_FACTOR));
+            for (int n = 0; (n < s1dTaylor.length) && (s1dTaylor[n] != null); ++n) {
+                fw.write(String.format("%d\t", n));
+            }
+            fw.write("\nCoeff Value\t");
+            for (int n = 0; n < sCoeff.length; ++n) {
+                fw.write(String.format("%e\t", sCoeff[n].value()));
+            }
+            fw.write("\nCoeff Uncertainty\t");
+            for (int n = 0; n < sCoeff.length; ++n) {
+                fw.write(String.format("%e\t", sCoeff[n].uncertainty()));
+            }
+            fw.write("\nTaylor Value\t");
+            for (int n = 0; (n < s1dTaylor.length) && (s1dTaylor[n] != null); ++n) {
+                fw.write(String.format("%e\t", s1dTaylor[n].value()));
+            }
+            fw.write("\nTaylor Uncertainty\t");
+            for (int n = 0; (n < s1dTaylor.length) && (s1dTaylor[n] != null); ++n) {
+                fw.write(String.format("%e\t", s1dTaylor[n].uncertainty()));
+            }
+            fw.write("\n");
+            fw.write("2n\tExponent Value\tExponent Variance\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty");
+            fw.write("\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty\n");
+        }
+        VarDbl value = s1dTaylor[0];
+        final VarDbl variance = new VarDbl();
+        final VarDbl var = new VarDbl(variance());
+        final VarDbl varn = new VarDbl(var);
+        int n = 2;
+        for ( ; (n < Momentum.MAX_FACTOR*2) && (0 < varn.value()) && (n < s1dTaylor.length); 
+                n += 2, varn.multiply(var, true)) {
+            final VarDbl newValue = (s1dTaylor[n] == null)
+                    ? new VarDbl() 
+                    : varn.multiply(s1dTaylor[n]).multiply(new VarDbl(Momentum.factor(n)));
+            final VarDbl newVariance = new VarDbl();
+            for (int j = 1; j < n; ++j) {
+                newVariance.add(s1dTaylor[j].multiply(s1dTaylor[n - j]).multiply(Momentum.factor(n)).multiply(varn), true);
+            }
+            for (int j = 2; j < n; j += 2) {
+                newVariance.minus(
+                    s1dTaylor[j].multiply(Momentum.factor(j)).multiply(s1dTaylor[n - j]).multiply(Momentum.factor(n - j)).multiply(varn),
+                    true);
+            }
+            value.add(newValue, true);
+            variance.add(newVariance, true);
+            if (fw != null) {
+                fw.write(String.format("%d\t%e\t%e\t%e\t%e\t%e\t%e", 
+                         n, varn.value(), varn.variance(), value.value(), value.uncertainty(), variance.value(), variance.uncertainty()));
+                fw.write(String.format("\t%e\t%e\t%e\t%e\n", 
+                         newValue.value(), newValue.variance(), newVariance.value(), newVariance.uncertainty()));
+            }
+
+            if ((!Double.isFinite(value.value())) || (!Double.isFinite(value.variance()))
+                    || (!Double.isFinite(variance.value())) || (!Double.isFinite(variance.variance()))) {
+                if (fw != null) {
+                    fw.write("DivergentException\n");
+                    fw.close();
+                }
+                throw new DivergentException("polynominal DivergentException", 
+                        s1dTaylor, false, false, this, 
+                        value, variance, n, newValue, newVariance);
+            }
+            if (variance.variance() > variance.value() * VARIANCE_THRESHOLD) {
+                if (fw != null) {
+                    fw.write("NotReliableException\n");
+                    fw.close();
+                }
+                throw new NotReliableException("polynominal NotReliableException", 
+                        s1dTaylor, false, false, this,
+                        value, variance, n, newValue, newVariance);
+            }
+        }
+        if (fw != null) {
+            fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n");
+            fw.write(String.format("%e\t%e\t%e\t%e\n", 
+                     value.value(), value.variance(), variance.value(), variance.variance()));
+            fw.close();
+        }
+        return new VarDbl(value.value(), variance.value() + value.variance(), true);
+    }
+    VarDbl polynominal(final double[] sCoeff, final String dumpPath) 
+            throws InitException, DivergentException, NotReliableException, IOException {
+        final VarDbl[] sVar = new VarDbl[sCoeff.length];
+        for (int i = 0; i < sCoeff.length; ++i)
+            sVar[i] = new VarDbl(sCoeff[i]);
+        return polynominal(sVar, dumpPath);
+    }
+    VarDbl polynominal(final VarDbl[] sCoeff) 
+            throws InitException, DivergentException, NotReliableException {
+        try {
+            return polynominal(sCoeff, null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
+    }
+    VarDbl polynominal(final double[] sCoeff) 
+            throws InitException, DivergentException, NotReliableException {
+        try {
+            return polynominal(sCoeff, null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
+    }
+
+
+    /*
      * 1d Taylor expansion.
      * 
      * @see     The paper for Variance Arithmetic on Taylor expansion convergence.
+     * 
+     * @return  The result of taylor expansion with this as input.
      * 
      * @param name          The name of the Taylor expansion, for exception logging.
      * @param s1dTaylor     The Taylor expansion coefficent, with f(x) as s1dTaylor[0]. It should already contains /n!.
@@ -282,15 +478,13 @@ public class VarDbl {
      * @param dumpPath                      If to dump the expansion to a file
      * @param enableStabilityTruncation     If to truncate when the expansion becomes stable.
      * 
-     * @return  The result of taylor expansion with this as input.
-     * 
      * @exception InitException         If any item in s1dTaylor is not finite.
      * @exception DivergentException    If the result is not finite.
      * @exception NotReliableException  If the uncertainty of the variance is too large for its value. 
      * @exceptopm NotMonotonicException If the result variance does not decrease monotonically. 
      * @exceptopm NotStableException    If after maximal order expansion, the expansion is still not stable.       
      */
-    VarDbl taylor(final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec,
+    VarDbl taylor(final String name, final VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec,
             final String dumpPath, boolean enableStabilityTruncation) 
             throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
         FileWriter fw = (dumpPath == null)? null : new FileWriter(dumpPath);
@@ -354,7 +548,7 @@ public class VarDbl {
                         s1dTaylor, inPrec, outPrec, this, 
                         value, variance, n, newValue, newVariance);
             }
-            if (variance.variance() > variance.value() * variance_threshold) {
+            if (variance.variance() > variance.value() * VARIANCE_THRESHOLD) {
                 if (fw != null) {
                     fw.write("NotReliableException\n");
                     fw.close();
@@ -406,16 +600,17 @@ public class VarDbl {
     }
     
     VarDbl taylor(final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec) 
-            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
-        return taylor(name, s1dTaylor, inPrec, outPrec, 
-             null, true);
+            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException {
+        try {
+            return taylor(name, s1dTaylor, inPrec, outPrec, null, true);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
     }
 
     /*
-     * Calculate this^exponent without changing this.
-     * 
-     * @param exponent
-     * @param dumpPath  File path to dump the Taylor expansion.
+     * @return this^exponenet
      */
     public VarDbl power(double exponent, final String dumpPath) 
             throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
@@ -425,8 +620,13 @@ public class VarDbl {
         if (exponent == 1) {
             return new VarDbl(this);
         }
-        if ((double) ((int) exponent) == exponent) {
-
+        if ((0 < exponent) && (Math.floor(exponent) == Math.ceil(exponent))) {
+            final VarDbl[] sCoeff = new VarDbl[((int) exponent) + 1];
+            for (int i = 0; i < exponent; ++i) {
+                sCoeff[i] = new VarDbl();
+            }
+            sCoeff[(int) exponent] = new VarDbl(1);
+            return polynominal(sCoeff, dumpPath);
         }
         final VarDbl[] sTaylor = Taylor.power(exponent);
         sTaylor[0] = new VarDbl(Math.pow(value, exponent));
@@ -435,7 +635,12 @@ public class VarDbl {
     }
     public VarDbl power(double exponent) 
             throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
-        return power(exponent, null);
+        try {
+            return power(exponent, null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
     }
 
     /*
@@ -447,8 +652,13 @@ public class VarDbl {
         return this.taylor(String.format("sin(%s)", this), s1dTaylor, false, false, dumpPath, true);
     }
     public VarDbl sin() 
-            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
-        return sin(null);
+            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException {
+        try {
+            return sin(null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
     }
 
     /*
@@ -460,8 +670,13 @@ public class VarDbl {
         return this.taylor(String.format("log(%s)", this), s1dTaylor, true, false, dumpPath, true);
     }
     public VarDbl log() 
-            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
-        return log(null);
+            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException {
+        try {
+            return log(null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
     }
 
     /*
@@ -473,8 +688,13 @@ public class VarDbl {
         return this.taylor(String.format("exp(%s)", this), s1dTaylor, false, true, dumpPath, true);
     }
     public VarDbl exp() 
-            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
-        return exp(null);
+            throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException {
+        try {
+            return exp(null);
+        } catch (IOException ex) {
+            assert false;
+            return null;
+        }
     }
 
 }
