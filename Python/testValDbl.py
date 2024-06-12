@@ -10,6 +10,22 @@ from taylor import NotReliableException, NotMonotonicException
 
 class TestInit (unittest.TestCase):
 
+    def testFrExp(self):
+        '''
+        significand is still a float in the range of (-1, +1)
+        '''
+        m, e = math.frexp(1)
+        self.assertEqual(m, 0.5)
+        self.assertEqual(e, 1)
+
+        m, e = math.frexp(0.5)
+        self.assertEqual(m, 0.5)
+        self.assertEqual(e, 0)
+
+        m, e = math.frexp(math.sqrt(2))
+        self.assertEqual(m, math.sqrt(0.5))
+        self.assertEqual(e, 1)
+
     def testInt(self):
         validate(self, VarDbl(0), 0, 0)
         validate(self, VarDbl(1), 1, 0)
@@ -17,15 +33,27 @@ class TestInit (unittest.TestCase):
 
 
     def testLargeInt(self):
+        '''
+        float(int) always rounds to the nearest
+        '''
         validate(self, VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND), VarDbl.DOUBLE_MAX_SIGNIFICAND, 0)
         validate(self, VarDbl(-VarDbl.DOUBLE_MAX_SIGNIFICAND), -VarDbl.DOUBLE_MAX_SIGNIFICAND, 0)
 
-        # lost resolution
-        f = float(VarDbl.DOUBLE_MAX_SIGNIFICAND + 1)
-        validate(self, VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND + 1), f, 0.5)
-        # no lost of resolution
-        f = float(1 << 54)
-        validate(self, VarDbl(1 << 54), f, 0)
+        # no lost resolution
+        i = (1 << 53)
+        validate(self, VarDbl(i), float(i), 0)
+        self.assertEqual(0, i - int(float(i)))
+        # lost of resolution
+        i = (1 << 53) + 1
+        validate(self, VarDbl(i), float(i), 0.5)
+        self.assertEqual(1, i - int(float(i)))
+        i = (1 << 54) + 1
+        self.assertEqual(1, i - int(float(i)))
+        validate(self, VarDbl(i), float(i), 0.25)
+        i = (1 << 54) + 3
+        validate(self, VarDbl(i), float(i), 0.25)
+        self.assertEqual(-1, i - int(float(i)))
+
 
     def testInit(self):
         validate(self, VarDbl(-1, 0), -1, 0)

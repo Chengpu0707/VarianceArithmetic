@@ -179,19 +179,19 @@ class Taylor:
                     fw.close()
                 raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance)
+            if (n >= Taylor.MIN_TERMINATE_ORDER):
+                if abs(prevVariance.value()) + unc < abs(newVariance.value()):
+                    if fw:
+                        fw.write("NotMonotonicException\n")
+                        fw.close()
+                    raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
+                            value, variance, n, newValue, newVariance)
+                if enableStabilityTruncation \
+                        and ((abs(newVariance.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
+                    break
 
-            if Taylor.MIN_TERMINATE_ORDER and (n >= Taylor.MIN_TERMINATE_ORDER) \
-                    and (abs(prevVariance.value()) + unc < abs(newVariance.value())):
-                if fw:
-                    fw.write("NotMonotonicException\n")
-                    fw.close()
-                raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
-                        value, variance, n, newValue, newVariance)
             varn *= var
             if varn.value() == 0:
-                break
-            if enableStabilityTruncation and (Taylor.MIN_TERMINATE_ORDER <= n) \
-                    and ((abs(newVariance.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
                 break
             prevVariance = newVariance
 
@@ -208,7 +208,8 @@ class Taylor:
             fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n")
             fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
             fw.close()
-        return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True)
+        var = variance.value() + value.variance()
+        return varDbl.VarDbl(value.value(), var, True) if var else varDbl.VarDbl(value.value())
     
 
     def polynominal(self, input:varDbl.VarDbl, sCoeff:tuple[typing.Union[float, varDbl.VarDbl]],
@@ -287,8 +288,7 @@ class Taylor:
                     fw.close()
                 raise varDbl.InitException(value, variance)
             varn *= var
-            if varn.value() == 0:
-                break
+            
         if variance.variance() > variance.value() * self._variance_threshold:
             if fw:
                 fw.write("NotStableException\n")
@@ -299,7 +299,8 @@ class Taylor:
             fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n")
             fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
             fw.close()
-        return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True) 
+        var = variance.value() + value.variance()
+        return varDbl.VarDbl(value.value(), var, True) if var else varDbl.VarDbl(value.value())
     
 
     def exp(self) -> list[varDbl.VarDbl]:

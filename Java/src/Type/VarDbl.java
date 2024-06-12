@@ -19,12 +19,12 @@ public class VarDbl {
     private double value;
     private double variance;
 
-    static final long DOUBLE_MAX_SIGNIFICAND = 1L << 53;
-    static final int DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT = 40;
+    static final long DOUBLE_MAX_SIGNIFICAND = (1L << 53) - 1;
+    static final long PRECISE_SIGNIFICAND_TAIL_MASK = (1L << 13) - 1;
     static final double BINDING_FOR_EQUAL = 0.67448975;
     static final double VARIANCE_THRESHOLD = 1.0 /Momentum.BINDING_FOR_TAYLOR/Momentum.BINDING_FOR_TAYLOR;
     static final double TAU = 7.18e-7;
-    static final int MIN_TERMINATE_ORDER = 20;
+    static final int TAYLOR_CHECK_ORDER = 20;
     static final double DEVIATION_OF_LSB = 1.0 / Math.sqrt(3);
 
     static public double ulp(double value) {
@@ -36,9 +36,17 @@ public class VarDbl {
     static public double ulp(final long value) {
         long val = Math.abs(value);
         double rounding = 0;
-        for (; DOUBLE_MAX_SIGNIFICAND <= val; val >>= 1, rounding /= 2) {
-            if ((val & 1L) != 0L)
-                rounding += 1;
+        boolean posi = true;
+        for (; DOUBLE_MAX_SIGNIFICAND < val; val >>= 1, rounding /= 2) {
+            if ((val & 1L) != 0L) {
+                if (posi) {
+                    rounding += 1;
+                    posi = false;
+                } else {
+                    rounding -= 1;
+                    posi = true;
+                }
+            }
         }
         return rounding; 
     }
@@ -47,11 +55,15 @@ public class VarDbl {
         if (val.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0)
             return ulp(val.longValue());
         double rounding = 0;
-        for (int cnt = val.getLowestSetBit(); DOUBLE_MAX_SIGNIFICAND <= val.doubleValue(); 
+        boolean posi = true;
+        for (int cnt = val.getLowestSetBit(); DOUBLE_MAX_SIGNIFICAND < val.doubleValue(); 
                 rounding /= ((cnt < ((Long.BYTES << 3) - 1))? (1L << cnt) : Math.pow(2, cnt)), 
                 val = val.shiftRight(cnt), cnt = val.getLowestSetBit()) {
             if (cnt == 0) {
-                rounding += 1;
+                if (posi) {
+                    rounding -= 1;
+                    posi = false;
+                }
                 cnt = 1;
             }
         }
@@ -82,13 +94,19 @@ public class VarDbl {
             throw new InitException(String.format("VarDbl value=%g", value), 
                                     value, variance);
         }
-        double val = value;
-        for (int bit = 0; bit <= VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT; ++ bit) {
-            val = value * ((double) (1L << (VarDbl.DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT - bit)));
-            if (Double.isFinite(val))
-                break;
+        final long val = Double.doubleToLongBits(value);
+        final double dev = ((val & PRECISE_SIGNIFICAND_TAIL_MASK) == 0L)? 0 : ulp(value);
+        this.value = value;
+        this.variance = dev * dev;
+    }
+    public VarDbl(final float value) 
+            throws InitException {
+        if (!Double.isFinite(value)) {
+            throw new InitException(String.format("VarDbl value=%g", value), 
+                                    value, variance);
         }
-        final double dev = (Math.ceil(val) == Math.floor(val))? 0 : ulp(value);
+        final long val = Float.floatToIntBits(value);
+        final double dev = ((val & PRECISE_SIGNIFICAND_TAIL_MASK) == 0L)? 0 : Math.ulp(value) * DEVIATION_OF_LSB;
         this.value = value;
         this.variance = dev * dev;
     }
@@ -415,7 +433,8 @@ public class VarDbl {
                      value.value(), value.variance(), variance.value(), variance.variance()));
             fw.close();
         }
-        return new VarDbl(value.value(), variance.value() + value.variance(), true);
+        final double res = variance.value() + value.variance();
+        return (res == 0)? new VarDbl(value.value()) : new VarDbl(value.value(), res, true);
     }
     VarDbl polynominal(final double[] sCoeff, final String dumpPath) 
             throws InitException, DivergentException, NotReliableException, IOException {
@@ -494,7 +513,7 @@ public class VarDbl {
         final VarDbl varn = new VarDbl(var);
         VarDbl prevVariance = null;
         int n = 2;
-        for ( ; (n < Momentum.MAX_FACTOR*2) && (0 < varn.value()) && (n < s1dTaylor.length) && (s1dTaylor[n - 1] != null); 
+        for ( ; (n < Momentum.MAX_FACTOR*2) && (varn.value() > 0) && (n < s1dTaylor.length) && (s1dTaylor[n - 1] != null); 
                 n += 2, varn.multiply(var, true)) {
             final VarDbl newValue = (s1dTaylor[n] == null)
                     ? new VarDbl() 
@@ -537,24 +556,24 @@ public class VarDbl {
                         s1dTaylor, inPrec, outPrec, this,
                         value, variance, n, newValue, newVariance);
             }
-            if ((MIN_TERMINATE_ORDER > 0) && (n >= MIN_TERMINATE_ORDER) 
-                    && (Math.abs(prevVariance.value()) + unc < Math.abs(newVariance.value()))) {
-                if (fw != null) {
-                    fw.write("NotMonotonicException\n");
-                    fw.close();
+            if (n >= TAYLOR_CHECK_ORDER) {
+                if (Math.abs(prevVariance.value()) + unc < Math.abs(newVariance.value())) {
+                    if (fw != null) {
+                        fw.write("NotMonotonicException\n");
+                        fw.close();
+                    }
+                    throw new NotMonotonicException(name + " NotMonotonicException", 
+                            s1dTaylor, inPrec, outPrec, this,
+                            value, variance, n, newValue, newVariance, prevVariance);
                 }
-                throw new NotMonotonicException(name + " NotMonotonicException", 
-                        s1dTaylor, inPrec, outPrec, this,
-                        value, variance, n, newValue, newVariance, prevVariance);
-            }
-            if (enableStabilityTruncation && (MIN_TERMINATE_ORDER <= n) 
-                    && ((Math.abs(newVariance.value()) < unc) || (Math.abs(newValue.value()) < Math.ulp(value.value())))) {
-                if (fw != null) {
-                    fw.write("Terminated\n");
+                if (enableStabilityTruncation
+                        && ((Math.abs(newVariance.value()) < unc) || (Math.abs(newValue.value()) < Math.ulp(value.value())))) {
+                    if (fw != null) {
+                        fw.write("Terminated\n");
+                    }
+                    break;
                 }
-                break;
             }
-
             prevVariance = newVariance;
         }
         if (enableStabilityTruncation && (Momentum.MAX_FACTOR*2 <= n)) {
@@ -576,7 +595,8 @@ public class VarDbl {
                      value.value(), value.variance(), variance.value(), variance.variance()));
             fw.close();
         }
-        return new VarDbl(value.value(), variance.value() + value.variance(), true);
+        final double res = variance.value() + value.variance();
+        return (res == 0)? new VarDbl(value.value()) : new VarDbl(value.value(), res, true);
     }
     
     VarDbl taylor(final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec) 

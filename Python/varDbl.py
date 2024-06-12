@@ -25,7 +25,7 @@ class VarDbl:
     BINDING_FOR_EQUAL = 0.67448975
         # z value for 50% probability of equal
     
-    DOUBLE_MAX_SIGNIFICAND = (1 << 53)
+    DOUBLE_MAX_SIGNIFICAND = (1 << 53) - 1
     DOUBLE_MAX_PRECISE_SIGNIFICAND_BIT = 30
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
         # rounding error is uniformly distrubuted within LSB of float
@@ -35,10 +35,16 @@ class VarDbl:
             return math.ulp(value) * VarDbl.DEVIATION_OF_LSB
         if type(value) == int:
             round = 0.0
+            posi = True
             val = abs(value)
-            while VarDbl.DOUBLE_MAX_SIGNIFICAND <= val:
+            while VarDbl.DOUBLE_MAX_SIGNIFICAND < val:
                 if val & 1:
-                    round += 1
+                    if posi:
+                        round += 1
+                        posi = False
+                    else:
+                        round -= 1
+                        posi = True
                 round *= 0.5
                 val >>= 1
             return round

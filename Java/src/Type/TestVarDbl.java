@@ -76,28 +76,39 @@ public class TestVarDbl {
         testToString("-1~1.0e+03", -1, 1000);    
         testToString("1.000e-03~1.0e-03", 0.001, 0.001);
         testToString("1.000e-03~1.3e-19", 0.001);
-        testToString("1.341e+154", Math.sqrt(Double.MAX_VALUE));
+        testToString("1.341e+154~8.6e+137", Math.sqrt(Double.MAX_VALUE));
         testToString("2.225e-308", Double.MIN_NORMAL, Double.MIN_VALUE);
         testToString("2.225e-308", Double.MIN_NORMAL);        
     }
  
     @Test 
     public void testInitLong() {
-        op = new VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND - 1);
-        assertEquals(VarDbl.DOUBLE_MAX_SIGNIFICAND - 1, op.value(), 0);
+        long l;
+
+        l = VarDbl.DOUBLE_MAX_SIGNIFICAND;
+        op = new VarDbl(l);
+        assertEquals(0, ((long) op.value()) - l);
         assertEquals(0, op.uncertainty(), 0);
 
-        op = new VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND);
-        assertEquals(VarDbl.DOUBLE_MAX_SIGNIFICAND, op.value(), 0);
+        l = VarDbl.DOUBLE_MAX_SIGNIFICAND + 1;
+        op = new VarDbl(l);
+        assertEquals(0, ((long) op.value()) - l);
         assertEquals(0, op.uncertainty(), 0);
 
-        op = new VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND + 1);
-        assertEquals(VarDbl.DOUBLE_MAX_SIGNIFICAND + 1, op.value(), 0);
+        l = VarDbl.DOUBLE_MAX_SIGNIFICAND + 2;
+        op = new VarDbl(l);
+        assertEquals(-1, ((long) op.value()) - l);
         assertEquals(0.5, op.uncertainty(), 0);
 
-        op = new VarDbl(VarDbl.DOUBLE_MAX_SIGNIFICAND + 2);
-        assertEquals(VarDbl.DOUBLE_MAX_SIGNIFICAND + 2, op.value(), 0);
-        assertEquals(0, op.uncertainty(), 0);
+        l = ((VarDbl.DOUBLE_MAX_SIGNIFICAND + 1) << 1) + VarDbl.DOUBLE_MAX_SIGNIFICAND + 2;
+        op = new VarDbl(l);
+        assertEquals(-1, ((long) op.value()) - l, 0);
+        assertEquals(0.25, op.uncertainty(), 0);
+
+        l = ((VarDbl.DOUBLE_MAX_SIGNIFICAND + 1) << 1) + VarDbl.DOUBLE_MAX_SIGNIFICAND + 3;
+        op = new VarDbl(l);
+        assertEquals(-2, ((long) op.value()) - l);
+        assertEquals(0.5, op.uncertainty(), 0);
     }
 
     @Test
