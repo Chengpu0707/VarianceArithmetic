@@ -36,6 +36,9 @@ static void assertFalse(bool expression, std::string msg = "");
 static void assertEquals(double x, double y, double delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
 template<typename T, typename U> static void assertEqual(const T& x, const U& y, std::string msg = "");
+    // generic value comparison
+template<typename T, typename U> static void assertEquals(const T& sX, const U& sY, std::string msg);
+    // generic collection comparison
 
 
 inline void fail(std::string msg) {
