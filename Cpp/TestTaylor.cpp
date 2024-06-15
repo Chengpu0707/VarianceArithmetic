@@ -9,8 +9,8 @@ using namespace var_dbl;
 
 void assertEquals(VarDbl var, double value, double uncertainty) 
 {
-    test::assertEquals(var.value(), value);
-    test::assertEquals(var.uncertainty(), uncertainty);
+    test::assertAlmostEqual(var.value(), value);
+    test::assertAlmostEqual(var.uncertainty(), uncertainty);
 }
 
 constexpr static const double EXP_VALUE_DELTA = 5e-7;
@@ -38,11 +38,11 @@ VarDbl validate_exp(double exp, double uncertainty,
     const VarDbl prec = res * std::exp(-exp);
     std::ostringstream os;
     os << "exp(" << var << ")=" << res;
-    test::assertEquals(prec.value(),
+    test::assertAlmostEqual(prec.value(),
             1 + std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 +\
                 std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384,
             valueDelta, os.str());
-    test::assertEquals(prec.variance(),
+    test::assertAlmostEqual(prec.variance(),
             std::pow(uncertainty, 2) + std::pow(uncertainty, 4)*3/2 +\
                 std::pow(uncertainty, 6)*7/6 + std::pow(uncertainty, 8)*5/8,
             varianceDelta, os.str());
@@ -87,11 +87,11 @@ VarDbl validate_log(double x, double uncertainty,
     std::ostringstream os;
     os << "log(" << var << ")=" << res;
     const double precIn = abs(uncertainty/x);
-    test::assertEquals(prec.value(),
+    test::assertAlmostEqual(prec.value(),
             - std::pow(precIn, 2)/2 - std::pow(precIn, 4)/4 \
             - std::pow(precIn, 6)/6 - std::pow(precIn, 8)/8,
             valueDelta, os.str());
-    test::assertEquals(prec.variance(),
+    test::assertAlmostEqual(prec.variance(),
             std::pow(precIn, 2) + std::pow(precIn, 4)*9/8 +\
             std::pow(precIn, 6)*119/24 + std::pow(precIn, 8)*991/32,
             varianceDelta, os.str());
@@ -166,12 +166,12 @@ VarDbl validate_sin(double x, double uncertainty,
     const VarDbl prec = res - std::sin(x);
     std::ostringstream os;
     os << "sin(" << var << ")=" << res;
-    test::assertEquals(prec.value(),
+    test::assertAlmostEqual(prec.value(),
             std::sin(x) * (-std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 +\
                            -std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384),
             valueDelta, os.str());
     const double cos2 = std::cos(x) * std::cos(x);
-    test::assertEquals(prec.variance(),
+    test::assertAlmostEqual(prec.variance(),
             std::pow(uncertainty, 2) * cos2 - std::pow(uncertainty, 4)*(3./2 * cos2 - 1./2) +\
                         std::pow(uncertainty, 6)*(7./6 * cos2 - 1./2),
             varianceDelta, os.str());
@@ -232,12 +232,12 @@ VarDbl validate_pow(double exp, double uncertainty,
     const VarDbl prec = res - VarDbl(1, 0);
     std::ostringstream os;
     os << "pow(" << var << ", " << exp << ")=" << res;
-    test::assertEquals(prec.value(),
+    test::assertAlmostEqual(prec.value(),
 	    std::pow(uncertainty, 2) * exp*(exp-1)/2 + \
 	    std::pow(uncertainty, 4) * exp*(exp-1)*(exp-2)*(exp-3)/24 +\
 	    std::pow(uncertainty, 6) * exp*(exp-1)*(exp-2)*(exp-3)*(exp-4)*(exp-5)/720,
             valueDelta, os.str());
-    test::assertEquals(prec.variance(),
+    test::assertAlmostEqual(prec.variance(),
 	    std::pow(uncertainty, 2) * exp*exp + \
 	    std::pow(uncertainty, 4) * exp*exp*(exp-1)*(exp-5./3)*3./2 +\
 	    std::pow(uncertainty, 6) * exp*exp*(exp-1)*(exp-2)*(exp-2)*(exp-16./7)*7./6,

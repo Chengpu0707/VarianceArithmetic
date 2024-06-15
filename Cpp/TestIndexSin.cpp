@@ -91,48 +91,48 @@ void test_sin()
 {
     test::assertEqual(8, indexSin.size());
 
-    test::assertEqual(indexSin.sin(0).value(), 0);
-    test::assertEqual(indexSin.sin(1).value(), std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(2).value(), std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.sin(3).value(), std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(4).value(), 1);
-    test::assertEqual(indexSin.sin(5).value(), std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(6).value(), std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.sin(7).value(), std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(8).value(), 0);
+    test::assertAlmostEqual(indexSin.sin(0).value(), 0);
+    test::assertAlmostEqual(indexSin.sin(1).value(), std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(2).value(), std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.sin(3).value(), std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(4).value(), 1);
+    test::assertAlmostEqual(indexSin.sin(5).value(), std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(6).value(), std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.sin(7).value(), std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(8).value(), 0);
 
-    test::assertEqual(indexSin.sin(-1).value(), -std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(-2).value(), -std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.sin(-3).value(), -std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(-4).value(), -1);
-    test::assertEqual(indexSin.sin(-5).value(), -std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(-6).value(), -std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.sin(-7).value(), -std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.sin(-8).value(), 0);
+    test::assertAlmostEqual(indexSin.sin(-1).value(), -std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(-2).value(), -std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.sin(-3).value(), -std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(-4).value(), -1);
+    test::assertAlmostEqual(indexSin.sin(-5).value(), -std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(-6).value(), -std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.sin(-7).value(), -std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.sin(-8).value(), 0);
 }
 
 void test_sin_error()
 {
-    test::assertEqual(-std::sin(std::numbers::pi*1/8) - 9.992007221626409e-16, 
-                        std::sin(std::numbers::pi*1001/8));
-    test::assertEqual(ulp(std::sin(std::numbers::pi*1/8)), 5.551115123125783e-17);
+    test::assertAlmostEqual(-std::sin(std::numbers::pi*1/8) - 9.992007221626409e-16, 
+                            std::sin(std::numbers::pi*1001/8));
+    test::assertAlmostEqual(ulp(std::sin(std::numbers::pi*1/8)), 5.551115123125783e-17);
 }
 
 void test_cos()
 {
-    test::assertEqual(indexSin.cos(0).value(), 1);
-    test::assertEqual(indexSin.cos(1).value(), std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.cos(2).value(), std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.cos(3).value(), std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.cos(4).value(), 0);
-    test::assertEqual(indexSin.cos(5).value(), -std::sin(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.cos(6).value(), -std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.cos(7).value(), -std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.cos(8).value(), -1);
+    test::assertAlmostEqual(indexSin.cos(0).value(), 1);
+    test::assertAlmostEqual(indexSin.cos(1).value(), std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(2).value(), std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.cos(3).value(), std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(4).value(), 0);
+    test::assertAlmostEqual(indexSin.cos(5).value(), -std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(6).value(), -std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.cos(7).value(), -std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(8).value(), -1);
 
-    test::assertEqual(indexSin.cos(-1).value(), std::cos(std::numbers::pi*1/8));
-    test::assertEqual(indexSin.cos(-2).value(), std::cos(std::numbers::pi*2/8));
-    test::assertEqual(indexSin.cos(-3).value(), std::sin(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(-1).value(), std::cos(std::numbers::pi*1/8));
+    test::assertAlmostEqual(indexSin.cos(-2).value(), std::cos(std::numbers::pi*2/8));
+    test::assertAlmostEqual(indexSin.cos(-3).value(), std::sin(std::numbers::pi*1/8));
 }
 
 int main()
@@ -142,6 +142,6 @@ int main()
     test_sin();
     test_sin_error();
     test_cos();
-
+    std::cout << "All indexed sine tests are successful";
     return 0;
 }

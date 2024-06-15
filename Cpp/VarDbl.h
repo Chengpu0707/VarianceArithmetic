@@ -52,16 +52,12 @@ private:
     double _value = 0;
     double _variance = 0;
 
-    void init(double value, double variance, const std::string what) 
-    {
+    void init(double value, double variance, const std::string what) {
         if (!std::isfinite(value) || !std::isfinite(variance))
             throw InitException(value, variance, what);
         _value = value;
         _variance = variance;
     }
-
-    VarDbl taylor1d(std::string name, const VarDbl sTaylor[], bool inPrec, bool outPrec,
-                    bool enableStabilityTruncation = true) const;
 
 public:
     double value() const { return _value; }
@@ -71,8 +67,7 @@ public:
     // constructors
     VarDbl();
     VarDbl(const VarDbl& other);
-    VarDbl(double value, double uncertainty);
-        // uncertainty is limited between sqrt(std::numeric_limits<double>::mim()) and sqrt(std::numeric_limits<double>::max())
+    VarDbl(double value, double uncertainty, bool uncertaintyAsVariance = false);
     
     // conversion constructors
     template <typename T> requires std::floating_point<T> VarDbl(T value);
@@ -125,6 +120,49 @@ public:
     VarDbl sin() const;
     VarDbl pow(double exp) const;
 
+
+    /*
+     * 1d Taylor expansion.
+     * 
+     * @see     The paper for Variance Arithmetic on Taylor expansion convergence.
+     * 
+     * @return  The result of taylor expansion with this as input.
+     *          If the input is precise, the uncertainty is the floating-point uncertainty of the result.
+     * 
+     * @param name          The name of the Taylor expansion, for exception logging.
+     * @param s1dTaylor     The Taylor expansion coefficent, with f(x) as s1dTaylor[0]. It should already contains /n!.
+     * @param inPrec        If to expand by input precision
+     * @param outPrec       If the variance result needs to be multiplied by s1dTaylor[0].
+     * @param dumpPath                      If to dump the expansion to a file
+     * @param enableStabilityTruncation     If to truncate when the expansion becomes stable.
+     * 
+     * @exception InitException         If any item in s1dTaylor is not finite.
+     * @exception DivergentException    If the result is not finite.
+     * @exception NotReliableException  If the uncertainty of the variance is too large for its value. 
+     * @exceptopm NotMonotonicException If the result variance does not decrease monotonically. 
+     * @exceptopm NotStableException    If after maximal order expansion, the expansion is still not stable.       
+     */
+    VarDbl taylor1d(std::string name, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
+                    bool enableStabilityTruncation = true) const;
+
+    /*
+     * 1d polynominal
+     * 
+     * @see     The paper for Variance Arithmetic on Taylor expansion convergence.
+     * 
+     * @return  The result of taylor expansion with this as input.
+     * 
+     * @param sCoeff                    Polynominal coefficients
+     * @param dumpPath                  If to dump the expansion to a file
+     * 
+     * @exception InitException         If any item in sCoeff is not finite.
+     * @exception DivergentException    If the result is not finite.
+     * @exception NotReliableException  If the uncertainty of the variance is too large for its value. 
+     * 
+     * @raise IllegalArgumentException  If the length of sCoeff is too long, or if sCoeff contains null
+     */
+    VarDbl polynominal(const std::vector<VarDbl>& sCoeff) const;
+
 };
 
 
@@ -140,11 +178,11 @@ struct NotReliableException : public std::runtime_error
     const VarDbl newVariance;
 
     explicit NotReliableException(const std::string what, 
-                const VarDbl& input, const VarDbl* p1dTaylor, bool inPrec, bool outPrec,
+                const VarDbl& input, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
                 const VarDbl& value, const VarDbl& variance, 
                 size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
             runtime_error(what + " NotReliableException"), input(input), 
-            s1dTaylor(p1dTaylor, p1dTaylor + VarDbl::MAX_ORDER_FOR_TAYLOR), inPrec(inPrec), outPrec(outPrec),
+            s1dTaylor(s1dTaylor), inPrec(inPrec), outPrec(outPrec),
             value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
     {}
 };
@@ -162,11 +200,11 @@ struct DivergentException : public std::runtime_error
     const VarDbl newVariance;
 
     explicit DivergentException(const std::string what, 
-                const VarDbl& input, const VarDbl* p1dTaylor, bool inPrec, bool outPrec,
+                const VarDbl& input, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
                 const VarDbl& value, const VarDbl& variance, 
                 size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
             runtime_error(what + " DivergentException"), input(input), 
-            s1dTaylor(p1dTaylor, p1dTaylor + VarDbl::MAX_ORDER_FOR_TAYLOR), inPrec(inPrec), outPrec(outPrec),
+            s1dTaylor(s1dTaylor), inPrec(inPrec), outPrec(outPrec),
             value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
     {}
 };
@@ -184,11 +222,11 @@ struct NotMonotonicException : public std::runtime_error
     const VarDbl newVariance;
 
     explicit NotMonotonicException(const std::string what, 
-                const VarDbl& input, const VarDbl* p1dTaylor, bool inPrec, bool outPrec,
+                const VarDbl& input, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
                 const VarDbl& value, const VarDbl& variance, 
                 size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
             runtime_error(what + " NotMonotonicException"), input(input), 
-            s1dTaylor(p1dTaylor, p1dTaylor + VarDbl::MAX_ORDER_FOR_TAYLOR), inPrec(inPrec), outPrec(outPrec),
+            s1dTaylor(s1dTaylor), inPrec(inPrec), outPrec(outPrec),
             value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
     {}
 };
@@ -206,11 +244,11 @@ struct NotStableException : public std::runtime_error
     const VarDbl newVariance;
 
     explicit NotStableException(const std::string what, 
-                const VarDbl& input, const VarDbl* p1dTaylor, bool inPrec, bool outPrec,
+                const VarDbl& input, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
                 const VarDbl& value, const VarDbl& variance, 
                 size_t n, const VarDbl& newValue, const VarDbl& newVariance) :
             runtime_error(what + " NotStableException"), input(input), 
-            s1dTaylor(p1dTaylor, p1dTaylor + VarDbl::MAX_ORDER_FOR_TAYLOR), inPrec(inPrec), outPrec(outPrec),
+            s1dTaylor(s1dTaylor), inPrec(inPrec), outPrec(outPrec),
             value(value), variance(variance), n(n), newValue(newValue), newVariance(newVariance)
     {}
 };
@@ -227,11 +265,11 @@ inline VarDbl::VarDbl(const VarDbl& other)
     _variance = other._variance;
 }
 
-inline VarDbl::VarDbl(double value, double uncertainty) 
+inline VarDbl::VarDbl(double value, double uncertainty, bool uncertaintyAsVariance) 
 {
     std::ostringstream ss;
-    ss << "VarDbl(double " << value << ", double " << uncertainty << ")";
-    init(value, uncertainty*uncertainty, ss.str());
+    ss << "VarDbl( " << value << ", " << (uncertaintyAsVariance? "var " : "unc ")  << uncertainty << ")";
+    init(value, uncertaintyAsVariance? uncertainty : uncertainty*uncertainty, ss.str());
 }
 
 template <typename T> requires std::floating_point<T> 
@@ -250,7 +288,7 @@ inline VarDbl::VarDbl(T value) {
 template <typename T> requires std::integral<T> 
 inline VarDbl::VarDbl(T value) {
     std::ostringstream ss;
-    ss << "VarDbl(" << value << ")";
+    ss << "VarDbl(i " << value << ")";
     const double uncertainty = var_dbl::ulp(value);
     init(value, uncertainty*uncertainty, ss.str());
 }
@@ -450,9 +488,12 @@ inline bool operator>=(T first, const VarDbl& second)
 }
 
 
-inline VarDbl VarDbl::taylor1d(std::string name, const VarDbl s1dTaylor[], bool inPrec, bool outPrec,
+inline VarDbl VarDbl::taylor1d(std::string name, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
                                bool enableStabilityTruncation) const
 {
+    if (variance() == 0) {
+        return VarDbl(s1dTaylor[0]);
+    }
     VarDbl value = outPrec? VarDbl(1, 0) : s1dTaylor[0];
     VarDbl variance = VarDbl();
     VarDbl var = VarDbl(this->variance());
@@ -460,7 +501,9 @@ inline VarDbl VarDbl::taylor1d(std::string name, const VarDbl s1dTaylor[], bool 
         var *= VarDbl( 1.0 /this->value() /this->value() );
     VarDbl varn = VarDbl(var);
     VarDbl prevVariance;
-    for (size_t n = 2; (n < MAX_ORDER_FOR_TAYLOR) && (varn.value() > 0); n += 2, varn *= var) {
+    for (size_t n = 2; 
+            (n < MAX_ORDER_FOR_TAYLOR) && (n < s1dTaylor.size()) && (varn.value() > 0); 
+            n += 2, varn *= var) {
         VarDbl newValue = s1dTaylor[n] * _momentum.factor(n) * varn;
         VarDbl newVariance = VarDbl();
         for (size_t j = 1; j < n; ++j) {
@@ -503,24 +546,89 @@ inline VarDbl VarDbl::taylor1d(std::string name, const VarDbl s1dTaylor[], bool 
         value *= s1dTaylor[0];
         variance *= s1dTaylor[0] * s1dTaylor[0];
     }
-    if ((variance.value() + value.variance()) <= 0)
-        return VarDbl(value.value());
     VarDbl res;
     res.init(value.value(), variance.value() + value.variance(), name);
     return res;
 }
 
 
+inline VarDbl VarDbl::polynominal(const std::vector<VarDbl>& sCoeff) const
+{
+    if (sCoeff.size() >= VarDbl::MAX_ORDER_FOR_TAYLOR*2) {
+        std::ostringstream oss;
+        oss << "coefficient length " << sCoeff.size() << " is too large!";
+        throw std::invalid_argument(oss.str());
+    }
+    const int exp = sCoeff.size() - 1;
+    std::vector<VarDbl> s1dTaylor(2*exp + 1);
+    s1dTaylor[0] = sCoeff[0];
+    std::vector<double> sPow;
+    sPow.push_back(1);
+    sPow.push_back(value());
+    long sTaylor[2*exp + 1];
+    sTaylor[0] = 1;
+    for (int j = 1; j < sCoeff.size(); ++j) {
+        const VarDbl& coeff = sCoeff[j];
+        if (!std::isfinite(coeff.value()) || !std::isfinite(coeff.variance())) {
+            std::ostringstream oss;
+            oss << "polynominal coefficent at " << j << "/" << sCoeff.size();
+            throw InitException(coeff.value(), coeff.variance(), oss.str());
+        }
+        sTaylor[1] = j;
+        for (int k = 2; k <= j; ++k) {
+            sTaylor[k] = sTaylor[k - 1] * (j + 1 - k) / k;
+            if (sPow.size() <= k)
+                sPow.push_back(sPow.back() * value());
+        }
+        for (int k = 0; k <= j; ++k) {
+            s1dTaylor[k] += coeff * sTaylor[k] * sPow[j - k];
+        }
+    }
+
+    VarDbl value = s1dTaylor[0];
+    VarDbl variance = VarDbl();
+    const VarDbl var = VarDbl(this->variance());
+    VarDbl varn = VarDbl(var);
+    for (int n = 2; (n < MAX_ORDER_FOR_TAYLOR*2) && (0 < varn.value()) && (n < s1dTaylor.size()); 
+            n += 2, varn *= var) {
+        VarDbl newValue = (n >= s1dTaylor.size())? VarDbl() : varn * s1dTaylor[n] * _momentum.factor(n);
+        VarDbl newVariance = VarDbl();
+        for (int j = 1; j < n; ++j) {
+            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * _momentum.factor(n) * varn;
+        }
+        for (int j = 2; j < n; j += 2) {
+            newVariance -= s1dTaylor[j] * _momentum.factor(j) * s1dTaylor[n - j] * _momentum.factor(n - j) * varn;
+        }
+        value += newValue;
+        variance += newVariance;
+
+        if ((! std::isfinite(value.value())) || (! std::isfinite(value.variance()))
+                || (! std::isfinite(variance.value())) || (! std::isfinite(variance.variance()))) {
+            throw DivergentException("polynominal DivergentException", *this, s1dTaylor, false, false,
+                    value, variance, n, newValue, newVariance);
+        }
+        if (variance.variance() > variance.value() * VARIANCE_THRESHOLD) {
+            throw NotReliableException("polynominal NotReliableException", *this, s1dTaylor, false, false,
+                    value, variance, n, newValue, newVariance);
+        }
+    }
+    if ((variance.value() + value.variance()) == 0)
+        return VarDbl(value.value());
+    VarDbl res;
+    res.init(value.value(), variance.value() + value.variance(), "polynominal");
+    return res;
+}
 
 
 inline VarDbl VarDbl::exp() const
 {
-    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
-    sTaylor[0] = VarDbl(std::exp(value()));
-    VarDbl n = VarDbl(1, 0);
+    std::vector<VarDbl> sTaylor;
+    sTaylor.reserve(MAX_ORDER_FOR_TAYLOR);
+    sTaylor.push_back(VarDbl(std::exp(value())));
+    VarDbl n(1);
     for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
         n *= 1.0 / i;
-        sTaylor[i] = n;
+        sTaylor.push_back(VarDbl(n));
     }
     std::ostringstream os;
     os << "exp(" << *this << ")";
@@ -529,10 +637,11 @@ inline VarDbl VarDbl::exp() const
 
 inline VarDbl VarDbl::log() const 
 {
-    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
-    sTaylor[0] = VarDbl(std::log(value()));
+    std::vector<VarDbl> sTaylor;
+    sTaylor.reserve(MAX_ORDER_FOR_TAYLOR);
+    sTaylor.push_back(VarDbl(std::log(value())));
     for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
-        sTaylor[i] = VarDbl((((i%2) == 1)? 1.0 : -1.0) / i);
+        sTaylor.push_back(VarDbl((((i%2) == 1)? 1.0 : -1.0) / i));
     }
     std::ostringstream os;
     os << "log(" << *this << ")";
@@ -541,23 +650,24 @@ inline VarDbl VarDbl::log() const
 
 inline VarDbl VarDbl::sin() const 
 {
-    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
-    sTaylor[0] = VarDbl(std::sin(value()));
+    std::vector<VarDbl> sTaylor;
+    sTaylor.reserve(MAX_ORDER_FOR_TAYLOR);
+    sTaylor.push_back(VarDbl(std::sin(value())));
     VarDbl n = VarDbl(1, 0);
     for (size_t i = 1; i < MAX_ORDER_FOR_TAYLOR; ++i) {
         n *= 1.0 / i;
         switch (i % 4) {
             case 0:
-                sTaylor[i] = VarDbl(std::sin(value()) * n);
+                sTaylor.push_back(VarDbl(std::sin(value()) * n));
                 break;
             case 1:
-                sTaylor[i] = VarDbl(std::cos(value()) * n);  
+                sTaylor.push_back(VarDbl(std::cos(value()) * n));  
                 break;
             case 2:
-                sTaylor[i] = VarDbl(-std::sin(value()) * n);
+                sTaylor.push_back(VarDbl(-std::sin(value()) * n));
                 break;
             case 3:
-                sTaylor[i] = VarDbl(-std::cos(value()) * n);
+                sTaylor.push_back(VarDbl(-std::cos(value()) * n));
                 break;
         }
     }
@@ -568,11 +678,28 @@ inline VarDbl VarDbl::sin() const
 
 inline VarDbl VarDbl::pow(double exp) const 
 {
-    VarDbl sTaylor[MAX_ORDER_FOR_TAYLOR];
-    sTaylor[0] = VarDbl(std::pow(value(), exp));
-    sTaylor[1] = VarDbl(exp);
+    switch ((size_t) exp)
+    {
+    case 0:
+        return VarDbl(1);
+    case 1:
+        return *this;
+    default:
+        break;
+    }
+    if ((exp > 0) && (std::ceil(exp) == std::floor(exp))) {
+        std::vector<VarDbl> sCoeff(exp + 1);
+        sCoeff[(size_t) exp] = 1;
+        return polynominal(sCoeff);
+    }
+    std::vector<VarDbl> sTaylor;
+    sTaylor.reserve(MAX_ORDER_FOR_TAYLOR);
+    sTaylor.push_back(VarDbl(std::pow(value(), exp)));
+    sTaylor.push_back(VarDbl(exp));
     for (size_t i = 2; i < MAX_ORDER_FOR_TAYLOR; ++i) {
-        sTaylor[i] = sTaylor[i - 1] * ((exp + 1)/i - 1);
+        sTaylor.push_back(sTaylor[i - 1] * ((exp + 1)/i - 1));
+        if (sTaylor.back().value() == 0)
+            break;
     }
     std::ostringstream os;
     os << "pow(" << *this << ", " << exp << ")";
