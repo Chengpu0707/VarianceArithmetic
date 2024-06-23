@@ -1,13 +1,15 @@
 #include "IndexSin.h"
+#include "Stat.h"
 #include "Test.h"
 #include "ulp.h"
 
+#include <fstream>
 #include <iostream>
 #include <numbers>
 
 using namespace var_dbl;
 
-const IndexSin indexSin(3, false);
+const IndexSin indexSin(3);
 
 void test_neg_rem() // assume order==3, so size==8
 {
@@ -135,6 +137,76 @@ void test_cos()
     test::assertAlmostEqual(indexSin.cos(-3).value(), std::sin(std::numbers::pi*1/8));
 }
 
+void dump_error()
+{
+    struct Hint {
+        unsigned index;
+        double rad;
+        double first;
+        double second;
+        double ulp;
+    };
+    const unsigned max_order = 12;
+    Stat<double, Hint> sin, cos, tan, lib;
+
+    std::ostringstream oss;
+    oss << "./Output/Lib_Error_" << max_order << ".txt";
+    std::ofstream of(oss.str());
+    of << "Order\tSize";
+    for (auto subj: {"Sin", "Cos", "Tan", "Lib"}) {
+        for (auto prop: {" Mean", " Std",  
+                         " Max", " Max At Ulp", " Max At Index", " Max At Rad", " Max At First", " Max At Second", 
+                         " Min", " Min At Ulp", " Min At Index", " Min At Rad", " Min At First", " Min At Second"})
+            of << "\t" << subj << prop;
+    }
+    of << "\n";
+    of.flush();
+    for (unsigned order = 3; order < max_order; ++order) {
+        const IndexSin indexSin(order);
+        const unsigned size = 1 << (order * 2);
+        for (unsigned i = 0; i < size; ++i) {
+            const double isin = indexSin.sin(i).value();
+            const double icos = indexSin.cos(i).value();
+            const double itan = isin/icos;
+            const double rad = std::numbers::pi * i / (1 << order);
+            const double rsin = std::sin(rad);
+            const double rcos = std::cos(rad);
+            const double rtan = std::tan(rad);
+            const double rlib = rsin / rcos;
+            if ((rsin + isin) != 0) {
+                const double dulp = (rsin - isin) / ulp(rsin + isin);
+                sin.addAt(rsin - isin, {i, rad, isin, rsin, dulp});
+            }
+            if ((rcos + icos) != 0) {
+                const double dulp = (rcos - icos) / ulp(rcos + icos);
+                cos.addAt(rcos - icos, {i, rad, icos, rcos, dulp});
+            }
+            if (std::isfinite(itan) && std::isfinite(rtan)) {
+                const double dulp = (itan - rtan) / ulp(itan + rtan);
+                tan.addAt(dulp, {i, rad, itan, rtan, dulp});
+            }
+            if (std::isfinite(rlib) && std::isfinite(rtan)) {
+                const double dulp = (rlib - rtan) / ulp(rlib + rtan);
+                lib.addAt(dulp, {i, rad, rlib, rtan, dulp});
+            }
+        }
+        of << order << "\t" << size;
+        for (auto subj: {sin, cos, tan, lib}) {
+            of << "\t" << subj.mean();
+            of << "\t" << subj.std();
+            of << "\t" << subj.max();
+            Hint maxAt = subj.maxAt();
+            of << "\t" << maxAt.ulp << "\t" << maxAt.index << "\t"  << maxAt.rad << "\t"  << maxAt.first << "\t"  << maxAt.second;
+            of << "\t" << subj.min();
+            Hint minAt = subj.minAt();
+            of << "\t" << minAt.ulp << "\t" << minAt.index << "\t"  << minAt.rad << "\t"  << minAt.first << "\t"  << minAt.second;
+        }
+        of << "\n";
+        of.flush();
+    }
+}
+
+
 int main()
 {
     test_neg_rem();
@@ -142,6 +214,7 @@ int main()
     test_sin();
     test_sin_error();
     test_cos();
+    dump_error();
     std::cout << "All indexed sine tests are successful";
     return 0;
 }

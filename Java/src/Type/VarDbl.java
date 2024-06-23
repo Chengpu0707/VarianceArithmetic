@@ -304,7 +304,8 @@ public class VarDbl {
      * 
      * @return  The result of taylor expansion with this as input.
      * 
-     * @param dumpPath                      If to dump the expansion to a file
+     * @param sCoeff                    Polynominal coefficients
+     * @param dumpPath                  If to dump the expansion to a file
      * 
      * @exception InitException         If any item in sCoeff is not finite.
      * @exception DivergentException    If the result is not finite.
@@ -332,7 +333,7 @@ public class VarDbl {
 
         for (int j = 1; j < sCoeff.length; ++j) {
             final VarDbl coeff = sCoeff[j];
-            if (coeff == null) {
+            if ((coeff == null)) {
                 throw new IllegalArgumentException(String.format("null coefficient at index %d/%d is too large", 
                         j, sCoeff.length));
             }
@@ -469,6 +470,7 @@ public class VarDbl {
      * @see     The paper for Variance Arithmetic on Taylor expansion convergence.
      * 
      * @return  The result of taylor expansion with this as input.
+     *          If the input is precise, the uncertainty is the floating-point uncertainty of the result.
      * 
      * @param name          The name of the Taylor expansion, for exception logging.
      * @param s1dTaylor     The Taylor expansion coefficent, with f(x) as s1dTaylor[0]. It should already contains /n!.
@@ -486,6 +488,8 @@ public class VarDbl {
     VarDbl taylor(final String name, final VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec,
             final String dumpPath, boolean enableStabilityTruncation) 
             throws InitException, DivergentException, NotReliableException, NotMonotonicException, NotStableException, IOException {
+        if (variance() == 0)
+            return new VarDbl(s1dTaylor[0]);
         FileWriter fw = (dumpPath == null)? null : new FileWriter(dumpPath);
         if (fw != null) {
             fw.write("name\tvalue\tuncertainty\tvariance\tinPrec\toutPrec\tenableStabilityTruncation\tBinding\tMaxOrder\n");
@@ -595,8 +599,7 @@ public class VarDbl {
                      value.value(), value.variance(), variance.value(), variance.variance()));
             fw.close();
         }
-        final double res = variance.value() + value.variance();
-        return (res == 0)? new VarDbl(value.value()) : new VarDbl(value.value(), res, true);
+       return new VarDbl(value.value(), variance.value() + value.variance(), true);
     }
     
     VarDbl taylor(final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec) 

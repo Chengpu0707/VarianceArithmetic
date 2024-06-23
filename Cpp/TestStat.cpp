@@ -1,74 +1,143 @@
 #include "Stat.h"
 #include "Test.h"
 
-#include <iostream>
-
 using namespace var_dbl;
 
 void testStat()
 {
-    std::vector sData{1,3,2};
-    Stat stat = calcStat(sData.begin(), sData.end());
-    test::assertEqual(stat.count, 3);
-    test::assertEqual(stat.min, 1);
-    test::assertEqual(stat.max, 3);
-    test::assertEqual(stat.mean, 2);
-    test::assertEqual(stat.stddev, 1);
+    const std::vector<int> sSample{1, 2, 3};
+    Stat<int> stat1(sSample.begin(), sSample.end());
+    test::assertEqual(3, stat1.count());
+    test::assertEqual(1, stat1.min());
+    test::assertEqual(3, stat1.max());
+    test::assertAlmostEqual(2, stat1.mean());
+    test::assertAlmostEqual(1, stat1.std());
 
-    sData.pop_back();
-    stat = calcStat(sData.begin(), sData.end());
-    test::assertEqual(stat.count, 2);
-    test::assertEqual(stat.min, 1);
-    test::assertEqual(stat.max, 3);
-    test::assertEqual(stat.mean, 2);
-    test::assertEqual(stat.stddev, std::sqrt(2));
+    Stat<int> stat2{1, 2, 3};
+    test::assertEqual(3, stat2.count());
+    test::assertEqual(1, stat2.min());
+    test::assertEqual(3, stat2.max());
+    test::assertAlmostEqual(2, stat2.mean());
+    test::assertAlmostEqual(1, stat2.std());
 
-    sData.pop_back();
-    stat = calcStat(sData.begin(), sData.end());
-    test::assertEqual(stat.count, 1);
-    test::assertEqual(stat.min, 1);
-    test::assertEqual(stat.max, 1);
-    test::assertEqual(stat.mean, 1);
-    test::assertEqual(stat.stddev, 0);
+    Stat<double> stat3;
+    test::assertEqual(0, stat3.count());
+    test::assertTrue(stat3.min() > stat3.max());
+    test::assertFalse(std::isfinite(stat3.mean()));
+    test::assertFalse(std::isfinite(stat3.std()));
 
-    sData.pop_back();
-    stat = calcStat(sData.begin(), sData.end());
-    test::assertEqual(stat.min, std::numeric_limits<double>::max());
-    test::assertEqual(stat.max, -std::numeric_limits<double>::max());
-    test::assertEqual(stat.count, 0);
-    test::assertEqual(stat.mean, 0);
-    test::assertEqual(stat.stddev, 0);
+    test::assertEqual(1, stat3.addAt(1, 0));
+    test::assertEqual(1, stat3.count());
+    test::assertEqual(1, stat3.min());
+    test::assertEqual(1, stat3.max());
+    test::assertEqual(0, stat3.minAt());
+    test::assertEqual(0, stat3.maxAt());
+    test::assertAlmostEqual(1, stat3.mean());
+    test::assertAlmostEqual(0, stat3.std());
+
+    test::assertEqual(2, stat3.add(3));
+    test::assertEqual(2, stat3.count());
+    test::assertEqual(1, stat3.min());
+    test::assertEqual(3, stat3.max());
+    test::assertEqual(0, stat3.minAt());
+    test::assertEqual(0, stat3.maxAt());
+    test::assertAlmostEqual(2, stat3.mean());
+    test::assertAlmostEqual(std::sqrt(2), stat3.std(), 1e-16);
+
+    test::assertEqual(3, stat3.addAt(2, 1));
+    test::assertEqual(3, stat3.count());
+    test::assertEqual(1, stat3.min());
+    test::assertEqual(3, stat3.max());
+    test::assertEqual(0, stat3.minAt());
+    test::assertEqual(0, stat3.maxAt());
+    test::assertAlmostEqual(2, stat3.mean());
+    test::assertAlmostEqual(1, stat3.std());
+
+    test::assertEqual(6, stat3.add({1,2,3}));
+    test::assertEqual(6, stat3.count());
+    test::assertEqual(1, stat3.min());
+    test::assertEqual(3, stat3.max());
+    test::assertEqual(0, stat3.minAt());
+    test::assertEqual(0, stat3.maxAt());
+    test::assertAlmostEqual(2, stat3.mean());
+    test::assertAlmostEqual(std::sqrt(0.8), stat3.std(), 3e-17);
 }
 
-void testHisto()
+
+void testHistogram()
 {
-    float RANGE = 1.5;
-    unsigned DIVIDES = 2;
-    std::vector<int> sData;
-    for (int i = -10; i <= 10; ++i) 
-        sData.push_back(i);
-    Histo histo;
-    test::assertTrue(calcHisto(histo, sData.begin(), sData.end(), RANGE, DIVIDES));
-    test::assertEqual(histo.stat.count, 21);
-    test::assertEqual(histo.stat.min, -10);
-    test::assertEqual(histo.stat.max, 10);
-    test::assertEqual(histo.stat.mean, 0);
-    test::assertEqual(histo.stat.stddev, 10/std::sqrt(3)*1.0747092630102337);
-    test::assertEqual(histo.sHisto.size(), 6);
-    test::assertEqual(histo.less, 1);
-    test::assertEqual(histo.more, 1);
-    double sCenter[] = {-1.25f, -0.75f, -0.25f, 0.25f, 0.75f, 1.25f};
-    std::vector<float> sHistoCenter = calcHistoCenters(RANGE, DIVIDES);
-    test::assertEqual(sHistoCenter.size(), 6);
-    for (int i = -3; i < 3; ++i) {
-        test::assertEqual(sHistoCenter[i + 3], sCenter[i + 3]);
-        test::assertEqual(histo.sHisto[i + 3], ((i == 0)? 4.0f : 3.0f)/19);
+    Histogram histo;
+    test::assertEqual(histo.range, 3);
+    test::assertEqual(histo.divids, 5);
+    std::vector<double> sData;
+    for (int i = -16; i <= 16; ++i) {
+        test::assertEqual(histo.add(i/5.), i + 17);
+        sData.push_back(i/5.);
+    }
+    test::assertEquals(histo.histogram(), std::vector<unsigned>(31, 1));
+    test::assertEqual(histo.lowers(), 1);
+    test::assertEqual(histo.uppers(), 1);
+
+    histo.add(sData.begin(), sData.end());
+    test::assertEquals(histo.histogram(), std::vector<unsigned>(31, 2));
+    test::assertEqual(histo.lowers(), 2);
+    test::assertEqual(histo.uppers(), 2);
+
+    test::assertAlmostEqual(histo.mean(), 0);
+    test::assertAlmostEqual(histo.std(), 16./5 /std::sqrt(3), 0.075);
+        // 1.919 vs 1.849
+}
+
+
+void testWhite() 
+{
+    Random rand(0, 1);
+    Histogram histo(std::sqrt(3), 2);
+    for (unsigned i = 1; i <= 1000; ++i)
+        test::assertEqual(histo.add(rand.white()), i);
+    test::assertEqual(histo.lowers(), 0);
+    test::assertEqual(histo.uppers(), 0);
+    test::assertAlmostEqual(histo.mean(), 0, 0.07);
+    test::assertAlmostEqual(histo.std(), 1, 0.03);
+    const std::vector<unsigned> histogram = histo.histogram();
+    test::assertEqual(histogram.size(), 7);
+    for (unsigned i = 1; i < 4; ++i)
+        test::assertAlmostEqual(histogram[i], 1000/7., 20);
+    test::assertEqual(histo.header(), "\t-1.5\t-1\t-0.5\t0\t0.5\t1\t1.5");
+    std::istringstream iss(histo.formatted());
+    double pct;
+    for (unsigned i = 0; i < 7; ++i) {
+        iss >> pct;
+        test::assertAlmostEqual(pct, 1./7, 0.05);
     }
 }
 
-int main() 
+
+void testGaussian() 
+{
+    Random rand(0, 1);
+    Histogram sHist[]{Histogram(1, 10), Histogram(2, 10), Histogram(3, 10)};
+    for (unsigned i = 1; i <= 10000; ++i) {
+        const double val = rand.gauss();
+        for (int j = 0; j < 3; ++j)
+            test::assertEqual(sHist[j].add(val), i);
+    }
+    for (int j = 0; j < 3; ++j) {
+        test::assertAlmostEqual(sHist[j].mean(), 0, 0.03);
+        test::assertAlmostEqual(sHist[j].std(), 1, 0.02);
+    }
+    test::assertAlmostEqual(sHist[0].lowers() + sHist[0].uppers(), 3200, 1000);
+    test::assertAlmostEqual(sHist[1].lowers() + sHist[1].uppers(), 500, 200);
+    test::assertAlmostEqual(sHist[2].lowers() + sHist[2].uppers(), 30, 20);
+}
+
+
+int main()
 {
     testStat();
-    testHisto();
+    testHistogram();
+    testWhite();
+    testGaussian();
     std::cout << "All Stat tests are successful";
+    return 0;
 }

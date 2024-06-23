@@ -26,7 +26,7 @@ class IndexSin {
     std::vector<VarDbl> _sSin;
 
 public:
-    IndexSin(unsigned order, bool withUncertainty);
+    IndexSin(unsigned char order);
     size_t size() const { return _size; }
 
     VarDbl sin(int freq) const;
@@ -39,7 +39,7 @@ public:
 };
 
 
-inline IndexSin::IndexSin(unsigned order, bool withUncertainty) :
+inline IndexSin::IndexSin(unsigned char order) :
     _size(1 << order), _half(1 << (order - 1))
 {
     if (order < 3) {
@@ -48,16 +48,10 @@ inline IndexSin::IndexSin(unsigned order, bool withUncertainty) :
         throw std::invalid_argument(os.str());
     }
     _sSin.reserve(_size + 1);
-    if (! withUncertainty) {
-        for (int i = 0; i < _half/2; ++i)
-            _sSin.push_back(std::sin(std::numbers::pi/_size*i));
-        for (int i = 0; i <= _half/2; ++i)
-            _sSin.push_back(std::cos(std::numbers::pi*1/4 - std::numbers::pi*i/_size));
-        return;
-    }
-    _sSin.insert(_sSin.end(), _half + 1, VarDbl());
-
-
+    for (int i = 0; i < _half/2; ++i)
+        _sSin.push_back(std::sin(std::numbers::pi/_size*i));
+    for (int i = 0; i <= _half/2; ++i)
+        _sSin.push_back(std::cos(std::numbers::pi*1/4 - std::numbers::pi*i/_size));
 }
 
 inline int IndexSin::get_index(int freq) const
@@ -91,7 +85,7 @@ inline VarDbl IndexSin::cos(int freq) const
 
 inline VarDbl IndexSin::tan(int freq) const
 {
-//TODO:    return sin(freq) / cos(freq);
+    return sin(freq) / cos(freq);
 }
 
 

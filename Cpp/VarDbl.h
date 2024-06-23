@@ -7,7 +7,6 @@ It relies only on Momentum.h, which is also in the var_dbl namespace.
 */
 #include <cmath>
 #include <exception>
-#include <format>   // not supported in gcc 13.2.0
 #include <sstream>
 #include <string>
 #include <vector>
@@ -678,15 +677,10 @@ inline VarDbl VarDbl::sin() const
 
 inline VarDbl VarDbl::pow(double exp) const 
 {
-    switch ((size_t) exp)
-    {
-    case 0:
+    if (exp == 0)
         return VarDbl(1);
-    case 1:
+    else if (exp == 1)
         return *this;
-    default:
-        break;
-    }
     if ((exp > 0) && (std::ceil(exp) == std::floor(exp))) {
         std::vector<VarDbl> sCoeff(exp + 1);
         sCoeff[(size_t) exp] = 1;

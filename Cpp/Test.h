@@ -2,6 +2,7 @@
 A minimal unittest tool box
 */
 
+#include <cmath>
 #include <cassert>
 #include <iostream>
 #include <ranges>
@@ -33,11 +34,11 @@ struct AssertException : public std::runtime_error
 static void fail(std::string msg = "");
 static void assertTrue(bool expression, std::string msg = "");
 static void assertFalse(bool expression, std::string msg = "");
-static void assertAlmostEqual(double x, double y, double delta = 0, std::string msg = "");
+static void assertAlmostEqual(long double x, long double y, long double delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
 template<typename T, typename U> static void assertEqual(const T& x, const U& y, std::string msg = "");
     // generic value comparison
-template<typename T, typename U> static void assertEquals(const T& sX, const U& sY, std::string msg);
+template<typename T, typename U> static void assertEquals(const T& sX, const U& sY, std::string msg = "");
     // generic collection comparison
 
 
@@ -65,7 +66,7 @@ inline void assertFalse(bool expression, std::string msg)
 }
 
 
-inline void assertAlmostEqual(double x, double y, double delta, std::string msg)
+inline void assertAlmostEqual(long double x, long double y, long double delta, std::string msg)
 {
     if (std::isfinite(x) != std::isfinite(y)) {
         std::ostringstream os;

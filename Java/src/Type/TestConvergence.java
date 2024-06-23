@@ -39,7 +39,7 @@ public class TestConvergence {
     public void testSin() {
         try (FileWriter f = new FileWriter("./Java/Output/SinEdge.txt")) {
             f.write(TestConvergence.EDGE_HEADER);
-            for (int i = -16; i <= 16; i += 1) {
+            for (int i = -16; i <= 16; ++i) {
                 final double x = i/16. * Math.PI;
                 String except = "";
                 for (int j = 150; j >= 50; --j) {
