@@ -94,8 +94,8 @@ public:
     template<typename InputIt> unsigned add(InputIt begin, InputIt end);
 
     std::vector<unsigned> histogram() { return std::vector<unsigned>(_sHistogram); }
-    std::string header();
-    std::string formatted(bool normalized = true);
+    std::string header() const;
+    std::string formatted(bool normalized = true) const;
 };
 
 
@@ -243,7 +243,7 @@ template<typename InputIt> inline unsigned Histogram::add(InputIt begin, InputIt
 }
 
 
-inline std::string Histogram::header()
+inline std::string Histogram::header() const
 {
     std::ostringstream oss;
     for (double i = -(int) _center; i <= (int) _center; ++i)
@@ -252,7 +252,7 @@ inline std::string Histogram::header()
 }
 
 
-inline std::string Histogram::formatted(bool normalized)
+inline std::string Histogram::formatted(bool normalized) const
 {
     const double cnt = count() - lowers() - uppers();
     std::ostringstream oss;

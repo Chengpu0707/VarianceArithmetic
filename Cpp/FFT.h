@@ -20,8 +20,8 @@ public:
         IndexedSin,
         LibrarySin
     };
-    constexpr static const std::array<SinSource, 2> sSinSource{IndexedSin, LibrarySin};
-
+    constexpr static const std::array<std::string, 2> sSinSource{"IndexedSin", "LibrarySin"};
+    constexpr static const std::string sinSourceName(SinSource sinSouce) { return sSinSource[static_cast<size_t>(sinSouce)]; }
 
     constexpr static unsigned char MIN_ORDER = 2;
     constexpr static unsigned char MAX_ORDER = 20;

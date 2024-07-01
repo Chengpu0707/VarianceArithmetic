@@ -101,7 +101,7 @@ class Taylor:
         else:
             self._variance_threshold = uncertainty_precision_threshold * uncertainty_precision_threshold
 
-    def taylor1d(self, input:varDbl.VarDbl, name:str, s1dTaylor:list[typing.Union[float, varDbl.VarDbl]], 
+    def taylor1d(self, input:typing.Union[float, varDbl.VarDbl], name:str, s1dTaylor:list[typing.Union[float, varDbl.VarDbl]], 
                  inPrec:bool, outPrec:bool,
                  dumpPath=None, enableStabilityTruncation=True):
         '''
@@ -124,6 +124,8 @@ class Taylor:
         @exceptopm NotMonotonicException If the result variance does not decrease monotonically. 
         @exceptopm NotStableException    If after maximal order expansion, the expansion is still not stable.       
         '''
+        if (type(input) != varDbl.VarDbl) or (not input.variance()):
+            return varDbl.VarDbl(s1dTaylor[0])
         fw = None
         if dumpPath:
             fw = open(dumpPath, "w")
@@ -208,8 +210,7 @@ class Taylor:
             fw.write("Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n")
             fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
             fw.close()
-        var = variance.value() + value.variance()
-        return varDbl.VarDbl(value.value(), var, True) if var else varDbl.VarDbl(value.value())
+        return varDbl.VarDbl(value.value(), variance.value() + value.variance(), True) 
     
 
     def polynominal(self, input:varDbl.VarDbl, sCoeff:tuple[typing.Union[float, varDbl.VarDbl]],
