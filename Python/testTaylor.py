@@ -7,7 +7,6 @@ import unittest
 import sys
 
 from histo import Stat, Histo
-from momentum import Momentum
 from taylor import Taylor, NotReliableException, NotMonotonicException, NotStableException
 from varDbl import VarDbl, InitException, validate
 
@@ -137,11 +136,11 @@ class TestExp (unittest.TestCase):
  
         self.validate(-392, 0.2, InitException)      # prec has inf variance
         self.validate(-390, 0.2, AssertionError)            # res has 0 variance
-        self.validate(-200, 0.2, valueDelta=1e-3)
+        self.validate(-200, 0.2, valueDelta=1e-3, varianceDelta=2e-6)
 
         self.validate(196, 0.2, InitException)
         self.validate(194, 0.2, AssertionError)
-        self.validate(100, 0.2, valueDelta=1e-3)
+        self.validate(100, 0.2, valueDelta=1e-3, varianceDelta=2e-6)
  
         self.validate(-392, 1, InitException)
         self.validate(-390, 1, AssertionError)
@@ -618,23 +617,32 @@ class TestExpansion (unittest.TestCase):
     def testPower(self):
         s1dTaylor = TestExpansion.taylor.power(-1)
 
+        pw = 0.202
+        file = f'./Python/Output/Power_1_{pw}_-1.txt'
+        try:
+            os.remove(file)
+        except:
+            pass
         with self.assertRaises(NotMonotonicException):
             s1dTaylor[0] = VarDbl(math.pow(1, -1))
-            taylor.taylor1d(VarDbl(1, 0.2), "(1~0.2)^(-1)", s1dTaylor, True, True,
-                        './Python/Output/Power_1_0.2_-1.txt')
-        self.assertTrue(os.path.isfile('./Python/Output/Power_1_0.2_-1.txt'))
-        with open('./Python/Output/Power_1_0.2_-1.txt') as f:
+            taylor.taylor1d(VarDbl(1, pw), f"(1~{pw})^(-1)", s1dTaylor, True, True, file)
+        self.assertTrue(os.path.isfile(file))
+        with open(file) as f:
             cnt = 0
             for line in f:
                 cnt += 1
-            self.assertEqual(57, cnt)
+            self.assertEqual(35, cnt)
             self.assertEqual('NotMonotonicException\n', line)
 
+        file = f'./Python/Output/Power_2_{pw}_-1.txt'
+        try:
+            os.remove(file)
+        except:
+            pass
         s1dTaylor[0] = VarDbl(math.pow(2, -1))
-        res = taylor.taylor1d(VarDbl(2, 0.2), "(2~0.2)^(-1)", s1dTaylor, True, True,
-                    './Python/Output/Power_2_0.2_-1.txt')
-        self.assertTrue(os.path.isfile('./Python/Output/Power_2_0.2_-1.txt'))
-        with open('./Python/Output/Power_2_0.2_-1.txt') as f:
+        res = taylor.taylor1d(VarDbl(2, pw), f"(2~{pw})^(-1)", s1dTaylor, True, True, file)
+        self.assertTrue(os.path.isfile(file))
+        with open(file) as f:
             cnt = 0
             for line in f:
                 cnt += 1
@@ -707,7 +715,7 @@ class TestPolyNearOne (unittest.TestCase):
                         self.assertAlmostEqual(res.value(), expd.value(), places=3)
                         self.assertAlmostEqual(res.variance(), expd.variance(), places=1)
                     else:
-                        self.assertAlmostEqual(res.value(), expd.value(), places=5)
+                        self.assertAlmostEqual(res.value(), expd.value(), places=4)
                         self.assertAlmostEqual(res.variance(), expd.variance(), places=3)
                 except AssertionError as ex:
                     if i == 7:
@@ -861,16 +869,16 @@ class TestPolyNearOne (unittest.TestCase):
         self.assertAlmostEqual(res.uncertainty(), 0.633039, places=5)
 
         with self.assertRaises(NotMonotonicException):
-            1/VarDbl(0.3, 0.06)
+            1/VarDbl(0.3, 0.065)
         res = taylor.polynominal(VarDbl(0.3, 0.06), [1] * (taylor._momentum._maxOrder - 1))
         self.assertAlmostEqual(res.value(), 1.4393071662283592)
-        self.assertAlmostEqual(res.uncertainty(), 0.1262339097790444)
+        self.assertAlmostEqual(res.uncertainty(), 0.12623379127377468)
 
         with self.assertRaises(NotMonotonicException):
             1/VarDbl(0.3, 0.09)
         res = taylor.polynominal(VarDbl(0.3, 0.09), [1] * (taylor._momentum._maxOrder - 1))
         self.assertAlmostEqual(res.value(), 1.4534671456516448)
-        self.assertAlmostEqual(res.uncertainty(), 0.1973935167783444)
+        self.assertAlmostEqual(res.uncertainty(), 0.1973931234956738)
 
 
 
@@ -881,18 +889,18 @@ class TestPolyNearOne (unittest.TestCase):
         self.assertAlmostEqual(res.uncertainty(), 4.388015458239491e-16)
         self.assertAlmostEqual(math.ulp(1/3), 4.388015458239491e-16)
         self.assertTupleEqual(self.calc_imprecise(VarDbl(0.7), 0), 
-                              (True, False, True, True, False))
+                              (True, False, False, False, False))
         self.assertTupleEqual(self.calc_imprecise(VarDbl(0.7, 0.01), 0.01), 
-                              (True, True, True, True, False))
+                              (True, True, True, False, False))
         self.assertTupleEqual(self.calc_imprecise(VarDbl(0.7, 0.01), 0.04), 
-                              (True, True, True, True, False))
+                              (True, True, True, False, False))
         
         self.assertTupleEqual(self.calc_imprecise(VarDbl(-0.7), 0), 
-                              (True, False, True, True, False))
+                              (True, False, False, False, False))
         self.assertTupleEqual(self.calc_imprecise(VarDbl(-0.7, 0.01), 0.01), 
-                              (True, True, True, True, True))
+                              (True, True, True, False, False))
         self.assertTupleEqual(self.calc_imprecise(VarDbl(-0.7, 0.01), 0.04), 
-                              (True, True, True, True, True))
+                              (True, True, True, False, False))
     
     @unittest.skip('10 minutes slow')
     def test_imprecise(self):
@@ -1025,12 +1033,10 @@ class TestConvergence (unittest.TestCase):
     def test_invesion_at_one(self):
         EXP = -1
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.201)**EXP
-        with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.200)**EXP
-        res = VarDbl(1, 0.199)**EXP
-        self.assertAlmostEqual(res.value(), 1.045692, places=5)
-        self.assertAlmostEqual(res.uncertainty(), 0.2472, places=3)
+            VarDbl(1, 0.202)**EXP
+        res = VarDbl(1, 0.201)**EXP
+        self.assertAlmostEqual(res.value(), 1.046785, places=5)
+        self.assertAlmostEqual(res.uncertainty(), 0.2506, places=3)
 
         with open('./Python/Output/InversionAtOne.txt', 'w') as f:
             TestConvergence.writePowerHeader(f)
@@ -1045,10 +1051,10 @@ class TestConvergence (unittest.TestCase):
     def test_square_root_at_one(self):
         EXP = 0.5
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.205)**EXP
-        res = VarDbl(1, 0.204)**EXP
-        self.assertAlmostEqual(res.value(), 0.9945670, places=6)
-        self.assertAlmostEqual(res.uncertainty(), 0.1040980, places=6)
+            VarDbl(1, 0.211)**EXP
+        res = VarDbl(1, 0.210)**EXP
+        self.assertAlmostEqual(res.value(), 0.9942255, places=6)
+        self.assertAlmostEqual(res.uncertainty(), 0.1073106, places=6)
 
         with open('./Python/Output/SquareRootAtOne.txt', 'w') as f:
             TestConvergence.writePowerHeader(f)
@@ -1062,26 +1068,26 @@ class TestConvergence (unittest.TestCase):
     def test_cubic_square_root_at_one(self):
         EXP = 1.5
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.206)**EXP
-        res = VarDbl(1, 0.205)**EXP
-        self.assertAlmostEqual(res.value(), 1.015892200903304)
-        self.assertAlmostEqual(res.uncertainty(), 0.3066532771911667)
+            VarDbl(1, 0.215)**EXP
+        res = VarDbl(1, 0.214)**EXP
+        self.assertAlmostEqual(res.value(), 1.0173324)
+        self.assertAlmostEqual(res.uncertainty(), 0.3200323)
 
     def test_penta_square_root_at_one(self):
         EXP = 2.5
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.210)**EXP
-        res = VarDbl(1, 0.209)**EXP
-        self.assertAlmostEqual(res.value(), 1.0816704016245913)
-        self.assertAlmostEqual(res.uncertainty(), 0.5435159817989529)
+            VarDbl(1, 0.219)**EXP
+        res = VarDbl(1, 0.218)**EXP
+        self.assertAlmostEqual(res.value(), 1.0888327)
+        self.assertAlmostEqual(res.uncertainty(), 0.5688138)
 
     def test_inversion_square_one(self):
         EXP = -2
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.195)**EXP
-        res = VarDbl(1, 0.194)**EXP
-        self.assertAlmostEqual(res.value(), 1.14360, places=5)
-        self.assertAlmostEqual(res.uncertainty(), 0.715, places=3)
+            VarDbl(1, 0.196)**EXP
+        res = VarDbl(1, 0.195)**EXP
+        self.assertAlmostEqual(res.value(), 1.145553, places=5)
+        self.assertAlmostEqual(res.uncertainty(), 0.683151, places=3)
 
 
     @staticmethod

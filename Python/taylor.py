@@ -3,8 +3,8 @@ import math
 import logging
 import typing
 
-import varDbl
 import momentum
+import varDbl
 
 logger = logging.getLogger(__name__)
 
@@ -94,16 +94,13 @@ class Taylor:
 
     __slots__ = ('_variance_threshold', '_momentum')
 
-    def __init__(self, uncertainty_precision_threshold:float=None) -> None:
+    def __init__(self) -> None:
         self._momentum = momentum.Momentum()
-        if uncertainty_precision_threshold is None:
-            self._variance_threshold = 1.0 / self._momentum._binding / self._momentum._binding
-        else:
-            self._variance_threshold = uncertainty_precision_threshold * uncertainty_precision_threshold
+        self._variance_threshold = 1.0 / self._momentum.binding / self._momentum.binding
 
     def taylor1d(self, input:typing.Union[float, varDbl.VarDbl], name:str, s1dTaylor:list[typing.Union[float, varDbl.VarDbl]], 
                  inPrec:bool, outPrec:bool,
-                 dumpPath=None, enableStabilityTruncation=True):
+                 dumpPath:str=None, enableStabilityTruncation=True):
         '''
         1d Taylor expansion.
         
@@ -153,13 +150,13 @@ class Taylor:
         varn = varDbl.VarDbl(var)
         prevVariance = None
         for n in range(2, min(len(s1dTaylor), self._momentum._maxOrder*2), 2):
-            newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
+            newValue = varn * s1dTaylor[n] * self._momentum[n]
             newVariance = varDbl.VarDbl()
             for j in range(1, n):
-                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
+                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum[n]
             for j in range(2, n, 2):
-                newVariance -= varn * s1dTaylor[j] * self._momentum.factor(j) * \
-                               s1dTaylor[n - j] * self._momentum.factor(n - j)
+                newVariance -= varn * s1dTaylor[j] * self._momentum[j] * \
+                               s1dTaylor[n - j] * self._momentum[n - j]
             value += newValue
             variance += newVariance
             unc = variance.value() *(Taylor.TAU**2)
@@ -270,13 +267,13 @@ class Taylor:
         var = varDbl.VarDbl(input.variance())
         varn = varDbl.VarDbl(var)
         for n in range(2, 2*exp + 1, 2):
-            newValue = varn * s1dTaylor[n] * self._momentum.factor(n)
+            newValue = varn * s1dTaylor[n] * self._momentum[n]
             newVariance = varDbl.VarDbl()
             for j in range(1, n):
-                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum.factor(n)
+                newVariance += varn * s1dTaylor[j] * s1dTaylor[n - j] * self._momentum[n]
             for j in range(2, n, 2):
-                newVariance -= varn * s1dTaylor[j] * self._momentum.factor(j) * \
-                               s1dTaylor[n - j] * self._momentum.factor(n - j)
+                newVariance -= varn * s1dTaylor[j] * self._momentum[j] * \
+                               s1dTaylor[n - j] * self._momentum[n - j]
             value += newValue
             variance += newVariance
             if fw:

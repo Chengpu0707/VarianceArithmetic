@@ -4,6 +4,7 @@ The arithmetic is described in Latex/VarianceArithmetic
 
 The pyton implementation is under ./Python, containing both source code and test code.
 Run all unit test will generate txt files under ./Python/Output
+Specifically, analytic.py allows the solution to any analytic functions.
 
 The C++ implementation is under ./Cpp, as *.h files, with a self-made simple unit test framework using assert.
 Run all unit test will generate txt files under ./Cpp/Output

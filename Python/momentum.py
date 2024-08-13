@@ -1,56 +1,161 @@
+import datetime
+import logging
 import math
+import os
 
-import varDbl
 
 class Momentum:
     '''
     Calculate variance momentum.
 
-    Value becomes inf when MAX_ORDER=127
-    Variance becomes inf when MAX_ORDER=123
+    {BINDING_FACTOR} is default to 5 for leakage smaller than 5e-7
+    {MAX_ORDER} is default to the max 122 before variance overflows
+
+    The accurate calculation of higher-order momentum of is too slow, so approximate calculation is used.
+
+    To run manually:
+        VarianceArithemtic/Python> python -m unittest testMomentum.TestMomentum.testAnalyticCalc
+    Change to:
+        FILE_APPROX = './Output/NormalMomentum_5.txt'
+        FILE_PRECISE = './NormalMomentum_5.txt'
     '''
     BINDING_FACTOR:float = 5.0
     MAX_ORDER:int = 122
+    FILE_APPROX = './Python/Output/NormalMomentum_5.txt'
+    FILE_PRECISE = './Python/NormalMomentum_5.txt'
+#    FILE_APPROX = './Output/NormalMomentum_5.txt'
+#    FILE_PRECISE = './NormalMomentum_5.txt'
 
-    __slots__ = ('_sFactor', '_maxOrder', '_binding')
+    __slots__ = ('_sMomentum', '_maxOrder', '_binding', '_header')
 
     def __init__(self, binding:float=BINDING_FACTOR, maxOrder:int=MAX_ORDER) -> None:
-        '''
-        "binding" is default to 5 for leakage smaller than 5e-7
-        "maxOrder" is default to the max 126 before variance overflows
-
-        This call took about 1.3 second
-        '''
         self._binding = binding
         self._maxOrder = maxOrder
-        self._sFactor = []
-        for j in range(maxOrder):
-            self._sFactor.append(varDbl.VarDbl())
+        self._header = f'n\tMomentum\tUncertainty\t!!Diff\tSigma={self._binding}\n'
 
-        divid = 32
-        divid2 = divid * divid
-        limit = int(math.ceil(divid * binding))
-        for i in range(-limit, limit + 1):
-            x2 = varDbl.VarDbl(i*i / divid2, 0)
-            pdf = varDbl.VarDbl( 1.0 / math.sqrt(2*math.pi)) * varDbl.VarDbl( math.exp(- x2.value() * 0.5) / divid )
-            sq = varDbl.VarDbl( 1, 0 )
-            for j in range(maxOrder):
-                self._sFactor[j] += pdf * sq
-                sq *= x2
-            # print(i, pdf, self._sFactor[0])
+        if os.path.isfile(Momentum.FILE_APPROX):
+            self._sMomentum = self._read(Momentum.FILE_APPROX)
+        else:
+            self._sMomentum = self.approxCalc()
+        sMomentum = self._read(Momentum.FILE_PRECISE)
+        for i, mmt in enumerate(sMomentum):
+            self._sMomentum[i] = mmt
+        self._maxOrder = len(self._sMomentum)
 
-    def factor(self, n:int) -> varDbl.VarDbl:
-        '''
-        Fetch the variance momentum at "n".
+    @property
+    def binding(self):
+        return self._binding
+    
+    @property
+    def maxOrder(self):
+        return self._maxOrder
 
-        To be tested by IPyNb/Momentum.ipynb.
-        '''
-        if (n % 2) == 1:
-            return varDbl.VarDbl( 0, 0 )
-        n //= 2
-        if n > self._maxOrder:
+    def __getitem__(self, n:int) -> float:
+        if n < 0:
             return IndexError()
-        return self._sFactor[n]
+        if (n % 2) == 1:
+            return 0
+        n //= 2
+        if n >= len(self._sMomentum):
+            return IndexError()
+        return self._sMomentum[n]
+
+
+    def analyticCalc(self) -> bool:
+        try:
+            import sympy
+            try:
+                sMomentum = self._read(Momentum.FILE_PRECISE)
+            except:
+                sMomentum = []
+            x = sympy.symbols("x", is_real=True)
+            while ((n := len(sMomentum)*2) < self.maxOrder):
+                print(f'At {datetime.datetime.now()}, Calculate {n}/{self.maxOrder} momentum')
+                density = 1/sympy.sqrt(2*sympy.pi) * sympy.exp(-x**2/2) * x**n
+                mmt = sympy.integrate(density, (x, -self.binding, self.binding))
+                if not math.isfinite(mmt):
+                    print(f'The variance moment at {n} becomes inifinite')
+                    break
+                sMomentum.append(mmt.evalf())
+                if not self._write(Momentum.FILE_PRECISE, sMomentum):
+                    return False
+            return True
+        except:
+            return False
+
+    def approxCalc(self) -> list[float]:       
+        import varDbl
+        sMomentum = []
+        for j in range(self._maxOrder // 2):
+            sMomentum.append(varDbl.VarDbl())
+        divid = 64
+        norm = varDbl.VarDbl(1.0 / math.sqrt(2*math.pi) / divid)
+        limit = int(math.ceil(divid * self.binding))
+        for i in range(-limit, limit + 1):
+            x2 = i*i /divid /divid
+            pdf = norm * varDbl.VarDbl(math.exp(- x2 * 0.5))
+            sq = varDbl.VarDbl(1)
+            for j in range(self._maxOrder // 2):
+                try:
+                    sMomentum[j] += pdf * sq
+                    sq *= x2
+                except BaseException as ex:
+                    raise ValueError(f'The {j}-th moment {sMomentum[j]} becomes overlow: {ex}')
+                if sMomentum[j].uncertainty() * self.binding > sMomentum[j].value():
+                    raise ValueError(f'The {j}-th moment {sMomentum[j]} becomes unreliable')
+        if not self._write(Momentum.FILE_APPROX, sMomentum):
+            raise ValueError('Approx calc of momentum failed')
+        return [mmt.value() for mmt in sMomentum]
+
+
+    def _write(self, file: str, sMomentum: list[float]):
+        import varDbl
+        with open(file, 'w') as f:
+            f.write(self._header)
+            dbFac = 1
+            for i, mmt in enumerate(sMomentum):
+                unc = 0
+                if type(mmt) == varDbl.VarDbl:
+                    unc = mmt.uncertainty()
+                    mmt = mmt.value()
+                if i > 1:
+                    dbFac *= 2*i - 1
+                    if not (sMomentum[i - 1] < mmt < dbFac):
+                        print(f'Invalid {i}-th momentum {mmt} vs !!={dbFac} and {i - 1}-th momentum {sMomentum[i - 1]}')
+                        f.flush()
+                        return False
+                    if not math.isfinite(mmt):
+                        break
+                f.write(f'{i*2}\t{mmt}\t{unc}\t{(mmt / dbFac) - 1}\n')
+            f.flush()
+            return True
+
+    def _read(self, file: str) -> list[float]:
+        sMomentum = []
+        with open(file) as f:
+            header = next(f)
+            if header != self._header:
+                raise IOError(f'{file} has wrong header "{header}" != "{self._header}"')
+            dbFac = 1
+            for line in f:
+                sWord = line.split('\t')
+                i = int(sWord[0])
+                if i != (len(sMomentum) * 2):
+                    raise IOError(f'{file} has wrong index {i} vs {len(sMomentum)} at line "{line}"')
+                momentum = float(sWord[1])
+                match i:
+                    case 0:
+                        if not ((1 - 1e-06) < momentum < 1):
+                            raise IOError(f'{file} has wrong momentum {momentum} <= {sMomentum[-1]} at index {i} of line "{line}"')
+                    case 2:
+                        if not ((1 - 2e-05) < momentum <= sMomentum[-1]):
+                            raise IOError(f'{file} has wrong momentum {momentum} <= {sMomentum[-1]} at index {i} of line "{line}"')
+                    case _:
+                        dbFac *= i - 1
+                        if not (sMomentum[-1] < momentum < dbFac):
+                            raise IOError(f'{file} has wrong momentum {momentum} <= {sMomentum[-1]} at index {i} of line "{line}"')
+                sMomentum.append(momentum) 
+        return sMomentum
 
 
 
