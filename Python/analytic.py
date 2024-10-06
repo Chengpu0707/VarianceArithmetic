@@ -1,4 +1,5 @@
 import functools
+import math
 import operator
 import sympy
 import typing
@@ -26,6 +27,7 @@ class momentum (sympy.Function):
         TODO: not find dps argment for evalf() to convert prec
         '''
         n = self.args[0]
+        #return sympy.Integer(math.prod(range(n - 1, 0, -2)))
         return sympy.Float(momentum.mmt[int(n)])
 
 
@@ -57,23 +59,19 @@ def _taylor_matrix_series(matx: sympy.Matrix,
 
 
 def taylor_series(func: sympy.Function, 
-        sX: typing.Union[tuple[sympy.Symbol], sympy.Symbol], 
-        maxOrder:int=Momentum.MAX_ORDER,
-        indexInsteadOfTupleFor1d=True) \
+        sX: tuple[sympy.Symbol], 
+        maxOrder:int=Momentum.MAX_ORDER) \
     -> tuple[dict[typing.Union[tuple[int],int], sympy.Function]]:
     '''
     Calculate Taylor expansion of {func} to a set of variables {sX}, 
-        up to {maxOrder} of Taylor expansion
+        up to {maxOrder} of Taylor expansion.
     return the Taylor series, the bias series, and the variance series,
-        withn each indexed as the power of the variable set
-    For 1d Taylor expansion, if {indexInsteadOfTupleFor1d} is True:
-        *) {sX} can be a symbol instead of a tuple
-        *) The return keys are int rather than (int,)
+        within each indexed as the power of the variable set
     '''
     if not sX:
         raise ValueError(f'No variable {sX} for {func}')
     if not _is_iterable(sX):
-        sX = (sX,)
+        raise ValueError(f'Variable {sX} is not iterable for {func}')
     if isinstance(func, sympy.Matrix):
         return _taylor_matrix_series(func, sX, maxOrder=maxOrder) 
     sDiff = {tuple([0]*len(sX)): func}
@@ -101,72 +99,94 @@ def taylor_series(func: sympy.Function,
             key = tuple(map(operator.add, key1, key2))
             if [k for k in key if (k % 2)]:
                 continue
+            if sum(key) >= maxOrder:
+                continue
             if key not in sVar:
-                sVar[key] = sympy.Integer(0)
+                sVar[key] = 0
             sVar[key] += sDiff[key1] * sDiff[key2] * _key_momentum(key)
             if [k for k in key1 if (k % 2)] and [k for k in key2 if (k % 2)]:
                 continue
             sVar[key] -= sDiff[key1] * _key_momentum(key1) * sDiff[key2] * _key_momentum(key2)
     sDiff[tuple([0]*len(sX))] = func
 
-    if (len(sX) == 1) and indexInsteadOfTupleFor1d:
-        sDiff = {k[0]: v for k,v in sDiff.items()}
-        sBias = {k[0]: v for k,v in sBias.items()}
-        sVar = {k[0]: v for k,v in sVar.items()}
     return sDiff, sBias, sVar
 
 
 def taylor(func: sympy.Function, 
-        sXnVar: typing.Union[tuple[tuple[sympy.Symbol]], tuple[sympy.Symbol]], 
-        maxOrder:int=126,
-        checkConvergence=False,
-        checkRelaibility=False) \
+        sXnVar: tuple[tuple[sympy.Symbol]], 
+        maxOrder:int=Momentum.MAX_ORDER,
+        minTermimationOrder:int=20) \
     -> tuple[sympy.Function]:
     '''
     Calculate Taylor expansion of {func} to a set of variables {sXnVar}, 
         up to {maxOrder} of Taylor expansion
-    Each input is a tuple containing value(x) +/- variance(x).
     The input is a tupel for mutiple dimension of input.
-    The result is two value: bias and variance
-    If {checkConvergence} is true, make sure that the vairance is monotonic with order
-    If {checkRelaibility} is true, make sure that the vairance has precision less than 1/sigma
+    Each input contains:
+        symbolic x, 
+        variance(x), which could either be a symbol or a value
+        optional value(x).
+    The result is four part: sDiff, bias, variance, convergency, 
+        with convergency be either true or false or None
     '''
-    if not sX:
-        raise ValueError(f'No variable {sX} for {func}')
-    if not _is_iterable(sX):
-        sX = (sX,)
-        sVarX = (0,)
-    if len(sXnVar) == 2:
-        sX = (sXnVar[0],)
-        sVarX = (sXnVar[1],)
-    else:
+    if not sXnVar:
+        raise ValueError(f'No variable {sXnVar} for {func}')
+    if _is_iterable(sXnVar):
         sX = []
         sVarX = []
+        sValX = []
         for i, XnVar in enumerate(sXnVar):
-            if not _is_iterable(XnVar):
-                sX.append(XnVar)
-                sVarX.append(0)
-                continue
+            if not _is_iterable(sXnVar):
+                raise ValueError(f'Invalid #{i} variable {XnVar} in {sXnVar} for {func}')
             match len(XnVar):
+                case 0:
+                    sX.append(XnVar)
+                    sVarX.append(0)
+                    sValX.append(None)
                 case 1:
                     sX.append(XnVar[0])
                     sVarX.append(0)
+                    sValX.append(None)
                 case 2:
                     sX.append(XnVar[0])
                     sVarX.append(XnVar[1])
+                    sValX.append(None)
+                case 3:
+                    sX.append(XnVar[0])
+                    sVarX.append(XnVar[1])
+                    sValX.append(XnVar[2])
                 case _:
                     raise ValueError(f'Invalid # {i} input variable {sXnVar} for {func}')
-    assert len(sX) == len(sVarX)
-    sDiff, sBias, sVar = taylor_series(func, sX, maxOrder=maxOrder, indexInsteadOfTupleFor1d=False)
+    else:
+        sX = (sXnVar,)
+        sVarX = (0,)
+        sValX = (None,)
+    assert len(sX) == len(sVarX) == len(sValX)
+    sDiff, sBias, sVar = taylor_series(func, sX, maxOrder=maxOrder)
+    sSub = {x: val for x, val in zip(sX, sValX) if val is not None}
+    if sSub:
+        sDiff = {k: v.subs(sSub) for k,v in sDiff.items()}
+        sBias = {k: v.subs(sSub) for k,v in sBias.items()}
+        sVar =  {k: v.subs(sSub) for k,v in sVar.items()}
     bias = 0
     for k,v in sBias.items():
-        bias += v * functools.reduce(operator.mul, [x**pw for pw,x in zip(k, sVarX)])
-    var = 0
-    if checkConvergence or checkRelaibility:
-        raise NotImplementedError(f'checkConvergence or checkRelaibility are not implemented for Taylor expansion in general')
+        bias += v.evalf() * functools.reduce(operator.mul, [x**pw for pw,x in zip(k, sVarX)])
+    sExpand = [0]
     for k,v in sVar.items():
-        var += v * functools.reduce(operator.mul, [x**pw for pw,x in zip(k, sVarX)])
-    return sDiff, bias, var
+        idx = sum(k) //2
+        if len(sExpand) <= idx:
+            sExpand.extend([0] * (idx - len(sExpand) + 1))
+        sExpand[idx] += v.evalf() * functools.reduce(operator.mul, [x**(pw//2) for pw,x in zip(k, sVarX)])
+    convergency = True
+    if (minTermimationOrder > 0) and (len(sDiff) >= Momentum.MAX_ORDER):
+        for i in range(1, minTermimationOrder //2):
+            try:
+                if bool((sExpand[-i] / sExpand[-i - 1]) > 1):
+                    convergency = False
+                    break
+            except TypeError:
+                convergency = None
+                break
+    return sDiff, bias, sum(sExpand), convergency
 
 
 

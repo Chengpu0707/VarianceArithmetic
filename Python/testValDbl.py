@@ -5,7 +5,7 @@ import unittest
 import sys
 
 from varDbl import VarDbl, InitException, InitException, validate
-from taylor import NotReliableException, NotMonotonicException
+from taylor import NotFiniteException, NotMonotonicException, NotPositiveException
 
 
 class TestInit (unittest.TestCase):
@@ -31,7 +31,6 @@ class TestInit (unittest.TestCase):
         validate(self, VarDbl(1), 1, 0)
         validate(self, VarDbl(-1), -1, 0)
 
-
     def testLargeInt(self):
         '''
         float(int) always rounds to the nearest
@@ -54,11 +53,20 @@ class TestInit (unittest.TestCase):
         validate(self, VarDbl(i), float(i), 0.25)
         self.assertEqual(-1, i - int(float(i)))
 
-
     def testInit(self):
         validate(self, VarDbl(-1, 0), -1, 0)
         validate(self, VarDbl(-1, 1), -1, 1)
         validate(self, VarDbl(-1, -1), -1, 1)
+
+        validate(self, VarDbl(-1), -1, 0)
+        validate(self, VarDbl(0.1), 0.1, VarDbl.ulp(0.1))
+        value = math.sqrt(2)
+        validate(self, VarDbl(value), value, VarDbl.ulp(value))
+        value = math.sqrt(sys.float_info.max)
+        validate(self, VarDbl(value), value, VarDbl.ulp(value))
+        with self.assertRaises(InitException):
+            VarDbl(sys.float_info.max)
+
 
     def testValueException(self):
         with self.assertRaises(InitException):
@@ -81,6 +89,15 @@ class TestInit (unittest.TestCase):
         minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
         validate(self, VarDbl(0, minU), 0, minU) 
         validate(self, VarDbl(0, minU*0.5), 0, 0) 
+
+    def testStr(self):
+        validate(self, VarDbl('-1', '0'), -1, 0)
+        validate(self, VarDbl('-1', '1'), -1, 1)
+        validate(self, VarDbl('-1', '-1'), -1, 1)
+        with self.assertRaises(ValueError):
+            VarDbl('-1', 'x')
+        with self.assertRaises(ValueError):
+            VarDbl('x', '1')
 
 
 class TestRepresentation (unittest.TestCase):
@@ -310,18 +327,14 @@ class TestPower (unittest.TestCase):
                 self.assertAlmostEqual(res.uncertainty(), math.sqrt(2)*(dx**2), delta=DELTA_UNCERTAINTY*4)
             except AssertionError as ex:
                 raise ex        
-        try:
+        with self.assertRaises(ZeroDivisionError):
             res = VarDbl(0, 1/8) ** (2 - 1e-9)
-        except ZeroDivisionError:
-            pass
 
         res = VarDbl(-1, 1/8) ** 2
         self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(4 + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
-        try:
+        with self.assertRaises(ValueError):
             res = VarDbl(-1, 1/8) ** (2 - 1e-9)
-        except ValueError:
-            pass
 
         res = VarDbl(1, 1/8) ** 2
         self.assertAlmostEqual(res.value(), 1 + 1/(8**2), delta=DELTA_VALUE)
@@ -343,15 +356,17 @@ class TestPower (unittest.TestCase):
         self.assertAlmostEqual(res.value(), (2**2) + 1/(8**2), delta=DELTA_VALUE)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(2**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4*2)
 
-        res = VarDbl(0.5, 1/8) ** 2
-        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
-        res = VarDbl(0.5, 1/8) ** (2 - 1e-9)
-        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
-        res = VarDbl(0.5, 1/8) ** (2 + 1e-9)
-        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(8**2), delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(8**2))/8, delta=DELTA_UNCERTAINTY*4)
+        with self.assertRaises(NotPositiveException):
+            VarDbl(0.5, 1/8) ** (2 - 1e-9)
+        res = VarDbl(0.5, 1/16) ** 2
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(16**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(16**2))/16, delta=DELTA_UNCERTAINTY*4)
+        res = VarDbl(0.5, 1/16) ** (2 - 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(16**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(16**2))/16, delta=DELTA_UNCERTAINTY*4)
+        res = VarDbl(0.5, 1/16) ** (2 + 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**2) + 1/(16**2), delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(4*(0.5**2) + 2/(16**2))/16, delta=DELTA_UNCERTAINTY*4)
 
     def test_3(self):
         DELTA_VALUE = 1e-6
@@ -360,10 +375,8 @@ class TestPower (unittest.TestCase):
         res = VarDbl(0, 1/8) ** 3
         self.assertAlmostEqual(res.value(), 0)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(15)/8**3, delta=3e-6)
-        try:
-            res = VarDbl(0, 1/8) ** (2 - 1e-9)
-        except ZeroDivisionError:
-            pass
+        with self.assertRaises(ZeroDivisionError):
+            res = VarDbl(0, 1/8) ** (3 - 1e-9)
 
         res = VarDbl(-1, 1/8) ** 3
         self.assertAlmostEqual(res.value(), -1 - 3/8**2, delta=DELTA_VALUE)
@@ -377,10 +390,8 @@ class TestPower (unittest.TestCase):
         res = VarDbl(1, 1/8) ** (3 + 1e-9)
         self.assertAlmostEqual(res.value(), 1 + 3/8**2, delta=DELTA_VALUE)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(9 + 36/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
-        try:
+        with self.assertRaises(ValueError):
             res = VarDbl(-1, 1/8) ** (3 - 1e-9)
-        except ValueError:
-            pass
 
         res = VarDbl(-2, 1/8) ** 3
         self.assertAlmostEqual(res.value(), (-2**3) - 3*2/8**2, delta=DELTA_VALUE*2)
@@ -395,18 +406,20 @@ class TestPower (unittest.TestCase):
         self.assertAlmostEqual(res.value(), (2**3) + 3*2/8**2, delta=DELTA_VALUE*2)
         self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(2**4) + 36*(2**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY*4)
 
-        res = VarDbl(-0.5, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), (-0.5**3) - 3*0.5/8**2, delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
-        res = VarDbl(0.5, 1/8) ** 3
-        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
-        res = VarDbl(0.5, 1/8) ** (3 - 1e-9)
-        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
-        res = VarDbl(0.5, 1/8) ** (3 + 1e-9)
-        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/8**2, delta=DELTA_VALUE)
-        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/8**2 + 15/8**4)/8, delta=DELTA_UNCERTAINTY)
+        with self.assertRaises(NotMonotonicException):
+            VarDbl(0.5, 1/8) ** (3 - 1e-9)
+        res = VarDbl(-0.5, 1/16) ** 3
+        self.assertAlmostEqual(res.value(), (-0.5**3) - 3*0.5/16**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/16**2 + 15/16**4)/16, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/16) ** 3
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/16**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/16**2 + 15/16**4)/16, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/16) ** (3 - 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/16**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/16**2 + 15/16**4)/16, delta=DELTA_UNCERTAINTY)
+        res = VarDbl(0.5, 1/16) ** (3 + 1e-9)
+        self.assertAlmostEqual(res.value(), (0.5**3) + 3*0.5/16**2, delta=DELTA_VALUE)
+        self.assertAlmostEqual(res.uncertainty(), math.sqrt(9*(0.5**4) + 36*(0.5**2)/16**2 + 15/16**4)/16, delta=DELTA_UNCERTAINTY)
 
 
 
@@ -491,32 +504,15 @@ class TestDivideBy (unittest.TestCase):
         validate(self, 0.5 / VarDbl(1, 1e-3), 0.5, 0.0005, deltaValue=5e-7, deltaUncertainty=4.0e-9)
 
     def testVarDblByVarDblZero(self):
-        try:
+        with self.assertRaises(ValueError):
             VarDbl(0) / VarDbl(0)
-            self.fail()
-        except ValueError:
-            pass
-        except Exception as ex:
-            self.fail(ex)
 
-        try:
+        with self.assertRaises(ValueError):
             VarDbl(0) / VarDbl(0, 1)
-            self.fail()
-        except ValueError:
-            pass
-        except Exception as ex:
-            self.fail(ex)
 
-        try:
+        with self.assertRaises(NotFiniteException):
             VarDbl(0) / VarDbl(0.1, 1)
-            self.fail()
-        except NotReliableException:
-            pass
-        except NotMonotonicException:
-            pass
-        except Exception as ex:
-            self.fail(ex)
-
+ 
     def testVarDblByVarDblTwo(self):
         validate(self, VarDbl(0) / VarDbl(2), 0, 0)
         validate(self, VarDbl(1) / VarDbl(2), 0.5, 0)

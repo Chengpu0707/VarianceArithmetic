@@ -1,9 +1,7 @@
 import math
 import unittest
 
-from fft import FFTBase, FFTIndexSin, FFTLibSin
-from fft import FFTTest, FFTSinSource, SignalType, NoiseType, TestType
-from varDbl import VarDbl
+from fft import FFTBase, FFTIndexSin, FFTLibSin, FFTTest
 
 class TestFFTBase (unittest.TestCase):
 
@@ -148,60 +146,10 @@ class TestFFTLibSin (unittest.TestCase):
             self.assertAlmostEqual(datum, res, delta=math.ulp(2))
 
 
-class CompareSin (unittest.TestCase):
-
-    @unittest.skip('Too slow')
-    def testSquare(self):
-        idx = FFTIndexSin()
-        lib = FFTLibSin()
-        MAX_ORDER = 12
-        with open(f'./Python/Output/SinError_{MAX_ORDER - 1}.txt', 'w') as f:
-            f.write('Freq\tIndexSin Error\tIndexSin Uncertainty\tLibSin Error\tLibSin Uncertainty\n')
-            for i in range(1, 1 << (MAX_ORDER - 1)):
-                try:
-                    idxErr = VarDbl(idx.sin(i, MAX_ORDER))**2 + VarDbl(idx.cos(i, MAX_ORDER))**2 - 1
-                    libErr = VarDbl(lib.sin(i, MAX_ORDER))**2 + VarDbl(lib.cos(i, MAX_ORDER))**2 - 1
-                    f.write(f'{i}\t{idxErr.value()}\t{idxErr.uncertainty()}\t{libErr.value()}\t{libErr.uncertainty()}\n')
-                except BaseException as ex:
-                    raise ex
-
-
-class TestCleanLib (unittest.TestCase):
-
-    @unittest.skip('Too slow')
-    def testLinear(self):
-        '''
-        Demonstrate the extent of lib error beyond least significant value
-        '''
-        ORDER = 18
-        DEVS = 2000
-        with open(f'./Python/Output/FFT_Lib_Linear_{ORDER}.txt', 'w') as fw:
-            fw.write(FFTTest.title(1, DEVS))
-            test = FFTTest(FFTSinSource.LibSin, NoiseType.Gaussian, 0,
-                           SignalType.Linear, ORDER, 0,
-                           divids=1, devs=DEVS)
-            test.dumpMeasure(fw, FFTSinSource.LibSin, NoiseType.Gaussian, 0,
-                             SignalType.Linear, ORDER, 0, test.measure)
-
-
-
 class TestDumpFFT (unittest.TestCase):
-
-    @unittest.skip('24 seconds slow')
-    def testSpectra(self):
-        '''
-        Demonstrate the reverse has not enough calculation for large enough uncertainty
-        '''
-        with open(f'./Python/Output/FFT_4_8_Spec.txt', 'w') as fw:
-            FFTTest.dumpSpectrumHeader(fw)
-            FFTTest.dumpSpectra(fw, range(4,8))
 
     def testOrder_4(self):
         FFTTest.dumpOrders(sOrder=[4])
-
-    @unittest.skip('Too slow')
-    def testOrderAll(self):
-        FFTTest.dumpOrders()
 
 if __name__ == '__main__':
     unittest.main()

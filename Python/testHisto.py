@@ -71,6 +71,13 @@ class TestHisto (unittest.TestCase):
         self.assertEqual('"Stat: 9, 0.0+/-1.2909944487358056"', str(histo))
 
 
+class TestTriangularWave (unittest.TestCase):
+    def test(self):
+        sWave = list(range(15)) + list(range(15, -1, -1))
+        return
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

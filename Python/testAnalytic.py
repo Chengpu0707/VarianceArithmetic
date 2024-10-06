@@ -8,7 +8,7 @@ class TestSeries (unittest.TestCase):
     The series is Maclaurin series
     '''
     def testSin(self):
-        x = sympy.symbols('x')
+        x = sympy.symbols('x', is_real=True)
         sin = sympy.sin(x)
         self.assertTupleEqual(sin.args, (x,))
         e = sin.series(x, 0, 10).removeO()
@@ -40,80 +40,128 @@ class TestSeries (unittest.TestCase):
         })
 
 
+class TestCompare (unittest.TestCase):
+
+    def testNameOrder(self):
+        '''
+        x < y by default
+        '''
+        x, y = sympy.symbols('x y', real=True)
+        self.assertEqual(x.compare(y), -1)
+        self.assertEqual(y.compare(x), 1)
+        with self.assertRaises(TypeError):
+            bool(x < y)
+
+    def testAssumption(self):
+        '''
+        Assumption can only be True
+        '''
+        x = sympy.Symbol('x', positive=True)
+        self.assertTrue(0 < x)
+        y = sympy.Symbol('y', negative=True)
+        self.assertTrue(y < 0)
+        self.assertTrue(y < x)
+        self.assertTrue(y <= x)
+        z = sympy.Symbol('z', positive=False)
+        with self.assertRaises(TypeError):
+            bool(z <= 0)
+        z = sympy.Symbol('z', nonpositive=True)
+        self.assertTrue(z <= 0)
+
+    def testInequality(self):
+        x = sympy.symbols('x', real=True)
+        self.assertEqual(sympy.Pow(x, 2).compare(x), 1)
+        self.assertEqual(x.compare(sympy.Pow(x, 2)), -1)
+
+
 class TestTaylor1d (unittest.TestCase):
+    MAX_ORDER = 9
 
     def _testBiasVar(self, sDiff, sBias, sVar):
-        self.assertEqual(sympy.simplify(sBias[2] - sDiff[2] *analytic.momentum(2)), 0)
-        self.assertEqual(sympy.simplify(sBias[4] - sDiff[4] *analytic.momentum(4)), 0)
-        self.assertEqual(sympy.simplify(sBias[6] - sDiff[6] *analytic.momentum(6)), 0)
+        self.assertEqual(sympy.simplify(sBias[(2,)] - sDiff[(2,)] *analytic.momentum(2)), 0)
+        self.assertEqual(sympy.simplify(sBias[(4,)] - sDiff[(4,)] *analytic.momentum(4)), 0)
+        self.assertEqual(sympy.simplify(sBias[(6,)] - sDiff[(6,)] *analytic.momentum(6)), 0)
+        self.assertEqual(sympy.simplify(sBias[(8,)] - sDiff[(8,)] *analytic.momentum(8)), 0)
 
-        eq = sDiff[1]**2 *analytic.momentum(2)
-        self.assertEqual(sympy.simplify(sVar[2] - eq), 0)
-        eq = (sDiff[2]**2 + sDiff[1]*sDiff[3]*2) *analytic.momentum(4) - sBias[2]**2
-        self.assertEqual(sympy.simplify(sVar[4] - eq), 0)
-        eq = (sDiff[3]**2 + sDiff[2]*sDiff[4]*2 + sDiff[1]*sDiff[5]*2) *analytic.momentum(6) \
-             - sBias[2]*sBias[4]*2
-        self.assertEqual(sympy.simplify(sVar[6] - eq), 0)
+        eq = sDiff[(1,)]**2 *analytic.momentum(2)
+        self.assertEqual(sympy.simplify(sVar[(2,)] - eq), 0)
+        eq = (sDiff[(2,)]**2 + sDiff[(1,)]*sDiff[(3,)]*2) *analytic.momentum(4) - sBias[(2,)]**2
+        self.assertEqual(sympy.simplify(sVar[(4,)] - eq), 0)
+        eq = (sDiff[(3,)]**2 + sDiff[(2,)]*sDiff[(4,)]*2 + sDiff[(1,)]*sDiff[(5,)]*2) *analytic.momentum(6) \
+             - sBias[(2,)]*sBias[(4,)]*2
+        self.assertEqual(sympy.simplify(sVar[(6,)] - eq), 0)
+        eq = (sDiff[(4,)]**2 + sDiff[(3,)]*sDiff[(5,)]*2 + sDiff[(2,)]*sDiff[(6,)]*2 + sDiff[(1,)]*sDiff[(7,)]*2) *analytic.momentum(8) \
+             - sBias[(2,)]*sBias[(6,)]*2 - sBias[(4,)]**2
+        self.assertEqual(sympy.simplify(sVar[(8,)] - eq), 0)
 
 
     def testExp(self):
-        x = sympy.symbols('x')
+        x = sympy.symbols('x', is_real=True)
         exp = sympy.exp(x)
-        sDiff, sBias, sVar = analytic.taylor_series(exp, x, maxOrder=7)
+        sDiff, sBias, sVar = analytic.taylor_series(exp, (x,), maxOrder=TestTaylor1d.MAX_ORDER)
 
-        self.assertEqual(sDiff[0], exp)
-        self.assertEqual(sDiff[1], exp)
-        self.assertEqual(sDiff[2], exp/2)
-        self.assertEqual(sDiff[3], exp/6)
-        self.assertEqual(sDiff[4], exp/24)
-        self.assertEqual(sDiff[5], exp/120)
-        self.assertEqual(sDiff[6], exp/720)
+        self.assertEqual(sDiff[(0,)], exp)
+        self.assertEqual(sDiff[(1,)], exp)
+        self.assertEqual(sDiff[(2,)], exp/2)
+        self.assertEqual(sDiff[(3,)], exp/6)
+        self.assertEqual(sDiff[(4,)], exp/24)
+        self.assertEqual(sDiff[(5,)], exp/120)
+        self.assertEqual(sDiff[(6,)], exp/720)
+        self.assertEqual(sDiff[(7,)], exp/5040)
+        self.assertEqual(sDiff[(8,)], exp/40320)
 
         self._testBiasVar(sDiff, sBias, sVar)
 
     def testSin(self):
-        x = sympy.symbols('x')
+        x = sympy.symbols('x', is_real=True)
         sin = sympy.sin(x)
         cos = sympy.cos(x)
-        sDiff, sBias, sVar = analytic.taylor_series(sin, x, maxOrder=7)
+        sDiff, sBias, sVar = analytic.taylor_series(sin, (x,), maxOrder=TestTaylor1d.MAX_ORDER)
 
-        self.assertEqual(sDiff[0], sin)
-        self.assertEqual(sDiff[1], +cos)
-        self.assertEqual(sDiff[2], -sin/2)
-        self.assertEqual(sDiff[3], -cos/6)
-        self.assertEqual(sDiff[4], +sin/24)
-        self.assertEqual(sDiff[5], +cos/120)
-        self.assertEqual(sDiff[6], -sin/720)
+        self.assertEqual(sDiff[(0,)], sin)
+        self.assertEqual(sDiff[(1,)], +cos)
+        self.assertEqual(sDiff[(2,)], -sin/2)
+        self.assertEqual(sDiff[(3,)], -cos/6)
+        self.assertEqual(sDiff[(4,)], +sin/24)
+        self.assertEqual(sDiff[(5,)], +cos/120)
+        self.assertEqual(sDiff[(6,)], -sin/720)
+        self.assertEqual(sDiff[(7,)], -cos/5040)
+        self.assertEqual(sDiff[(8,)], +sin/40320)
 
         self._testBiasVar(sDiff, sBias, sVar)
 
     def testLog(self):
-        x = sympy.symbols('x')
+        x = sympy.symbols('x', is_positive=True)
         log = sympy.log(x)
-        sDiff, sBias, sVar = analytic.taylor_series(log, x, maxOrder=7)
+        sDiff, sBias, sVar = analytic.taylor_series(log, (x,), maxOrder=TestTaylor1d.MAX_ORDER)
 
-        self.assertEqual(sDiff[0], log)
-        self.assertEqual(sDiff[1], +1/x)
-        self.assertEqual(sDiff[2], -sympy.Rational(1, 2) /x**2)
-        self.assertEqual(sDiff[3], +sympy.Rational(1, 3) /x**3)
-        self.assertEqual(sDiff[4], -sympy.Rational(1, 4) /x**4)
-        self.assertEqual(sDiff[5], +sympy.Rational(1, 5) /x**5)
-        self.assertEqual(sDiff[6], -sympy.Rational(1, 6) /x**6)
+        self.assertEqual(sDiff[(0,)], log)
+        self.assertEqual(sDiff[(1,)], +1/x)
+        self.assertEqual(sDiff[(2,)], -sympy.Rational(1, 2) /x**2)
+        self.assertEqual(sDiff[(3,)], +sympy.Rational(1, 3) /x**3)
+        self.assertEqual(sDiff[(4,)], -sympy.Rational(1, 4) /x**4)
+        self.assertEqual(sDiff[(5,)], +sympy.Rational(1, 5) /x**5)
+        self.assertEqual(sDiff[(6,)], -sympy.Rational(1, 6) /x**6)
+        self.assertEqual(sDiff[(7,)], +sympy.Rational(1, 7) /x**7)
+        self.assertEqual(sDiff[(8,)], -sympy.Rational(1, 8) /x**8)
 
         self._testBiasVar(sDiff, sBias, sVar)
 
     def testPow(self):
-        x, c = sympy.symbols('x c')
+        x = sympy.symbols('x', is_positive=True)
+        c = sympy.symbols('c', is_real=True)
         pow = sympy.Pow(x, c)
-        sDiff, sBias, sVar = analytic.taylor_series(pow, x, maxOrder=7)
+        sDiff, sBias, sVar = analytic.taylor_series(pow, (x,), maxOrder=TestTaylor1d.MAX_ORDER)
 
-        self.assertEqual(sDiff[0], pow)
-        self.assertEqual(sympy.simplify(sDiff[1] - pow * c /x), 0)
-        self.assertEqual(sympy.simplify(sDiff[2] - pow * c*(c-1) /2 /x**2), 0)
-        self.assertEqual(sympy.simplify(sDiff[3] - pow * c*(c-1)*(c-2) /6 /x**3), 0)
-        self.assertEqual(sympy.simplify(sDiff[4] - pow * c*(c-1)*(c-2)*(c-3) /24 /x**4), 0)
-        self.assertEqual(sympy.simplify(sDiff[5] - pow * c*(c-1)*(c-2)*(c-3)*(c-4) /120 /x**5), 0)
-        self.assertEqual(sympy.simplify(sDiff[6] - pow * c*(c-1)*(c-2)*(c-3)*(c-4)*(c-5) /720 /x**6), 0)
+        self.assertEqual(sDiff[(0,)], pow)
+        self.assertEqual(sympy.simplify(sDiff[(1,)] - pow /x**1 * c), 0)
+        self.assertEqual(sympy.simplify(sDiff[(2,)] - pow /x**2 * c*(c-1) /2), 0)
+        self.assertEqual(sympy.simplify(sDiff[(3,)] - pow /x**3 * c*(c-1)*(c-2) /6), 0)
+        self.assertEqual(sympy.simplify(sDiff[(4,)] - pow /x**4 * c*(c-1)*(c-2)*(c-3) /24), 0)
+        self.assertEqual(sympy.simplify(sDiff[(5,)] - pow /x**5 * c*(c-1)*(c-2)*(c-3)*(c-4) /120), 0)
+        self.assertEqual(sympy.simplify(sDiff[(6,)] - pow /x**6 * c*(c-1)*(c-2)*(c-3)*(c-4)*(c-5) /720), 0)
+        self.assertEqual(sympy.simplify(sDiff[(7,)] - pow /x**7 * c*(c-1)*(c-2)*(c-3)*(c-4)*(c-5)*(c-6) /5040), 0)
+        self.assertEqual(sympy.simplify(sDiff[(8,)] - pow /x**8 * c*(c-1)*(c-2)*(c-3)*(c-4)*(c-5)*(c-6)*(c-7) /40320), 0)
 
         self._testBiasVar(sDiff, sBias, sVar)
 
@@ -121,7 +169,7 @@ class TestTaylor1d (unittest.TestCase):
 class TestTaylor2d (unittest.TestCase):
 
     def testAdd(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x + y
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, {(0,0): func, (1,0): 1, (0,1): 1})
@@ -129,7 +177,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertDictEqual(sVar, {(2,0): analytic.momentum(2), (0,2): analytic.momentum(2)})
 
     def testMinus(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x - y
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, {(0,0): func, (1,0): 1, (0,1): -1})
@@ -137,7 +185,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertDictEqual(sVar, {(2,0): analytic.momentum(2), (0,2): analytic.momentum(2)})
 
     def testMul(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x * y
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, {(0,0): func, (1,0): y, (0,1): x, (1,1): sympy.Integer(1)})
@@ -148,7 +196,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertEqual(sympy.simplify(sVar[(2,2)] - analytic.momentum(2)**2), 0)
 
     def testX2(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x**2
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, {(0,0): func, (1,0): x*2, (2,0): sympy.Integer(1)})
@@ -160,7 +208,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertEqual(sympy.simplify(sVar[(4,0)] - eq), 0)
 
     def testY2(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = y**2
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, {(0,0): func, (0,1): y*2, (0,2): sympy.Integer(1)})
@@ -172,7 +220,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertEqual(sympy.simplify(sVar[(0,4)] - eq), 0)
 
     def testX2Y2(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x**2 + y**2
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, { (0,0): func, 
@@ -188,7 +236,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertEqual(sympy.simplify(sVar[(2,2)]), 0)
 
     def testSum2(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x**2 + y**2 + 2*x*y
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, { (0,0): func, 
@@ -208,7 +256,7 @@ class TestTaylor2d (unittest.TestCase):
         self.assertEqual(sympy.simplify(sVar[(2,2)] - eq), 0)
 
     def testMinus2(self):
-        x, y = sympy.symbols('x y')
+        x, y = sympy.symbols('x y', is_real=True)
         func = x**2 + y**2 - 2*x*y
         sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=7)
         self.assertDictEqual(sDiff, { (0,0): func, 
@@ -230,20 +278,47 @@ class TestTaylor2d (unittest.TestCase):
     def testPower(self):
         x, y = sympy.symbols('x y', is_positive=True)
         func = x**y
-        sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=3)
+        sDiff, sBias, sVar = analytic.taylor_series(func, (x, y), maxOrder=5)
         self.assertDictEqual(sDiff, {
-            (0, 0): x**y, (1, 0): x**y *y/x, (0, 1): x**y *sympy.log(x), 
-            (2, 0): x**y *y**2/(2*x**2) - x**y *y/(2*x**2), (0, 2): x**y *sympy.log(x)**2 /2, 
-                (1, 1): x**y *y*sympy.log(x)/x + x**y /x
+            (0, 0): x**y, 
+            (1, 0): x**y *y/x, 
+            (0, 1): x**y *sympy.log(x), 
+            (2, 0): x**y *y**2/(2*x**2) - x**y *y/(2*x**2), 
+            (1, 1): x**y *y*sympy.log(x)/x + x**y /x,
+            (0, 2): x**y *sympy.log(x)**2 /2, 
+            (3, 0): x**y*y**3/(6*x**3) - x**y*y**2/(2*x**3) + x**y*y/(3*x**3), 
+            (2, 1): x**y*y**2*sympy.log(x)/(2*x**2) - x**y*y*sympy.log(x)/(2*x**2) + x**y*y/x**2 - x**y/(2*x**2), 
+            (1, 2): x**y*y*sympy.log(x)**2/(2*x) + x**y*sympy.log(x)/x, 
+            (0, 3): x**y*sympy.log(x)**3/6, 
+            (4, 0): x**y*y**4/(24*x**4) - x**y*y**3/(4*x**4) + 11*x**y*y**2/(24*x**4) - x**y*y/(4*x**4), 
+            (3, 1): x**y*y**3*sympy.log(x)/(6*x**3) - x**y*y**2*sympy.log(x)/(2*x**3) + x**y*y**2/(2*x**3) 
+                    + x**y*y*sympy.log(x)/(3*x**3) - x**y*y/x**3 + x**y/(3*x**3), 
+            (2, 2): x**y*y**2*sympy.log(x)**2/(4*x**2) - x**y*y*sympy.log(x)**2/(4*x**2) 
+                    + x**y*y*sympy.log(x)/x**2 - x**y*sympy.log(x)/(2*x**2) + x**y/(2*x**2), 
+            (1, 3): x**y*y*sympy.log(x)**3/(6*x) + x**y*sympy.log(x)**2/(2*x), 
+            (0, 4): x**y*sympy.log(x)**4/24, 
         })
         self.assertDictEqual(sBias, {
-            (2, 0): (x**y *y**2 /(2*x**2) - x**y *y/(2*x**2)) *analytic.momentum(2), (0, 2): x**y *sympy.log(x)**2 *analytic.momentum(2)/2
+            (2, 0): (x**y *y**2 /(2*x**2) - x**y *y/(2*x**2)) *analytic.momentum(2), 
+            (0, 2): x**y *sympy.log(x)**2 *analytic.momentum(2)/2, 
+            (4, 0): (x**y*y**4/(24*x**4) - x**y*y**3/(4*x**4) + 11*x**y*y**2/(24*x**4) 
+                     - x**y*y/(4*x**4))*analytic.momentum(4), 
+            (2, 2): (x**y*y**2*sympy.log(x)**2/(4*x**2) - x**y*y*sympy.log(x)**2/(4*x**2) 
+                     + x**y*y*sympy.log(x)/x**2 - x**y*sympy.log(x)/(2*x**2) + x**y/(2*x**2))*analytic.momentum(4), 
+            (0, 4): x**y*sympy.log(x)**4*analytic.momentum(4)/24
         })
         self.assertDictEqual(sVar, {
-            (2, 0): x**(2*y) *y**2 *analytic.momentum(2)/x**2, (0, 2): x**(2*y) *sympy.log(x)**2 *analytic.momentum(2), 
-            (4, 0): -(x**y*y**2/(2*x**2) - x**y*y/(2*x**2))**2*analytic.momentum(2)**2 + (x**y*y**2/(2*x**2) - x**y*y/(2*x**2))**2*analytic.momentum(4), 
-                (0, 4): -x**(2*y) *sympy.log(x)**4 *analytic.momentum(2)**2 /4 + x**(2*y)* sympy.log(x)**4 *analytic.momentum(4)/4,
-                (2, 2): (x**y *y*sympy.log(x)/x + x**y /x)**2 *analytic.momentum(2)**2 
+            (2, 0): x**(2*y) *y**2 *analytic.momentum(2)/x**2, 
+            (0, 2): x**(2*y) *sympy.log(x)**2 *analytic.momentum(2), 
+            (4, 0): -(x**y*y**2/(2*x**2) - x**y*y/(2*x**2))**2*analytic.momentum(2)**2 
+                    + (x**y*y**2/(2*x**2) - x**y*y/(2*x**2))**2*analytic.momentum(4) 
+                    + 2*x**y*y*(x**y*y**3/(6*x**3) - x**y*y**2/(2*x**3) + x**y*y/(3*x**3))*analytic.momentum(4)/x, 
+            (2, 2): 2*x**y*(x**y*y**2*sympy.log(x)/(2*x**2) - x**y*y*sympy.log(x)/(2*x**2) 
+                    + x**y*y/x**2 - x**y/(2*x**2))*sympy.log(x)*analytic.momentum(2)**2 
+                    + (x**y*y*sympy.log(x)/x + x**y/x)**2*analytic.momentum(2)**2 
+                    + 2*x**y*y*(x**y*y*sympy.log(x)**2/(2*x) + x**y*sympy.log(x)/x)*analytic.momentum(2)**2/x,
+            (0, 4): -x**(2*y) *sympy.log(x)**4 *analytic.momentum(2)**2 /4 
+                    + 7* x**(2*y)* sympy.log(x)**4 *analytic.momentum(4)/12,
         })
         return
 

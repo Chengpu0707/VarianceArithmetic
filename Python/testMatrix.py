@@ -1,19 +1,15 @@
-import datetime
 from fractions import Fraction
 import itertools
 import logging
 import math
 import numpy
-import os
-import random
-import traceback
 import unittest
 
 from histo import Histo, Stat
 from matrix import ElementType, permutSign, isSquareMatrix, createIntMatrix, createHilbertMatrix, addNoise
 from matrix import linear, multiply, adjugate, adjugate_mul
 from taylor import NotReliableException, NotMonotonicException
-from varDbl import VarDbl, VarianceException
+from varDbl import VarDbl, InitException
 
 
 logger = logging.getLogger(__name__)
@@ -375,34 +371,9 @@ class TestAdjugate (unittest.TestCase):
 
         adj = Adjugate(6, randRange=(1 << 19))
         ssVarOrg = addNoise(adj.ssOrg, 0)
-        with self.assertRaises((OverflowError, VarianceException)):
+        with self.assertRaises((OverflowError, InitException)):
             self.roundtrip(adj, 0.1, ssVarOrg)
 
-
-    @unittest.skip('Ran 1 test in 261.387s')
-    def testConditionNumber(self):
-        REPEATS = 8
-        with open('./Python/Output/MatrixCondition.txt', 'w') as fc:
-            fc.write("Size\tType\tNoise\tCondition Number"
-                    "\tDeterminant Value\tDeterminant Uncertainty\tDeterminant Precision"
-                    "\n")
-            def write(ssMat, matrixType, noise):
-                cond = numpy.linalg.cond(numpy.asarray([[var.value() for var in row] for row in ssMat]))
-                det, ssAdj = adjugate(ssMat)
-                detUnc = det.uncertainty()
-                fc.write(f'{size}\t{matrixType}\t{noise}\t{cond}'
-                         f'\t{det.value()}\t{detUnc}\t{detUnc/abs(det.value())}\n')  
-                fc.flush()
-
-            for size in range(4, Adjugate.MAX_SIZE):
-                ssHilbert = createHilbertMatrix(size)
-                for noise in (0, 1e-20, 1e-18, 1e-16, 1e-14):
-                    write(addNoise(ssHilbert, noise), 'Hilbert', noise)
-                for repeat in range(REPEATS):
-                    ssMat = tuple([tuple([VarDbl(random.normalvariate()) for col in range(size)]) 
-                                for row in range(size)])
-                    write(ssMat, 'Random', 0)
- 
 
     def testHilbert(self):
         '''
@@ -607,85 +578,6 @@ class TestAdjugate (unittest.TestCase):
                     raise ex
 
 
-    @unittest.skip('Too slow')
-    def testAdjugate(self):
-        '''
-        Time to take with     
-                ELEMENT_RANGE = 1 << 9
-                MAX_SIZE = 9
-            size=4, repeat= 47, noise=0.1: 2.025937
-            size=5, repeat= 39, noise=0.1: 10.393089
-            size=6, repeat= 31, noise=0.1: 120.547377
-            size=7, repeat= 23, noise=0.1: 1386.065661
-            size=8, repeat= 15, noise=0.1: 14560.539579
-        '''
-        REPEAT_FOLD = 8
-
-        LOG_PATH = './Python/Output/AdjMatrix.log'
-        if os.path.isfile(LOG_PATH):
-            os.remove(LOG_PATH)
-        logging.basicConfig(filename=LOG_PATH, encoding='utf-8', level=logging.DEBUG,
-                            format='%(asctime)s:%(levelname)s:%(message)s')
-       
-        def statHeader(name:str) ->str:
-            return f'\t{name} ' + f'\t{name} '.join(('Deviation', 'Mean', 'Minimum', 'Maximum', 'Loss'))
-        
-        def writeStat(stat:Stat):
-            f.write(f'\t{stat.dev()}\t{stat.mean()}\t{stat.min()}\t{stat.max()}')
-
-        with open('./Python/Output/AdjMatrix.txt', 'w') as f:
-            f.write("NoiseType\tNoise\tSize\tRepeat")
-            f.write(statHeader('Adjugate Error'))
-            f.write(statHeader('Adjugate Uncertainty'))
-            f.write(statHeader('Forward Error'))
-            f.write(statHeader('Roundtrip Error'))
-            f.write(statHeader('Multiple Error'))
-            for bucket in Adjugate.sAdjHisto[(Adjugate.MAX_SIZE - 1, 0)].buckets():
-                f.write(f'\t{bucket:.1f}')
-            f.write('\n')
-
-            def write(adj, noise, repeat):
-                f.write(f'Gaussian\t{noise}\t{adj.size}\t{repeat}')
-                histo = Adjugate.sAdjHisto[(adj.size, noise)]
-                writeStat(histo.stat())
-                writeStat(Adjugate.sAdjStat[(adj.size, noise)])
-                f.write(f'\t{Adjugate.sAdjLoss[(adj.size, noise)]}')
-                writeStat(Adjugate.sFwdStat[(adj.size, noise)])
-                f.write(f'\t{Adjugate.sFwdLoss[(adj.size, noise)]}')
-                writeStat(Adjugate.sRndStat[(adj.size, noise)])
-                f.write(f'\t{Adjugate.sRndLoss[(adj.size, noise)]}')
-                writeStat(Adjugate.sMulStat[(adj.size, noise)])
-                f.write(f'\t{Adjugate.sMulLoss[(adj.size, noise)]}')
-                count = sum([c for c in histo.histogram()])
-                for c in histo.histogram():
-                        if count:
-                            f.write(f'\t{c/count}')
-                        else:
-                            f.write(f'\t{c}')
-                f.write('\n')
-                f.flush()
-
-            for size in range(4, Adjugate.MAX_SIZE):
-                logger.info(f'Start size={size}')
-                for noise in NOISES:
-                    for repeat in range((Adjugate.MAX_SIZE + 1 - size)*REPEAT_FOLD):
-                        adj = Adjugate(size)
-                        logger.info(f'Start  size={size}, noise={noise}, repeat={repeat}, detAdj={adj.detAdj}: {adj.ssOrg}')
-                        ssVarOrg = addNoise(adj.ssOrg, Adjugate.noise(noise))
-                        try:
-                            detAdj = self.roundtrip(adj, noise, ssVarOrg)
-                        except BaseException as ex:  # avoid singular
-                            logger.info(f'First failure to process size={size}, noise={noise}, repeat={repeat}: ex={ex}')
-                            try:
-                                adj = Adjugate(size)
-                                logger.info(f'Start size={size}, noise={noise}, repeat={repeat}, detAdj={adj.detAdj}: {adj.ssOrg}')
-                                ssVarOrg = addNoise(adj.ssOrg, Adjugate.noise(noise))
-                                detAdj = self.roundtrip(adj, noise, ssVarOrg)
-                            except BaseException as ex:
-                                logger.warn(f'Second failure to process size={size}, noise={noise}, repeat={repeat}: ex={ex}')
-                                raise ex
-                        logger.info(f'Finish size={size}, noise={noise}, repeat={repeat}, detAdj={detAdj}: {ssVarOrg}')
-                    write(adj, noise, repeat)
                 
 
 
