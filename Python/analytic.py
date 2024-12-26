@@ -4,14 +4,14 @@ import operator
 import sympy
 import typing
 
-from momentum import Momentum
+import momentum
 
 class momentum (sympy.Function):
     '''
-    Variance momentum for Normal distribution
+    Variance momentum for momentum.Normal distribution
     '''
     is_negative = False
-    mmt = Momentum()
+    mmt = momentum.Normal()
 
     @classmethod
     def eval(cls, n):
@@ -45,7 +45,7 @@ def _is_iterable(obj) -> bool:
 
 def _taylor_matrix_series(matx: sympy.Matrix, 
             sX: tuple[sympy.Symbol], 
-            maxOrder:int=Momentum.MAX_ORDER) \
+            maxOrder:int=momentum.Normal.MAX_ORDER) \
     -> sympy.Matrix:
     '''
     Calculate Taylor expansion of {func} to a set of variables in the matrix {sX}, 
@@ -60,7 +60,7 @@ def _taylor_matrix_series(matx: sympy.Matrix,
 
 def taylor_series(func: sympy.Function, 
         sX: tuple[sympy.Symbol], 
-        maxOrder:int=Momentum.MAX_ORDER) \
+        maxOrder:int=momentum.Normal.MAX_ORDER) \
     -> tuple[dict[typing.Union[tuple[int],int], sympy.Function]]:
     '''
     Calculate Taylor expansion of {func} to a set of variables {sX}, 
@@ -114,7 +114,7 @@ def taylor_series(func: sympy.Function,
 
 def taylor(func: sympy.Function, 
         sXnVar: tuple[tuple[sympy.Symbol]], 
-        maxOrder:int=Momentum.MAX_ORDER,
+        maxOrder:int=momentum.Normal.MAX_ORDER,
         minTermimationOrder:int=20) \
     -> tuple[sympy.Function]:
     '''
@@ -177,7 +177,7 @@ def taylor(func: sympy.Function,
             sExpand.extend([0] * (idx - len(sExpand) + 1))
         sExpand[idx] += v.evalf() * functools.reduce(operator.mul, [x**(pw//2) for pw,x in zip(k, sVarX)])
     convergency = True
-    if (minTermimationOrder > 0) and (len(sDiff) >= Momentum.MAX_ORDER):
+    if (minTermimationOrder > 0) and (len(sDiff) >= momentum.Normal.MAX_ORDER):
         for i in range(1, minTermimationOrder //2):
             try:
                 if bool((sExpand[-i] / sExpand[-i - 1]) > 1):

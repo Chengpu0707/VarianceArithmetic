@@ -1,10 +1,10 @@
 package Type;
 
 /*
- * The Taylor expansion result has large uncetainty for either value or variance
+ * The Taylor expansion variance is negative
  */
-public class NotStableException extends Taylor1dException {
-    public NotStableException(String msg, 
+public class NotPositiveException extends Taylor1dException {
+    public NotPositiveException(String msg, 
             String name, final UnionArray s1dTaylor, boolean inPrec, boolean outPrec,
             VarDbl input, VarDbl value, VarDbl variance,
             int order, VarDbl newValue, VarDbl newVariance, int monotonics) {
@@ -12,4 +12,5 @@ public class NotStableException extends Taylor1dException {
                 input, value, variance,
                 order, newValue, newVariance, monotonics);
     }
+    
 }

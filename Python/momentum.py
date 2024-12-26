@@ -3,7 +3,7 @@ import math
 import os
 
 
-class Momentum:
+class Normal:
     '''
     Calculate variance momentum.
 
@@ -16,29 +16,39 @@ class Momentum:
     So both FILE_APPROX and FILE_PRECISE has two location
     '''
     BINDING_FACTOR:float = 5.0
-    MAX_ORDER:int = 244
+    MAX_ORDER:int = 442
     FILE_APPROX = ('./Python/Output/NormalMomentum_5.txt', './Output/NormalMomentum_5.txt')
     FILE_PRECISE = ('./Python/NormalMomentum_5.txt', './NormalMomentum_5.txt')
 
-    __slots__ = ('_sMomentum', '_maxOrder', '_binding', '_header')
+    __slots__ = ('_sMomentum', '_maxOrder', '_binding', '_header', '_divid')
 
-    def __init__(self, binding:float=BINDING_FACTOR, maxOrder:int=MAX_ORDER) -> None:
+    def __init__(self, binding:float=BINDING_FACTOR, maxOrder:int=MAX_ORDER, divid:int=128,
+                 readCached:bool=True) -> None:
         self._binding = binding
         self._maxOrder = maxOrder
-        self._header = f'n\tMomentum\tUncertainty\t!!Diff\tSigma={self._binding}\n'
+        self._divid = divid
+        self._header = f'n\tMomentum\t!!Diff\tSigma={self._binding}\n'
 
-        if os.path.isfile(Momentum.FILE_APPROX[0]):
-            self._sMomentum = self._read(Momentum.FILE_APPROX[0])
-        elif os.path.isfile(Momentum.FILE_APPROX[1]):
-            self._sMomentum = self._read(Momentum.FILE_APPROX[1])
-        else:
+        self._sMomentum = []
+        if readCached:
+            if os.path.isfile(Normal.FILE_APPROX[0]):
+                self._sMomentum = self._read(Normal.FILE_APPROX[0])
+                if len(self._sMomentum) > maxOrder:
+                    self._sMomentum = self._sMomentum[:maxOrder]
+            elif os.path.isfile(Normal.FILE_APPROX[1]):
+                self._sMomentum = self._read(Normal.FILE_APPROX[1])
+                if len(self._sMomentum) > maxOrder:
+                    self._sMomentum = self._sMomentum[:maxOrder]
+        if not self._sMomentum:
             self._sMomentum = self.approxCalc()
-        if os.path.isfile(Momentum.FILE_PRECISE[0]):
-            sMomentum = self._read(Momentum.FILE_PRECISE[0])
-        elif os.path.isfile(Momentum.FILE_PRECISE[1]):
-            sMomentum = self._read(Momentum.FILE_PRECISE[1])
-        for i, mmt in enumerate(sMomentum):
-            self._sMomentum[i] = mmt
+
+        if readCached:
+            if os.path.isfile(Normal.FILE_PRECISE[0]):
+                sMomentum = self._read(Normal.FILE_PRECISE[0])
+            elif os.path.isfile(Normal.FILE_PRECISE[1]):
+                sMomentum = self._read(Normal.FILE_PRECISE[1])
+            for i, mmt in enumerate(sMomentum):
+                self._sMomentum[i] = mmt
 
     @property
     def binding(self):
@@ -63,10 +73,10 @@ class Momentum:
         try:
             import sympy
             try:
-                sMomentum = self._read(Momentum.FILE_PRECISE[0])
+                sMomentum = self._read(Normal.FILE_PRECISE[0])
             except:
                 try:
-                    sMomentum = self._read(Momentum.FILE_PRECISE[1])
+                    sMomentum = self._read(Normal.FILE_PRECISE[1])
                 except:
                     sMomentum = []
             x = sympy.symbols("x", is_real=True)
@@ -78,64 +88,57 @@ class Momentum:
                     print(f'The variance moment at {n} becomes inifinite')
                     break
                 sMomentum.append(mmt.evalf())
-                if self._write(Momentum.FILE_PRECISE[0], sMomentum) or \
-                   self._write(Momentum.FILE_PRECISE[1], sMomentum):
+                if self._write(Normal.FILE_PRECISE[0], sMomentum) or \
+                   self._write(Normal.FILE_PRECISE[1], sMomentum):
                     return True
-            print(f'Fail to write to either of {Momentum.FILE_PRECISE}')
+            print(f'Fail to write to either of {Normal.FILE_PRECISE}')
             return False
         except BaseException as ex:
             print(f'Exception when calculating momentum {sMomentum}: {ex}')
             return False
 
     def approxCalc(self) -> list[float]:       
-        import varDbl
-        sMomentum = []
-        for j in range(self._maxOrder // 2):
-            sMomentum.append(varDbl.VarDbl())
-        divid = 64
-        norm = varDbl.VarDbl(1.0 / math.sqrt(2*math.pi) / divid)
-        limit = int(math.ceil(divid * self.binding))
-        for i in range(-limit, limit + 1):
-            x2 = i*i /divid /divid
-            pdf = norm * varDbl.VarDbl(math.exp(- x2 * 0.5))
-            sq = varDbl.VarDbl(1)
+        sMomentum = [0] * (self._maxOrder // 2)
+        norm = 1.0 / math.sqrt(2*math.pi) / self._divid
+        limit = int(math.ceil(self._divid * self.binding))
+        for i in range(-limit, limit):
+            x2 = (i + 0.5)**2 /self._divid**2
+            pdf = norm * math.exp(- x2 * 0.5)
+            sq = 1
             for j in range(self._maxOrder // 2):
                 try:
                     sMomentum[j] += pdf * sq
                     sq *= x2
+                    if not math.isfinite(sMomentum[j]):
+                        raise ValueError(f'The {2*j}-th moment {sMomentum[j]} becomes overlow: {ex}')
                 except BaseException as ex:
                     raise ValueError(f'The {2*j}-th moment {sMomentum[j]} becomes overlow: {ex}')
-                if sMomentum[j].uncertainty() * self.binding > sMomentum[j].value():
-                    raise ValueError(f'The {2*j}-th moment {sMomentum[j]} becomes unreliable')
-        if (not self._write(Momentum.FILE_APPROX[0], sMomentum)) and \
-           (not self._write(Momentum.FILE_APPROX[1], sMomentum)):
+        if (not self._write(Normal.FILE_APPROX[0], sMomentum)) and \
+           (not self._write(Normal.FILE_APPROX[1], sMomentum)):
             raise ValueError('Approx calc of momentum failed')
-        return [mmt.value() for mmt in sMomentum]
+        return sMomentum
 
 
-    def _write(self, file: str, sMomentum: list[float]):
-        import varDbl
+    def _write(self, file: str, sMomentum: list[float], withFac=False):
         try:
             with open(file, 'w') as f:
                 f.write(self._header)
-                dbFac = 1
+                dbFac = 1.
                 for i, mmt in enumerate(sMomentum):
-                    unc = 0
-                    if type(mmt) == varDbl.VarDbl:
-                        unc = mmt.uncertainty()
-                        mmt = mmt.value()
-                    if i > 1:
-                        dbFac *= 2*i - 1
-                        if not (sMomentum[i - 1] < mmt < dbFac):
-                            print(f'Invalid {i}-th momentum {mmt} vs !!={dbFac} and {i - 1}-th momentum {sMomentum[i - 1]}')
-                            f.flush()
-                            return False
-                        if not math.isfinite(mmt):
-                            break
-                    f.write(f'{i*2}\t{mmt}\t{unc}\t{(mmt / dbFac) - 1}\n')
-                f.flush()
+                    if not math.isfinite(mmt):
+                        break
+                    if withFac and math.isfinite(dbFac):
+                        if i:
+                            try:
+                                dbFac *= 2*i - 1
+                            except OverflowError:
+                                pass
+                        f.write(f'{i*2}\t{mmt}\t{mmt / dbFac}\n')
+                    else:
+                        f.write(f'{i*2}\t{mmt}\n')
+                    f.flush()
                 return True
-        except:
+        except BaseException as ex:
             return False
 
     def _read(self, file: str) -> list[float]:
@@ -144,7 +147,7 @@ class Momentum:
             header = next(f)
             if header != self._header:
                 raise IOError(f'{file} has wrong header "{header}" != "{self._header}"')
-            dbFac = 1
+            dbFac = 1.0
             for line in f:
                 sWord = line.split('\t')
                 i = int(sWord[0])
@@ -159,9 +162,12 @@ class Momentum:
                         if not ((1 - 2e-05) < momentum <= sMomentum[-1]):
                             raise IOError(f'{file} has wrong momentum {momentum} <= {sMomentum[-1]} at index {i} of line "{line}"')
                     case _:
-                        dbFac *= i - 1
-                        if not (sMomentum[-1] < momentum < dbFac):
+                        if sMomentum[-1] >= momentum:
                             raise IOError(f'{file} has wrong momentum {momentum} <= {sMomentum[-1]} at index {i} of line "{line}"')
+                        dbFac *= i - 1
+                        if math.isfinite(dbFac):
+                            if momentum >= dbFac:
+                                raise IOError(f'{file} has wrong momentum {momentum} >= {dbFac} at index {i} of line "{line}"')
                 sMomentum.append(momentum) 
         return sMomentum
 

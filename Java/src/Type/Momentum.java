@@ -10,24 +10,22 @@ package Type;
 public class Momentum {
 
     public static final int BINDING_FOR_TAYLOR = 5;
-    public static final int MAX_FACTOR = 126;
+    public static final int MAX_FACTOR = 442;
 
-    private static final VarDbl sFactor[] = new VarDbl[MAX_FACTOR];
-    private static final int divid = 32;
+    private static final double sFactor[] = new double[MAX_FACTOR];
+    private static final int divid = 128;
     static {
-        for (int j = 0; j < MAX_FACTOR; ++j)
-            sFactor[j] = new VarDbl();
         final int limit = BINDING_FOR_TAYLOR * divid;
         final double divid2 = divid * divid;
-        for (int i = -limit; i <= limit; ++i) {
+        for (int i = -limit; i < limit; ++i) {
             try {
-                final VarDbl x2 = new VarDbl( i*i / divid2, 0);
-                final VarDbl pdf = new VarDbl(1.0/Math.sqrt(2*Math.PI)).multiply(new VarDbl(Math.exp(- x2.value() * 0.5) / divid));
-                for (int j = 0; j < MAX_FACTOR; ++j) {
-                    sFactor[j].add(pdf, true);
-                    pdf.multiply(x2, true);
+                final double x2 = (i + 0.5)*(i + 0.5) / divid2;
+                double pdf =1.0/Math.sqrt(2*Math.PI) * Math.exp(- x2 * 0.5) / divid;
+                for (int j = 0; j < MAX_FACTOR / 2; ++j) {
+                    sFactor[j << 1] += pdf;
+                    pdf *= x2;
                 }
-             } catch (InitException e) {
+             } catch (Throwable e) {
                 e.printStackTrace();
                 assert false;
             }
@@ -41,9 +39,9 @@ public class Momentum {
      * 
      * @return      0 when n is odd, variance momentum when n is even
      */
-    public static VarDbl factor(int n) {
-        if ((n < 0) || (n > MAX_FACTOR) || ((n % 2) == 1))
-            return new VarDbl();
-        return sFactor[n >> 1];
+    public static double get(int n) {
+        if ((n < 0) || (n >= MAX_FACTOR))
+            return 0;
+        return sFactor[n];
     }
 }

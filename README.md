@@ -16,4 +16,4 @@ Run all unit test will generate txt files under ./Java/Output
 The txt files under ./{Python, Cpp, Java}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb.
 Different implementation should give the same result.
 
-Right now, C++ and Java implementations are not up-to-date
+Right now, C++ and Java implementations contains less test cases such as for matrix calculations.

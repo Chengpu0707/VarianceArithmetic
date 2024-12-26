@@ -5,10 +5,10 @@ import unittest
 import momentum
 
 
-class TestMomentum (unittest.TestCase):
+class TestNormal (unittest.TestCase):
 
     def testNormal(self):
-        mmt = momentum.Momentum()
+        mmt = momentum.Normal()
         self.assertAlmostEqual(mmt[0],    1*(1 - 5.733031e-07))
         self.assertEqual(mmt[1], 0)
         self.assertAlmostEqual(mmt[2],    1*(1 - 1.544050e-05))
@@ -22,18 +22,29 @@ class TestMomentum (unittest.TestCase):
         self.assertAlmostEqual(mmt[10], 945*(1 - 9.1166811e-03))
 
     def testApproxCalc(self):
-        if os.path.isfile(momentum.Momentum.FILE_APPROX[0]):
-            os.remove(momentum.Momentum.FILE_APPROX[0])
-        elif os.path.isfile(momentum.Momentum.FILE_APPROX[1]):
-            os.remove(momentum.Momentum.FILE_APPROX[1])
-        with self.assertRaises(ValueError):
-            mmt = momentum.Momentum(maxOrder = momentum.Momentum.MAX_ORDER + 2)
-        mmt = momentum.Momentum()
+        mmt = momentum.Normal()
         self.assertTrue(math.isfinite(mmt._sMomentum[-1]))
+        mmt2 = momentum.Normal(divid=mmt._divid*2, readCached=False)
+        self.assertTrue(math.isfinite(mmt2._sMomentum[-1]))
+        self.assertAlmostEqual(mmt2._sMomentum[0] / mmt._sMomentum[0], 1)
+        self.assertAlmostEqual(mmt2._sMomentum[1] / mmt._sMomentum[1], 1)
+        self.assertAlmostEqual(mmt2._sMomentum[2] / mmt._sMomentum[2], 1)
+        self.assertAlmostEqual(mmt2._sMomentum[3] / mmt._sMomentum[3], 1)
+        self.assertAlmostEqual(mmt2._sMomentum[4] / mmt._sMomentum[4], 1)
+        self.assertAlmostEqual(mmt2._sMomentum[5] / mmt._sMomentum[5], 1, delta=6e-8)
+        self.assertAlmostEqual(mmt2._sMomentum[6] / mmt._sMomentum[6], 1, delta=2e-7)
+        self.assertAlmostEqual(mmt2._sMomentum[7] / mmt._sMomentum[7], 1, delta=2e-7)
+        self.assertAlmostEqual(mmt2._sMomentum[8] / mmt._sMomentum[8], 1, delta=3e-7)
+        self.assertAlmostEqual(mmt2._sMomentum[9] / mmt._sMomentum[9], 1, delta=4e-7)
+        self.assertAlmostEqual(mmt2._sMomentum[10] / mmt._sMomentum[10], 1, delta=4e-7)
+        for i in range(20, len(mmt._sMomentum)):
+            self.assertAlmostEqual(mmt2._sMomentum[i] / mmt._sMomentum[i], 1)
 
     def testMaxOrder(self):
-        mmt = momentum.Momentum()
+        mmt = momentum.Normal()
         self.assertEqual(len(mmt._sMomentum) * 2, mmt.MAX_ORDER)
+        with self.assertRaises(ValueError):
+            mmt = momentum.Normal(maxOrder = momentum.Normal.MAX_ORDER + 2, readCached=False)
 
 
 

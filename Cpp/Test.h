@@ -1,5 +1,7 @@
 /*
-A minimal unittest tool box
+A minimal unittest tool box which terminates on the first failure.
+
+To get the stack trace, break inside AssertException::AssertException()
 */
 
 #include <cmath>
@@ -36,10 +38,15 @@ static void assertTrue(bool expression, std::string msg = "");
 static void assertFalse(bool expression, std::string msg = "");
 static void assertAlmostEqual(long double x, long double y, long double delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
+
+// generic value comparison
 template<typename T, typename U> static void assertEqual(const T& x, const U& y, std::string msg = "");
-    // generic value comparison
+template<typename T, typename U> static void assertNotEqual(const T& x, const U& y, std::string msg = "");
+template<typename T, typename U> static void assertLess(const T& x, const U& y, std::string msg = "");
+template<typename T, typename U> static void assertLessEqual(const T& x, const U& y, std::string msg = "");
+
+// generic container comparison
 template<typename T, typename U> static void assertEquals(const T& sX, const U& sY, std::string msg = "");
-    // generic collection comparison
 
 
 inline void fail(std::string msg) {
@@ -80,9 +87,7 @@ inline void assertAlmostEqual(long double x, long double y, long double delta, s
         return;
     if (delta == 0)
         delta = var_dbl::ulp(x);
-    if (((x - delta) <= y) && (y <= (x + delta)))
-        return;
-    if (((y - delta) <= x) && (x <= (y + delta)))
+    if (std::abs(x - y) <= delta)
         return;
     std::ostringstream os;
     os << "assertEquals("<< std::scientific << y << " != " << x << "+-" << delta;
@@ -98,12 +103,53 @@ inline void assertEqual(const T& x, const U& y, std::string msg)
     if (x == y)
         return;
     std::ostringstream os;
-    os << "assertEqual(" << std::scientific << y << " != " << x;
+    os << "assertEqual(" << std::scientific << x << " != " << y;
     if (!msg.empty())
         os << ", " << msg;
     os << ")";
     throw AssertException(os.str());
 }
+
+template<typename T, typename U> 
+inline void assertNotEqual(const T& x, const U& y, std::string msg)
+{
+    if (x != y)
+        return;
+    std::ostringstream os;
+    os << "assertNotEqual(" << std::scientific << x << " == " << y;
+    if (!msg.empty())
+        os << ", " << msg;
+    os << ")";
+    throw AssertException(os.str());
+}
+
+template<typename T, typename U> 
+inline void assertLess(const T& x, const U& y, std::string msg)
+{
+    if (x < y)
+        return;
+    std::ostringstream os;
+    os << "assertEqual(" << std::scientific << x << " >= " << y;
+    if (!msg.empty())
+        os << ", " << msg;
+    os << ")";
+    throw AssertException(os.str());
+}
+
+
+template<typename T, typename U> 
+inline void assertLessEqual(const T& x, const U& y, std::string msg)
+{
+    if (x <= y)
+        return;
+    std::ostringstream os;
+    os << "assertEqual(" << std::scientific << x << " >" << y;
+    if (!msg.empty())
+        os << ", " << msg;
+    os << ")";
+    throw AssertException(os.str());
+}
+
 
 template<typename T, typename U> 
 inline void assertEquals(const T& sX, const U& sY, std::string msg)
@@ -128,6 +174,7 @@ inline void assertEquals(const T& sX, const U& sY, std::string msg)
         ++i;
     }
 }
+
 
 } // namespace test
 #endif  // __Test_h__

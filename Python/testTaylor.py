@@ -94,7 +94,7 @@ def _validate(self, func, arg, uncertainty, exception,
                     self.assertEqual(lines, cnt)
                 sVal = list(map(float, line.split('\t')))
                 self.assertAlmostEqual(res.value(), sVal[0])
-                self.assertAlmostEqual(res.variance(), sVal[1]**2 + sVal[2])
+                self.assertAlmostEqual(res.variance(), sVal[1] + sVal[2])
         return res
     except BaseException as ex:
         if (exception is None) or (not isinstance(ex, exception)): 
@@ -107,7 +107,7 @@ def _validate(self, func, arg, uncertainty, exception,
                     cnt += 1
                 if lines:
                     self.assertEqual(lines, cnt)
-                self.assertEqual(f'{exception.__name__}\n', line)
+                self.assertEqual(f'{exception.__name__}', line.strip().split("\t")[0])
 
     
 
@@ -149,7 +149,7 @@ class TestExp (unittest.TestCase):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
         self.validate(0, 0.1, 
-                dumpPath='./Python/Output/exp_1_0.1.txt', lines=128)
+                dumpPath='./Python/Output/exp_1_0.1.txt', lines=168)
         self.validate(0, 0.2, varianceDelta=3e-5)
         self.validate(0, 1, valueDelta=4e-4, varianceDelta=9e-2)
 
@@ -187,11 +187,16 @@ class TestExp (unittest.TestCase):
         self.validate(195, 1, valueDelta=7e-1, varianceDelta=3)
         self.validate(100, 1, valueDelta=4e-4, varianceDelta=9e-2)
  
-    def test_limit_at_0(self):
-        self.validate(0, 8.001, exception=NotFiniteException)    # infinitive variance
-        res = self.validate(0, 8.000, exception=AssertionError)
-        self.assertAlmostEqual(res.value(), 1.069964861360303e+11)
-        self.assertAlmostEqual(res.uncertainty(), 8.90825356119187e+13)
+    def test_upperBount(self):
+        self.validate(0, 19.87, exception=NotMonotonicException,
+                      dumpPath='./Python/Output/exp_0_19.87.txt')
+        res = self.validate(0, 19.86, exception=AssertionError,
+                            dumpPath='./Python/Output/exp_0_19.86.txt')
+        self.assertAlmostEqual(res.uncertainty() / res.value(), 1682.511, delta=0.01)
+        for x in (1, -1, 10, -10, 100, -100):
+            self.validate(0, 19.87, exception=NotMonotonicException)
+            res = self.validate(0, 19.86, exception=AssertionError)
+            self.assertAlmostEqual(res.uncertainty() / res.value(), 1682.511, delta=0.01)
 
     def test_exp_min_input_precision(self):
         for x in (0, 1, -1, 10, -10, 100, -100):
@@ -254,19 +259,19 @@ class TestLog (unittest.TestCase):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
         self.validate(1, 0.1,
-                dumpPath='./Python/Output/log_1_0.1.txt', lines=128)
+                dumpPath='./Python/Output/log_1_0.1.txt', lines=168)
         self.validate(2, 0.2)
 
         self.validate(0.5, 0.101, exception=NotMonotonicException)
         self.validate(0.5, 0.100, valueDelta=0.05, varianceDelta=0.07)
 
-        self.validate(1, 0.202, exception=NotMonotonicException)
-        self.validate(1, 0.201, valueDelta=0.05, varianceDelta=0.07)
+        self.validate(1, 0.201, exception=NotMonotonicException)
+        self.validate(1, 0.200, valueDelta=0.05, varianceDelta=0.07)
 
     def test_max_out_uncertainty(self):
         for x in (0.5, 1, 2, 5, 10, 20, 50):
             res = Taylor.log(VarDbl(x, x/5))
-            self.assertAlmostEqual(res.uncertainty(), 0.2120047)
+            self.assertAlmostEqual(res.uncertainty(), 0.2120048)
 
     @staticmethod
     def func(x):
@@ -358,8 +363,7 @@ class TestSin (unittest.TestCase):
         self.assertAlmostEqual(res1.uncertainty(), res2.uncertainty())
 
     def test_exception_quater_pi(self):
-        self.validate(math.pi/4, 0.1)
-        self.validate(math.pi/4, math.pi/8)
+#        self.validate(math.pi/4, math.pi/8, dumpPath='./Python/Output/sin_0.25_0.125.txt')
         res = self.validate(math.pi/4, math.pi/4, valueDelta=8e-5, varianceDelta=2e-3)
         self.assertAlmostEqual(res.value() - math.sin(math.pi/4), -0.1876634)
         self.validate(math.pi/4, math.pi/2, NotPositiveException)
@@ -445,7 +449,7 @@ class TestPow (unittest.TestCase):
                     dumpPath='./Python/Output/pow_0_0.1_-1.txt')
         self.assertEqual(str(ex.exception), 'math domain error')   # 0^{-1}
 
-        with self.assertRaises(NotMonotonicException):
+        with self.assertRaises(NotFiniteException):
             Taylor.pow(VarDbl(0.1, 0.1), -1,
                     dumpPath='./Python/Output/pow_0.1_0.1_-1.txt')
 
@@ -457,43 +461,41 @@ class TestPow (unittest.TestCase):
         self.validate(2, 1, varianceDelta=8e-5,     # due to momentum(4) != 3
                 dumpPath='./Python/Output/pow_1_1_2.txt')
         
-    def test_exception(self):
-        self.validate(5/4, 0.25, NotPositiveException)
-        self.validate(5/4, 0.20252669, NotMonotonicException)
-        self.validate(5/4, 0.20252668, valueDelta=1e-2, varianceDelta=6e-5)
-
-        self.validate(-1.5, 0.5, NotMonotonicException)
-        self.validate(-1.5, 0.2, NotMonotonicException)
-        self.validate(-1.5, 0.19874, NotStableException)
-        self.validate(-1.5, 0.19873, valueDelta=2e-1, varianceDelta=6e-1)
-
-    def test_edge(self):
-        self.validate(+1e-6, 0.202, NotMonotonicException)    
-        self.validate(+1e-6, 0.201, valueDelta=5e-2, varianceDelta=7e-3) 
-        self.validate(0.5, 0.202, NotMonotonicException)    
-        self.validate(0.5, 0.201, valueDelta=3e-2, varianceDelta=1e-3)    
-        self.validate(1 - 1e-6, 0.203, NotMonotonicException)
-        self.validate(1 - 1e-6, 0.202, valueDelta=2e-2)  
-        self.validate(1 + 1e-6, 0.203, NotMonotonicException)
-        self.validate(1 + 1e-6, 0.202, valueDelta=2e-2)  
-        self.validate(1.5, 0.203, NotMonotonicException)    
-        self.validate(1.5, 0.202, valueDelta=6e-3, varianceDelta=5e-5)   
-        self.validate(2 - 1e-6, 0.204, NotMonotonicException)
-        self.validate(2 - 1e-6, 0.203)  
-        self.validate(2 + 1e-6, 0.204, NotMonotonicException)
-        self.validate(2 + 1e-6, 0.203)  
-
-        self.validate(-1e-6, 0.202, NotMonotonicException)    
-        self.validate(-1e-6, 0.201, valueDelta=5e-2, varianceDelta=7e-3)    
-        self.validate(-0.5, 0.201, NotMonotonicException)    
-        self.validate(-0.5, 0.200, valueDelta=8e-2, varianceDelta=3e-2)    
-        self.validate(-1, 0.200, NotMonotonicException) 
-        self.validate(-1, 0.199, valueDelta=0.2, varianceDelta=0.1)  
-        self.validate(-1.5, 0.199, NotMonotonicException) 
-        self.validate(-1.5, 0.198, valueDelta=2e-1, varianceDelta=5e-1)  
-        self.validate(-2, 0.198, NotMonotonicException) 
-        self.validate(-2, 0.197, valueDelta=3e-1, varianceDelta=3)   
-
+    def test_inverse(self):
+        self.validate(-1, 0.100, valueDelta = 3e-2, varianceDelta = 7e-4,
+                      dumpPath="./Python/Output/pow_1_0.1_-1.txt") 
+        self.validate(-2, 0.100, valueDelta = 4e-2, varianceDelta = 4e-3,
+                      dumpPath="./Python/Output/pow_1_0.1_-2.txt") 
+        
+        self.validate(-1, 0.201, NotMonotonicException, 
+                      dumpPath="./Python/Output/pow_1_0.201_-1.txt") 
+        self.validate(-2, 0.200, NotMonotonicException, 
+                      dumpPath="./Python/Output/pow_1_0.200_-2.txt") 
+        
+    def test_continuity(self):
+        RES = 10000
+        MIN = int(0.2 * RES)
+        MAX = int(0.21 * RES)
+        with open("./Python/Output/pow_continuity.txt", 'w') as f:
+            f.write('n\tdelta n\tUpper Bound\tValue\tUncertainty\tDiff Value\tDiff Uncertainty\tException\n')
+            for n in range(10):
+                for dx in (1e-6, -1e-6):
+                    excpt = None
+                    iMin = MIN
+                    iMax = MAX
+                    while iMin + 1 < iMax:
+                        iMid = int((iMin + iMax)/2)
+                        try:
+                            res = Taylor.pow(VarDbl(1, iMid / RES), n + dx)
+                            iMin = iMid
+                        except BaseException as ex:
+                            iMax = iMid
+                            excpt = ex
+                    upper = iMin/RES
+                    std = Taylor.pow(VarDbl(1, upper), n)
+                    f.write(f'{n}\t{dx}\t{upper}\t{std.value()}\t{std.uncertainty()}\t{res.value() - std.value()}\t{res.uncertainty() - std.uncertainty()}\t{excpt}\n')
+                    f.flush()
+ 
 
     @staticmethod
     def func(x):
@@ -562,44 +564,43 @@ class TestLibError (unittest.TestCase):
 
 class TestDumpFile (unittest.TestCase):
 
-    def test(self):
-        dumpPath='./Python/Output/Pow_1_0.19732_-2.txt'
-        res = Taylor.pow(VarDbl(1, 0.19732), -2, dumpPath=dumpPath)
+    def test_normal(self):
+        dumpPath='./Python/Output/Pow_1_0.197_-2.txt'
+        res = Taylor.pow(VarDbl(1, 0.197), -2, dumpPath=dumpPath)
         x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertAlmostEqual(res.value(), out.value())
         self.assertAlmostEqual(res.variance(), out.variance())
         self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.19732)
+        self.assertAlmostEqual(x.uncertainty(), 0.197)
         self.assertEqual(len(sTaylor), Taylor.maxOrder())
-        self.assertEqual(len(sExpansion), 121)
-        self.assertEqual(sExpansion[-1].monotonics, 47)
-        self.assertLess(sExpansion[-1].newVal.value(), sExpansion[-1].limit)
+        self.assertEqual(len(sExpansion), 220)
+        self.assertEqual(sExpansion[-1].monotonics, 164)
 
     def test_NotStableException(self):
-        dumpPath='./Python/Output/Pow_1_0.19733_-2.txt'
+        s1dTaylor = [i * (1 if (i & 1) == 0 else -1) for i in range(60)]
+        dumpPath='./Python/Output/Pow_1_-2_NotStable.txt'
         with self.assertRaises(NotStableException):
-            Taylor.pow(VarDbl(1, 0.19733), -2, dumpPath=dumpPath)
+            Taylor._taylor._taylor1d(VarDbl(1, 0.193), 'test_NotStableException', 
+                            s1dTaylor, True, True, maxOrder=60, dumpPath=dumpPath)
         x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, "NotStableException")
         self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.19733)
-        self.assertEqual(len(sTaylor), Taylor.maxOrder())
-        self.assertEqual(len(sExpansion), 121)
-        self.assertEqual(sExpansion[-1].monotonics, 47)
-        self.assertGreater(sExpansion[-1].newVal.value(), sExpansion[-1].limit)
+        self.assertAlmostEqual(x.uncertainty(), 0.193)
+        self.assertListEqual(sTaylor, s1dTaylor)
+        self.assertEqual(len(sExpansion), 29)
+        self.assertEqual(sExpansion[-1].monotonics, 28)
 
     def test_NotMonotonicException(self):
-        dumpPath='./Python/Output/Pow_1_0.198_-2.txt'
+        dumpPath='./Python/Output/Pow_1_0.2_-2.txt'
         with self.assertRaises(NotMonotonicException):
-            Taylor.pow(VarDbl(1, 0.198), -2, dumpPath=dumpPath)
+            Taylor.pow(VarDbl(1, 0.2), -2, dumpPath=dumpPath)
         x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, "NotMonotonicException")
         self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.198)
+        self.assertAlmostEqual(x.uncertainty(), 0.2)
         self.assertEqual(len(sTaylor), Taylor.maxOrder())
-        self.assertEqual(len(sExpansion), 121)
-        self.assertEqual(sExpansion[-1].monotonics, 14)
-        self.assertGreater(sExpansion[-2].newVar.value(), sExpansion[-1].newVar.value())
+        self.assertEqual(len(sExpansion), 220)
+        self.assertEqual(sExpansion[-1].monotonics, 0)
 
     def test_NotPositiveException(self):
         dumpPath = './Python/Output/Sin_0.5_0.3185.txt'
@@ -609,30 +610,63 @@ class TestDumpFile (unittest.TestCase):
         self.assertEqual(out, 'NotPositiveException')
         self.assertAlmostEqual(x.value(), 0.5*math.pi)
         self.assertAlmostEqual(x.uncertainty(), 0.3185*math.pi)
-        self.assertEqual(len(sTaylor), 171)
+        self.assertEqual(len(sTaylor), 442)
         self.assertAlmostEqual(sTaylor[0], 1)
         self.assertAlmostEqual(sTaylor[1], 0)
         self.assertAlmostEqual(sTaylor[2], -0.5)
         self.assertEqual(len(sExpansion), 3)
         self.assertLess(sExpansion[-1].var, 0)
 
-    def test_DivergentException(self):
-        dumpPath='./Python/Output/Exp_0_8.001.txt'
+    def test_NotFiniteException(self):
+        dumpPath='./Python/Output/pow_1_1_-2.txt'
         with self.assertRaises(NotFiniteException):
-            Taylor.exp(VarDbl(0, 8.001), dumpPath=dumpPath)
+            Taylor.pow(VarDbl(1, 1), -2, dumpPath=dumpPath)
         x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, 'NotFiniteException')
-        self.assertAlmostEqual(x.value(), 0)
-        self.assertAlmostEqual(x.uncertainty(), 8.001)
-        self.assertEqual(len(sTaylor), 178)
-        for i, ty in enumerate(sTaylor):
-            self.assertAlmostEqual(ty, 1 /math.factorial(i))
-        self.assertAlmostEqual(sTaylor[10], 1 /math.factorial(10))
-        self.assertEqual(len(sExpansion), 93)
-        self.assertEqual(sExpansion[-1].monotonics, 54)
+        self.assertAlmostEqual(x.value(), 1)
+        self.assertAlmostEqual(x.uncertainty(), 1)
+        self.assertEqual(len(sTaylor), 442)
+        self.assertEqual(len(sExpansion), 122)
+        self.assertEqual(sExpansion[-1].monotonics, 0)
 
 
 class TestConvergence (unittest.TestCase):
+
+    def test_exp(self):
+        for x in (0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50, 100, -100):
+            i = 18000
+            j = 20000
+            while (i + 1 < j):
+                k = (i + j)//2
+                try:
+                    res = Taylor.exp(VarDbl(x, k/1000.))
+                    i = k
+                except Exception as ex:
+                    exception = ex
+                    j = k
+            self.assertEqual(i, 19864)
+            self.assertAlmostEqual(res.uncertainty() / res.value(), 1681.419, delta=1e-3)
+            self.assertEqual(type(exception), NotMonotonicException)
+        
+    def test_log(self):
+        for x in (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001):
+            i = 20000
+            j = 21000
+            while (i + 1 < j):
+                k = (i + j)//2
+                try:
+                    res = Taylor.log(VarDbl(x, x*k/100000.))
+                    i = k
+                except Exception as ex:
+                    exception = ex
+                    j = k
+            self.assertEqual(i, 20087)
+            self.assertAlmostEqual(res.uncertainty(), 0.2130627, delta=1e-6)
+            self.assertEqual(type(exception), NotMonotonicException)
+        
+
+
+class TestStat (unittest.TestCase):
     @staticmethod
     def writePowerHeader(f, divids:int=5, devs:int=3):
         f.write('Exponent\tInput Value\tInput Uncertainty'
@@ -672,50 +706,50 @@ class TestConvergence (unittest.TestCase):
 
     def test_square_at_zero(self):
         with open('./Python/Output/SquareAtZero.txt', 'w') as f:
-            TestConvergence.writePowerHeader(f)
+            TestStat.writePowerHeader(f)
             for x in (-0.2, -0.1, 0, 0.1, 0.2):
-                TestConvergence.calc_power(x, 0.2, 2, f)
+               TestStat.calc_power(x, 0.2, 2, f)
 
     def test_natural_number_at_zero(self):
         with open('./Python/Output/NaturalAtZero.txt', 'w') as f:
-            TestConvergence.writePowerHeader(f)
-            TestConvergence.calc_power(0, 0.2, 2, f)
-            TestConvergence.calc_power(0.2, 0.2, 2, f)
-            TestConvergence.calc_power(0, 0.2, 3, f)                
-            TestConvergence.calc_power(0.2, 0.2, 3, f)                
-            TestConvergence.calc_power(-0.2, 0.2, 3, f)                
+            TestStat.writePowerHeader(f)
+            TestStat.calc_power(0, 0.2, 2, f)
+            TestStat.calc_power(0.2, 0.2, 2, f)
+            TestStat.calc_power(0, 0.2, 3, f)                
+            TestStat.calc_power(0.2, 0.2, 3, f)                
+            TestStat.calc_power(-0.2, 0.2, 3, f)                
 
     def test_square_at_one(self):
         with open('./Python/Output/SquareAtOne.txt', 'w') as f:
-            TestConvergence.writePowerHeader(f)
+            TestStat.writePowerHeader(f)
             for c in (2, 2 - 1e-6, 2 + 1e-6):
-                TestConvergence.calc_power(1, 0.2, c, f)
+               TestStat.calc_power(1, 0.2, c, f)
 
     def test_invesion_at_one(self):
         EXP = -1
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.199803)**EXP
-        res = VarDbl(1, 0.199802)**EXP
-        self.assertAlmostEqual(res.value(), 1.0461366, places=6)
-        self.assertAlmostEqual(res.uncertainty(), 0.2512768, places=6)
+            VarDbl(1, 0.2001)**EXP
+        res = VarDbl(1, 0.2000)**EXP
+        self.assertAlmostEqual(res.value(), 1.0462500, places=6)
+        self.assertAlmostEqual(res.uncertainty(), 0.2547412, places=6)
 
         with open('./Python/Output/InversionAtOne.txt', 'w') as f:
-            TestConvergence.writePowerHeader(f)
-            for dx in (0.199802, 0.1, 1e-2, 1e-3, 1e-4):
-                TestConvergence.calc_power(1, dx, EXP, f) 
+            TestStat.writePowerHeader(f)
+            for dx in (0.2, 0.1, 1e-2, 1e-3, 1e-4):
+               TestStat.calc_power(1, dx, EXP, f) 
 
     def test_square_root_at_one(self):
         EXP = 0.5
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.20190)**EXP
-        res = VarDbl(1, 0.20189)**EXP
-        self.assertAlmostEqual(res.value(), 0.994684, places=6)
-        self.assertAlmostEqual(res.uncertainty(), 0.102972, places=6)
+            VarDbl(1, 0.2012)**EXP
+        res = VarDbl(1, 0.2011)**EXP
+        self.assertAlmostEqual(res.value(), 0.9947278, places=6)
+        self.assertAlmostEqual(res.uncertainty(), 0.1025509, places=6)
 
         with open('./Python/Output/SquareRootAtOne.txt', 'w') as f:
-            TestConvergence.writePowerHeader(f)
-            for dx in (0.20189, 1e-1, 1e-2, 1e-3):
-                TestConvergence.calc_power(1, dx, EXP, f) 
+            TestStat.writePowerHeader(f)
+            for dx in (0.2011, 1e-1, 1e-2, 1e-3):
+               TestStat.calc_power(1, dx, EXP, f) 
 
 
 class TestRoundingError (unittest.TestCase):

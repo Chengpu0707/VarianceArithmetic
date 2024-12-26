@@ -5,51 +5,48 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 
 
 public class TestMomentum {
 
-    void validate(VarDbl var, double denom, double valueDelta, double uncertainty) {
-        final double val = var.value() / denom;
-        assertEquals(1, val, valueDelta);
-        assertEquals(uncertainty, var.uncertainty(), Math.ulp(uncertainty));
-    }
-
-     @Test
+    @Test
     public void TestFactor() {
-        validate(Momentum.factor(0), 1, 0.99999947194737793, 1.0510612137199506E-17);
-        validate(Momentum.factor(2), 1, 0.99998569318184616, 1.0096418147444105E-17);
-        validate(Momentum.factor(4), 3, 0.99987013368935596, 2.998915588392244E-17);
-        validate(Momentum.factor(6), 15, 0.99928863789470035, 1.4926804198403977E-16);
-        validate(Momentum.factor(8), 105, 0.99719860134891214, 1.0409495599106208E-15);
-        validate(Momentum.factor(10), 945, 0.99135593485973217, 9.33728878727979E-15);
+        assertEquals(Momentum.get(0) / 1, 1, 6e-7);
+        assertEquals(Momentum.get(2) / 1, 1, 2e-4);
+        assertEquals(Momentum.get(4) / 3, 1, 2e-3);
+        assertEquals(Momentum.get(6) / 15, 1, 7e-3);
+        assertEquals(Momentum.get(8) / 105, 1, 4e-2);
+        assertEquals(Momentum.get(10) / 945, 1, 1e-2);
       
-        assertEquals(0, Momentum.factor(1).value(), 0);
-        assertEquals(0, Momentum.factor(3).value(), 0);
-        assertEquals(0, Momentum.factor(5).value(), 0);
-        assertEquals(0, Momentum.factor(7).value(), 0);
-        assertEquals(0, Momentum.factor(9).value(), 0);
+        assertEquals(0, Momentum.get(1), 0);
+        assertEquals(0, Momentum.get(3), 0);
+        assertEquals(0, Momentum.get(5), 0);
+        assertEquals(0, Momentum.get(7), 0);
+        assertEquals(0, Momentum.get(9), 0);
     }
 
     /*
-     * Generate data for IPyNb/Momentum.ipynb.
+     * compare with Python calculation.
      */
     @Test
-    public void TestFactorDump() {
+    public void TestCompare() {
         System.out.println(System.getProperty("user.dir"));
-        try (
-            final FileWriter fw = new FileWriter("./Java/Output/Momentum.txt")) {
-            fw.write("2n\t(2n-1)!!\tValue\tUncertainty\n");
-            double doubleFactor = 1;
-            for (int i = 2; i <= Momentum.MAX_FACTOR; i += 2, doubleFactor *= (i - 1)) {
-                final VarDbl fac = Momentum.factor(i);
-                fw.write(String.format("%d\t%e\t%e\t%e\n", 
-                         i, doubleFactor, fac.value(), fac.uncertainty()));
+        try (   final BufferedReader fr = new BufferedReader(new FileReader("./Python/Output/NormalMomentum_5.txt"));
+                final FileWriter fw = new FileWriter("./Java/Output/NormalMomentum_5.txt")) {
+            String line = fr.readLine().strip();
+            assertEquals(line, "n\tMomentum\t!!Diff\tSigma=5.0");
+            fw.write("2n\tPython\tJava\tError\n");
+            for (int i = 0; i < Momentum.MAX_FACTOR; i += 2) {
+                line = fr.readLine().strip();
+                final String[] sWord = line.strip().split("\t");
+                assertEquals(i, Integer.parseInt(sWord[0]));
+                final double value = Double.parseDouble(sWord[1]);
+                fw.write(String.format("%d\t%e\t%e\t%e\n", i, value, Momentum.get(i), Momentum.get(i)/value - 1));
             }
-            fw.close();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             fail(e.getMessage());
         } 
     }

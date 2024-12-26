@@ -3,27 +3,14 @@ package Type;
 /*
  * The Taylor expansion is not strictly monotonic
  */
-public class NotMonotonicException extends Exception {
-    public final VarDbl[] s1dTaylor;
-    public final boolean inPrec, outPrec;
-    public final VarDbl input, value, variance;
-    public final int order;
-    public final  VarDbl newValue, newVariance, prevVariance;
+public class NotMonotonicException extends Taylor1dException {
     public NotMonotonicException(String msg, 
-                    final VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec,
-                    VarDbl input, VarDbl value, VarDbl variance,
-                    int order, VarDbl newValue, VarDbl newVariance, VarDbl prevVariance) {
-        super(msg);
-        this.s1dTaylor = s1dTaylor;
-        this.inPrec = inPrec;
-        this.outPrec = outPrec;
-        this.input = input;
-        this.value = value;
-        this.variance = variance;
-        this.order = order;
-        this.newValue = newValue;
-        this.newVariance = newVariance;
-        this.prevVariance = prevVariance;
+            String name, final UnionArray s1dTaylor, boolean inPrec, boolean outPrec,
+            VarDbl input, VarDbl value, VarDbl variance,
+            int order, VarDbl newValue, VarDbl newVariance, int monotonics) {
+        super(msg, name, s1dTaylor, inPrec, outPrec,
+                input, value, variance,
+                order, newValue, newVariance, monotonics);
     }
     
 }
