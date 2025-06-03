@@ -56,7 +56,6 @@ class VarDbl (numbers.Number):
             return round
         return VarDbl.ulp(float(value))
             
-
     __slots__ = ('_value', '_variance')
 
     def value(self):
@@ -180,7 +179,7 @@ class VarDbl (numbers.Number):
    
     def __pow__(self, exp):
         import taylor
-        return taylor.Taylor.pow(self, exp)
+        return taylor.Taylor.default().pow(self, exp)
     
     def __hash__(self) -> int:
         raise NotImplemented('Difficult to find hash')

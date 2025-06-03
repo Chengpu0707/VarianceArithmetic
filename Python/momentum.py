@@ -1,57 +1,67 @@
 import datetime
 import math
 import os
-
+import scipy.special
+import scipy.stats
 
 class Normal:
     '''
-    Calculate variance momentum.
+    Calculate variance momentum for the given {bounding}.
+    Detect the {_maxOrder} for the bounding, which is 442 when {bounding}=5.
 
-    {BINDING_FACTOR} is default to 5 for leakage smaller than 5e-7
-    {MAX_ORDER} is default to the max 122 before variance overflows
-
-    The accurate calculation of higher-order momentum of is too slow, so approximate calculation is used.
-
-    So far, manual run of unittest can only be carried out in VarianceArithemtic\Python folder.
-    So both FILE_APPROX and FILE_PRECISE has two location
+    The precise calculation of higher-order momentum of is too slow, 
+    so approximate calculation is used with {_divid} divisions.
+     *) {_filePrecise} stores the precise calculation.
+     *) {_fileApprox} stores the approximate calculation.
+     *) {_header} is the header of the output files.
+    
     '''
-    BINDING_FACTOR:float = 5.0
-    MAX_ORDER:int = 442
-    FILE_APPROX = ('./Python/Output/NormalMomentum_5.txt', './Output/NormalMomentum_5.txt')
-    FILE_PRECISE = ('./Python/NormalMomentum_5.txt', './NormalMomentum_5.txt')
 
-    __slots__ = ('_sMomentum', '_maxOrder', '_binding', '_header', '_divid')
+    __slots__ = ('_sMomentum', '_maxOrder', '_binding', '_header', '_divid', '_fileApprox', '_filePrecise')
 
-    def __init__(self, binding:float=BINDING_FACTOR, maxOrder:int=MAX_ORDER, divid:int=128,
+    @staticmethod
+    def calcLow(bounding:float, n:int) -> float:
+        if (n % 2) == 1:
+            return 0.0
+        if not (0 <= n <= 10):
+            raise ValueError(f'Invalid n {n} for lower calculation')
+        if not (0 <= bounding <= 10):
+            raise ValueError(f'Invalid bounding {bounding} for lower calculation')
+        first = scipy.special.erf(bounding / math.sqrt(2))
+        dfrac = 1.0
+        sum = 0
+        num = bounding * 2 * scipy.stats.norm.pdf(bounding)
+        for i in range(1, n // 2 + 1):
+            dfrac *= 2*i - 1
+            sum += num / dfrac
+            num *= bounding**2
+        return dfrac * (first - sum)
+    
+
+    def __init__(self, bounding:float=5.0, divid:int=128,
                  readCached:bool=True) -> None:
-        self._binding = binding
-        self._maxOrder = maxOrder
+        self._binding = bounding
         self._divid = divid
-        self._header = f'n\tMomentum\t!!Diff\tSigma={self._binding}\n'
+        self._header = f'n\tMomentum\t!!Diff\tSigma={bounding}\n'
+        self._fileApprox = f'./Python/Output/NormalMomentum_{bounding}.txt'
+        self._filePrecise = f'./Python/NormalMomentum_{bounding}.txt'
 
         self._sMomentum = []
         if readCached:
-            if os.path.isfile(Normal.FILE_APPROX[0]):
-                self._sMomentum = self._read(Normal.FILE_APPROX[0])
-                if len(self._sMomentum) > maxOrder:
-                    self._sMomentum = self._sMomentum[:maxOrder]
-            elif os.path.isfile(Normal.FILE_APPROX[1]):
-                self._sMomentum = self._read(Normal.FILE_APPROX[1])
-                if len(self._sMomentum) > maxOrder:
-                    self._sMomentum = self._sMomentum[:maxOrder]
+            if os.path.isfile(self._fileApprox):
+                self._sMomentum = self._read(self._fileApprox)
+                self._maxOrder = len(self._sMomentum) * 2
         if not self._sMomentum:
             self._sMomentum = self.approxCalc()
 
         if readCached:
-            if os.path.isfile(Normal.FILE_PRECISE[0]):
-                sMomentum = self._read(Normal.FILE_PRECISE[0])
-            elif os.path.isfile(Normal.FILE_PRECISE[1]):
-                sMomentum = self._read(Normal.FILE_PRECISE[1])
-            for i, mmt in enumerate(sMomentum):
-                self._sMomentum[i] = mmt
+            if os.path.isfile(self._filePrecise):
+                sMomentum = self._read(self._filePrecise)
+                for i, mmt in enumerate(sMomentum):
+                    self._sMomentum[i] = mmt
 
     @property
-    def binding(self):
+    def bounding(self):
         return self._binding
     
     @property
@@ -73,34 +83,32 @@ class Normal:
         try:
             import sympy
             try:
-                sMomentum = self._read(Normal.FILE_PRECISE[0])
+                sMomentum = self._read(self._filePrecise)
             except:
-                try:
-                    sMomentum = self._read(Normal.FILE_PRECISE[1])
-                except:
-                    sMomentum = []
+                sMomentum = []
             x = sympy.symbols("x", is_real=True)
             while ((n := len(sMomentum)*2) < self.maxOrder):
                 print(f'At {datetime.datetime.now()}, Calculate {n}/{self.maxOrder} momentum')
                 density = 1/sympy.sqrt(2*sympy.pi) * sympy.exp(-x**2/2) * x**n
-                mmt = sympy.integrate(density, (x, -self.binding, self.binding))
+                mmt = sympy.integrate(density, (x, -self.bounding, self.bounding))
                 if not math.isfinite(mmt):
                     print(f'The variance moment at {n} becomes inifinite')
                     break
                 sMomentum.append(mmt.evalf())
-                if self._write(Normal.FILE_PRECISE[0], sMomentum) or \
-                   self._write(Normal.FILE_PRECISE[1], sMomentum):
+                if self._write(self._filePrecise[0], sMomentum) or \
+                   self._write(self._filePrecise[1], sMomentum):
                     return True
-            print(f'Fail to write to either of {Normal.FILE_PRECISE}')
+            print(f'Fail to write to either of {self._filePrecise}')
             return False
         except BaseException as ex:
             print(f'Exception when calculating momentum {sMomentum}: {ex}')
             return False
 
-    def approxCalc(self) -> list[float]:       
-        sMomentum = [0] * (self._maxOrder // 2)
+    def approxCalc(self) -> list[float]:
         norm = 1.0 / math.sqrt(2*math.pi) / self._divid
-        limit = int(math.ceil(self._divid * self.binding))
+        limit = int(math.ceil(self._divid * self.bounding))
+        self._maxOrder = 1000       
+        sMomentum = [0] * (self._maxOrder // 2)
         for i in range(-limit, limit):
             x2 = (i + 0.5)**2 /self._divid**2
             pdf = norm * math.exp(- x2 * 0.5)
@@ -110,13 +118,12 @@ class Normal:
                     sMomentum[j] += pdf * sq
                     sq *= x2
                     if not math.isfinite(sMomentum[j]):
-                        raise ValueError(f'The {2*j}-th moment {sMomentum[j]} becomes overlow: {ex}')
+                        self._maxOrder = j * 2
                 except BaseException as ex:
-                    raise ValueError(f'The {2*j}-th moment {sMomentum[j]} becomes overlow: {ex}')
-        if (not self._write(Normal.FILE_APPROX[0], sMomentum)) and \
-           (not self._write(Normal.FILE_APPROX[1], sMomentum)):
+                    self._maxOrder = j * 2
+        if not self._write(self._fileApprox, sMomentum):
             raise ValueError('Approx calc of momentum failed')
-        return sMomentum
+        return sMomentum[:self.maxOrder // 2]
 
 
     def _write(self, file: str, sMomentum: list[float], withFac=False):

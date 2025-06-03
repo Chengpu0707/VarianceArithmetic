@@ -84,8 +84,6 @@ class RegressiveSin (IndexSin):
         '''
         Return None for successfully reading the file which contain sin with uncertainty.
         Otherwise return error string and restore the original float/int values
-
-        "binding" is for comparing the z-difference between lib sin/cos and the calculated sin/cos
         '''
         sSin = self._sSin[:]
         with open (RegressiveSin.path(self._order)) as f:
@@ -147,8 +145,6 @@ class RegressiveSin (IndexSin):
         '''
         Return None for successfully calculating the file which contain sin with uncertainty.
         Otherwise return error string
-
-        "binding" is for comparing the z-difference between lib sin/cos and the calculated sin/cos
         '''
         try:
             self.withUncertainty(incomplete=True)

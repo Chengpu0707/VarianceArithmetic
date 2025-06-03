@@ -7,6 +7,7 @@ Thus, each function needs to be calculated independently
 import collections
 import math
 import logging
+import scipy.special
 import typing
 import unittest
 
@@ -60,15 +61,26 @@ class NotFiniteException (Taylor1dException):
 Expansion = collections.namedtuple('Expansion', ('exp', 'val', 'var', 'newVal', 'newVar', 'monotonics'))
 
 
-class _Taylor:
-    TAU = 7.18e-7   # The stability test 
+class Taylor:
     MIN_MONOTONIC_COUNT = 20
 
-    __slots__ = ('_momentum')
+    @staticmethod
+    def default():
+        return _taylor
 
-    def __init__(self, binding:float = momentum.Normal.BINDING_FACTOR) -> None:
-        self._momentum = momentum.Normal(binding=binding)
+    __slots__ = ('_momentum', '_tau')
 
+    def __init__(self, bounding:float = 5.0, readCached:bool=True) -> None:
+        self._momentum = momentum.Normal(bounding=bounding, readCached=readCached)
+        self._tau = scipy.special.erfinv(1 - scipy.special.erf(bounding/math.sqrt(2)))*math.sqrt(2)
+
+    @property
+    def momentum(self):
+        return self._momentum
+
+    @property
+    def tau(self):
+        return self._tau
 
     @staticmethod
     def _writeList(fw, name, sList:tuple[typing.Union[float, VarDbl]]):
@@ -107,8 +119,8 @@ class _Taylor:
         return "Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n"
     
 
-    def _taylor1d(self, input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
-                 inPrec:bool, outPrec:bool, maxOrder:int=momentum.Normal.MAX_ORDER, 
+    def taylor1d(self, input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
+                 inPrec:bool, outPrec:bool, maxOrder:int=0, 
                  checkMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True,
                  dumpPath:str=None):
         '''
@@ -116,7 +128,7 @@ class _Taylor:
         When {inPrec} is true, calculate Taylor expnasion against the precision of {input}.
         When {outPrec} is true, the result of the Taylor expnasion is the precision.
         s1dTaylor[n] should already normalized by /n!. 
-        The max order of expansion is {maxOrder}, which should not exceed momentum.Normal.MAX_ORDER
+        The max order of expansion is {self.momentum.maxOrder}, which should not exceed {self.momentum.maxOrder}
 
         When {checkMonotonic} is true, raise {NotMonotonicException} if 
             after full expansion, the monotonic count is still less than {MIN_MONOTONIC_COUNT}.
@@ -128,7 +140,7 @@ class _Taylor:
         It should always be True.
 
         When {checkReliablity} is true, raise {NotReliableException} if
-            the precision of the result variance is more than 1/5, in which 5 is the binding factor.
+            the precision of the result variance is more than 1/5, in which 5 is the bounding factor.
         It should always be True.
 
         When {checkPositive} is true, raise {NotPosive} if
@@ -141,6 +153,8 @@ class _Taylor:
         Dump the expansion to {dumpPath} when it is provided.
         {dumpPath} can be read back and tested using verifyDumpFile()
         '''
+        if not maxOrder:
+            maxOrder = self._momentum.maxOrder
         for n in range(len(s1dTaylor)):
             if isinstance(s1dTaylor[n], VarDbl):
                 if (not math.isfinite(s1dTaylor[n].value())) or (not math.isfinite(s1dTaylor[n].variance())):
@@ -158,13 +172,13 @@ class _Taylor:
         fw = None
         if dumpPath:
             fw = open(dumpPath, "w")
-            fw.write(_Taylor.headerForInput())
+            fw.write(Taylor.headerForInput())
             fw.write(f"{name}\t{input.value()}\t{input.uncertainty()}\t{input.variance()}"
                      f"\t{inPrec}\t{outPrec}"
-                     f"\t{self._momentum._binding}\t{maxOrder}\t{_Taylor.MIN_MONOTONIC_COUNT}"
+                     f"\t{self._momentum._binding}\t{maxOrder}\t{Taylor.MIN_MONOTONIC_COUNT}"
                      f"\t{checkMonotonic}\t{checkStability}\t{checkReliablity}\t{checkPositive}\tFalse\n")
-            _Taylor._writeList(fw, "Taylor1d", s1dTaylor)
-            fw.write(_Taylor.headerForExpansion())
+            Taylor._writeList(fw, "Taylor1d", s1dTaylor)
+            fw.write(Taylor.headerForExpansion())
 
         monotonics = 0
 
@@ -214,7 +228,7 @@ class _Taylor:
                     fw.write(f"Fail\t{ex}\t{n}\t{j}\t{s1dTaylor[j]}\t{s1dTaylor[n - j]}\t{self._momentum[n]}\n")
                 raise ex
             if not finite:
-                if checkMonotonic and (monotonics >= _Taylor.MIN_MONOTONIC_COUNT):
+                if checkMonotonic and (monotonics >= Taylor.MIN_MONOTONIC_COUNT):
                     value = oldValue
                     variance = oldVariance
                     newValue = prevValue
@@ -247,13 +261,13 @@ class _Taylor:
             if varn == 0:
                 break
 
-        if checkMonotonic and (varn > 0) and (monotonics < _Taylor.MIN_MONOTONIC_COUNT):
+        if checkMonotonic and (varn > 0) and (monotonics < Taylor.MIN_MONOTONIC_COUNT):
             if fw:
                 fw.write("NotMonotonicException\n")
                 fw.close()
             raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
-        unc = math.sqrt(value.variance() + variance.value()) *_Taylor.TAU
+        unc = math.sqrt(value.variance() + variance.value()) * self.tau
         if checkStability and not ((abs(newValue.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
             if fw:
                 fw.write(f"NotStableException\t{n}\t{len(s1dTaylor)}\t{unc}\n")
@@ -271,14 +285,14 @@ class _Taylor:
                     fw.close()
                 raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
-        if checkReliablity and (variance.value() * self._momentum.binding < variance.uncertainty()):
+        if checkReliablity and (variance.value() * self._momentum.bounding < variance.uncertainty()):
             if fw:
                 fw.write("NotReliableException\n")
                 fw.close()
             raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
         if fw:
-            fw.write(_Taylor.headerForResult())
+            fw.write(Taylor.headerForResult())
             fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
             fw.close()
         try:
@@ -290,40 +304,42 @@ class _Taylor:
             raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance)
 
+
     @staticmethod   
-    def verifyDumpFile(self:unittest.TestCase, dumpPath:str, checkExp=True)\
+    def verifyDumpFile(testcase:unittest.TestCase, dumpPath:str, checkExp=True)\
             -> tuple[VarDbl, list[float], Expansion, typing.Union[VarDbl, str]]:
         '''
         When input uncertainty is rounding error, checkExp=False
         '''
         with open(dumpPath) as f:
-            self.assertEqual(next(f), _Taylor.headerForInput())
+            testcase.assertEqual(next(f), Taylor.headerForInput())
             sWord = next(f).strip().split('\t')
             x = VarDbl(sWord[1], sWord[2])
-            self.assertEqual(len(sWord), len(_Taylor.headerForInput().split('\t')))
+            testcase.assertEqual(len(sWord), len(Taylor.headerForInput().split('\t')))
             sWord = next(f).strip().split('\t')
-            self.assertEqual(sWord[0], 'Index:')
+            testcase.assertEqual(sWord[0], 'Index:')
             n = len(sWord) - 1
-            self.assertListEqual(sWord[1:], [f'{i}' for i in range(n)])
+            testcase.assertListEqual(sWord[1:], [f'{i}' for i in range(n)])
             sWord = next(f).strip().split('\t')
-            self.assertEqual(len(sWord), n + 1)
-            self.assertEqual(sWord[0], 'Taylor1d Value:')
+            testcase.assertEqual(len(sWord), n + 1)
+            testcase.assertEqual(sWord[0], 'Taylor1d Value:')
             sTaylor = list(map(float, sWord[1:]))
-            self.assertEqual(next(f), _Taylor.headerForExpansion())
+            testcase.assertEqual(next(f), Taylor.headerForExpansion())
             sExpansion = []
             infinite = False
-            for n in range(2, momentum.Normal.MAX_ORDER, 2):
+            mmt = momentum.Normal()
+            for n in range(2, mmt.maxOrder, 2):
                 sWord = next(f).strip().split('\t')
                 try:
                     nn = int(sWord[0])
                 except ValueError:
                     break
-                self.assertEqual(n, nn)
+                testcase.assertEqual(n, nn)
                 try:
                     monotonics = int(sWord[1])
                     exp = float(sWord[2])
                     if checkExp:
-                        self.assertAlmostEqual(x.uncertainty() **n / exp, 1)
+                        testcase.assertAlmostEqual(x.uncertainty() **n / exp, 1)
                     val = VarDbl(sWord[4], sWord[5])
                     var = VarDbl(sWord[6], sWord[7])
                     newVal = VarDbl(sWord[8], sWord[9])
@@ -333,48 +349,25 @@ class _Taylor:
                 sExpansion.append(Expansion(exp, val, var, newVal, newVar, monotonics))
             else:
                 sWord = next(f).strip().split('\t')
-            if _Taylor.headerForResult().startswith(sWord[0]):
+            if Taylor.headerForResult().startswith(sWord[0]):
                 sWord = next(f).strip().split('\t')
                 res = VarDbl(sWord[0], float(sWord[1]) + float(sWord[2]), True)
             else:
                 res = sWord[0]
                 if infinite:
-                    self.assertEqual(res, 'NotFiniteException')
+                    testcase.assertEqual(res, 'NotFiniteException')
             return x, sTaylor, sExpansion, res
     
 
 
-class Taylor:  
-    TAU = _Taylor.TAU
-    MIN_MONOTONIC_COUNT = _Taylor.MIN_MONOTONIC_COUNT
-    MAX_POLY_ORDER = momentum.Normal.MAX_ORDER // 2
-    _taylor = _Taylor()
-
-    @staticmethod
-    def maxOrder():
-        return Taylor._taylor._momentum.maxOrder
-    
-    @staticmethod
-    def taylor1d(input:VarDbl, name:str, sTaylor:tuple[float], 
-                 inPrec:bool, outPrec:bool, 
-                 dumpPath:str=None):
-        return Taylor._taylor._taylor1d(input, name, sTaylor, 
-                 inPrec, outPrec, maxOrder=Taylor.maxOrder,
-                 dumpPath=dumpPath)
-    
-    @staticmethod   
-    def verifyDumpFile(self:unittest.TestCase, dumpPath:str, checkExp=True):
-        return _Taylor.verifyDumpFile(self, dumpPath, checkExp=checkExp)
-
-    @staticmethod
-    def polynominal(input:VarDbl, sCoeff:tuple[float],
+    def polynominal(self, input:VarDbl, sCoeff:tuple[float],
                     dumpPath:str=None):
         '''
         1d Taylor expansion for polynominal at "input" with "sCoeff".
         Allow input.value() +- input.uncertainty() to include 0
         '''
-        if len(sCoeff) > (Taylor.MAX_POLY_ORDER):
-            raise ValueError(f'The lenght {len(sCoeff)} of polynominal coefficient is more than half of {Taylor.maxOrder()}: {sCoeff}')
+        if len(sCoeff) > (self.momentum.maxOrder // 2):
+            raise ValueError(f'The lenght {len(sCoeff)} of polynominal coefficient is more than half of {self.momentum.maxOrder // 2}: {sCoeff}')
         exp = len(sCoeff) - 1
         s1dTaylor = [sCoeff[0]] + [0] * 2*exp
         sPow = [1, input.value()]
@@ -390,33 +383,30 @@ class Taylor:
             for k in range(j + 1):
                 s1dTaylor[k] += coeff * sTaylor[k] * sPow[j - k]
                  
-        return Taylor._taylor._taylor1d(input, f'poly({sCoeff})', s1dTaylor, False, False, 
+        return self.taylor1d(input, f'poly({sCoeff})', s1dTaylor, False, False, 
                 dumpPath = dumpPath, checkMonotonic = False, checkStability = False)
 
-    @staticmethod
-    def exp(input:VarDbl, dumpPath:str=None) -> VarDbl:
+    def exp(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
         sTaylor = [math.exp(input.value()), 1.0]
-        for i in range(2, Taylor.maxOrder()):
+        for i in range(2, self.momentum.maxOrder):
             sTaylor.append(sTaylor[-1]/i)
-        return Taylor._taylor._taylor1d(input, f"exp({input})", sTaylor, False, True, 
+        return self.taylor1d(input, f"exp({input})", sTaylor, False, True, 
                     dumpPath=dumpPath)
     
-    @staticmethod
-    def log(input:VarDbl, dumpPath:str=None) -> VarDbl:
+    def log(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         sTaylor.append(math.log(input.value()))
-        for i in range(1, Taylor.maxOrder()):
+        for i in range(1, self.momentum.maxOrder):
             sTaylor.append(1/i if ((i%2) == 1) else -1/i)
-        return Taylor._taylor._taylor1d(input, f"log({input})", sTaylor, True, False, 
+        return self.taylor1d(input, f"log({input})", sTaylor, True, False, 
                     dumpPath=dumpPath)
 
-    @staticmethod
-    def sin(input:VarDbl, dumpPath:str=None) -> VarDbl:
+    def sin(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         x = input.value()
         sTaylor.append( math.sin(x) )
         fac = 1.0
-        for i in range(1, Taylor.maxOrder()):
+        for i in range(1, self.momentum.maxOrder):
             fac /= i
             match i % 4:
                 case 0:
@@ -427,11 +417,10 @@ class Taylor:
                     sTaylor.append(-math.sin(x) *fac)
                 case 3:
                     sTaylor.append(-math.cos(x) *fac)
-        return Taylor._taylor._taylor1d(input, f"sin({input})", sTaylor, False, False, 
+        return self.taylor1d(input, f"sin({input})", sTaylor, False, False, 
                     dumpPath=dumpPath)
     
-    @staticmethod
-    def pow(input:VarDbl, exp:float, dumpPath:str=None) -> VarDbl:
+    def pow(self, input:VarDbl, exp:float, dumpPath:str=None) -> VarDbl:
         match exp:
             case 0:
                 return VarDbl(1, 0)
@@ -440,11 +429,12 @@ class Taylor:
         if (exp > 0) and ((type(exp) == int) or (math.ceil(exp) == math.floor(exp))):
             sCoeff = [0] * int(exp)
             sCoeff.append(1)
-            return Taylor.polynominal(input, sCoeff, dumpPath=dumpPath)
+            return self.polynominal(input, sCoeff, dumpPath=dumpPath)
         sTaylor = [math.pow(input.value(), exp), exp]
-        for i in range(2, Taylor.maxOrder()):
+        for i in range(2, self.momentum.maxOrder):
             sTaylor.append( sTaylor[-1]/i * (exp + 1 - i) )
-        return Taylor._taylor._taylor1d(input, f"({input})**{exp}", sTaylor, True, True, 
+        return self.taylor1d(input, f"({input})**{exp}", sTaylor, True, True, 
                     dumpPath=dumpPath)
     
 
+_taylor = Taylor()  # Singleton instance   
