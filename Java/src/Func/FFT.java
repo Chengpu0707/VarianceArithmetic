@@ -154,10 +154,10 @@ public class FFT {
 
         for (int i = 0; i < (sIndex.length - 1); i += 2 ) {
             final VarDbl rt = sRes[(i << 1)].clone(), it = sRes[(i << 1) + 1].clone();
-            sRes[(i << 1)].add(sRes[(i << 1) + 2], true);
-            sRes[(i << 1) + 1].add(sRes[(i << 1) + 3], true);
-            sRes[(i << 1) + 2] = rt.minus(sRes[(i << 1) + 2], true);
-            sRes[(i << 1) + 3] = it.minus(sRes[(i << 1) + 3], true);
+            sRes[(i << 1)].addInPlace(sRes[(i << 1) + 2]);
+            sRes[(i << 1) + 1].addInPlace(sRes[(i << 1) + 3]);
+            sRes[(i << 1) + 2] = rt.minusInPlace(sRes[(i << 1) + 2]);
+            sRes[(i << 1) + 3] = it.minusInPlace(sRes[(i << 1) + 3]);
         }
         if (fw != null) {
             fw.write("\n1\tReal");
@@ -186,8 +186,8 @@ public class FFT {
             
                     sRes[idx1] = sRes[idx0].minus(rd);
                     sRes[idx1 + 1] = sRes[idx0 + 1].minus(id);
-                    sRes[idx0].add(rd, true);
-                    sRes[idx0 + 1].add(id, true);
+                    sRes[idx0].addInPlace(rd);
+                    sRes[idx0 + 1].addInPlace(id);
                 }   // for( i
             }
             if (fw != null) {
@@ -205,7 +205,7 @@ public class FFT {
         
         if (!forward) {
             for (int i = 0; i < (sIndex.length << 1); i ++ ) {
-                sRes[i].multiply(new VarDbl(1.0/(1L << order), 0), true);
+                sRes[i].multiplyInPlace(new VarDbl(1.0/(1L << order), 0));
             }
             if (fw != null) {
                 fw.write("\nOutput\tReal");

@@ -25,7 +25,7 @@ namespace var_dbl
 
 struct VarDbl;
 
-using UnionVector = std::variant<std::vector<VarDbl>, std::vector<double>>;
+using UnionVector = std::variant<std::vector<VarDbl>, std::vector<double>, std::vector<int>>;
 
 
 struct VarDbl { 
@@ -35,10 +35,7 @@ struct VarDbl {
         // z for 50% probability of equal
 
     // Taylor expansion
-    constexpr static const int BINDING_FOR_TAYLOR = 5;
-    constexpr static const double VARIANCE_THRESHOLD = 1.0 /BINDING_FOR_TAYLOR /BINDING_FOR_TAYLOR;
     constexpr static const int MIN_MONOTONIC_COUNT = 20;
-    constexpr static const double TAU = 7.18e-7;  
     constexpr static const long PRECISE_SIGNIFICAND_TAIL_BITS = 23;
 
     constexpr static const char* INPUT_HEADER = 
@@ -139,7 +136,7 @@ public:
 
         When {checkStability} is true, raise {NotStableException} if 
             after full expansion, the value for the last expansion term is more than 
-            TAU-fold of the expansion uncertainty.
+            _momentum.LEAKAGE-fold of the expansion uncertainty.
         It should always be True.
 
         When {checkReliablity} is true, raise {NotReliableException} if
@@ -168,6 +165,8 @@ public:
     /*
      1d polynominal with coeeficient {sCoeff}
     */
+    VarDbl polynominal(const std::vector<int>& sCoeff,
+                       const char* const dumpPath=nullptr) const;
     VarDbl polynominal(const std::vector<double>& sCoeff,
                        const char* const dumpPath=nullptr) const;
     VarDbl polynominal(const std::vector<VarDbl>& sCoeff,
@@ -175,7 +174,7 @@ public:
 
 };
 
-const NormalMomentum VarDbl::_momentum(VarDbl::BINDING_FOR_TAYLOR);
+const NormalMomentum VarDbl::_momentum;
 
 
 
@@ -554,7 +553,7 @@ inline VarDbl VarDbl::taylor1d(
         ofs << INPUT_HEADER <<"\n";
         ofs << name << '\t' << value() << '\t' << uncertainty() << '\t' << variance() << '\t' 
             << inPrec << '\t' << outPrec << '\t' 
-            << BINDING_FOR_TAYLOR << '\t' << _momentum.size() << '\t' 
+            << _momentum.BOUNDING << '\t' << _momentum.maxOrder() << '\t' 
             << checkMonotonic << '\t' << checkStability << '\t' << checkReliablity << '\t' << checkPositive<< '\n';
         ofs << "Index";
         for (size_t i = 0; i < size; ++i)
@@ -581,8 +580,9 @@ inline VarDbl VarDbl::taylor1d(
     double varn = var;
     VarDbl prevValue, prevVariance, newValue, newVariance;
     size_t monotonics = 0;
+    bool monotonicPrev = true;
     size_t n = 2;
-    for (; (n < _momentum.size()) && (n < size) && std::isfinite(varn) && (varn > 0); n += 2, varn *= var) {
+    for (; (n < _momentum.maxOrder()) && (n < size) && std::isfinite(varn) && (varn > 0); n += 2, varn *= var) {
         const VarDbl oldValue = value;
         const VarDbl oldVariance = variance;
         std::string except;
@@ -633,6 +633,8 @@ inline VarDbl VarDbl::taylor1d(
 
         if (abs(newVariance.value()) <= abs(prevVariance.value()))
             monotonics += 1;
+        else if ((monotonics >= VarDbl::MIN_MONOTONIC_COUNT) && monotonicPrev) 
+            monotonicPrev = false;
         else
             monotonics = 0;
         if (ofs) {
@@ -664,7 +666,7 @@ inline VarDbl VarDbl::taylor1d(
         throw NotMonotonicException(name, *this, s1dTaylor, inPrec, outPrec,
                     value, variance, n, monotonics, newValue, newVariance);
     }
-    const double unc = std::sqrt(variance.value()) *TAU;
+    const double unc = std::sqrt(variance.value()) *_momentum.LEAKAGE;
     if (checkStability && !((std::abs(prevValue.value()) < unc) || (std::abs(prevValue.value()) < var_dbl::ulp(value.value())))) {
         if (ofs) {
             ofs << "NotStableException\t" << unc << "\t" << var_dbl::ulp(value.value()) << "\n";
@@ -718,6 +720,11 @@ inline VarDbl VarDbl::polynominal(const std::vector<double>& sCoeff, const char*
     return polynominal(UnionVector(sCoeff), dumpPath);
 }
 
+inline VarDbl VarDbl::polynominal(const std::vector<int>& sCoeff, const char* const dumpPath) const
+{
+    return polynominal(UnionVector(sCoeff), dumpPath);
+}
+
 
 inline VarDbl VarDbl::polynominal(UnionVector sCoeff, const char* const dumpPath) const
 {
@@ -726,7 +733,7 @@ inline VarDbl VarDbl::polynominal(UnionVector sCoeff, const char* const dumpPath
     const double* const sDbl = isDbl? std::get<std::vector<double>>(sCoeff).data() : nullptr;
     const VarDbl* const sVar = isDbl? nullptr : std::get<std::vector<VarDbl>>(sCoeff).data();
 
-    if (size >= VarDbl::_momentum.size()*2) {
+    if (size >= VarDbl::_momentum.maxOrder()*2) {
         std::ostringstream oss;
         oss << "coefficient length " << size << " is too large!";
         throw std::invalid_argument(oss.str());
@@ -788,10 +795,10 @@ inline VarDbl VarDbl::polynominal(UnionVector sCoeff, const char* const dumpPath
 inline VarDbl VarDbl::exp(const char* const dumpPath) const
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(_momentum.size());
+    sTaylor.reserve(_momentum.maxOrder());
     sTaylor.push_back(std::exp(value()));
     double n = 1;
-    for (size_t i = 1; i < _momentum.size(); ++i) {
+    for (size_t i = 1; i < _momentum.maxOrder(); ++i) {
         n *= 1.0 / i;
         sTaylor.push_back(n);
     }
@@ -803,9 +810,9 @@ inline VarDbl VarDbl::exp(const char* const dumpPath) const
 inline VarDbl VarDbl::log(const char* const dumpPath) const 
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(_momentum.size());
+    sTaylor.reserve(_momentum.maxOrder());
     sTaylor.push_back(std::log(value()));
-    for (size_t i = 1; i < _momentum.size(); ++i) {
+    for (size_t i = 1; i < _momentum.maxOrder(); ++i) {
         sTaylor.push_back((((i%2) == 1)? 1.0 : -1.0) / i);
     }
     std::ostringstream os;
@@ -816,10 +823,10 @@ inline VarDbl VarDbl::log(const char* const dumpPath) const
 inline VarDbl VarDbl::sin(const char* const dumpPath) const 
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(_momentum.size());
+    sTaylor.reserve(_momentum.maxOrder());
     sTaylor.push_back(std::sin(value()));
     double n = 1;
-    for (size_t i = 1; i < _momentum.size(); ++i) {
+    for (size_t i = 1; i < _momentum.maxOrder(); ++i) {
         n *= 1.0 / i;
         switch (i % 4) {
             case 0:
@@ -853,10 +860,10 @@ inline VarDbl VarDbl::pow(double exp, const char* const dumpPath) const
         return polynominal(UnionVector(sCoeff));
     }
     std::vector<double> sTaylor;
-    sTaylor.reserve(_momentum.size());
+    sTaylor.reserve(_momentum.maxOrder());
     sTaylor.push_back(std::pow(value(), exp));
     sTaylor.push_back(exp);
-    for (size_t i = 2; i < _momentum.size(); ++i) {
+    for (size_t i = 2; i < _momentum.maxOrder(); ++i) {
         sTaylor.push_back(sTaylor[i - 1] * ((exp + 1)/i - 1));
     }
     std::ostringstream os;

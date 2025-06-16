@@ -41,15 +41,15 @@ int main()
             break;
         }
     }
-    test::assertEqual(i, 20089);
+    test::assertEqual(i, 20087);
     std::vector<double> sX{1., 2., 1./2, 4., 1./4, 8., 1./8, 16., 1./16, 64., 1./64};
     for (double value: sX) {
         validate_log(value, 0);
         validate_log(value, 0.1 * value);
         validate_log(value, 0.15 * value);
-        validate_log(value, 0.20089 * value, "NotMonotonicException");
-        const VarDbl res = validate_log(value, 0.20088 * value, 2e-3);
-        test::assertAlmostEqual(res.uncertainty(), 0.213075, 1e-6);
+        validate_log(value, 0.20087 * value, "NotMonotonicException");
+        const VarDbl res = validate_log(value, 0.20086 * value, 2e-3);
+        test::assertAlmostEqual(res.uncertainty(), 0.2130506, 1e-6);
     } 
 
     stat_func("Log", 

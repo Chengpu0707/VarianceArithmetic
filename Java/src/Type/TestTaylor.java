@@ -14,6 +14,7 @@ import Stats.Histogram;
 import Stats.Stat;
 
 
+
 public class TestTaylor {
     static final int HIST_RANGE = 3;
     static final int HIST_DIVIDS = 5;
@@ -156,13 +157,13 @@ public class TestTaylor {
         assertEquals(r, sTaylor[0], REPR_DELTA);
         if ((exp > 0) && (Math.floor(exp) == Math.ceil(exp))) {
             final int n = (int) exp;
-            assertTrue(sTaylor.length < Momentum.MAX_FACTOR);
+            assertTrue(sTaylor.length < VarDbl.momentum.maxOrder);
             assertEquals(sTaylor[1], n * Math.pow(x, n - 1), REPR_DELTA);
             assertEquals(sTaylor[n], 1, REPR_DELTA);
             for (int i = n + 1; i < sTaylor.length; ++i)
             assertEquals(sTaylor[i], 0, 0);
         } else {
-            assertEquals(sTaylor.length, Momentum.MAX_FACTOR);
+            assertEquals(sTaylor.length, VarDbl.momentum.maxOrder);
             assertEquals(exp/1, sTaylor[1], Math.ulp(sTaylor[1]));
             assertEquals(exp*(exp - 1)/2, sTaylor[2], Math.ulp(sTaylor[2]));
         }
@@ -172,11 +173,11 @@ public class TestTaylor {
             assertTrue(0 <= exp);
             assertTrue(Math.floor(exp) == Math.ceil(exp));
             int n = (int) exp;
-            double value = Math.pow(dx, n) * Momentum.get(2);
+            double value = Math.pow(dx, n) * VarDbl.momentum.get(2);
             double variance = 0;
             n *= 2;
             for (int i = 1; i < n; ++i) {
-                variance += sTaylor[i] * sTaylor[n - i] * (Momentum.get(n) - Momentum.get(i)*Momentum.get(n - i));
+                variance += sTaylor[i] * sTaylor[n - i] * (VarDbl.momentum.get(n) - VarDbl.momentum.get(i) * VarDbl.momentum.get(n - i));
             }
             variance *= Math.pow(dx, n);
             if ((value == 0))
@@ -193,7 +194,7 @@ public class TestTaylor {
                     Math.pow(pr, 2) * exp*(exp-1)/2. + 
                     Math.pow(pr, 4) * exp*(exp-1)*(exp-2)*(exp-3)/24. +
                     Math.pow(pr, 6) * exp*(exp-1)*(exp-2)*(exp-3)*(exp-4)*(exp-5)/720.;
-                    final double variance = Math.pow(pr, 2) * exp*exp + 
+            final double variance = Math.pow(pr, 2) * exp*exp + 
                     Math.pow(pr, 4) * exp*exp*(exp-1)*(exp-5./3)*3/2 +
                     Math.pow(pr, 6) * exp*exp*(exp-1)*(exp-2)*(exp-2)*(exp-16./7)*7./6;
             if ((r == 0) || (value == 0))
@@ -256,6 +257,14 @@ public class TestTaylor {
     }
 
     @Test
+    public void testPow_3() 
+            throws IOException {
+        validatePow(3.01, 1, 0.2023, 7e-6, 5e-5, null);
+        validatePow(3.02, 1, 0.2023, 2e-5, 5e-5, null);
+        validatePow(3.02, 1, 0.1900, 2e-5, 5e-5, null);
+    }
+
+    @Test
     public void testPow_half() 
             throws IOException {
         validatePow(0.5, 1, 0.1, 9e-6, 6e-6, null);
@@ -272,8 +281,8 @@ public class TestTaylor {
         validatePow(-1, 1, 0.1, 3e-4, 7e-4, null);
         validatePow(-1, 10, 1, 3e-4, 7e-4, null);
         validatePow(-1, 0.1, 1, 0, 0, "NotFiniteException");
-        validatePow(-1, 1, 0.20005, 0, 0, "NotMonotonicException");
-        validatePow(-1, 1, 0.20004, 5e-3, 2e-1, null);
+        validatePow(-1, 1, 0.20003, 0, 0, "NotMonotonicException");
+        validatePow(-1, 1, 0.20002, 5e-3, 2e-1, null);
     }
 
     @Test
@@ -319,7 +328,7 @@ public class TestTaylor {
                     var.variance() /Math.exp(x)/Math.exp(x), precVar);
         VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
         final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(Momentum.MAX_FACTOR, sTaylor.length);
+        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
         assertEquals(Math.exp(x), sTaylor[0], REPR_DELTA);
         assertEquals(1.0/1, sTaylor[1], REPR_DELTA);
         assertEquals(1.0/2, sTaylor[2], REPR_DELTA);
@@ -365,7 +374,7 @@ public class TestTaylor {
                     var.variance(), deltaVar);
         VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
         final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(Momentum.MAX_FACTOR, sTaylor.length);
+        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
         assertEquals(sTaylor[0], Math.log(x), REPR_DELTA);
         assertEquals(1.0/1, sTaylor[1], REPR_DELTA);
         assertEquals(-1.0/2, sTaylor[2], REPR_DELTA);
@@ -415,7 +424,7 @@ public class TestTaylor {
                     var.variance(), deltaVar);
         VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
         final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(Momentum.MAX_FACTOR, sTaylor.length);
+        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
         assertEquals(sTaylor[0], sin, REPR_DELTA);
         assertEquals(+cos/1, sTaylor[1], REPR_DELTA);
         assertEquals(-sin/2, sTaylor[2], REPR_DELTA);

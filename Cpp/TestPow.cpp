@@ -40,6 +40,8 @@ VarDbl validate_pow(double value, double uncertainty, std::string exception)
 
 int main() 
 {
+    VarDbl(1,0.2).pow(-1, "./Output/pow_1_0.2_-2.txt");
+
     validate_pow(0, 0);
     validate_pow(0, 0.1);
     validate_pow(0, 0.2);
@@ -61,17 +63,16 @@ int main()
     validate_pow(0.5, 0);
     validate_pow(0.5, 0.1);
     validate_pow(0.5, 0.2);
-    validate_pow(0.5, 1, "NotFiniteException");
+    validate_pow(0.5, 0.21, "NotMonotonicException");
 
     validate_pow(-1, 0);
     validate_pow(-1, 0.1);
     validate_pow(-1, 0.2, 5e-3, 8e-3);
-    validate_pow(-1, 1, "NotFiniteException");
+    validate_pow(-1, 0.21, "NotMonotonicException");
 
     validate_pow(-2, 0);
     validate_pow(-2, 0.1, 2e-3);
-    validate_pow(-2, 0.2, "NotMonotonicException");
-    validate_pow(-2, 1, "NotFiniteException");
+    validate_pow(-2, 0.21, "NotMonotonicException");
 
     std::vector<double> sX;
     const int DIVIDS = 30;

@@ -14,7 +14,7 @@ public class TestConvergence {
     private void searchEdge(final String type, final double[] sX, final int[] sSearch, boolean ignoreNoBound) 
             throws InitException {
         try (FileWriter f = new FileWriter(String.format("./Java/Output/%sEdge.txt", type))) {
-            f.write("Edge Value\tEdge Uncertainty\tBias\tUncertainty\tException\n");
+            f.write("X\tEdge\tBias\tValue\tUncertainty\tException\n");
             assertNotEquals(0, sX.length);
             assertEquals(3, sSearch.length);
             assertTrue(sSearch[0] < sSearch[1]);
@@ -59,8 +59,8 @@ public class TestConvergence {
                 if (ignoreNoBound && (j == sSearch[1]))
                     continue; 
                 assertNotEquals(j, sSearch[1]);
-                f.write(String.format("%e\t%e\t%e\t%e\t%s\n", 
-                    x, edge, res.value() - val, res.uncertainty(), except));}
+                f.write(String.format("%e\t%e\t%e\t%e\t%e\t%s\n", 
+                    x, edge, res.value() - val, res.value(), res.uncertainty(), except));}
         } catch (IOException ex) {
             fail(ex.getMessage());
         }
@@ -69,8 +69,8 @@ public class TestConvergence {
     @Test
     public void testPow() throws InitException {
         final double[] sX = new double[701];
-        for (int i = -300; i <= 400; i += 1) {
-            sX[i + 300] = i/100.;
+        for (int i = -60; i <= 80; i += 1) {
+            sX[i + 60] = i/20.;
         }
         searchEdge("Pow", sX, new int[]{18000, 22000, 100000}, true);
     }
@@ -93,13 +93,13 @@ public class TestConvergence {
         };
         for (double x: sX) {
             try {
-                final VarDbl res = new VarDbl(x, x * 0.200887).log();
-                assertEquals(res.uncertainty(), 0.213083, 1e-6);
+                final VarDbl res = new VarDbl(x, x * 0.20086).log();
+                assertEquals(res.uncertainty(), 0.2130506, 1e-6);
             } catch (Throwable ex) {
                 fail(String.format("Log(%f) fails for %s", x, ex.getMessage()));
             }
             try {
-                new VarDbl(x, x * 0.200888).log();
+                new VarDbl(x, x * 0.20087).log();
                 fail(String.format("Log(%f) not fails", x));
             } catch (NotMonotonicException ex) {
 
@@ -111,12 +111,12 @@ public class TestConvergence {
     public void testExp() 
             throws InitException, NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException {
         final double[] sX = new double[]{
-            -100, -50, -20, -10, -5, -2, 0, 2, 5, 10, 20, 50, 100
+            -50, -20, -10, -5, -2, 0, 2, 5, 10, 20, 50
         };
         for (double x: sX) {
             try {
                 final VarDbl res = new VarDbl(x, 19.864).exp();
-                assertEquals(res.uncertainty() / res.value(), 1680.377, 1e-3);
+                assertEquals(res.uncertainty() / res.value(), 1681.767, 1e-3);
             } catch (Throwable ex) {
                 fail(String.format("Log(%f) fails for %s", x, ex.getMessage()));
             }

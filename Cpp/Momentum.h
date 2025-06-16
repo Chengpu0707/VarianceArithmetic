@@ -15,45 +15,63 @@ namespace var_dbl
 
 class NormalMomentum {
 public:
-    NormalMomentum(double BINDING=5, size_t DIVID=128);
-    double operator[](size_t i) const;
-    size_t size() const { return _sFactor.size(); }
+    static double pdf(double z);
 
-    const double BINDING;
+    NormalMomentum(double BOUNDING=5, size_t MAX_ORDER = 10000);
+    double operator[](size_t i) const;
+    size_t maxOrder() const { return _sMomentum.size() * 2; }
+
+    const double BOUNDING;
+    const double LEAKAGE;
 private:
-    std::vector<double> _sFactor;
+    std::vector<double> _sMomentum;
 };
 
 
-inline NormalMomentum::NormalMomentum(double BINDING, size_t DIVID) 
-        : BINDING(BINDING), _sFactor(2000) { 
-    const double divid2 = DIVID * DIVID;
-    const double norm = 1.0/sqrt(2*std::numbers::pi) / DIVID;
-    const long limit = DIVID * BINDING;
-    for (long i = -limit ; i < limit; ++i) {
-        const double x2 = (i + 0.5)*(i + 0.5) / divid2;
-        const double pdf = norm * exp(- x2 * 0.5);
-        double sq = 1;
-        for (int j = 0; j < _sFactor.size(); j += 2) {
-            if (! std::isfinite(_sFactor[j]))
-                break;
-            _sFactor[j] += pdf * sq;
-            sq *= x2;
+inline double NormalMomentum::pdf(double z) {
+    const double x2 = z * z;
+    return std::exp(-0.5 * x2) / sqrt(2 * std::numbers::pi);
+}
+
+
+
+inline NormalMomentum::NormalMomentum(double BOUNDING, size_t MAX_ORDER) 
+        : BOUNDING(BOUNDING), LEAKAGE(1 - std::erf(BOUNDING/std::sqrt(2))) { 
+
+    double term = 2 * pdf(BOUNDING) * BOUNDING;
+    const double bounding2 = BOUNDING * BOUNDING;
+    double sTerm[MAX_ORDER];
+    size_t n = 0;
+    for (; n < MAX_ORDER; ++n) {
+        sTerm[n] = term / (2*n + 1);
+        if (!std::isfinite(sTerm[n])) {
+            break;
         }
+        term *= bounding2;
     }
-    size_t i;
-    for (i = 0; i < _sFactor.size(); ++i) {
-        if (! std::isfinite(_sFactor[i]))
+    
+    _sMomentum.insert(_sMomentum.end(), sTerm, sTerm + n);
+    for (size_t j = 2; j < _sMomentum.size(); ++j) {
+        for (size_t i = 0; i < n; ++i) {
+            sTerm[i] = sTerm[i] / (2*i - 1 + 2*j) * bounding2;
+            const double prev = _sMomentum[i];
+            _sMomentum[i] += sTerm[i];
+            if (prev == _sMomentum[i]) {
+                n = i;
+                break;
+            }
+        }
+        if (n <= 0) 
             break;
     }
-    _sFactor.erase(_sFactor.begin() + i, _sFactor.end());
 }
 
 
 inline double NormalMomentum::operator[](size_t i) const {
-    if (i >= _sFactor.size())
+    const size_t j = i >> 1;
+    if (j >= _sMomentum.size() || (i & 1) != 0)
         return 0;
-    return _sFactor[i];
+    return _sMomentum[j];
 }
 
 } // namespace var_dbl

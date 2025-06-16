@@ -66,6 +66,13 @@ class VarDbl (numbers.Number):
     
     def variance(self):
         return self._variance
+    
+    def precision(self):
+        try:
+            return self.uncertainty() / abs(self.value())
+        except ZeroDivisionError:
+            return float('inf')
+
         
     def __init__(self, value: typing.Union[float, int, str]=0, 
                  uncertainty: typing.Union[float, str, None]=None,

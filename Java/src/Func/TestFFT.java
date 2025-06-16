@@ -263,90 +263,73 @@ public class TestFFT {
     }
 
     @Test
-    public void testFFTOrder2Sin() {
+    public void testFFTOrder2Sin() throws InitException, IOException {
         VarDbl[] sData = new VarDbl[] {
             new VarDbl(),new VarDbl(), new VarDbl(1),new VarDbl(), 
             new VarDbl(),new VarDbl(), new VarDbl(-1),new VarDbl()};
         VarDbl[] sSpec = new VarDbl[] {
             new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(2), 
             new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(-2)}; 
-        try {
-            validate( sSpec, fft.transform(sData, true, "./Java/Output/testFFTOrder2Sin_for.txt"), 0);
-            validate( sData, fft.transform(sSpec, false, "./Java/Output/testFFTOrder2Sin_rev.txt"), 0);
-        } catch (InitException | IOException e) {
-            fail(e.getMessage());
-        }       
+        validate( sSpec, fft.transform(sData, true, "./Java/Output/testFFTOrder2Sin_for.txt"), 0);
+        validate( sData, fft.transform(sSpec, false, "./Java/Output/testFFTOrder2Sin_rev.txt"), 0);
     }
 
     @Test
-    public void testFFTOrder2Cos() {
+    public void testFFTOrder2Cos() throws InitException, IOException {
         VarDbl[] sData = new VarDbl[] {
             new VarDbl(1),new VarDbl(), new VarDbl(),new VarDbl(), 
             new VarDbl(-1),new VarDbl(), new VarDbl(0),new VarDbl()};
         VarDbl[] sSpec = new VarDbl[] {
             new VarDbl(),new VarDbl(), new VarDbl(2),new VarDbl(), 
             new VarDbl(),new VarDbl(), new VarDbl(2),new VarDbl()}; 
-        try {
-            validate( sSpec, fft.transform(sData, true, "./Java/Output/testFFTOrder2Sin_for.txt"), 0);
-            validate( sData, fft.transform(sSpec, false, "./Java/Output/testFFTOrder2Sin_rev.txt"), 0);
-        } catch (InitException | IOException e) {
-            fail(e.getMessage());
-        }       
+        validate( sSpec, fft.transform(sData, true, "./Java/Output/testFFTOrder2Sin_for.txt"), 0);
+        validate( sData, fft.transform(sSpec, false, "./Java/Output/testFFTOrder2Sin_rev.txt"), 0);
     }
 
     @Test
-    public void testFFTOrder3Sin() {
+    public void testFFTOrder3Sin() throws InitException, IOException {
         final double q = Math.sqrt(0.5);
-        try {
-            final VarDbl[] sData = new VarDbl[] {
-                new VarDbl(),new VarDbl(), new VarDbl(q),new VarDbl(),  new VarDbl(1),new VarDbl(), new VarDbl(q),new VarDbl(), 
-                new VarDbl(),new VarDbl(), new VarDbl(-q),new VarDbl(), new VarDbl(-1),new VarDbl(), new VarDbl(-q),new VarDbl()};
-            final VarDbl[] sSpec = new VarDbl[] {
-                new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(4), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(),
-                new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(-4)}; 
-            final VarDbl[] sFor = fft.transform(sData, true, "./Java/Output/testFFTOrder3Sin_for.txt");
-            validate(sSpec, sFor, Math.ulp(2));
-            final VarDbl[] sRev = fft.transform(sSpec, false, "./Java/Output/testFFTOrder3Sin_rev.txt");
-            validate(sData, sRev, Math.ulp(2));
-        } catch (InitException | IOException e) {
-            fail(e.getMessage());
-        }       
+        final VarDbl[] sData = new VarDbl[] {
+            new VarDbl(),new VarDbl(), new VarDbl(q),new VarDbl(),  new VarDbl(1),new VarDbl(), new VarDbl(q),new VarDbl(), 
+            new VarDbl(),new VarDbl(), new VarDbl(-q),new VarDbl(), new VarDbl(-1),new VarDbl(), new VarDbl(-q),new VarDbl()};
+        final VarDbl[] sSpec = new VarDbl[] {
+            new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(4), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(),
+            new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(), new VarDbl(),new VarDbl(-4)}; 
+        final VarDbl[] sFor = fft.transform(sData, true, "./Java/Output/testFFTOrder3Sin_for.txt");
+        validate(sSpec, sFor, Math.ulp(2));
+        final VarDbl[] sRev = fft.transform(sSpec, false, "./Java/Output/testFFTOrder3Sin_rev.txt");
+        validate(sData, sRev, Math.ulp(2));
     }
 
     @Test
-    public void testFFTOrder4Sin() {
+    public void testFFTOrder4Sin() throws InitException, IOException {
         final int size = 1 << 4;
         final int freq = 4;
         final double f = Math.PI*2 *freq/size;
-        try {
-            final VarDbl[] sData = new VarDbl[size << 1];
-            final VarDbl[] sSpec = new VarDbl[size << 1];
-            for (int i = 0; i < size; ++i) {
-                sData[(i << 1)] = new VarDbl(Math.sin(f*i));
-                sData[(i << 1) + 1] = new VarDbl();
-                sSpec[(i << 1)] = new VarDbl();
-                if (i == freq)
-                    sSpec[(i << 1) + 1] = new VarDbl(size/2);
-                else if ((size - i) == freq)
-                    sSpec[(i << 1) + 1] = new VarDbl(-size/2);
-                else
-                    sSpec[(i << 1) + 1] = new VarDbl();
-            }
-            final VarDbl[] sFor = fft.transform(sData, true, "./Java/Output/testFFTOrder4Sin_for.txt");
-            validate(sSpec, sFor, Math.ulp(2));
-            final VarDbl[] sRev = fft.transform(sSpec, false, "./Java/Output/testFFTOrder4Sin_rev.txt");
-            validate(sData, sRev, Math.ulp(2));
-
-            final Signal signal = new Signal(4, freq, SignalType.Sin, NoiseType.White, 0, FFT.SinSource.IndexSin);
-            validate(sSpec, signal.sSpec, Math.ulp(2));
-            validate(sData, signal.sRev, Math.ulp(2));
-            validate(sData, signal.sRound, Math.ulp(2));
-            final Measure measure = Signal.ssssAggr.get(4).get(NoiseType.White).get(0.).get(FFT.SinSource.IndexSin);
-            assertEquals(0, measure.sHisto.get(TestType.Forward).stat().count());
-        } catch (InitException | IOException e) {
-            fail(e.getMessage());
+        final VarDbl[] sData = new VarDbl[size << 1];
+        final VarDbl[] sSpec = new VarDbl[size << 1];
+        for (int i = 0; i < size; ++i) {
+            sData[(i << 1)] = new VarDbl(Math.sin(f*i));
+            sData[(i << 1) + 1] = new VarDbl();
+            sSpec[(i << 1)] = new VarDbl();
+            if (i == freq)
+                sSpec[(i << 1) + 1] = new VarDbl(size/2);
+            else if ((size - i) == freq)
+                sSpec[(i << 1) + 1] = new VarDbl(-size/2);
+            else
+                sSpec[(i << 1) + 1] = new VarDbl();
         }
+        final VarDbl[] sFor = fft.transform(sData, true, "./Java/Output/testFFTOrder4Sin_for.txt");
+        validate(sSpec, sFor, Math.ulp(2));
+        final VarDbl[] sRev = fft.transform(sSpec, false, "./Java/Output/testFFTOrder4Sin_rev.txt");
+        validate(sData, sRev, Math.ulp(2));
 
+        final Signal signal = new Signal(4, freq, SignalType.Sin, NoiseType.White, 0, FFT.SinSource.IndexSin);
+        validate(sSpec, signal.sSpec, Math.ulp(2));
+        validate(sData, signal.sRev, Math.ulp(2));
+        validate(sData, signal.sRound, Math.ulp(2));
+        final Measure measure = Signal.ssssAggr.get(4).get(NoiseType.White).get(0.).get(FFT.SinSource.IndexSin);
+        assertEquals(0, measure.sHisto.get(TestType.Forward).stat().count());
     }
     
     static void dump(final FileWriter fw, final String tag, TestType test, String part, 
@@ -432,7 +415,7 @@ public class TestFFT {
         }
     }
 
-    // TODO: @Test
+    @Test
     public void inspect() {
         inspect(0);
     }
@@ -469,9 +452,11 @@ public class TestFFT {
     }
 
  
-    //TODO: generate FFT @Test
-    public void dump() {
-        final String pathOut = String.format("./Java/Output/FFT_%d_%d.txt", 4, IndexSin.MAX_ORDER);
+    // @Test very time comsuming
+    public void dump() throws ArithmeticException, InitException {
+        final int MIN_ORDER = 4;
+        final int MAX_ORDER = IndexSin.MAX_ORDER;
+        final String pathOut = String.format("./Java/Output/FFT_%d_%d.txt", MIN_ORDER, MAX_ORDER);
         try (final FileWriter fw = new FileWriter(pathOut)) {
             fw.write("SinSource\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest");
             fw.write("\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Maximum");
@@ -480,16 +465,14 @@ public class TestFFT {
                 fw.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
             }
             fw.write("\n");
-            for (int order = 4; order <= IndexSin.MAX_ORDER; ++order) {
+            for (int order = MIN_ORDER; order <= MAX_ORDER; ++order) {
                 for (final double noise : sNoise) {
-                    for (final NoiseType noiseType: NoiseType.values()) {
-                        for (final SinSource sinType : SinSource.values()) {
-                            run(fw, sinType, noiseType, noise, SignalType.Linear, order, 0);
-                            for (final int freq : sFreq) {
-                                run(fw, sinType, noiseType, noise, SignalType.Sin, order, freq);
-                                run(fw, sinType, noiseType, noise, SignalType.Cos, order, freq);
-                            }        
-                        }
+                    for (final SinSource sinType : SinSource.values()) {
+                        run(fw, sinType, NoiseType.Gaussian, noise, SignalType.Linear, order, 0);
+                        for (final int freq : sFreq) {
+                            run(fw, sinType, NoiseType.Gaussian, noise, SignalType.Sin, order, freq);
+                            run(fw, sinType, NoiseType.Gaussian, noise, SignalType.Cos, order, freq);
+                        }        
                     }
                 }
                 final Map<NoiseType, Map<Double, Map<SinSource, Measure>>> sssAggr = Signal.ssssAggr.get(order);
@@ -519,7 +502,7 @@ public class TestFFT {
                     }
                 }
             }
-        } catch (ArithmeticException | InitException | IOException e) {
+        } catch (IOException e) {
             fail(e.getMessage());
         }
     }

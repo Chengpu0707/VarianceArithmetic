@@ -9,39 +9,30 @@ using namespace var_dbl;
 
 int main() 
 {
-    const auto _momentum = NormalMomentum();
-    test::assertEqual( _momentum.size(), 442);
-    test::assertEqual(  1 * 0.99999942673466358, _momentum[0], "0");
-    test::assertEqual(  1 * 0.99998456037129324, _momentum[2], "2");
-    test::assertEqual(  3 * 0.99986067282526425, _momentum[4], "4");
-    test::assertEqual( 15 * 0.99924122967608053, _momentum[6], "6");
-    test::assertEqual(105 * 0.99702891516115077, _momentum[8], "8");
-    test::assertEqual(945 * 0.99088355330473754, _momentum[10], "10"); 
+    const auto mmt = NormalMomentum();
+    test::assertAlmostEqual( mmt.BOUNDING, 5);
+    test::assertAlmostEqual( mmt.LEAKAGE, 5.7330e-07, 1e-10);
+    test::assertEqual( mmt.maxOrder(), 448);
 
-    test::assertEqual(0, _momentum[1], "1");
-    test::assertEqual(0, _momentum[3], "3");
-    test::assertEqual(0, _momentum[5], "5");
-    test::assertEqual(0, _momentum[7], "7");
-    test::assertEqual(0, _momentum[9], "9");
-
-    std::ifstream ifs("../Python/Output/NormalMomentum_5.txt");
-    test::assertTrue(ifs.is_open(), "../Python/Output/NormalMomentum_5.txt");
+    std::ifstream ifs("../Python/NormalMomentum_5.0.txt");
+    test::assertTrue(ifs.is_open(), "../Python/NormalMomentum_5.0.txt");
     std::string line;
     std::getline(ifs, line);
-    test::assertEqual(line, "n\tMomentum\t!!Diff\tSigma=5.0", line);
-
-    std::ofstream ofs("./Output/NormalMomentum_5.txt");
-    test::assertTrue(ofs.is_open(), "./Output/NormalMomentum_5.txt");
-    ofs << "2n\tPython\tCpp\tError" << std::endl;
-
+    test::assertEqual(line, "n\tMomentum\tBounding:\t5.0", line);
     size_t j;
     double val;
-    for (size_t i =0; i < _momentum.size(); i += 2) {
+    for (size_t i = 0; i <= 24; i += 2) {
         ifs >> j >> val;
         test::assertEqual(i, j);
-        test::assertAlmostEqual(_momentum[i]/val, 1, 2e-2);
-        ofs << i << '\t' << val << '\t' << _momentum[i] << '\t' << _momentum[i]/val - 1 << std::endl;
+        test::assertAlmostEqual(mmt[i]/val, 1, 1e-10);
+        test::assertAlmostEqual(mmt[i + 1], 0, 1e-10);
     }
+
+    std::ofstream ofs("../Cpp/Output/NormalMomentum_5.0.txt");
+    test::assertTrue(ofs.is_open(), "../Python/Output/NormalMomentum_5.0.txt");
+    ofs << "n\tMomentum\n";
+    for (int n = 0; n < mmt.maxOrder(); n += 2)
+        ofs << n << "\t" << mmt[n] << "\n";
 
     std::cout << "All Momentum tests are successful";
     return 0;

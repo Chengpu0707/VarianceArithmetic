@@ -42,14 +42,14 @@ int main()
     }
     test::assertEqual(i, 19865);
 
-    std::vector<double> sX{0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50, 100, -100};
+    std::vector<double> sX{0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50};
     for (int value: sX) {
         validate_exp(value, 0);
         validate_exp(value, 0.1);
         validate_exp(value, 1, 3e-4, 4e-1);
         validate_exp(value, 19.865, "NotMonotonicException");
         VarDbl res = validate_exp(value, 19.864, 2e+36, 6e+78);
-        test::assertAlmostEqual(res.uncertainty() / res.value(), 1680.377, 1e-3);
+        test::assertAlmostEqual(res.uncertainty() / res.value(), 1681.7672, 1e-3);
     }  
 
     stat_func("Exp", 

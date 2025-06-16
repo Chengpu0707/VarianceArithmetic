@@ -68,19 +68,19 @@ class Taylor:
     def default():
         return _taylor
 
-    __slots__ = ('_momentum', '_tau')
+    __slots__ = ('_momentum', '_leakage')
 
-    def __init__(self, bounding:float = 5.0, readCached:bool=True) -> None:
-        self._momentum = momentum.Normal(bounding=bounding, readCached=readCached)
-        self._tau = scipy.special.erfinv(1 - scipy.special.erf(bounding/math.sqrt(2)))*math.sqrt(2)
+    def __init__(self, bounding:float = 5.0) -> None:
+        self._momentum = momentum.Normal(bounding=bounding)
+        self._leakage = 1 - scipy.special.erf(bounding/math.sqrt(2))
 
     @property
     def momentum(self):
         return self._momentum
 
     @property
-    def tau(self):
-        return self._tau
+    def leakage(self):
+        return self._leakage   
 
     @staticmethod
     def _writeList(fw, name, sList:tuple[typing.Union[float, VarDbl]]):
@@ -111,7 +111,7 @@ class Taylor:
 
     @staticmethod
     def headerForInput():
-        return ("name\tvalue\tuncertainty\tvariance\tinPrec\toutPrec\tBinding\tMaxOrder\tmonotonicThreshold"
+        return ("name\tvalue\tuncertainty\tvariance\tinPrec\toutPrec\tBinding\tMaxOrder\tMinMonotonic"
                 "\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tenableExpansionTruncation\n")
     
     @staticmethod
@@ -121,7 +121,7 @@ class Taylor:
 
     def taylor1d(self, input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
                  inPrec:bool, outPrec:bool, maxOrder:int=0, 
-                 checkMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True,
+                 checkMinMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True,
                  dumpPath:str=None):
         '''
         1d Taylor expansion for differential series {s1dTaylor} at {input}, with {name} for logging.
@@ -130,8 +130,10 @@ class Taylor:
         s1dTaylor[n] should already normalized by /n!. 
         The max order of expansion is {self.momentum.maxOrder}, which should not exceed {self.momentum.maxOrder}
 
-        When {checkMonotonic} is true, raise {NotMonotonicException} if 
+        When {checkMinMonotonic} is true, raise {NotMonotonicException} if 
             after full expansion, the monotonic count is still less than {MIN_MONOTONIC_COUNT}.
+        When the momentum is more than {MAX_MONOTONIC_MOMENTUM}, turn off resetting the monotonic check
+            due to numerical unstability, e.g., TestDumpFile.test_NotMonotonicException_AfterMax().
         It should always be True.
 
         When {checkStability} is true, raise {NotStableException} if 
@@ -140,7 +142,7 @@ class Taylor:
         It should always be True.
 
         When {checkReliablity} is true, raise {NotReliableException} if
-            the precision of the result variance is more than 1/5, in which 5 is the bounding factor.
+            the precision of the result variance is more than the bounding factor.
         It should always be True.
 
         When {checkPositive} is true, raise {NotPosive} if
@@ -149,6 +151,8 @@ class Taylor:
 
         Both the result value and variance are guaranteed to be finite, otherwise
             raise {NotFiniteException}
+        But if the monotonic count is more than {MIN_MONOTONIC_COUNT},
+            roll back to the previous value and variance.
 
         Dump the expansion to {dumpPath} when it is provided.
         {dumpPath} can be read back and tested using verifyDumpFile()
@@ -175,12 +179,13 @@ class Taylor:
             fw.write(Taylor.headerForInput())
             fw.write(f"{name}\t{input.value()}\t{input.uncertainty()}\t{input.variance()}"
                      f"\t{inPrec}\t{outPrec}"
-                     f"\t{self._momentum._binding}\t{maxOrder}\t{Taylor.MIN_MONOTONIC_COUNT}"
-                     f"\t{checkMonotonic}\t{checkStability}\t{checkReliablity}\t{checkPositive}\tFalse\n")
+                     f"\t{self._momentum.bounding}\t{maxOrder}\t{Taylor.MIN_MONOTONIC_COUNT}"
+                     f"\t{checkMinMonotonic}\t{checkStability}\t{checkReliablity}\t{checkPositive}\tFalse\n")
             Taylor._writeList(fw, "Taylor1d", s1dTaylor)
             fw.write(Taylor.headerForExpansion())
 
         monotonics = 0
+        monotonicPrev = True
 
         value = VarDbl(1, 0) if outPrec else VarDbl(s1dTaylor[0])
         variance = VarDbl()
@@ -211,6 +216,8 @@ class Taylor:
                     finite = False
                 elif abs(newVariance.value()) <= abs(prevVariance.value()):
                     monotonics += 1
+                elif (monotonics >= Taylor.MIN_MONOTONIC_COUNT) and monotonicPrev:
+                    monotonicPrev = False
                 else:
                     monotonics = 0
                 prevValue = newValue
@@ -228,7 +235,8 @@ class Taylor:
                     fw.write(f"Fail\t{ex}\t{n}\t{j}\t{s1dTaylor[j]}\t{s1dTaylor[n - j]}\t{self._momentum[n]}\n")
                 raise ex
             if not finite:
-                if checkMonotonic and (monotonics >= Taylor.MIN_MONOTONIC_COUNT):
+                if checkMinMonotonic and (monotonics >= Taylor.MIN_MONOTONIC_COUNT):
+                    # roll back to the previous value
                     value = oldValue
                     variance = oldVariance
                     newValue = prevValue
@@ -261,13 +269,13 @@ class Taylor:
             if varn == 0:
                 break
 
-        if checkMonotonic and (varn > 0) and (monotonics < Taylor.MIN_MONOTONIC_COUNT):
+        if checkMinMonotonic and (varn > 0) and (monotonics < Taylor.MIN_MONOTONIC_COUNT):
             if fw:
                 fw.write("NotMonotonicException\n")
                 fw.close()
             raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
-        unc = math.sqrt(value.variance() + variance.value()) * self.tau
+        unc = math.sqrt(value.variance() + variance.value()) * self.leakage
         if checkStability and not ((abs(newValue.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
             if fw:
                 fw.write(f"NotStableException\t{n}\t{len(s1dTaylor)}\t{unc}\n")
@@ -384,7 +392,7 @@ class Taylor:
                 s1dTaylor[k] += coeff * sTaylor[k] * sPow[j - k]
                  
         return self.taylor1d(input, f'poly({sCoeff})', s1dTaylor, False, False, 
-                dumpPath = dumpPath, checkMonotonic = False, checkStability = False)
+                dumpPath = dumpPath, checkMinMonotonic = False, checkStability = False)
 
     def exp(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
         sTaylor = [math.exp(input.value()), 1.0]

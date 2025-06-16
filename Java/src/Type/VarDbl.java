@@ -14,6 +14,8 @@ import java.util.Map;
 
 import Type.VarDbl;
 
+
+
 class UnionArray {
     public UnionArray(final double[] sDbl) {
         this.sDbl = sDbl;
@@ -39,10 +41,12 @@ public class VarDbl {
     private double value;
     private double variance;
 
+    static final Momentum.Normal momentum = new Momentum.Normal(); // 1/sqrt(3)
+
     static final long DOUBLE_MAX_SIGNIFICAND = (1L << 53) - 1;
     static final long PRECISE_SIGNIFICAND_TAIL_MASK = (1L << 20) - 1;
     static final double BINDING_FOR_EQUAL = 0.67448975;
-    static final double VARIANCE_THRESHOLD = 1.0 /Momentum.BINDING_FOR_TAYLOR/Momentum.BINDING_FOR_TAYLOR;
+    static final double VARIANCE_THRESHOLD = 1.0 /momentum.bounding/momentum.bounding;
     static final double TAU = 7.18e-7;
     static final int MIN_MONOTONIC_COUNT = 20;
     static final double DEVIATION_OF_LSB = 1.0 / Math.sqrt(3);
@@ -422,9 +426,9 @@ public class VarDbl {
         FileWriter fw = (dumpPath == null)? null : new FileWriter(dumpPath);
         if (fw != null) {
             fw.write(INPUT_HEADER + "\n");
-            fw.write(String.format("%s\t%e\t%e\t%e\t%b\t%b\t%d\t%d\t%b\t%b\t%b\t%b\n", 
+            fw.write(String.format("%s\t%e\t%e\t%e\t%b\t%b\t%.3f\t%d\t%b\t%b\t%b\t%b\n", 
                      name, value(), uncertainty(), variance(), inPrec, outPrec, 
-                     Momentum.BINDING_FOR_TAYLOR, Momentum.MAX_FACTOR,
+                     momentum.bounding, momentum.maxOrder,
                      checkMonotonic, checkStability, checkReliablity, checkPositive));
             if (s1dPoly != null)
                 writeList(fw, "Polynomial", s1dPoly);
@@ -433,6 +437,7 @@ public class VarDbl {
         }
 
         int monotonics = 0;
+        boolean monotonicPrev = true;
 
         VarDbl value = outPrec? new VarDbl(1) : new VarDbl((s1dTaylor.sDbl != null)? s1dTaylor.sDbl[0] : s1dTaylor.sVar[0].value());
         VarDbl variance = new VarDbl();
@@ -440,7 +445,7 @@ public class VarDbl {
         double varn = var;
         VarDbl prevValue = null, prevVariance = new VarDbl();
         int n = 2;
-        for ( ; (n < Momentum.MAX_FACTOR) && (n < length) && Double.isFinite(varn) && (varn > 0); 
+        for ( ; (n < momentum.maxOrder) && (n < length) && Double.isFinite(varn) && (varn > 0); 
                 n += 2, varn *= var) {
             final VarDbl oldValue = value, oldVariance = variance;
             final VarDbl newValue = new VarDbl(), newVariance = new VarDbl();
@@ -448,21 +453,21 @@ public class VarDbl {
             int j = 0;
             try {
                 if (s1dTaylor.sDbl != null) {
-                    newValue.addInPlace(s1dTaylor.sDbl[n] * varn * Momentum.get(n));
+                    newValue.addInPlace(s1dTaylor.sDbl[n] * varn * momentum.get(n));
                     double newVar = 0;
                     for (j = 1; j < n; ++j) {
                         newVar += s1dTaylor.sDbl[j] * s1dTaylor.sDbl[n - j] * varn *
-                            (Momentum.get(n) - Momentum.get(j) * Momentum.get(n - j));
+                            (momentum.get(n) - momentum.get(j) * momentum.get(n - j));
                     }
                     newVariance.addInPlace(newVar);
                 } else {
                     if (!Double.isFinite(s1dTaylor.sVar[n].value()) || !Double.isFinite(s1dTaylor.sVar[n].variance())) {
                         throw new IllegalArgumentException(String.format("Invalid Taylor coefficient [%d]=%s", n, val));
                     }
-                    newValue.addInPlace(s1dTaylor.sVar[n].multiply(varn * Momentum.get(n)));
+                    newValue.addInPlace(s1dTaylor.sVar[n].multiply(varn * momentum.get(n)));
                     for (j = 1; j < n; ++j) {
                         newVariance.addInPlace(s1dTaylor.sVar[j].multiply(s1dTaylor.sVar[n - j]).multiply(varn *
-                            (Momentum.get(n) - Momentum.get(j) * Momentum.get(n - j))));
+                            (momentum.get(n) - momentum.get(j) * momentum.get(n - j))));
                     }
                 }
                 value.addInPlace(newValue);
@@ -471,7 +476,7 @@ public class VarDbl {
                 infinite = e.getMessage();
             } catch(Throwable e) {
                 if (fw != null) {
-                    fw.write(String.format("Exception\t%s\t%d\t%d\t%e\n", e.getMessage(), n, j, Momentum.get(n)));
+                    fw.write(String.format("Exception\t%s\t%d\t%d\t%e\n", e.getMessage(), n, j, momentum.get(n)));
                 }
                 throw e;
             }
@@ -483,6 +488,8 @@ public class VarDbl {
                 infinite = "variance variance infinite";
             else if (Math.abs(newVariance.value()) <= Math.abs(prevVariance.value()))
                 monotonics += 1;
+            else if ((monotonics > MIN_MONOTONIC_COUNT) && monotonicPrev)
+                monotonicPrev = false;
             else
                 monotonics = 0;
             if (infinite == null) {
@@ -492,7 +499,7 @@ public class VarDbl {
 
             if (fw != null) {
                 fw.write(String.format("%d\t%d\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\n", 
-                        n, monotonics, varn, Momentum.get(n), value.value(), value.uncertainty(), variance.value(), variance.uncertainty(),
+                        n, monotonics, varn, momentum.get(n), value.value(), value.uncertainty(), variance.value(), variance.uncertainty(),
                         newValue.value(), newValue.variance(), newVariance.value(), newVariance.uncertainty()));
                 fw.flush();
             }
@@ -663,9 +670,9 @@ public class VarDbl {
         }
         else
             throw new IllegalArgumentException("Invalid Taylor coefficient");
-        if (length * 2 >= Momentum.MAX_FACTOR) {
+        if (length * 2 >= momentum.maxOrder) {
             throw new IllegalArgumentException(String.format("coefficient length %d >= %d", 
-                    length, Momentum.MAX_FACTOR / 2));
+                    length, momentum.maxOrder / 2));
         }
         final int exp = length - 1;
         if (s1dCoeff.sVar != null) {
@@ -763,11 +770,11 @@ public class VarDbl {
             sCoeff[exp] = 1;
             return polynominal(sCoeff, dumpPath);
         }
-        final double[] sTaylor = new double[Momentum.MAX_FACTOR];
+        final double[] sTaylor = new double[momentum.maxOrder];
         sTaylor[0] = 0;
         sTaylor[1] = exponent;
         double exp = exponent - 1;
-        for (int i = 2; i < Momentum.MAX_FACTOR; ++i, --exp) {
+        for (int i = 2; i < momentum.maxOrder; ++i, --exp) {
             sTaylor[i] = sTaylor[i - 1] * exp / i;
         }
         sTaylor[0] = Math.pow(value, exponent);
@@ -792,11 +799,11 @@ public class VarDbl {
      */
     public VarDbl sin(final String dumpPath) 
             throws InitException, NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, IOException {
-        final double[] sTaylor = new double[Momentum.MAX_FACTOR];
+        final double[] sTaylor = new double[momentum.maxOrder];
         final double x = value();
         sTaylor[0] = Math.sin(x);
         double fac = 1;
-        for (int i = 1; i < Momentum.MAX_FACTOR; ++i, fac /= i) {
+        for (int i = 1; i < momentum.maxOrder; ++i, fac /= i) {
             switch (i%4) {
             case 0:
                 sTaylor[i] = Math.sin(x) * fac; 
@@ -829,10 +836,10 @@ public class VarDbl {
      */
     public VarDbl exp(final String dumpPath) 
             throws InitException, NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, IOException {
-        final double[] sTaylor = new double[Momentum.MAX_FACTOR];
+        final double[] sTaylor = new double[momentum.maxOrder];
         sTaylor[0] = Math.exp(value());
         double fac = 1;
-        for (int i = 1; i < Momentum.MAX_FACTOR; ++i, fac /= i) {
+        for (int i = 1; i < momentum.maxOrder; ++i, fac /= i) {
             sTaylor[i] = 1.0 *fac;
         }
         return this.taylor(String.format("exp(%s)", this), sTaylor, false, true, dumpPath);
@@ -852,9 +859,9 @@ public class VarDbl {
      */
     public VarDbl log(final String dumpPath) 
             throws InitException, NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, IOException {
-        final double[] sTaylor = new double[Momentum.MAX_FACTOR];
+        final double[] sTaylor = new double[momentum.maxOrder];
         sTaylor[0] = Math.log(value());
-        for (int i = 1; i < Momentum.MAX_FACTOR; ++i) {
+        for (int i = 1; i < momentum.maxOrder; ++i) {
             sTaylor[i] =((i%2) == 1)? +1.0/i : -1.0/i;
         }
         return this.taylor(String.format("log(%s)", this), sTaylor, true, false, dumpPath);

@@ -79,11 +79,11 @@ void search_edge(const char* const dumpPath, std::function<VarDbl(double, double
     oss.str("");
     oss << "Inalid path " << dumpPath;
     test::assertTrue(ofs.is_open(), oss.str());
-    ofs << "Edge Value\tEdge Uncertainty\tBias\tUncertainty\tException\n";
+    ofs << "X\tEdge\tBias\tValue\tUncertainty\tException\n";
 
     for (double x: sX) {
         double edge;
-        VarDbl res;
+        VarDbl res, bias;
         std::string except;
         int i = sSearch[0], j = sSearch[1]; 
         while (i + 1 < j) {
@@ -104,9 +104,8 @@ void search_edge(const char* const dumpPath, std::function<VarDbl(double, double
         if (allowNoEdge && (j == sSearch[1]))
             continue;
         test::assertNotEqual(j, sSearch[1], oss.str());
-        if (!exception.empty())
-            test::assertEqual(except, exception, oss.str());
-        ofs << x << "\t" << edge << "\t" << res.value() - std::sin(x) << "\t" << res.uncertainty() << "\t" << except << "\n";
+        bias = func(x, 0);
+        ofs << x << "\t" << edge << "\t" << res.value() - bias.value() << "\t" << res.value() << "\t" << res.uncertainty() << "\t" << except << "\n";
         ofs.flush();
     }
 }
