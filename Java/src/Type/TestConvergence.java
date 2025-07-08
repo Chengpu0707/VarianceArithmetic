@@ -30,19 +30,19 @@ public class TestConvergence {
                     try {
                         switch (type) {
                             case "Pow":
-                                res = new VarDbl(1, dx).pow(x);
+                                res = Taylor.pow(new VarDbl(1, dx), x);
                                 val = 1;
                                 break;
                             case "Exp":
-                                res = new VarDbl(x, dx).exp();
+                                res = Taylor.exp(new VarDbl(x, dx));
                                 val = Math.exp(x);
                                 break;
                             case "Log":
-                                res = new VarDbl(x, dx).log();
+                                res = Taylor.log(new VarDbl(x, dx));
                                 val = Math.log(x);
                                 break;
                             case "Sin":
-                                res = new VarDbl(x, dx).sin();
+                                res = Taylor.sin(new VarDbl(x, dx));
                                 val = Math.sin(x);
                                 break;
                             default:
@@ -59,7 +59,7 @@ public class TestConvergence {
                 if (ignoreNoBound && (j == sSearch[1]))
                     continue; 
                 assertNotEquals(j, sSearch[1]);
-                f.write(String.format("%e\t%e\t%e\t%e\t%e\t%s\n", 
+                f.write(String.format("%.15e\t%.15e\t%.15e\t%.15e\t%.15e\t%s\n", 
                     x, edge, res.value() - val, res.value(), res.uncertainty(), except));}
         } catch (IOException ex) {
             fail(ex.getMessage());
@@ -68,6 +68,13 @@ public class TestConvergence {
 
     @Test
     public void testPow() throws InitException {
+        try {
+            Taylor.pow(new VarDbl(1, 0.19929), -1.75, "./Java/Output/pow_1_0.19929_-1.75.txt");
+        } catch (NotStableException ex) {
+        } catch (Throwable e) {
+            fail(String.format("(1+-0.19929)^-1.75 throws %s", e));
+        }
+
         final double[] sX = new double[701];
         for (int i = -60; i <= 80; i += 1) {
             sX[i + 60] = i/20.;
@@ -77,12 +84,12 @@ public class TestConvergence {
 
     @Test
     public void testSin() throws InitException {
-        final int DIVIDS = 32;
+        final int DIVIDS = 64;
         final double[] sX = new double[DIVIDS * 2 + 1];
         for (int i = -DIVIDS; i <= DIVIDS; i += 1) {
             sX[i + DIVIDS] = Math.PI * i /DIVIDS;
         }
-        searchEdge("Sin", sX, new int[]{9000, 15000, 10000}, false);
+        searchEdge("Sin", sX, new int[]{9000, 20000, 10000}, false);
     }
 
     @Test
@@ -93,16 +100,17 @@ public class TestConvergence {
         };
         for (double x: sX) {
             try {
-                final VarDbl res = new VarDbl(x, x * 0.20086).log();
+                final VarDbl res = Taylor.log(new VarDbl(x, x * 0.20086));
                 assertEquals(res.uncertainty(), 0.2130506, 1e-6);
             } catch (Throwable ex) {
                 fail(String.format("Log(%f) fails for %s", x, ex.getMessage()));
             }
             try {
-                new VarDbl(x, x * 0.20087).log();
+                Taylor.log(new VarDbl(x, x * 0.20087));
                 fail(String.format("Log(%f) not fails", x));
             } catch (NotMonotonicException ex) {
-
+            } catch (IOException e) {
+                fail(String.format("Log(%f) fails: %s", x, e));
             }
         }
     }
@@ -115,15 +123,17 @@ public class TestConvergence {
         };
         for (double x: sX) {
             try {
-                final VarDbl res = new VarDbl(x, 19.864).exp();
+                final VarDbl res = Taylor.exp(new VarDbl(x, 19.864));
                 assertEquals(res.uncertainty() / res.value(), 1681.767, 1e-3);
             } catch (Throwable ex) {
-                fail(String.format("Log(%f) fails for %s", x, ex.getMessage()));
+                fail(String.format("Exp(%f) fails for %s", x, ex.getMessage()));
             }
             try {
-                new VarDbl(x, 19.865).exp();
-                fail(String.format("Log(%f) not fails", x));
+                Taylor.exp(new VarDbl(x, 19.865));
+                fail(String.format("Exp(%f) not fails", x));
             } catch (NotMonotonicException ex) {
+            } catch (IOException e) {
+                fail(String.format("Exp(%f) fails for %s", x, e.getMessage()));
             }
         }
     }

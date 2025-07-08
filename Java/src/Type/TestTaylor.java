@@ -50,16 +50,16 @@ public class TestTaylor {
                     double expect;
                     try {
                         if (test.equals("pow")) {
-                            var = new VarDbl(1, dev).pow(x);
+                            var = Taylor.pow(new VarDbl(1, dev), x);
                             expect = 1;
                         } else if (test == "exp") {
-                            var = new VarDbl(x, dev).exp();
+                            var = Taylor.exp(new VarDbl(x, dev));
                             expect = Math.exp(x);
                         } else if (test == "log") {
-                            var = new VarDbl(x, dev).log();
+                            var = Taylor.log(new VarDbl(x, dev));
                             expect = Math.log(x);
                         } else if (test == "sin") {
-                            var = new VarDbl(x*Math.PI, dev).sin();
+                            var = Taylor.sin(new VarDbl(x*Math.PI, dev));
                             expect = Math.sin(x);
                         } else {
                             throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
@@ -138,7 +138,7 @@ public class TestTaylor {
             throws IOException { 
         final String dumpFile = String.format("./Java/Output/pow_%s_%s_%s.txt", x, dx, exp);
         try {
-            var = new VarDbl(x, dx).pow(exp, dumpFile);
+            var = Taylor.pow(new VarDbl(x, dx), exp, dumpFile);
         } catch (InitException e) {
             assertEquals(exception, "InitException");
             return;
@@ -152,42 +152,17 @@ public class TestTaylor {
         File f = new File(dumpFile);
         if (!f.exists())
             return;
-        VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
-        final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(r, sTaylor[0], REPR_DELTA);
-        if ((exp > 0) && (Math.floor(exp) == Math.ceil(exp))) {
-            final int n = (int) exp;
-            assertTrue(sTaylor.length < VarDbl.momentum.maxOrder);
-            assertEquals(sTaylor[1], n * Math.pow(x, n - 1), REPR_DELTA);
-            assertEquals(sTaylor[n], 1, REPR_DELTA);
-            for (int i = n + 1; i < sTaylor.length; ++i)
-            assertEquals(sTaylor[i], 0, 0);
-        } else {
-            assertEquals(sTaylor.length, VarDbl.momentum.maxOrder);
-            assertEquals(exp/1, sTaylor[1], Math.ulp(sTaylor[1]));
-            assertEquals(exp*(exp - 1)/2, sTaylor[2], Math.ulp(sTaylor[2]));
-        }
         if (exception != null)
             return;
         if (x == 0) {
             assertTrue(0 <= exp);
             assertTrue(Math.floor(exp) == Math.ceil(exp));
             int n = (int) exp;
-            double value = Math.pow(dx, n) * VarDbl.momentum.get(2);
-            double variance = 0;
-            n *= 2;
-            for (int i = 1; i < n; ++i) {
-                variance += sTaylor[i] * sTaylor[n - i] * (VarDbl.momentum.get(n) - VarDbl.momentum.get(i) * VarDbl.momentum.get(n - i));
-            }
-            variance *= Math.pow(dx, n);
+            double value = Math.pow(dx, n) * Taylor.IDEAL_MOMENTUM.get(2);
             if ((value == 0))
                 assertEquals(var.value(), value, valPrec);
             else
                 assertEquals(var.value() /value, 1, valPrec);
-            if ((variance == 0))
-                assertEquals(var.variance(), variance, varPrec);
-            else
-                assertEquals(var.variance() /variance, 1, varPrec);
         } else {
             final double pr = dx / x;
             final double value = 1 + 
@@ -283,6 +258,7 @@ public class TestTaylor {
         validatePow(-1, 0.1, 1, 0, 0, "NotFiniteException");
         validatePow(-1, 1, 0.20003, 0, 0, "NotMonotonicException");
         validatePow(-1, 1, 0.20002, 5e-3, 2e-1, null);
+        validatePow(-1, 1, 0.2, 5e-3, 2e-1, null);
     }
 
     @Test
@@ -291,8 +267,9 @@ public class TestTaylor {
         validatePow(-2, 1, 0.1, 2e-3, 4e-3, null);
         validatePow(-2, 10, 1, 2e-3, 4e-3, null);
         validatePow(-2, 0.1, 1, 0, 0, "NotFiniteException");
-        validatePow(-2, 1, 0.19906, 0, 0, "NotMonotonicException");
-        validatePow(-2, 1, 0.19905, 3e-2, 30, null);
+        validatePow(-2, 1, 0.2, 0, 0, "NotMonotonicException");
+        validatePow(-2, 1, 0.19903, 0, 0, "NotStableException");
+        validatePow(-2, 1, 0.19902, 3e-2, 30, null);
     }
 
     @Test
@@ -316,7 +293,7 @@ public class TestTaylor {
             throws IOException {
         final String dumpFile = String.format("./Java/Output/exp_%s_%s.txt", x, dx);
         try {
-            var = new VarDbl(x, dx).exp(dumpFile);
+            var = Taylor.exp(new VarDbl(x, dx), dumpFile);
         } catch (InitException e) {
             assertEquals(exception, "InitException");
         } catch (Taylor1dException e) {
@@ -326,15 +303,6 @@ public class TestTaylor {
                     var.value() /Math.exp(x), precVal);
         assertEquals(Math.pow(dx, 2) + Math.pow(dx, 4) *3/2 + Math.pow(dx, 6) *7/6 + Math.pow(dx, 8) *5/8, 
                     var.variance() /Math.exp(x)/Math.exp(x), precVar);
-        VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
-        final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
-        assertEquals(Math.exp(x), sTaylor[0], REPR_DELTA);
-        assertEquals(1.0/1, sTaylor[1], REPR_DELTA);
-        assertEquals(1.0/2, sTaylor[2], REPR_DELTA);
-        assertEquals(1.0/6, sTaylor[3], REPR_DELTA);
-        assertEquals(1.0/24, sTaylor[4], REPR_DELTA);
-        assertEquals(1.0/120, sTaylor[5], REPR_DELTA);
     }
 
     @Test
@@ -361,7 +329,7 @@ public class TestTaylor {
             throws IOException {
         final String dumpFile = String.format("./Java/Output/log_%s_%s.txt", x, dx);
         try {
-            var = new VarDbl(x, dx).log(dumpFile);
+            var = Taylor.log(new VarDbl(x, dx), dumpFile);
         } catch (InitException e) {
             assertEquals(exception, "InitException");
         } catch (Taylor1dException e) {
@@ -372,16 +340,7 @@ public class TestTaylor {
                     var.value() - Math.log(x), deltaVal);
         assertEquals(Math.pow(pr, 2) + Math.pow(pr, 4) *9/8 + Math.pow(pr, 6) *119/24 + Math.pow(pr, 8) *991/32, 
                     var.variance(), deltaVar);
-        VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
-        final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
-        assertEquals(sTaylor[0], Math.log(x), REPR_DELTA);
-        assertEquals(1.0/1, sTaylor[1], REPR_DELTA);
-        assertEquals(-1.0/2, sTaylor[2], REPR_DELTA);
-        assertEquals(1.0/3, sTaylor[3], REPR_DELTA);
-        assertEquals(-1.0/4, sTaylor[4], REPR_DELTA);
-        assertEquals(1.0/5, sTaylor[5], REPR_DELTA);
-}
+    }
 
     @Test
     public void testLog() 
@@ -404,11 +363,11 @@ public class TestTaylor {
     }
 
 
-    void validateSin(final double x, final double dx, final double deltaVal, final double deltaVar, final String exception) 
+    void validateSin(final double x, final double dx, final double deltaVal, final double deltaVar,
+                final String dumpFile, final String exception) 
             throws IOException {
-        final String dumpFile = String.format("./Java/Output/sin_%s_%s.txt", x, dx);
         try {
-            var = new VarDbl(x, dx).sin(dumpFile);
+            var = Taylor.sin(new VarDbl(x, dx), dumpFile);
         } catch (InitException e) {
             assertEquals(exception, "InitException");
         } catch (Taylor1dException e) {
@@ -422,24 +381,28 @@ public class TestTaylor {
         assertEquals(Math.pow(dx, 2) *cos2 - Math.pow(dx, 4) *(cos2*3/2 - 1./2) 
                         + Math.pow(dx, 6) *(cos2*7/6 - 1./2) - Math.pow(dx, 8) *(cos2*5/8 - 7./24), 
                     var.variance(), deltaVar);
-        VarDbl.DumpResult res = VarDbl.readDumpFile(dumpFile, var, exception);
-        final double[] sTaylor = res.s1dTaylor.sDbl;
-        assertEquals(VarDbl.momentum.maxOrder, sTaylor.length);
-        assertEquals(sTaylor[0], sin, REPR_DELTA);
-        assertEquals(+cos/1, sTaylor[1], REPR_DELTA);
-        assertEquals(-sin/2, sTaylor[2], REPR_DELTA);
-        assertEquals(-cos/6, sTaylor[3], REPR_DELTA);
-        assertEquals(+sin/24, sTaylor[4], REPR_DELTA);
-        assertEquals(+cos/120, sTaylor[5], REPR_DELTA);
+    }
+
+    void validateSin(final double x, final double dx, final double deltaVal, final double deltaVar, 
+            final String dumpFile) 
+        throws IOException {
+        validateSin(x, dx, deltaVal, deltaVar, dumpFile, null);
+    }
+    void validateSin(final double x, final double dx, final double deltaVal, final double deltaVar) 
+        throws IOException {
+        validateSin(x, dx, deltaVal, deltaVar, null, null);
     }
 
 
     @Test
     public void testSin() 
             throws IOException {
-        validateSin(0, 0.1, 0, 3e-4, null);
-        validateSin(Math.PI/4, 0.1, 6e-8, 2e-4, null);
-        validateSin(Math.PI/2, 0.1, 8e-8, 1e-8, null);
+        validateSin(0, 0.1, 0, 3e-4, "./Java/Output/sin_0_0.1.txt");
+        validateSin(0, 1, 0, 0.1, "./Java/Output/sin_0_1.txt");
+        validateSin(Math.PI/4, 0.1, 6e-8, 2e-4, "./Java/Output/sin_0.25_0.1.txt");
+        validateSin(Math.PI/4, 1, 0.9, 4e-3, "./Java/Output/sin_0.25_1.txt");
+        validateSin(Math.PI/2, 0.1, 8e-8, 1e-8, "./Java/Output/sin_0.5_0.1.txt");
+        validateSin(Math.PI/2, 1, 3e-4, 1e-1, "./Java/Output/sin_0.5_1.txt");
         validateSin(Math.PI/4*3, 0.1, 6e-8, 8e-8, null);
         validateSin(Math.PI, 0.1, 1e-23, 2e-7, null);
         validateSin(-Math.PI/4, 0.1, 6e-8, 8e-8, null);

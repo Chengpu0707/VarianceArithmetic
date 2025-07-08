@@ -9,9 +9,9 @@ using namespace var_dbl;
 
 int main() 
 {
-    const auto mmt = NormalMomentum();
-    test::assertAlmostEqual( mmt.BOUNDING, 5);
-    test::assertAlmostEqual( mmt.LEAKAGE, 5.7330e-07, 1e-10);
+    const Momentum& mmt = IDEAL_MOMENTUM;
+    test::assertAlmostEqual( mmt.bounding, 5);
+    test::assertAlmostEqual( mmt.leakage, 5.7330e-07, 1e-10);
     test::assertEqual( mmt.maxOrder(), 448);
 
     std::ifstream ifs("../Python/NormalMomentum_5.0.txt");

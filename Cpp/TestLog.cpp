@@ -1,4 +1,4 @@
-#include "TestVarDbl.h"
+#include "TestTaylor.h"
 
 using namespace var_dbl;
 
@@ -10,12 +10,11 @@ TestResult test_log(double value, double uncertainty, std::ostringstream& oss) {
     const double precIn = uncertainty / value;
     res.expn = VarDbl(- std::pow(precIn, 2)/2 - std::pow(precIn, 4)/4 
                         - std::pow(precIn, 6)/6 - std::pow(precIn, 8)/8,
-                      std::pow(precIn, 2) + std::pow(precIn, 4)*9/8 
-                        + std::pow(precIn, 6)*119/24 + std::pow(precIn, 8)*991/32, 
-                      true);
+                      std::sqrt(std::pow(precIn, 2) + std::pow(precIn, 4)*9/8 
+                        + std::pow(precIn, 6)*119/24 + std::pow(precIn, 8)*991/32));
     std::ostringstream os;
     os << "./Output/log_" << value << "_" << uncertainty << ".txt";
-    res.var = res.input.log(os.str().c_str());
+    res.var = Taylor::log(res.input, os.str().c_str());
     res.err = res.var - res.val;
     return res;
 }
@@ -36,7 +35,7 @@ int main()
     int i = 20080;
     for (; i < 20100; ++i) {
         try {
-            VarDbl(1, i/100000.).log();
+            Taylor::log(VarDbl(1, i/100000.));
         } catch (std::runtime_error ex) {
             break;
         }
@@ -53,7 +52,7 @@ int main()
     } 
 
     stat_func("Log", 
-            [](double value, double uncertainty){ return VarDbl(value, uncertainty).log(); },
+            [](double value, double uncertainty){ return Taylor::log(VarDbl(value, uncertainty)); },
             [](double value, double noise){ return std::log(value + noise); },
             sX);
     std::cout << "All log tests are successful";

@@ -1,6 +1,8 @@
 import math
 import numbers
+import sys
 import typing
+import unittest
 
 '''
 VarDbl uses Taylor which import VarDbl, causing a circular dependency, 
@@ -30,7 +32,7 @@ class VarDbl (numbers.Number):
     '''
     BINDING_FOR_EQUAL = 0.67448975
         # z value for 50% probability of equal
-    DOUBLE_MAX_PRECISE_FILTER = (1 << 30) - 1
+    DOUBLE_MAX_PRECISE_FILTER = (1 << 23) - 1
     
     DOUBLE_MAX_SIGNIFICAND = (1 << 53) - 1
     DEVIATION_OF_LSB = 1.0 / math.sqrt(3)
@@ -56,16 +58,16 @@ class VarDbl (numbers.Number):
             return round
         return VarDbl.ulp(float(value))
             
-    __slots__ = ('_value', '_variance')
+    __slots__ = ('_value', '_uncertainty')
 
     def value(self):
         return self._value
     
     def uncertainty(self):
-        return math.sqrt(self.variance())
+        return self._uncertainty
     
     def variance(self):
-        return self._variance
+        return self._uncertainty**2
     
     def precision(self):
         try:
@@ -75,15 +77,12 @@ class VarDbl (numbers.Number):
 
         
     def __init__(self, value: typing.Union[float, int, str]=0, 
-                 uncertainty: typing.Union[float, str, None]=None,
-                 bUncertaintyAsVariance=False) -> None:
+                 uncertainty: typing.Union[float, str, None]=None) -> None:
         '''
         Intialize with "value" and "uncertainty".
         "uncertainty" will be absolute, and limited between 
             math.sqrt(sys.float_info.min) and math.sqrt(sys.float_info.max)
-        If "bUncertaintyAsVariance" is True, the uncertainty actually means variance, 
-            which should only be True during intermediate calculations. 
-        Both value and variance have to be finite. 
+        Both value and vuncertainty have to be finite. 
             Otherwise InitException will throw.
 
         When "uncertainty" is not specified:
@@ -99,7 +98,7 @@ class VarDbl (numbers.Number):
         if uncertainty is None:
             if type(value) == VarDbl:
                 self._value = value._value
-                self._variance = value._variance
+                self._uncertainty = value._uncertainty
                 return
             if type(value) == int:
                 uncertainty = VarDbl.ulp(value)
@@ -109,37 +108,40 @@ class VarDbl (numbers.Number):
                     raise InitException(value, None, 'Init value=inf')
                 sig, _ = math.frexp(value)
                 sig = int(sig * (VarDbl.DOUBLE_MAX_SIGNIFICAND + 1))
-                uncertainty = VarDbl.ulp(value) if (sig & VarDbl.DOUBLE_MAX_PRECISE_FILTER) else 0
-        variance = uncertainty if bUncertaintyAsVariance else uncertainty * uncertainty
-        if (not math.isfinite(value)) or (not math.isfinite(variance)):
-            raise InitException(value, variance, f'Init value={value}, variance={variance}')
+                uncertainty = VarDbl.ulp(value) if (sig & VarDbl.DOUBLE_MAX_PRECISE_FILTER) != 0 else 0
+        else:
+            uncertainty = abs(uncertainty)
+        if (not math.isfinite(value)) or (not math.isfinite(uncertainty)):
+            raise InitException(value, uncertainty, f'Init value={value}, uncertainty={uncertainty}')
         self._value = float(value)
-        self._variance = float(variance)
+        self._uncertainty = float(uncertainty)
 
     def __str__(self) -> str:
         return f'{self.value():.6e}~{self.uncertainty():.3e}'
 
     def __repr__(self) -> str:
-        return f'{repr(self.value())}~{repr(self.variance())}'
+        return f'{repr(self.value())}~{repr(self.uncertainty())}'
     
     def __bool__(self) -> bool:
-        return (self._value != 0) or (self._variance != 0)
+        return (self._value != 0) or ( (self._uncertainty != 0))
     
     def __abs__(self):
-        return VarDbl(abs(self.value()), self.variance(), True)
+        return VarDbl(abs(self.value()), self.uncertainty())
     
     def __add__(self, other):
         if type(other) != VarDbl:
             other = VarDbl(value=other)
         value = self.value() + other.value()
-        variance = self.variance() + other.variance()
-        if (not math.isfinite(value)) or (not math.isfinite(variance)):
-            raise InitException(value, variance, f"{self} + {other} = {value}~{variance}")
-        if (not variance) and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
-                          and (abs(other.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
-                          and (VarDbl.DOUBLE_MAX_SIGNIFICAND <= abs(value)):
-            return VarDbl(int(self.value()) + int(other.value()))
-        return VarDbl(value, variance, True)
+        if self.uncertainty() == 0:
+            uncertainty = other.uncertainty()
+        elif other.uncertainty() == 0:
+            uncertainty = self.uncertainty()
+        else:
+            try:
+                uncertainty = math.sqrt(self.variance() + other.variance())
+            except OverflowError:
+                raise InitException(value, uncertainty, f"{self} + {other}")
+        return VarDbl(value, uncertainty)
 
     def __radd__(self, other):
         return self + other
@@ -147,7 +149,7 @@ class VarDbl (numbers.Number):
     def __neg__(self):
         ret = VarDbl()
         ret._value = - self._value
-        ret._variance = self._variance
+        ret._uncertainty = self._uncertainty
         return ret
 
     def __sub__(self, other):
@@ -160,17 +162,23 @@ class VarDbl (numbers.Number):
     def __mul__(self, other):
         if type(other) != VarDbl:
             other = VarDbl(value=other)
-        value = self.value() * other.value()
-        variance = self.variance() * other.value() * other.value() +\
-                    other.variance() *self.value() * self.value() +\
-                    self.variance() * other.variance()
+        try:
+            value = self.value() * other.value()
+        except OverflowError:
+            raise InitException(None, None, f"{self} * {other}")
+        try:
+            variance = self.variance() * other.value() * other.value() +\
+                        other.variance() *self.value() * self.value() +\
+                        self.variance() * other.variance()
+        except OverflowError:
+            raise InitException(value, None, f"{self} * {other}")
         if (not math.isfinite(value)) or (not math.isfinite(variance)):
             raise InitException(value, variance, f"{self} * {other} = {value}~{variance}")
         if (not variance) and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
                           and (abs(other.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
                           and (VarDbl.DOUBLE_MAX_SIGNIFICAND <= abs(value)):
             return VarDbl(int(self.value()) * int(other.value()))
-        return VarDbl(value, variance, True)
+        return VarDbl(value, math.sqrt(variance))
     
     def __rmul__(self, other):
         return self * other
@@ -186,7 +194,7 @@ class VarDbl (numbers.Number):
    
     def __pow__(self, exp):
         import taylor
-        return taylor.Taylor.default().pow(self, exp)
+        return taylor.Taylor.pow(self, exp)
     
     def __hash__(self) -> int:
         raise NotImplemented('Difficult to find hash')
@@ -231,8 +239,27 @@ class VarDbl (numbers.Number):
         return self.value() > other.value()
   
 
+SMALLEST_SUB_NORAMAL_FLOAT = sys.float_info.min * sys.float_info.epsilon
 
-
+def assertVarDblEqual(self:unittest.TestCase, l:VarDbl, r:VarDbl, valPrec=1e-6, uncPrec=1e-6):
+    try:
+        if (r.value() == 0):
+            self.assertLessEqual(abs(l.value()), SMALLEST_SUB_NORAMAL_FLOAT)
+        elif (l.value() == 0):
+            self.assertLessEqual(abs(r.value()), SMALLEST_SUB_NORAMAL_FLOAT)
+        else:
+            self.assertAlmostEqual(l.value() / r.value(), 1, delta=valPrec)
+    except AssertionError as ex:
+        raise ex
+    try:
+        if (r.uncertainty() == 0):
+            self.assertLessEqual(abs(l.uncertainty()), SMALLEST_SUB_NORAMAL_FLOAT)
+        elif (l.uncertainty() == 0):
+            self.assertLessEqual(abs(r.uncertainty()), SMALLEST_SUB_NORAMAL_FLOAT)
+        else:
+            self.assertAlmostEqual(l.uncertainty() / r.uncertainty(), 1, delta=uncPrec)
+    except AssertionError as ex:
+        raise ex
 
 
 

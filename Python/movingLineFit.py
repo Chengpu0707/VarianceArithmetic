@@ -1,4 +1,5 @@
 import enum
+import math
 
 import varDbl
 
@@ -47,8 +48,8 @@ def movingLineFit(sInput, half:int, fitType:FitType) ->tuple[tuple[tuple[varDbl.
             v0 = sum([sInput[k].variance() for k in range(full) if type(sInput[k]) == varDbl.VarDbl])
             v1 = sum([k**2 * sInput[half + k].variance()
                       for k in range(-half, half + 1) if type(sInput[half + k]) == varDbl.VarDbl])
-            sFit = [(varDbl.VarDbl((value(sInput[0]) + c0)*denom0, v0 *denom0sq, True),
-                     varDbl.VarDbl(c1 *denom1, v1 *denom1sq, True))]
+            sFit = [(varDbl.VarDbl((value(sInput[0]) + c0)*denom0, math.sqrt(v0 *denom0sq)),
+                     varDbl.VarDbl(c1 *denom1, math.sqrt(v1 *denom1sq)))]
             for j in range(full, len(sInput)):
                 c1 += half*(value(sInput[j - full]) + value(sInput[j])) - c0
                 v1 = sum([k**2 * sInput[j - half + k].variance()
@@ -60,8 +61,8 @@ def movingLineFit(sInput, half:int, fitType:FitType) ->tuple[tuple[tuple[varDbl.
                 if (type(sInput[j - full + 1]) == varDbl.VarDbl):
                     v0 -= sInput[j - full + 1].variance()
 
-                sFit.append((varDbl.VarDbl((value(sInput[j - full + 1]) + c0)*denom0, v0 *denom0sq, True), 
-                             varDbl.VarDbl(c1 *denom1, v1 *denom1sq, True)))
+                sFit.append((varDbl.VarDbl((value(sInput[j - full + 1]) + c0)*denom0, math.sqrt(v0 *denom0sq)), 
+                             varDbl.VarDbl(c1 *denom1, math.sqrt(v1 *denom1sq))))
             return tuple(sFit)
         
         case _:

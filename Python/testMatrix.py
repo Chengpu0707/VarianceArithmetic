@@ -8,7 +8,7 @@ import unittest
 from histo import Histo, Stat
 from matrix import ElementType, permutSign, isSquareMatrix, createIntMatrix, createHilbertMatrix, addNoise
 from matrix import linear, multiply, adjugate, adjugate_mul
-from taylor import NotReliableException, NotMonotonicException
+from taylor import NotReliableException, NotMonotonicException, NotFiniteException
 from varDbl import VarDbl, InitException
 
 
@@ -302,7 +302,7 @@ class TestAdjugate (unittest.TestCase):
         noTracing = VarDbl( 1,1e-1)*VarDbl(-5,1e-5)*VarDbl( 9,1e-9) - VarDbl( 1,1e-1)*VarDbl( 6,1e-6)*VarDbl( 8,1e-8) +\
                     VarDbl( 2,1e-2)*VarDbl( 6,1e-6)*VarDbl( 7,1e-7) - VarDbl( 2,1e-2)*VarDbl(-4,1e-4)*VarDbl( 9,1e-9) +\
                     VarDbl( 3,1e-3)*VarDbl(-4,1e-4)*VarDbl( 8,1e-8) - VarDbl( 3,1e-3)*VarDbl(-5,1e-5)*VarDbl( 7,1e-7)
-        self.verifyValue(noTracing, VarDbl(72, 43.59825805262702, True))
+        self.verifyValue(noTracing, VarDbl(72, 6.602897701208691))
 
     def testVarDblSize3(self):
         ssMat3 = ((VarDbl( 1,1e-1), VarDbl( 2,1e-2), VarDbl( 3,1e-3)),
@@ -320,30 +320,30 @@ class TestAdjugate (unittest.TestCase):
 
         ssAdj = (
             (
-                VarDbl(-93, (1e-5*1e-9)**2 + (5*1e-9)**2 + (1e-5*9)**2
-                          + (1e-6*1e-8)**2 + (6*1e-8)**2 + (1e-6*8)**2, True),
-                VarDbl(6,   (1e-2*1e-9)**2 + (2*1e-9)**2 + (1e-2*9)**2
-                          + (1e-8*1e-3)**2 + (8*1e-3)**2 + (1e-8*3)**2, True),
-                VarDbl(27,  (1e-2*1e-6)**2 + (2*1e-5)**2 + (1e-2*6)**2
-                          + (1e-5*1e-3)**2 + (5*1e-3)**2 + (1e-5*3)**2, True),
+                VarDbl(-93, math.sqrt((1e-5*1e-9)**2 + (5*1e-9)**2 + (1e-5*9)**2 +
+                                      (1e-6*1e-8)**2 + (6*1e-8)**2 + (1e-6*8)**2)),
+                VarDbl(6,   math.sqrt((1e-2*1e-9)**2 + (2*1e-9)**2 + (1e-2*9)**2 +
+                                      (1e-8*1e-3)**2 + (8*1e-3)**2 + (1e-8*3)**2)),
+                VarDbl(27,  math.sqrt((1e-2*1e-6)**2 + (2*1e-5)**2 + (1e-2*6)**2 +
+                                      (1e-5*1e-3)**2 + (5*1e-3)**2 + (1e-5*3)**2)),
             ), 
             (
-                VarDbl(78,  (1e-5*1e-7)**2 + (6*1e-7)**2 + (1e-5*7)**2
-                          + (1e-4*1e-9)**2 + (4*1e-9)**2 + (1e-4*9)**2, True ),
-                VarDbl(-12, (1e-1*1e-9)**2 + (1*1e-9)**2 + (1e-1*9)**2
-                          + (1e-3*1e-7)**2 + (3*1e-7)**2 + (1e-3*7)**2, True),
-                VarDbl(-18, (1e-1*1e-6)**2 + (1*1e-6)**2 + (1e-1*6)**2
-                          + (1e-4*1e-3)**2 + (4*1e-3)**2 + (1e-4*3)**2, True),
+                VarDbl(78,  math.sqrt((1e-5*1e-7)**2 + (6*1e-7)**2 + (1e-5*7)**2 +
+                                      (1e-4*1e-9)**2 + (4*1e-9)**2 + (1e-4*9)**2)),
+                VarDbl(-12, math.sqrt((1e-1*1e-9)**2 + (1*1e-9)**2 + (1e-1*9)**2 +
+                                      (1e-3*1e-7)**2 + (3*1e-7)**2 + (1e-3*7)**2)),
+                VarDbl(-18, math.sqrt((1e-1*1e-6)**2 + (1*1e-6)**2 + (1e-1*6)**2 +
+                                      (1e-4*1e-3)**2 + (4*1e-3)**2 + (1e-4*3)**2)),
             ),
             (
-                VarDbl(3,   (1e-4*1e-8)**2 + (4*1e-8)**2 + (1e-4*8)**2 
-                          + (1e-5*1e-7)**2 + (5*1e-7)**2 + (1e-5*7)**2, True),
-                VarDbl(6,   (1e-2*1e-7)**2 + (2*1e-7)**2 + (1e-2*7)**2
-                          + (1e-1*1e-8)**2 + (1*1e-8)**2 + (1e-1*8)**2, True ),
-                VarDbl(3,   (1e-1*1e-5)**2 + (1*1e-5)**2 + (1e-1*5)**2
-                          + (1e-2*1e-4)**2 + (2*1e-4)**2 + (1e-2*4)**2, True),
+                VarDbl(3,   math.sqrt((1e-4*1e-8)**2 + (4*1e-8)**2 + (1e-4*8)**2 +
+                                      (1e-5*1e-7)**2 + (5*1e-7)**2 + (1e-5*7)**2)),
+                VarDbl(6,   math.sqrt((1e-2*1e-7)**2 + (2*1e-7)**2 + (1e-2*7)**2 + 
+                                      (1e-1*1e-8)**2 + (1*1e-8)**2 + (1e-1*8)**2)),
+                VarDbl(3,   math.sqrt((1e-1*1e-5)**2 + (1*1e-5)**2 + (1e-1*5)**2 +
+                                      (1e-2*1e-4)**2 + (2*1e-4)**2 + (1e-2*4)**2)),
             ))
-        self.verify(ssMat3, VarDbl(val3, var3, True), ssAdj)
+        self.verify(ssMat3, VarDbl(val3, math.sqrt(var3)), ssAdj)
 
 
     def testDirectMultiplication(self):
@@ -417,7 +417,7 @@ class TestAdjugate (unittest.TestCase):
                 for j in range(adj.size):
                     try:
                         (ssAdj[i][j] /detAdj) - (adj.ssAdj[i][j] /adj.detAdj)
-                    except (NotMonotonicException, NotReliableException) as ex:
+                    except (NotMonotonicException, NotReliableException, NotFiniteException) as ex:
                         print(f'Found at ssAdj[{i}][{j}]={ssAdj[i][j]}, detAdj={detAdj}, noise={noise}, ssOrg={ssOrg}')
                         break
         

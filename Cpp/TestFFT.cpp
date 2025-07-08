@@ -254,8 +254,8 @@ Signal::Signal(SignalType signalType, unsigned order, int freq, NoiseType noiseT
 	sData.reserve(size << 1);
 	sBack.reserve(size << 1);
 	for (int i = 0; i < (size << 1); ++i) { 
-        sData.push_back(VarDbl(sWave[i].value() + getNoise(rand), noise*noise + sWave[i].variance(), true));
-        sBack.push_back(VarDbl(sFreq[i].value() + getNoise(rand), noise*noise + sFreq[i].variance(), true));
+        sData.push_back(VarDbl(sWave[i].value() + getNoise(rand), std::sqrt(noise*noise + sWave[i].variance())));
+        sBack.push_back(VarDbl(sFreq[i].value() + getNoise(rand), std::sqrt(noise*noise + sFreq[i].variance())));
 	}
 
 	sSpec = fft.transform(sData, true);

@@ -1,4 +1,4 @@
-#include "TestVarDbl.h"
+#include "TestTaylor.h"
 
 using namespace var_dbl;
 
@@ -9,12 +9,11 @@ TestResult test_exp(double value, double uncertainty, std::ostringstream& oss) {
     res.val = std::exp(value);
     res.expn = VarDbl(std::pow(uncertainty, 2)/2 + std::pow(uncertainty, 4)/8 
                         + std::pow(uncertainty, 6)/48 + std::pow(uncertainty, 8)/384,
-                      std::pow(uncertainty, 2) + std::pow(uncertainty, 4)*3/2 
-                        + std::pow(uncertainty, 6)*7/6 + std::pow(uncertainty, 8)*5/8, 
-                      true);
+                      std::sqrt(std::pow(uncertainty, 2) + std::pow(uncertainty, 4)*3/2 
+                        + std::pow(uncertainty, 6)*7/6 + std::pow(uncertainty, 8)*5/8));
     std::ostringstream os;
     os << "./Output/exp_" << value << "_" << uncertainty << ".txt";
-    res.var = input.exp(os.str().c_str());
+    res.var = Taylor::exp(input, os.str().c_str());
     res.err = res.var / res.val - 1;
     return res;
 }
@@ -35,7 +34,7 @@ int main()
     int i = 19500;
     for (; i < 20000; ++i) {
         try {
-            VarDbl(0, i/1000.).exp();
+            Taylor::exp(VarDbl(0, i/1000.));
         } catch (const NotMonotonicException& ex) {
             break;
         }
@@ -53,7 +52,7 @@ int main()
     }  
 
     stat_func("Exp", 
-            [](double value, double uncertainty){ return VarDbl(value, uncertainty).exp(); },
+            [](double value, double uncertainty){ return Taylor::exp(VarDbl(value, uncertainty)); },
             [](double value, double noise){ return std::exp(value + noise); },
             sX);
     std::cout << "All exp tests are successful";

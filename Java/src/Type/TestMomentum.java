@@ -14,7 +14,7 @@ public class TestMomentum {
  
     @Test
     public void TestNormal() {
-        Momentum.Normal norm = new Momentum.Normal(5.0);
+        NormalMomentum norm = new NormalMomentum(5.0);
         assertEquals(norm.bounding, 5.0, 1e-10);
         assertEquals(norm.maxOrder, 448);
         assertEquals(norm.leakage, 2.8665E-7, 1e-10);

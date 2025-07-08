@@ -70,7 +70,7 @@ def addNoise(ssMatrix:tuple[tuple[typing.Union[int]]], noise:float) -> tuple[tup
         raise ValueError(f'Invalid int or float')
     size = len(ssMatrix)
     return tuple([tuple([varDbl.VarDbl(ssMatrix[row][col] + noise * random.normalvariate(), 
-                                       noise**2 + math.ulp(ssMatrix[row][col])**2, True) 
+                                       math.sqrt(noise**2 + math.ulp(ssMatrix[row][col])**2)) 
                          for col in range(size)]) 
                   for row in range(size)])
 
@@ -167,8 +167,8 @@ def adjugate(ssMatrix:tuple[tuple[ElementType]]) -> tuple[ElementType, tuple[tup
                 sCofVal[k[0]] = v
                 sCofVar[k[0]] -= v**2
  
-    return varDbl.VarDbl(value, variance, True) if variance > 0 else value, \
-           tuple([tuple([varDbl.VarDbl(sCofVal[(i,j)], sCofVar[(i,j)], True) if 0 < sCofVar[(i,j)] else sCofVal[(i,j)] 
+    return varDbl.VarDbl(value, math.sqrt(variance)) if variance > 0 else value, \
+           tuple([tuple([varDbl.VarDbl(sCofVal[(i,j)], math.sqrt(sCofVar[(i,j)])) if 0 < sCofVar[(i,j)] else sCofVal[(i,j)] 
                          for i in range(size)]) 
                   for j in range(size)])
 

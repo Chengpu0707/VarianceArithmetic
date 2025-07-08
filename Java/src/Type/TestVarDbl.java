@@ -21,12 +21,13 @@ public class TestVarDbl {
             op = new VarDbl(1.001, 0.001);
             op2 = new VarDbl(1.000, 0.002);
             assertEquals(0, op.compareTo(op2));
-            assertEquals(1, op.compareTo(op2, 0.4));
         
             op = new VarDbl(1.002, 0.001);
             assertEquals(1, op.compareTo(op2));
             assertEquals(-1, op2.compareTo(op));
 
+            assertEquals(0, op.compareTo(1.002));
+            assertEquals(1, op.compareTo(1.001));
         } catch (InitException e) {
             fail(e.getMessage());
         }
@@ -77,8 +78,9 @@ public class TestVarDbl {
         testToString("1.000e-03~1.0e-03", 0.001, 0.001);
         testToString("1.000e-03~1.3e-19", 0.001);
         testToString("1.341e+154~8.6e+137", Math.sqrt(Double.MAX_VALUE));
-        testToString("2.225e-308", Double.MIN_NORMAL, Double.MIN_VALUE);
+        testToString("2.225e-308~4.9e-324", Double.MIN_NORMAL, Double.MIN_VALUE);
         testToString("2.225e-308", Double.MIN_NORMAL);        
+        testToString("2.225e-308~4.9e-324", Double.MIN_NORMAL - Double.MIN_VALUE);        
     }
  
     @Test 
@@ -126,30 +128,14 @@ public class TestVarDbl {
         assertFalse(res.equals(op));
         assertTrue(op != res);
         assertFalse(op == res);
-        try {
-            assertEquals(0, op.compareTo(res));
-        } catch (InitException e) {
-            fail(e.getMessage());
-        }
-        try {
-            assertEquals(0, res.compareTo(op));
-        } catch (InitException e) {
-            fail(e.getMessage());
-        }
+        assertEquals(0, op.compareTo(res));
+        assertEquals(0, res.compareTo(op));
 
         VarDbl clone = res.clone();
         assertFalse(op.equals(clone));
         assertFalse(clone.equals(op));
-        try {
-            assertEquals(0, op.compareTo(clone));
-        } catch (InitException e) {
-            fail(e.getMessage());
-        }
-        try {
-            assertEquals(0, clone.compareTo(op));
-        } catch (InitException e) {
-            fail(e.getMessage());
-        }
+        assertEquals(0, op.compareTo(clone));
+        assertEquals(0, clone.compareTo(op));
     }
     
     private void testNegate() {
@@ -165,8 +151,13 @@ public class TestVarDbl {
             op2 = new VarDbl(offset);
             res = op.add(op2);
             assertEquals(op.value() + offset, res.value(), 0);
-            assertEquals(Math.sqrt(op.uncertainty()*op.uncertainty() + op2.uncertainty()*op2.uncertainty()), 
-                         res.uncertainty(), Math.ulp(res.uncertainty()));
+            if (op.uncertainty() == 0)
+                assertEquals(op2.uncertainty(), res.uncertainty(), 0);
+            else if (op2.uncertainty() == 0)
+                assertEquals(op.uncertainty(), res.uncertainty(), 0);
+            else
+                assertEquals(Math.sqrt(op.uncertainty()*op.uncertainty() + op2.uncertainty()*op2.uncertainty()), 
+                            res.uncertainty(), Math.ulp(res.uncertainty()));
         } catch (InitException e) {
             fail(e.getMessage());
         }
@@ -216,7 +207,7 @@ public class TestVarDbl {
         try {
             op = new VarDbl(value, dev);
             assertEquals(value, op.value(), op.ulp());
-            assertEquals(Math.sqrt(dev*dev), op.uncertainty(), Math.ulp(op.uncertainty()));
+            assertEquals(dev, op.uncertainty(), Math.ulp(op.uncertainty()));
         } catch (InitException e) {
             fail(e.getMessage());
         }

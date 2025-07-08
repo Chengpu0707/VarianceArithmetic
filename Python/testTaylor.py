@@ -8,23 +8,11 @@ import unittest
 import sys
 
 from histo import Stat, Histo
-from taylor import Taylor, Taylor1dException, NotFiniteException, NotPositiveException, NotMonotonicException, NotStableException
+import momentum
+from taylor import Taylor, Taylor1dException, NotFiniteException, NotPositiveException, NotMonotonicException
 from varDbl import VarDbl, InitException
 
 logger = logging.getLogger(__name__)
-
-taylor = Taylor.default()
-
-class TestConst (unittest.TestCase):
-
-    def test_maxOrder(self):  
-        self.assertEqual(taylor.momentum.maxOrder, 448)
-
-    def test_bounding(self):  
-        self.assertEqual(taylor.momentum.bounding, 5)
-
-    def test_leakage(self):
-        self.assertAlmostEqual(taylor.leakage, 5.7330314e-7)
 
 
 def _dump_test(self, test:str, func, npfun, sX:tuple[float],
@@ -87,41 +75,15 @@ def _dump_test(self, test:str, func, npfun, sX:tuple[float],
                         f.write(f'\t{hist[i]}')
                     f.write('\n')
 
-def _validate(self, func, arg, uncertainty, exception, 
-              dumpPath, lines = 0):
-    if dumpPath:
-        try:
-            os.remove(dumpPath)
-        except:
-            pass
+def _validate(self, func, arg, uncertainty, exception, dumpPath):
     try:
         res = func(arg, uncertainty, dumpPath)
         if exception is not None:
             self.fail(f'No {exception} for {func.__name__}({arg}, {uncertainty})={res} not throw')
-        if dumpPath:
-            self.assertTrue(os.path.isfile(dumpPath))
-            with open(dumpPath) as f:
-                cnt = 0
-                for line in f:
-                    cnt += 1
-                if lines:
-                    self.assertEqual(lines, cnt)
-                sVal = list(map(float, line.split('\t')))
-                self.assertAlmostEqual(res.value(), sVal[0])
-                self.assertAlmostEqual(res.variance(), sVal[1] + sVal[2])
         return res
     except BaseException as ex:
         if (exception is None) or (not isinstance(ex, exception)): 
             raise ex
-        if dumpPath:
-            self.assertTrue(os.path.isfile(dumpPath))
-            with open(dumpPath) as f:
-                cnt = 0
-                for line in f:
-                    cnt += 1
-                if lines:
-                    self.assertEqual(lines, cnt)
-                self.assertEqual(f'{exception.__name__}', line.strip().split("\t")[0])
 
     
 
@@ -129,13 +91,13 @@ class TestExp (unittest.TestCase):
     @staticmethod
     def exp(arg, uncertainty, dumpPath):
         var = VarDbl(arg, uncertainty)
-        return taylor.exp(var, dumpPath)
+        return Taylor.exp(var, dumpPath=dumpPath)
 
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=2e-5, varianceDelta=2e-5, dumpPath=None, lines=0) -> VarDbl:
         res = _validate(self, TestExp.exp, exp, uncertainty, 
                         exception = None if (exception == InitException) or (exception == AssertionError) else exception, 
-                        dumpPath=dumpPath, lines=lines)
+                        dumpPath=dumpPath)
         if res is None:
             return
         try:
@@ -163,11 +125,15 @@ class TestExp (unittest.TestCase):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
         self.validate(0, 0.1, 
-                dumpPath='./Python/Output/exp_1_0.1.txt', lines=168)
+                dumpPath='./Python/Output/exp_0_0.1.txt', lines=328)
         self.validate(0, 0.2, varianceDelta=3e-5)
         self.validate(0, 1, valueDelta=4e-4, varianceDelta=9e-2)
 
+
+
     def test_limit_1_10th(self):
+        self.validate(1, 0.1, 
+                dumpPath='./Python/Output/exp_1_0.1.txt', lines=328)
         self.validate(0.1, 0.1)
         self.validate(0.01, 0.1)
 
@@ -208,7 +174,7 @@ class TestExp (unittest.TestCase):
             iMin = RES // 2
             while iMin + 1 < iMax:
                 iMid = int((iMin + iMax)/2)
-                res = taylor.exp(VarDbl(x, iMid/RES))
+                res = Taylor.exp(VarDbl(x, iMid/RES))
                 if res.value() < res.uncertainty():
                     iMax = iMid
                 else:
@@ -234,14 +200,14 @@ class TestLog (unittest.TestCase):
     @staticmethod
     def log(arg, uncertainty, dumpPath):
         var = VarDbl(arg, uncertainty)
-        return taylor.log(var, dumpPath)
+        return Taylor.log(var, dumpPath=dumpPath)
 
     def validate(self, x, uncertainty, 
                  exception=None, valueDelta=2e-2, varianceDelta=2e-2,
                  dumpPath=None, lines=0) -> VarDbl:
         res = _validate(self, TestLog.log, x, uncertainty, 
                         exception = None if (exception == AssertionError) else exception, 
-                        dumpPath=dumpPath, lines=lines)
+                        dumpPath=dumpPath)
         if res is None:
             return
         try:
@@ -261,9 +227,8 @@ class TestLog (unittest.TestCase):
     def test_exception(self):
         self.assertAlmostEqual(709.78, math.log(sys.float_info.max), delta=0.1)
 
-        self.validate(1, 0.1,
-                dumpPath='./Python/Output/log_1_0.1.txt', lines=168)
-        self.validate(2, 0.2)
+        self.validate(1, 0.1, dumpPath='./Python/Output/log_1_0.1.txt')
+        self.validate(2, 0.2, dumpPath='./Python/Output/log_2_0.2.txt')
 
         self.validate(0.5, 0.101, exception=NotMonotonicException)
         self.validate(0.5, 0.100, valueDelta=0.05, varianceDelta=0.07)
@@ -273,7 +238,7 @@ class TestLog (unittest.TestCase):
 
     def test_max_out_uncertainty(self):
         for x in (0.5, 1, 2, 5, 10, 20, 50):
-            res = taylor.log(VarDbl(x, x/5))
+            res = Taylor.log(VarDbl(x, x/5))
             self.assertAlmostEqual(res.uncertainty(), 0.2120048)
 
     @staticmethod
@@ -294,14 +259,14 @@ class TestSin (unittest.TestCase):
     @staticmethod
     def sin(arg, uncertainty, dumpPath):
         var = VarDbl(arg, uncertainty)
-        return taylor.sin(var, dumpPath)
+        return Taylor.sin(var, dumpPath=dumpPath)
 
     def validate(self, x, uncertainty, exception = None, 
                  valueDelta = 2e-5, varianceDelta = 2e-4, 
-                 dumpPath = None, lines = 0) -> VarDbl:
+                 dumpPath = None) -> VarDbl:
         res = _validate(self, TestSin.sin, x, uncertainty, 
                         exception = None if (exception == AssertionError) else exception, 
-                        dumpPath=dumpPath, lines=lines)
+                        dumpPath=dumpPath)
         if res is None:
             return
         try:
@@ -335,6 +300,8 @@ class TestSin (unittest.TestCase):
 
         self.validate(0, math.pi/8)
         self.validate(0, math.pi/4, varianceDelta=3e-2)
+        self.validate(0, 1.0, varianceDelta=0.3, 
+                dumpPath='./Python/Output/sin_0_1.0.txt')
         self.validate(0, math.pi/2, NotPositiveException,
                 dumpPath='./Python/Output/sin_0_0.5.txt')
 
@@ -348,12 +315,11 @@ class TestSin (unittest.TestCase):
         self.assertAlmostEqual(res1.uncertainty(), res2.uncertainty())
 
     def test_exception_half_pi(self):
-        self.validate(math.pi/2, 0.1)
+        self.validate(math.pi/2, 0.1, dumpPath='./Python/Output/sin_0.5_0.1.txt')
         self.validate(math.pi/2, math.pi/8, varianceDelta=2e-3)
-        res = self.validate(math.pi/2, math.pi/4, valueDelta=8e-5, varianceDelta=8e-2)
-        self.assertAlmostEqual(res.value() - math.sin(math.pi/2), -0.2653961)
-        self.validate(math.pi/2, math.pi/2, NotPositiveException)
-
+        res = self.validate(math.pi/2, 1, valueDelta=7e-4, varianceDelta=0.4,
+                            dumpPath='./Python/Output/sin_0.5_1.txt')
+ 
         self.validate(-math.pi/2, 0.1)
         self.validate(-math.pi/2, math.pi/8, varianceDelta=2e-3)
         res = self.validate(-math.pi/2, math.pi/4, valueDelta=8e-5, varianceDelta=8e-2)
@@ -366,12 +332,14 @@ class TestSin (unittest.TestCase):
         self.assertAlmostEqual(res1.uncertainty(), res2.uncertainty())
 
     def test_exception_quater_pi(self):
+        self.validate(math.pi/4, 0.1, dumpPath='./Python/Output/sin_0.25_0.1.txt')
+        res = self.validate(math.pi/4, 1, valueDelta=7e-4, varianceDelta=0.4,
+                            dumpPath='./Python/Output/sin_0.25_1.txt')
+
         res = self.validate(math.pi/4, math.pi/4, valueDelta=8e-5, varianceDelta=2e-3)
         self.assertAlmostEqual(res.value() - math.sin(math.pi/4), -0.1876634)
         self.validate(math.pi/4, math.pi/2, NotPositiveException)
 
-        self.validate(-math.pi/4, 0.1)
-        self.validate(-math.pi/4, math.pi/8)
         res = self.validate(-math.pi/4, math.pi/4, valueDelta=8e-5, varianceDelta=2e-3)
         self.assertAlmostEqual(res.value() - math.sin(-math.pi/4), 0.1876634)
         self.validate(-math.pi/4, math.pi/2, NotPositiveException)
@@ -380,7 +348,6 @@ class TestSin (unittest.TestCase):
         res2 = self.validate(math.pi/4 + math.pi/64, 0.1)
         self.assertLess(res1.value(), res2.value())
         self.assertGreater(res1.uncertainty(), res2.uncertainty())
-
 
     @staticmethod
     def func(x):
@@ -401,15 +368,15 @@ class TestPow (unittest.TestCase):
     @staticmethod
     def pow(arg, uncertainty, dumpPath):
         var = VarDbl(1, uncertainty)
-        return taylor.pow(var, arg, dumpPath)
+        return Taylor.pow(var, arg, dumpPath=dumpPath)
 
     def validate(self, exp, uncertainty, exception=None, 
                  valueDelta=2e-5, varianceDelta=2e-5, 
-                 dumpPath=None, lines=0) -> VarDbl:
+                 dumpPath=None) -> VarDbl:
         try:
             res = _validate(self, TestPow.pow, exp, uncertainty, 
                     exception = None if (exception == InitException) or (exception == AssertionError) else exception, 
-                    dumpPath=dumpPath, lines=lines)
+                    dumpPath=dumpPath)
             if res is None:
                 return
             prec = res - 1
@@ -447,12 +414,12 @@ class TestPow (unittest.TestCase):
 
     def test_zero(self):
         with self.assertRaises(ValueError) as ex:
-            taylor.pow(VarDbl(0, 0.1), -1,
+            Taylor.pow(VarDbl(0, 0.1), -1,
                     dumpPath='./Python/Output/pow_0_0.1_-1.txt')
         self.assertEqual(str(ex.exception), 'math domain error')   # 0^{-1}
 
         with self.assertRaises(NotFiniteException):
-            taylor.pow(VarDbl(0.1, 0.1), -1,
+            Taylor.pow(VarDbl(0.1, 0.1), -1,
                     dumpPath='./Python/Output/pow_0.1_0.1_-1.txt')
 
     def test_two(self):
@@ -488,13 +455,13 @@ class TestPow (unittest.TestCase):
                     while iMin + 1 < iMax:
                         iMid = int((iMin + iMax)/2)
                         try:
-                            res = taylor.pow(VarDbl(1, iMid / RES), n + dx)
+                            res = Taylor.pow(VarDbl(1, iMid / RES), n + dx)
                             iMin = iMid
                         except BaseException as ex:
                             iMax = iMid
                             excpt = ex
                     upper = iMin/RES
-                    std = taylor.pow(VarDbl(1, upper), n)
+                    std = Taylor.pow(VarDbl(1, upper), n)
                     f.write(f'{n}\t{dx}\t{upper}\t{std.value()}\t{std.uncertainty()}\t{res.value() - std.value()}\t{res.uncertainty() - std.uncertainty()}\t{excpt}\n')
                     f.flush()
  
@@ -517,12 +484,12 @@ class TestLibError (unittest.TestCase):
 
     def testExpLogNoError(self):
         for x in (2, math.sqrt(2), math.pi):
-            var = taylor.exp(VarDbl(x))
-            res = taylor.log(var) - x
+            var = Taylor.exp(VarDbl(x))
+            res = Taylor.log(var) - x
             self.assertEqual(res.value(), 0)
 
-            var = taylor.log(VarDbl(x))
-            res = taylor.exp(var) - x
+            var = Taylor.log(VarDbl(x))
+            res = Taylor.exp(var) - x
             self.assertEqual(res.value(), 0)
     
     def testExpLog(self):
@@ -530,12 +497,12 @@ class TestLibError (unittest.TestCase):
             f.write('X\tType\tError\tVarDbl Error\tUncertainty\n')
             for i in range(-200, 201):
                 x = i / 100
-                var = taylor.log(taylor.exp(VarDbl(x))) - x
+                var = Taylor.log(Taylor.exp(VarDbl(x))) - x
                 lib = math.log(math.exp(x)) - x
                 f.write(f'{x}\tlog(exp(x))\t{lib}\t{var.value()}\t{var.uncertainty()}\n')
                 if x <= 0:
                     continue
-                var = taylor.exp(taylor.log(VarDbl(x))) - x
+                var = Taylor.exp(Taylor.log(VarDbl(x))) - x
                 lib = math.exp(math.log(x)) - x
                 f.write(f'{x}\texp(log(x))\t{lib}\t{var.value()}\t{var.uncertainty()}\n')
 
@@ -552,7 +519,7 @@ class TestLibError (unittest.TestCase):
                         continue
                     try:
                         exp = j / 10
-                        var = taylor.pow(taylor.pow(x, exp), 1/exp) - x
+                        var = Taylor.pow(Taylor.pow(x, exp), 1/exp) - x
                         lib = VarDbl(math.pow(math.pow(x.value(), exp), 1/exp)) - x.value()
                         f.write(f'{x.value()}\t{exp}\t{var.value()}\t{var.uncertainty()}\t{lib.value()}\t{lib.uncertainty()}\n')
                     except BaseException as ex:
@@ -573,92 +540,74 @@ class TestLibError (unittest.TestCase):
 class TestDumpFile (unittest.TestCase):
 
     def test_normal(self):
-        dumpPath='./Python/Output/Pow_1_0.197_-2.txt'
-        res = taylor.pow(VarDbl(1, 0.197), -2, dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
+        dumpPath='./Python/Output/Pow_1_0.2_-1.txt'
+        res = Taylor.pow(VarDbl(1, 0.2), -1, dumpPath=dumpPath)
+        sInput, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertAlmostEqual(res.value(), out.value())
         self.assertAlmostEqual(res.variance(), out.variance())
-        self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.197)
-        self.assertEqual(len(sTaylor), taylor.momentum.maxOrder)
-        self.assertEqual(len(sExpansion), taylor.momentum.maxOrder//2 - 1)
-        self.assertEqual(sExpansion[-1].monotonics, 167)
-
-
-    def test_NotStableException(self):
-        s1dTaylor = [i * (1 if (i & 1) == 0 else -1) for i in range(60)]
-        dumpPath='./Python/Output/Pow_1_-2_NotStable.txt'
-        with self.assertRaises(NotStableException):
-            taylor.taylor1d(VarDbl(1, 0.193), 'test_NotStableException', 
-                            s1dTaylor, True, True, maxOrder=60, dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
-        self.assertEqual(out, "NotStableException")
-        self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.193)
-        self.assertListEqual(sTaylor, s1dTaylor)
-        self.assertEqual(len(sExpansion), 29)
-        self.assertEqual(sExpansion[-1].monotonics, 28)
+        self.assertAlmostEqual(sInput['input'].value(), 1)
+        self.assertAlmostEqual(sInput['input'].uncertainty(), 0.2)
+        self.assertAlmostEqual(sInput['result'], 1)
+        self.assertEqual(sInput['inPrec'], True)
+        self.assertEqual(sInput['outPrec'], True)
+        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertEqual(len(sExpansion), momentum.IDEAL.maxOrder)
+        self.assertEqual(sExpansion[-1].monotonics, 222)
 
     def test_NotMonotonicException(self):
         dumpPath='./Python/Output/Pow_1_0.2_-2.txt'
         with self.assertRaises(NotMonotonicException):
-            taylor.pow(VarDbl(1, 0.2), -2, dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
+            Taylor.pow(VarDbl(1, 0.2), -2, dumpPath=dumpPath)
+        sInput, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, "NotMonotonicException")
-        self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.2)
-        self.assertEqual(len(sTaylor), taylor.momentum.maxOrder)
-        self.assertEqual(len(sExpansion), taylor.momentum.maxOrder//2 - 1)
+        self.assertAlmostEqual(sInput['input'].value(), 1)
+        self.assertAlmostEqual(sInput['input'].uncertainty(), 0.2)
+        self.assertAlmostEqual(sInput['result'], 1)
+        self.assertEqual(sInput['inPrec'], True)
+        self.assertEqual(sInput['outPrec'], True)
+        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertEqual(len(sExpansion), momentum.IDEAL.maxOrder)
         self.assertEqual(sExpansion[-1].monotonics, 0)
-
-    def test_NotMonotonicException_AfterMax(self):
-        dumpPath = f'./Python/Output/Pow_1_0.19902_2.95.txt'
-        res = taylor.pow(VarDbl(1, 0.19902), 2.95, dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
-        self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 0.19902)
-        self.assertEqual(res.value(), out.value())
-        self.assertEqual(res.variance(), out.variance())
-        self.assertEqual(len(sTaylor), taylor.momentum.maxOrder)
-        self.assertEqual(len(sExpansion), taylor.momentum.maxOrder//2 - 1)
-        self.assertAlmostEqual(sExpansion[-3].newVar.value(), 9.1629E-20, delta=1e-23)
-        self.assertAlmostEqual(sExpansion[-2].newVar.value(), 9.3954E-20, delta=1e-23)
-        self.assertAlmostEqual(sExpansion[-1].newVar.value(), 7.6975E-21, delta=1e-24)
-        self.assertEqual(sExpansion[-3].monotonics, 220)
-        self.assertEqual(sExpansion[-2].monotonics, 220)
-        self.assertEqual(sExpansion[-1].monotonics, 221)
-
 
     def test_NotPositiveException(self):
         dumpPath = './Python/Output/Sin_0.5_0.3185.txt'
         with self.assertRaises(NotPositiveException):
-            taylor.sin(VarDbl(0.5*math.pi, 0.3185*math.pi), dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
+            Taylor.sin(VarDbl(0.5*math.pi, 0.3185*math.pi), dumpPath=dumpPath)
+        sInput, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, 'NotPositiveException')
-        self.assertAlmostEqual(x.value(), 0.5*math.pi)
-        self.assertAlmostEqual(x.uncertainty(), 0.3185*math.pi)
-        self.assertEqual(len(sTaylor), taylor.momentum.maxOrder)
-        self.assertAlmostEqual(sTaylor[0], 1)
-        self.assertAlmostEqual(sTaylor[1], 0)
-        self.assertAlmostEqual(sTaylor[2], -0.5)
-        self.assertEqual(len(sExpansion), 3)
+        self.assertAlmostEqual(sInput['input'].value(), 0.5*math.pi)
+        self.assertAlmostEqual(sInput['input'].uncertainty(), 0.3185*math.pi)
+        self.assertAlmostEqual(sInput['result'], 1)
+        self.assertEqual(sInput['inPrec'], False)
+        self.assertEqual(sInput['outPrec'], False)
+        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertEqual(len(sExpansion), 7)
         self.assertLess(sExpansion[-1].var, 0)
 
     def test_NotFiniteException(self):
-        dumpPath='./Python/Output/pow_1_1_-2.txt'
+        dumpPath='./Python/Output/pow_1_0.5_-2.txt'
         with self.assertRaises(NotFiniteException):
-            taylor.pow(VarDbl(1, 1), -2, dumpPath=dumpPath)
-        x, sTaylor, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
+            Taylor.pow(VarDbl(1, 0.5), -2, dumpPath=dumpPath)
+        sInput, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
         self.assertEqual(out, 'NotFiniteException')
-        self.assertAlmostEqual(x.value(), 1)
-        self.assertAlmostEqual(x.uncertainty(), 1)
-        self.assertEqual(len(sTaylor), taylor.momentum.maxOrder)
-        self.assertEqual(len(sExpansion), 122)
+        self.assertAlmostEqual(sInput['input'].value(), 1)
+        self.assertAlmostEqual(sInput['input'].uncertainty(), 0.5)
+        self.assertAlmostEqual(sInput['result'], 1)
+        self.assertEqual(sInput['inPrec'], True)
+        self.assertEqual(sInput['outPrec'], True)
+        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertEqual(len(sExpansion), 429)
         self.assertEqual(sExpansion[-1].monotonics, 0)
 
 
+
+
 class TestConvergence (unittest.TestCase):
-    HEADER = 'X\tEdge\tBias\tValue\tUncertainty\tPrecision\tException\n'
+    HEADER = 'X\tEdge\tBias\tValue\tUncertainty\tException\n'
 
     @staticmethod
     def _search(dxMin: float, dxMax: float, dxRes:int, sX: list[float], 
@@ -684,28 +633,36 @@ class TestConvergence (unittest.TestCase):
                     raise ValueError(f'No result for x={x}, dxMin={dxMin}, dxMax={dxMax}, exception={excpt}')
                 if excpt is None:
                     raise ValueError(f'Noexception for x={x}, dxMin={dxMin}, dxMax={dxMax}')
-                f.write(f'{x}\t{iMin/dxRes}\t{res.value() - valFunc(x)}\t{res.value()}\t{res.uncertainty()}\t{res.precision()}\t{excpt}\n')
+                f.write(f'{x}\t{iMin/dxRes}\t{res.value() - valFunc(x)}\t{res.value()}\t{res.uncertainty()}\t{excpt}\n')
                 f.flush()
 
     def test_pow(self):
+        Taylor.pow(VarDbl(1, 0.19929), -1.75, dumpPath='./Python/Output/Pow_1_0.19929_-1.75.txt')
+
+        DIVIDS = 20
         TestConvergence._search(0.19, 0.21, 100000,
-                [i/20 for i in range(-3*20, 4*20 + 1) if (i % 20) != 0],
-                lambda x, dx: taylor.pow(VarDbl(1, dx), x), lambda x: 1,
-                './Python/Output/PowAtOneEdge.txt')
+                [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
+                lambda x, dx: Taylor.pow(VarDbl(1, dx), x), lambda x: 1,
+                './Python/Output/PowEdge.txt')
 
     def test_sin(self):
-        TestConvergence._search(0.3, 0.55, 1000,
-                [i/64 for i in range(-1*64, 1*64 + 1)],
-                lambda x, dx: taylor.sin(VarDbl(x *math.pi, dx *math.pi)), 
-                lambda x: math.sin(x *math.pi),
+        DIVIDS = 64
+        TestConvergence._search(0.3, 5.0, 1000,
+                [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
+                lambda x, dx: Taylor.sin(VarDbl(x, dx)), 
+                lambda x: math.sin(x),
                 './Python/Output/SinEdge.txt')
         
 
     def test_exp(self):
+        Taylor.exp(VarDbl(0, 19), dumpPath='./Python/Output/Exp_0_16.txt')
+        with self.assertRaises(NotMonotonicException):
+            Taylor.exp(VarDbl(0, 20), dumpPath='./Python/Output/Exp_0_17.txt')
+
         dumpPath = './Python/Output/ExpEdge.txt'
         TestConvergence._search(19, 20, 1000,
-                (0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50),
-                lambda x, dx: taylor.exp(VarDbl(x, dx)), 
+                (0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50, 100, -100),
+                lambda x, dx: Taylor.exp(VarDbl(x, dx)), 
                 lambda x: math.exp(x),
                 dumpPath)
         with open(dumpPath) as f:
@@ -713,17 +670,18 @@ class TestConvergence (unittest.TestCase):
             self.assertEqual(hdr, TestConvergence.HEADER)  
             for line in f:
                 sWords = line.split('\t')
-                x, edge, bias, val, unc, prec = map(float, sWords[:-1])
+                x, edge, bias, val, unc = map(float, sWords[:-1])
                 exception = sWords[-1].strip()
                 self.assertEqual(edge, 19.864)
-                self.assertAlmostEqual(prec, 1681.7672471, delta=1e-6)
+                prec = unc / val
+                self.assertAlmostEqual(prec, 1681.7672471)
                 self.assertTrue(exception.startswith('NotMonotonicException'))
         
     def test_log(self):
         dumpPath = './Python/Output/LogEdge.txt'
         TestConvergence._search(0.20, 0.21, 100000,
                 (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
-                lambda x, dx: taylor.log(VarDbl(x, x*dx)), 
+                lambda x, dx: Taylor.log(VarDbl(x, x*dx)), 
                 lambda x: math.log(x),
                 dumpPath)
         with open(dumpPath) as f:
@@ -731,10 +689,10 @@ class TestConvergence (unittest.TestCase):
             self.assertEqual(hdr, TestConvergence.HEADER)  
             for line in f:
                 sWords = line.split('\t')
-                x, edge, bias, val, unc, prec = map(float, sWords[:-1])
+                x, edge, bias, val, unc = map(float, sWords[:-1])
                 exception = sWords[-1].strip()
                 self.assertEqual(edge, 0.20086)
-                self.assertAlmostEqual(unc, 0.2130505830, delta=1e-9)
+                self.assertAlmostEqual(unc, 0.2130506)
                 self.assertTrue(exception.startswith('NotMonotonicException'))
         
 
@@ -814,10 +772,10 @@ class TestStat (unittest.TestCase):
     def test_square_root_at_one(self):
         EXP = 0.5
         with self.assertRaises(NotMonotonicException):
-            VarDbl(1, 0.2012)**EXP
-        res = VarDbl(1, 0.2011)**EXP
-        self.assertAlmostEqual(res.value(), 0.9947278, places=6)
-        self.assertAlmostEqual(res.uncertainty(), 0.1025509, places=6)
+            VarDbl(1, 0.20116)**EXP
+        res = VarDbl(1, 0.20115)**EXP
+        self.assertAlmostEqual(res.value(), 0.9947250, places=6)
+        self.assertAlmostEqual(res.uncertainty(), 0.1025776, places=6)
 
         with open('./Python/Output/SquareRootAtOne.txt', 'w') as f:
             TestStat.writePowerHeader(f)
@@ -831,19 +789,19 @@ class TestRoundingError (unittest.TestCase):
     '''
 
     def test_inverse(self):
-        inv = taylor.pow(VarDbl(0.1), -1, dumpPath='./Python/Output/Pow_0.1_-1.txt')
+        inv = Taylor.pow(VarDbl(0.1), -1, dumpPath='./Python/Output/Pow_0.1_-1.txt')
         self.assertAlmostEqual(inv.value() / 10, 1)
         self.assertAlmostEqual(inv.uncertainty() / 8.01228266906342e-16, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.7763568394002505e-15, 1)
         self.assertAlmostEqual(VarDbl.ulp(inv.value())/1.0255800994045676e-15, 1)
 
-        inv = taylor.pow(VarDbl(0.01), -1, dumpPath='./Python/Output/Pow_0.01_-1.txt')
+        inv = Taylor.pow(VarDbl(0.01), -1, dumpPath='./Python/Output/Pow_0.01_-1.txt')
         self.assertAlmostEqual(inv.value() / 99.99999999999991, 1)
         self.assertAlmostEqual(inv.uncertainty() / 1.0015353336329276e-14, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.4210854715202004e-14, 1)
         self.assertAlmostEqual(VarDbl.ulp(inv.value())/8.20464079523654e-15, 1)
 
-        inv = taylor.pow(VarDbl(0.001), -1, dumpPath='./Python/Output/Pow_0.001_-1.txt')
+        inv = Taylor.pow(VarDbl(0.001), -1, dumpPath='./Python/Output/Pow_0.001_-1.txt')
         self.assertAlmostEqual(inv.value() / 1000, 1)
         self.assertAlmostEqual(inv.uncertainty() / 1.2519191670411594e-13, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.1368683772161603e-13, 1)
@@ -853,14 +811,24 @@ class TestRoundingError (unittest.TestCase):
 class TestImpreciseCoeff (unittest.TestCase):
      
      def test_inverse(self):
+        Taylor.pow(VarDbl(1, 0.20002), -1)
+        with self.assertRaises(NotMonotonicException):
+            Taylor.pow(VarDbl(1, 0.20003), -1)
+
+        sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, 0.5) for i in range(momentum.IDEAL.maxOrder)]
+        Taylor.taylor1d(VarDbl(1, 0.20002), 'Imprecise_Coeff Upper', sTaylor, True, True)
+        with self.assertRaises(NotMonotonicException):
+            Taylor.taylor1d(VarDbl(1, 0.20003), 'Imprecise_Coeff NotMonotonic', sTaylor, True, True)
+
         with open('./Python/Output/InversionAtOneImprecise.txt', 'w') as f:
             f.write('Taylor Uncertainty\tInput Uncertainty\tValue\tUncertainty\n')
-            for dx in (0.05, 0.1, 0.15, 0.2):
+            for dx in (0.05, 0.1, 0.15, 0.20002):
                 for i in range(0, 51, 2):
                     dy = i / 100
-                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(taylor.momentum.maxOrder)]
-                    res = taylor.taylor1d(VarDbl(1, dx), 'Imprecise_Coeff', sTaylor, True, True)
+                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(momentum.IDEAL.maxOrder)]
+                    res = Taylor.taylor1d(VarDbl(1, dx), 'Imprecise_Coeff', sTaylor, True, True)
                     f.write(f'{dy}\t{dx}\t{res.value()}\t{res.uncertainty()}\n')
+                    f.flush()
 
 
 

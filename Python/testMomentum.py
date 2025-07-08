@@ -1,8 +1,8 @@
-import math
 import os
 import unittest
 
 import momentum
+import varDbl
 
 class TestNormal (unittest.TestCase):
     filePath = './Python/NormalMomentum_5.0.txt'
@@ -23,8 +23,9 @@ class TestNormal (unittest.TestCase):
         self.assertAlmostEqual(sMomentum[4],  105*(1 - 2.9711805e-03))
         self.assertAlmostEqual(sMomentum[5],  945*(1 - 9.1166811e-03))
 
-    def testNormal(self):
-        mmt = momentum.Normal()
+    def testNormal_withoutVariance(self):
+        mmt = momentum.Normal(withVariance=False)
+        self.assertAlmostEqual(mmt.leakage, 5.7330314e-07)
         self.assertEqual(mmt.maxOrder, 448)
         bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
         self.assertEqual(bounding, 5)
@@ -32,13 +33,31 @@ class TestNormal (unittest.TestCase):
             self.assertAlmostEqual(mmt[i*2] / m, 1)
             self.assertEqual(mmt[i*2 + 1], 0)
 
-
-    def testCalcLow(self):
+    def testNormal_withVariance(self):
+        mmt = momentum.Normal(withVariance=True)
+        self.assertEqual(mmt.maxOrder, 250)
         bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
         self.assertEqual(bounding, 5)
-        for i in range(11):
-            self.assertAlmostEqual(momentum.Normal.calcLow(5, i*2, False) / sMomentum[i], 1)
-            self.assertEqual(momentum.Normal.calcLow(5, i*2 + 1), 0)
+        for i, m in enumerate(sMomentum):
+            self.assertAlmostEqual(mmt[i*2].value() / m, 1)
+            self.assertEqual(mmt[i*2 + 1], 0)
+
+    def testCompare(self):
+        mmtV = momentum.Normal(withVariance=True)
+        self.assertEqual(mmtV.maxOrder, 250)
+        self.assertEqual(mmtV.bounding, 5)
+        mmtF = momentum.Normal(withVariance=False)
+        self.assertGreater(mmtF.maxOrder, 250)
+        self.assertEqual(mmtF.bounding, 5)
+        bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
+        self.assertEqual(bounding, 5)
+        with open('./Python/Output/NormalMomentum_compare.txt', 'w') as f:
+            f.write('Order\tVar Value\tVar Uncertainty\tVar Precison\tVar Diff\tFloat Diff\tFloat Uncertainty\tFloat Precison\n')
+            for n in range(0, mmtV.maxOrder, 2):
+                unc = varDbl.VarDbl(mmtF[n]).uncertainty()
+                f.write(f'{n}\t{mmtV[n].value()}\t{mmtV[n].uncertainty()}\t{mmtV[n].precision()}'
+                        f'\t{mmtV[n].value() - sMomentum[n >> 1] if n < len(sMomentum) * 2 else ""}'
+                        f'\t{mmtF[n] - mmtV[n].value()}\t{unc}\t{unc/mmtF[n]}\n')
 
 
 

@@ -4,7 +4,7 @@ import pickle
 import unittest
 import sys
 
-from varDbl import VarDbl, InitException, InitException, validate
+from varDbl import VarDbl, InitException, InitException, validate, assertVarDblEqual
 from taylor import NotFiniteException, NotMonotonicException, NotPositiveException
 
 
@@ -50,7 +50,7 @@ class TestInit (unittest.TestCase):
         self.assertEqual(1, i - int(float(i)))
         validate(self, VarDbl(i), float(i), 0.25)
         i = (1 << 54) + 3
-        validate(self, VarDbl(i), float(i), 0.25)
+        validate(self, VarDbl(i), float(i), -0.25)
         self.assertEqual(-1, i - int(float(i)))
 
     def testInit(self):
@@ -62,10 +62,7 @@ class TestInit (unittest.TestCase):
         validate(self, VarDbl(0.1), 0.1, VarDbl.ulp(0.1))
         value = math.sqrt(2)
         validate(self, VarDbl(value), value, VarDbl.ulp(value))
-        value = math.sqrt(sys.float_info.max)
-        validate(self, VarDbl(value), value, VarDbl.ulp(value))
-        with self.assertRaises(InitException):
-            VarDbl(sys.float_info.max)
+        validate(self, VarDbl(sys.float_info.max), sys.float_info.max, VarDbl.ulp(sys.float_info.max))
 
 
     def testValueException(self):
@@ -81,14 +78,7 @@ class TestInit (unittest.TestCase):
             VarDbl(0, float('inf'))
             
     def testUncertaintyRange(self):
-        maxU = math.sqrt(sys.float_info.max)
-        with self.assertRaises(InitException):
-            VarDbl(0, maxU + VarDbl.ulp(maxU))
-        validate(self, VarDbl(0, maxU), 0, maxU) 
-        
-        minU = math.sqrt(VarDbl.ulp(sys.float_info.min))
-        validate(self, VarDbl(0, minU), 0, minU) 
-        validate(self, VarDbl(0, minU*0.5), 0, 0) 
+        validate(self, VarDbl(0, sys.float_info.max), 0, sys.float_info.max) 
 
     def testStr(self):
         validate(self, VarDbl('-1', '0'), -1, 0)
@@ -98,6 +88,9 @@ class TestInit (unittest.TestCase):
             VarDbl('-1', 'x')
         with self.assertRaises(ValueError):
             VarDbl('x', '1')
+
+    def testUlp(self):
+        self.assertAlmostEqual(VarDbl.ulp(4.69569871120438e-319), 4.94065645841247e-324)
 
 
 class TestRepresentation (unittest.TestCase):
@@ -111,7 +104,7 @@ class TestRepresentation (unittest.TestCase):
             pickle.dump(v, f, pickle.HIGHEST_PROTOCOL)
         with open('./Java/Output/data.pickle', 'rb') as f:
             vr = pickle.load(f)
-        validate(self, vr, v.value(), v.uncertainty())
+        assertVarDblEqual(self, vr, v)
 
     def testBool(self):
         self.assertTrue(VarDbl(1))

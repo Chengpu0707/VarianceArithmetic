@@ -7,7 +7,6 @@ Thus, each function needs to be calculated independently
 import collections
 import math
 import logging
-import scipy.special
 import typing
 import unittest
 
@@ -58,69 +57,63 @@ class NotStableException (Taylor1dException):
 class NotFiniteException (Taylor1dException):
     pass
 
-Expansion = collections.namedtuple('Expansion', ('exp', 'val', 'var', 'newVal', 'newVar', 'monotonics'))
+Expansion = collections.namedtuple('Expansion', ('order', 'taylor', 'exp', 'momentum', 'monotonics', 'val', 'var', 'newVal', 'newVar'))
+
 
 
 class Taylor:
+    def __new__(cls):
+        raise TypeError('Static classes cannot be instantiated')
+    
     MIN_MONOTONIC_COUNT = 20
 
-    @staticmethod
-    def default():
-        return _taylor
-
-    __slots__ = ('_momentum', '_leakage')
-
-    def __init__(self, bounding:float = 5.0) -> None:
-        self._momentum = momentum.Normal(bounding=bounding)
-        self._leakage = 1 - scipy.special.erf(bounding/math.sqrt(2))
-
-    @property
-    def momentum(self):
-        return self._momentum
-
-    @property
-    def leakage(self):
-        return self._leakage   
+    DUMP_PATH_INPUT_HEADER = (
+        "result\tvalue\tuncertainty\tinPrec\toutPrec\tbounding\tmaxOrder\tMinMonotonic"
+        "\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tName\n")
+    DUMP_PATH_EXPANSION_HEADER = (
+        "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMomentum\tMonotonics"
+        "\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty"
+        "\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty\n")
+    DUMP_PATH_OUTPUT_HEADER = (
+        "Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tException\n")  
 
     @staticmethod
     def _writeList(fw, name, sList:tuple[typing.Union[float, VarDbl]]):
-        fw.write("Index:\t")
+        fw.write(f"{name}\t")
         for n in range(len(sList)):
             fw.write(f"{n}\t")
         fw.write("\n")
-        fw.write(f"{name} Value:\t")
         hasVar = False
         for n in range(len(sList)):
             if isinstance(sList[n], VarDbl):    
-                fw.write(f"{sList[n].value()}\t")
                 if sList[n].variance() > 0:
                     hasVar = True
+        fw.write("Value\t" if hasVar else "Double\t")
+        for n in range(len(sList)):
+            if isinstance(sList[n], VarDbl):    
+                fw.write(f"{sList[n].value()}\t")
             else:
                 fw.write(f"{sList[n]}\t")
         fw.write("\n")
         if hasVar:
-            fw.write(f"{name} Uncertainty:\t")
+            fw.write("Uncertainty\t")
             for n in range(len(sList)):
                 fw.write(f"{sList[n].uncertainty()}\t")
             fw.write("\n")
 
     @staticmethod
-    def headerForExpansion():
-        return ("2n\tMonotonics\tExponent\tMomentum\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty"  # 0-5
-                "\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty\n")
-
-    @staticmethod
-    def headerForInput():
-        return ("name\tvalue\tuncertainty\tvariance\tinPrec\toutPrec\tBinding\tMaxOrder\tMinMonotonic"
-                "\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tenableExpansionTruncation\n")
-    
-    @staticmethod
-    def headerForResult():
-        return "Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\n"
+    def _writeResult(fw, value:VarDbl, variance:VarDbl, exception:str):
+        if not fw:
+            return
+        fw.write(Taylor.DUMP_PATH_OUTPUT_HEADER)
+        fw.write(f"{value.value()}\t{value.uncertainty()}\t{variance.value()}\t{variance.uncertainty()}\t{exception}\n")
+        fw.close()
     
 
-    def taylor1d(self, input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
-                 inPrec:bool, outPrec:bool, maxOrder:int=0, 
+    @staticmethod
+    def taylor1d(input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
+                 inPrec:bool, outPrec:bool, 
+                 momentum=momentum.IDEAL,
                  checkMinMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True,
                  dumpPath:str=None):
         '''
@@ -157,8 +150,6 @@ class Taylor:
         Dump the expansion to {dumpPath} when it is provided.
         {dumpPath} can be read back and tested using verifyDumpFile()
         '''
-        if not maxOrder:
-            maxOrder = self._momentum.maxOrder
         for n in range(len(s1dTaylor)):
             if isinstance(s1dTaylor[n], VarDbl):
                 if (not math.isfinite(s1dTaylor[n].value())) or (not math.isfinite(s1dTaylor[n].variance())):
@@ -176,206 +167,213 @@ class Taylor:
         fw = None
         if dumpPath:
             fw = open(dumpPath, "w")
-            fw.write(Taylor.headerForInput())
-            fw.write(f"{name}\t{input.value()}\t{input.uncertainty()}\t{input.variance()}"
-                     f"\t{inPrec}\t{outPrec}"
-                     f"\t{self._momentum.bounding}\t{maxOrder}\t{Taylor.MIN_MONOTONIC_COUNT}"
-                     f"\t{checkMinMonotonic}\t{checkStability}\t{checkReliablity}\t{checkPositive}\tFalse\n")
-            Taylor._writeList(fw, "Taylor1d", s1dTaylor)
-            fw.write(Taylor.headerForExpansion())
+            fw.write(Taylor.DUMP_PATH_INPUT_HEADER)
+            fw.write(f"{s1dTaylor[0]}\t{input.value()}\t{input.uncertainty()}\t{inPrec}\t{outPrec}"
+                     f"\t{momentum.bounding}\t{momentum.maxOrder}\t{Taylor.MIN_MONOTONIC_COUNT}"
+                     f"\t{checkMinMonotonic}\t{checkStability}\t{checkReliablity}\t{checkPositive}"
+                     f"\t{name}\n")
+            fw.write(Taylor.DUMP_PATH_EXPANSION_HEADER)
 
         monotonics = 0
         monotonicPrev = True
 
         value = VarDbl(1, 0) if outPrec else VarDbl(s1dTaylor[0])
         variance = VarDbl()
-        var = input.variance()
+        unc = input.uncertainty()
         if inPrec:
-            var *= 1 /input.value() /input.value()
-        varn = var
-        prevValue = VarDbl()
+            unc /= input.value()
+        uncN = 1
         prevVariance = VarDbl()
-        for n in range(2, min(len(s1dTaylor), maxOrder), 2):
-            oldValue = VarDbl(value)
-            oldVariance = VarDbl(variance)
-            finite = True
+        infinite = None
+        for n in range(1, min(len(s1dTaylor), momentum.maxOrder)):
+            uncN *= unc
+            if not math.isfinite(uncN):
+                break
+            if uncN == 0:
+                break
             try:
-                newValue = s1dTaylor[n] * varn * self._momentum[n]
-                newVariance = 0
-                for j in range(1, n):
-                    newVariance += s1dTaylor[j] * s1dTaylor[n - j] * \
-                                    varn * (self._momentum[n] - self._momentum[j] * self._momentum[n - j])
+                if abs(uncN) < 1:
+                    newValue = s1dTaylor[n] * (uncN * momentum[n])
+                else:
+                    newValue = s1dTaylor[n] * uncN * momentum[n]
                 if not isinstance(newValue, VarDbl):
                     newValue = VarDbl(newValue)
-                if not isinstance(newVariance, VarDbl):
-                    newVariance = VarDbl(newVariance)
-                value += newValue
-                variance += newVariance
-                if (not math.isfinite(value.value())) or (not math.isfinite(value.variance() + variance.value())) or \
-                        (not math.isfinite(variance.variance())):
-                    finite = False
-                elif abs(newVariance.value()) <= abs(prevVariance.value()):
-                    monotonics += 1
-                elif (monotonics >= Taylor.MIN_MONOTONIC_COUNT) and monotonicPrev:
-                    monotonicPrev = False
-                else:
-                    monotonics = 0
-                prevValue = newValue
-                prevVariance = newVariance
+
+                try:
+                    newVariance = 0
+                    for j in range(1, n):
+                        if abs(uncN) < 1:
+                            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * (uncN * \
+                                            (momentum[n] - momentum[j] * momentum[n - j]))
+                        else:
+                            newVariance += s1dTaylor[j] * s1dTaylor[n - j] * uncN * \
+                                            (momentum[n] - momentum[j] * momentum[n - j])
+                    if not isinstance(newVariance, VarDbl):
+                        newVariance = VarDbl(newVariance)
+                except (OverflowError, InitException) as ex:
+                    infinite = 'NotFiniteException\tnewVariance'
+
+                try:    
+                    value += newValue
+                except (OverflowError, InitException) as ex:
+                    infinite = 'NotFiniteException\tvalue'
+                try:
+                    variance += newVariance
+                except (OverflowError, InitException) as ex:
+                    infinite = 'NotFiniteException\tvariance'
+
+                if (not infinite) and ((n & 1) == 0):
+                    if abs(newVariance.value()) <= abs(prevVariance.value()):
+                        monotonics += 1
+                    elif (monotonics >= Taylor.MIN_MONOTONIC_COUNT) and monotonicPrev:
+                        monotonicPrev = False
+                    else:
+                        monotonics = 0
+                    prevVariance = newVariance
 
                 if fw:
-                    fw.write(f"{n}\t{monotonics}\t{varn}\t{self._momentum[n]}"
+                    tyVal = s1dTaylor[n].value() if type(s1dTaylor[n]) == VarDbl else s1dTaylor[n]
+                    tyVar = s1dTaylor[n].uncertainty() if type(s1dTaylor[n]) == VarDbl else 0
+                    fw.write(f"{n}\t{tyVal}\t{tyVar}\t{uncN}\t{momentum[n]}\t{monotonics}"
                              f"\t{value.value()}\t{value.uncertainty()}\t{variance.value()}\t{variance.uncertainty()}"
                              f"\t{newValue.value()}\t{newValue.variance()}\t{newVariance.value()}\t{newVariance.uncertainty()}"
                              f"\n")
             except (OverflowError, InitException) as ex:
-                finite = False
+                infinite = 'NotFiniteException\tnewValue'
             except BaseException as ex:
+                infinite = f'NotFiniteException\t{ex}'
                 if fw:
-                    fw.write(f"Fail\t{ex}\t{n}\t{j}\t{s1dTaylor[j]}\t{s1dTaylor[n - j]}\t{self._momentum[n]}\n")
+                    fw.write(f"{value.value()}\t{value.uncertainty()}\t{variance.value()}\t{variance.uncertainty()}\t{ex}\n")
                 raise ex
-            if not finite:
-                if checkMinMonotonic and (monotonics >= Taylor.MIN_MONOTONIC_COUNT):
-                    # roll back to the previous value
-                    value = oldValue
-                    variance = oldVariance
-                    newValue = prevValue
-                    newVariance = prevVariance
-                    break
-                if not math.isfinite(value.value()):
-                    if fw:
-                        fw.write("NotFiniteException\tvalue\n")
-                        fw.close()
-                elif (not math.isfinite(value.variance() + variance.value())) or (not math.isfinite(variance.variance())):
-                    if fw:
-                        fw.write("NotFiniteException\tvariance\n")
-                        fw.close()
-                else:
-                    if fw:
-                        fw.write(f"NotFiniteException\tcalculation\t{n}\t{j}\t{value}\t{newValue}\t{variance}\t{newVariance}\n")
-                        fw.close()
+            if infinite:
+                Taylor._writeResult(fw, value, variance, infinite)
                 raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
                 
             if checkPositive and (variance.value() < 0):
-                if fw:
-                    fw.write("NotPositiveException\n")
-                    fw.close()
+                Taylor._writeResult(fw, value, variance, 'NotPositiveException')
                 raise NotPositiveException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
-            varn *= var
-            if not math.isfinite(varn):
-                break
-            if varn == 0:
-                break
 
-        if checkMinMonotonic and (varn > 0) and (monotonics < Taylor.MIN_MONOTONIC_COUNT):
-            if fw:
-                fw.write("NotMonotonicException\n")
-                fw.close()
+        if checkMinMonotonic and (uncN > 0) and (monotonics < Taylor.MIN_MONOTONIC_COUNT):
+            Taylor._writeResult(fw, value, variance, 'NotMonotonicException')
             raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
-        unc = math.sqrt(value.variance() + variance.value()) * self.leakage
-        if checkStability and not ((abs(newValue.value()) < unc) or (abs(newValue.value()) < math.ulp(value.value()))):
-            if fw:
-                fw.write(f"NotStableException\t{n}\t{len(s1dTaylor)}\t{unc}\n")
-                fw.close()
-            raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
-                    value, variance, n, newValue, newVariance, monotonics)
+        if checkStability:
+            if abs(newValue.value()) >= math.ulp(value.value()):
+                Taylor._writeResult(fw, value, variance, 'NotStableException\tvalue')
+                raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance, monotonics)
+            unc = math.sqrt(value.variance() + variance.value()) * momentum.leakage
+            if abs(newValue.value()) >= unc:
+                Taylor._writeResult(fw, value, variance, 'NotStableException\tuncertainty')
+                raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance, monotonics)
         
         if outPrec:
             try:
                 value *= s1dTaylor[0]
-                variance *= s1dTaylor[0]**2
-            except InitException as ex:
-                if fw:
-                    fw.write(f"NotFiniteException\t{ex}\n")
-                    fw.close()
+            except InitException:
+                Taylor._writeResult(fw, value, variance, f'NotFiniteException\toutPrec value\t{s1dTaylor[0]}')
                 raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
-        if checkReliablity and (variance.value() * self._momentum.bounding < variance.uncertainty()):
-            if fw:
-                fw.write("NotReliableException\n")
-                fw.close()
+            try:
+                variance *= s1dTaylor[0]**2
+            except InitException:
+                Taylor._writeResult(fw, value, variance, f'NotFiniteException\toutPrec variance\t{s1dTaylor[0]}')
+                raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
+                        value, variance, n, newValue, newVariance, monotonics)
+        if checkReliablity and (variance.value() * momentum.bounding < variance.uncertainty()):
+            Taylor._writeResult(fw, value, variance, f'NotReliableException')
             raise NotReliableException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
-        if fw:
-            fw.write(Taylor.headerForResult())
-            fw.write(f"{value.value()}\t{value.variance()}\t{variance.value()}\t{variance.variance()}\n")
-            fw.close()
         try:
-            return VarDbl(value.value(), variance.value() + value.variance(), True) 
+            ret = VarDbl(value.value(), math.sqrt(variance.value() + value.variance()))
         except InitException as ex:
-            if fw:
-                fw.write(f"NotFiniteException\tresult\t{ex}\n")
-                fw.close()
+            Taylor._writeResult(fw, value, variance, f'NotFiniteException\t{ex}')
             raise NotFiniteException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance)
+        Taylor._writeResult(fw, value, variance, '')
+        return ret
 
 
     @staticmethod   
-    def verifyDumpFile(testcase:unittest.TestCase, dumpPath:str, checkExp=True)\
-            -> tuple[VarDbl, list[float], Expansion, typing.Union[VarDbl, str]]:
+    def verifyDumpFile(testcase:unittest.TestCase, dumpPath:str)\
+            -> tuple[VarDbl, list[Expansion], typing.Union[VarDbl, str]]:
         '''
         When input uncertainty is rounding error, checkExp=False
         '''
         with open(dumpPath) as f:
-            testcase.assertEqual(next(f), Taylor.headerForInput())
+            testcase.assertEqual(next(f), Taylor.DUMP_PATH_INPUT_HEADER)
+            sHdr = Taylor.DUMP_PATH_INPUT_HEADER.split('\t')
             sWord = next(f).strip().split('\t')
-            x = VarDbl(sWord[1], sWord[2])
-            testcase.assertEqual(len(sWord), len(Taylor.headerForInput().split('\t')))
-            sWord = next(f).strip().split('\t')
-            testcase.assertEqual(sWord[0], 'Index:')
-            n = len(sWord) - 1
-            testcase.assertListEqual(sWord[1:], [f'{i}' for i in range(n)])
-            sWord = next(f).strip().split('\t')
-            testcase.assertEqual(len(sWord), n + 1)
-            testcase.assertEqual(sWord[0], 'Taylor1d Value:')
-            sTaylor = list(map(float, sWord[1:]))
-            testcase.assertEqual(next(f), Taylor.headerForExpansion())
-            sExpansion = []
+            testcase.assertEqual(len(sWord), len(sHdr))
+            for i in (8,9,10,11):
+                testcase.assertIn(sWord[i], ('True', 'true', '1'))
+            for i in (3,4):
+                testcase.assertIn(sWord[i], ('True', 'true', '1', 'False', 'false', '0'))
+            testcase.assertEqual(int(sWord[7]), Taylor.MIN_MONOTONIC_COUNT)
+            sInput = {
+                'result': float(sWord[0]),
+                'input': VarDbl(sWord[1], sWord[2]),
+                'inPrec': sWord[3] in ('True', 'true', '1'), 'outPrec': sWord[4] in ('True', 'true', '1'),
+                'bounding': float(sWord[5]), 'maxOrder': int(sWord[6]),
+             }
+
+            testcase.assertEqual(next(f), Taylor.DUMP_PATH_EXPANSION_HEADER)
+            sExpansion = [0]
             infinite = False
-            mmt = momentum.Normal()
-            for n in range(2, mmt.maxOrder, 2):
-                sWord = next(f).strip().split('\t')
+            size = len(Taylor.DUMP_PATH_EXPANSION_HEADER.split('\t'))
+            for n in range(1, 10000):
                 try:
-                    nn = int(sWord[0])
-                except ValueError:
+                    sWord = next(f).strip().split('\t')
+                except StopIteration:
+                    testcase.fail(f'Unexpected end of file {dumpPath} at line {n+1}: {sWord}')
                     break
+                if size != len(sWord):
+                    break
+                nn = int(sWord[0])
                 testcase.assertEqual(n, nn)
                 try:
-                    monotonics = int(sWord[1])
-                    exp = float(sWord[2])
-                    if checkExp:
-                        testcase.assertAlmostEqual(x.uncertainty() **n / exp, 1)
-                    val = VarDbl(sWord[4], sWord[5])
-                    var = VarDbl(sWord[6], sWord[7])
-                    newVal = VarDbl(sWord[8], sWord[9])
-                    newVar = VarDbl(sWord[10], sWord[11])
+                    ty = VarDbl(sWord[1], sWord[2])
+                    exp, mmt = map(float, sWord[3:5])
+                    monotonics = int(sWord[5])
+                    if n & 1:
+                        testcase.assertEqual(0, mmt)
+                    else:
+                        testcase.assertLess(0, mmt)
+                    val = VarDbl(sWord[6], sWord[7])
+                    var = VarDbl(sWord[8], sWord[9])
+                    newVal = VarDbl(sWord[10], sWord[11])
+                    newVar = VarDbl(sWord[12], sWord[13])
                 except InitException:
                     infinite = True
-                sExpansion.append(Expansion(exp, val, var, newVal, newVar, monotonics))
+                sExpansion.append(Expansion(n, ty, exp, mmt, monotonics, val, var, newVal, newVar))
+            testcase.assertListEqual(sWord, Taylor.DUMP_PATH_OUTPUT_HEADER.strip().split('\t'))
+            sWord = next(f).strip().split('\t')
+            testcase.assertLessEqual(4, len(sWord))
+            if infinite:
+                testcase.assertEqual(sWord[4], 'NotFiniteException')
+            if 4 < len(sWord):
+                res = sWord[4]
             else:
-                sWord = next(f).strip().split('\t')
-            if Taylor.headerForResult().startswith(sWord[0]):
-                sWord = next(f).strip().split('\t')
-                res = VarDbl(sWord[0], float(sWord[1]) + float(sWord[2]), True)
-            else:
-                res = sWord[0]
-                if infinite:
-                    testcase.assertEqual(res, 'NotFiniteException')
-            return x, sTaylor, sExpansion, res
+                val = VarDbl(sWord[0], sWord[1])
+                var = VarDbl(sWord[2], sWord[3])
+                res = VarDbl(val.value(), math.sqrt(val.variance() + var.value()))
+            return sInput, sExpansion, res
     
 
 
-    def polynominal(self, input:VarDbl, sCoeff:tuple[float],
-                    dumpPath:str=None):
+    @staticmethod
+    def polynominal1d(input:VarDbl, sCoeff:tuple[float], 
+                      momentum=momentum.IDEAL,
+                      dumpPath:str=None):
         '''
         1d Taylor expansion for polynominal at "input" with "sCoeff".
         Allow input.value() +- input.uncertainty() to include 0
         '''
-        if len(sCoeff) > (self.momentum.maxOrder // 2):
-            raise ValueError(f'The lenght {len(sCoeff)} of polynominal coefficient is more than half of {self.momentum.maxOrder // 2}: {sCoeff}')
+        if len(sCoeff) > (momentum.maxOrder // 2):
+            raise ValueError(f'The lenght {len(sCoeff)} of polynominal coefficient is more than half of {momentum.maxOrder}: {sCoeff}')
         exp = len(sCoeff) - 1
         s1dTaylor = [sCoeff[0]] + [0] * 2*exp
         sPow = [1, input.value()]
@@ -391,30 +389,34 @@ class Taylor:
             for k in range(j + 1):
                 s1dTaylor[k] += coeff * sTaylor[k] * sPow[j - k]
                  
-        return self.taylor1d(input, f'poly({sCoeff})', s1dTaylor, False, False, 
+        return Taylor.taylor1d(input, f'poly({sCoeff})', s1dTaylor, False, False, 
+                momentum = momentum,
                 dumpPath = dumpPath, checkMinMonotonic = False, checkStability = False)
 
-    def exp(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
+    @staticmethod
+    def exp(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
         sTaylor = [math.exp(input.value()), 1.0]
-        for i in range(2, self.momentum.maxOrder):
+        for i in range(2, momentum.maxOrder):
             sTaylor.append(sTaylor[-1]/i)
-        return self.taylor1d(input, f"exp({input})", sTaylor, False, True, 
-                    dumpPath=dumpPath)
+        return Taylor.taylor1d(input, f"exp({input})", sTaylor, False, True, 
+                               momentum=momentum, dumpPath=dumpPath)
     
-    def log(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
+    @staticmethod
+    def log(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         sTaylor.append(math.log(input.value()))
-        for i in range(1, self.momentum.maxOrder):
+        for i in range(1, momentum.maxOrder):
             sTaylor.append(1/i if ((i%2) == 1) else -1/i)
-        return self.taylor1d(input, f"log({input})", sTaylor, True, False, 
-                    dumpPath=dumpPath)
+        return Taylor.taylor1d(input, f"log({input})", sTaylor, True, False, 
+                               momentum=momentum, dumpPath=dumpPath)
 
-    def sin(self, input:VarDbl, dumpPath:str=None) -> VarDbl:
+    @staticmethod
+    def sin(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         x = input.value()
         sTaylor.append( math.sin(x) )
         fac = 1.0
-        for i in range(1, self.momentum.maxOrder):
+        for i in range(1, momentum.maxOrder):
             fac /= i
             match i % 4:
                 case 0:
@@ -425,10 +427,11 @@ class Taylor:
                     sTaylor.append(-math.sin(x) *fac)
                 case 3:
                     sTaylor.append(-math.cos(x) *fac)
-        return self.taylor1d(input, f"sin({input})", sTaylor, False, False, 
-                    dumpPath=dumpPath)
+        return Taylor.taylor1d(input, f"sin({input})", sTaylor, False, False, 
+                               momentum=momentum, dumpPath=dumpPath)
     
-    def pow(self, input:VarDbl, exp:float, dumpPath:str=None) -> VarDbl:
+    @staticmethod
+    def pow(input:VarDbl, exp:float, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
         match exp:
             case 0:
                 return VarDbl(1, 0)
@@ -437,12 +440,11 @@ class Taylor:
         if (exp > 0) and ((type(exp) == int) or (math.ceil(exp) == math.floor(exp))):
             sCoeff = [0] * int(exp)
             sCoeff.append(1)
-            return self.polynominal(input, sCoeff, dumpPath=dumpPath)
-        sTaylor = [math.pow(input.value(), exp), exp]
-        for i in range(2, self.momentum.maxOrder):
-            sTaylor.append( sTaylor[-1]/i * (exp + 1 - i) )
-        return self.taylor1d(input, f"({input})**{exp}", sTaylor, True, True, 
-                    dumpPath=dumpPath)
+            return Taylor.polynominal1d(input, sCoeff, dumpPath=dumpPath)
+        sTaylor = [math.pow(input.value(), exp), VarDbl(exp)]
+        for i in range(2, momentum.maxOrder):
+            sTaylor.append( sTaylor[-1] * ((exp + 1 - i)/i) )
+        return Taylor.taylor1d(input, f"({input})**{exp}", sTaylor, True, True, 
+                               momentum=momentum, dumpPath=dumpPath)
     
 
-_taylor = Taylor()  # Singleton instance   

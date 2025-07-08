@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "IndexSin.h"
-#include "VarDbl.h"
+#include "Taylor.h"
 #include "Stat.h"
 
 #ifndef __FFT_h__
