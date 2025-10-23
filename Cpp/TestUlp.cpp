@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cmath>
 #include <iostream>
 
 #include "ulp.h"
@@ -22,6 +21,8 @@ int main()
     assert(std::numeric_limits<double>::epsilon() == var_dbl::ulp(1.));
     assert(std::numeric_limits<double>::epsilon() == var_dbl::ulp(-1.));
     assert(std::numeric_limits<double>::epsilon() == var_dbl::ulp(std::sqrt(2)));
+    assert(std::numeric_limits<double>::epsilon()*2 == var_dbl::ulp(2.));
+    assert(std::numeric_limits<double>::epsilon()*0.5 == var_dbl::ulp(0.5));
 
     assert(0 == var_dbl::ulp(0., 2));
     assert(0 == var_dbl::ulp(1., 2));

@@ -1,7 +1,6 @@
 
 #include <numbers>
-#include <random>
-#include <map>
+#include <sstream>
 #include <vector>
 #include <unordered_map>
 
@@ -14,43 +13,37 @@
 namespace var_dbl 
 {
 
+/*
+ * A class to facilitate testing of FFT
+ */
 class FFT {
 public:
-    enum SinSource {
-        IndexedSin,
-        LibrarySin
-    };
-    constexpr static const std::array<std::string, 2> sSinSource{"IndexedSin", "LibrarySin"};
-    constexpr static const std::string sinSourceName(SinSource sinSouce) { return sSinSource[static_cast<size_t>(sinSouce)]; }
-
-    constexpr static unsigned char MIN_ORDER = 2;
-    constexpr static unsigned char MAX_ORDER = 20;
-        // (1 << MAX_ORDER) == 2 * PI
-    VarDbl sin(long long freq, unsigned char order) const;
-        // sin(Math.pi * freq / (1 << order))
-    VarDbl cos(long long freq, unsigned char order) const;
-        // cos(Math.pi * freq / (1 << order))
-
     static std::vector<size_t> bitReversedIndices(unsigned char order);
 
-    static const IndexSin isin;
-
-    std::vector<VarDbl> transform(const std::vector<VarDbl>& sData, bool forward) const;
-
+    std::vector<VarDbl> transform(const std::vector<VarDbl>& sData, bool forward,
+                                  bool traceSteps=false) const;
+        // FFT of input {sData} of (real + imag) of size (2 << order)
+        // When {traceSteps} is true, {ssStep} contains the data for intermediate steps,
+        //  with [order + 1] for the result, and [order + 2] for the value error which could be non-exist
     template<typename T> requires std::floating_point<T> || std::integral<T>
-    std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward) const;
+    std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward, 
+                                  bool traceSteps=false) const;
+    // intermediate steps for the transform() when {traceSteps} is true
+    mutable std::vector<std::vector<VarDbl>> ssStep;
 
-    FFT(SinSource sinSource) { _sinType = sinSource; }
-private:
-    SinSource _sinType;
+    FFT(IndexSin::SinSource sinSource = IndexSin::SinSource::Quart, const std::string& dumpDir = "") 
+        : _sin(sinSource, dumpDir) {}
+        // if {dumpDir} is not empty, read sin value from the file in the {dumpDir}
+
+protected:
+    const IndexSin _sin;
 };
 
-
-const IndexSin FFT::isin(FFT::MAX_ORDER);
 
 
 inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order) 
 {
+    IndexSin::validateOrder(order);
     static std::unordered_map<unsigned char, std::vector<size_t>> _ssBitReversedIndex; 
     auto it = _ssBitReversedIndex.find(order);
     if (it != _ssBitReversedIndex.end())
@@ -74,50 +67,6 @@ inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order)
     return sRes;
 }
 
-inline VarDbl FFT::sin(long long freq, unsigned char order) const
-{
-    std::ostringstream oss;
-    switch (_sinType) {
-    case IndexedSin:
-        if (order < MIN_ORDER) {
-            oss << "The order " << order << " < " << MIN_ORDER << " for fft.sin()";
-            throw std::invalid_argument(oss.str());
-        }
-        if (MAX_ORDER < order) {
-            oss << "The order " << order << " > " << MAX_ORDER << " for fft.sin()";
-            throw std::invalid_argument(oss.str());
-        }
-        return isin.sin(freq *(1L <<(MAX_ORDER - order + 1)));
-    case LibrarySin:            
-        return std::sin(std::numbers::pi *freq /(1L << (order - 1)));
-    default:
-        oss << "Unknown SinSource " <<  _sinType << " for fft.sin()";
-        throw std::invalid_argument(oss.str());
-    }
-}
-
-inline VarDbl FFT::cos(long long freq, unsigned char order) const
-{
-    std::ostringstream oss;
-    switch (_sinType) {
-    case IndexedSin:
-        if (order < MIN_ORDER) {
-            oss << "The order " << order << " < " << MIN_ORDER << " for fft.cos()";
-            throw std::invalid_argument(oss.str());
-        }
-        if (MAX_ORDER < order) {
-            oss << "The order " << order << " > " << MAX_ORDER << " for fft.cos()";
-            throw std::invalid_argument(oss.str());
-        }
-        return isin.cos(freq *(1L <<(MAX_ORDER - order + 1)));
-    case LibrarySin:            
-        return std::cos(std::numbers::pi *freq /(1L << (order - 1)));
-    default:
-        oss << "Unknown SinSource " <<  _sinType << " for fft.sin()";
-        throw std::invalid_argument(oss.str());
-    }
-}
-
 /*
     * 1-dimentional Fast Fourier Transformation (FFT)
     * 
@@ -125,22 +74,13 @@ inline VarDbl FFT::cos(long long freq, unsigned char order) const
     * 
     * @return      an array of size (2<<order), with each datum contains (real, image)
     */
-inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool forward) const
+inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool forward, bool traceSteps) const
 {
-    int order = MIN_ORDER;
-    for (; order <= MAX_ORDER; ++order) {
-        if ((2 << order) == sData.size()) {
-            break;
-        }
-    }
-    if (order > MAX_ORDER) {
-        std::ostringstream oss;
-        oss << "Invalid input array size " << sData.size() << " for fft.transform()";
-        throw std::invalid_argument(oss.str());
-    }
+    const unsigned char order = IndexSin::getOrder(sData.size() >> 1);
     const unsigned size = 1 << order;
 
     std::vector<VarDbl> sRes(2 << order);
+    ssStep.clear();
     
     const std::vector<size_t> sIndex = bitReversedIndices(order);
     for (int i = 0; i < sIndex.size(); i++) {
@@ -148,6 +88,8 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
         sRes[(i << 1)] = sData[j << 1];
         sRes[(i << 1) + 1] = sData[(j << 1) + 1];
     }
+    if (traceSteps)
+        ssStep.push_back(sRes);
 
     for (int i = 0; i < (sIndex.size() - 1); i += 2 ) {
         const VarDbl rt = sRes[(i << 1)], it = sRes[(i << 1) + 1];
@@ -156,16 +98,18 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
         sRes[(i << 1) + 2] = rt - sRes[(i << 1) + 2];
         sRes[(i << 1) + 3] = it - sRes[(i << 1) + 3];
     }
+    if (traceSteps)
+        ssStep.push_back(sRes);
 
-    for (unsigned o = 2, k = 4; o <= order; ++o, k <<= 1) {
+    for (unsigned o = 1, k = 4; o < order; ++o, k <<= 1) {
         for (long j = 0; j < (k >> 1); j++) {
-            const VarDbl vcos = cos( j, o );
-            const VarDbl vsin = sin( forward? j : -j, o );
+            const VarDbl vcos = _sin.cos(j, o);
+            const VarDbl vsin = _sin.sin(forward? j : -j, o);
             for (int i = 0; i < sIndex.size(); i += k ) {
                 const int idx0 = (i + j) << 1;
                 const int idx1 = idx0 + k;
-                const VarDbl r1 = sRes[idx1];
-                const VarDbl i1 = sRes[idx1 + 1];
+                const VarDbl& r1 = sRes[idx1];
+                const VarDbl& i1 = sRes[idx1 + 1];
         
                 const VarDbl rd = r1 * vcos - i1 * vsin;
                 const VarDbl id = i1 * vcos + r1 * vsin;
@@ -176,22 +120,25 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
                 sRes[idx0 + 1] += id;
             }   // for( i
         }
+        if (traceSteps)
+            ssStep.push_back(sRes);
     }
     
     if (!forward) {
         for (int i = 0; i < (sIndex.size() << 1); i ++ ) {
-            sRes[i] *= 1.0/(1L << order);
+            sRes[i] *= 1.0/size;
         }
     }
+    if (traceSteps)
+        ssStep.push_back(sRes);
     return sRes;
 }
 
 template<typename T> requires std::floating_point<T> || std::integral<T>
-inline std::vector<VarDbl> FFT::transform(const std::vector<T>& sData, bool forward) const
+inline std::vector<VarDbl> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
 {
-    return transform(std::vector<VarDbl>{sData}, forward);
+    return transform(std::vector<VarDbl>{sData}, forward, traceSteps);
 }
-
 
 
 } // namespace var_dbl

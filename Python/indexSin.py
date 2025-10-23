@@ -5,181 +5,209 @@ import typing
 
 import varDbl
 
+import enum
+import math
+import os
+import typing
+
+import varDbl
+
+
+class SinSource (enum.StrEnum):
+    Quart = 'Quart',
+    Full = 'Full',
+    Fixed = 'Fixed',
+    Limit = 'Limit',
+    Lib = 'Lib',
+    Prec = 'Prec'
+
+
 class IndexSin:
     '''
-    A sin() with index frequence as input, with resolution \pi/size()
-    size() = 1 << "order".
-    When the index "freq" == size, the result is sin(\pi).
+    A sin() with index frequence as input, with resolution PI /(1 << "order)
     '''
-    __slots__ = ['_order', '_size', '_half', '_sSin']
+    MIN_ORDER = 1
+    MAX_ORDER = 18
 
-    def __init__(self, order) -> None:
-        if order < 3:
-            raise ValueError(f'order {order} is less than 4 for IndexSin')
-        self._order = order
-        self._size = 1 << order
-        self._half = self._size >> 1
-        self._sSin = [0] + [math.sin(i/self._size *math.pi) for i in range(1, self._half >> 1)] + \
-                [math.cos((1/4 - i/self._size)*math.pi) for i in range(self._half >> 1)] + [1] 
+    _size = 1 << MAX_ORDER
+    _half = 1 << (MAX_ORDER - 1)
+
+    _sSinQuart = None
+    _sSinFull = None
+    _sSinFixed = None
+
+    __slots__ = ['_order', '_sinSource', '_sSin', '_sCos', '_order']
+
+    @staticmethod
+    def validateOrder(order:int):
+        if not (IndexSin.MIN_ORDER <= order <= IndexSin.MAX_ORDER):
+            raise RuntimeError(f'order={order} is not in the range of [{IndexSin.MIN_ORDER}, {IndexSin.MAX_ORDER}]')
+
+    @staticmethod
+    def validateSize(size:int) -> int:
+        for order in range(IndexSin.MIN_ORDER, IndexSin.MAX_ORDER + 1):
+            if (1 << order) == size:
+                return order
+        else:
+            raise RuntimeError(f'Invalid input array size {size} which is not 2^{order}')
+
+
+    def __init__(self, sinSource = SinSource.Quart,
+                 sCosSin:tuple[varDbl.VarDbl]=None) -> None:                
+        self._sinSource = sinSource
+        match sinSource:
+            case SinSource.Prec:
+                IndexSin._sSinPrec = IndexSin.read(SinSource.Prec)
+                self._order = IndexSin.MAX_ORDER
+                self._sSin = IndexSin._sSinPrec
+                self._sCos =  None
+            case SinSource.Quart:
+                if not IndexSin._sSinQuart:
+                    quart = IndexSin._half >> 1
+                    sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(quart)] + \
+                        [math.cos(math.pi * (quart - i) / IndexSin._size) for i in range(quart + 1)]
+                    IndexSin._sSinQuart = tuple([varDbl.VarDbl(v, math.ulp(v)) for v in sSin])
+                self._order = IndexSin.MAX_ORDER
+                self._sSin = IndexSin._sSinQuart
+                self._sCos =  None
+            case SinSource.Full:
+                if not IndexSin._sSinFull:
+                    sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(IndexSin._size)]
+                    IndexSin._sSinFull = tuple([varDbl.VarDbl(v, math.ulp(v)) for v in sSin])
+                self._order = IndexSin.MAX_ORDER
+                self._sSin = IndexSin._sSinFull
+                self._sCos =  None
+            case SinSource.Fixed:
+                if not IndexSin._sSinFixed:
+                    sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(IndexSin._size)]
+                    IndexSin._sSinFixed = tuple([varDbl.VarDbl(v, math.ulp(1.)) for v in sSin])
+                self._order = IndexSin.MAX_ORDER
+                self._sSin = IndexSin._sSinFixed
+                self._sCos =  None
+            case SinSource.Limit:
+                if not sCosSin:
+                    raise RuntimeError('No sCosSin for SinSource.Limit')
+                self._order = IndexSin.validateSize(len(sCosSin) >> 1)
+                self._sCos = sCosSin[::2] + [-sCosSin[0]]
+                self._sSin = sCosSin[1::2]
+            case SinSource.Lib:
+                self._order = None
+                self._sSin = None
+                self._sCos =  None
+            case _:
+                raise RuntimeError(f'sinSource={sinSource}')
+
+    @staticmethod
+    def header():
+        return 'Index\tX\tValue\tUncertainty\n'
+
+    def dump(self, order:int=MAX_ORDER) -> None:
+        IndexSin.validateOrder(order)
+        with open(f'./Python/Output/IndexSin_{self._sinSource}_{order}.txt', 'w') as f:
+            f.write(IndexSin.header())
+            size = 1 << order
+            for i in range(size + 1):
+                v = self.sin(i, order)
+                f.write(f'{i}\t{i/size}\t{v.value()}\t{v.uncertainty()}\n')
+
+    @staticmethod
+    def read(sinSource:SinSource, order:int=MAX_ORDER, errorFold:float=1e6) -> list[varDbl.VarDbl]:
+        '''
+        {errorFold} indicates the difference between C++ long double and python double
+        '''
+        IndexSin.validateOrder(order)
+        size = 1 << order
+        if os.getcwd().endswith('\\Python'):
+            dumpPath = f'../Cpp/Output/IndexSin_{sinSource}_{order}.txt'
+        elif os.getcwd().endswith('\\VarianceArithemtic'):
+            dumpPath = f'./Cpp/Output/IndexSin_{sinSource}_{order}.txt'
+        else:
+            raise RuntimeError(f'Invalid current working directory {os.getcwd()}')
+        sSin = []
+        with open(dumpPath) as f:
+            hdr = next(f)
+            if hdr != IndexSin.header():
+                raise RuntimeError(f'Invalid header in file {dumpPath}: {hdr} vs {IndexSin.header()}')
+            for ln, line in enumerate(f):
+                sWord = line.split('\t')
+                if ln != int(sWord[0]):
+                    raise RuntimeError(f'Invalid index {sWord[0]} vs {ln} in {dumpPath}: {line}')
+                phase = ln / size
+                if float(sWord[1]) != phase:
+                    raise RuntimeError(f'Invalid phase {sWord[1]} vs {phase} for index {ln} in {dumpPath}: {line}')
+                sin = math.sin(math.pi * phase)
+                val, unc = map(float, sWord[2:])
+                if unc < 0:
+                    raise RuntimeError(f'Invalid uncertainty {sWord[3]} for index {ln} in {dumpPath}: {line}')
+                if abs(val - sin) > unc * errorFold:
+                    if unc > 0:
+                        raise RuntimeError(f'Invalid value {sWord[2]} and uncertainty {sWord[3]} for sin={sin} diffFold={(val - sin)/unc} at index {ln} in {dumpPath}: {line}')
+                sSin.append(varDbl.VarDbl(val, unc))
+            if len(sSin) < (size >> 1) + 1:
+                raise RuntimeError(f'Invalid sin count {len(sSin)} < {(size >> 1) + 1} in {dumpPath}: {line}')
+            return sSin
+
+    @property  
+    def sinSource(self) -> int:
+        return self._sinSource
         
-    def size(self):
-        return self._size
-        
-    def get_index(self, freq:int) ->int:
+    def get_index(self, freq:int, order:int) ->int:
         '''
         get index into _sSin, with -index means -sin
         '''
-        div = freq // self._half
-        rem = freq % self._half
+        size = 1 << order
+        div = freq // size
+        rem = freq % size
+        if ((self.sinSource == SinSource.Prec) or (self.sinSource == SinSource.Quart)) and (rem > (size >> 1)):
+            rem = size - rem
         if div & 1:
-            div += 1
-            rem -= self._half
-        if div & 2:
-            return -rem
+            return - rem
         else:       
             return rem
 
-    def sin(self, freq:int) -> float:
-        idx = self.get_index(freq)
-        return self._sSin[idx] if idx >= 0 else -self._sSin[-idx]
 
-    def cos(self, freq:int) -> float:
-        return self.sin(freq + self._half)
+    def sin(self, freq:int, order:int) -> varDbl.VarDbl:
+        if self.sinSource == SinSource.Lib:
+            v = math.sin(math.pi * freq / (1 << order))
+            return varDbl.VarDbl(v, math.ulp(v))
+        elif self.sinSource == SinSource.Limit:
+            if self._order < order:
+                raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
+            idx = self.get_index(freq, order)
+            if idx >= 0:
+                return self._sSin[idx << (self._order - order)]
+            else:
+                return -self._sSin[(-idx) << (self._order - order)]
+        else:
+            IndexSin.validateOrder(order)
+            idx = self.get_index(freq << (IndexSin.MAX_ORDER - order), IndexSin.MAX_ORDER)
+            if idx >= 0:
+                return self._sSin[idx]
+            else:
+                return -self._sSin[-idx]
 
-    def tan(self, freq:int) -> float:
-        return self.sin(freq) / self.cos(freq)
+    def cos(self, freq:int, order:int) -> varDbl.VarDbl:
+        if self.sinSource == SinSource.Lib:
+            v = math.cos(math.pi * freq / (1 << order))
+            return varDbl.VarDbl(v, math.ulp(v))
+        elif self.sinSource == SinSource.Limit:
+            if self._order < order:
+                raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
+            '''
+            0->7:0->7, 8:8, 9->15:7->1, 16->23:0->7, 24:8    
+            -1->-7:1-7, -8:8, -9->-15:7->1, -16->23:0->7, -24:8
+            '''
+            freq = abs(freq)
+            freq <<= self._order - order
+            size = 1 << self._order
+            div = freq // size
+            rem = freq % size
+            if div & 1:
+                rem = size - rem
+            return self._sCos[rem]
+        else:
+            IndexSin.validateOrder(order)
+            return self.sin(freq + (1 << (order - 1)), order)
       
-    def arc_sin(self, value:float) -> float:
-        if not -1 <= value <= 1:
-            raise ValueError(f'Invalid sine value {value}')
-        sign = 1 if value >=0 else -1
-        value = abs(value)
-        idx = bisect.bisect_left(self._sSin, value)
-        if idx == len(self._sSin) - 1:
-            return sign * idx 
-        return sign * (idx + (value - self._sSin[idx]) / (self._sSin[idx + 1] - self._sSin[idx]))
         
-
-class RegressiveSin (IndexSin):
-    '''
-    Use regression to generate sin(j /(1<<order) *math.pi)
-    '''
-    ZERO = varDbl.VarDbl(0,0)
-    ONE = varDbl.VarDbl(1,0)
-    HALF = varDbl.VarDbl(1/2,0)
-
-    HEADER = "Order\tIndex"\
-             "\tSin Value\tSin Uncertainty\tSin Normalized Error"\
-             "\tCos Value\tCos Uncertainty\tCos Normalized Error"\
-             "\tError Value\tError Uncertainty\tNormalized Error\n"
-    
-    staticmethod
-    def path(order:int) ->str:
-        return f'./Python/Output/UncertainSin_{order}.txt'
-    
-    def __init__(self, order) -> None:
-        super().__init__(order)
-
-    def withUncertainty(self, incomplete:bool=False) -> typing.Optional[str]:
-        '''
-        Return None for successfully reading the file which contain sin with uncertainty.
-        Otherwise return error string and restore the original float/int values
-        '''
-        sSin = self._sSin[:]
-        with open (RegressiveSin.path(self._order)) as f:
-            title = next(f)
-            if title != RegressiveSin.HEADER:
-                return f'Wrong header: {title}'
-            for ln, line in enumerate(f):
-                sWord = line.strip().split('\t')
-                if len(sWord) != 11:
-                    self._sSin = sSin
-                    return f'line #{ln} is invalid: {line}'
-                ord, idx = map(int, sWord[:2])
-                if not (0 <= ord <= self._order):
-                    self._sSin = sSin
-                    return f'line #{ln} order={ord} outside the range of [0, {self._order}]'
-                if not (0 <= idx <= self._half):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} outside the range of [0, {self._half}]'
-                arc = math.pi * idx/self._size
-                sValue = list(map(float, sWord[2:])) 
-                if sValue[2] if (sValue[1] <= 0) else \
-                        math.ulp(sValue[2]) < abs((sValue[0] - math.sin(arc)) / sValue[1] - sValue[2]):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} sin values disagree: {math.sin(arc)} vs {sValue[0]}~{sValue[1]} = {sValue[2]}'
-                if sValue[4] if (sValue[4] <= 0) else \
-                        math.ulp(sValue[3]) < abs((sValue[3] - math.cos(arc)) / sValue[4] - sValue[5]):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} cos values disagree: {math.cos(arc)} vs {sValue[3]}~{sValue[4]} = {sValue[5]}'
-                if sValue[7] if (sValue[7] <= 0) else \
-                        math.ulp(sValue[8]) < abs(sValue[6] / sValue[7] - sValue[8]):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} error values disagree: {sValue[8]} vs {sValue[6]}~{sValue[7]}'
-                self._sSin[idx] = varDbl.VarDbl(sValue[0], sValue[1])
-                self._sSin[self._half - idx] = varDbl.VarDbl(sValue[3], sValue[4])
-                error = varDbl.VarDbl(sValue[6], sValue[7])
-                err = self._sSin[idx] * self._sSin[idx] + \
-                        self._sSin[self._half - idx] * self._sSin[self._half - idx] - 1
-                if error.uncertainty() < math.ulp(sValue[6]) < abs(error.value() - err.value()):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} error values disagree: {error} vs {err}'
-                '''
-                if sValue[6] if (sValue[6] <= 0) else \
-                        math.ulp(sValue[6]) < abs(error.value() - err.value()):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} error values disagree: {error} vs {err}'
-                if sValue[7] if (sValue[7] <= 0) else \
-                        math.ulp(sValue[7]) < abs(error.uncertainty() - err.uncertainty()):
-                    self._sSin = sSin
-                    return f'line #{ln} index={idx} error uncertainties disagree: {error} vs {err}'
-                '''
-        sMissing = [i for i, e in enumerate(self._sSin) if not isinstance(e, varDbl.VarDbl)]
-        if sMissing and (not incomplete):
-            self._sSin = sSin
-            return f'order {self._order} missing {len(sMissing)} indices: {sMissing}'
-
-        return None
-
-    def calc(self):
-        '''
-        Return None for successfully calculating the file which contain sin with uncertainty.
-        Otherwise return error string
-        '''
-        try:
-            self.withUncertainty(incomplete=True)
-        except BaseException as ex:
-            print(f'Fail to read {RegressiveSin.path(self._order)}: {ex}')
-        self._sSin[0] = RegressiveSin.ZERO
-        self._sSin[self._half] = RegressiveSin.ONE
-        exist = os.path.isfile(RegressiveSin.path(self._order))
-        with open (RegressiveSin.path(self._order), 'a' if exist else 'w') as f:
-            if not exist:
-                f.write(RegressiveSin.HEADER)
-                f.write('0\t0\t0\t0\t0\t1\t0\t0\t0\t0\t0\n')
-            self._calc(0, self._half, 1, f)
-
-    def _calc(self, begin, end, order, file):
-        if order >= self._order:
-            return None
-        smid = (begin + end) >> 1
-        cmid = self._half - smid
-        if (type(self._sSin[smid]) != varDbl.VarDbl) or (type(self._sSin[cmid]) != varDbl.VarDbl):
-            x = self._sSin[self._half - begin] * self._sSin[self._half - end] \
-                - self._sSin[begin] * self._sSin[end]
-            self._sSin[smid] = ((RegressiveSin.ONE - x) *RegressiveSin.HALF) ** 0.5
-            self._sSin[cmid] = ((RegressiveSin.ONE + x) *RegressiveSin.HALF) ** 0.5
-            arc = math.pi * smid/self._size
-            err = self._sSin[smid] **2 + self._sSin[cmid] **2 - 1   
-            file.write(f'{order}\t{smid}')
-            file.write(f'\t{self._sSin[smid].value():.16e}\t{self._sSin[smid].uncertainty():.16e}\t{(self._sSin[smid].value() - math.sin(arc))/self._sSin[smid].uncertainty():.16e}')
-            file.write(f'\t{self._sSin[cmid].value():.16e}\t{self._sSin[cmid].uncertainty():.16e}\t{(self._sSin[cmid].value() - math.cos(arc))/self._sSin[cmid].uncertainty():.16e}')
-            file.write(f'\t{err.value():.16e}\t{err.uncertainty():.16e}\t{err.value()/err.uncertainty():.16e}\n')
-            file.flush()
-        self._calc(begin, smid, order + 1, file)
-        self._calc(smid, end, order + 1, file)
-        
-
-    
-
 

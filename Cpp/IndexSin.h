@@ -10,7 +10,10 @@ When "withUncertainty"==True, use regression to calculate the sin
 
 #include "VarDbl.h"
 
+#include <cassert>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <vector>
 
@@ -21,72 +24,250 @@ namespace var_dbl
 {
 
 class IndexSin {
-    const size_t _size;
-    const int _half;
-    std::vector<VarDbl> _sSin;
-
 public:
-    IndexSin(unsigned char order);
-    size_t size() const { return _size; }
+    enum SinSource {
+        Prec,
+        Quart,
+        Full,
+        Fixed,
+        Lib,
+    };
+    constexpr static const std::array<std::string, 5> sSinSource{"Prec", "Quart", "Full", "Fixed", "Lib"};
+    constexpr static const std::string sinSourceName(SinSource sinSouce) { return sSinSource[static_cast<size_t>(sinSouce)]; }
+    constexpr static SinSource toSinSource(const std::string & name) {
+        for (size_t i = 0; i < sSinSource.size(); ++i) {
+            if (name == sSinSource[i])
+                return static_cast<SinSource>(i);
+        }
+        std::ostringstream oss;
+        oss << "Invalid name=" << name << " for SinSource";
+        throw std::invalid_argument(oss.str());
+    }
 
-    VarDbl sin(int freq) const;
-    VarDbl cos(int freq) const;
-    VarDbl tan(int freq) const;
+    constexpr static unsigned char MIN_ORDER = 1;
+    constexpr static unsigned char MAX_ORDER = 18;
+        // (1 << MAX_ORDER) == PI
+    static void validateOrder(unsigned char order);
+        // assert MIN_ORDER <= order <= MAX_ORDER, and throw invalid_argument otherwise
+    static const std::vector<VarDbl>& validateSinSource(SinSource sinSource);
+        // get the sin source according to {sinSource}, and throw invalid_argument otherwise
+    static unsigned char getOrder(size_t size);
+        // get the order so that {size} = 2^{order}, and throw invalid_argument otherwise
 
-    int get_index(int freq) const;
-        // get index into _sSin, with -index means -sin
+    VarDbl sin(long long freq, unsigned char order) const;
+        // sin(pi * freq / (1 << order))
+    VarDbl cos(long long freq, unsigned char order) const;
+        // cos(pi * freq / (1 << order))
+    long long getIndex(long long freq, unsigned char order) const;
+
+    const SinSource sinSource;
+
+    bool dump(unsigned char order, const std::string& dumpPath) const;
+
+    IndexSin(SinSource sinSource = Quart, const std::string& dumpDir = "");
+        // if {dumpDir} is not empty, read value from the file in the {dumpDir}
+private:
+    const std::vector<VarDbl>& _sSin;
+   
+    static std::vector<VarDbl> _sSinQuart;
+    static std::vector<VarDbl> _sSinFull;
+    static std::vector<VarDbl> _sSinFixed;
+    static std::vector<VarDbl> _sSinLib;
+    static std::vector<VarDbl> _sSinPrec;
+
+    static void read(std::vector<VarDbl>& sSin, const SinSource sinSource, const std::string& dumpDir);
+        // read the sin values from the file in the {dumpDir}, and throw invalid_argument on error
 
 };
 
+std::vector<VarDbl> IndexSin::_sSinQuart;
+std::vector<VarDbl> IndexSin::_sSinFull;
+std::vector<VarDbl> IndexSin::_sSinFixed;
+std::vector<VarDbl> IndexSin::_sSinLib;
+std::vector<VarDbl> IndexSin::_sSinPrec;
 
-inline IndexSin::IndexSin(unsigned char order) :
-    _size(1 << order), _half(1 << (order - 1))
+inline const std::vector<VarDbl>& IndexSin::validateSinSource(SinSource sinSource)
 {
-    if (order < 3) {
-        std::ostringstream os;
-        os << "order=" << order << " < 3 for IndexSin.";
-        throw std::invalid_argument(os.str());
+    switch (sinSource) {
+    case Quart:
+        return _sSinQuart;
+    case Full:
+        return _sSinFull;
+    case Fixed:            
+        return _sSinFixed;
+    case Lib:            
+        return _sSinLib;
+    case Prec:            
+        return _sSinPrec;
+    default: 
+        std::ostringstream oss;
+        oss << "Unknown SinSource " <<  sinSource << " for fft.sin()";
+        throw std::invalid_argument(oss.str());
     }
-    _sSin.reserve(_size + 1);
-    for (int i = 0; i < _half/2; ++i)
-        _sSin.push_back(std::sin(std::numbers::pi/_size*i));
-    for (int i = 0; i <= _half/2; ++i)
-        _sSin.push_back(std::cos(std::numbers::pi*1/4 - std::numbers::pi*i/_size));
 }
 
-inline int IndexSin::get_index(int freq) const
+
+inline void IndexSin::validateOrder(unsigned char order)
 {
-    int div = freq / _half, rem = freq % _half;
-    if (div & 1) {
-        if (div > 0) {
-            div -= 1;
-            rem = _half - rem;
-        } else {
-            div += 1;
-            rem = -_half - rem;
+    if (order < MIN_ORDER) {
+        std::ostringstream oss;
+        oss << "The order " << order << " < " << MIN_ORDER << " for fft.sin()";
+        throw std::invalid_argument(oss.str());
+    }
+    if (MAX_ORDER < order) {
+        std::ostringstream oss;
+        oss << "The order " << order << " > " << MAX_ORDER << " for fft.sin()";
+        throw std::invalid_argument(oss.str());
+    }
+}
+
+
+inline unsigned char IndexSin::getOrder(size_t size)
+{
+    unsigned char order = IndexSin::MIN_ORDER;
+    for (; order <= IndexSin::MAX_ORDER; ++order) {
+        if ((1 << order) == size) {
+            return order;
         }
     }
-    if (div & 2)
-        rem = -rem;
-    return rem;
+    std::ostringstream oss;
+    oss << "Invalid input array size " << size << " for fft.transform()";
+    throw std::invalid_argument(oss.str());
 }
 
 
-inline VarDbl IndexSin::sin(int freq) const
+inline long long IndexSin::getIndex(long long freq, unsigned char order) const
 {
-    const int idx = get_index(freq);
-    return (idx >= 0)? _sSin[idx] : -_sSin[-idx];
+    validateOrder(order);
+    bool pos = (freq >= 0);
+    const size_t size = 1 << order;
+    lldiv_t res = std::div(std::abs(freq), size);
+    if (res.quot & 1)
+        pos = !pos;
+    if (((sinSource == Quart) || (sinSource == Prec)) && (res.rem > (size >> 1)))
+        res.rem = size - res.rem;
+    return pos? res.rem : - res.rem;
 }
 
-inline VarDbl IndexSin::cos(int freq) const
+
+inline bool IndexSin::dump(unsigned char order, const std::string& dumpPath) const
 {
-    return sin(freq + _half);
+    if (sinSource == Lib) {
+        std::cerr << "Cannot dump sin values for SinSource::Lib";
+        return false;
+    }
+    std::ofstream ofs(dumpPath);
+    if (!ofs.is_open())
+        return false;
+    ofs << std::setprecision(20);
+    ofs << "Index\tX\tValue\tUncertainty\n";
+    const size_t size = 1 << order;
+    for (size_t i = 0; i < _sSin.size(); ++i) {
+        ofs << i << '\t' << ((double) i) / size << '\t' << _sSin[i].value() << '\t' << _sSin[i].uncertainty() << "\n";
+   }
+   return true;
 }
 
-inline VarDbl IndexSin::tan(int freq) const
+inline void IndexSin::read(std::vector<VarDbl>& sSin, const SinSource sinSource, const std::string& dumpDir)
 {
-    return sin(freq) / cos(freq);
+    if (sinSource == Lib) {
+        throw std::invalid_argument("Cannot dump sin values for SinSource::Lib");
+    }
+    std::ostringstream oss;
+    oss << dumpDir << "/IndexSin_" << sinSourceName(sinSource) << "_" << (unsigned) MAX_ORDER << ".txt";
+    const std::string dumpPath = oss.str();
+    oss.str("");
+    std::ifstream ifs(dumpPath);
+    if (!ifs.is_open()) {
+        oss << "Failed to open file " << dumpPath;
+        throw std::invalid_argument(oss.str());
+    }
+    std::string line;
+    std::getline(ifs, line);
+    if (line != "Index\tX\tValue\tUncertainty") {
+        oss << "Invalid header in file " << dumpPath << ": " << line;
+        throw std::invalid_argument(oss.str());
+    }
+    const size_t size = (1 << MAX_ORDER);
+    sSin.reserve(size + 1);
+    for (size_t n = 1; std::getline(ifs, line); ++n) {
+        std::istringstream iss(line);
+        int i;
+        double x, value, uncertainty;
+        if ((iss >> i >> x >> value >> uncertainty).fail()) {
+            oss << "At line #" << n <<", failed to read value/uncertainty: " << line;
+            throw std::invalid_argument(oss.str());
+        }
+        sSin.emplace_back(value, uncertainty);
+    }
+    if (sSin.size() != (size + 1)) {
+        oss << "Only read " << sSin.size() << " lines from " << dumpPath << ", need " << (size + 1) << " lines";
+        throw std::invalid_argument(oss.str());
+    }
 }
+
+
+
+
+inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
+    sinSource(sinSource), _sSin(validateSinSource(sinSource))
+{
+    const size_t size = (1 << MAX_ORDER);
+    const size_t half = size / 2;
+    const size_t quart = size / 4;
+    if (_sSinPrec.empty()) {
+        if (dumpDir.empty()) {
+            const long double PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164;
+            for (size_t i = 0; i < size; ++i) {
+                const double value = std::sin(std::numbers::pi * i /size);
+                if (i <= quart) {
+                    const long double val = std::sin(PI * i /size);
+                    _sSinPrec.emplace_back(val, std::abs(val - value));
+                    _sSinQuart.emplace_back(value, ulp(value));
+                }  else if (i <= half) {
+                    const double value = std::cos(std::numbers::pi * (half - i) /size);
+                    const long double val = std::cos(PI * (half - i) /size);
+                    _sSinPrec.emplace_back(val, std::abs(val - value));
+                    _sSinQuart.emplace_back(value, ulp(value));
+                }
+                _sSinFull.emplace_back(value, ulp(value));
+                _sSinFixed.emplace_back(value, ulp(1.));
+            }
+            assert(_sSinPrec.size() == (half + 1));
+            assert(_sSinQuart.size() == (half + 1));
+            assert(_sSinFull.size() == size);
+            assert(_sSinFixed.size() == size);
+        } else {
+            read(_sSinPrec, Prec, dumpDir);
+            read(_sSinQuart, Quart, dumpDir);
+            read(_sSinFull, Full, dumpDir);
+            read(_sSinFixed, Fixed, dumpDir);
+            _sSinPrec.erase(_sSinQuart.begin() + half + 1, _sSinQuart.end());
+            _sSinQuart.erase(_sSinPrec.begin() + half + 1, _sSinPrec.end());
+            _sSinFull.erase(_sSinFull.begin() + size, _sSinFull.end());
+            _sSinFixed.erase(_sSinFixed.begin() + size, _sSinFixed.end());
+        }
+        assert(_sSinLib.empty());
+    }
+}
+
+inline VarDbl IndexSin::sin(long long freq, unsigned char order) const
+{
+    validateOrder(order);
+    if (sinSource == Lib) {
+        const double value = std::sin(std::numbers::pi * freq / (1 << order));
+        return VarDbl(value, ulp(value));
+    }
+    const long long idx = getIndex(freq, order);
+    const VarDbl val = _sSin[abs(idx) << (MAX_ORDER - order)];
+    return (0 <= idx)? val : -val;
+}
+
+inline VarDbl IndexSin::cos(long long freq, unsigned char order) const
+{
+    return sin(freq + (1 << (order - 1)), order);
+}
+
 
 
 

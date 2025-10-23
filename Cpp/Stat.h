@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <optional>
 #include <sstream>
 #include <random>
 #include <format>
@@ -37,60 +38,56 @@ public:
 
 template <typename T, typename HINT = int> requires std::floating_point<T> || std::integral<T>
 class Stat {
+protected:
     T _min;
     T _max;
-    HINT _minAt;
-    HINT _maxAt;
-    bool _at;
+    std::optional<HINT> _minAt;
+    std::optional<HINT> _maxAt;
     unsigned _count;
     double _sum;
     double _sum2;
 
 public: 
     Stat() { clear(); }
-    template<typename U> Stat(std::initializer_list<U> sInit);
+    Stat(std::initializer_list<T> sInit);
     template<typename InputIt> Stat(InputIt begin, InputIt end);
 
     void clear();
 
     unsigned add(const T val);
     unsigned addAt(const T val, HINT at);
-    template<typename U> unsigned add(std::initializer_list<U> sInit);
+    unsigned add(std::initializer_list<T> sInit);
     template<typename InputIt> unsigned add(InputIt begin, InputIt end);
 
     unsigned count() const { return _count; }
     T min() const { return _min; }
     T max() const { return _max; }
-    HINT minAt() const;
-    HINT maxAt() const;
+    std::optional<HINT> minAt() const { return _minAt; }
+    std::optional<HINT> maxAt() const { return _maxAt; }
     double mean() const;
     double std() const;
 };
 
-
-class Histogram : public Stat<double, int> 
+template <typename T = double, typename HINT = int> requires std::floating_point<T>
+class Histogram : public Stat<T, HINT> 
 {
+protected:
 	const unsigned _center;
 	std::vector<unsigned> _sHistogram;
     unsigned _lowers = 0, _uppers = 0;
 
 public:
-	const double range;
+	const T range;
 	const unsigned divids;
     unsigned lowers() const { return _lowers; }
     unsigned uppers() const { return _uppers; }
 
-    Histogram(double range = 3, unsigned divids = 5) :
-        Stat<double>(), range(range), divids(divids), _center(divids * range)
-    {
-        const unsigned size = 1 + (_center * 2);
-        _sHistogram.reserve(size);
-        _sHistogram.insert(_sHistogram.begin(), size, 0);
-    }
+    Histogram(T range = 3, unsigned divids = 5);
 
     void clear();
-    unsigned add(double val);
-    template<typename U> unsigned add(std::initializer_list<U> sInit);
+    unsigned add(T val);
+    unsigned addAt(T val, HINT at);
+    unsigned add(std::initializer_list<T> sInit);
     template<typename InputIt> unsigned add(InputIt begin, InputIt end);
 
     std::vector<unsigned> histogram() { return std::vector<unsigned>(_sHistogram); }
@@ -100,28 +97,12 @@ public:
 
 
 template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
-inline HINT Stat<T, HINT>::minAt() const 
-{ 
-    if (_at) 
-        return _minAt; 
-    throw std::domain_error("minAt(): No at info"); 
-}
-
-template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
-inline HINT Stat<T, HINT>::maxAt() const 
-{ 
-    if (_at) 
-        return _maxAt; 
-    throw std::domain_error("maxAt(): No at info"); 
-}
-
-
-template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
 inline void Stat<T, HINT>::clear() 
 {
     _min = std::numeric_limits<T>::max();
     _max = -std::numeric_limits<T>::max();
-    _at = false;
+    _minAt.reset();
+    _maxAt.reset();
     _count = 0;
     _sum = 0;
     _sum2 = 0;
@@ -143,7 +124,6 @@ inline unsigned Stat<T, HINT>::add(const T val)
 template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
 inline unsigned Stat<T, HINT>::addAt(const T val, HINT at) 
 {
-    _at = true;
     if (_min > val)
         _minAt = at;
     if (_max < val)
@@ -152,8 +132,7 @@ inline unsigned Stat<T, HINT>::addAt(const T val, HINT at)
 }
 
 template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
-template<typename U> 
-inline unsigned Stat<T, HINT>::add(std::initializer_list<U> sInit)
+inline unsigned Stat<T, HINT>::add(std::initializer_list<T> sInit)
 {
     for (auto v: sInit)
         add(v);
@@ -178,8 +157,7 @@ inline Stat<T, HINT>::Stat(InputIt begin, InputIt end)
 }
 
 template <typename T, typename HINT> requires std::floating_point<T> || std::integral<T>
-template<typename U> 
-inline Stat<T, HINT>::Stat(std::initializer_list<U> sInit) 
+inline Stat<T, HINT>::Stat(std::initializer_list<T> sInit) 
 {
     clear();
     for (auto v: sInit)
@@ -205,16 +183,28 @@ inline double Stat<T, HINT>::std() const
 }
 
 
-inline void Histogram::clear()
+template <typename T, typename HINT> requires std::floating_point<T>
+inline Histogram<T, HINT>::Histogram(T range, unsigned divids) :
+        Stat<T, HINT>(), range(range), divids(divids), _center(divids * range)
+{
+    const unsigned size = 1 + (_center * 2);
+    _sHistogram.reserve(size);
+    _sHistogram.insert(_sHistogram.begin(), size, 0);
+}
+
+
+template <typename T, typename HINT> requires std::floating_point<T>
+inline void Histogram<T, HINT>::clear()
 {
     _lowers = 0;
     _uppers = 0;
     std::fill(_sHistogram.begin(), _sHistogram.end(), 0);
-    Stat<double>::clear();
+    Stat<T, HINT>::clear();
 }
 
 
-inline unsigned Histogram::add(double val)
+template <typename T, typename HINT> requires std::floating_point<T>
+inline unsigned Histogram<T, HINT>::add(T val)
 {
     const int idx = (int) std::round( val * divids ) + _center;
     if (idx < 0)
@@ -223,27 +213,42 @@ inline unsigned Histogram::add(double val)
         ++_uppers;
     else
         ++_sHistogram[idx];
-    return Stat<double>::add(val);
+    return Stat<T, HINT>::add(val);
 }
 
 
-template<typename U> inline unsigned Histogram::add(std::initializer_list<U> sInit)
+template <typename T, typename HINT> requires std::floating_point<T>
+inline unsigned Histogram<T, HINT>::addAt(T val, HINT at)
+{
+    if (Stat<T, HINT>::_min > val)
+        Stat<T, HINT>::_minAt = at;
+    if (Stat<T, HINT>::_max < val)
+        Stat<T, HINT>::_maxAt = at;
+    return Histogram<T, HINT>::add(val);
+}
+
+
+template <typename T, typename HINT> requires std::floating_point<T>
+inline unsigned Histogram<T, HINT>::add(std::initializer_list<T> sInit)
 {
     for (auto v: sInit)
         add(v);
-    return count();
+    return Stat<T, HINT>::count();
 }
 
 
-template<typename InputIt> inline unsigned Histogram::add(InputIt begin, InputIt end)
+template <typename T, typename HINT> requires std::floating_point<T>
+template<typename InputIt> 
+inline unsigned Histogram<T, HINT>::add(InputIt begin, InputIt end)
 {
     for (auto it = begin; it != end; ++it)
         add(*it);
-    return count();
+    return Stat<T, HINT>::count();
 }
 
 
-inline std::string Histogram::header() const
+template <typename T, typename HINT> requires std::floating_point<T>
+inline std::string Histogram<T, HINT>::header() const
 {
     std::ostringstream oss;
     for (double i = -(int) _center; i <= (int) _center; ++i)
@@ -252,9 +257,10 @@ inline std::string Histogram::header() const
 }
 
 
-inline std::string Histogram::formatted(bool normalized) const
+template <typename T, typename HINT> requires std::floating_point<T>
+inline std::string Histogram<T, HINT>::formatted(bool normalized) const
 {
-    const double cnt = count() - lowers() - uppers();
+    const double cnt = Stat<T, HINT>::count() - lowers() - uppers();
     std::ostringstream oss;
     for (size_t i = 0; i < _sHistogram.size(); ++i)
         oss << "\t" << (((cnt == 0) || !normalized)? _sHistogram[i] : _sHistogram[i]/cnt);

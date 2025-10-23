@@ -240,11 +240,10 @@ inline VarDbl VarDbl::operator-=(const VarDbl& other)
 
 inline VarDbl VarDbl::operator*=(const VarDbl& other) 
 {
-    const double uncertainty = (this->uncertainty() == 0)? other.uncertainty() * abs(this->value()) :
-            ((other.uncertainty() == 0)? this->uncertainty() * abs(other.value()) :
-            std::sqrt(this->variance() * other.value() * other.value() +
-                      other.variance() * value() * value() +
-                      this->variance() * other.variance()));
+    const double uncertainty = std::sqrt(
+            this->variance() * other.value() * other.value() +
+            other.variance() * value() * value() +
+            this->variance() * other.variance());
     init(value() * other.value(), uncertainty, "*=");
     return *this;
 }

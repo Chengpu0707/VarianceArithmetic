@@ -440,7 +440,7 @@ class Taylor:
         if (exp > 0) and ((type(exp) == int) or (math.ceil(exp) == math.floor(exp))):
             sCoeff = [0] * int(exp)
             sCoeff.append(1)
-            return Taylor.polynominal1d(input, sCoeff, dumpPath=dumpPath)
+            return Taylor.polynominal1d(input, sCoeff, momentum=momentum, dumpPath=dumpPath)
         sTaylor = [math.pow(input.value(), exp), VarDbl(exp)]
         for i in range(2, momentum.maxOrder):
             sTaylor.append( sTaylor[-1] * ((exp + 1 - i)/i) )

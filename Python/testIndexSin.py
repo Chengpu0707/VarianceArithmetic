@@ -1,17 +1,22 @@
 import math
-import os
+import typing
 import unittest
 
-from indexSin import IndexSin, RegressiveSin
+from indexSin import IndexSin, SinSource
 from varDbl import VarDbl
-from histo import Stat
+from histo import Stat, Histo
+
+
+q1 = math.sin(1/8*math.pi)
+q2 = math.sin(2/8*math.pi)
+q3 = math.cos(1/8*math.pi)
 
 
 class TestIndexSin (unittest.TestCase):
 
     def test_neg_rem(self):
         '''
-        assume order==3, so size==8
+        The reminder is always positive
         '''
         # whe index is near 0
         self.assertEqual(0, 1 // 4)     #0 % 1
@@ -43,243 +48,566 @@ class TestIndexSin (unittest.TestCase):
         self.assertEqual(-3, -9 // 4)   #0 % 1
         self.assertEqual(3, -9 % 4)
 
-    def test_get_sin_index(self):
-        indexSin = IndexSin(3)
-        self.assertEqual(8, indexSin.size())
 
-        self.assertEqual( 0, indexSin.get_index(0))
-        self.assertEqual( 1, indexSin.get_index(1))
-        self.assertEqual( 2, indexSin.get_index(2))
-        self.assertEqual( 3, indexSin.get_index(3))
-        self.assertEqual( 4, indexSin.get_index(4))
-        self.assertEqual( 3, indexSin.get_index(5))
-        self.assertEqual( 2, indexSin.get_index(6))
-        self.assertEqual( 1, indexSin.get_index(7))
-        self.assertEqual( 0, indexSin.get_index(8))
-        self.assertEqual(-1, indexSin.get_index(9))
-        self.assertEqual(-2, indexSin.get_index(10))
-        self.assertEqual(-3, indexSin.get_index(11))
-        self.assertEqual(-4, indexSin.get_index(12))
-        self.assertEqual(-3, indexSin.get_index(13))
-        self.assertEqual(-2, indexSin.get_index(14))
-        self.assertEqual(-1, indexSin.get_index(15))
-        self.assertEqual( 0, indexSin.get_index(16))
-        self.assertEqual( 1, indexSin.get_index(17))
-        self.assertEqual( 2, indexSin.get_index(18))
+    def assert_get_index_1(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 1))
+        self.assertEqual( 1, indexSin.get_index(1, 1))
+        self.assertEqual( 0, indexSin.get_index(2, 1))
+        self.assertEqual(-1, indexSin.get_index(3, 1))
+        self.assertEqual( 0, indexSin.get_index(4, 1))
 
-        self.assertEqual(-1, indexSin.get_index(-1))
-        self.assertEqual(-2, indexSin.get_index(-2))
-        self.assertEqual(-3, indexSin.get_index(-3))
-        self.assertEqual(-4, indexSin.get_index(-4))
-        self.assertEqual(-3, indexSin.get_index(-5))
-        self.assertEqual(-2, indexSin.get_index(-6))
-        self.assertEqual(-1, indexSin.get_index(-7))
-        self.assertEqual( 0, indexSin.get_index(-8))
-        self.assertEqual( 1, indexSin.get_index(-9))
-        self.assertEqual( 2, indexSin.get_index(-10))
-        self.assertEqual( 3, indexSin.get_index(-11))
-        self.assertEqual( 4, indexSin.get_index(-12))
-        self.assertEqual( 3, indexSin.get_index(-13))
-        self.assertEqual( 2, indexSin.get_index(-14))
-        self.assertEqual( 1, indexSin.get_index(-15))
-        self.assertEqual( 0, indexSin.get_index(-16))
-        self.assertEqual(-1, indexSin.get_index(-17))
-        self.assertEqual(-2, indexSin.get_index(-18))
+        self.assertEqual(-1, indexSin.get_index(-1, 1))
+        self.assertEqual( 0, indexSin.get_index(-2, 1))
+        self.assertEqual( 1, indexSin.get_index(-3, 1))
+        self.assertEqual( 0, indexSin.get_index(-4, 1))
+
+    def assert_get_index_2(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 2))
+        self.assertEqual( 1, indexSin.get_index(1, 2))
+        self.assertEqual( 2, indexSin.get_index(2, 2))
+        self.assertEqual( 3, indexSin.get_index(3, 2))
+        self.assertEqual( 0, indexSin.get_index(4, 2))
+        self.assertEqual(-1, indexSin.get_index(5, 2))
+        self.assertEqual(-2, indexSin.get_index(6, 2))
+        self.assertEqual(-3, indexSin.get_index(7, 2))
+        self.assertEqual( 0, indexSin.get_index(8, 2))
+        self.assertEqual( 1, indexSin.get_index(9, 2))
+
+        self.assertEqual(-3, indexSin.get_index(-1, 2))
+        self.assertEqual(-2, indexSin.get_index(-2, 2))
+        self.assertEqual(-1, indexSin.get_index(-3, 2))
+        self.assertEqual( 0, indexSin.get_index(-4, 2))
+        self.assertEqual( 3, indexSin.get_index(-5, 2))
+        self.assertEqual( 2, indexSin.get_index(-6, 2))
+        self.assertEqual( 1, indexSin.get_index(-7, 2))
+        self.assertEqual( 0, indexSin.get_index(-8, 2))
+        self.assertEqual(-3, indexSin.get_index(-9, 2))
+
+    def assert_get_index_3(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 3))
+        self.assertEqual( 1, indexSin.get_index(1, 3))
+        self.assertEqual( 2, indexSin.get_index(2, 3))
+        self.assertEqual( 3, indexSin.get_index(3, 3))
+        self.assertEqual( 4, indexSin.get_index(4, 3))
+        self.assertEqual( 5, indexSin.get_index(5, 3))
+        self.assertEqual( 6, indexSin.get_index(6, 3))
+        self.assertEqual( 7, indexSin.get_index(7, 3))
+        self.assertEqual( 0, indexSin.get_index(8, 3))
+        self.assertEqual(-1, indexSin.get_index(9, 3))
+        self.assertEqual(-2, indexSin.get_index(10, 3))
+        self.assertEqual(-3, indexSin.get_index(11, 3))
+        self.assertEqual(-4, indexSin.get_index(12, 3))
+        self.assertEqual(-5, indexSin.get_index(13, 3))
+        self.assertEqual(-6, indexSin.get_index(14, 3))
+        self.assertEqual(-7, indexSin.get_index(15, 3))
+        self.assertEqual( 0, indexSin.get_index(16, 3))
+        self.assertEqual( 1, indexSin.get_index(17, 3))
+        self.assertEqual( 2, indexSin.get_index(18, 3))
+
+        self.assertEqual(-7, indexSin.get_index(-1, 3))
+        self.assertEqual(-6, indexSin.get_index(-2, 3))
+        self.assertEqual(-5, indexSin.get_index(-3, 3))
+        self.assertEqual(-4, indexSin.get_index(-4, 3))
+        self.assertEqual(-3, indexSin.get_index(-5, 3))
+        self.assertEqual(-2, indexSin.get_index(-6, 3))
+        self.assertEqual(-1, indexSin.get_index(-7, 3))
+        self.assertEqual( 0, indexSin.get_index(-8, 3))
+        self.assertEqual( 7, indexSin.get_index(-9, 3))
+        self.assertEqual( 6, indexSin.get_index(-10, 3))
+        self.assertEqual( 5, indexSin.get_index(-11, 3))
+        self.assertEqual( 4, indexSin.get_index(-12, 3))
+        self.assertEqual( 3, indexSin.get_index(-13, 3))
+        self.assertEqual( 2, indexSin.get_index(-14, 3))
+        self.assertEqual( 1, indexSin.get_index(-15, 3))
+        self.assertEqual( 0, indexSin.get_index(-16, 3))
+        self.assertEqual(-7, indexSin.get_index(-17, 3))
+        self.assertEqual(-6, indexSin.get_index(-18, 3))
+
+
+    def assert_get_half_index_1(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 1))
+        self.assertEqual( 1, indexSin.get_index(1, 1))
+        self.assertEqual( 0, indexSin.get_index(2, 1))
+        self.assertEqual(-1, indexSin.get_index(3, 1))
+        self.assertEqual( 0, indexSin.get_index(4, 1))
+
+        self.assertEqual(-1, indexSin.get_index(-1, 1))
+        self.assertEqual( 0, indexSin.get_index(-2, 1))
+        self.assertEqual( 1, indexSin.get_index(-3, 1))
+        self.assertEqual( 0, indexSin.get_index(-4, 1))
+
+    def assert_get_half_index_2(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 2))
+        self.assertEqual( 1, indexSin.get_index(1, 2))
+        self.assertEqual( 2, indexSin.get_index(2, 2))
+        self.assertEqual( 1, indexSin.get_index(3, 2))
+        self.assertEqual( 0, indexSin.get_index(4, 2))
+        self.assertEqual(-1, indexSin.get_index(5, 2))
+        self.assertEqual(-2, indexSin.get_index(6, 2))
+        self.assertEqual(-1, indexSin.get_index(7, 2))
+        self.assertEqual( 0, indexSin.get_index(8, 2))
+        self.assertEqual( 1, indexSin.get_index(9, 2))
+
+        self.assertEqual(-1, indexSin.get_index(-1, 2))
+        self.assertEqual(-2, indexSin.get_index(-2, 2))
+        self.assertEqual(-1, indexSin.get_index(-3, 2))
+        self.assertEqual( 0, indexSin.get_index(-4, 2))
+        self.assertEqual( 1, indexSin.get_index(-5, 2))
+        self.assertEqual( 2, indexSin.get_index(-6, 2))
+        self.assertEqual( 1, indexSin.get_index(-7, 2))
+        self.assertEqual( 0, indexSin.get_index(-8, 2))
+        self.assertEqual(-1, indexSin.get_index(-9, 2))
+
+    def assert_get_half_index_3(self, indexSin):
+        self.assertEqual( 0, indexSin.get_index(0, 3))
+        self.assertEqual( 1, indexSin.get_index(1, 3))
+        self.assertEqual( 2, indexSin.get_index(2, 3))
+        self.assertEqual( 3, indexSin.get_index(3, 3))
+        self.assertEqual( 4, indexSin.get_index(4, 3))
+        self.assertEqual( 3, indexSin.get_index(5, 3))
+        self.assertEqual( 2, indexSin.get_index(6, 3))
+        self.assertEqual( 1, indexSin.get_index(7, 3))
+        self.assertEqual( 0, indexSin.get_index(8, 3))
+        self.assertEqual(-1, indexSin.get_index(9, 3))
+        self.assertEqual(-2, indexSin.get_index(10, 3))
+        self.assertEqual(-3, indexSin.get_index(11, 3))
+        self.assertEqual(-4, indexSin.get_index(12, 3))
+        self.assertEqual(-3, indexSin.get_index(13, 3))
+        self.assertEqual(-2, indexSin.get_index(14, 3))
+        self.assertEqual(-1, indexSin.get_index(15, 3))
+        self.assertEqual( 0, indexSin.get_index(16, 3))
+        self.assertEqual( 1, indexSin.get_index(17, 3))
+        self.assertEqual( 2, indexSin.get_index(18, 3))
+
+        self.assertEqual(-1, indexSin.get_index(-1, 3))
+        self.assertEqual(-2, indexSin.get_index(-2, 3))
+        self.assertEqual(-3, indexSin.get_index(-3, 3))
+        self.assertEqual(-4, indexSin.get_index(-4, 3))
+        self.assertEqual(-3, indexSin.get_index(-5, 3))
+        self.assertEqual(-2, indexSin.get_index(-6, 3))
+        self.assertEqual(-1, indexSin.get_index(-7, 3))
+        self.assertEqual( 0, indexSin.get_index(-8, 3))
+        self.assertEqual( 1, indexSin.get_index(-9, 3))
+        self.assertEqual( 2, indexSin.get_index(-10, 3))
+        self.assertEqual( 3, indexSin.get_index(-11, 3))
+        self.assertEqual( 4, indexSin.get_index(-12, 3))
+        self.assertEqual( 3, indexSin.get_index(-13, 3))
+        self.assertEqual( 2, indexSin.get_index(-14, 3))
+        self.assertEqual( 1, indexSin.get_index(-15, 3))
+        self.assertEqual( 0, indexSin.get_index(-16, 3))
+        self.assertEqual(-1, indexSin.get_index(-17, 3))
+        self.assertEqual(-2, indexSin.get_index(-18, 3))
+
+
+    def assert_sin_1(self, indexSin):
+        self.assertAlmostEqual(indexSin.sin(0, 1).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(1, 1).value(), 1)
+        self.assertAlmostEqual(indexSin.sin(2, 1).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(3, 1).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(4, 1).value(), 0)
+
+        self.assertAlmostEqual(indexSin.sin(-1, 1).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(-2, 1).value(), 0)
+
+    def assert_sin_2(self, indexSin):
+        self.assertAlmostEqual(indexSin.sin(0, 2).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(1, 2).value(), q2)
+        self.assertAlmostEqual(indexSin.sin(2, 2).value(), 1)
+        self.assertAlmostEqual(indexSin.sin(3, 2).value(), q2)
+        self.assertAlmostEqual(indexSin.sin(4, 2).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(5, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(6, 2).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(7, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(8, 2).value(), 0)
+
+        self.assertAlmostEqual(indexSin.sin(-1, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(-2, 2).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(-3, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(-4, 2).value(), 0)
+
+    def assert_sin_3(self, indexSin):
+        self.assertAlmostEqual(indexSin.sin(0, 3).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(1, 3).value(), q1)
+        self.assertAlmostEqual(indexSin.sin(2, 3).value(), q2)
+        self.assertAlmostEqual(indexSin.sin(3, 3).value(), q3)
+        self.assertAlmostEqual(indexSin.sin(4, 3).value(), 1)
+        self.assertAlmostEqual(indexSin.sin(5, 3).value(), q3)
+        self.assertAlmostEqual(indexSin.sin(6, 3).value(), q2)
+        self.assertAlmostEqual(indexSin.sin(7, 3).value(), q1)
+        self.assertAlmostEqual(indexSin.sin(8, 3).value(), 0)
+        self.assertAlmostEqual(indexSin.sin(9, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.sin(10, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(11, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.sin(12, 3).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(13, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.sin(14, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(15, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.sin(16, 3).value(), 0)
+
+        self.assertAlmostEqual(indexSin.sin(-1, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.sin(-2, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(-3, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.sin(-4, 3).value(), -1)
+        self.assertAlmostEqual(indexSin.sin(-5, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.sin(-6, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.sin(-7, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.sin(-8, 3).value(), 0)
+
+
+    def assert_cos_1(self, indexSin):
+        self.assertAlmostEqual(indexSin.cos(0, 1).value(), 1)
+        self.assertAlmostEqual(indexSin.cos(1, 1).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(2, 1).value(), -1)
+        self.assertAlmostEqual(indexSin.cos(3, 1).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(4, 1).value(), 1)
+
+        self.assertAlmostEqual(indexSin.cos(-1, 1).value(), 0)
+
+    def assert_cos_2(self, indexSin):
+        self.assertAlmostEqual(indexSin.cos(0, 2).value(), 1)
+        self.assertAlmostEqual(indexSin.cos(1, 2).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(2, 2).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(3, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.cos(4, 2).value(), -1)
+        self.assertAlmostEqual(indexSin.cos(5, 2).value(), -q2)
+        self.assertAlmostEqual(indexSin.cos(6, 2).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(7, 2).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(8, 2).value(), 1)
+
+        self.assertAlmostEqual(indexSin.cos(-1, 2).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(-2, 2).value(), 0)
+
+    def assert_cos_3(self, indexSin):
+        self.assertAlmostEqual(indexSin.cos(0, 3).value(), 1)
+        self.assertAlmostEqual(indexSin.cos(1, 3).value(), q3)
+        self.assertAlmostEqual(indexSin.cos(2, 3).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(3, 3).value(), q1)
+        self.assertAlmostEqual(indexSin.cos(4, 3).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(5, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.cos(6, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.cos(7, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.cos(8, 3).value(), -1)
+        self.assertAlmostEqual(indexSin.cos(9, 3).value(), -q3)
+        self.assertAlmostEqual(indexSin.cos(10, 3).value(), -q2)
+        self.assertAlmostEqual(indexSin.cos(11, 3).value(), -q1)
+        self.assertAlmostEqual(indexSin.cos(12, 3).value(), 0)
+        self.assertAlmostEqual(indexSin.cos(13, 3).value(), q1)
+        self.assertAlmostEqual(indexSin.cos(14, 3).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(15, 3).value(), q3)
+        self.assertAlmostEqual(indexSin.cos(16, 3).value(), 1)
+
+        self.assertAlmostEqual(indexSin.cos(-1, 3).value(), q3)
+        self.assertAlmostEqual(indexSin.cos(-2, 3).value(), q2)
+        self.assertAlmostEqual(indexSin.cos(-3, 3).value(), q1)
+
+
+    def writeToFile(self, indexSin:IndexSin, order:int):
+        indexSin.dump(order)
+
+
+class TestPrec (TestIndexSin):
+    indexSin = IndexSin(SinSource.Prec)
+
+    def test_index(self):
+        self.assert_get_half_index_1(TestPrec.indexSin)
+        self.assert_get_half_index_2(TestPrec.indexSin)
+        self.assert_get_half_index_3(TestPrec.indexSin)
 
     def test_sin(self):
-        indexSin = IndexSin(3)
-        self.assertEqual(8, indexSin.size())
-
-        self.assertEqual(indexSin.sin(0), 0)
-        self.assertEqual(indexSin.sin(1), math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.sin(2), math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.sin(3), math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.sin(4), 1)
-        self.assertEqual(indexSin.sin(5), math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.sin(6), math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.sin(7), math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.sin(8), 0)
-
-        self.assertEqual(indexSin.sin(-1), -math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.sin(-2), -math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.sin(-3), -math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.sin(-4), -1)
-        self.assertEqual(indexSin.sin(-5), -math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.sin(-6), -math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.sin(-7), -math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.sin(-8), 0)
-
-    def test_sin_error(self):
-        self.assertEqual(-math.sin(1/8*math.pi) - 9.992007221626409e-16, 
-                         math.sin(1001/8*math.pi))
-        self.assertEqual(math.ulp(math.sin(1/8*math.pi)), 5.551115123125783e-17)
+        self.assert_sin_1(TestPrec.indexSin)
+        self.assert_sin_2(TestPrec.indexSin)
+        self.assert_sin_3(TestPrec.indexSin)
 
     def test_cos(self):
-        indexSin = IndexSin(3)
-        self.assertEqual(8, indexSin.size())
-
-        self.assertEqual(indexSin.cos(0), 1)
-        self.assertEqual(indexSin.cos(1), math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.cos(2), math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.cos(3), math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.cos(4), 0)
-        self.assertEqual(indexSin.cos(5), -math.sin(1/8*math.pi))
-        self.assertEqual(indexSin.cos(6), -math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.cos(7), -math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.cos(8), -1)
-
-        self.assertEqual(indexSin.cos(-1), math.cos(1/8*math.pi))
-        self.assertEqual(indexSin.cos(-2), math.cos(2/8*math.pi))
-        self.assertEqual(indexSin.cos(-3), math.sin(1/8*math.pi))
-
-    def test_arc_sin(self):
-        indexSin = IndexSin(3)
-        self.assertEqual( 0, indexSin.arc_sin( 0))
-        self.assertEqual( 1, indexSin.arc_sin( math.sin(math.pi*1/8)))
-        self.assertEqual( 2, indexSin.arc_sin( math.sin(math.pi*2/8)))
-        self.assertEqual( 3, indexSin.arc_sin( math.sin(math.pi*3/8)))
-        self.assertEqual( 4, indexSin.arc_sin( 1))
-
-        self.assertEqual(-1, indexSin.arc_sin(-math.sin(math.pi*1/8)))
-        self.assertEqual(-2, indexSin.arc_sin(-math.sin(math.pi*2/8)))
-        self.assertEqual(-3, indexSin.arc_sin(-math.sin(math.pi*3/8)))
-        self.assertEqual(-4, indexSin.arc_sin(-1))
-
-        self.assertEqual( 2.239966192595619, indexSin.arc_sin( math.sin(math.pi*1/3)))
-        self.assertEqual(-2.239966192595619, indexSin.arc_sin(-math.sin(math.pi*1/3)))
+        self.assert_cos_1(TestPrec.indexSin)
+        self.assert_cos_2(TestPrec.indexSin)
+        self.assert_cos_3(TestPrec.indexSin)
 
 
-class TestIndexSinVsLibSin (unittest.TestCase):
+class TestQuart (TestIndexSin):
+    indexSin = IndexSin()
 
-    @unittest.skip('Too slow and no longer needed')
-    def testSinDiff(self):
-        with open(f'./Python/Output/SinDiff.txt', 'w') as f:
-            f.write('Order\tFreq\tX\tIndex Sin\tValue Error\tUncertainty\n')
-            for order in range(4, 8):
+    def test_index(self):
+        self.assert_get_half_index_1(TestQuart.indexSin)
+        self.assert_get_half_index_2(TestQuart.indexSin)
+        self.assert_get_half_index_3(TestQuart.indexSin)
+
+    def test_sin(self):
+        self.assert_sin_1(TestQuart.indexSin)
+        self.assert_sin_2(TestQuart.indexSin)
+        self.assert_sin_3(TestQuart.indexSin)
+
+    def test_cos(self):
+        self.assert_cos_1(TestQuart.indexSin)
+        self.assert_cos_2(TestQuart.indexSin)
+        self.assert_cos_3(TestQuart.indexSin)
+
+    def test_writeToFile(self):
+        self.writeToFile(TestQuart.indexSin, 10)
+
+    def test_writeToFile_large(self):
+        self.writeToFile(TestQuart.indexSin, 18)
+
+
+
+class TestFull (TestIndexSin):
+    indexSin = IndexSin(SinSource.Full)
+
+    def test_get_index(self):
+        self.assert_get_index_1(TestFull.indexSin)
+        self.assert_get_index_2(TestFull.indexSin)
+        self.assert_get_index_3(TestFull.indexSin)
+
+    def test_sin(self):
+        self.assert_sin_1(TestFull.indexSin)
+        self.assert_sin_2(TestFull.indexSin)
+        self.assert_sin_3(TestFull.indexSin)
+
+    def test_cos(self):
+        self.assert_cos_3(TestFull.indexSin)
+
+    def test_writeToFile(self):
+        self.writeToFile(TestFull.indexSin, 10)
+
+    def test_writeToFile_large(self):
+        self.writeToFile(TestFull.indexSin, 18)
+
+
+class TestFixed (TestIndexSin):
+    indexSin = IndexSin(SinSource.Fixed)
+
+    def test_get_index(self):
+        self.assert_get_index_1(TestFixed.indexSin)
+        self.assert_get_index_2(TestFixed.indexSin)
+        self.assert_get_index_3(TestFixed.indexSin) 
+
+    def test_sin(self):
+        self.assert_sin_1(TestFixed.indexSin)
+        self.assert_sin_2(TestFixed.indexSin)
+        self.assert_sin_3(TestFixed.indexSin)
+
+    def test_cos(self):
+        self.assert_cos_3(TestFixed.indexSin)
+
+    def test_writeToFile_large(self):
+        self.writeToFile(TestFixed.indexSin, 18)
+
+
+class TestLimit (TestIndexSin):
+    indexSin = IndexSin(SinSource.Limit, 
+                        sCosSin=[VarDbl(v) for v in (1,0, q3,q1, q2,q2, q1,q3, 0,1, -q1,q3, -q2,q2, -q3,q1)])
+
+    def test_get_index(self):
+        self.assert_get_index_1(TestLimit.indexSin) 
+        self.assert_get_index_2(TestLimit.indexSin) 
+        self.assert_get_index_3(TestLimit.indexSin) 
+
+    def test_sin(self):
+        self.assert_sin_1(TestLimit.indexSin)
+        self.assert_sin_2(TestLimit.indexSin)
+        self.assert_sin_3(TestLimit.indexSin)
+
+    def test_cos(self):
+        TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
+
+class TestLib (TestIndexSin):
+
+    def test_sin(self):
+        self.assert_sin_1(TestLimit.indexSin)
+        self.assert_sin_2(TestLimit.indexSin)
+        self.assert_sin_3(TestLimit.indexSin)
+
+    def test_cos(self):
+        TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
+
+
+def dumpStat(dumpPath:str, testName:str, maxRange:float,
+             sStat:dict[int, Stat], sHist:dict[int, Histo]):
+    '''
+    dump the uncertainty stat {sStat} and normalize error histogram {sHist} to file {dumpPath}
+    '''
+    if (not sHist) or set(sStat.keys()) != set(sHist.keys()):
+        raise RuntimeError(f'Invalid uncertainty stat {sStat.keys()} and normalize error histogram {sHist.keys()}')
+    with open(dumpPath, 'w') as fw:
+        hist = sHist[list(sHist.keys())[0]]
+        HEADER = ("Order\tRange\tTest"
+                  "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Maximum"
+                  "\tError Count\tError Mean\tError Deviation\tError Minimum\tError Maximum\t") + \
+                  '\t'.join([str(i) for i in hist.buckets()])
+        fw.write(HEADER)
+        for order in sorted(sHist):
+            stat = sStat[order]
+            hist = sHist[order]
+            fw.write(f'\n{order}\t{maxRange}\t{testName}\t'
+                        f'{stat.count()}\t{stat.mean()}\t{stat.dev()}\t{stat.min()}\t{stat.max()}\t'
+                        f'{hist.stat().count()}\t{hist.stat().mean()}\t{hist.stat().dev()}\t{hist.stat().min()}\t{hist.stat().max()}\t')
+            if hist.stat().count():
+                fw.write('\t'.join([str(c/hist.stat().count()) for c in hist.histogram()]))
+            else:
+                fw.write('\t' *(len(hist.buckets()) - 1))
+            fw.flush()
+
+
+class TestIndexSinDiff (unittest.TestCase):
+    '''
+    Compare between different SinSource of IndexSin
+    '''
+    quart = IndexSin(SinSource.Quart)
+    full = IndexSin(SinSource.Full)
+    prec = IndexSin(SinSource.Prec)
+
+    def profile(self, testName:str, 
+                funcIdx:typing.Callable[[int, int], VarDbl], funcLib:typing.Callable[[int, int], VarDbl],
+                sOrderRange=(4,11), maxRange=8,
+                divids=5, devs=3):
+        '''
+        Compare two sin(i, order) between [0, {maxRange}] for the order in {sOrder}
+        The output is display with x = i/(1 << order), without PI 
+        '''
+        sStat = {}
+        sHist = {}
+        dumpPath = f'./Python/Output/Profile_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
+        HEADER = "Order\tRange\tTest\tX\tValue Error\tUncertainty\tNormalized Error"
+        with open(dumpPath, 'w') as fw:
+            fw.write(HEADER)
+            for order in range(*sOrderRange):
+                sStat[order] = Stat()
+                sHist[order] = Histo(divids=divids, devs=devs)
                 size = 1 << order
-                sin = IndexSin(order)
-                
-                for i in range(size >> 3):
-                    x = i / size * math.pi
-                    err = VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
-                    f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')
-
-                for i in range(size >> 3, size**2 //2):
-                    x = i / size * math.pi
-                    err = VarDbl(math.sin(x)) - VarDbl(sin.sin(i))
-                    f.write(f'{order}\t{i}\t{x}\t{sin.sin(i)}\t{err.value()}\t{err.uncertainty()}\n')  
-
-    @unittest.skip('One day slow')
-    def testSinDiffStat(self):
-        FILE = './Python/Output/SinDiff_Stat.txt'
-        minOrder = 3
-        if os.path.isfile(FILE):
-            with open(FILE) as f:
-                for line in f:
-                    sWord = line.split('\t')
-                    if (sWord[1] != 'Library') or (sWord[2] != 'Tan'):
-                        continue
-                    minOrder = int(sWord[0])
-
-        with open(FILE, 'a' if minOrder > 3 else 'w') as f:
-            if minOrder == 3:
-                f.write('Order\tPart\tType\tCount\tMin\tMax\tMean\tDev\n')
-            for order in range(minOrder + 1, 16):
-                sin = IndexSin(order)
-                size = 1 << order
-
-                statVal = Stat()
-                statNrm = Stat()
-                for i in range(1, size >> 3):
-                    err = VarDbl(sin.sin(i))**2 + VarDbl(sin.cos(i))**2 - 1
-                    statVal.accum( err.value() )
-                    statNrm.accum( err.value() / err.uncertainty() )
-                f.write(f'{order}\tIndexed\tValue'
-                        f'\t{statVal.count()}\t{statVal.min()}\t{statVal.max()}\t{statVal.mean()}\t{statVal.dev()}\n')
-                f.write(f'{order}\tIndexed\tNormalized'
-                        f'\t{statNrm.count()}\t{statNrm.min()}\t{statNrm.max()}\t{statNrm.mean()}\t{statNrm.dev()}\n')
-
-                statVal = Stat()
-                statNrm = Stat()
-                statSin = Stat()
-                statTan = Stat()
-                for i in range(size**2 //2):
-                    x = i / size * math.pi
-                    err = VarDbl(math.sin(x))**2 + VarDbl(math.cos(x))**2 - 1
-                    statVal.accum( err.value() )
-                    statNrm.accum( err.value() / err.uncertainty() )
-                    statSin.accum( math.sin(x) - sin.sin(i) )
-                    if sin.sin(i):
-                        statTan.accum( 1/math.tan(x) - sin.cos(i)/sin.sin(i) )
-                f.write(f'{order}\tLibrary\tValue'
-                        f'\t{statVal.count()}\t{statVal.min()}\t{statVal.max()}\t{statVal.mean()}\t{statVal.dev()}\n')
-                f.write(f'{order}\tLibrary\tNormalized'
-                        f'\t{statNrm.count()}\t{statNrm.min()}\t{statNrm.max()}\t{statNrm.mean()}\t{statNrm.dev()}\n')
-                f.write(f'{order}\tLibrary\tSin'
-                        f'\t{statSin.count()}\t{statSin.min()}\t{statSin.max()}\t{statSin.mean()}\t{statSin.dev()}\n')
-                f.write(f'{order}\tLibrary\tTan'
-                        f'\t{statTan.count()}\t{statTan.min()}\t{statTan.max()}\t{statTan.mean()}\t{statTan.dev()}\n')
-                f.flush()
-       
-
-    @unittest.skip('Too slow')
-    def testCtan(self):
-        with open(f'./Python/Output/CotDiff.txt', 'w') as f:
-            f.write('Order\tFreq\tX\tIndex Cot\tValue Error\tUncertainty\n')
-            for order in range(4, 8):
-                size = 1 << order
-                sin = IndexSin(order)
-                for i in range(size):
-                    x = i / size * math.pi
+                for i in range(size*maxRange + 1):
+                    x = i / size
+                    fw.write(f'\n{order}\t{maxRange}\t{testName}\t{x}')
                     try:
-                        ctan = VarDbl(sin.cos(i)) / VarDbl(sin.sin(i))
-                        err = ctan - 1/math.tan(x)
-                        f.write(f'{order}\t{i}\t{x}\t{ctan.value()}\t{err.value()}\t{err.uncertainty()}\n') 
+                        valIdx = funcIdx(i, order)
+                        valLib = funcLib(i, order)
+                        err = valLib - valIdx
+                        sStat[order].accum(err.uncertainty())
+                        if err.uncertainty() > 0:
+                            sHist[order].accum(err.value() / err.uncertainty())
+                        fw.write(f'\t{err.value()}\t{err.uncertainty()}')
+                        if err.uncertainty() > 0:
+                            fw.write(f'\t{err.value() /err.uncertainty()}')
+                        else:
+                            fw.write('\t')
                     except BaseException as ex:
-                        print(f'Ignore i={i} order={order}: {ex}')
+#                        traceback.print_exc()
                         continue
+                    fw.flush()
 
-            for order in range(8, 17):
-                size = 1 << order
-                sin = IndexSin(order)
-                sin = IndexSin(order)
-                for i in range(size *7//8, size):
-                    x = i / size * math.pi
-                    try:
-                        ctan = VarDbl(sin.cos(i)) / VarDbl(sin.sin(i))
-                        err = ctan - 1/math.tan(x)
-                        f.write(f'{order}\t{i}\t{x}\t{ctan.value()}\t{err.uncertainty()}\t{err.value()}\n') 
-                    except BaseException as ex:
-                        print(f'Ignore i={i} order={order}: {ex}')
-                        continue
+        dumpPath = f'./Python/Output/Stat_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
+        dumpStat(dumpPath, testName, maxRange, sStat, sHist)
+
+    def test_SinDiff_Quart_vs_Prec(self):
+        self.profile('SinDiff_Quart_vs_Prec',
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order),
+                     lambda i, order: TestIndexSinDiff.prec.sin(i, order))
+        
+    def test_SinDiff_Prec_vs_Lib(self):
+        self.profile('SinDiff_Prec_vs_Lib', 
+                     lambda i, order: TestIndexSinDiff.prec.sin(i, order),
+                     lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order))))
+
+    def test_SinDiff_Quart_vs_Lib(self):
+        self.profile('SinDiff_Quart_vs_Lib',
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order),
+                     lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order))))
+        
+    def test_SinDiff_Quart_vs_Full(self):
+        self.profile('SinDiff_Quart_vs_Full', 
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order),
+                     lambda i, order: TestIndexSinDiff.full.sin(i, order),
+                     maxRange=1)
+
+
+    def test_SinError_Quart(self):
+        self.profile('SinError_Quart', 
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order)**2 + TestIndexSinDiff.quart.cos(i, order)**2,
+                     lambda i, order: 1)
+        
+    def test_SinError_Lib(self):
+        self.profile('SinError_Lib', 
+                     lambda i, order: 1,
+                     lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order)))**2 + VarDbl(math.cos(math.pi *i/(1 << order)))**2)
+
+    def test_SinError_Prec(self):
+        self.profile('SinError_Prec', 
+                     lambda i, order: TestIndexSinDiff.prec.sin(i, order)**2 + TestIndexSinDiff.prec.cos(i, order)**2,
+                     lambda i, order: 1)
+
+
+    def test_CTanDiff_Quart_vs_Lib(self):
+        self.profile('CTanDiff_Quart_vs_Lib', 
+                     lambda i, order: TestIndexSinDiff.quart.cos(i, order) / TestIndexSinDiff.quart.sin(i, order),
+                     lambda i, order: VarDbl(1 /math.tan(math.pi *i/(1 << order))))
+        
+    def test_CTanDiff_Lib_vs_Lib(self):
+        self.profile('CTanDiff_Lib_vs_Lib', 
+                     lambda i, order: VarDbl(math.cos(math.pi *i/(1 << order)) / math.sin(math.pi *i/(1 << order))),
+                     lambda i, order: VarDbl(1 /math.tan(math.pi *i/(1 << order))))
+
+    def test_CTanDiff_Quart_vs_Full(self):
+        self.profile('CTanDiff_Quart_vs_Full', 
+                     lambda i, order: TestIndexSinDiff.quart.cos(i, order) / TestIndexSinDiff.quart.sin(i, order),
+                     lambda i, order: TestIndexSinDiff.full.cos(i, order) / TestIndexSinDiff.full.sin(i, order),
+                     maxRange=1)
+        
+
+    def test_TanDiff_Quart_vs_Lib(self):
+        self.profile('TanDiff_Quart_vs_Lib', 
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order) / TestIndexSinDiff.quart.cos(i, order),
+                     lambda i, order: VarDbl(math.tan(math.pi *i/(1 << order))))
+        
+    def test_TanDiff_Lib_vs_Lib(self):
+        self.profile('TanDiff_Lib_vs_Lib', 
+                     lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order)) / math.cos(math.pi *i/(1 << order))),
+                     lambda i, order: VarDbl(math.tan(math.pi *i/(1 << order))))
+        
+    def test_TanDiff_Quart_vs_Full(self):
+        self.profile('TanDiff_Quart_vs_Full', 
+                     lambda i, order: TestIndexSinDiff.quart.sin(i, order) / TestIndexSinDiff.quart.cos(i, order),
+                     lambda i, order: TestIndexSinDiff.full.sin(i, order) / TestIndexSinDiff.full.cos(i, order),
+                     maxRange=1)
+
+
+class TestCodeDiff (unittest.TestCase):
+    '''
+    Compare the indexed sine for another code with Python
+    '''
+    def codeDiff(self, code:str, sinSource:SinSource, order:int, base='Python'):
+        IndexSin.validateOrder(order)
+        dumpPathBase = f'./{base}/Output/IndexSin_{sinSource}_{order}.txt'
+        dumpPathCode = f'./{code}/Output/IndexSin_{sinSource}_{order}.txt'
+        dumpPath = f'./{base}/Output/IndexSin_{sinSource}_{order}_{code}_{base}.txt'
+        with open(dumpPathBase) as fb, open(dumpPathCode) as fc, open(dumpPath, 'w') as fw:
+            self.assertEqual(next(fb), next(fc))
+            fw.write('Index\tX\tValue Error\tUncertainty\tNormalized Error [LSB]')
+            ln = 0
+            sDiff = {1: 0}
+            for lineBase, lineCode in zip(fb, fc):
+                ln += 1
+                sWordBase = tuple(map(float, lineBase.split('\t')))
+                sWordCode = tuple(map(float, lineCode.split('\t')))
+                self.assertTupleEqual(sWordBase[:2], sWordCode[:2])
+                err = VarDbl(sWordCode[2], sWordCode[3]) - VarDbl(sWordBase[2], sWordBase[3])
+                norm = err.value() /err.uncertainty()* math.sqrt(2) if err.uncertainty() > 0 else ""
+                fw.write(f'\n{int(sWordBase[0])}\t{sWordBase[1]}\t{err.value()}\t{err.uncertainty()}\t{norm}')
+                if norm:
+                    k = abs(int(round(norm)))
+                    if k in sDiff:
+                        sDiff[k] += 1
+                    else:
+                        sDiff[k] = 1
+            print(f'For {sinSource} out of {ln}, the diff is: {sDiff}')
+
+    def test_cpp_vs_python(self):
+        self.codeDiff('Cpp', SinSource.Quart, 10)
+        self.codeDiff('Cpp', SinSource.Full, 10)
 
 
 
 
-class TestRegressiveSin(unittest.TestCase):
 
-    def testWithUncertainty_4(self):
-        sin = RegressiveSin(4)
-        sin.calc()
-        self.assertIsNone(sin.withUncertainty())
 
-    def testWithUncertainty_6(self):
-        sin = RegressiveSin(6)
-        sin.calc()
-        self.assertIsNone(sin.withUncertainty())
-
-    def testWithUncertainty_18(self):
-        sin = RegressiveSin(18)
-        if not os.path.isfile(RegressiveSin.path(18)):
-            sin.calc()
-        self.assertIsNone(sin.withUncertainty())
-
-    @unittest.skip("1 minute slow")
-    def testWithUncertainty_19(self):
-        sin = RegressiveSin(19)
-        if not os.path.isfile(RegressiveSin.path(19)):
-            sin.calc()
-        self.assertIsNone(sin.withUncertainty())
 
 
 if __name__ == '__main__':

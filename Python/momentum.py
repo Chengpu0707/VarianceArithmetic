@@ -1,6 +1,5 @@
 import datetime
 import math
-import numpy
 import os
 import scipy.special
 import scipy.stats
@@ -17,7 +16,13 @@ class Normal:
 
     @staticmethod
     def getPath(bounding:float):
-        return f'./Python/NormalMomentum_{bounding}.txt'
+        if os.getcwd().endswith('VarianceArithemtic'):
+            return f'./Python/NormalMomentum_{bounding}.txt'
+        elif os.getcwd().endswith('Python'):
+            return f'./NormalMomentum_{bounding}.txt'
+        else:
+            raise ValueError(f'Invalid cwd {os.getcwd()}')
+        
 
     @staticmethod
     def readPreciseNorm(filePath:str):
@@ -59,7 +64,12 @@ class Normal:
 
     def __init__(self, bounding:float=5, maxOrder:int=1000000, withVariance:bool=False):
         self._bounding = bounding
-        filePath = f'./Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
+        if os.getcwd().endswith('VarianceArithemtic'):
+            filePath = f'./Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
+        elif os.getcwd().endswith('Python'):
+            filePath = f'./Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
+        else:
+            raise ValueError(f'Invalid cwd {os.getcwd()}')
         HEADER = 'Order\tValue\tUncertainty\n'
         if os.path.isfile(filePath):
             try:
@@ -161,3 +171,23 @@ class Normal:
 
 
 IDEAL = Normal(bounding=5.0)
+
+class Uniform:
+    '''
+    Pre-calculated variance momentum for uniform distribution [-1, 1].
+    '''
+    __slots__ = ('_sMomentum', '_maxOrder')
+
+
+    def __init__(self):
+        self._sMomentum = []
+        self._maxOrder = len(self._sMomentum)
+
+    @property
+    def maxOrder(self):
+        return self._maxOrder
+
+    def __getitem__(self, n:int) -> float:
+        if n < 0 or n >= self._maxOrder or (n % 2) == 1:
+            return IndexError()
+        return self._sMomentum[n >> 1]

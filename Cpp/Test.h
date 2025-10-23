@@ -36,7 +36,8 @@ struct AssertException : public std::runtime_error
 static void fail(std::string msg = "");
 static void assertTrue(bool expression, std::string msg = "");
 static void assertFalse(bool expression, std::string msg = "");
-static void assertAlmostEqual(long double x, long double y, long double delta = 0, std::string msg = "");
+template<typename T> requires std::floating_point<T>
+static void assertAlmostEqual(T x, T y, T delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
 
 // generic value comparison
@@ -72,8 +73,8 @@ inline void assertFalse(bool expression, std::string msg)
     return assertTrue(!expression, msg);
 }
 
-
-inline void assertAlmostEqual(long double x, long double y, long double delta, std::string msg)
+template<typename T> requires std::floating_point<T>
+inline void assertAlmostEqual(T x, T y, T delta, std::string msg)
 {
     if (std::isfinite(x) != std::isfinite(y)) {
         std::ostringstream os;
@@ -86,7 +87,7 @@ inline void assertAlmostEqual(long double x, long double y, long double delta, s
     if (!std::isfinite(x))
         return;
     if (delta == 0)
-        delta = var_dbl::ulp(x);
+        delta = var_dbl::ulp(std::max(std::abs(x), std::abs(y)));
     if (std::abs(x - y) <= delta)
         return;
     std::ostringstream os;
