@@ -170,8 +170,6 @@ class Normal:
         return self._sMomentum[n]
 
 
-IDEAL = Normal(bounding=5.0)
-
 class Uniform:
     '''
     Pre-calculated variance momentum for uniform distribution [-1, 1].
@@ -181,13 +179,35 @@ class Uniform:
 
     def __init__(self):
         self._sMomentum = []
+        fac = 1
+        for n in range(10000):
+            try:
+                mmt = fac/(2*n + 1)
+            except OverflowError:
+                break
+            self._sMomentum.append(mmt)
+            fac *= 3
         self._maxOrder = len(self._sMomentum)
 
+    @property
+    def bounding(self):
+        return math.sqrt(3)
+    
+    @property
+    def leakage(self):
+        return 0
+    
     @property
     def maxOrder(self):
         return self._maxOrder
 
     def __getitem__(self, n:int) -> float:
         if n < 0 or n >= self._maxOrder or (n % 2) == 1:
-            return IndexError()
+            return 0
         return self._sMomentum[n >> 1]
+    
+
+IDEAL = Normal(bounding=5.0)
+
+UNIFORM = Uniform()
+

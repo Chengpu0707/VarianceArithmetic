@@ -114,7 +114,7 @@ class Taylor:
     def taylor1d(input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
                  inPrec:bool, outPrec:bool, 
                  momentum=momentum.IDEAL,
-                 checkMinMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True,
+                 checkMinMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True, checkLSB=False,
                  dumpPath:str=None):
         '''
         1d Taylor expansion for differential series {s1dTaylor} at {input}, with {name} for logging.
@@ -259,13 +259,14 @@ class Taylor:
             Taylor._writeResult(fw, value, variance, 'NotMonotonicException')
             raise NotMonotonicException(input, name, s1dTaylor, inPrec, outPrec,
                     value, variance, n, newValue, newVariance, monotonics)
-        if checkStability:
+        if checkLSB:
             if abs(newValue.value()) >= math.ulp(value.value()):
                 Taylor._writeResult(fw, value, variance, 'NotStableException\tvalue')
                 raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
+        if checkStability:
             unc = math.sqrt(value.variance() + variance.value()) * momentum.leakage
-            if abs(newValue.value()) >= unc:
+            if unc > 0 and abs(newValue.value()) >= unc:
                 Taylor._writeResult(fw, value, variance, 'NotStableException\tuncertainty')
                 raise NotStableException(input, name, s1dTaylor, inPrec, outPrec,
                         value, variance, n, newValue, newVariance, monotonics)
