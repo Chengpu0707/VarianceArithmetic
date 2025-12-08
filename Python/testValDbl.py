@@ -44,13 +44,13 @@ class TestInit (unittest.TestCase):
         self.assertEqual(0, i - int(float(i)))
         # lost of resolution
         i = (1 << 53) + 1
-        validate(self, VarDbl(i), float(i), 0.5)
+        validate(self, VarDbl(i), float(i), 1)
         self.assertEqual(1, i - int(float(i)))
         i = (1 << 54) + 1
         self.assertEqual(1, i - int(float(i)))
-        validate(self, VarDbl(i), float(i), 0.25)
+        validate(self, VarDbl(i), float(i), 0.5)
         i = (1 << 54) + 3
-        validate(self, VarDbl(i), float(i), -0.25)
+        validate(self, VarDbl(i), float(i), -0.5)
         self.assertEqual(-1, i - int(float(i)))
 
     def testInit(self):
@@ -269,12 +269,12 @@ class TestMultiply (unittest.TestCase):
 
         re34 = VarDbl(-159018721) * VarDbl(83739041)
         self.assertEqual( -13316075197586560.0, re34.value(), math.ulp(re34.value()))
-        self.assertEqual(0.5, re34.uncertainty(), math.ulp(re34.uncertainty()))
+        self.assertEqual(1, re34.uncertainty(), math.ulp(re34.uncertainty()))
 
         re = re12 + re34
         self.assertEqual(2, re.value(), math.ulp(re.value()))
         self.assertEqual(VarDbl.ulp(re12.value()), VarDbl.ulp(re34.value()), math.ulp(re.uncertainty()))
-        self.assertEqual(0.5, re.uncertainty(), math.ulp(re.uncertainty()))
+        self.assertEqual(1, re.uncertainty(), math.ulp(re.uncertainty()))
 
     def testSinUncertainty(self):
         res = VarDbl(1.1984225887068295e-05, 1.9530084268958033e-12) **2

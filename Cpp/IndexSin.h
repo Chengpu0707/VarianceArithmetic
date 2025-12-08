@@ -53,6 +53,7 @@ public:
         // get the sin source according to {sinSource}, and throw invalid_argument otherwise
     static unsigned char getOrder(size_t size);
         // get the order so that {size} = 2^{order}, and throw invalid_argument otherwise
+    constexpr static const long double PI = 3.1415926535897932384626433832795029L;
 
     VarDbl sin(long long freq, unsigned char order) const;
         // sin(pi * freq / (1 << order))
@@ -159,7 +160,7 @@ inline bool IndexSin::dump(unsigned char order, const std::string& dumpPath) con
     std::ofstream ofs(dumpPath);
     if (!ofs.is_open())
         return false;
-    ofs << std::setprecision(20);
+    ofs << std::scientific << std::setprecision(20);
     ofs << "Index\tX\tValue\tUncertainty\n";
     const size_t size = 1 << order;
     for (size_t i = 0; i < _sSin.size(); ++i) {
@@ -217,21 +218,20 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
     const size_t quart = size / 4;
     if (_sSinPrec.empty()) {
         if (dumpDir.empty()) {
-            const long double PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164;
             for (size_t i = 0; i < size; ++i) {
                 const double value = std::sin(std::numbers::pi * i /size);
                 if (i <= quart) {
-                    const long double val = std::sin(PI * i /size);
-                    _sSinPrec.emplace_back(val, std::abs(val - value));
-                    _sSinQuart.emplace_back(value, ulp(value));
+                    const long double val = std::sin(IndexSin::PI * i /size);
+                    _sSinPrec.emplace_back(val, std::abs(val - ((double) val)));
+                    _sSinQuart.emplace_back(value);
                 }  else if (i <= half) {
                     const double value = std::cos(std::numbers::pi * (half - i) /size);
                     const long double val = std::cos(PI * (half - i) /size);
                     _sSinPrec.emplace_back(val, std::abs(val - value));
-                    _sSinQuart.emplace_back(value, ulp(value));
+                    _sSinQuart.emplace_back(value);
                 }
-                _sSinFull.emplace_back(value, ulp(value));
-                _sSinFixed.emplace_back(value, ulp(1.));
+                _sSinFull.emplace_back(value);
+                _sSinFixed.emplace_back(value, VarDbl::ulp(1.));
             }
             assert(_sSinPrec.size() == (half + 1));
             assert(_sSinQuart.size() == (half + 1));
@@ -256,7 +256,7 @@ inline VarDbl IndexSin::sin(long long freq, unsigned char order) const
     validateOrder(order);
     if (sinSource == Lib) {
         const double value = std::sin(std::numbers::pi * freq / (1 << order));
-        return VarDbl(value, ulp(value));
+        return VarDbl(value);
     }
     const long long idx = getIndex(freq, order);
     const VarDbl val = _sSin[abs(idx) << (MAX_ORDER - order)];

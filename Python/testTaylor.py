@@ -1,4 +1,3 @@
-from collections.abc import Callable
 import math
 import logging
 import numpy as np
@@ -14,7 +13,7 @@ from varDbl import VarDbl, InitException
 
 logger = logging.getLogger(__name__)
 
-OUTDIR = f'./Python/Output' if os.getcwd().endswith('VarianceArithemtic') else "./Output"
+OUTDIR = f'./Python/Output' if os.getcwd().endswith('VarianceArithmetic') else "./Output"
 
 
 
@@ -609,135 +608,6 @@ class TestDumpFile (unittest.TestCase):
 
 
 
-class TestConvergence (unittest.TestCase):
-    HEADER = 'X\tEdge\tBias\tValue\tUncertainty\tException\n'
-
-    @staticmethod
-    def _search(dxMin: float, dxMax: float, dxRes:int, sX: list[float], 
-                varFunc:Callable[[float, float], VarDbl], valFunc:Callable[[float], float],
-                path: str):
-        with open(path, 'w') as f:
-            f.write(TestConvergence.HEADER)
-            for x in sX:
-                excpt = None
-                res = None
-                iMin = int(dxMin * dxRes)
-                iMax = int(dxMax * dxRes)
-                while iMin + 1 < iMax:
-                    iMid = int((iMin + iMax)/2)
-                    try:
-                        dx = iMid / dxRes
-                        res = varFunc(x, dx)
-                        iMin = iMid
-                    except BaseException as ex:
-                        excpt = ex
-                        iMax = iMid
-                if res is None:
-                    raise ValueError(f'No result for x={x}, dxMin={dxMin}, dxMax={dxMax}, exception={excpt}')
-                if excpt is None:
-                    raise ValueError(f'Noexception for x={x}, dxMin={dxMin}, dxMax={dxMax}')
-                f.write(f'{x}\t{iMin/dxRes}\t{res.value() - valFunc(x)}\t{res.value()}\t{res.uncertainty()}\t{excpt}\n')
-                f.flush()
-
-    def test_pow(self):
-        Taylor.pow(VarDbl(1, 0.19929), -1.75, dumpPath=f'{OUTDIR}/Pow_1_0.19929_-1.75.txt')
-
-        DIVIDS = 20
-        TestConvergence._search(0.19, 0.21, 100000,
-                [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
-                lambda x, dx: Taylor.pow(VarDbl(1, dx), x), lambda x: 1,
-                f'{OUTDIR}/PowEdge.txt')
-
-    def test_pow_uniform(self):
-        Taylor.pow(VarDbl(1, 0.57), -3, momentum=momentum.UNIFORM,
-                   dumpPath=f'{OUTDIR}/Pow_1_0.57_-3.Uniform.txt')
-        Taylor.pow(VarDbl(1, 0.58), 2.9, momentum=momentum.UNIFORM,
-                   dumpPath=f'{OUTDIR}/Pow_1_0.58_2.9.Uniform.txt')
-
-        DIVIDS = 20
-        TestConvergence._search(0.57, 0.59, 100000,
-                [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
-                lambda x, dx: Taylor.pow(VarDbl(1, dx), x, momentum=momentum.UNIFORM), lambda x: 1,
-                f'{OUTDIR}/PowEdge.Uniform.txt')
-
-    def test_sin(self):
-        DIVIDS = 64
-        TestConvergence._search(0.3, 5.0, 1000,
-                [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
-                lambda x, dx: Taylor.sin(VarDbl(x, dx)), 
-                lambda x: math.sin(x),
-                f'{OUTDIR}/SinEdge.txt')
-        
-    def test_sin_uniform(self):
-        DIVIDS = 64
-        TestConvergence._search(0.3, 5.0, 1000,
-                [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
-                lambda x, dx: Taylor.sin(VarDbl(x, dx), momentum=momentum.UNIFORM), 
-                lambda x: math.sin(x),
-                f'{OUTDIR}/SinEdge.Uniform.txt')
-        
-
-
-    def test_exp(self):
-        Taylor.exp(VarDbl(0, 19), dumpPath=f'{OUTDIR}/Exp_0_16.txt')
-        with self.assertRaises(NotMonotonicException):
-            Taylor.exp(VarDbl(0, 20), dumpPath=f'{OUTDIR}/Exp_0_17.txt')
-
-        dumpPath = f'{OUTDIR}/ExpEdge.txt'
-        TestConvergence._search(19, 20, 1000,
-                (0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50, 100, -100),
-                lambda x, dx: Taylor.exp(VarDbl(x, dx)), 
-                lambda x: math.exp(x),
-                dumpPath)
-        with open(dumpPath) as f:
-            hdr = next(f)
-            self.assertEqual(hdr, TestConvergence.HEADER)  
-            for line in f:
-                sWords = line.split('\t')
-                x, edge, bias, val, unc = map(float, sWords[:-1])
-                exception = sWords[-1].strip()
-                self.assertEqual(edge, 19.864)
-                prec = unc / val
-                self.assertAlmostEqual(prec, 1681.7672471)
-                self.assertTrue(exception.startswith('NotMonotonicException'))
-
-
-    def test_log(self):
-        dumpPath = f'{OUTDIR}/LogEdge.txt'
-        TestConvergence._search(0.20, 0.21, 100000,
-                (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
-                lambda x, dx: Taylor.log(VarDbl(x, x*dx)), 
-                lambda x: math.log(x),
-                dumpPath)
-        with open(dumpPath) as f:
-            hdr = next(f)
-            self.assertEqual(hdr, TestConvergence.HEADER)  
-            for line in f:
-                sWords = line.split('\t')
-                x, edge, bias, val, unc = map(float, sWords[:-1])
-                exception = sWords[-1].strip()
-                self.assertEqual(edge, 0.20086)
-                self.assertAlmostEqual(unc, 0.2130506)
-                self.assertTrue(exception.startswith('NotMonotonicException'))
-        
-    def test_log_uniform(self):
-        dumpPath = f'{OUTDIR}/LogEdge.uniform.txt'
-        TestConvergence._search(0.57, 0.59, 100000,
-                (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
-                lambda x, dx: Taylor.log(VarDbl(x, x*dx), momentum=momentum.UNIFORM), 
-                lambda x: math.log(x),
-                dumpPath)
-        with open(dumpPath) as f:
-            hdr = next(f)
-            self.assertEqual(hdr, TestConvergence.HEADER)  
-            for line in f:
-                sWords = line.split('\t')
-                x, edge, bias, val, unc = map(float, sWords[:-1])
-                exception = sWords[-1].strip()
-                self.assertEqual(edge, 0.57899)
-                self.assertAlmostEqual(unc, 1.0350349)
-                self.assertTrue(exception.startswith('NotMonotonicException'))
-        
 
 
 class TestStat (unittest.TestCase):

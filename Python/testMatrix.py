@@ -363,10 +363,10 @@ class Adjugate (unittest.TestCase):
     
     @staticmethod
     def dumpPath(minSize:int=MIN_SIZE, maxSize:int=MAX_SIZE) ->tuple[str, str]:
-        if os.getcwd().endswith('\\VarianceArithemtic'):
+        if os.getcwd().endswith('\\VarianceArithmetic'):
             dumpPath = f'./Python/Output/AdjMatrix_{minSize}_{maxSize}.txt'
             logPath = f'./Python/Output/AdjMatrix_{minSize}_{maxSize}.log'
-        elif os.getcwd().endswith('\\VarianceArithemtic\\Python'):
+        elif os.getcwd().endswith('\\VarianceArithmetic\\Python'):
             dumpPath = f'./Output/AdjMatrix_{minSize}_{maxSize}.txt'
             logPath = f'./Output/AdjMatrix_{minSize}_{maxSize}.log'
         else:

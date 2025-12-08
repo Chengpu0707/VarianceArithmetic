@@ -16,7 +16,7 @@ class Normal:
 
     @staticmethod
     def getPath(bounding:float):
-        if os.getcwd().endswith('VarianceArithemtic'):
+        if os.getcwd().endswith('VarianceArithmetic'):
             return f'./Python/NormalMomentum_{bounding}.txt'
         elif os.getcwd().endswith('Python'):
             return f'./NormalMomentum_{bounding}.txt'
@@ -64,7 +64,7 @@ class Normal:
 
     def __init__(self, bounding:float=5, maxOrder:int=1000000, withVariance:bool=False):
         self._bounding = bounding
-        if os.getcwd().endswith('VarianceArithemtic'):
+        if os.getcwd().endswith('VarianceArithmetic'):
             filePath = f'./Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
         elif os.getcwd().endswith('Python'):
             filePath = f'./Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'

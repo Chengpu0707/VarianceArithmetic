@@ -21,6 +21,9 @@ class VarDbl {
     constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
         // z for 50% probability of equal
     constexpr static const long PRECISE_SIGNIFICAND_TAIL_BITS = 23;
+        // If the last 23 bits of significand are zero, the value is 2's fractional.
+    constexpr static const long long DOUBLE_MAX_SIGNIFICAND = (1LL << std::numeric_limits<double>::digits) - 1;
+        // max significand for double
 
     double _value = 0;
     double _uncertainty = 0;
@@ -244,7 +247,17 @@ inline VarDbl VarDbl::operator*=(const VarDbl& other)
             this->variance() * other.value() * other.value() +
             other.variance() * value() * value() +
             this->variance() * other.variance());
-    init(value() * other.value(), uncertainty, "*=");
+    if (uncertainty <= 0) {
+        const long long val = ((long long) value()) * ((long long) other.value());
+        if (VarDbl::DOUBLE_MAX_SIGNIFICAND < std::abs(val) &&
+            value() < VarDbl::DOUBLE_MAX_SIGNIFICAND && other.value() < VarDbl::DOUBLE_MAX_SIGNIFICAND) {
+            const VarDbl v(val);
+            this->_value = v._value;
+            this->_uncertainty = v._uncertainty;
+        } else
+            init(value() * other.value(), uncertainty, "*=");
+    } else
+        init(value() * other.value(), uncertainty, "*=");
     return *this;
 }
 

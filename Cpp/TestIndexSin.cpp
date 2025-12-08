@@ -32,11 +32,28 @@ void test_int_size()
 
 void test_floating_size()
 {
+    // casting long double to double does not result in the same value
+    test::assertEqual(sizeof(IndexSin::PI), 16);
     test::assertEqual(sizeof(std::numbers::pi), 8);
-    const long double PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164;
-    const long double diff = std::sin(PI/4) - (long double) std::sin(std::numbers::pi/4);
-    test::assertEqual((double) diff, 4.10370522285763428272e-17);
-    test::assertEqual(sizeof(std::numbers::pi), 8);
+    const long double lsin = std::sin(IndexSin::PI / 4);
+    test::assertEqual(lsin, 0.707106781186547524436L, "lsin");
+    const double sin = std::sin(std::numbers::pi / 4);
+    test::assertEqual(sin,           0.70710678118654746, "sin");
+    test::assertEqual((double) lsin, 0.70710678118654757, "(double) lsin");
+    const long double unc = lsin - ((double) lsin);
+    test::assertEqual((double) unc, -4.8301206784229223e-17, "(double) unc");
+    test::assertEqual(unc,          -4.8301206784229222535e-17, "unc");
+    test::assertEqual(lsin - sin,   6.27210956782864315073e-17L, "lsin - sin");
+    
+    // io will not change the value
+    std::ostringstream oss;
+    oss << std::setprecision(20) << std::scientific << (double) lsin << ' ' << sin << '\n';
+    std::istringstream iss(oss.str());
+    double dlsin, dsin;
+    iss >> dlsin >> dsin;
+    test::assertEqual(dsin,  0.70710678118654746, "dsin");
+    test::assertEqual(dlsin, 0.70710678118654757, "dlsin");
+    test::assertEqual(0.70710678118654757, 0.70710678118654757237, "dlsin 20 digits");
 }
 
 void test_neg_rem()
@@ -213,7 +230,7 @@ void test_Full_cos()
 void dump_Quart_indexSin()
 {
     const IndexSin indexSin(IndexSin::SinSource::Quart);
-    test::assertTrue(indexSin.dump(10, "./Output/IndexSin_Quart_10.txt"));
+    test::assertTrue(indexSin.dump(18, "./Output/IndexSin_Quart_18.txt"));
     const IndexSin readback(IndexSin::SinSource::Quart, "./Output");
     const unsigned order = 6;
     for (size_t n = 0; n <= (1 << order); ++n) {
@@ -364,7 +381,23 @@ void test_Prec_cos()
 void dump_prec_indexSin()
 {
     const IndexSin indexSin(IndexSin::SinSource::Prec);
-    indexSin.dump(IndexSin::MAX_ORDER, "./Output/IndexSin_Prec.txt");
+    indexSin.dump(IndexSin::MAX_ORDER, "./Output/IndexSin_Prec_18.txt");
+
+    std::ofstream ofs("./Output/IndexSin_Prec_Error.txt");
+    if (!ofs.is_open())
+        test::fail("Cannot write to ./Output/IndexSin_Prec_Error.txt");
+    ofs << std::scientific << std::setprecision(20);
+    ofs << "index\tsin\tcos\terror\tlerror\tdsin\tdcos\n";
+    const size_t size = (1 << IndexSin::MAX_ORDER);
+    for (size_t i = 0; i < (size >> 1); ++i) {
+        const long double lsin = std::sin(IndexSin::PI * i / size);
+        const long double lcos = std::cos(IndexSin::PI * i / size);
+        const double sin = std::sin(std::numbers::pi * i / size);
+        const double cos = std::cos(std::numbers::pi * i / size);
+        ofs << i << '\t' << sin << '\t' << cos << '\t'
+            << sin * sin + cos * cos - 1 << '\t' << lsin * lsin + lcos * lcos - 1 << '\t'
+            << lsin - sin << '\t' << lcos - cos << "\n";
+    }
 }
 
 

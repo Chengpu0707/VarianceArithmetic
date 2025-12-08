@@ -6,6 +6,7 @@ import org.junit.Test;
 
 
 public class TestIndexSin {
+    private IndexSin indexSin = new IndexSin(SinSource.Quart);
 
     @Test
     public void test_neg_rem() {
@@ -43,47 +44,44 @@ public class TestIndexSin {
 
     @Test
     public void test_get_index() {
-        IndexSin indexSin = new IndexSin(3);
-        assertEquals(3, indexSin.order());
+        assertEquals( 0, indexSin.get_index(0, 3));
+        assertEquals( 1, indexSin.get_index(1, 3));
+        assertEquals( 2, indexSin.get_index(2, 3));
+        assertEquals( 3, indexSin.get_index(3, 3));
+        assertEquals( 4, indexSin.get_index(4, 3));
+        assertEquals( 3, indexSin.get_index(5, 3));
+        assertEquals( 2, indexSin.get_index(6, 3));
+        assertEquals( 1, indexSin.get_index(7, 3));
+        assertEquals( 0, indexSin.get_index(8, 3));
+        assertEquals(-1, indexSin.get_index(9, 3));
+        assertEquals(-2, indexSin.get_index(10, 3));
+        assertEquals(-3, indexSin.get_index(11, 3));
+        assertEquals(-4, indexSin.get_index(12, 3));
+        assertEquals(-3, indexSin.get_index(13, 3));
+        assertEquals(-2, indexSin.get_index(14, 3));
+        assertEquals(-1, indexSin.get_index(15, 3));
+        assertEquals( 0, indexSin.get_index(16, 3));
+        assertEquals( 1, indexSin.get_index(17, 3));
+        assertEquals( 2, indexSin.get_index(18, 3));
 
-        assertEquals( 0, indexSin.get_index(0));
-        assertEquals( 1, indexSin.get_index(1));
-        assertEquals( 2, indexSin.get_index(2));
-        assertEquals( 3, indexSin.get_index(3));
-        assertEquals( 4, indexSin.get_index(4));
-        assertEquals( 3, indexSin.get_index(5));
-        assertEquals( 2, indexSin.get_index(6));
-        assertEquals( 1, indexSin.get_index(7));
-        assertEquals( 0, indexSin.get_index(8));
-        assertEquals(-1, indexSin.get_index(9));
-        assertEquals(-2, indexSin.get_index(10));
-        assertEquals(-3, indexSin.get_index(11));
-        assertEquals(-4, indexSin.get_index(12));
-        assertEquals(-3, indexSin.get_index(13));
-        assertEquals(-2, indexSin.get_index(14));
-        assertEquals(-1, indexSin.get_index(15));
-        assertEquals( 0, indexSin.get_index(16));
-        assertEquals( 1, indexSin.get_index(17));
-        assertEquals( 2, indexSin.get_index(18));
-
-        assertEquals(-1, indexSin.get_index(-1));
-        assertEquals(-2, indexSin.get_index(-2));
-        assertEquals(-3, indexSin.get_index(-3));
-        assertEquals(-4, indexSin.get_index(-4));
-        assertEquals(-3, indexSin.get_index(-5));
-        assertEquals(-2, indexSin.get_index(-6));
-        assertEquals(-1, indexSin.get_index(-7));
-        assertEquals( 0, indexSin.get_index(-8));
-        assertEquals( 1, indexSin.get_index(-9));
-        assertEquals( 2, indexSin.get_index(-10));
-        assertEquals( 3, indexSin.get_index(-11));
-        assertEquals( 4, indexSin.get_index(-12));
-        assertEquals( 3, indexSin.get_index(-13));
-        assertEquals( 2, indexSin.get_index(-14));
-        assertEquals( 1, indexSin.get_index(-15));
-        assertEquals( 0, indexSin.get_index(-16));
-        assertEquals(-1, indexSin.get_index(-17));
-        assertEquals(-2, indexSin.get_index(-18));
+        assertEquals(-1, indexSin.get_index(-1, 3));
+        assertEquals(-2, indexSin.get_index(-2, 3));
+        assertEquals(-3, indexSin.get_index(-3, 3));
+        assertEquals(-4, indexSin.get_index(-4, 3));
+        assertEquals(-3, indexSin.get_index(-5, 3));
+        assertEquals(-2, indexSin.get_index(-6, 3));
+        assertEquals(-1, indexSin.get_index(-7, 3));
+        assertEquals( 0, indexSin.get_index(-8, 3));
+        assertEquals( 1, indexSin.get_index(-9, 3));
+        assertEquals( 2, indexSin.get_index(-10, 3));
+        assertEquals( 3, indexSin.get_index(-11, 3));
+        assertEquals( 4, indexSin.get_index(-12, 3));
+        assertEquals( 3, indexSin.get_index(-13, 3));
+        assertEquals( 2, indexSin.get_index(-14, 3));
+        assertEquals( 1, indexSin.get_index(-15, 3));
+        assertEquals( 0, indexSin.get_index(-16, 3));
+        assertEquals(-1, indexSin.get_index(-17, 3));
+        assertEquals(-2, indexSin.get_index(-18, 3));
     }
  
 
@@ -91,88 +89,106 @@ public class TestIndexSin {
     static final double q2 = Math.sin(Math.PI/4);
     static final double q3 = Math.sin(Math.PI/8*3);
 
-    static final FFT fft = new FFT(FFT.SinSource.IndexSin);
+    private void testSine(IndexSin index, double delta) {
+        assertEquals(0, index.sin(0, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+        assertEquals(q1, index.sin(1, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(q2, index.sin(2, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q3, index.sin(3, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+
+        assertEquals(1, index.sin(4, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+        assertEquals(q3, index.sin(5, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(q2, index.sin(6, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q1, index.sin(7, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+
+        assertEquals(0, index.sin(8, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+        assertEquals(-q1, index.sin(9, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(-q2, index.sin(10, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(-q3, index.sin(11, 3).value(),(delta > 0)? delta :  Math.ulp(q3));
+        assertEquals(-1, index.sin(12, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+
+        assertEquals(-q3, index.sin(13, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(-q2, index.sin(14, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(-q1, index.sin(15, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(0, index.sin(16, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+
+        assertEquals(q1, index.sin(17, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(q2, index.sin(18, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q3, index.sin(19, 3).value(), (delta > 0)? delta : Math.ulp(q3));       
+        assertEquals(1, index.sin(20, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+
+        assertEquals(-q3, index.sin(-5, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+
+        assertEquals(-1,  index.sin(-4, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+        assertEquals(-q3, index.sin(-3, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(-q2, index.sin(-2, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(-q1, index.sin(-1, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+    }
+
+    private void testSine(IndexSin index) {
+        testSine(index, 0);
+    }
+
+    private void testCosine(IndexSin index, double delta) {
+        assertEquals(-q1, index.cos(-5, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+
+        assertEquals(0, index.cos(-4, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+        assertEquals(q1, index.cos(-3, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(q2, index.cos(-2, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q3, index.cos(-1, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+
+        assertEquals(1, index.cos(0, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+        assertEquals(q3, index.cos(1, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(q2, index.cos(2, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q1, index.cos(3, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+
+        assertEquals(0, index.cos(4, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+        assertEquals(-q1, index.cos(5, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(-q2, index.cos(6, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(-q3, index.cos(7, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+
+        assertEquals(-1, index.cos(8, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+        assertEquals(-q3, index.cos(9, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(-q2, index.cos(10, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(-q1, index.cos(11, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+
+        assertEquals(0, index.cos(12, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+        assertEquals(q1, index.cos(13, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+        assertEquals(q2, index.cos(14, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q3, index.cos(15, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+
+        assertEquals(1, index.cos(16, 3).value(), (delta > 0)? delta : Math.ulp(1.0));
+        assertEquals(q3, index.cos(17, 3).value(), (delta > 0)? delta : Math.ulp(q3));
+        assertEquals(q2, index.cos(18, 3).value(), (delta > 0)? delta : Math.ulp(q2));
+        assertEquals(q1, index.cos(19, 3).value(), (delta > 0)? delta : Math.ulp(q1));
+
+        assertEquals(0, index.cos(20, 3).value(), (delta > 0)? delta : Double.MIN_VALUE);
+    }
+
+    private void testCosine(IndexSin index) {
+        testCosine(index, 0);
+    }
+
 
     @Test
-    public void testSine() {
-        assertEquals(-q3, fft.sin(-5, 4), Math.ulp(q3));
-
-        assertEquals(-1,  fft.sin(-4, 4), Math.ulp(1.0));
-        assertEquals(-q3, fft.sin(-3, 4), Math.ulp(q3));
-        assertEquals(-q2, fft.sin(-2, 4), Math.ulp(q2));
-        assertEquals(-q1, fft.sin(-1, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.sin(0, 4), Double.MIN_VALUE);
-        assertEquals(q1, fft.sin(1, 4), Math.ulp(q1));
-        assertEquals(q2, fft.sin(2, 4), Math.ulp(q2));
-        assertEquals(q3, fft.sin(3, 4), Math.ulp(q3));
-
-        assertEquals(1, fft.sin(4, 4), Math.ulp(1.0));
-        assertEquals(q3, fft.sin(5, 4), Math.ulp(q3));
-        assertEquals(q2, fft.sin(6, 4), Math.ulp(q2));
-        assertEquals(q1, fft.sin(7, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.sin(8, 4), Double.MIN_VALUE);
-        assertEquals(-q1, fft.sin(9, 4), Math.ulp(q1));
-        assertEquals(-q2, fft.sin(10, 4), Math.ulp(q2));
-        assertEquals(-q3, fft.sin(11, 4), Math.ulp(q3));
-        assertEquals(-1, fft.sin(12, 4), Math.ulp(1.0));
-
-        assertEquals(-q3, fft.sin(13, 4), Math.ulp(q3));
-        assertEquals(-q2, fft.sin(14, 4), Math.ulp(q2));
-        assertEquals(-q1, fft.sin(15, 4), Math.ulp(q1));
-        assertEquals(0, fft.sin(16, 4), Double.MIN_VALUE);
-
-        assertEquals(q1, fft.sin(17, 4), Math.ulp(q1));
-        assertEquals(q2, fft.sin(18, 4), Math.ulp(q2));
-        assertEquals(q3, fft.sin(19, 4), Math.ulp(q3));
-        
-        assertEquals(1, fft.sin(20, 4), Math.ulp(1.0));
+    public void test_Quart() {
+        final IndexSin index = new IndexSin(SinSource.Quart);
+        testSine(index);
+        testCosine(index);
+        indexSin.dump("./Java/Output/IndexSin_Quart_18.txt", 18);
     }
 
     @Test
-    public void testLargeIndexSin() {
-        assertEquals(fft.sin(16, IndexSin.MAX_ORDER), fft.sin(268451838, 15), Math.ulp(1.0));
-        assertEquals(0, fft.sin(-2147483648L, 17), Math.ulp(1.0));
-        assertEquals(fft.sin(49152L, 18), fft.sin(2147532800L, 18), Math.ulp(1.0));
+    public void test_Prec() {
+        final IndexSin index = new IndexSin(SinSource.Prec);
+        testSine(index);
+        testCosine(index);
     }
 
     @Test
-    public void testCosine() {
-        assertEquals(-q1, fft.cos(-5, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.cos(-4, 4), Double.MIN_VALUE);
-        assertEquals(q1, fft.cos(-3, 4), Math.ulp(q1));
-        assertEquals(q2, fft.cos(-2, 4), Math.ulp(q2));
-        assertEquals(q3, fft.cos(-1, 4), Math.ulp(q3));
-
-        assertEquals(1, fft.cos(0, 4), Math.ulp(1.0));
-        assertEquals(q3, fft.cos(1, 4), Math.ulp(q3));
-        assertEquals(q2, fft.cos(2, 4), Math.ulp(q2));
-        assertEquals(q1, fft.cos(3, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.cos(4, 4), Double.MIN_VALUE);
-        assertEquals(-q1, fft.cos(5, 4), Math.ulp(q1));
-        assertEquals(-q2, fft.cos(6, 4), Math.ulp(q2));
-        assertEquals(-q3, fft.cos(7, 4), Math.ulp(q3));
-
-        assertEquals(-1, fft.cos(8, 4), Math.ulp(1.0));
-        assertEquals(-q3, fft.cos(9, 4), Math.ulp(q3));
-        assertEquals(-q2, fft.cos(10, 4), Math.ulp(q2));
-        assertEquals(-q1, fft.cos(11, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.cos(12, 4), Double.MIN_VALUE);
-        assertEquals(q1, fft.cos(13, 4), Math.ulp(q1));
-        assertEquals(q2, fft.cos(14, 4), Math.ulp(q2));
-        assertEquals(q3, fft.cos(15, 4), Math.ulp(q3));
-
-        assertEquals(1, fft.cos(16, 4), Math.ulp(1.0));
-        assertEquals(q3, fft.cos(17, 4), Math.ulp(q3));
-        assertEquals(q2, fft.cos(18, 4), Math.ulp(q2));
-        assertEquals(q1, fft.cos(19, 4), Math.ulp(q1));
-
-        assertEquals(0, fft.cos(20, 4), Double.MIN_VALUE);
+    public void test_Lib() {
+        final IndexSin index = new IndexSin(SinSource.Lib);
+        testSine(index, Math.ulp(1));
+        testCosine(index, Math.ulp(1));
     }
 
-    
 }

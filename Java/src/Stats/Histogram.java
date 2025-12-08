@@ -2,23 +2,24 @@ package Stats;
 
 /*
  * To construct a distogram:
- * 	*) symetric distributed between -d_maxRange and +d_maxRange
+ * 	*) symetric distributed between -_maxRange and +_maxRange
  *  *) with divids for each 1
  */
 public class Histogram {
 
-	public final double d_maxRange;
-	public final int d_divids;
-	protected final int d_center;
-	protected final int[] d_sHistogram;
-	protected final Stat d_stat = new Stat();
-	protected int d_actRange = 0;
+	public final double _maxRange;
+	public final int _divids;
+	protected final int _center;
+	protected final int[] _sHistogram;
+	protected final Stat _stat = new Stat();
+	protected int _lower = 0;
+    protected int _upper = 0;
 	
 	public Histogram( double maxRange, int divids ) {
-		d_maxRange = maxRange;
-		d_divids = Math.abs(divids);
-		d_center = (int) (d_divids * maxRange);
-		d_sHistogram = new int[1 + d_center * 2];
+		_maxRange = maxRange;
+		_divids = Math.abs(divids);
+		_center = (int) (_divids * maxRange);
+		_sHistogram = new int[1 + _center * 2];
 	}
 	public Histogram( int range ) {
 		this( range, 10 );
@@ -28,58 +29,63 @@ public class Histogram {
 	}
 
 	public int divids() {
-		return d_divids;
+		return _divids;
 	}
 	public double maxRange() {
-		return d_maxRange;
+		return _maxRange;
 	}
 	
 	
-	public boolean accum( double value ) {
+	public boolean accum( double value, int index ) {
 		try {
-			final int idx = (int) Math.rint( value * d_divids ) + d_center;
-			if ((idx < 0) || (idx >= d_sHistogram.length)) {
+			_stat.accum(value, index);
+			final int idx = (int) Math.rint( value * _divids ) + _center;
+			if (idx < 0) {
+                ++_lower;
 				return false;
-			}
-			d_stat.accum(value);
-			++d_sHistogram[idx];
-			final int actRange = Math.abs(idx - d_center);
-			if (d_actRange < actRange) {
-				d_actRange = actRange;
-			}
+			} else if (idx >= _sHistogram.length) {
+                ++_upper;
+                return false;
+            }
+			++_sHistogram[idx];
 			return true;
 		} catch (Exception ex) {
 			return false;
 		}
 	}
 	
-	public int actRange() {
-		return d_actRange;
+	public int lower() {
+		return _lower;
 	}
+	public int upper() {
+		return _upper;
+	}
+
+
 	public double[] histo( int range ) {
-		if ((d_stat.count() <= 0) || (d_stat.count() > Double.MAX_VALUE)) {
+		if ((_stat.count() <= 0) || (_stat.count() > Double.MAX_VALUE)) {
 			return null;
 		}
 		if (range <= 0) {
 			return new double[] {1};
 		}
-		final double s = 1.0/ d_stat.count();
+		final double s = 1.0/ _stat.count();
 		double[] sRes = new double[1 + 2*range];
 		for (int i = 0; i < sRes.length; ++i) {
-			final int idx = d_center - range + i;
-			if ((idx < 0) || (idx >= d_sHistogram.length)) {
+			final int idx = _center - range + i;
+			if ((idx < 0) || (idx >= _sHistogram.length)) {
 				sRes[i] = 0;
 			} else {
-				sRes[i] = d_sHistogram[idx] * s;
+				sRes[i] = _sHistogram[idx] * s;
 			}
 		}
 		return sRes;
 	}
 	public double[] histo() {
-		return histo( (int) (d_maxRange * d_divids) );
+		return histo( (int) (_maxRange * _divids) );
 	}
 	
 	public Stat stat() {
-		return new Stat( d_stat );
+		return new Stat( _stat );
 	}
 }

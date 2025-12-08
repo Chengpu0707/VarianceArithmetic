@@ -83,7 +83,7 @@ public class TestTaylor {
                             res = Math.sin(x*Math.PI + d*dev);
                         else
                             throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
-                        stat.accum(res);
+                        stat.accum(res, i);
                     }
 
                     double leak = 0;
@@ -104,8 +104,8 @@ public class TestTaylor {
                             res = Math.sin(x*Math.PI + d*dev);
                         else
                             throw new IllegalArgumentException(String.format("Unkonwn test %s", test));
-                        stat.accum((res - expect)/var.uncertainty());
-                        if (!histo.accum((res - vavg)/vdev)) {
+                        stat.accum((res - expect)/var.uncertainty(), i);
+                        if (!histo.accum((res - vavg)/vdev, i)) {
                             leak += 1;
                         }
                     }

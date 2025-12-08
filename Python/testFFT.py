@@ -2,8 +2,9 @@ import math
 import os
 import unittest
 
-from fft import FFT, FFT_Order, FFT_Step, SinSource, SignalType, NoiseType, TestType
+from fft import FFT, FFT_Signal, FFT_Order, FFT_Step, SinSource, SignalType, NoiseType, TestType
 from indexSin import IndexSin
+from varDbl import VarDbl
 
 class TestFFT (unittest.TestCase):
 
@@ -25,7 +26,7 @@ class TestFFT (unittest.TestCase):
 
 
 class Test_FFT_Prec (unittest.TestCase):
-    fft = FFT(SinSource.Quart)
+    fft = FFT(SinSource.Prec)
 
     def testOrder2Sin(self):       
         sData = [0,0, 1,0, 0,0, -1,0]
@@ -156,6 +157,7 @@ class Test_FFT_Quart (unittest.TestCase):
                 raise ex  
 
 
+@unittest.skip('No longer needed')
 class Test_FFT_Full (unittest.TestCase):
     fft = FFT(SinSource.Full)
 
@@ -210,57 +212,106 @@ class Test_FFT_Lib (unittest.TestCase):
 
 class Test_FFT_Step (unittest.TestCase):
 
-    def validate_Step(self, order: int, sinSource:SinSource, 
-                      errPrec=5e-1, uncPrec=1e-2, precDiff=1):
+    def test_clean(self):
+        for order in range(2, 6):
+            for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
+                FFT_Step.dump(order, sinSource)
+
+    def test_order3_sin1_Prec(self):
         '''
-        Generate dump file, and compare it with official order calculation
-        Sin and Cos have significant difference for lower order
+        SinSource.Prec does not mean more precision
         '''
-        if os.getcwd().endswith('VarianceArithemtic'):
-            dumpOrderPath=f'./Python/Output/FFT_Order_{order}_{sinSource}.txt'
-        elif os.getcwd().endswith('Python'):
-            dumpOrderPath=f'./Output/FFT_Order_{order}_{sinSource}.txt'
-        else:
-            raise ValueError(f'Invalid cwd {os.getcwd()}')
-        FFT_Step.dump(order, sinSource, dumpOrderPath=dumpOrderPath)
-        if sinSource == SinSource.Lib:
-            return
-        FFT_Step.recalc(self, order, sinSource, errPrec=errPrec, uncPrec=uncPrec, precDiff=precDiff)
+        # i/o are accurate enough
+        var = VarDbl('0.70710678118654757237', '4.83012067842292225350e-17')
+        self.assertEqual(var.value(), 0.70710678118654757237)
+        self.assertEqual(var.uncertainty(), 4.83012067842292225350e-17)
 
-    def test_2(self):
-        self.validate_Step(2, SinSource.Quart, errPrec=5)
-        self.validate_Step(2, SinSource.Full, errPrec=5)
-        self.validate_Step(2, SinSource.Prec, errPrec=5)
-        self.validate_Step(2, SinSource.Lib, errPrec=5)
+        fftSignal = FFT_Signal(SinSource.Prec, SignalType.Sin, 3, 1)
+        fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].value(), 0.0)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.18313310582018730308e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].value(), -4.44089209850062616169e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.18313310582018730308e-16)
 
-    def test_3(self):
-        self.validate_Step(3, SinSource.Quart, errPrec=1)
-        self.validate_Step(3, SinSource.Full, errPrec=1)
-        self.validate_Step(3, SinSource.Prec, errPrec=1)
-        self.validate_Step(3, SinSource.Lib, errPrec=1)
+        sin = fftOrder.idxSin.sin(1, 2)
+        self.assertEqual(sin.value(), 7.07106781186547572737e-01)
+        self.assertEqual(sin.uncertainty(), 4.83012067842292225350e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 6.83082217132443123058e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 6.83082217132443123058e-17)
 
-    def test_4(self):
-        self.validate_Step(4, SinSource.Prec)
-        self.validate_Step(4, SinSource.Quart,  errPrec=1)
-        self.validate_Step(4, SinSource.Full)
-        self.validate_Step(4, SinSource.Prec)
-        self.validate_Step(4, SinSource.Lib)
+        # floating point multiplication difference
+        rd0 = fftOrder.ssSpecStep[3][10] * sin
+        self.assertEqual(rd0.value(), 1.0000000000000002)
+        self.assertEqual(rd0.uncertainty(), 8.366014421717556e-17)
 
-    def test_5(self):
-        self.validate_Step(5, SinSource.Quart)
-        self.validate_Step(5, SinSource.Full)
-        self.validate_Step(5, SinSource.Prec)
-        self.validate_Step(5, SinSource.Lib)
-
-    def test_6(self):
+    def test_order3_sin1_Quart(self):
         '''
-        self.validate_Step(6, SinSource.Quart)
-        self.validate_Step(6, SinSource.Full)
-        self.validate_Step(6, SinSource.Prec)
+        similar to SinSource.Prec but with slightly higher uncertainty
         '''
-        self.validate_Step(6, SinSource.Lib)
+        fftSignal = FFT_Signal(SinSource.Quart, SignalType.Sin, 3, 1)
+        fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].value(), 0.0)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.57009245868377541324e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].value(), -4.44089209850062616169e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.57009245868377541324e-16)
 
-    
+        sin = fftOrder.idxSin.sin(1, 2)
+        self.assertEqual(sin.value(), 7.07106781186547572737e-01)
+        self.assertEqual(sin.uncertainty(), 6.40987562127854728723e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 9.06493303673679024482e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 9.06493303673679024482e-17)
+
+        # floating point multiplication difference
+        rd0 = fftOrder.ssSpecStep[3][10] * sin
+        self.assertEqual(rd0.value(), 1.0000000000000002)
+        self.assertEqual(rd0.uncertainty(), 1.1102230246251568e-16)
+ 
+        fftSignal = FFT_Signal(SinSource.Quart, SignalType.Sin, 3, 1)
+        fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].value(), -4.44089209850062616169e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.57009245868377541324e-16)
+
+        sin = fftOrder.idxSin.sin(1, 2)
+        self.assertEqual(sin.value(), 7.07106781186547572737e-01)
+        self.assertEqual(sin.uncertainty(), 6.40987562127854728723e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 9.06493303673679024482e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309514547e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 9.06493303673679024482e-17)
+
+        # floating point multiplication difference
+        rd0 = fftOrder.ssSpecStep[3][10] * sin
+        self.assertEqual(rd0.value(), 1.0000000000000002)
+        self.assertEqual(rd0.uncertainty(), 1.1102230246251568e-16)
+ 
+    def test_order3_sin1_Lib(self):
+        '''
+        SinSource.Lib does not mean less precision
+        '''
+        fftSignal = FFT_Signal(SinSource.Lib, SignalType.Sin, 3, 1)
+        fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].value(), 2.22044604925031308085e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.57009245868377516672e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].value(), 0.0)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.57009245868377516672e-16)
+
+        sin = fftOrder.idxSin.sin(1, 2)
+        self.assertEqual(sin.value(), 7.07106781186547572737e-01)
+        self.assertEqual(sin.uncertainty(), 6.40987562127854728723e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309492343e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 9.06493303673679024482e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309536752e+00)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 9.06493303673679024482e-17)
+
+        # floating point multiplication difference
+        rd0 = fftOrder.ssSpecStep[3][10] * sin
+        self.assertEqual(rd0.value(), 1.0)
+        self.assertEqual(rd0.uncertainty(), 1.1102230246251565e-16)
+ 
 
 
 
@@ -281,7 +332,7 @@ class Test_FFT_Order (unittest.TestCase):
         self.assertTupleEqual(tuple(sssssAggr.keys()), sOrder)
         for order in sOrder:
             ssssAggr = sssssAggr[order]
-            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.Quart, SinSource.Full, SinSource.Lib, SinSource.Fixed))
+            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.Quart, SinSource.Lib))
             for src in ssssAggr.keys():
                 sssAggr = ssssAggr[src]
                 self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian,))
@@ -307,6 +358,24 @@ class Test_FFT_Order (unittest.TestCase):
     def test_8(self):
         self.assertErrDev((8,), forwardPrec=5e-2, reversePrec=5e-2, roundtripPrec=5e-4,
                           sNoise = [0, 1e-15, 1e-12])
+        
+    @unittest.skip("Only for rerun")
+    def test_sort(self):
+        '''
+        Generate filtered FFT order dump excluding specified SinSource
+        Only for rerun when new SinSource is added
+        '''
+        FFT_Order.sort(dumpPath='./Python/Output/FFT_2_19.txt')  
+
+    @unittest.skip("Only for rerun")
+    def test_sort_filterOut(self):
+        '''
+        Generate filtered FFT order dump excluding specified SinSource
+        Only for rerun when new SinSource is added
+        '''
+        FFT_Order.sort(dumpPath='./Python/Output/FFT_2_19.txt', 
+                       filterFunc=lambda order, sinSource, noiseType, noise:  
+                            order == 2 and sinSource == SinSource.Lib)
 
 
 

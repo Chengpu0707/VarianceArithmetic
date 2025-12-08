@@ -13,7 +13,7 @@ import java.io.FileReader;
 public class TestMomentum {
  
     @Test
-    public void TestNormal() {
+    public void OutputNormal() {
         NormalMomentum norm = new NormalMomentum(5.0);
         assertEquals(norm.bounding, 5.0, 1e-10);
         assertEquals(norm.maxOrder, 448);
@@ -36,5 +36,18 @@ public class TestMomentum {
         } catch (Throwable e) {
             fail(e.getMessage());
         } 
+    }
+
+    public void NormalValues() {
+        NormalMomentum norm = new NormalMomentum(5.0);
+        assertEquals(norm.bounding, 5.0, 1e-10);
+        assertEquals(norm.maxOrder, 448);
+        assertEquals(norm.leakage, 2.8665E-7, 1e-10);
+        assertEquals(norm.get(0),    1*(1 - 5.733031e-07), 5e-14);
+        assertEquals(norm.get(2),    1*(1 - 1.544050e-05), 2e-12);
+        assertEquals(norm.get(4),    3*(1 - 1.393338e-04), 3e-11);
+        assertEquals(norm.get(6),   15*(1 - 7.588003e-04), 7e-10);
+        assertEquals(norm.get(8),  105*(1 - 2.9711805e-03), 2e-9);
+        assertEquals(norm.get(10), 945*(1 - 9.1166811e-03), 3e-1);
     }
 }

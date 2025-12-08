@@ -81,6 +81,8 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
 
     std::vector<VarDbl> sRes(2 << order);
     ssStep.clear();
+    if (traceSteps)
+        ssStep.push_back(sData);
     
     const std::vector<size_t> sIndex = bitReversedIndices(order);
     for (int i = 0; i < sIndex.size(); i++) {

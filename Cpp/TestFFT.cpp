@@ -145,6 +145,12 @@ FFT_Signal::FFT_Signal(SignalType signalType, unsigned order, int freq, IndexSin
 }
 
 
+FFT_Signal::FFT_Signal(const FFT_Signal& other) :
+    FFT(other.sinSource),
+    sinSource(other.sinSource), order(other.order), size(other.size), freq(other.freq), signalType(other.signalType),
+    sWave(other.sWave), sFreq(other.sFreq)
+{
+}
 
 
 std::map<unsigned, std::map<FFT_Order::NoiseType, std::map<double, std::map<IndexSin::SinSource, FFT_Order::Measure>>>> FFT_Order::ssssAggr;
@@ -214,7 +220,7 @@ void FFT_Order::accum(TestType testType, size_t index, const VarDbl& res, const 
 
 FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise, 
                      bool traceSteps, unsigned minCount) :
-        FFT_Signal(signal.signalType, signal.order, signal.freq, signal.sinSource), 
+        FFT_Signal(signal), 
         noiseType(noiseType), noise(std::abs(noise))  
 {
 	switch (noiseType) {
@@ -248,10 +254,10 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
 
         if (traceSteps) {
             ssSpecStep.push_back(sFreq);
-            ssRoundStep.push_back(sFrwd);
-            ssRevStep.push_back(sWave);
             ssSpecStep.push_back(std::vector<VarDbl>());
+            ssRoundStep.push_back(sFrwd);
             ssRoundStep.push_back(std::vector<VarDbl>());
+            ssRevStep.push_back(sWave);
             ssRevStep.push_back(std::vector<VarDbl>());
         }
         const bool hasAggr = (signalType == Sin) || (signalType == Cos);
@@ -399,7 +405,7 @@ bool FFT_Order::dump(
         std::cout << "Fail to open " << dumpPath;
         return false;
     }
-    ofs << std::setprecision(20);
+    ofs << std::scientific << std::setprecision(20);
     if (sssssAggr.empty())
         ofs << HEADER << "\n";   
         
@@ -468,13 +474,9 @@ void FFT_Step::dump(std::ofstream& ofs, const std::vector<VarDbl>& sData, const 
 
 
 void FFT_Step::dump(std::ofstream& ofs, TestType testType,
-        const std::vector<VarDbl>& sInput, const std::vector<std::vector<VarDbl>>& ssStep) const
+        const std::vector<std::vector<VarDbl>>& ssStep) const
 {
     std::ostringstream oss;
-    oss << IndexSin::sinSourceName(sinSource) << '\t' << noiseTypeName(noiseType) << '\t' << noise
-        << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t'
-        << FFT_Order::testTypeName(testType) << '\t' << "Input";
-    dump(ofs, sInput, oss.str());
     for (size_t step = 0; step < ssStep.size(); ++step) {
         oss.str("");
         oss << IndexSin::sinSourceName(sinSource) << '\t' << noiseTypeName(noiseType) << '\t' << noise
@@ -488,9 +490,9 @@ void FFT_Step::dump(std::ofstream& ofs, TestType testType,
 
 void FFT_Step::dump(std::ofstream& ofs) const
 {
-    dump(ofs, TestType::Forward, sFrwd, ssSpecStep);
-    dump(ofs, TestType::Roundtrip, sSpec, ssRoundStep);
-    dump(ofs, TestType::Reverse, sBack, ssRevStep);
+    dump(ofs, TestType::Forward, ssSpecStep);
+    dump(ofs, TestType::Roundtrip, ssRoundStep);
+    dump(ofs, TestType::Reverse, ssRevStep);
 }
 
 
@@ -521,13 +523,6 @@ bool FFT_Step::dump(
     std::cout << "] with order result to " << dumpOrderPath << std::endl;
     const size_t size = 1 << order;
 
-    std::vector<VarDbl> sCosSin;
-    sCosSin.reserve(size);
-    const IndexSin sin(sinSource);
-    for (size_t i = 0; i < size; ++i) {
-        sCosSin.push_back(sin.cos(i, order));
-        sCosSin.push_back(sin.sin(i, order));
-    }
     std::ostringstream oss;
     if (dumpPath.empty())
         dumpPath = defaultDumpPath(sinSource, order);
@@ -536,12 +531,19 @@ bool FFT_Step::dump(
         std::cerr << "Failed to open file " << dumpPath << " to dump FFT with SinSource=" << IndexSin::sinSourceName(sinSource);
         return false;
     }
-    ofs << std::setprecision(20);
+    ofs << std::scientific << std::setprecision(20);
     ofs << "SinSource\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest\tStep\tImag\tValue";
     for (size_t i = 0; i < size; ++i) {
         ofs << '\t' << i;
     }
     ofs << '\n';
+    std::vector<VarDbl> sCosSin;
+    sCosSin.reserve(size);
+    const IndexSin sin(sinSource);
+    for (size_t i = 0; i < size; ++i) {
+        sCosSin.push_back(sin.cos(i, order));
+        sCosSin.push_back(sin.sin(i, order));
+    }
     oss.str("");
     oss << IndexSin::sinSourceName(sinSource) << "\t\t0\t\t" << order << "\t\tCosSin\t";
     dump(ofs, sCosSin, oss.str());
@@ -571,7 +573,14 @@ bool FFT_Step::dump(
     return FFT_Order::dump(dumpOrderPath, order, order + 1, {sinSource}, sNoiseType, sNoise, sFreq);
 }
 
+struct FFT_Test: public FFT_Order {
+    FFT_Test(const FFT_Signal& signal, NoiseType noiseType, double noise) :
+        FFT_Order(signal, noiseType, noise, true)
+    {}
 
+    IndexSin getIndexSin() const { return _sin; }
+    std::vector<std::vector<VarDbl>> getSpecStep() const {return ssSpecStep; }
+};
 
 
 int main(int argc, char* argv[])
@@ -587,19 +596,20 @@ int main(int argc, char* argv[])
     testBitReversion();
 
     if (argc == 1) {
-        std::cout << "Start calculate FFT order" << std::endl;
-        std::remove(FFT_Order::defaultDumpPath(2, 6).c_str());
-        test::assertTrue(FFT_Order::dump("", 2, 6));
-        std::cout << "Start reading FFT order" << std::endl;
-        test::assertTrue(FFT_Order::dump("", 2, 6));
-
         std::cout << "Start calculate FFT step" << std::endl;
         for (size_t order = 2; order < 6; ++order) {
             std::cout << "Start calculate FFT step order=" << order << std::endl;
-            for (auto src : IndexSin::sSinSource) {
+            for (auto src : {"Prec", "Quart", "Lib"}) {
                 FFT_Step::dump(IndexSin::toSinSource(src), order);
             }
         }
+
+        std::cout << "Start calculate FFT order" << std::endl;
+        const std::string dumpPath = FFT_Order::defaultDumpPath(2, 6);
+        std::remove(dumpPath.c_str());
+        test::assertTrue(FFT_Order::dump(dumpPath, 2, 6));
+        std::cout << "Start reading FFT order" << std::endl;
+        test::assertTrue(FFT_Order::dump("", 2, 6));
     } else if ((argc == 2) && (std::string(argv[1]) == "Test"))
         test::assertTrue(FFT_Order::dump());
     else if (argc <= 5) {

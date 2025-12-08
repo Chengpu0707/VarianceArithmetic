@@ -363,7 +363,7 @@ class FFT_Order (FFT_Signal):
 
     @staticmethod
     def dumpPath(sOrder:tuple[int]):
-        if os.getcwd().endswith('VarianceArithemtic'):
+        if os.getcwd().endswith('VarianceArithmetic'):
             return f'./Python/Output/FFT_{min(sOrder)}_{max(sOrder) + 1}.txt'
         elif os.getcwd().endswith('Python'):
             return f'./Output/FFT_{min(sOrder)}_{max(sOrder) + 1}.txt'
@@ -645,7 +645,7 @@ class FFT_Step (FFT_Order):
 
     @staticmethod
     def dumpPath(order, sinSource):
-        if os.getcwd().endswith('VarianceArithemtic'):
+        if os.getcwd().endswith('VarianceArithmetic'):
             return f'./Python/Output/FFT_Step_{order}_{sinSource}.txt'
         elif os.getcwd().endswith('Python'):
             return f'./Output/FFT_Step_{order}_{sinSource}.txt'

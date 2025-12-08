@@ -23,6 +23,7 @@ double ulp(T x)
     double round_error = 0;
     bool posi = true;
     while (val > max_significand) {
+        round_error *= 0.5;
         if ((val & 1) == 1) {
             if (posi) {
                 round_error += 1;
@@ -32,7 +33,6 @@ double ulp(T x)
                 posi = true;
             }
         }
-        round_error *= 0.5;
         val >>= 1;
     }
     return round_error;   

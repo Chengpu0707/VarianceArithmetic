@@ -14,6 +14,10 @@ q3 = math.cos(1/8*math.pi)
 
 class TestIndexSin (unittest.TestCase):
 
+    def test_float_precision(self):
+        self.assertEqual(float('0.70710678118654757274'), 0.7071067811865476)
+        self.assertEqual(float('7.07106781186547572737e-01'), 0.7071067811865476)
+
     def test_neg_rem(self):
         '''
         The reminder is always positive
@@ -411,14 +415,18 @@ class TestLimit (TestIndexSin):
         TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
 
 class TestLib (TestIndexSin):
+    indexSin = IndexSin(SinSource.Lib)
 
     def test_sin(self):
-        self.assert_sin_1(TestLimit.indexSin)
-        self.assert_sin_2(TestLimit.indexSin)
-        self.assert_sin_3(TestLimit.indexSin)
+        self.assert_sin_1(TestLib.indexSin)
+        self.assert_sin_2(TestLib.indexSin)
+        self.assert_sin_3(TestLib.indexSin)
 
     def test_cos(self):
-        TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
+        TestIndexSin.assert_cos_3(self, TestLib.indexSin)
+
+    def test_writeToFile_large(self):
+        self.writeToFile(TestLib.indexSin, 18)
 
 
 def dumpStat(dumpPath:str, testName:str, maxRange:float,
@@ -567,41 +575,6 @@ class TestIndexSinDiff (unittest.TestCase):
                      lambda i, order: TestIndexSinDiff.quart.sin(i, order) / TestIndexSinDiff.quart.cos(i, order),
                      lambda i, order: TestIndexSinDiff.full.sin(i, order) / TestIndexSinDiff.full.cos(i, order),
                      maxRange=1)
-
-
-class TestCodeDiff (unittest.TestCase):
-    '''
-    Compare the indexed sine for another code with Python
-    '''
-    def codeDiff(self, code:str, sinSource:SinSource, order:int, base='Python'):
-        IndexSin.validateOrder(order)
-        dumpPathBase = f'./{base}/Output/IndexSin_{sinSource}_{order}.txt'
-        dumpPathCode = f'./{code}/Output/IndexSin_{sinSource}_{order}.txt'
-        dumpPath = f'./{base}/Output/IndexSin_{sinSource}_{order}_{code}_{base}.txt'
-        with open(dumpPathBase) as fb, open(dumpPathCode) as fc, open(dumpPath, 'w') as fw:
-            self.assertEqual(next(fb), next(fc))
-            fw.write('Index\tX\tValue Error\tUncertainty\tNormalized Error [LSB]')
-            ln = 0
-            sDiff = {1: 0}
-            for lineBase, lineCode in zip(fb, fc):
-                ln += 1
-                sWordBase = tuple(map(float, lineBase.split('\t')))
-                sWordCode = tuple(map(float, lineCode.split('\t')))
-                self.assertTupleEqual(sWordBase[:2], sWordCode[:2])
-                err = VarDbl(sWordCode[2], sWordCode[3]) - VarDbl(sWordBase[2], sWordBase[3])
-                norm = err.value() /err.uncertainty()* math.sqrt(2) if err.uncertainty() > 0 else ""
-                fw.write(f'\n{int(sWordBase[0])}\t{sWordBase[1]}\t{err.value()}\t{err.uncertainty()}\t{norm}')
-                if norm:
-                    k = abs(int(round(norm)))
-                    if k in sDiff:
-                        sDiff[k] += 1
-                    else:
-                        sDiff[k] = 1
-            print(f'For {sinSource} out of {ln}, the diff is: {sDiff}')
-
-    def test_cpp_vs_python(self):
-        self.codeDiff('Cpp', SinSource.Quart, 10)
-        self.codeDiff('Cpp', SinSource.Full, 10)
 
 
 

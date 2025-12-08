@@ -64,11 +64,11 @@ void testInitInt() {
     long long ll = (1LL << 53); 
     assertEquals( VarDbl(ll), ll, 0 );
     ll = (1LL << 53) + 1;
-    assertEquals( VarDbl(ll), ll, 0.5 );
+    assertEquals( VarDbl(ll), ll, 1 );
     ll = (1LL << 54) + 1;
-    assertEquals( VarDbl(ll), ll, 0.25 );
+    assertEquals( VarDbl(ll), ll, 0.5 );
     ll = (1LL << 54) + 3;
-    assertEquals( VarDbl(ll), ll, 0.25 );
+    assertEquals( VarDbl(ll), ll, 0.5 );
 }
 
 void testInitFloat() {
@@ -320,6 +320,19 @@ void testCompareFloat()
     test::assertTrue(v3 >= v1);
 }
 
+void testLargeDiff()
+{
+    const VarDbl v1(64919121), v2(205117922), v3(159018721), v4(83739041);
+    const VarDbl v12 = v1 * v2, v34 = v3 * v4;
+    const VarDbl v = v12 - v34;
+    test::assertEqual(v12.value(), 13316075197586562.0);
+    test::assertEqual(v34.value(), 13316075197586560.0);
+    test::assertEqual(v.value(), 2);
+    test::assertEqual(v12.uncertainty(), 0);
+    test::assertEqual(v34.uncertainty(), 1);
+    test::assertEqual(v.uncertainty(), 1);
+}
+
 
 int main() 
 {
@@ -346,6 +359,9 @@ int main()
 
     testCompareVarDbl();
     testCompareFloat();
+
+    testLargeDiff();
+
     std::cout << "All VarDbl tests are successful";
     return 0;
 }

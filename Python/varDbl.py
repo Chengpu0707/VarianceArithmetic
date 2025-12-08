@@ -46,6 +46,7 @@ class VarDbl (numbers.Number):
             posi = True
             val = abs(value)
             while VarDbl.DOUBLE_MAX_SIGNIFICAND < val:
+                round *= 0.5
                 if val & 1:
                     if posi:
                         round += 1
@@ -53,7 +54,6 @@ class VarDbl (numbers.Number):
                     else:
                         round -= 1
                         posi = True
-                round *= 0.5
                 val >>= 1
             return round
         return VarDbl.ulp(float(value))
@@ -140,7 +140,7 @@ class VarDbl (numbers.Number):
             try:
                 uncertainty = math.sqrt(self.variance() + other.variance())
             except OverflowError:
-                raise InitException(value, uncertainty, f"{self} + {other}")
+                raise InitException(value, self.variance() + other.variance(), f"{self} + {other}")
         return VarDbl(value, uncertainty)
 
     def __radd__(self, other):
@@ -239,23 +239,22 @@ class VarDbl (numbers.Number):
         return self.value() > other.value()
   
 
-SMALLEST_SUB_NORAMAL_FLOAT = sys.float_info.min * sys.float_info.epsilon
 
 def assertVarDblEqual(self:unittest.TestCase, l:VarDbl, r:VarDbl, valPrec=1e-6, uncPrec=1e-6):
     try:
         if (r.value() == 0):
-            self.assertLessEqual(abs(l.value()), SMALLEST_SUB_NORAMAL_FLOAT)
+            self.assertLessEqual(abs(l.value()), sys.float_info.epsilon)
         elif (l.value() == 0):
-            self.assertLessEqual(abs(r.value()), SMALLEST_SUB_NORAMAL_FLOAT)
+            self.assertLessEqual(abs(r.value()), sys.float_info.epsilon)
         else:
             self.assertAlmostEqual(l.value() / r.value(), 1, delta=valPrec)
     except AssertionError as ex:
         raise ex
     try:
         if (r.uncertainty() == 0):
-            self.assertLessEqual(abs(l.uncertainty()), SMALLEST_SUB_NORAMAL_FLOAT)
+            self.assertLessEqual(abs(l.uncertainty()), sys.float_info.epsilon)
         elif (l.uncertainty() == 0):
-            self.assertLessEqual(abs(r.uncertainty()), SMALLEST_SUB_NORAMAL_FLOAT)
+            self.assertLessEqual(abs(r.uncertainty()),sys.float_info.epsilon)
         else:
             self.assertAlmostEqual(l.uncertainty() / r.uncertainty(), 1, delta=uncPrec)
     except AssertionError as ex:

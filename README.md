@@ -23,6 +23,6 @@ Right now, C++ and Java implementations contains less test cases such as for mat
 
 Some performance numbrs in minutes on my old laptop:
 Language  FFT/14 FFT/15 FFT/16 FFT/17  FFT/18 Adj/6 Adj/7 Adj/8
+Java        0.25   0.95   1.75    3.75
 C++        17     36     76     141    300
-Java
 Python     92    272    463    1083   1756    11    118	  1425

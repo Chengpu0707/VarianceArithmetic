@@ -119,7 +119,7 @@ class IndexSin:
         size = 1 << order
         if os.getcwd().endswith('\\Python'):
             dumpPath = f'../Cpp/Output/IndexSin_{sinSource}_{order}.txt'
-        elif os.getcwd().endswith('\\VarianceArithemtic'):
+        elif os.getcwd().endswith('\\VarianceArithmetic'):
             dumpPath = f'./Cpp/Output/IndexSin_{sinSource}_{order}.txt'
         else:
             raise RuntimeError(f'Invalid current working directory {os.getcwd()}')
