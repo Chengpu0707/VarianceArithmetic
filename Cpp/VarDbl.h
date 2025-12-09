@@ -125,6 +125,9 @@ public:
     template<typename T> requires std::floating_point<T> || std::integral<T> friend 
         bool operator>=(const T& first, const VarDbl& second);
 
+    static void assertEqual(const VarDbl& var, double value, double uncertainty, const std::string& msg = "",
+                     double valueDelta = 0, double uncertaintyDelta = 0);
+
 };
 
 
@@ -480,6 +483,23 @@ inline bool operator>=(const T& first, const VarDbl& second)
 {
     return VarDbl(first) >= second; 
 }
+
+
+inline void VarDbl::assertEqual(const VarDbl& var, double value, double uncertainty, 
+            const std::string& msg,
+            double deltaValue, double deltaUncertainty) {
+    std::ostringstream oss;
+    if (!msg.empty())
+        oss << msg << ": ";
+    oss << var.value() << "~" << var.uncertainty() << " vs " << value << "~" << uncertainty;
+    if (deltaValue == 0)
+        deltaValue = std::max(ulp(var.value()), ulp(value));
+    test::assertAlmostEqual(var.value(), value, deltaValue, oss.str());
+    if (deltaUncertainty == 0)
+        deltaUncertainty = std::max(ulp(var.uncertainty()), ulp(uncertainty));
+    test::assertAlmostEqual(var.uncertainty(), uncertainty, deltaUncertainty, oss.str());
+}
+
 
 
 } // namespace var_dbl

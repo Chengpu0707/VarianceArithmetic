@@ -36,6 +36,7 @@ struct AssertException : public std::runtime_error
 static void fail(std::string msg = "");
 static void assertTrue(bool expression, std::string msg = "");
 static void assertFalse(bool expression, std::string msg = "");
+
 template<typename T> requires std::floating_point<T>
 static void assertAlmostEqual(T x, T y, T delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
@@ -47,7 +48,18 @@ template<typename T, typename U> static void assertLess(const T& x, const U& y, 
 template<typename T, typename U> static void assertLessEqual(const T& x, const U& y, std::string msg = "");
 
 // generic container comparison
-template<typename T, typename U> static void assertEquals(const T& sX, const U& sY, std::string msg = "");
+template <typename T>
+concept StdContainer =
+    std::ranges::range<T> &&                      // Must be iterable
+    requires(T a) {
+        typename T::value_type;                   // Must have value_type
+        typename T::allocator_type;               // Must have allocator_type
+        typename T::size_type;                    // Must have size_type
+        { a.size() } -> std::convertible_to<typename T::size_type>; // Must have size()
+    };
+template<typename T, typename U> 
+requires StdContainer<T> && StdContainer<U>
+static void assertEquals(const T& sX, const U& sY, std::string msg = "");
 
 
 inline void fail(std::string msg) {
@@ -153,6 +165,7 @@ inline void assertLessEqual(const T& x, const U& y, std::string msg)
 
 
 template<typename T, typename U> 
+requires StdContainer<T> && StdContainer<U>
 inline void assertEquals(const T& sX, const U& sY, std::string msg)
 {
     std::ostringstream os;

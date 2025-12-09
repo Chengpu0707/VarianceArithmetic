@@ -158,3 +158,28 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+.metadata/*
+Cpp/*.exe
+Cpp/Output/*
+IPyNb/.ipynb_checkpoints/*
+Java/bin/*
+Java/Output/*
+Latex/*.aux
+Latex/*.blg
+Latex/*.dvi
+Latex/*.pdf.dox
+Latex/*.log
+Latex/*.out
+Latex/*.synctex.gz
+Latex/*.toc
+Python/__pycache__/*
+Python/Output/*
+Temp/*
+ToolBox/*
+VarDouble/*
+Latex/Trash.txt
+Latex/VarianceArithmetic.bbl
+Latex/VarianceArithmetic.docx
+Latex/VarianceArithmetic.pdf.docx
+Latex/VarianceArithmetic.pdf

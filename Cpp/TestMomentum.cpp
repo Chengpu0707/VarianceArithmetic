@@ -9,27 +9,18 @@ using namespace var_dbl;
 
 int main() 
 {
-    const Momentum& mmt = IDEAL_MOMENTUM;
-    test::assertAlmostEqual( mmt.bounding, 5);
-    test::assertAlmostEqual( mmt.leakage, 5.7330e-07, 1e-10);
+    const NormalMomentum mmt(5.0);
+    test::assertEqual( mmt.bounding, 5);
     test::assertEqual( mmt.maxOrder(), 448);
-
-    std::ifstream ifs("../Python/NormalMomentum_5.0.txt");
-    test::assertTrue(ifs.is_open(), "../Python/NormalMomentum_5.0.txt");
-    std::string line;
-    std::getline(ifs, line);
-    test::assertEqual(line, "n\tMomentum\tBounding:\t5.0", line);
-    size_t j;
-    double val;
-    for (size_t i = 0; i <= 24; i += 2) {
-        ifs >> j >> val;
-        test::assertEqual(i, j);
-        test::assertAlmostEqual(mmt[i]/val, 1, 1e-10);
-        test::assertAlmostEqual(mmt[i + 1], 0, 1e-10);
-    }
+    test::assertAlmostEqual( mmt.leakage, 5.7330e-07, 1e-10);
+    test::assertAlmostEqual( mmt[2] / 0.999984559501709, 1., 1e-10);
+    test::assertAlmostEqual( mmt[4] / 2.99958199862644, 1., 1e-10);
+    test::assertAlmostEqual( mmt[6] / 14.9886179961651, 1., 1e-10);
+    test::assertAlmostEqual( mmt[8] / 104.688026048979, 1., 1e-10);
+    test::assertAlmostEqual( mmt[10] / 936.384736336377, 1., 1e-10);
 
     std::ofstream ofs("../Cpp/Output/NormalMomentum_5.0.txt");
-    test::assertTrue(ofs.is_open(), "../Python/Output/NormalMomentum_5.0.txt");
+    test::assertTrue(ofs.is_open(), "../Cpp/Output/NormalMomentum_5.0.txt");
     ofs << "n\tMomentum\n";
     for (int n = 0; n < mmt.maxOrder(); n += 2)
         ofs << n << "\t" << mmt[n] << "\n";

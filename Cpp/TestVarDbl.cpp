@@ -1,4 +1,5 @@
 #include "VarDbl.h"
+#include "Taylor.h"
 #include "Test.h"
 #include "ulp.h"
 
@@ -6,19 +7,6 @@
 
 using namespace var_dbl;
 
-
-void assertEquals(VarDbl var, double value, double uncertainty,
-                  double deltaValue=0, double deltaUncertainty=0) 
-{
-    std::ostringstream oss;
-    oss << var;
-    if (deltaValue == 0)
-        deltaValue = std::max(ulp(var.value()), ulp(value));
-    test::assertAlmostEqual(var.value(), value, deltaValue, oss.str());
-    if (deltaUncertainty == 0)
-        deltaUncertainty = std::max(ulp(var.uncertainty()), ulp(uncertainty));
-    test::assertAlmostEqual(var.uncertainty(), uncertainty, deltaUncertainty, oss.str());
-}
 
 void assertValueError(std::function<void()> func, std::string what ) 
 {
@@ -53,42 +41,42 @@ void assertUncertaintyError(std::function<void()> func, std::string what )
 void testInitCopy() {
     const VarDbl vs(-1, 4);
     const VarDbl vc(vs);
-    assertEquals( vc, vs.value(), vs.uncertainty() );
+    VarDbl::assertEqual( vc, vs.value(), vs.uncertainty() );
 }
 
 void testInitInt() {
-    assertEquals( VarDbl(), 0, 0 );
-    assertEquals( VarDbl(-1), -1, 0 );
+    VarDbl::assertEqual( VarDbl(), 0, 0 );
+    VarDbl::assertEqual( VarDbl(-1), -1, 0 );
 
     // when long long looses resolution
     long long ll = (1LL << 53); 
-    assertEquals( VarDbl(ll), ll, 0 );
+    VarDbl::assertEqual( VarDbl(ll), ll, 0 );
     ll = (1LL << 53) + 1;
-    assertEquals( VarDbl(ll), ll, 1 );
+    VarDbl::assertEqual( VarDbl(ll), ll, 1 );
     ll = (1LL << 54) + 1;
-    assertEquals( VarDbl(ll), ll, 0.5 );
+    VarDbl::assertEqual( VarDbl(ll), ll, 0.5 );
     ll = (1LL << 54) + 3;
-    assertEquals( VarDbl(ll), ll, 0.5 );
+    VarDbl::assertEqual( VarDbl(ll), ll, 0.5 );
 }
 
 void testInitFloat() {
-    assertEquals( VarDbl(0.0f), 0, 0 );
-    assertEquals( VarDbl(1.0f), 1, 0 );
+    VarDbl::assertEqual( VarDbl(0.0f), 0, 0 );
+    VarDbl::assertEqual( VarDbl(1.0f), 1, 0 );
     assertValueError([](){ VarDbl(std::numeric_limits<float>::infinity()); }, "VarDbl(float inf)");
 }
 
 void testInitDouble() {
     // use ulp 
-    assertEquals( VarDbl(0.0), 0, 0 );
-    assertEquals( VarDbl(-1.0), -1, VarDbl::ulp(std::numeric_limits<float>::epsilon()) );
-    assertEquals( VarDbl(-2.0), -2, VarDbl::ulp(2 * std::numeric_limits<float>::epsilon()) );
+    VarDbl::assertEqual( VarDbl(0.0), 0, 0 );
+    VarDbl::assertEqual( VarDbl(-1.0), -1, VarDbl::ulp(std::numeric_limits<float>::epsilon()) );
+    VarDbl::assertEqual( VarDbl(-2.0), -2, VarDbl::ulp(2 * std::numeric_limits<float>::epsilon()) );
 }
 
 void testInitUncertainty() {
-    assertEquals( VarDbl(1, 0), 1, 0 );
-    assertEquals( VarDbl(-1, 1), -1, 1 );
-    assertEquals( VarDbl(1, -1), 1, 1 );
-    assertEquals( VarDbl(1, std::numeric_limits<double>::max()), 1, std::numeric_limits<double>::max() );
+    VarDbl::assertEqual( VarDbl(1, 0), 1, 0 );
+    VarDbl::assertEqual( VarDbl(-1, 1), -1, 1 );
+    VarDbl::assertEqual( VarDbl(1, -1), 1, 1 );
+    VarDbl::assertEqual( VarDbl(1, std::numeric_limits<double>::max()), 1, std::numeric_limits<double>::max() );
 }
 
 void testInitException() {
@@ -107,11 +95,11 @@ void testInitException() {
 }
 
 void testUncertaintyRange() {
-    assertEquals( VarDbl(0, std::numeric_limits<double>::max()), 0, std::numeric_limits<double>::max() );
+    VarDbl::assertEqual( VarDbl(0, std::numeric_limits<double>::max()), 0, std::numeric_limits<double>::max() );
    
     const double minU = sqrt(ulp(std::numeric_limits<double>::min()));
-    assertEquals( VarDbl(0, minU), 0, minU );
-    assertEquals( VarDbl(0, minU/2), 0, minU/2 );
+    VarDbl::assertEqual( VarDbl(0, minU), 0, minU );
+    VarDbl::assertEqual( VarDbl(0, minU/2), 0, minU/2 );
 }
 
 void testRepresentation() 
@@ -143,9 +131,9 @@ void testAddVarDbl()
 {
     VarDbl v1(sqrt(2), sqrt(2));
     VarDbl v2(-sqrt(2), sqrt(2));
-    assertEquals( v1 + v2, 0, 2 );
+    VarDbl::assertEqual( v1 + v2, 0, 2 );
     v1 += v2;
-    assertEquals( v1, 0, 2 );
+    VarDbl::assertEqual( v1, 0, 2 );
     
 }
 
@@ -153,58 +141,58 @@ void testSubVarDbl()
 {
     VarDbl v1(sqrt(2), sqrt(2));
     VarDbl v2(-sqrt(2), sqrt(2));
-    assertEquals( v1 - v2, 2*sqrt(2), 2 );
+    VarDbl::assertEqual( v1 - v2, 2*sqrt(2), 2 );
     v2 -= v1;
-    assertEquals( v2, -2*sqrt(2), 2 );
+    VarDbl::assertEqual( v2, -2*sqrt(2), 2 );
 }
 
 void testAddInt() 
 {
     VarDbl v1(1, sqrt(2));
-    assertEquals( v1 + 2, 3, sqrt(2) );
-    assertEquals( 2 + v1, 3, sqrt(2) );
+    VarDbl::assertEqual( v1 + 2, 3, sqrt(2) );
+    VarDbl::assertEqual( 2 + v1, 3, sqrt(2) );
     v1 += 2;
-    assertEquals( v1, 3, sqrt(2) );
+    VarDbl::assertEqual( v1, 3, sqrt(2) );
 }
 
 void testSubInt() 
 {
     VarDbl v1(1, sqrt(2));
-    assertEquals( v1 - 2, -1, sqrt(2) );
-    assertEquals( 2 - v1, 1, sqrt(2) );
+    VarDbl::assertEqual( v1 - 2, -1, sqrt(2) );
+    VarDbl::assertEqual( 2 - v1, 1, sqrt(2) );
     v1 -= 2;
-    assertEquals( v1, -1, sqrt(2) );
+    VarDbl::assertEqual( v1, -1, sqrt(2) );
 }
 
 void testAddFloat() 
 {
     VarDbl v1(1, sqrt(2));
-    assertEquals( v1 + 2.0, 3, sqrt(2) );
-    assertEquals( 2.0 + v1, 3, sqrt(2) );
+    VarDbl::assertEqual( v1 + 2.0, 3, sqrt(2) );
+    VarDbl::assertEqual( 2.0 + v1, 3, sqrt(2) );
     v1 += 2.0;
-    assertEquals( v1, 3, sqrt(2) );
+    VarDbl::assertEqual( v1, 3, sqrt(2) );
 
     VarDbl v2(1.0);
     VarDbl v = v2 + 2.0;
-    assertEquals( v2 + 2.0, 3, 0 );
-    assertEquals( 2.0 + v2, 3, 0 );
+    VarDbl::assertEqual( v2 + 2.0, 3, 0 );
+    VarDbl::assertEqual( 2.0 + v2, 3, 0 );
     v2 += 2.0;
-    assertEquals( v2, 3, 0 );
+    VarDbl::assertEqual( v2, 3, 0 );
 }
 
 void testSubFloat() 
 {
     VarDbl v1(1, sqrt(2));
-    assertEquals( v1 - 2.0, -1, sqrt(2) );
-    assertEquals( 2.0 - v1, 1, sqrt(2) );
+    VarDbl::assertEqual( v1 - 2.0, -1, sqrt(2) );
+    VarDbl::assertEqual( 2.0 - v1, 1, sqrt(2) );
     v1 -= 2.0;
-    assertEquals( v1, -1, sqrt(2) );
+    VarDbl::assertEqual( v1, -1, sqrt(2) );
 
     VarDbl v2(1.0);
-    assertEquals( v2 - 2.0, -1, 0 );
-    assertEquals( 2.0 - v2, 1, 0 );
+    VarDbl::assertEqual( v2 - 2.0, -1, 0 );
+    VarDbl::assertEqual( 2.0 - v2, 1, 0 );
     v2 -= 2.0;
-    assertEquals( v2, -1, 0 );
+    VarDbl::assertEqual( v2, -1, 0 );
 }
 
 void testAddSubException()
@@ -217,43 +205,43 @@ void testAddSubException()
 
 void testMultiplyZero() 
 {
-    assertEquals( VarDbl(0) * VarDbl(1), 0, 0);
-    assertEquals( VarDbl(0) * 1, 0, 0);
-    assertEquals(  1 * VarDbl(0), 0, 0);
+    VarDbl::assertEqual( VarDbl(0) * VarDbl(1), 0, 0);
+    VarDbl::assertEqual( VarDbl(0) * 1, 0, 0);
+    VarDbl::assertEqual(  1 * VarDbl(0), 0, 0);
 
-    assertEquals( VarDbl(0) * VarDbl(1.0), 0, 0);
-    assertEquals( VarDbl(0) * 1.0, 0, 0);
-    assertEquals( 1.0 * VarDbl(0), 0, 0);
+    VarDbl::assertEqual( VarDbl(0) * VarDbl(1.0), 0, 0);
+    VarDbl::assertEqual( VarDbl(0) * 1.0, 0, 0);
+    VarDbl::assertEqual( 1.0 * VarDbl(0), 0, 0);
 
-    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
-    assertEquals( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
-    assertEquals( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
+    VarDbl::assertEqual( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
+    VarDbl::assertEqual( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
+    VarDbl::assertEqual( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
 
-    assertEquals( VarDbl(0) * VarDbl(2.0, 1e-3), 0, 0);
-    assertEquals( VarDbl(2, 1e-3) * 0.0, 0, 0);
-    assertEquals( 0.0 * VarDbl(2, 1e-3), 0, 0);
+    VarDbl::assertEqual( VarDbl(0) * VarDbl(2.0, 1e-3), 0, 0);
+    VarDbl::assertEqual( VarDbl(2, 1e-3) * 0.0, 0, 0);
+    VarDbl::assertEqual( 0.0 * VarDbl(2, 1e-3), 0, 0);
 
-    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
-    assertEquals( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
-    assertEquals( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
+    VarDbl::assertEqual( VarDbl(0, 1e-3) * VarDbl(2.0), 0, 2e-3);
+    VarDbl::assertEqual( VarDbl(0, 1e-3) * 2.0, 0, 2e-3);
+    VarDbl::assertEqual( 2.0 * VarDbl(0, 1e-3), 0, 2e-3);
 
-    assertEquals( VarDbl(0, 1e-3) * VarDbl(2.0, 1e-2), 0, sqrt(4 + 1e-4)*1e-3);
+    VarDbl::assertEqual( VarDbl(0, 1e-3) * VarDbl(2.0, 1e-2), 0, sqrt(4 + 1e-4)*1e-3);
 }
 
 void testMultiplyOne() 
 {
-    assertEquals( VarDbl(-1) * VarDbl(2), -2, 0);
-    assertEquals( VarDbl(-1) * 2, -2, 0);
-    assertEquals( 2 * VarDbl(-1), -2, 0);
+    VarDbl::assertEqual( VarDbl(-1) * VarDbl(2), -2, 0);
+    VarDbl::assertEqual( VarDbl(-1) * 2, -2, 0);
+    VarDbl::assertEqual( 2 * VarDbl(-1), -2, 0);
 
-    assertEquals( VarDbl(-1.0) * VarDbl(2), -2, 0);
-    assertEquals( VarDbl(-1.0) * 2, -2, 0);
-    assertEquals( 2 * VarDbl(-1.0), -2, 0);
+    VarDbl::assertEqual( VarDbl(-1.0) * VarDbl(2), -2, 0);
+    VarDbl::assertEqual( VarDbl(-1.0) * 2, -2, 0);
+    VarDbl::assertEqual( 2 * VarDbl(-1.0), -2, 0);
 
-    assertEquals( VarDbl(-1.0) * VarDbl(2.0), -2,0);
-    assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3);
-    assertEquals( VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3);
-    assertEquals( VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, sqrt(5 + 1e-6) * 1e-3);
+    VarDbl::assertEqual( VarDbl(-1.0) * VarDbl(2.0), -2,0);
+    VarDbl::assertEqual( VarDbl(-1.0, 1e-3) * VarDbl(2.0), -2, 2e-3);
+    VarDbl::assertEqual( VarDbl(-1.0) * VarDbl(2.0, 1e-3), -2, 1e-3);
+    VarDbl::assertEqual( VarDbl(-1.0, 1e-3) * VarDbl(2.0, 1e-3), -2, sqrt(5 + 1e-6) * 1e-3);
 }
 
 void testMultiplyException() 
@@ -334,6 +322,154 @@ void testLargeDiff()
 }
 
 
+void testVarDblByVarDblOne() 
+{
+    VarDbl::assertEqual(VarDbl(0) / VarDbl(1), 0, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(1),   1, 0);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(1), -1, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(-1), -1, 0);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(-1), 1, 0);
+    VarDbl::assertEqual(VarDbl(2) / VarDbl(1),   2, 0);
+
+    VarDbl::assertEqual(VarDbl(1.0) / VarDbl(1), 1, 0);
+    VarDbl::assertEqual(VarDbl(2.0) / VarDbl(1), 2, 0);
+    VarDbl::assertEqual(VarDbl(0.5) / VarDbl(1), 0.5, 0);
+
+    VarDbl::assertEqual(VarDbl(1.0) / VarDbl(1.0), 1, 0);
+    VarDbl::assertEqual(VarDbl(2.0) / VarDbl(1.0), 2, 0);
+    VarDbl::assertEqual(VarDbl(0.5) / VarDbl(1.0), 0.5, 0);
+
+    VarDbl::assertEqual(VarDbl(0, 1e-3) / VarDbl(1), 0, 1e-3);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(1), 1, 1e-3);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(1), -1, 1e-3);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(-1), -1, 1e-3);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(-1), 1, 1e-3);
+    VarDbl::assertEqual(VarDbl(2, 1e-3) / VarDbl(1), 2, 1e-3);
+    VarDbl::assertEqual(VarDbl(0.5, 1e-3) / VarDbl(1), 0.5, 1e-3);
+
+    VarDbl::assertEqual(VarDbl(0) / VarDbl(1, 1e-3), 0, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(1, 1e-3), 1, 1e-3, "1 /1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(1, 1e-3), -1, 1e-3, "-1 /1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(-1, 1e-3), -1, 1e-3, "1 /-1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(-1, 1e-3), 1, 1e-3, "-1 /-1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(VarDbl(2) / VarDbl(1, 1e-3), 2, 0.002, "2 /1~1e-3", 2e-6, 8e-9);
+    VarDbl::assertEqual(VarDbl(0.5) / VarDbl(1, 1e-3), 0.5, 0.0005, "0.5 /1~1e-3", 5e-7, 4e-9);
+
+    VarDbl::assertEqual(VarDbl(0, 1e-3) / VarDbl(1, 1e-3), 0, 1e-3, "0 /1~1e-3", 0, 2e-9);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(1, 1e-3), 1, 1e-3*std::sqrt(2), "1~1e-3 /1~1e-3", 1e-6, 2e-9);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(1, 1e-3), -1, 1e-3*std::sqrt(2), "-1~1e-3 /1~1e-3", 1e-6, 2e-9);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(-1, 1e-3), -1, 1e-3*std::sqrt(2), "1~1e-3 /-1~1e-3", 1e-6, 2e-9);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(-1, 1e-3), 1, 1e-3*std::sqrt(2), "-1~1e-3 /-1~1e-3", 1e-6, 2e-9);
+    VarDbl::assertEqual(VarDbl(2, 1e-3) / VarDbl(1, 1e-3), 2, 1e-3*std::sqrt(5), "2~1e-3 /1~1e-3", 2e-6, 6e-9);
+    VarDbl::assertEqual(VarDbl(0.5, 1e-3) / VarDbl(1, 1e-3), 0.5, 0.0005*std::sqrt(5), "0.5~1e-3 /1~1e-3", 5e-7, 2e-9);
+}
+
+void testVarDblByFloatOne() 
+{
+    VarDbl::assertEqual(VarDbl(0)/ 1.0, 0, 0);
+    VarDbl::assertEqual(VarDbl(1)/ 1.0,   1, 0);
+    VarDbl::assertEqual(VarDbl(-1)/ 1.0, -1, 0);
+    VarDbl::assertEqual(VarDbl(1)/ -1.0, -1, 0);
+    VarDbl::assertEqual(VarDbl(-1)/ -1.0, 1, 0);
+    VarDbl::assertEqual(VarDbl(2)/ 1.0,   2, 0);
+
+    VarDbl::assertEqual(VarDbl(0.5)/ 1.0, 0.5, 0);
+    VarDbl::assertEqual(VarDbl(1.0)/ 1.0, 1.0, 0);
+    VarDbl::assertEqual(VarDbl(2.0)/ 1.0, 2.0, 0);
+
+    VarDbl::assertEqual(VarDbl(0, 1e-3)/ 1.0, 0, 1e-3);
+    VarDbl::assertEqual(VarDbl(1, 1e-3)/ 1.0, 1, 1e-3);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3)/ 1.0, -1, 1e-3);
+    VarDbl::assertEqual(VarDbl(1, 1e-3)/ -1.0, -1, 1e-3);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3)/ -1.0, 1, 1e-3);
+    VarDbl::assertEqual(VarDbl(2, 1e-3)/ 1.0, 2, 1e-3);
+    VarDbl::assertEqual(VarDbl(0.5, 1e-3)/ 1.0, 0.5, 1e-3);
+}
+
+void testFloatByVarDblOne() 
+{
+    VarDbl::assertEqual(0 / VarDbl(1), 0, 0);
+    VarDbl::assertEqual(1 / VarDbl(1),   1, 0);
+    VarDbl::assertEqual(-1 / VarDbl(1), -1, 0);
+    VarDbl::assertEqual(1 / VarDbl(-1), -1, 0);
+    VarDbl::assertEqual(-1 / VarDbl(-1), 1, 0);
+    VarDbl::assertEqual(2 / VarDbl(1),   2, VarDbl::ulp(2.));
+
+    VarDbl::assertEqual(0.5 / VarDbl(1), 0.5, 0);
+
+    VarDbl::assertEqual(0 / VarDbl(1, 1e-3), 0, 0);
+    VarDbl::assertEqual(1 / VarDbl(1, 1e-3), 1, 1e-3, "1 /1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(-1 / VarDbl(1, 1e-3), -1, 1e-3, "-1 /1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(1 / VarDbl(-1, 1e-3), -1, 1e-3, "1 /-1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(-1 / VarDbl(-1, 1e-3), 1, 1e-3, "-1 /-1~1e-3", 1e-6, 4e-9);
+    VarDbl::assertEqual(2 / VarDbl(1, 1e-3), 2, 0.002, "2 /1~1e-3", 2e-6, 8e-9);
+    VarDbl::assertEqual(0.5 / VarDbl(1, 1e-3), 0.5, 0.0005, "0.5 /1~1e-3", 5e-7, 4e-9);
+}
+
+void testVarDblByVarDblZero() 
+{
+    try {
+        VarDbl(0) / VarDbl(0);
+        test::fail("VarDbl(0) / VarDbl(0)");
+    } catch (InitException ex) {
+    } catch (std::exception ex) {
+        test::fail(ex.what());
+    }
+
+    try {
+        VarDbl(0) / VarDbl(0, 1);
+        test::fail("VarDbl(0) / VarDbl(0, 1)");
+    } catch (InitException) {
+    } catch (std::exception ex) {
+        test::fail(ex.what());
+    }
+
+    try {
+        VarDbl(0) / VarDbl(0.1, 1);
+        test::fail("VarDbl(0) / VarDbl(0.1, 1)");
+    } catch (NotMonotonicException ex) {
+    } catch (NotFiniteException ex) {
+    } catch (std::exception ex) {
+        test::fail(ex.what());
+    }
+}
+
+void testVarDblByVarDblTwo() 
+{
+    VarDbl::assertEqual(VarDbl(0) / VarDbl(2), 0, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(2),   0.5, 0);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(2), -0.5, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(-2), -0.5, 0);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(-2), 0.5, 0);
+    VarDbl::assertEqual(VarDbl(2) / VarDbl(2),     1, 0);
+    VarDbl::assertEqual(VarDbl(0.5) / VarDbl(2), 0.25, 0);
+
+    VarDbl::assertEqual(VarDbl(0, 1e-3) / VarDbl(2), 0, 5e-4);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(2), 0.5, 5e-4);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(2), -0.5, 5e-4);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(-2), -0.5, 5e-4);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(-2), 0.5, 5e-4);
+    VarDbl::assertEqual(VarDbl(2, 1e-3) / VarDbl(2), 1, 5e-4);
+    VarDbl::assertEqual(VarDbl(0.5, 1e-3) / VarDbl(2), 0.25, 5e-4);
+
+    VarDbl::assertEqual(VarDbl(0) / VarDbl(2, 1e-3), 0, 0);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(2, 1e-3), 0.5, 2.5e-4, "1 /2~1e-3", 1e-6, 4.0e-9);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(2, 1e-3), -0.5, 2.5e-4, "-1 /1~2e-3", 1e-6, 4.0e-9);
+    VarDbl::assertEqual(VarDbl(1) / VarDbl(-2, 1e-3), -0.5, 2.5e-4, "1 /-2~1e-3", 1e-6, 4.0e-9);
+    VarDbl::assertEqual(VarDbl(-1) / VarDbl(-2, 1e-3), 0.5, 2.5e-4, "-1 /-2~1e-3", 1e-6, 4.0e-9);
+    VarDbl::assertEqual(VarDbl(2) / VarDbl(2, 1e-3), 1, 5e-4, "2 /2~1e-3", 2e-6, 6.4e-9);
+    VarDbl::assertEqual(VarDbl(0.5) / VarDbl(2, 1e-3), 0.25, 1.25e-4, "0.5 /2~1e-3", 5e-7, 4.0e-9);
+
+    VarDbl::assertEqual(VarDbl(0, 1e-3) / VarDbl(2, 1e-3), 0, 5e-4, "0~1e-3 /2~1e-3", 0, 1.5e-9);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(2, 1e-3), 0.5, 2.5e-4*std::sqrt(5), "1~1e-3 /2~1e-3", 1e-6, 1.2e-9);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(2, 1e-3), -0.5, 2.5e-4*std::sqrt(5), "-1~1e-3 /2~1e-3", 1e-6, 1.2e-9);
+    VarDbl::assertEqual(VarDbl(1, 1e-3) / VarDbl(-2, 1e-3), -0.5, 2.5e-4*std::sqrt(5), "1~1e-3 /-2~1e-3", 1e-6, 1.2e-9);
+    VarDbl::assertEqual(VarDbl(-1, 1e-3) / VarDbl(-2, 1e-3), 0.5, 2.5e-4*std::sqrt(5), "-1~1e-3 /-2~1e-3", 1e-6, 1.2e-9);
+    VarDbl::assertEqual(VarDbl(2, 1e-3) / VarDbl(2, 1e-3), 1, 1e-3*std::sqrt(0.5), "2~1e-3 /2~1e-3", 2e-6, 5.0e-9);
+    VarDbl::assertEqual(VarDbl(0.5, 1e-3) / VarDbl(2, 1e-3), 0.25, 2.5e-4*std::sqrt(4.25), "0.5~1e-3 /2~1e-3", 5e-7, 1.2e-9);
+}
+
+
 int main() 
 {
     testInitCopy();
@@ -361,6 +497,12 @@ int main()
     testCompareFloat();
 
     testLargeDiff();
+
+    testVarDblByVarDblOne();
+    testVarDblByFloatOne();
+    testFloatByVarDblOne();
+    testVarDblByVarDblZero();
+    testVarDblByVarDblTwo();
 
     std::cout << "All VarDbl tests are successful";
     return 0;
