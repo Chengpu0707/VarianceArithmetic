@@ -98,7 +98,7 @@ The unit tests:
 
 ## VarDbl
 
-The basic data type for variance arithmetic in _ Sub Section Numerical Representation _ of  _ Section Variance Arithmetic _:
+The basic data type for variance arithmetic in _Sub Section Numerical Representation_ of  _Section Variance Arithmetic_:
  * Cpp/VarDbl.h
  * Java/Types/VarDbl.java: no operator override, with *InPlace() version for arithmetic operations.
  * Python/varDbl.py
@@ -110,7 +110,7 @@ The unit tests:
 
 ## Statistical Taylor Expansion
 
-The numerical implementation of statistical Taylor expansion in _ Section Variance Arithmetic:
+The numerical implementation of statistical Taylor expansion in _Section Variance Arithmetic_:
  * Cpp/Taylor.h
  * Java/Types/Taylor.java
  * Python/taylor.py
@@ -118,7 +118,7 @@ The numerical implementation of statistical Taylor expansion in _ Section Varian
 Analysis:
  * IPyNb/TaylorExpansion.ipynb: expansion of 1/(1 - x)
 
-Direct application of statistical Taylor expansion in _ Section Mathematical Library Functions _
+Direct application of statistical Taylor expansion in _Section Mathematical Library Functions_
  * Cpp/TestExp.cpp, Cpp/TestLog.cpp, Cpp/TestSin.cpp, Cpp/TestPow.cpp
  * Java/TestTaylor.java
  * Python/testTaylor.py
@@ -128,3 +128,22 @@ Analysis:
  * IPyNb/LogStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/LogStat.txt
  * IPyNb/SinStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/SinStat.txt
  * IPyNb/PowStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/PowStat.txt
+ * IPyNb/PowerError.ipynb: (x^c)^(1/c) - x error
+ * IPyNb/ExpLogError.ipynb: log(e^x) - x and e^(log(x)) - x error.
+
+Convergence edge calculation for x^c in _Sub Section Monotonic_ and _Sub Section Monotonic_ of _Section Variance Arithmetic_:
+ * Cpp/TestExp.cpp, Cpp/TestLog.cpp, Cpp/TestSin.cpp, Cpp/TestPow.cpp
+ * Java/TestConvergence.java
+ * Python/testManual.py: class TestConvergence:
+
+ Analysis:
+  * IPyNb/ConvergeEdge.ipynb
+
+## Polynomal Expansion
+
+_Section Polynomial_
+ * Cpp/TestPolynominal.cpp
+ * Java/TestPolynominal.Java
+ * Python/testPolynominal.cpp
+
+Analysis:
