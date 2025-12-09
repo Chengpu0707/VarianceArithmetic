@@ -695,6 +695,7 @@ public class TestFFT {
     @Test 
     public void dump_Order_2_19() throws ArithmeticException, InitException {
         FFT_Order.dump("./Java/Output/FFT_2_19.txt");
+        System.out.print(String.format("%s: Finished FFT_Order.dump_Order_2_19", LocalDateTime.now()));
     }
 
     

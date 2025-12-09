@@ -22,7 +22,7 @@ public class Histogram {
 		_sHistogram = new int[1 + _center * 2];
 	}
 	public Histogram( int range ) {
-		this( range, 10 );
+		this( range, 5 );
 	}
 	public Histogram() {
 		this( 3 );
@@ -62,14 +62,13 @@ public class Histogram {
 	}
 
 
-	public double[] histo( int range ) {
-		if ((_stat.count() <= 0) || (_stat.count() > Double.MAX_VALUE)) {
+	public double[] histo() {
+        final int range = (int) (_maxRange * _divids);
+        final int cnt = _stat.count() - lower() - upper();
+		if (cnt <= 0) {
 			return null;
 		}
-		if (range <= 0) {
-			return new double[] {1};
-		}
-		final double s = 1.0/ _stat.count();
+		final double s = 1.0/ cnt;
 		double[] sRes = new double[1 + 2*range];
 		for (int i = 0; i < sRes.length; ++i) {
 			final int idx = _center - range + i;
@@ -80,9 +79,6 @@ public class Histogram {
 			}
 		}
 		return sRes;
-	}
-	public double[] histo() {
-		return histo( (int) (_maxRange * _divids) );
 	}
 	
 	public Stat stat() {

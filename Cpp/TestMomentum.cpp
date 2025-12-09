@@ -13,6 +13,7 @@ int main()
     test::assertEqual( mmt.bounding, 5);
     test::assertEqual( mmt.maxOrder(), 448);
     test::assertAlmostEqual( mmt.leakage, 5.7330e-07, 1e-10);
+    test::assertAlmostEqual( mmt[0] / 0.999999426696856, 1., 1e-10);
     test::assertAlmostEqual( mmt[2] / 0.999984559501709, 1., 1e-10);
     test::assertAlmostEqual( mmt[4] / 2.99958199862644, 1., 1e-10);
     test::assertAlmostEqual( mmt[6] / 14.9886179961651, 1., 1e-10);

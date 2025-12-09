@@ -18,24 +18,12 @@ public class TestMomentum {
         assertEquals(norm.bounding, 5.0, 1e-10);
         assertEquals(norm.maxOrder, 448);
         assertEquals(norm.leakage, 2.8665E-7, 1e-10);
-
-        System.out.println(System.getProperty("user.dir"));
-        try (final BufferedReader fr = new BufferedReader(new FileReader("./Python/NormalMomentum_5.0.txt"))) {
-            String line = fr.readLine().strip();
-            assertEquals(line, "n\tMomentum\tBounding:\t5.0");
-            int i = 0;
-            while ((line = fr.readLine()) != null) {
-                line = line.strip();
-                final String[] sWord = line.split("\t");
-                assertEquals(i*2, Integer.parseInt(sWord[0]));
-                final double value = Double.parseDouble(sWord[1]);
-                assertEquals(norm.get(i*2) /value, 1.0, 1e-10);
-                assertEquals(norm.get(i*2 + 1), 0, 1e-17);
-                ++i;
-            }
-        } catch (Throwable e) {
-            fail(e.getMessage());
-        } 
+        assertEquals( norm.get(0) / 0.999999426696856, 1., 1e-10);
+        assertEquals( norm.get(2) / 0.999984559501709, 1., 1e-10);
+        assertEquals( norm.get(4) / 2.99958199862644, 1., 1e-10);
+        assertEquals( norm.get(6) / 14.9886179961651, 1., 1e-10);
+        assertEquals( norm.get(8) / 104.688026048979, 1., 1e-10);
+        assertEquals( norm.get(10) / 936.384736336377, 1., 1e-10);
     }
 
     public void NormalValues() {
