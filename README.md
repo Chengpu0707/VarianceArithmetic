@@ -77,9 +77,14 @@ For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, norma
 
 # Fuction Description and Related files
 
+The Jupiter files in ./IpyNb folder shows that difference implmentation of variance arithmetic has identical results.
+
+./Python/testCompare.py also compares selected files from the Output folders from difference implmentation directly to show no difference in the results.
+
+
 ## Bounded Momentum
 
-Calculation of bounded momentum for Normal and Uniform distributions:
+Calculation of bounded momentum for Normal and Uniform distributions in _ Sub Section Bounding Asymptote _:
  * Cpp/momentum.h
  * Java/Types/Momentum.java: calculate uncertainty as well.
  * Python/Momentum.py
@@ -93,7 +98,7 @@ The unit tests:
 
 ## VarDbl
 
-The basic data type for variance arithmetic to calculate ideal uncertainty offset and ideal uncertainty:
+The basic data type for variance arithmetic in _ Sub Section Numerical Representation _ of  _ Section Variance Arithmetic _:
  * Cpp/VarDbl.h
  * Java/Types/VarDbl.java: no operator override, with *InPlace() version for arithmetic operations.
  * Python/varDbl.py
@@ -105,17 +110,19 @@ The unit tests:
 
 ## Statistical Taylor Expansion
 
-Statistical Taylor expansion:
+The numerical implementation of statistical Taylor expansion in _ Section Variance Arithmetic:
  * Cpp/Taylor.h
  * Java/Types/Taylor.java
  * Python/taylor.py
+
 Analysis:
  * IPyNb/TaylorExpansion.ipynb: expansion of 1/(1 - x)
 
-Direct application of statistical Taylor expansion
+Direct application of statistical Taylor expansion in _ Section Mathematical Library Functions _
  * Cpp/TestExp.cpp, Cpp/TestLog.cpp, Cpp/TestSin.cpp, Cpp/TestPow.cpp
  * Java/TestTaylor.java
  * Python/testTaylor.py
+
 Analysis:
  * IPyNb/ExpStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/ExpStat.txt
  * IPyNb/LogStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/LogStat.txt
