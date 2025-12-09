@@ -16,10 +16,11 @@ For the ease of sharing source code, no project file is provided.
 The pyton implementation is under ./Python, containing both source code and test code.
 Run all unit test will generate txt files under ./Python/Output
 Specifically, analytic.py allows the solution to any analytic functions.
-Not included is the python interpreter and libraries (numpy, scipy, sympy) 
-which needs to be piped by the donwloader. 
+Not included is the python interpreter and libraries (numpy, scipy, sympy) which needs to be pip-ed. 
 
-The C++ implementation is under ./Cpp, as *.h files, with a self-made simple unit test framework using assert.
+The C++ implementation is under ./Cpp, as *.h files, for easier souce code sharing.
+The cpp files contains tests using a self-made simple unit test framework provided by test.h.
+There is no project file so each cpp file should be complied to be executed by itself.
 Run all unit test will generate txt files under ./Cpp/Output
 
 The Java implementation is under ./Java, containing both source code and test code.
@@ -58,3 +59,65 @@ To enable manual test in Python:
     ...\VarianceArithmetic\Python> Python -m unittest testManual.Test_FFT_Order.test_Gaussian
 ```
 
+## Outlier
+
+Outliers is applied only when in FFT calculation 
+ * the sine source is library, and
+ * the signal is either sine or cosine without added noise, and 
+ * the test is reverse transformation, and 
+ * the expected value is 0~0 and
+ * the value is error deviation whose average value is 1, and
+ * An outlier minimal threshold of 1e14 is applied, to filter out 1e-16~1e-32 vs 0~0, such as:
+```
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=32769, normaliized error outlier 8604408562923685.0 between 6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=65536, normaliized error outlier -8604408562923685.0 between 0.000000e+00~0.000e+00 and 1.224647e-16~1.423e-32
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, normaliized error outlier -8604408562923685.0 between -6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
+```
+
+
+# Fuction Description and Related files
+
+## Bounded Momentum
+
+Calculation of bounded momentum for Normal and Uniform distributions:
+ * Cpp/momentum.h
+ * Java/Types/Momentum.java: calculate uncertainty as well.
+ * Python/Momentum.py
+Analysis:
+ * IPyNb/Momentum.ipynb: Linear fit.
+
+The unit tests:
+ * Cpp/TestMomentum.cpp
+ * Java/Types/TestMomentum.java
+ * Python/testMomentum.py
+
+## VarDbl
+
+The basic data type for variance arithmetic to calculate ideal uncertainty offset and ideal uncertainty:
+ * Cpp/VarDbl.h
+ * Java/Types/VarDbl.java: no operator override, with *InPlace() version for arithmetic operations.
+ * Python/varDbl.py
+
+The unit tests:
+ * Cpp/TestVarDbl.cpp
+ * Java/Types/TestVarDbl.java, Java/Types/TestVarDblAdd.java, Java/Types/TestVarDblMutiply.java
+ * Python/testVarDbl.py
+
+## Statistical Taylor Expansion
+
+Statistical Taylor expansion:
+ * Cpp/Taylor.h
+ * Java/Types/Taylor.java
+ * Python/taylor.py
+Analysis:
+ * IPyNb/TaylorExpansion.ipynb: expansion of 1/(1 - x)
+
+Direct application of statistical Taylor expansion
+ * Cpp/TestExp.cpp, Cpp/TestLog.cpp, Cpp/TestSin.cpp, Cpp/TestPow.cpp
+ * Java/TestTaylor.java
+ * Python/testTaylor.py
+Analysis:
+ * IPyNb/ExpStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/ExpStat.txt
+ * IPyNb/LogStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/LogStat.txt
+ * IPyNb/SinStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/SinStat.txt
+ * IPyNb/PowStat{Cpp, Java, Python}.ipynb: for ./{Cpp, Java, Python}/Output/PowStat.txt
