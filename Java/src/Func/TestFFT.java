@@ -329,7 +329,7 @@ class FFT_Order extends FFT_Signal {
                 "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Minimum At\tUncertainty Maximum\tUncertainty Maximum At" +
                 "\tValue Count\tValue Mean\tValue Deviation\tValue Minimum\tValue Minimum At\tValue Maximum\tValue Maximum At" +
                 "\tError Count\tError Mean\tError Deviation\tError Minimum\tError Minimum At\tError Maximum\tError Maximum At" +
-                "\tLower\tUpper");
+                "\tLower Count\tUpper Count");
         for (int i = - Measure.BINDING * Measure.DIVIDS; i <= Measure.BINDING * Measure.DIVIDS; ++i) {
             hdrBuilder.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
         }
@@ -688,10 +688,11 @@ public class TestFFT {
 
     @Test 
     public void dump_Order_2_6() {
-       FFT_Order.dump("./Java/Output/FFT_Order_2_6.txt", 6);
+        FFT_Order.dump("./Java/Output/FFT_Order_2_6.txt", 6);
+        System.out.print(String.format("%s: Finished FFT_Order.dump_Order_2_19", LocalDateTime.now()));
     }
 
-    // very time comsuming
+    // about 2 hours from start to finish
     @Test 
     public void dump_Order_2_19() throws ArithmeticException, InitException {
         FFT_Order.dump("./Java/Output/FFT_2_19.txt");

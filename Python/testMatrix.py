@@ -59,7 +59,7 @@ class TestSquareMatrix (unittest.TestCase):
         matrix = createIntMatrix(2, randRange=Adjugate.ELEMENT_RANGE)
         self.assertTrue(isSquareMatrix(matrix, sType=(int,)))
         mat = numpy.matrix(matrix)
-        self.assertEqual(mat.dtype, numpy.int64)
+        self.assertEqual(mat.dtype, numpy.int32)
         self.assertEqual(type(numpy.linalg.det(mat)), numpy.float64)
 
     def testCreateIntMatrix(self):

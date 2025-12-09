@@ -1,11 +1,23 @@
 # VarianceArithmetic
+
+## Purpose
+
 A floating-point arithmetic with value and uncertainty (variance) pair.
 The arithmetic is described in Latex/VarianceArithmetic
 It is also published at http://arxiv.org/abs/2410.01223
 
+## Target
+
+The code is targeted for Vs Code IDE.
+For the ease of sharing source code, no project file is provided.
+
+## Implementing Languages and Folders
+
 The pyton implementation is under ./Python, containing both source code and test code.
 Run all unit test will generate txt files under ./Python/Output
 Specifically, analytic.py allows the solution to any analytic functions.
+Not included is the python interpreter and libraries (numpy, scipy, sympy) 
+which needs to be piped by the donwloader. 
 
 The C++ implementation is under ./Cpp, as *.h files, with a self-made simple unit test framework using assert.
 Run all unit test will generate txt files under ./Cpp/Output
@@ -16,13 +28,33 @@ Run all unit test will generate txt files under ./Java/Output
 The txt files under ./{Python, Cpp, Java}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb.
 Different implementation should give the same result.
 
-Some tests takes a long time to finish, so the test can resume from where leftoff in the result file.
-For these tests, it is preferable to delete and remake the /Output folder, and manually run the test in a separated console.
 
-Right now, C++ and Java implementations contains less test cases such as for matrix calculations.
+# Unit Tests
 
-Some performance numbrs in minutes on my old laptop:
-Language  FFT/14 FFT/15 FFT/16 FFT/17  FFT/18 Adj/6 Adj/7 Adj/8
-Java        0.25   0.95   1.75    3.75
-C++        17     36     76     141    300
-Python     92    272    463    1083   1756    11    118	  1425
+## Manual test
+
+The manual tests needs to run first before all the unit test can pass:
+* Python: TestBoundingFactor relies on TestNormal and TestUniform
+* Python: testCompare.py compares the results of Java, C++, and Python for the selected tests.
+
+### FFT Test
+
+The output file is ./{Java, Cpp, Python}/Output/FFT_2_19.txt.
+If it exist, the test can be continue.
+For a clean test, delete the file.
+
+Java unit test TestFFT.dump_Order_2_19() takes about 2.1 hours
+
+For debugging, C++ code is not compiled with any optimization, so it is much slower than java.
+The full FFT test took 17.9 hours:
+```
+    ...\VarianceArithmetic\Cpp> .\TestFFT.exe Test
+```
+
+To enable manual test in Python:
+ 1) Turn SKIP_TEST to False.  It is committed as True.
+ 2) Run manually from the command prompt as:
+``` 
+    ...\VarianceArithmetic\Python> Python -m unittest testManual.Test_FFT_Order.test_Gaussian
+```
+

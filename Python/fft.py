@@ -31,6 +31,16 @@ class TestType (enum.StrEnum):
 
 
 class FFT:
+    EXTRA_STEPS = 5
+    '''
+    0: Input
+    1: bit reverse
+    2 to order + 1: intermediate steps
+    order + 2: output
+    order + 3: exptected
+    order + 4: error
+    '''
+
     _bitReversedIndex = {}
 
     def __init__(self, sinSource:SinSource):
@@ -72,6 +82,8 @@ class FFT:
         size = 1 << order
         sRes = [0] * (size << 1)
         self.ssStep = []
+        if traceSteps:
+            self.ssStep.append(tuple([varDbl.VarDbl(var) for var in sInput]))
         
         sIndex = FFT.bitReversedIndices(order)
         for i in range(len(sIndex)):
@@ -159,7 +171,7 @@ class FFT_Signal (FFT):
                 if not (1 <= freq <= half):
                     raise RuntimeError(f'Invalid freq={freq} for order={order}')
                 for i in range(self.size):
-                    self.sWave.append(self.idxSin.sin(freq * i * 2, order))
+                    self.sWave.append(self.idxSin.sin(freq * i, order - 1))
                     self.sWave.append(varDbl.VarDbl(0))
                     if i == freq:
                         self.sFreq.append(varDbl.VarDbl(0))
@@ -174,7 +186,7 @@ class FFT_Signal (FFT):
                 if not (1 <= freq <= half):
                     raise RuntimeError(f'Invalid freq={freq} for order={order}')
                 for i in range(self.size):
-                    self.sWave.append(self.idxSin.cos(freq * i * 2, order))
+                    self.sWave.append(self.idxSin.cos(freq * i, order - 1))
                     self.sWave.append(varDbl.VarDbl(0))
                     if i == freq:
                         self.sFreq.append(varDbl.VarDbl(half))
@@ -220,7 +232,8 @@ class FFT_Order (FFT_Signal):
     DIVIDS = 5
     DEVS = 3
     MIN_COUNT = 64
-    NORMALIZED_ERROR_OUTLIER = 1e15
+    NORMALIZED_ERROR_OUTLIER = 1e14
+
     ssssAggr = {}
 
     def __init__(self, signal:FFT_Signal, noiseType:NoiseType, noise:float,
@@ -330,10 +343,29 @@ class FFT_Order (FFT_Signal):
                "\tLower Count\tUpper Count\t"\
                + '\t'.join([f'{i/divids}' for i in range(-devs * divids, devs * divids + 1)])\
                + '\n' 
+    
+    @staticmethod
+    def is_title(header:str, dumpPath:str) -> str:
+        title = FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS).strip()
+        if header.strip() == title:
+            return True
+        sTitle = title.strip().split('\t')
+        sHeader = header.strip().split('\t')
+        if sTitle[:FFT_Order.histo_offset()] != sHeader[:FFT_Order.histo_offset()]:
+            print(f'Warning: Invalid title of {dumpPath}: {sHeader[:FFT_Order.histo_offset()]} vs {sTitle[:FFT_Order.histo_offset()]}') 
+            return False 
+        if [float(hist) for hist in sTitle[FFT_Order.histo_offset():]] != [float(hist) for hist in sHeader[FFT_Order.histo_offset():]]:
+            print(f'Warning: Invalid histogram of {dumpPath}: {sHeader[FFT_Order.histo_offset():]} vs {sTitle[FFT_Order.histo_offset()]:}')  
+            return False
+        return True
 
     @staticmethod
     def uncertainty_offset():
         return 7
+    
+    @staticmethod
+    def value_offset():
+        return 14
     
     @staticmethod
     def error_offset():
@@ -407,13 +439,9 @@ class FFT_Order (FFT_Signal):
             return
         sssssAggr = {}
         with open(dumpPath) as f:
-            hdr = next(f).split('\t')
-            header = FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS).split('\t')
-            if hdr != header:
-                if hdr[:FFT_Order.histo_offset()] != header[:FFT_Order.histo_offset()]:
-                    print(f'Warning: Invalid title of {dumpPath}: {hdr[:FFT_Order.histo_offset()]} vs {header[:FFT_Order.histo_offset()]}')  
-                if [float(hist) for hist in hdr[FFT_Order.histo_offset():]] != [float(hist) for hist in header[FFT_Order.histo_offset():]]:
-                    print(f'Warning: Invalid histogram of {dumpPath}: {hdr[FFT_Order.histo_offset():]} vs {header[FFT_Order.histo_offset()]:}')  
+            hdr = next(f)
+            if not FFT_Order.is_title(hdr, dumpPath):
+                raise RuntimeError(f'Invalid title line in {dumpPath}: {hdr}')
             n = 0
             for ln, line in enumerate(f):
                 try:
@@ -447,7 +475,7 @@ class FFT_Order (FFT_Signal):
 
     @staticmethod
     def dump(sOrder=range(2, IndexSin.MAX_ORDER + 1), 
-             sSinSource=(SinSource.Prec, SinSource.Quart, SinSource.Full, SinSource.Lib, SinSource.Fixed),
+             sSinSource=(SinSource.Prec, SinSource.Quart, SinSource.Lib),
              sFreq = range(1, MAX_FREQ),
              sNoise=[0] + [math.pow(10, n) for n in range(-17, 1)],
              sNoiseType=(NoiseType.Gaussian, NoiseType.White)):
@@ -485,9 +513,10 @@ class FFT_Order (FFT_Signal):
                             fw.flush()
 
     @staticmethod
-    def sort(dumpPath:str=None):
+    def sort(dumpPath:str=None, 
+             filterFunc:typing.Callable[[int, SinSource, NoiseType, float], bool]=None):
         '''
-        Obselete: Order the FFT dump to be comparable with those from C++ and Java
+        Order the FFT dump to be comparable with those from C++ and Java
         '''
         if not dumpPath:
             dumpPath = FFT_Order.dumpPath((IndexSin.MIN_ORDER, IndexSin.MAX_ORDER - 1))
@@ -497,14 +526,17 @@ class FFT_Order (FFT_Signal):
         
         sssssssSort = {}
         with open(dumpPath) as f:
-            title = next(f)
-            if FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS) != title:
-                raise RuntimeError(f'Invalid title line in {dumpPath}: {title}')
+            hdr = next(f)
+            if not FFT_Order.is_title(hdr, dumpPath):
+                raise RuntimeError(f'Invalid title line in {dumpPath}: {hdr}')
             for ln, line in enumerate(f):
                 try:
                     sinSource,noiseType,noise,signalType,order,freq,test = FFT_Order.readLine(line, ln, dumpPath)
                 except BaseException as ex:
                    raise ex
+                if filterFunc and filterFunc(order, sinSource, noiseType, noise):
+                    print(f'Filtered out: {line}')
+                    continue
                 sssssssSort.setdefault(order, {}).setdefault(sinSource, {})\
                            .setdefault(noiseType, {}).setdefault(noise, {})\
                            .setdefault(signalType, {}).setdefault(freq, {})\
@@ -513,7 +545,7 @@ class FFT_Order (FFT_Signal):
                 raise RuntimeError(f'Invalid end line of {dumpPath}: {line}')
                 
         with open(dumpPath, 'w') as f:
-            f.write(FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS))
+            f.write(hdr)
             for order in sorted(sssssssSort):
                 ssssssSort = sssssssSort[order]
                 for sinSource in sorted(ssssssSort):
@@ -532,15 +564,18 @@ class FFT_Order (FFT_Signal):
     @staticmethod
     def compare(testCase:unittest.TestCase, thisPath:str, thatPath:str, 
                 filterSignalType=SignalType.Aggr, filterFreq=0,
-                precErr=5e-1, precUnc=1e-6, matchCount=False, 
-                minNoise=1e-15, minCount=MIN_COUNT, minOrder=2):
+                minNoise=0, minCount=MIN_COUNT, minOrder=4) \
+            -> dict[SinSource, dict[TestType, list[float]]]:
         '''
         Compare two FFT dump files {thisPath} and {thatPath} for uncertainty mean and error deviation.
         When {matchCount} is true, also compare the uncertainty count.
         Only compare the error deviation for noise >= {minNoise}.
         Only compare the error deviation for uncertainty count >= {minCount}
+        Return the max differences of error deviation for each SinSource as a dictionary.
         ''' 
-
+        sssDiff = {sinSource: {test: (histo.Stat(), histo.Stat(), histo.Stat()) 
+                               for test in TestType} 
+                   for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib)}
         sKey = []
         sssssThis = FFT_Order.read(thisPath, filterSignalType, filterFreq, checkEnding=False)
         sssssThat = FFT_Order.read(thatPath, filterSignalType, filterFreq, checkEnding=False)
@@ -576,6 +611,8 @@ class FFT_Order (FFT_Signal):
                         sKey.append(f'Diff noise for order={order} sinSource={sinSource} noiseType={noiseType}: '
                                     f'{sThis - sThat} only in {thisPath}, {sThat - sThis} only in {thatPath}')
                     for noise in sorted(sThis & sThat):
+                        if noise < minNoise:
+                            continue
                         sThis = set(ssThis[noise].keys())
                         sThat = set(ssThat[noise].keys())
                         if sThis != sThat:
@@ -587,20 +624,15 @@ class FFT_Order (FFT_Signal):
                         for test in sCommon:
                             this = sThis[test]
                             that = sThat[test]
-                            if matchCount:
-                                try:
-                                    testCase.assertEqual(this[2], that[2])
-                                except AssertionError as ex:
-                                    testCase.fail(f'Diff count {this[2]} vs {that[2]} for order={order} sinSource={sinSource} noiseType={noiseType} noise={noise} test={test}: {ex}')                           
-                            try:
-                                testCase.assertAlmostEqual(this[1] / that[1], 1, delta = precUnc)
-                            except AssertionError as ex:
-                                testCase.fail(f'Diff uncertainty {this[1]} vs {that[1]} for order={order} sinSource={sinSource} noiseType={noiseType} noise={noise} test={test}: {ex}')
-                            if (test != TestType.Roundtrip) and (minNoise <= noise) and (minCount <= this[2]) and (minCount <=that[2]):
-                                try:
-                                    testCase.assertAlmostEqual(this[0] / that[0], 1, delta = precErr)
-                                except AssertionError as ex:
-                                    testCase.fail(f'Diff error {this[0]} vs {that[0]} for order={order} sinSource={sinSource} noiseType={noiseType} noise={noise} test={test}: {ex}')
+                            if this[2] < minCount or that[2] < minCount:
+                                continue
+                            if this[1] <= 0 or that[1] < 0:
+                                continue
+                            for i in range(3):
+                                sssDiff[sinSource][test][i].accum((this[i] - that[i]) / max(this[i], that[i]),
+                                                    (noiseType, noise, order, this[i], that[i]))
+        return sssDiff
+        
 
 class FFT_Signal_Param: 
     def __init__(self, sinSource:SinSource, signalType:SignalType, order:int, freq:int):
@@ -625,7 +657,6 @@ class FFT_Step (FFT_Order):
     FFT_Step.dump() dumps the result to file.
     FFT_Step.test() tests the result from the dump file by recalculating.
     '''
-    EXTRA_STEPS = ('Output', 'Expected', 'Error')
 
     def __init__(self, signal:FFT_Signal, noiseType:NoiseType, noise:float,
                  sCosSin:tuple[varDbl.VarDbl]=None,
@@ -654,11 +685,10 @@ class FFT_Step (FFT_Order):
 
     @staticmethod
     def dump(order:int, sinSource: SinSource,
-             sNoiseType = (NoiseType.Gaussian, NoiseType.White),
-             sNoise:tuple[float]=(0, 1e-15, 1e-12, 1e-9, 1e-6, 1e-3, 1), 
+             sNoiseType = (NoiseType.Gaussian,),
+             sNoise:tuple[float]=(0,), 
              sFreq=range(1, FFT_Order.MAX_FREQ),
-             dumpStepPath:str=None,
-             dumpOrderPath:str=None):
+             dumpStepPath:str=None):
         if not IndexSin.MIN_ORDER <= order < IndexSin.MAX_ORDER:
             raise RuntimeError(f'Invalid order {order}')
         size = 1 << order
@@ -671,18 +701,15 @@ class FFT_Step (FFT_Order):
             os.remove(dumpPath)
 
         def writeData(fw, sData:tuple[varDbl.VarDbl], 
-                      noiseType:NoiseType, noise:float, 
+                      noiseType:NoiseType, noise:float,
                       signal:SignalType, freq:int, test:TestType, step):
             for imag in (0, 1):
                 for val in (1, 0):
                     fw.write(f'\n{sinSource}\t{noiseType}\t{noise}\t{signal}\t{order}\t{freq}\t{test}\t{step}\t{imag}\t{val}')
                     for i in range(imag, size << 1, 2):
-                        fw.write(f'\t{sData[i].value() if val else sData[i].uncertainty()}')
+                        fw.write(f'\t{sData[i].value() if val else sData[i].uncertainty():.20e}')
                 fw.flush()
 
-        fo = open(dumpOrderPath, 'w') if dumpOrderPath else None
-        if fo:
-            fo.write(FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS))
         print(f'{datetime.datetime.now()}: Start dump to {dumpPath}')
         with open(dumpPath, 'w') as fw:
             fw.write(FFT_Step.header(order))
@@ -691,32 +718,20 @@ class FFT_Step (FFT_Order):
                 sCosSin.append(fft.idxSin.cos(i, order))
                 sCosSin.append(fft.idxSin.sin(i, order))
             writeData(fw, sCosSin, '', 0, '', '', 'CosSin', '')
-            
-            print(f'{datetime.datetime.now()}: Start calulation order={order}, sinSource={sinSource}')
+
             half = size >> 1
             sSignal = [FFT_Signal(sinSource, SignalType.Sin, order, freq) for freq in sFreq if freq < half] +\
                       [FFT_Signal(sinSource, SignalType.Cos, order, freq) for freq in sFreq if freq < half] +\
                       [FFT_Signal(sinSource, SignalType.Linear, order, 0)]
-
             for noiseType in sNoiseType:
                 for noise in sNoise:
                     for signal in sSignal:
                         calc = FFT_Step(signal, noiseType, noise)
-                        for test, sInput, ssStep in ((TestType.Forward, calc.sFrwd, calc.ssSpecStep),
-                                                     (TestType.Roundtrip, calc.sSpec, calc.ssRoundStep),
-                                                     (TestType.Reverse, calc.sBack, calc.ssRevStep)):
-                            writeData(fw, sInput, calc.noiseType, calc.noise,
-                                      calc.signalType, calc.freq, test, 'Input')
+                        for test, ssStep in ((TestType.Forward, calc.ssSpecStep),
+                                            (TestType.Roundtrip, calc.ssRoundStep),
+                                            (TestType.Reverse, calc.ssRevStep)):
                             for step, sStep in enumerate(ssStep):
-                                writeData(fw, sStep, calc.noiseType, calc.noise,
-                                          calc.signalType, calc.freq, test, step)
-                        if fo:
-                            calc.dumpMeasure(fo, calc.signalType, calc.measure) 
-                    if fo:
-                        calc.dumpMeasure(fo, SignalType.Aggr, FFT_Order.ssssAggr[order][sinSource][noiseType][noise])
-        if fo:
-            print(f'{datetime.datetime.now()}: Finish dump to {dumpOrderPath}')
-            fo.close()
+                                writeData(fw, sStep, noiseType, noise, calc.signalType, calc.freq, test, step)
 
     @staticmethod
     def readCosSin(testCase:unittest.TestCase, order:int, sinSource:SinSource, fr) -> tuple[varDbl.VarDbl]:
@@ -728,7 +743,7 @@ class FFT_Step (FFT_Order):
                 sWord = line.split('\t')
                 testCase.assertEqual(FFT_Step.dataOffset() + size, len(sWord))
                 testCase.assertEqual(sinSource, SinSource(sWord[0]))
-                testCase.assertEqual('0', sWord[2])
+                testCase.assertEqual(0, float(sWord[2]))
                 testCase.assertEqual(order, int(sWord[4]))
                 testCase.assertEqual('CosSin', sWord[6])
                 for i in (1,3,5,7):
@@ -761,7 +776,7 @@ class FFT_Step (FFT_Order):
 
     @staticmethod
     def readStep(testCase:unittest.TestCase, order:int, sinSource:SinSource, 
-                 dumpStepPath:str, fr, param:FFT_Order_Param, test:TestType, step:typing.Union[str, int]) \
+                 dumpStepPath:str, fr, param:FFT_Order_Param, test:TestType, step:int) \
             -> tuple[tuple[varDbl.VarDbl], FFT_Order_Param]:
         '''
         Read one step from {fr}, which is the file reader of {dumpStepPath}.
@@ -776,13 +791,13 @@ class FFT_Step (FFT_Order):
                 try:
                     line = next(fr)
                 except StopIteration:
-                    if test == TestType.Forward and step == 'Input' and imag == 0 and val == 1:
+                    if test == TestType.Forward and step == 0 and imag == 0 and val == 1:
                         return None, None
                     else:
                         testCase.fail(f'Invalid empty line for {dumpStepPath} at test={test} step={step}, imag={imag}, val={val}')
                 sWord = line.split('\t')
                 if not param:
-                    testCase.assertEqual(step, 'Input')
+                    testCase.assertEqual(step, 0)
                     param = FFT_Step.readFFTOrderParam(testCase, sWord, dumpStepPath)
                     testCase.assertEqual(param.signal.order, order)
                     testCase.assertEqual(param.signal.sinSource, sinSource)
@@ -795,7 +810,7 @@ class FFT_Step (FFT_Order):
                         testCase.assertEqual(param.signal.order, int(sWord[4]))
                         testCase.assertEqual(param.signal.freq, int(sWord[5]))
                         testCase.assertEqual(test, TestType(sWord[6]))
-                        testCase.assertEqual(step, sWord[7])
+                        testCase.assertEqual(step, int(sWord[7]))
                         testCase.assertEqual(imag, int(sWord[8]))
                         testCase.assertEqual(val, int(sWord[9]))
                     except (AssertionError, ValueError) as ex:
@@ -813,14 +828,14 @@ class FFT_Step (FFT_Order):
     @staticmethod
     def readSteps(testCase:unittest.TestCase, order:int, sinSource:SinSource, 
                   dumpStepPath:str, fr, test:TestType) -> tuple[tuple[varDbl.VarDbl], tuple[tuple[varDbl.VarDbl]], FFT_Signal, NoiseType, float]:
-        sInput, param = FFT_Step.readStep(testCase, order, sinSource, dumpStepPath, fr, None, test, 'Input')
-        if not sInput:
-            return None, None, None
-        ssStep = []
-        for i in range(order + len(FFT_Step.EXTRA_STEPS) + 1):
-            sStep, _ = FFT_Step.readStep(testCase, order, sinSource, dumpStepPath, fr, param, test, str(i))
+        sStep, param = FFT_Step.readStep(testCase, order, sinSource, dumpStepPath, fr, None, test, 0)
+        if not sStep:
+            return None, None
+        ssStep = [sStep]
+        for i in range(1, order + FFT.EXTRA_STEPS):
+            sStep, _ = FFT_Step.readStep(testCase, order, sinSource, dumpStepPath, fr, param, test, i)
             ssStep.append(sStep)
-        return param, sInput, ssStep
+        return param, ssStep
 
     @staticmethod
     def assertStep(testCase:unittest.TestCase, context:str, order:int, step:int,
@@ -834,24 +849,7 @@ class FFT_Step (FFT_Order):
         '''
         testCase.assertEqual(len(sData1), len(sData2))
         for i in range(len(sData1)):
-            if precDiff > 0:
-                diff = sData1[i] - sData2[i]
-                try:
-                    testCase.assertLessEqual(abs(diff.value()), precDiff * diff.uncertainty())
-                except AssertionError as ex:
-                    print(f'Diff at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
-                    raise ex
-            elif precDiff == 0:
-                try:
-                    varDbl.assertVarDblEqual(testCase, sData1[i], sData2[i])
-                except AssertionError as ex:
-                    diff =  sData1[i] - sData2[i]
-                    try:
-                        testCase.assertLessEqual(abs(diff.value()), math.ulp(1))
-                    except AssertionError as ex:
-                        print(f'Diff at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
-                        raise ex
-            else:
+            if precDiff < 0:
                 try:
                     testCase.assertAlmostEqual(sData1[i].value(), sData2[i].value(), 
                                                 delta=math.ulp(1) * (sData1[i].value() + sData2[i].value()))
@@ -864,13 +862,27 @@ class FFT_Step (FFT_Order):
                 except AssertionError as ex:
                     print(f'Diff uncertainty at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
                     raise ex
+            elif precDiff == 0:
+                try:
+                    varDbl.assertVarDblEqual(testCase, sData1[i], sData2[i])
+                except AssertionError as ex:
+                    diff =  sData1[i] - sData2[i]
+                    print(f'Diff at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
+                    raise ex
+            else:
+                diff = sData1[i] - sData2[i]
+                try:
+                    testCase.assertLessEqual(abs(diff.value()), precDiff * diff.uncertainty())
+                except AssertionError as ex:
+                    print(f'Diff at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
+                    raise ex
 
 
     @staticmethod
     def assertSteps(testCase:unittest.TestCase, context:str, order:int,
                     ssData1:tuple[tuple[varDbl.VarDbl]], ssData2:tuple[tuple[varDbl.VarDbl]],
                     precDiff=0):
-        for i in range(order + len(FFT_Step.EXTRA_STEPS) + 1):
+        for i in range(order + FFT.EXTRA_STEPS):
             FFT_Step.assertStep(testCase, context, order, i, ssData1[i], ssData2[i], precDiff=precDiff)
 
     @staticmethod                
@@ -884,150 +896,58 @@ class FFT_Step (FFT_Order):
 
 
     @staticmethod
-    def recalc(testCase:unittest.TestCase, order:int, sinSource: SinSource, 
-                dumpStepPath:str=None, 
-                dumpOrderPath=f'./Python/Output/FFT_{IndexSin.MIN_ORDER}_{IndexSin.MAX_ORDER}.txt',
-                uncPrec=1e-2, errPrec=1, precDiff=0,
-                minCount=FFT_Order.MIN_COUNT, minNoise=1e-14,
-                verbose=False):
+    def compare(testCase:unittest.TestCase, sinSource:SinSource, order:int,
+                dumpStepPath1:str, dumpStepPath2:str, precDiff=-1):
         '''
-        Test the FFT step from the dump file {dumpStepPath} by recalculation FFT_Step using data from the dump file, 
-            to verify the floating arithmetic from different languages.
-
-        Compare the individual step calculation with the aggregated result {dumpOrderPath}.
-            The error deviation must be within {errPrec} and the uncertainty mean within {uncPrec}.
-            Only test the error deviation for noise >= {minNoise} and the count > minCount.
-        '''
-        IndexSin.validateOrder(order)
-        size = 1 << order
-
-        if not dumpStepPath:
-            dumpStepPath = FFT_Step.dumpPath(order, sinSource)
-        if not os.path.isfile(dumpStepPath):
-            testCase.fail(f'Invalid dumpPath {dumpStepPath} for reading FFT data')
-
-        if dumpOrderPath:
-            sssssAggr = FFT_Order.read(dumpOrderPath, SignalType.Aggr, 0, checkEnding=False)
-            sssssLine = FFT_Order.read(dumpOrderPath, SignalType.Linear, 0, checkEnding=False)
-        else:
-            sssssAggr = {}
-            sssssLine = {}
-
-        def assertIndexSin(testCase, idxSin:IndexSin):
-            testCase.assertEqual(idxSin.sinSource, SinSource.Limit)
-            half = size >> 1
-            for i in range(size):
-                cos = idxSin.cos(i, order)
-                sin = idxSin.sin(i + half, order)
-                testCase.assertEqual(cos.value(), sin.value())
-                testCase.assertEqual(cos.uncertainty(), sin.uncertainty())
+        Direct compare the FFT step result from different languages at {dumpStepPath1} and {dumpStepPath2} for {sinSource} and {order}.
         
-        with open(dumpStepPath) as fr:
-            hdr = next(fr)      
-            size = len(hdr.split('\t')) - FFT_Step.dataOffset()
-            testCase.assertEqual(size, 1 << order)
-            testCase.assertEqual(hdr.strip(), FFT_Step.header(order))
-            sCosSin = FFT_Step.readCosSin(testCase, order, sinSource, fr)
+        When {precDiff} > 0, the difference of the value must be within {precDiff} times the uncertainty.
+        When {precDiff} == 0, the difference of the value or uncertainty must be within 1e-16 precision.
+        When {precDiff} < 0, the value and uncertainty must be exactly the same.
 
-            while True:
-                forward, sFrwd, ssSpecStep = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath, fr, TestType.Forward)
-                if not forward:
-                    break
-                print(f'{datetime.datetime.now()}: Start assert order={order} sinSource={sinSource} signal={forward.signal.signalType} freq={forward.signal.freq} noiseType={forward.noiseType} noise={forward.noise}')
-                roundtrip, sRound, ssRoundStep = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath, fr, TestType.Roundtrip)
-                FFT_Step.assertFFTOrderParam(testCase, forward, roundtrip)
-                FFT_Step.assertStep(testCase, f'signal={forward.signal.signalType} freq={forward.signal.freq} noise={forward.noise} roundtrip', 
-                                    order, order + 1, sRound, ssSpecStep[order + 1])
-                reverse, sBack, ssRevStep = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath, fr, TestType.Reverse)
-                FFT_Step.assertFFTOrderParam(testCase, forward, reverse)
-                sFreq = ssSpecStep[order + 2]
-                sWave = ssRevStep[order + 2]
-
-                fft = FFT_Step(forward.signal, forward.noiseType, forward.noise,
-                               sCosSin=sCosSin, sWave=sWave, sFreq=sFreq, sFrwd=sFrwd, sBack=sBack)
-                testCase.assertEqual(len(fft.ssSpecStep), order + len(FFT_Step.EXTRA_STEPS) + 1)
-                testCase.assertEqual(len(fft.ssRoundStep), order + len(FFT_Step.EXTRA_STEPS) + 1)
-                testCase.assertEqual(len(fft.ssRevStep), order + len(FFT_Step.EXTRA_STEPS) + 1)
-                assertIndexSin(testCase, fft.idxSin)
-                if verbose:
-                    print(f'Start assert for order={order} sinSource={sinSource} signal={forward.signal.signalType} freq={forward.signal.freq} noiseType={forward.noiseType} noise={forward.noise}')
-                FFT_Step.assertSteps(testCase, f'signal={forward.signal.signalType} freq={forward.signal.freq} noise={forward.noise} forward', 
-                                     order, ssSpecStep, fft.ssSpecStep, precDiff=precDiff)
-                FFT_Step.assertSteps(testCase, f'signal={forward.signal.signalType} freq={forward.signal.freq} noise={forward.noise} roundtrip', 
-                                     order, ssRoundStep, fft.ssRoundStep, precDiff=precDiff)
-                FFT_Step.assertSteps(testCase, f'signal={forward.signal.signalType} freq={forward.signal.freq} noise={forward.noise} reverse', 
-                                     order, ssRevStep, fft.ssRevStep, precDiff=precDiff)
-
-
-                sssssOrder = sssssLine if forward.signal.signalType == SignalType.Linear else sssssAggr
-                if sssssOrder and (ssssOrder := sssssOrder.get(order)) and (sssOrder := ssssOrder.get(sinSource)) \
-                        and (ssOrder := sssOrder.get(forward.noiseType)) and (sOrder := ssOrder.get(forward.noise)) and (len(sOrder) == 3):
-                    for test in TestType:
-                        errDev, uncMean, cntErr = sOrder[test]
-                        try:
-                            testCase.assertLessEqual(fft.measure.sHisto[test].stat().count(), cntErr)
-                        except AssertionError as ex:
-                            raise ex
-                        if forward.noise < minNoise:
-                            continue
-                        try:
-                            unc = fft.measure.sUncStat[test].mean()
-                            testCase.assertAlmostEqual(unc /uncMean, 1, delta = uncPrec)
-                        except AssertionError as ex:
-                            raise ex
-                        if minCount <= cntErr and test != TestType.Roundtrip and 0 < forward.noise:
-                            try:
-                                err = fft.measure.sHisto[test].stat().dev()
-                                testCase.assertAlmostEqual(err / errDev, 1, delta = errPrec)
-                            except AssertionError as ex:
-                                raise ex
-
-                                     
-
-    @staticmethod
-    def compare(testCase:unittest.TestCase, sinSource:SinSource, dumpStepPath1:str, dumpStepPath2:str, precDiff= 1):
+        When the noise is not zero, construct the FFT with the noise data from the dump file, to avoid the randomness of noise generation.
+        Otherwise, when the noise is zero:
+         *) When the sinSource is SinSource.Prec, only compare the value.
         '''
-        Direct compare the FFT step result from different folder {dumpDir}
-        '''
-        print(f'{datetime.datetime.now()}: Start compare {dumpStepPath1} vs {dumpStepPath2}')
+        print(f'{datetime.datetime.now()}: Start compare {dumpStepPath1} vs {dumpStepPath2} with precDiff={precDiff}')
         with open(dumpStepPath1) as f1, open(dumpStepPath2) as f2:
             hdr = next(f1)      
             size = len(hdr.split('\t')) - FFT_Step.dataOffset()
-            order = IndexSin.validateSize(size)
+            testCase.assertEqual(order, IndexSin.validateSize(size))
             testCase.assertEqual(hdr, next(f2))
             sCosSin1 = FFT_Step.readCosSin(testCase, order, sinSource, f1)
             sCosSin2 = FFT_Step.readCosSin(testCase, order, sinSource, f2)
-            FFT_Step.assertStep(testCase, 'CosSin', order, 'CosSin', sCosSin1, sCosSin2, precDiff=0)
+            match sinSource:
+                case SinSource.Prec:
+                    FFT_Step.assertStep(testCase, 'CosSin', order, 'CosSin', sCosSin1, sCosSin2, precDiff=-1)
+                case _:
+                    FFT_Step.assertStep(testCase, 'CosSin', order, 'CosSin', sCosSin1, sCosSin2, precDiff=precDiff)
 
             while True:
-                forward1, sFrwd1, ssSpecStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Forward)
-                if not forward1:
+                forward1, ssSpecStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Forward)
+                if (not forward1) or forward1.noise:
+                    forward2, ssSpecStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Forward)
+                    testCase.assertIsNone(forward2)
                     break
-                print(f'{datetime.datetime.now()}: Start compare order={order} sinSource={sinSource} signal={forward1.signal.signalType} freq={forward1.signal.freq} noiseType={forward1.noiseType} noise={forward1.noise}')    
+                print(f'{datetime.datetime.now()}: Start compare order={order} sinSource={sinSource} signal={forward1.signal.signalType} freq={forward1.signal.freq} noiseType={forward1.noiseType} noise={forward1.noise} precDiff={precDiff}')    
                 testCase.assertEqual(forward1.signal.order, order)
                 context = f'signal={forward1.signal.signalType} freq={forward1.signal.freq} noise={forward1.noise} forward'
-                forward2, sFrwd2, ssSpecStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Forward)
+                forward2, ssSpecStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Forward)
                 FFT_Step.assertFFTOrderParam(testCase, forward1, forward2)
-                FFT_Step.assertStep(testCase, context, order, 'sFrwd', sFrwd1, sFrwd2, precDiff=precDiff)
-                FFT_Step.assertStep(testCase, context, order, 'sFreq', ssSpecStep1[-2], ssSpecStep2[-2], precDiff=-1)
                 FFT_Step.assertSteps(testCase, context, order, ssSpecStep1, ssSpecStep2, precDiff=precDiff)
 
                 context = f'signal={forward1.signal.signalType} freq={forward1.signal.freq} noise={forward1.noise} roundtrip'
-                roundtrip1, sRound1, ssRoundStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Roundtrip)
-                roundtrip2, sRound2, ssRoundStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Roundtrip)
+                roundtrip1, ssRoundStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Roundtrip)
+                roundtrip2, ssRoundStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Roundtrip)
                 FFT_Step.assertFFTOrderParam(testCase, forward1, roundtrip1)
                 FFT_Step.assertFFTOrderParam(testCase, forward2, roundtrip2)
-                FFT_Step.assertStep(testCase, context, order, 'sRound', sRound1, sRound2, precDiff=precDiff)
-                FFT_Step.assertStep(testCase, context, order, 'sFrwd', ssRoundStep1[-2], ssRoundStep2[-2], precDiff=precDiff)
                 FFT_Step.assertSteps(testCase, context, order, ssRoundStep1, ssRoundStep2, precDiff=precDiff)
                 
                 context = f'signal={forward1.signal.signalType} freq={forward1.signal.freq} noise={forward1.noise} reverse'
-                reverse1, sBack1, ssRevStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Reverse)
-                reverse2, sBack2, ssRevStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Reverse)
+                reverse1, ssRevStep1 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath1, f1, TestType.Reverse)
+                reverse2, ssRevStep2 = FFT_Step.readSteps(testCase, order, sinSource, dumpStepPath2, f2, TestType.Reverse)
                 FFT_Step.assertFFTOrderParam(testCase, forward1, reverse1)
                 FFT_Step.assertFFTOrderParam(testCase, forward2, reverse2)
-                FFT_Step.assertStep(testCase, context, order, 'sBack', sBack1, sBack2, precDiff=precDiff)
-                FFT_Step.assertStep(testCase, context, order, 'sWave', ssRevStep1[-2], ssRevStep2[-2], precDiff=-1)
                 FFT_Step.assertSteps(testCase, context, order, ssRevStep1, ssRevStep2, precDiff=precDiff)
 
 

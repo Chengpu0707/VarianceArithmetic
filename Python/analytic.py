@@ -45,7 +45,7 @@ def _is_iterable(obj) -> bool:
 
 def _taylor_matrix_series(matx: sympy.Matrix, 
             sX: tuple[sympy.Symbol], 
-            maxOrder:int=momentum.Normal.MAX_ORDER) \
+            maxOrder:int=448) \
     -> sympy.Matrix:
     '''
     Calculate Taylor expansion of {func} to a set of variables in the matrix {sX}, 
@@ -60,7 +60,7 @@ def _taylor_matrix_series(matx: sympy.Matrix,
 
 def taylor_series(func: sympy.Function, 
         sX: tuple[sympy.Symbol], 
-        maxOrder:int=momentum.Normal.MAX_ORDER) \
+        maxOrder:int=448) \
     -> tuple[dict[typing.Union[tuple[int],int], sympy.Function]]:
     '''
     Calculate Taylor expansion of {func} to a set of variables {sX}, 
@@ -114,7 +114,7 @@ def taylor_series(func: sympy.Function,
 
 def taylor(func: sympy.Function, 
         sXnVar: tuple[tuple[sympy.Symbol]], 
-        maxOrder:int=momentum.Normal.MAX_ORDER,
+        maxOrder:int=448,
         minTermimationOrder:int=20) \
     -> tuple[sympy.Function]:
     '''

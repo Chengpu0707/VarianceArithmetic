@@ -7,11 +7,21 @@ import varDbl
 class TestNormal (unittest.TestCase):
     filePath = './Python/NormalMomentum_5.0.txt'
 
+    @staticmethod
+    def preciseNormalMomentum5():
+        return ( 1*(1 - 5.733031e-07), 
+                 1*(1 - 1.544050e-05),
+                 3*(1 - 1.393338e-04),
+                15*(1 - 7.588003e-04),
+               105*(1 - 2.9711805e-03),
+               945*(1 - 9.1166811e-03));   
+
     @unittest.skip('1 day slow')
     def testCalcPrecice(self):
         momentum.Normal.calcPreciseNorm(maxOrder=24)
         self.assertTrue(os.path.isfile(TestNormal.filePath))
 
+    @unittest.skip('file may not exist')
     def testReadPrecice(self):
         bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
         self.assertEqual(bounding, 5)
@@ -27,8 +37,7 @@ class TestNormal (unittest.TestCase):
         mmt = momentum.Normal(withVariance=False)
         self.assertAlmostEqual(mmt.leakage, 5.7330314e-07)
         self.assertEqual(mmt.maxOrder, 448)
-        bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
-        self.assertEqual(bounding, 5)
+        sMomentum = TestNormal.preciseNormalMomentum5()
         for i, m in enumerate(sMomentum):
             self.assertAlmostEqual(mmt[i*2] / m, 1)
             self.assertEqual(mmt[i*2 + 1], 0)
@@ -36,8 +45,7 @@ class TestNormal (unittest.TestCase):
     def testNormal_withVariance(self):
         mmt = momentum.Normal(withVariance=True)
         self.assertEqual(mmt.maxOrder, 250)
-        bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
-        self.assertEqual(bounding, 5)
+        sMomentum = TestNormal.preciseNormalMomentum5()
         for i, m in enumerate(sMomentum):
             self.assertAlmostEqual(mmt[i*2].value() / m, 1)
             self.assertEqual(mmt[i*2 + 1], 0)
@@ -49,8 +57,7 @@ class TestNormal (unittest.TestCase):
         mmtF = momentum.Normal(withVariance=False)
         self.assertGreater(mmtF.maxOrder, 250)
         self.assertEqual(mmtF.bounding, 5)
-        bounding, sMomentum = momentum.Normal.readPreciseNorm(TestNormal.filePath)
-        self.assertEqual(bounding, 5)
+        sMomentum =TestNormal.preciseNormalMomentum5()
         with open('./Python/Output/NormalMomentum_compare.txt', 'w') as f:
             f.write('Order\tVar Value\tVar Uncertainty\tVar Precison\tVar Diff\tFloat Diff\tFloat Uncertainty\tFloat Precison\n')
             for n in range(0, mmtV.maxOrder, 2):

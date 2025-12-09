@@ -1,3 +1,4 @@
+import abc
 import datetime
 import math
 import os
@@ -7,7 +8,29 @@ import sympy
 
 import varDbl
 
-class Normal:
+class Momentum (abc.ABC):
+
+    @property
+    @abc.abstractmethod
+    def bounding(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def leakage(self):
+        pass
+   
+    @property
+    @abc.abstractmethod
+    def maxOrder(self):
+        pass
+
+    @abc.abstractmethod
+    def __getitem__(self, n:int) -> float:
+        pass
+
+
+class Normal (Momentum):
     '''
     Calculate variance momentum for the given {bounding}.
     Detect the {_maxOrder} for the bounding, which is 448 when {bounding}=5.   
@@ -174,10 +197,10 @@ class Uniform:
     '''
     Pre-calculated variance momentum for uniform distribution [-1, 1].
     '''
-    __slots__ = ('_sMomentum', '_maxOrder')
+    __slots__ = ('_bounding', '_sMomentum', '_maxOrder')
 
-
-    def __init__(self):
+    def __init__(self, bounding=1):
+        self._bounding = bounding
         self._sMomentum = []
         fac = 1
         for n in range(10000):
@@ -186,16 +209,16 @@ class Uniform:
             except OverflowError:
                 break
             self._sMomentum.append(mmt)
-            fac *= 3
+            fac *= 3 * bounding**2
         self._maxOrder = len(self._sMomentum)
 
     @property
     def bounding(self):
-        return math.sqrt(3)
+        return self._bounding
     
     @property
     def leakage(self):
-        return 0
+        return 1 - self.bounding
     
     @property
     def maxOrder(self):

@@ -1,14 +1,6 @@
-import bisect
-import math
-import os
-import typing
-
-import varDbl
-
 import enum
 import math
 import os
-import typing
 
 import varDbl
 
@@ -66,14 +58,14 @@ class IndexSin:
                     quart = IndexSin._half >> 1
                     sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(quart)] + \
                         [math.cos(math.pi * (quart - i) / IndexSin._size) for i in range(quart + 1)]
-                    IndexSin._sSinQuart = tuple([varDbl.VarDbl(v, math.ulp(v)) for v in sSin])
+                    IndexSin._sSinQuart = tuple([varDbl.VarDbl(v) for v in sSin])
                 self._order = IndexSin.MAX_ORDER
                 self._sSin = IndexSin._sSinQuart
                 self._sCos =  None
             case SinSource.Full:
                 if not IndexSin._sSinFull:
                     sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(IndexSin._size)]
-                    IndexSin._sSinFull = tuple([varDbl.VarDbl(v, math.ulp(v)) for v in sSin])
+                    IndexSin._sSinFull = tuple([varDbl.VarDbl(v) for v in sSin])
                 self._order = IndexSin.MAX_ORDER
                 self._sSin = IndexSin._sSinFull
                 self._sCos =  None
@@ -108,7 +100,7 @@ class IndexSin:
             size = 1 << order
             for i in range(size + 1):
                 v = self.sin(i, order)
-                f.write(f'{i}\t{i/size}\t{v.value()}\t{v.uncertainty()}\n')
+                f.write(f'{i}\t{i/size:.20e}\t{v.value():.20e}\t{v.uncertainty():.20e}\n')
 
     @staticmethod
     def read(sinSource:SinSource, order:int=MAX_ORDER, errorFold:float=1e6) -> list[varDbl.VarDbl]:
@@ -169,7 +161,7 @@ class IndexSin:
     def sin(self, freq:int, order:int) -> varDbl.VarDbl:
         if self.sinSource == SinSource.Lib:
             v = math.sin(math.pi * freq / (1 << order))
-            return varDbl.VarDbl(v, math.ulp(v))
+            return varDbl.VarDbl(v)
         elif self.sinSource == SinSource.Limit:
             if self._order < order:
                 raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
@@ -189,7 +181,7 @@ class IndexSin:
     def cos(self, freq:int, order:int) -> varDbl.VarDbl:
         if self.sinSource == SinSource.Lib:
             v = math.cos(math.pi * freq / (1 << order))
-            return varDbl.VarDbl(v, math.ulp(v))
+            return varDbl.VarDbl(v)
         elif self.sinSource == SinSource.Limit:
             if self._order < order:
                 raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
