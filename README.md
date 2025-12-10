@@ -90,9 +90,9 @@ Outliers is applied only when in FFT calculation
  * the sine source is library, and
  * the signal is either sine or cosine without added noise, and 
  * the test is reverse transformation, and 
- * the expected value is 0~0 and
+ * the expected value is 0+/-0 and
  * the value is error deviation whose average value is 1, and
- * An outlier minimal threshold of 1e14 is applied, to filter out 1e-16~1e-32 vs 0~0, such as:
+ * An outlier minimal threshold of 1e14 is applied, to filter out 1e-16+/-1e-32 vs 0~0, such as:
 ```
 For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=32769, normaliized error outlier 8604408562923685.0 between 6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
 For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=65536, normaliized error outlier -8604408562923685.0 between 0.000000e+00~0.000e+00 and 1.224647e-16~1.423e-32

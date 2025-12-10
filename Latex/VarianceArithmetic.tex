@@ -1092,13 +1092,14 @@ The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$, which shou
 \label{eqn: Gaussian experimental bounding leakage}
 \epsilon(\kappa_s, N) = &\; 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
 \end{align}
-When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
 Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$.
 It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$. 
 Figure \ref{fig: Bounding_Factor_Leakage} further demonstrates that for smaller $\kappa_s$, $\kappa(\kappa_s, N)$ approaches $\kappa_s$ more rapidly as $N$ increases (e.g., $\kappa(2, 100) \simeq 2$ vs $\kappa(5, 1000) \simeq 5$), but converges to a larger stable bounding leakage (e.g., $\epsilon(2) = 4.55\;10^{-2}$ vs $\epsilon(5) = 5.73\;10^{-7}$).
 Figure \ref{fig: Bounding_Factor_Leakage} also indicates that when $N \geq 30$, the difference between $\epsilon(4, N)$ and $\epsilon(5, N)$ is less than $10^{-3}$, suggesting that $\kappa(\kappa_s, N)$ becomes stable when $\kappa_s \geq 4$.
 Moreover, according to  the 5-$\sigma$ rule, $\kappa(5, N)$ in Figure \ref{fig: Normal_Bounding_Leakage} should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
 
+$\kappa_s = \sqrt{3}$ and $\kappa_s = 5$ are defined as the ideal bounding ranges for the uniform and Gaussian distributions respectively.
 
 
 \subsection{Ideal Statistics}
@@ -1132,12 +1133,12 @@ When sample count $N \rightarrow \infty$, $\zeta(0) \rightarrow 1$, $\zeta(2) \r
 Such relationship of $\delta^2 f$ versus sample count $N$ is general:
 \begin{itemize}
 \item
-When the underlying uncertainty distribution is Gaussian, Figure \ref{fig: Normal_Function} shows that the resulting variance $\delta^2 f$ for a selected functions rise with $N$ until reaching the corresponding stable values $\widehat{\delta^2} f$ when $N \geq 20$.
+When the underlying uncertainty distribution is Gaussian, Figure \ref{fig: Normal_Function} shows that the resulting variance $\delta^2 f$ for a selected functions rise with $N$ until reaching the corresponding stable values $\widehat{\delta^2} f$ when $N \geq 50$.
 When $N = 20$ and $\kappa_s = 5$, $\kappa = 3.8$ according to Figure \ref{fig: Normal_Bounding_Leakage}.
 Therefore it is sufficient to compute the stable variances $\widehat{\delta^2} f$ with $\zeta(n, 5)$.
 
 \item
-When the underlying uncertainty distribution is Uniform, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances are reached only when $N > 10^5$.
+When the underlying uncertainty distribution is Uniform, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances are reached only when $N > 10^4$.
 The stable variance $\widehat{\delta^2} f$ is computed using Formula \eqref{eqn: bound moment UN}.
 \end{itemize}
 
@@ -1149,13 +1150,14 @@ The stable resulting variances $\delta^2 f$ is reached only when $\epsilon(s, N)
 All functions approach their corresponding ideal variances with exactly the same trend.
 These observations suggest that bounding leakage is the reason for $\delta^2 f < \widehat{\delta^2} f$ and it is justified to infer confidential interval range $\kappa$ from bounding leakage $\epsilon(N)$.
 Define $\alpha \equiv \delta^2 f/\widehat{\delta^2} f \in [0, 1]$ as the \emph{ideal ratio}, which quantifies the reliability for $\widehat{\delta^2} f$  due to insufficient sample count $N$ for the given underlying distribution.
+Define the ideal ratio to be zero when the sample count $N$ is $1$.
 When there are multiple inputs each with its own ideal ratio $\alpha=\zeta(2, \kappa)$, Formula \eqref{eqn: sum leakage} demonstrates an example on how to calculate the resulting ideal ratio $\alpha$ for $x \pm y$.
 
 An ideal ratio also applies to the corresponding uncertainty bias.  
 The trends of uncertainty biases $\overline{f} - f$ versus sample count $N$ are exactly as those in Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, except that  $\overline{x} - x = 0$.
 This similarity is expected because the first-order approximation in both Formula \eqref{eqn: Taylor 1d mean} and Formula \eqref{eqn: Taylor 1d variance} contains $\sigma^2 \zeta(2)$. 
 
-Statistical Taylor expansion outputs ideal uncertainty, ideal uncertainty bias, and ideal ratio.
+Statistical Taylor expansion outputs ideal uncertainty, ideal uncertainty bias, and ideal ratio for the chosen ideal bounding ranges, in which the ideal ratio quantifies the reliability of the ideal uncertainty and ideal uncertainty bias.
 
 
 
