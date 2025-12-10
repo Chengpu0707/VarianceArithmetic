@@ -38,8 +38,11 @@ Run all unit test will generate txt files under ./Python/Output
 Specifically, analytic.py allows the solution to any analytic functions.
 Not included is the python interpreter and libraries (numpy, scipy, sympy) which needs to be downloaded and set up, such as by the python pip tool. 
 
-The txt files under ./{Python, Cpp, Java}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb.
+The txt files under ./{Python, Cpp, Java}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb/as *.ipynb files.
 Different implementation should give the same result.
+
+The figures in *.ipynb files are saved as *.png files under ./Latex, and converted to *.pdf files under ./Latex before they are used in the ./Latex/VarianceArithmetic.tex file.
+The Latex style file is ./Latex/intmacros.sty
 
 
 # Unit Tests
@@ -170,7 +173,7 @@ The unit tests:
  * Python/testVarDbl.py
 
 
-### _Sub Section: Monotonic_ and _Sub Section: Monotonic_ 
+### _Sub Section: Monotonic_ and _Sub Section: Positive_ 
 
 Unit tests:
  * Cpp/TestExp.cpp, Cpp/TestLog.cpp, Cpp/TestSin.cpp, Cpp/TestPow.cpp
@@ -213,7 +216,7 @@ Unit tests:
 Analysis:
  * IPyNb/TaylorExpansion.ipynb: expansion of 1/(1 - x)
  * IPyNb/Polynominal.ipynb
- * TODO: continuous
+ * IPyNb/ConvergeEdge.ipynb
 
 
 ## _Section: Matrix Calculations_
@@ -263,13 +266,10 @@ Unit tests:
  * Python/testFFT.py
 
 Anaylysis:
- * IPyNb/FFT.Cpp.ipynb
- * IPyNb/FFT.Java.ipynb
- * IPyNb/FFT.Python.ipynb
- * IPyNb/FFT_Step_Prec.Cpp.ipynb, IPyNb/FFT_Step_Quart.Cpp.ipynb, IPyNb/FFT_Step_Lib.SciPy.Cpp.ipynb
- * IPyNb/FFT_Step_Prec.Java.ipynb, IPyNb/FFT_Step_Quart.Java.ipynb, IPyNb/FFT_Step_Lib.SciPy.Java.ipynb
- * IPyNb/FFT_Step_Prec.Python.ipynb, IPyNb/FFT_Step_Quart.Python.ipynb, IPyNb/FFT_Step_Lib.SciPy.Python.ipynb
-
+ * IPyNb/FFT.{Cpp, Java, Python}.ipynb
+ * IPyNb/FFT_Step_{Prec, Quart}.{Cpp, Java, Python}.ipynb
+ * IPyNb/FFT_Step_Lib.SciPy.{Cpp, Java, Python}.ipynb
+ 
 
 ### _Sub Section: Trigonometric Library Errors_
 
