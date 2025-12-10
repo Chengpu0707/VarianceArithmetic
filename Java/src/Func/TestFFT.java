@@ -677,8 +677,8 @@ public class TestFFT {
   
 
     @Test 
-    public void dump_Step_2_6() {
-        for (int order = 2; order < 6; ++order) {
+    public void dump_Step_2_7() {
+        for (int order = 2; order < 7; ++order) {
             for (SinSource sinSource: SinSource.values()) {
                 final String dumpPath = String.format("./Java/Output/FFT_Step_%d_%s.txt", order, sinSource);
                 FFT_Step.dump(dumpPath, sinSource, order, NoiseType.Gaussian, 0);

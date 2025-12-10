@@ -597,7 +597,7 @@ int main(int argc, char* argv[])
 
     if (argc == 1) {
         std::cout << "Start calculate FFT step" << std::endl;
-        for (size_t order = 2; order < 6; ++order) {
+        for (size_t order = 2; order < 7; ++order) {
             std::cout << "Start calculate FFT step order=" << order << std::endl;
             for (auto src : {"Prec", "Quart", "Lib"}) {
                 FFT_Step::dump(IndexSin::toSinSource(src), order);

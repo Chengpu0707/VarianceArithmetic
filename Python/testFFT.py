@@ -213,7 +213,7 @@ class Test_FFT_Lib (unittest.TestCase):
 class Test_FFT_Step (unittest.TestCase):
 
     def test_clean(self):
-        for order in range(2, 6):
+        for order in range(2, 7):
             for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
                 FFT_Step.dump(order, sinSource)
 
