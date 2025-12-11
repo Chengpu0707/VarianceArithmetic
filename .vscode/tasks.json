@@ -9,6 +9,7 @@
                 "c++23",
                 "-fdiagnostics-color=always",
                 "-g",
+                "-O3",
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"

@@ -81,8 +81,9 @@ For Python, run the manual command:
 
 ## Last Unit tests to run
 
-testCompare.py compares the results of Java, C++, and Python for the selected tests, and it should be run last.
+testCompare.py compares the results of C++, Java, and Python for the selected tests, and it should be run last.
 
+IPyNb/ExeTime.ipynb comoares the executioin speed of C++, Java, and Python.
 
 
 ## Outlier

@@ -3216,9 +3216,21 @@ Except multiplication between two precise values, variance arithmetic does not t
 
 
 
+\subsection{Calculation Response}
+
+\begin{figure}
+\includegraphics[height=2.5in]{FFT_Performance.pdf} 
+\captionof{figure}{
+The FFT execution time (y-axis) versus the FFT order (x-axis) for the implementation using either C++, Java, or Python (legend).
+The C++ executable is complied with \textit{-O3} optimization.  
+}
+\label{fig: FFT_Performance}
+\end{figure}
 
 
-
+Except the performance, variance arithmetic shows no result difference when implemented using either C++, Java, or Python.
+As expected, the execution time increases exponentially with the FFT order $L$ as $2^L$ when the FFT order is large enough, validating the calculation response.
+The mystery is that the Java implementation is one order of magnitude faster than the C++ implementation, even though the C++ implementation has \textit{-O3} optimization.
 
  
 
