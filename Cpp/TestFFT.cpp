@@ -405,6 +405,11 @@ bool FFT_Order::dump(
         std::cout << "Fail to open " << dumpPath;
         return false;
     }
+    std::ofstream ofsl(dumpPath + ".log");
+    if (!ofsl) {
+        std::cerr << "Failed to open log file for " << dumpPath;
+        return false;
+    }
     ofs << std::scientific << std::setprecision(20);
     if (sssssAggr.empty())
         ofs << HEADER << "\n";   
@@ -426,7 +431,7 @@ bool FFT_Order::dump(
                         }
                     }
                     const std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-                    std::cout << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S") << ": "
+                    ofsl << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S") << ": "
                             << "Start calulation order=" << order << ", sinSource=" << IndexSin::sSinSource[sinSource] 
                             << ", noiseType=" << FFT_Order::sNoiseType[noiseType] <<", noise=" << noise << std::endl;
                     if (sSignal.empty()) {
@@ -438,7 +443,7 @@ bool FFT_Order::dump(
                         }
                         sSignal.emplace_back(FFT_Signal::Linear, order, 0, sinSource);
                         const std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-                        std::cout << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S") << ": "
+                        ofsl << std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S") << ": "
                                   << "Finish create signal for order=" << order << ", sinSource=" << IndexSin::sSinSource[sinSource] << std::endl;
                     }
                     for (const FFT_Signal& signal: sSignal) {

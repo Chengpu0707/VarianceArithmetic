@@ -1,13 +1,14 @@
 '''
 Compare Taylor expansion from different implementation
 '''
-
+import datetime
 import os
 import unittest
+import re
 import sys
 import traceback
 
-from histo import Histo
+from histo import Histo, Stat
 from taylor import Taylor
 from varDbl import VarDbl, assertVarDblEqual
 from testManual import TestConvergence
@@ -355,6 +356,74 @@ class Test_FFT_Order (unittest.TestCase):
         except AssertionError as ex:
             Test_FFT_Order.printDiff(sssDiff)
             raise ex
+
+
+class Test_Exe_Time (unittest.TestCase):
+
+    def readExeTime(self, logFile:str, regEx:str, 
+                    idxOrder:int, idxNoise:int, idxSinSource:int=None):
+        '''
+        read execution time in the format of <time>: <regEx for order>
+        '''
+        pattern = re.compile(regEx)
+        sExeTime:dict[int, Stat] = {}
+        prevTime = None
+        prevOrder = 0
+        with open(logFile) as f:
+            for line in f:
+                if ': ' not in line:
+                    prevTime = None
+                    continue
+                try:
+                    sWord = line.split(': ')
+                    time = datetime.datetime.fromisoformat(sWord[0])
+                    match = pattern.match(sWord[1])
+                    if not match:
+                        prevTime = None
+                        continue
+                    order = int(match.group(idxOrder))
+                    noise = float(match.group(idxNoise))
+                    sinSource = None if idxSinSource is None else match.group(idxSinSource)
+                except Exception:
+                    prevTime = None
+                    continue
+                if prevTime:
+                    if order not in sExeTime:
+                        sExeTime[order] = Stat()
+                    if sinSource:
+                        sExeTime[prevOrder].accum((time - prevTime).total_seconds(), (noise, sinSource))
+                    else:
+                        sExeTime[prevOrder].accum((time - prevTime).total_seconds(), noise)
+                prevTime = time
+                prevOrder = order
+        
+        with open(logFile + '.txt', 'w') as f:
+            f.write(f'Order\tCount\tMean\tDev\tMin\tMin At\tMax\tMax At\n')
+            for order in sorted(sExeTime.keys()):
+                stat = sExeTime[order]
+                self.assertGreaterEqual(stat.min(), 0)
+                self.assertLessEqual(stat.min(), stat.mean())
+                self.assertGreaterEqual(stat.max(), stat.mean())
+                f.write(f'{order}\t{stat.count()}\t{stat.mean()}\t{stat.dev()}\t{stat.min()}\t{stat.minAt()}\t{stat.max()}\t{stat.maxAt()}\n')
+
+    def test_Adjugate(self):
+        self.readExeTime('./Python/Output/testAdjugate.log', 
+                          '^Start size=(\d+), noise=(\d+e-\d+|\d+.\d+|\d+)$', 1, 2)
+
+    def test_FFT_Order_Cpp(self):
+        self.readExeTime('./Cpp/Output/FFT_2_19.txt.log', 
+                          '^Start calulation order=(\d+), sinSource=(Prec|Quart|Lib), noiseType=(Gaussian|White), noise=(\d+e-\d+|\d+.\d+|\d+)$',
+                          1, 4, 2)
+    
+    def test_FFT_Order_Java(self):
+        self.readExeTime('./Java/Output/FFT_2_19.txt.log', 
+                          '^Starting noiseType=(Gaussian|White) noise=(\d+e-\d+|\d+.\d+|\d+) order=(\d+) sinSource=(Prec|Quart|Lib)$',
+                          3, 2, 4)
+    
+    def test_FFT_Order_Python(self):
+        self.readExeTime('./Python/Output/FFT_2_19.txt.log', 
+                          '^Start calulation order=(\d+), sinSource=(Prec|Quart|Lib), noiseType=(Gaussian|White), noise=(\d+e-\d+|\d+.\d+|\d+)$',
+                          1, 4, 2)
 
 
 if __name__ == '__main__':

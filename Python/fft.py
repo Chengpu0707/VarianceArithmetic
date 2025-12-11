@@ -487,7 +487,7 @@ class FFT_Order (FFT_Signal):
         dumpPath = FFT_Order.dumpPath(sOrder)
         sssssAggr = FFT_Order.read(dumpPath)
 
-        with open(dumpPath, 'a' if sssssAggr else 'w') as fw:
+        with open(dumpPath, 'a' if sssssAggr else 'w') as fw, open(dumpPath + '.log', 'w') as fl:
             if not sssssAggr:
                 fw.write(FFT_Order.title(FFT_Order.DIVIDS, FFT_Order.DEVS))
             for noiseType in sNoiseType:
@@ -499,12 +499,14 @@ class FFT_Order (FFT_Signal):
                             if sssssAggr and (ssssAggr := sssssAggr.get(order)) and (sssAggr := ssssAggr.get(sinSource)) \
                                     and (ssAggr := sssAggr.get(noiseType)) and (sAggr := ssAggr.get(noise)) and (len(sAggr) == 3):
                                 continue
-                            print(f'{datetime.datetime.now()}: Start calulation order={order}, sinSource={sinSource}, noiseType={noiseType}, noise={noise}')
+                            fl.write(f'{datetime.datetime.now()}: Start calulation order={order}, sinSource={sinSource}, noiseType={noiseType}, noise={noise}\n')
+                            fl.flush()
                             if not sSignal:
                                 sSignal = [FFT_Signal(sinSource, SignalType.Sin, order, freq) for freq in sFreq if freq < half] +\
                                           [FFT_Signal(sinSource, SignalType.Cos, order, freq) for freq in sFreq if freq < half] +\
                                           [FFT_Signal(sinSource, SignalType.Linear, order, 0)]
-                                print(f'{datetime.datetime.now()}: Finish create signal for order={order}, sinSource={sinSource}')
+                                fl.write(f'{datetime.datetime.now()}: Finish create signal for order={order}, sinSource={sinSource}\n')
+                                fl.flush()
                             for signal in sSignal:
                                 calc = FFT_Order(signal, noiseType, noise)
                                 calc.dumpMeasure(fw, calc.signalType, calc.measure)

@@ -38,7 +38,7 @@ Run all unit test will generate txt files under ./Python/Output
 Specifically, analytic.py allows the solution to any analytic functions.
 Not included is the python interpreter and libraries (numpy, scipy, sympy) which needs to be downloaded and set up, such as by the python pip tool. 
 
-The txt files under ./{Python, Cpp, Java}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb/as *.ipynb files.
+The txt files under ./{Cpp, Java, Python}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb/as *.ipynb files.
 Different implementation should give the same result.
 
 The figures in *.ipynb files are saved as *.png files under ./Latex, and converted to *.pdf files under ./Latex before they are used in the ./Latex/VarianceArithmetic.tex file.
@@ -48,6 +48,7 @@ The Latex style file is ./Latex/intmacros.sty
 # Unit Tests
 
 All unit tests should pass.
+Before running unit tests, please make sub folder ./{Cpp, Java, Python}/Output.
 
 ## Manual test
 

@@ -342,61 +342,66 @@ class FFT_Order extends FFT_Signal {
         try (final FileWriter fw = new FileWriter(dumpPath, sssssAggr != null)) {
             if (sssssAggr == null)
                 fw.write(FFT_Order.header() + "\n");
-            for (NoiseType noiseType: sNoiseType) {
-                for (int order = minOrder; order < maxOrder; ++order) {
-                    for (final SinSource sinSource : sSinSource) {
-                        System.out.println(String.format("%s: Starting noiseType=%s order=%d sinSource=%s", 
-                                LocalDateTime.now(), noiseType, order, sinSource));
-                        for (final double noise : sNoise) {
-                            if (sssssAggr != null) {
-                                final Map<NoiseType, Map<Double, Map<SinSource, Set<TestType>>>> ssssAggr = sssssAggr.get(order);
-                                if (ssssAggr != null) {
-                                    final Map<Double, Map<SinSource, Set<TestType>>> sssAggr = ssssAggr.get(noiseType);
-                                    if (sssAggr != null) {
-                                        final Map<SinSource, Set<TestType>> ssAggr = sssAggr.get(noise);
-                                        if (ssAggr != null) {
-                                            final Set<TestType> sAggr = ssAggr.get(sinSource);
-                                            if ((sAggr != null) && (sAggr.size() == TestType.values().length))
-                                                continue;
+            try (final FileWriter fl = new FileWriter(dumpPath + ".log")) {
+                for (NoiseType noiseType: sNoiseType) {
+                    for (int order = minOrder; order < maxOrder; ++order) {
+                        for (final SinSource sinSource : sSinSource) {
+                            for (final double noise : sNoise) {
+                                fl.write(String.format("%s: Starting noiseType=%s noise=%f order=%d sinSource=%s\n", 
+                                         LocalDateTime.now(), noiseType, noise, order, sinSource));
+                                fl.flush();
+                                if (sssssAggr != null) {
+                                    final Map<NoiseType, Map<Double, Map<SinSource, Set<TestType>>>> ssssAggr = sssssAggr.get(order);
+                                    if (ssssAggr != null) {
+                                        final Map<Double, Map<SinSource, Set<TestType>>> sssAggr = ssssAggr.get(noiseType);
+                                        if (sssAggr != null) {
+                                            final Map<SinSource, Set<TestType>> ssAggr = sssAggr.get(noise);
+                                            if (ssAggr != null) {
+                                                final Set<TestType> sAggr = ssAggr.get(sinSource);
+                                                if ((sAggr != null) && (sAggr.size() == TestType.values().length))
+                                                    continue;
+                                            }
                                         }
                                     }
                                 }
+                                dump(fw, sinSource, noiseType, noise, SignalType.Linear, order, 0);
+                                for (final int freq : sFreq) {
+                                    if (freq >= (1 << (order - 1)))
+                                        continue;
+                                    dump(fw, sinSource, noiseType, noise, SignalType.Sin, order, freq);
+                                    dump(fw, sinSource, noiseType, noise, SignalType.Cos, order, freq);
+                                }        
+                                final Map<NoiseType, Map<Double, Map<SinSource, Measure>>> sssAggr = FFT_Order.ssssAggr.get(order);
+                                if (sssAggr == null) {
+                                    fail(String.format("Found no aggregated result for order=%d", order));
+                                }
+                                final Map<Double, Map<SinSource, Measure>> ssAggr = sssAggr.get(noiseType);
+                                if (ssAggr == null) {
+                                    fail(String.format("Found no aggregated result for order=%d noiseType=%s", 
+                                                        order, noiseType));
+                                }
+                                final Map<SinSource, Measure> sAggr = ssAggr.get(noise);
+                                if (sAggr == null) {
+                                    fail(String.format("Found no aggregated result for order=%d noiseType=%s noise=%e", 
+                                                        order, noiseType, noise));
+                                }
+                                final Measure aggr = sAggr.get(sinSource);
+                                if (aggr == null) {
+                                    fail(String.format("Found no aggregated result for order=%d noiseType=%s noise=%e sinSource=%s", 
+                                    order, noiseType, noise, sinSource));
+                                }
+                                dump(fw, sinSource, noiseType, noise, SignalType.Aggr, order, 0, aggr);
+                                fw.flush();
                             }
-                            dump(fw, sinSource, noiseType, noise, SignalType.Linear, order, 0);
-                            for (final int freq : sFreq) {
-                                if (freq >= (1 << (order - 1)))
-                                    continue;
-                                dump(fw, sinSource, noiseType, noise, SignalType.Sin, order, freq);
-                                dump(fw, sinSource, noiseType, noise, SignalType.Cos, order, freq);
-                            }        
-                            final Map<NoiseType, Map<Double, Map<SinSource, Measure>>> sssAggr = FFT_Order.ssssAggr.get(order);
-                            if (sssAggr == null) {
-                                fail(String.format("Found no aggregated result for order=%d", order));
-                            }
-                            final Map<Double, Map<SinSource, Measure>> ssAggr = sssAggr.get(noiseType);
-                            if (ssAggr == null) {
-                                fail(String.format("Found no aggregated result for order=%d noiseType=%s", 
-                                                    order, noiseType));
-                            }
-                            final Map<SinSource, Measure> sAggr = ssAggr.get(noise);
-                            if (sAggr == null) {
-                                fail(String.format("Found no aggregated result for order=%d noiseType=%s noise=%e", 
-                                                    order, noiseType, noise));
-                            }
-                            final Measure aggr = sAggr.get(sinSource);
-                            if (aggr == null) {
-                                fail(String.format("Found no aggregated result for order=%d noiseType=%s noise=%e sinSource=%s", 
-                                order, noiseType, noise, sinSource));
-                            }
-                            dump(fw, sinSource, noiseType, noise, SignalType.Aggr, order, 0, aggr);
-                            fw.flush();
                         }
                     }
                 }
+            } catch (IOException | ArithmeticException | NotFiniteException | NotReliableException | NotMonotonicException | NotStableException | NotPositiveException | InitException e) {
+                e.printStackTrace();
+                return false;
             }
-        } catch (IOException | ArithmeticException | NotFiniteException | NotReliableException | NotMonotonicException | NotStableException | NotPositiveException | InitException e) {
+        } catch(IOException e) {
             e.printStackTrace();
-            return false;
         }
         return true;
     }
