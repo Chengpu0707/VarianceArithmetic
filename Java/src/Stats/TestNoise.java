@@ -62,7 +62,7 @@ public class TestNoise {
         final double[] sExpected = new double[31];
         for (int i = 0; i < 31; ++i) {
             final double x0 = -1.5 + i * 0.1;
-            sExpected[i] = distr.cumulativeProbability(x0 + 0.2) - distr.cumulativeProbability(x0);
+            sExpected[i] = distr.cumulativeProbability(x0 + 0.1) - distr.cumulativeProbability(x0);
         }
         for (int i = 0; i < 200000; ++i) {
             histo.accum(noise.gaussian(2), i + 1);
