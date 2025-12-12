@@ -1,0 +1,201 @@
+\begin{thebibliography}{10}
+
+\bibitem{Statistical_Methods}
+Sylvain Ehrenfeld and Sebastian~B. Littauer.
+\newblock {\em Introduction to Statistical Methods}.
+\newblock McGraw-Hill, 1965.
+
+\bibitem{Precisions_Physical_Measurements}
+John~R. Taylor.
+\newblock {\em Introduction to Error Analysis: The Study of Output Precisions
+  in Physical Measurements}.
+\newblock University Science Books, 1997.
+
+\bibitem{Basic_Constants_Measurements}
+Jurgen Bortfeldt, editor.
+\newblock {\em Fundamental Constants in Physics and Chemistry}.
+\newblock Springer, 1992.
+
+\bibitem{Probability_Statistics}
+Michael~J. Evans and Jeffrey~S. Rosenthal.
+\newblock {\em Probability and Statistics: The Science of Uncertainty}.
+\newblock W. H. Freeman, 2003.
+
+\bibitem{Lower_Order_Variance_Expansion}
+Fredrik Gustafsson and Gustaf Hendeby.
+\newblock Some relations between extended and unscented kalman filters.
+\newblock {\em IEEE Transactions on Signal Processing}, 60-2:545--555, 2012.
+
+\bibitem{Computer_Architecture}
+John~P Hayes.
+\newblock {\em Computer Architecture}.
+\newblock McGraw-Hill, 1988.
+
+\bibitem{Floating_Point_Arithmetic}
+David Goldberg.
+\newblock What every computer scientist should know about floating-point
+  arithmetic.
+\newblock {\em ACM Computing Surveys}, March 1991.
+
+\bibitem{Floating_Point_Standard}
+Institute of Electrical and Electronics Engineers.
+\newblock {\em ANSI/IEEE 754-2008 Standard for Binary Floating-Point
+  Arithmetic}, 2008.
+
+\bibitem{Arithmetic_Digital_Computers}
+U.~Kulish and W.M. Miranker.
+\newblock The arithmetic of digital computers: A new approach.
+\newblock {\em SIAM Rev.}, 28(1), 1986.
+
+\bibitem{Rounding_Error}
+J.~H. Wilkinson.
+\newblock {\em Rounding Errors in Algebraic Processes}.
+\newblock SIAM, 1961.
+
+\bibitem{Algorithms_Accuracy}
+Nicholas~J. Higham.
+\newblock {\em Accuracy and Stability of Numerical Algorithms}.
+\newblock SIAM, 2002.
+
+\bibitem{Numerical_Recipes}
+William~H. Press, Saul~A Teukolsky, William~T. Vetterling, and Brian~P.
+  Flannery.
+\newblock {\em Numerical Recipes in C}.
+\newblock Cambridge University Press, 1992.
+
+\bibitem{Precise_Numerical_Methods}
+Oliver Aberth.
+\newblock {\em Precise Numerical Methods Using C++}.
+\newblock Academic Press, 1998.
+
+\bibitem{Linear_Algebra}
+J.~Hefferon.
+\newblock Linear algebra.
+\newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
+
+\bibitem{prob_interval}
+Nicholas~J. Higham† and Theo Mary.
+\newblock A new approach to probabilistic rounding error analysis.
+\newblock {\em SIAM Journal on Scientific Computing}, 41(5):A2815--A2835, 2019.
+
+\bibitem{Error_Analysi_Digital_Filters}
+B.~Liu and T.~Kaneko.
+\newblock Error analysis of digital filters realized with floating-point
+  arithmetic.
+\newblock {\em Proc. IEEE}, 57:p1735--1747, 1969.
+
+\bibitem{Floating-point_Digital_Filters}
+B.~D. Rao.
+\newblock Floating-point arithmetic and digital filters.
+\newblock {\em IEEE, Transations on Signal Processing}, 40:85--95, 1992.
+
+\bibitem{Chaotic_Dynamics}
+Gregory~L. Baker and Jerry~P. Gollub.
+\newblock {\em Chaotic Dynamics: An Introduction}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem{rouding_higher_precision}
+Brian Gladman, Vincenzo Innocente, John Mather, and Paul Zimmermann.
+\newblock Accuracy of mathematical functions in single, double, double
+  extended, and quadruple precision.
+\newblock 2024.
+
+\bibitem{Interval_Analysis}
+R.E. Moore.
+\newblock {\em Interval Analysis}.
+\newblock Prentice Hall, 1966.
+
+\bibitem{Worst_Case_Error_Bounds}
+W.~Kramer.
+\newblock A prior worst case error bounds for floating-point computations.
+\newblock {\em IEEE Trans. Computers}, 47:750--756, 1998.
+
+\bibitem{Interval_Analysis_Theory_Applications}
+G.~Alefeld and G.~Mayer.
+\newblock Interval analysis: Theory and applications.
+\newblock {\em Journal of Computational and Applied Mathematics}, 121:421--464,
+  2000.
+
+\bibitem{Interval_Arithmetic}
+W.~Kramer.
+\newblock Generalized intervals and the dependency problem.
+\newblock {\em Proceedings in Applied Mathematics and Mechanics}, 6:685--686,
+  2006.
+
+\bibitem{Interval_Analysis_Notations}
+A.~Neumaier S.M. Rump S.P.~Shary B.~Kearfott, M. T.~Nakao and P.~Van
+  Hentenryck.
+\newblock Standardized notation in interval analysis.
+\newblock {\em Computational Technologies}, 15:7--13, 2010.
+
+\bibitem{Statistics_For_Interval_Arithmetic}
+W.~T. Tucker and S.~Ferson.
+\newblock {\em Probability bounds analysis in environmental risk assessments}.
+\newblock Applied Biomathmetics, 100 North Country Road, Setauket, New York
+  11733, 2003.
+
+\bibitem{Affine_Arithmetic}
+J.~Stolfi and L.~H. de~Figueiredo.
+\newblock An introduction to affine arithmetic.
+\newblock {\em TEMA Tend. Mat. Apl. Comput.}, 4:297--312, 2003.
+
+\bibitem{Random_Interval_Arithmetic}
+R.~Alt and J.-L. Lamotte.
+\newblock Some experiments on the evaluation of functional ranges using a
+  random interval arithmetic.
+\newblock {\em Mathematics and Computers in Simulation}, 56:17--34, 2001.
+
+\bibitem{Affine_Arithmetic_book}
+J.~Stolfi and L.~H. de~Figueiredo.
+\newblock {\em Self-validated numerical methods and applications}.
+\newblock ftp:// ftp.tecgraf.puc-rio.br/pub/lhf/doc/cbm97.ps.gz, 1997.
+
+\bibitem{Prev_Precision_Arithmetic}
+C.~P. Wang.
+\newblock A new uncertainty-bearing floating-point arithmetic.
+\newblock {\em Reliable Computing}, 16:308--361, 2012.
+
+\bibitem{Statistical_Arithmetic}
+Propagation of uncertainty.
+\newblock \url{http://en.wikipedia.org/wiki/Propagation_of_uncertainty}, 2011.
+\newblock wikipedia, the free encyclopedia.
+
+\bibitem{Significance_Arithmetic}
+Significance arithmetic.
+\newblock \url{http://en.wikipedia.org/wiki/Significance_arithmetic}, 2011.
+\newblock wikipedia, the free encyclopedia.
+
+\bibitem{Digital_Significance_Arithmetic}
+M.~Goldstein.
+\newblock Significance arithmetic on a digital computer.
+\newblock {\em Communications of the ACM}, 6:111--117, 1963.
+
+\bibitem{Unnormalized_Arithmetic}
+R.~L. Ashenhurst and N.~Metropolis.
+\newblock Unnormalized floating-point arithmetic.
+\newblock {\em Journal of the ACM}, 6:415--428, 1959.
+
+\bibitem{Mathematica_Significance_Arithmetic}
+G.~Spaletta M.~Sofroniou.
+\newblock Precise numerical computation.
+\newblock {\em The Journal of Logic and Algebraic Programming}, 65:113–134,
+  2005.
+
+\bibitem{Stochastic_Arithmetic}
+J.~Vignes.
+\newblock A stochastic arithmetic for reliable scientific computation.
+\newblock {\em Mathematics and Computers in Simulation}, 35:233--261, 1993.
+
+\bibitem{CADNA_library}
+C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
+\newblock Numerical 'health' check for scientific codes: the cadna approach.
+\newblock {\em Computer Physics Communications}, 176(8):501--527, 2007.
+
+\bibitem{J9VM}
+J9 vm reference.
+\newblock
+  \url{https://www.ibm.com/docs/en/sdk-java-technology/8?topic=j9-vm-reference},
+  2024.
+\newblock IBM SDK, Java Technology Edition.
+
+\end{thebibliography}
