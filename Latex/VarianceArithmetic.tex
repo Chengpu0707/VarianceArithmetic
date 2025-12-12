@@ -25,7 +25,7 @@
 
 \newcommand{\eqspace}{\;\;\;}
 \newcommand{\largespace}{\;\;\;\;\;\;\;\;\;\;\;\;}
-%\newcommand{\Verbose}{}
+\newcommand{\Verbose}{}
 %\newcommand{\ManualReference}{}
 
 
@@ -3230,7 +3230,12 @@ The C++ executable is complied with \textit{-O3} optimization.
 
 Except the performance, variance arithmetic shows no result difference when implemented using either C++, Java, or Python.
 As expected, the execution time increases exponentially with the FFT order $L$ as $2^L$ when the FFT order is large enough, validating the calculation response.
-The mystery is that the Java implementation is one order of magnitude faster than the C++ implementation, even though the C++ implementation has \textit{-O3} optimization.
+
+It is surprising that the Java implementation is 3 times faster than the C++ implementation, even though the C++ implementation has \textit{-O3} optimization (the optimization already makes the C++ implementation run 3 times faster).
+It shows that under repeated and heavy computation, the dynamic just-in-time optimization of Java is superior to the static optimization of C++. 
+All three implementation are single-threaded without GPU-assistance.
+One possibility is that because FFT contains independent and logically identical branches, the dynamic just-in-time compiler parallelize the execution to the 10 cores on the laptop computer.
+If this is true, perhaps it is necessary to rethink multi-threading as a way to manually increase the performance of similar computations.
 
  
 
