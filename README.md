@@ -271,6 +271,8 @@ Anaylysis:
  * IPyNb/FFT.{Cpp, Java, Python}.ipynb
  * IPyNb/FFT_Step_{Prec, Quart}.{Cpp, Java, Python}.ipynb
  * IPyNb/FFT_Step_Lib.SciPy.{Cpp, Java, Python}.ipynb
+ * IPyNb/IndexSine_18.Quart.ipynb
+ * IPyNb/SinDiff.ipynb
  
 
 ### _Sub Section: Trigonometric Library Errors_

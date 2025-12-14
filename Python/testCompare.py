@@ -2,6 +2,7 @@
 Compare Taylor expansion from different implementation
 '''
 import datetime
+import math
 import os
 import unittest
 import re
@@ -21,12 +22,13 @@ class TestIndexSine (unittest.TestCase):
     It shows that Java and C++ are almost identical while Python differs slightly due to different sine implementation
     '''
     def diff(self, dumpPathBase:str, dumpPathCode:str, dumpPathDiff:str, context:str, dev:float,
-             compareUncertainty:bool=True):
+             compareUncertainty:bool=True, denom=2**18):
         '''
         compare the indexed sine dump file between {dumpPathBase} and {dumpPathCode}, 
         and dump the diff histogram to {dumpPathDiff}
         '''
         histo = Histo(5, 3)
+        sDiff = []
         with open(dumpPathBase) as fb, open(dumpPathCode) as fc:
             self.assertEqual(next(fb), next(fc))
             ln = 0
@@ -40,12 +42,16 @@ class TestIndexSine (unittest.TestCase):
                 if compareUncertainty:
                     self.assertEqual(sin1.uncertainty(), sin2.uncertainty())
                 err = sin1 - sin2
-                norm = err.value() /err.uncertainty() if err.uncertainty() > 0 else ""
-                if norm == "":
-                    self.assertEqual(err.value(), 0)
-                else:
+                if err.uncertainty() > 0:
+                    norm = err.value() /err.uncertainty()
+                    if compareUncertainty:
+                        norm *= math.sqrt(2/3)  # to LSB
                     histo.accum(norm, ln)
-            self.assertAlmostEqual(histo.stat().dev(), dev)
+                    if norm:
+                        sDiff.append((ln - 1, norm))
+                else:
+                    self.assertEqual(err.value(), 0)
+                   
         with open(dumpPathDiff, 'w') as fw:
             fw.write(f'Context\tCount\tMean\tDev\tMin\tMin At\tMax\tMax At\tLower\tUpper')
             for b in histo.buckets():
@@ -57,45 +63,50 @@ class TestIndexSine (unittest.TestCase):
                      f'\t{histo.less()}\t{histo.more()}')
             for c in histo.histogram():
                 fw.write(f'\t{c / stat.count()}')
+            fw.write('\nIndex\tNorm\n')
+            for ln, norm in sDiff:
+                fw.write(f'{ln/denom}\t{norm}\n')
+        self.assertAlmostEqual(histo.stat().dev(), dev)
             
     def test_cpp_vs_python(self):
         dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Cpp/Output/IndexSin_Quart_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_18_Cpp_Python.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart C++ vs Python', 0.22231507)
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart C++ vs Python', 0.1815195,)
 
     def test_java_vs_python(self):
         dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Java/Output/IndexSin_Quart_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_18_Java_Python.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs Python', 0.2231180)
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs Python', 0.1821751)
 
     def test_cpp_vs_java(self):
         dumpPathBase = './Cpp/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Java/Output/IndexSin_Quart_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_18_Java_Cpp.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs C++', 0.04345423)
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs C++', 0.0354802)
 
     def test_quart_vs_prec_python(self):
         dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Python.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Python', 0.6431503862291064,
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Python', 0.6431504,
                   compareUncertainty=False)
 
     def test_quart_vs_prec_cpp(self):
         dumpPathBase = './Cpp/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Cpp.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec C++', 0.6207007516105364,
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec C++', 0.6207008,
                   compareUncertainty=False)
 
     def test_quart_vs_prec_java(self):
         dumpPathBase = './Java/Output/IndexSin_Quart_18.txt'
         dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
         dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Java.txt'
-        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Java', 0.6210672798679593,
+        self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Java', 0.6210673,
                   compareUncertainty=False)
+
 
 class TestDumpPath (unittest.TestCase):
 
