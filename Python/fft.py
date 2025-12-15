@@ -475,7 +475,7 @@ class FFT_Order (FFT_Signal):
 
     @staticmethod
     def dump(sOrder=range(2, IndexSin.MAX_ORDER + 1), 
-             sSinSource=(SinSource.Prec, SinSource.Quart, SinSource.Lib),
+             sSinSource=(SinSource.Prec, SinSource.PrecAdj, SinSource.Quart, SinSource.Lib),
              sFreq = range(1, MAX_FREQ),
              sNoise=[0] + [math.pow(10, n) for n in range(-17, 1)],
              sNoiseType=(NoiseType.Gaussian, NoiseType.White)):
