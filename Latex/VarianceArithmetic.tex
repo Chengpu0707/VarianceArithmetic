@@ -3150,17 +3150,25 @@ Error deviation (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis
 
 \begin{table}
 \centering
-\begin{tabular}{|c|c|c|c|c|} 
+\begin{tabular}{|c|c|c|c|c|c|} 
 \hline 
-Signal     & Sine function & Forward       & Reverse       & Roundtrip    \\ 
+Code         & Signal     & Sine function & Forward       & Reverse       & Roundtrip    \\ 
 \hline 
-Sin/Cos   & Quart           & $10^{-15}$  & $10^{-12}$ & $10^{-14}$ \\ 
+Python      & Sin/Cos   & Quart           & $10^{-16}$  & $10^{-12}$ & $10^{-14}$ \\ 
 \hline 
-Sin/Cos   & Library         & $10^{-15}$  & $10^{-11}$ & $10^{-12}$ \\ 
+Java, C++ & Sin/Cos   & Quart           & $10^{-16}$  & $10^{-12}$ & $10^{-14}$ \\ 
 \hline 
-Linear     & Quart           & $10^{-11}$  & $10^{-7}$   & $10^{-8}$ \\
+Python      & Sin/Cos   & Library         & $10^{-16}$  & $10^{-11}$ & $10^{-12}$ \\ 
 \hline 
-Linear     & Library         & $10^{-11}$  & $10^{-3}$   & $10^{-8}$  \\
+Java, C++ & Sin/Cos   & Library         & $10^{-16}$  & $10^{-11}$ & $10^{-13}$ \\ 
+\hline 
+Python      & Linear     & Quart           & $10^{-11}$  & $10^{-7}$   & $10^{-8}$ \\
+\hline 
+Java, C++ & Linear     & Quart           & $10^{-11}$  & $10^{-7}$   & $10^{-8}$ \\
+\hline 
+Python      & Linear     & Library         & $10^{-11}$  & $10^{-3}$   & $10^{-8}$  \\
+\hline 
+Java, C++ & Linear     & Library         & $10^{-11}$  & $10^{-3}$   & $10^{-8}$  \\
 \hline 
 \end{tabular}
 \captionof{table}{
@@ -3212,7 +3220,8 @@ The key difference is that when using the Quart sine functions, the error deviat
 Adding noises has another obvious benefit: Different implementations of the variance arithmetic have almost identical result when the input noise is larger than $10^{-16}$. 
 For example, Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} are almost identical using either C++, or Java, or Python. 
 
-\subsection{Input Uncertainty Recovery by Roundtrip Transformations}
+
+\subsection{Input Uncertainty Recovery}
 
 \begin{figure}[p]
 \centering
@@ -3233,17 +3242,18 @@ Error deviation (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis
 \end{figure}
 
 
-Without added noises, the value error waveform for the roundtrip transformation is qualitatively similar to that of the the reverse transformation, with error deviations close to $1$, such as in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}, \ref{fig: FFT_SinCos_Clean_vs_Order_Cpp}, \ref{fig: FFT_SinCos_Clean_vs_Order_Lib}, and \ref{fig: FFT_Linear_vs_Order_Indexed}, even when proper coverage can no longer achieve for both forward and reverse transformations in Figure \ref{fig: FFT_Linear_vs_Order_Lib}.
-Without added noises, roundtrip transformation can always recover the input uncertainty statistically.
+With input uncertainty unspecified, the value error waveform for the roundtrip transformation is qualitatively similar to that of the the reverse transformation, with error deviations close to $1$, such as in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}, \ref{fig: FFT_SinCos_Clean_vs_Order_Cpp}, \ref{fig: FFT_SinCos_Clean_vs_Order_Lib}, and \ref{fig: FFT_Linear_vs_Order_Indexed}, even when proper coverage can no longer achieve for both forward and reverse transformations in Figure \ref{fig: FFT_Linear_vs_Order_Lib}.
+With input uncertainty unspecified, roundtrip transformation can always recover input uncertainty statistically.
 
-With added noises, using Lib sine function:
+With input uncertainty specified, roundtrip transformation can always recover input uncertainty numerically, and the quality of the recover increases with the quality of input uncertainty specification.
+For example, when using the Library sine function:
 \begin{itemize}
-\item Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} shows that the error deviations for the roundtrip transformation is much less than $1$, suggesting that each input uncertainty is recovered numerically.
+\item Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} shows that the error deviations for the roundtrip transformation is less than $1$, suggesting that each input uncertainty is recovered numerically.
 These error deviations increases with FFT orders, because the error deviations without added noises increases with the FFT orders according to Figure \ref{fig: FFT_Linear_vs_Order_Lib}.
 
 \item As a comparison, for Sin/Cos signal, because Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Lib} shows little increase with the FFT orders of the error deviations without added noises, the improvement of the numerical recovering in Figure \ref{fig: FFT_SinCos_Lib_Roudtrip_ErrorDev_vs_Noise_Order} is almost independent of FFT orders.
 \end{itemize} 
-The larger ratio of specific input uncertainty to unspecified input uncertainty, the better input uncertainty recovering numerically is provided by variance arithmetic.
+In both cases, error deviations decreases with the strength of the added noise.
 
 
 
@@ -3291,7 +3301,7 @@ This raises the question of whether a sine function with a more accurate uncerta
 If the Quart sine function is constructed using the 128-bit floating-point library of gcc and then converted to 64-bit values, the difference between each 128-bit value and its corresponding 64-bit value can be used as the uncertainty for the 64-bit representation.
 The resulting indexed sine function is referred to as the \emph{Prec} sine function.
 
-Figure \ref{fig: Sin_Error_Quart_Prec} compares the value errors and the uncertainties of  $\sin(x)^2 + \cos(x)^2 - 1$ between the Prec sine function and the Quart sine function, and demonstrates that the Prec sine functions has smaller uncertainties numerically than the Quart sine functions, but larger value errors statically presumably due to rounding errors introduced by the casting.
+Figure \ref{fig: Sin_Error_Quart_Prec} compares the value errors and the uncertainties of  $\sin(x)^2 + \cos(x)^2 - 1$ between the Prec sine function and the Quart sine function, and demonstrates that the Prec sine functions has smaller uncertainties numerically than the Quart sine functions, but larger value errors statically, presumably due to rounding errors introduced by the casting.
 This difference indicates that casting a 128-bit floating-point value to a 64-bit floating-point value is less accurate in the 64-bit floating-point arithmetic, and the Prec sine function is expected to under-perform the Quart sine function due to under-estimation of the value errors by the uncertainties.
 
 For Sin/Cos signals, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Prec} is very similar Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}, provided that the error deviations using Prec sine functions are about $1.7$ times larger than their counterparts using the Quart sine functions.
@@ -3304,7 +3314,7 @@ For Linear signals, when comparing Figure \ref{fig: FFT_Linear_Clean_Histo_Prec}
 \end{itemize}
 Although the ideal coverage regions for the reverse transformations remains identical in Figure \ref{fig: FFT_Linear_Prec_Reverse_ErrorDev_vs_Noise_Order} when compared with Figure \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}, using Prec sine function results in larger error deviations in the proper coverage regions.
 Thus, using Prec sine function is slightly inferior than using Quart sine function.
-In another word, in this case, higher bit floating-point arithmetic is not necessarily superior.
+In another word, casting values from higher floating-point representation to a lower floating-point arithmetic is not necessarily superior.
 
 
 
@@ -3318,7 +3328,7 @@ In another word, in this case, higher bit floating-point arithmetic is not neces
 \captionof{figure}{
 The FFT execution time (y-axis) versus the FFT order (x-axis) for the implementation using either C++, Java, or Python (legend), with each calculation consisted of $36$ roundtrip FFT transformations.
 The C++ executable is complied with \textit{-O3 -march=native} optimization.  
-Without such optimization, the C++ implementation is about a order of magnitude slower than the Java implementation.
+Without such optimization, the C++ \textit{-O0} implementation is about a order of magnitude slower than the Java implementation.
 }
 \label{fig: FFT_Performance}
 \end{figure}

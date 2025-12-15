@@ -328,6 +328,31 @@ class TestPrec (TestIndexSin):
         self.assert_cos_3(TestPrec.indexSin)
 
 
+class TestPrecAdj (TestIndexSin):
+    indexSin = IndexSin(SinSource.PrecAdj)
+
+    def test_index(self):
+        self.assert_get_half_index_1(TestPrecAdj.indexSin)
+        self.assert_get_half_index_2(TestPrecAdj.indexSin)
+        self.assert_get_half_index_3(TestPrecAdj.indexSin)
+
+    def test_sin(self):
+        self.assert_sin_1(TestPrecAdj.indexSin)
+        self.assert_sin_2(TestPrecAdj.indexSin)
+        self.assert_sin_3(TestPrecAdj.indexSin)
+
+    def test_cos(self):
+        self.assert_cos_1(TestPrecAdj.indexSin)
+        self.assert_cos_2(TestPrecAdj.indexSin)
+        self.assert_cos_3(TestPrecAdj.indexSin)
+
+    def test_writeToFile(self):
+        self.writeToFile(TestPrecAdj.indexSin, 10)
+
+    def test_writeToFile_large(self):
+        self.writeToFile(TestPrecAdj.indexSin, 18)
+
+
 class TestQuart (TestIndexSin):
     indexSin = IndexSin()
 
@@ -463,6 +488,7 @@ class TestIndexSinDiff (unittest.TestCase):
     quart = IndexSin(SinSource.Quart)
     full = IndexSin(SinSource.Full)
     prec = IndexSin(SinSource.Prec)
+    precAdj = IndexSin(SinSource.PrecAdj)
 
     def profile(self, testName:str, 
                 funcIdx:typing.Callable[[int, int], VarDbl], funcLib:typing.Callable[[int, int], VarDbl],
@@ -540,6 +566,11 @@ class TestIndexSinDiff (unittest.TestCase):
     def test_SinError_Prec(self):
         self.profile('SinError_Prec', 
                      lambda i, order: TestIndexSinDiff.prec.sin(i, order)**2 + TestIndexSinDiff.prec.cos(i, order)**2,
+                     lambda i, order: 1)
+
+    def test_SinError_PrecAdj(self):
+        self.profile('SinError_PrecAdj', 
+                     lambda i, order: TestIndexSinDiff.precAdj.sin(i, order)**2 + TestIndexSinDiff.precAdj.cos(i, order)**2,
                      lambda i, order: 1)
 
 
