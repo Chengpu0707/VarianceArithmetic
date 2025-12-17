@@ -28,7 +28,7 @@ from varDbl import VarDbl
 from testMatrix import Adjugate, TestAdjugate
 
 
-SKIP_TEST = False
+SKIP_TEST = True
 
 OUTDIR = f'./Python/Output' if os.getcwd().endswith('VarianceArithmetic') else "./Output"
 

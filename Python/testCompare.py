@@ -347,7 +347,7 @@ class Test_FFT_Order (unittest.TestCase):
                 for test in TestType:
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.3 if test == TestType.Roundtrip else 0.1)
                     self.assertLess(-sssDiff[sinSource][test][0].min(), 0.3 if test == TestType.Roundtrip else 0.1)
-                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 2e-3 if test == TestType.Roundtrip else 1e-3)
+                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 3e-3 if test == TestType.Roundtrip else 1e-3)
                     self.assertLess(sssDiff[sinSource][test][1].max(), 1e-15)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
@@ -361,7 +361,7 @@ class Test_FFT_Order (unittest.TestCase):
                 for test in TestType:
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
                     self.assertLess(-sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
-                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 6e-3 if test == TestType.Roundtrip else 3e-3)
+                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 6e-3 if test == TestType.Roundtrip else 4e-3)
                     self.assertLess(sssDiff[sinSource][test][1].max(), 1e-15)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:

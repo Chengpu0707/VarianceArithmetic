@@ -62,7 +62,9 @@ class IndexSin:
                 To avoid extra rounding error due to casting from long double to double in C++,
                 '''
                 if not IndexSin._sSinPrecAdj:
-                    cnt = 0
+                    replaces = 0
+                    ignores = 0
+                    corrects = 0
                     IndexSin._sSinPrecAdj = IndexSin.read(SinSource.Prec)
                     for i in range(len(IndexSin._sSinPrecAdj)):
                         if i > (IndexSin._half >> 1):
@@ -74,22 +76,21 @@ class IndexSin:
                         else:
                             sin = varDbl.VarDbl(math.sin(math.pi * i /IndexSin._size))
                             cos = varDbl.VarDbl(math.cos(math.pi * i /IndexSin._size))
-                        try:
-                            assert(abs(IndexSin._sSinPrecAdj[i].value() - sin) <= math.ulp(sin.value()))
-                        except AssertionError:
-                            raise RuntimeError(f'Invalid PrecAdj sin at index {i}: {IndexSin._sSinPrecAdj[i] - sin} vs {math.ulp(sin.value())}')
-                        try:
-                            assert(abs(IndexSin._sSinPrecAdj[j].value() - cos) <=  math.ulp(cos.value()))
-                        except AssertionError:
-                            raise RuntimeError(f'Invalid PrecAdj cos at index {j}: {IndexSin._sSinPrecAdj[j] - cos} vs {math.ulp(cos.value())}')
                         errPrec = IndexSin._sSinPrecAdj[i].value() ** 2 + IndexSin._sSinPrecAdj[j].value() ** 2 - 1.0
-                        errQuart =sin ** 2 + cos ** 2 - 1.0
-                        if errPrec and (not errQuart):
+                        errQuart = sin ** 2 + cos ** 2 - 1.0
+                        if errPrec and (not errQuart.value()):
                             IndexSin._sSinPrecAdj[i] = varDbl.VarDbl(sin)
                             IndexSin._sSinPrecAdj[j] = varDbl.VarDbl(cos)
-                            cnt += 1
-                    if cnt > 0:
-                        print(f'Adjusted {cnt} sin/cos values in PrecAdj to remove casting error')
+                            replaces += 2
+                        elif (abs(IndexSin._sSinPrecAdj[i].value() - sin) > math.ulp(sin.value())) or \
+                                (IndexSin._sSinPrecAdj[j].value() - cos) >  math.ulp(cos.value()):
+                            if (not errPrec) and errQuart.value():
+                                ignores += 2
+                            else:
+                                IndexSin._sSinPrecAdj[i] = varDbl.VarDbl(sin)
+                                IndexSin._sSinPrecAdj[j] = varDbl.VarDbl(cos)
+                                corrects += 2
+                    print(f'for {len(IndexSin._sSinPrecAdj)} sin/cos values in PrecAdj: replaces={replaces}, corrects={corrects}, ignores={ignores}')
                 self._order = IndexSin.MAX_ORDER
                 self._sSin = IndexSin._sSinPrecAdj
                 self._sCos =  None

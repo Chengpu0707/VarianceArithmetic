@@ -2877,7 +2877,7 @@ Despite these differences, error deviations are $0.65$ and $0.90$, suggesting th
 
 
 
-\subsection{Sensitivity to Quart sine functions}
+\subsection{Sensitivity to Quart Sine Functions}
 
 \begin{figure}[p]
 \centering
@@ -3050,7 +3050,7 @@ The FFT order is $18$.
 
 Figure \ref{fig: FFT_Linear_vs_Order_Indexed} shows that using the Quart sine function, the result uncertainties can track  the value errors of Linear signals with proper coverage.
 Because the input to the reverse transformation no longer consists predominantly of precise zeros, the output uncertainty increases more rapidly with FFT order than its counterpart in Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}.
-Such increase results in larger error deviations: At FFT order $18$, $0.89 > 0.65$ for the forward transformation, $1.08 > 0.90$ for the reverse transformation, $1.67 > 0.90$ for the roundtrip transformation, and wider distributions of the normalized value errors in Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} versus the corresponding histograms in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
+Such increase results in larger error deviations: At FFT order $18$, $0.89 > 0.65$ for the forward transformation, $1.08 > 0.90$ for the reverse transformation, $1.67 > 0.90$ for the roundtrip transformation, and wider distributions of the normalized errors in Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} versus the corresponding histograms in Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed}.
 Using the Quart sine function, variance arithmetic can provide proper coverage for Sin signals, Cos signals, and Linear signal.
 
 
@@ -3306,7 +3306,7 @@ This difference indicates that casting a 128-bit floating-point value to a 64-bi
 
 For Sin/Cos signals, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Prec} is very similar Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}, provided that the error deviations using Prec sine functions are about $1.7$ times larger than their counterparts using the Quart sine functions.
 
-For Linear signals, when comparing Figure \ref{fig: FFT_Linear_Clean_Histo_Prec} and \ref{fig: FFT_Linear_Clean_Histo_Indexed} for the normalized value error distributions:
+For Linear signals, when comparing Figure \ref{fig: FFT_Linear_Clean_Histo_Prec} and \ref{fig: FFT_Linear_Clean_Histo_Indexed} for the normalized error distributions:
 \begin{itemize}
 \item For the forward transformations, using either Prec or Quart sine function has very similar distributions.
 
@@ -3501,8 +3501,8 @@ Such choice certainly can not be applied to other distributions.
 
 Cases where $\delta^2 f < \widehat{\delta^2} f$ due to low sample count require further theoretical study and experimental verification.
 
+The dependence of the convergence of $\log(x \pm \delta x)$ and $(x \pm \delta x)^c$ on the chose of ideal bounding range $\kappa$ needs further discussion.
 Determining the uncertainty upper bounds for each analytic expression through analytic methods is an important next step.
-These results can validate variance arithmetic, and provide performance enhancement to variance arithmetic when the convergence of an analytic expression has to be deduced numerically from the full expansion each time.
 
 The performance of variance arithmetic must be improved for broader practical adoption.
 The fundamental formulas of statistical Taylor expansion, Formula \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, and \eqref{eqn: Taylor 2d variance} contain a large number of independent summations, making them excellent candidates for parallel processing.

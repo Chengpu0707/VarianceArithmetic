@@ -356,7 +356,7 @@ class Test_FFT_Order (unittest.TestCase):
         self.assertTupleEqual(tuple(sssssAggr.keys()), sOrder)
         for order in sOrder:
             ssssAggr = sssssAggr[order]
-            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.Quart, SinSource.Lib))
+            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.PrecAdj, SinSource.Quart, SinSource.Lib))
             for src in ssssAggr.keys():
                 sssAggr = ssssAggr[src]
                 self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian,))
