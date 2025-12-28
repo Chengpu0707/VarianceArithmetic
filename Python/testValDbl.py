@@ -1,9 +1,9 @@
-from contextlib import AbstractContextManager
 import math
 import pickle
 import unittest
 import sys
 
+from indexSin import OUTDIR
 from varDbl import VarDbl, InitException, InitException, validate, assertVarDblEqual
 from taylor import NotFiniteException, NotMonotonicException, NotPositiveException
 
@@ -100,9 +100,9 @@ class TestRepresentation (unittest.TestCase):
 
     def testRepr(self):
         v = VarDbl(-math.sqrt(2), math.sqrt(2))
-        with open('./Java/Output/data.pickle', 'wb') as f:
+        with open(f'{OUTDIR}/Python/Output/data.pickle', 'wb') as f:
             pickle.dump(v, f, pickle.HIGHEST_PROTOCOL)
-        with open('./Java/Output/data.pickle', 'rb') as f:
+        with open(f'{OUTDIR}/Python/Output/data.pickle', 'rb') as f:
             vr = pickle.load(f)
         assertVarDblEqual(self, vr, v)
 

@@ -16,8 +16,8 @@ import scipy
 import time
 import unittest
 
-from fft import NoiseType, FFT_Order, FFT_Step
-from indexSin import SinSource
+from fft import NoiseType, FFT_Order
+from indexSin import OUTDIR
 from matrix import createHilbertMatrix, addNoise
 from matrix import adjugate
 import momentum
@@ -29,8 +29,6 @@ from testMatrix import Adjugate, TestAdjugate
 
 
 SKIP_TEST = True
-
-OUTDIR = f'./Python/Output' if os.getcwd().endswith('VarianceArithmetic') else "./Output"
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +48,9 @@ class TestNormal (unittest.TestCase):
     KAPPAS = (1,1.25,1.5,1.75, 2,2.25,2.5,2.75, 3,3.5, 4, 5, 6)
     MIN_COUNT = 10000
 
-    leakPath = f"{OUTDIR}/NormalLeakage.txt"
+    leakPath = f"{OUTDIR}/Python/Output/NormalLeakage.txt"
     leakHeader = 'Samples\tKappa\tCount\tMean\tDeviation\tRange\n'
-    samplesPath = f"{OUTDIR}/NormalSamples.txt"
+    samplesPath = f"{OUTDIR}/Python/Output/NormalSamples.txt"
     samplesHeader = 'Samples\tSlope\tSlopeErr\tIntercept\tInterceptError\tCorrelation\tSamples\n'
 
     @staticmethod
@@ -163,7 +161,7 @@ class TestNormal (unittest.TestCase):
 class TestUniform (unittest.TestCase):
     SAMPLES = (2,3,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000)
     MIN_COUNT = 1000
-    leakPath = f'{OUTDIR}/UniformLeakage.txt'
+    leakPath = f'{OUTDIR}/Python/Output/UniformLeakage.txt'
     leakHeader = 'Samples\tCount\tMean\tDeviation\n'
 
     @staticmethod
@@ -249,7 +247,7 @@ class TestAdjugateManually (TestAdjugate):
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 261.387s')
     def testConditionNumber(self):
         REPEATS = 8
-        with open(f'{OUTDIR}/MatrixCondition.txt', 'w') as fc:
+        with open(f'{OUTDIR}/Python/Output/MatrixCondition.txt', 'w') as fc:
             fc.write("Size\tType\tNoise\tCondition Number"
                     "\tDeterminant Value\tDeterminant Uncertainty\tDeterminant Precision"
                     "\n")
@@ -294,7 +292,7 @@ class TestFFTDumpFile (unittest.TestCase):
                 lower = mid
                 upper = mid
             except NotStableException:
-                dumpPath = f'{OUTDIR}/Pow_1_{mid}_-2.txt'      
+                dumpPath = f'{OUTDIR}/Python/Output/Pow_1_{mid}_-2.txt'      
                 with self.assertRaises(NotStableException):
                     Taylor.taylor1d(VarDbl(1, upper), 'lower', sTayler, True, True, dumpPath=dumpPath)
                 sInput, sExpansion, out = Taylor.verifyDumpFile(self, dumpPath)
@@ -349,26 +347,26 @@ class TestConvergence (unittest.TestCase):
 
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 2088s')
     def test_pow(self):
-        Taylor.pow(VarDbl(1, 0.19929), -1.75, dumpPath=f'{OUTDIR}/Pow_1_0.19929_-1.75.txt')
+        Taylor.pow(VarDbl(1, 0.19929), -1.75, dumpPath=f'{OUTDIR}/Python/Output/Pow_1_0.19929_-1.75.txt')
 
         DIVIDS = 20
         TestConvergence._search(0.19, 0.21, 100000,
                 [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
                 lambda x, dx: Taylor.pow(VarDbl(1, dx), x), lambda x: 1,
-                f'{OUTDIR}/PowEdge.txt')
+                f'{OUTDIR}/Python/Output/PowEdge.txt')
 
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 4187s')
     def test_pow_uniform(self):
         Taylor.pow(VarDbl(1, 0.57), -3, momentum=momentum.UNIFORM,
-                   dumpPath=f'{OUTDIR}/Pow_1_0.57_-3.Uniform.txt')
+                   dumpPath=f'{OUTDIR}/Python/Output/Pow_1_0.57_-3.Uniform.txt')
         Taylor.pow(VarDbl(1, 0.58), 2.9, momentum=momentum.UNIFORM,
-                   dumpPath=f'{OUTDIR}/Pow_1_0.58_2.9.Uniform.txt')
+                   dumpPath=f'{OUTDIR}/Python/Output/Pow_1_0.58_2.9.Uniform.txt')
 
         DIVIDS = 20
         TestConvergence._search(0.57, 0.59, 100000,
                 [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
                 lambda x, dx: Taylor.pow(VarDbl(1, dx), x, momentum=momentum.UNIFORM), lambda x: 1,
-                f'{OUTDIR}/PowEdge.Uniform.txt')
+                f'{OUTDIR}/Python/Output/PowEdge.Uniform.txt')
 
     def test_sin(self):
         DIVIDS = 64
@@ -376,7 +374,7 @@ class TestConvergence (unittest.TestCase):
                 [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
                 lambda x, dx: Taylor.sin(VarDbl(x, dx)), 
                 lambda x: math.sin(x),
-                f'{OUTDIR}/SinEdge.txt')
+                f'{OUTDIR}/Python/Output/SinEdge.txt')
         
     def test_sin_uniform(self):
         DIVIDS = 64
@@ -384,15 +382,15 @@ class TestConvergence (unittest.TestCase):
                 [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
                 lambda x, dx: Taylor.sin(VarDbl(x, dx), momentum=momentum.UNIFORM), 
                 lambda x: math.sin(x),
-                f'{OUTDIR}/SinEdge.Uniform.txt')
+                f'{OUTDIR}/Python/Output/SinEdge.Uniform.txt')
         
 
     def test_exp(self):
-        Taylor.exp(VarDbl(0, 19), dumpPath=f'{OUTDIR}/Exp_0_16.txt')
+        Taylor.exp(VarDbl(0, 19), dumpPath=f'{OUTDIR}/Python/Output/Exp_0_16.txt')
         with self.assertRaises(NotMonotonicException):
-            Taylor.exp(VarDbl(0, 20), dumpPath=f'{OUTDIR}/Exp_0_17.txt')
+            Taylor.exp(VarDbl(0, 20), dumpPath=f'{OUTDIR}/Python/Output/Exp_0_17.txt')
 
-        dumpPath = f'{OUTDIR}/ExpEdge.txt'
+        dumpPath = f'{OUTDIR}/Python/Output/ExpEdge.txt'
         TestConvergence._search(19, 20, 1000,
                 (0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50, 100, -100),
                 lambda x, dx: Taylor.exp(VarDbl(x, dx)), 
@@ -412,7 +410,7 @@ class TestConvergence (unittest.TestCase):
 
 
     def test_log(self):
-        dumpPath = f'{OUTDIR}/LogEdge.txt'
+        dumpPath = f'{OUTDIR}/Python/Output/LogEdge.txt'
         TestConvergence._search(0.20, 0.21, 100000,
                 (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
                 lambda x, dx: Taylor.log(VarDbl(x, x*dx)), 
@@ -430,7 +428,7 @@ class TestConvergence (unittest.TestCase):
                 self.assertTrue(exception.startswith('NotMonotonicException'))
         
     def test_log_uniform(self):
-        dumpPath = f'{OUTDIR}/LogEdge.uniform.txt'
+        dumpPath = f'{OUTDIR}/Python/Output/LogEdge.uniform.txt'
         TestConvergence._search(0.57, 0.59, 100000,
                 (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
                 lambda x, dx: Taylor.log(VarDbl(x, x*dx), momentum=momentum.UNIFORM), 

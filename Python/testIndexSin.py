@@ -1,15 +1,33 @@
 import math
+import os
 import typing
 import unittest
 
-from indexSin import IndexSin, SinSource
+from indexSin import IndexSin, SinSource, OUTDIR
 from varDbl import VarDbl
 from histo import Stat, Histo
+
 
 
 q1 = math.sin(1/8*math.pi)
 q2 = math.sin(2/8*math.pi)
 q3 = math.cos(1/8*math.pi)
+
+
+class TestException (unittest.TestCase):
+
+    def testSize(self):
+        self.assertEqual(IndexSin.validateSize(1024), 10)
+        with self.assertRaises(RuntimeError):
+            IndexSin.validateSize(1000)
+
+    def testorder(self):
+        for order in range(IndexSin.MIN_ORDER, IndexSin.MAX_ORDER + 1):
+            IndexSin.validateOrder(order)
+        with self.assertRaises(RuntimeError):
+            IndexSin.validateSize(-1)
+        with self.assertRaises(RuntimeError):
+            IndexSin.validateSize(IndexSin.MAX_ORDER + 1)
 
 
 class TestIndexSin (unittest.TestCase):
@@ -500,7 +518,7 @@ class TestIndexSinDiff (unittest.TestCase):
         '''
         sStat = {}
         sHist = {}
-        dumpPath = f'./Python/Output/Profile_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
+        dumpPath = f'{OUTDIR}/Python/Output/Profile_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
         HEADER = "Order\tRange\tTest\tX\tValue Error\tUncertainty\tNormalized Error"
         with open(dumpPath, 'w') as fw:
             fw.write(HEADER)
@@ -528,7 +546,7 @@ class TestIndexSinDiff (unittest.TestCase):
                         continue
                     fw.flush()
 
-        dumpPath = f'./Python/Output/Stat_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
+        dumpPath = f'{OUTDIR}/Python/Output/Stat_{testName}_{sOrderRange[0]}_{sOrderRange[-1]}_{maxRange}.txt'
         dumpStat(dumpPath, testName, maxRange, sStat, sHist)
 
     def test_SinDiff_Quart_vs_Prec(self):

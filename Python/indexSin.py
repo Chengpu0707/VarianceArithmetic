@@ -4,6 +4,9 @@ import os
 
 import varDbl
 
+OUTDIR = '.' if os.getcwd().endswith('VarianceArithmetic') else \
+        '..' if os.getcwd().endswith('Python') else '\InvalidOutPath'
+
 
 class SinSource (enum.StrEnum):
     Quart = 'Quart',
@@ -136,7 +139,7 @@ class IndexSin:
 
     def dump(self, order:int=MAX_ORDER) -> None:
         IndexSin.validateOrder(order)
-        with open(f'./Python/Output/IndexSin_{self._sinSource}_{order}.txt', 'w') as f:
+        with open(f'{OUTDIR}/Python/Output/IndexSin_{self._sinSource}_{order}.txt', 'w') as f:
             f.write(IndexSin.header())
             size = 1 << order
             for i in range(size + 1):

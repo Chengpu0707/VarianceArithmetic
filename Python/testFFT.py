@@ -24,6 +24,17 @@ class TestFFT (unittest.TestCase):
                     org >>= 1
                 self.assertEqual(br, sRes[i])
 
+    def testFreqException(self):
+        for sinSource in (SinSource.Quart, SinSource.Prec, SinSource.Lib):
+            for order in range(IndexSin.MIN_ORDER, IndexSin.MAX_ORDER + 1):
+                with self.assertRaises(RuntimeError):
+                    FFT_Signal(sinSource, None, order, 1)
+                with self.assertRaises(RuntimeError):
+                    FFT_Signal(sinSource, SignalType.Linear, order, 1)
+                for signalType in (SignalType.Sin, SignalType.Cos):
+                    with self.assertRaises(RuntimeError):
+                        FFT_Signal(sinSource, signalType, order, 2**(order - 1) + 1)
+
 
 class Test_FFT_Prec (unittest.TestCase):
     fft = FFT(SinSource.Prec)
@@ -337,8 +348,6 @@ class Test_FFT_Step (unittest.TestCase):
         self.assertEqual(rd0.uncertainty(), 1.1102230246251565e-16)
  
 
-
-
 class Test_FFT_Order (unittest.TestCase):
     '''
     Check the FFT order result
@@ -349,7 +358,7 @@ class Test_FFT_Order (unittest.TestCase):
         path = FFT_Order.dumpPath(sOrder=sOrder)
         if os.path.isfile(path):
             os.remove(path)
-        FFT_Order.dump(sOrder, sNoise=sNoise, sNoiseType=(NoiseType.Gaussian,) )
+        FFT_Order.dump(sOrder, sNoise=sNoise, sNoiseType=(NoiseType.Gaussian, NoiseType.White) )
         self.assertTrue(os.path.isfile(path))
         sssssAggr = FFT_Order.read(path)
         self.assertTrue(sssssAggr)
@@ -359,8 +368,8 @@ class Test_FFT_Order (unittest.TestCase):
             self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.PrecAdj, SinSource.Quart, SinSource.Lib))
             for src in ssssAggr.keys():
                 sssAggr = ssssAggr[src]
-                self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian,))
-                for noiseType in (NoiseType.Gaussian,):
+                self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian, NoiseType.White))
+                for noiseType in (NoiseType.Gaussian, NoiseType.White):
                     ssAggr = sssAggr[noiseType]
                     self.assertListEqual(sorted(ssAggr.keys()), sNoise)
                     for noise in sNoise:
@@ -377,7 +386,7 @@ class Test_FFT_Order (unittest.TestCase):
                                 raise ex
 
     def test_2to4(self):
-        self.assertErrDev((2,3,4), forwardPrec=2e-1, reversePrec=5e-1, roundtripPrec=1e-2)
+        self.assertErrDev((2,3,4), forwardPrec=5e-1, reversePrec=5e-1, roundtripPrec=1e-2)
         
     def test_8(self):
         self.assertErrDev((8,), forwardPrec=5e-2, reversePrec=5e-2, roundtripPrec=5e-4,

@@ -6,17 +6,17 @@ import math
 import os
 import unittest
 
+from indexSin import OUTDIR
 import momentum
 import taylor
 import varDbl
-
 
 
 class TestBoundingFactor (unittest.TestCase):
 
     def assert_func(self, fileName:str):
         sMomentum = {}
-        filePath = f'./Python/Output/{fileName}Leakage.txt'
+        filePath = f'{OUTDIR}/Python/Output/{fileName}Leakage.txt'
         match fileName:
             case 'Normal':
                 with open(filePath) as f:
@@ -31,7 +31,7 @@ class TestBoundingFactor (unittest.TestCase):
                             raise ValueError(f'Duplicate samples {samples}')
                         sMomentum[samples] = momentum.Normal(bounding=bounding)
             case 'Uniform':
-                with open('./Python/Output/UniformLeakage.txt') as f:
+                with open(f'{OUTDIR}/Python/Output/UniformLeakage.txt') as f:
                     hdr = next(f)
                     self.assertEqual(hdr, 'Samples\tCount\tMean\tDeviation\n')
                     for line in f:
@@ -59,7 +59,7 @@ class TestBoundingFactor (unittest.TestCase):
         for exp in (2, 0.5, -1, -2):
             sFunc[f'x^{exp}'] = functools.partial(powFunc, exp)
 
-        filePath = f'./Python/Output/{fileName}Bounding.txt'
+        filePath = f'{OUTDIR}/Python/Output/{fileName}Bounding.txt'
         with open(filePath, 'w') as f:
             f.write('Samples\tBounding\tLeakage\tFunction\tStable Bias\tStable Variance'
                     '\tOutput Bias\tOutput Variance\tBias Ratio\tVariance Ratio'
@@ -94,8 +94,8 @@ class TestBoundingFactor (unittest.TestCase):
 
     def test_Uniform_Adj(self):
         mmt = momentum.Uniform(0.5)
-        ideal = taylor.Taylor.pow(varDbl.VarDbl(1, 0.1), -2, momentum=momentum.UNIFORM, dumpPath=f'./Python/Output/pow_1_0.1_-2.txt')
-        half = taylor.Taylor.pow(varDbl.VarDbl(1, 0.1), -2, momentum=mmt, dumpPath=f'./Python/Output/pow_1_0.1_-2_mmt_0.5.txt')
+        ideal = taylor.Taylor.pow(varDbl.VarDbl(1, 0.1), -2, momentum=momentum.UNIFORM, dumpPath=f'{OUTDIR}/Python/Output/pow_1_0.1_-2.txt')
+        half = taylor.Taylor.pow(varDbl.VarDbl(1, 0.1), -2, momentum=mmt, dumpPath=f'{OUTDIR}/Python/Output/pow_1_0.1_-2_mmt_0.5.txt')
         self.assertAlmostEqual((half.value() - 1) / mmt[2] / (ideal.value() - 1), 1, delta=0.03)
         self.assertAlmostEqual(half.variance() / mmt[2] / ideal.variance(), 1, delta=0.07)
 

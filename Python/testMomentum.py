@@ -1,11 +1,13 @@
 import os
 import unittest
 
+from indexSin import OUTDIR
 import momentum
 import varDbl
 
+
 class TestNormal (unittest.TestCase):
-    filePath = './Python/NormalMomentum_5.0.txt'
+    filePath = f'{OUTDIR}/Python/NormalMomentum_5.0.txt'
 
     @staticmethod
     def preciseNormalMomentum5():
@@ -58,7 +60,7 @@ class TestNormal (unittest.TestCase):
         self.assertGreater(mmtF.maxOrder, 250)
         self.assertEqual(mmtF.bounding, 5)
         sMomentum =TestNormal.preciseNormalMomentum5()
-        with open('./Python/Output/NormalMomentum_compare.txt', 'w') as f:
+        with open(f'{OUTDIR}/Python/Output/NormalMomentum_compare.txt', 'w') as f:
             f.write('Order\tVar Value\tVar Uncertainty\tVar Precison\tVar Diff\tFloat Diff\tFloat Uncertainty\tFloat Precison\n')
             for n in range(0, mmtV.maxOrder, 2):
                 unc = varDbl.VarDbl(mmtF[n]).uncertainty()

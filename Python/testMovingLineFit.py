@@ -1,10 +1,13 @@
 import math
+import os
 import random
 import unittest
 
 from histo import Stat
+from indexSin import OUTDIR
 from movingLineFit import FitType, movingLineFit
 from varDbl import VarDbl
+
 
 class TestMovingLineFitPrecise (unittest.TestCase):
 
@@ -180,7 +183,7 @@ class TestMovingLineFitImprecise (unittest.TestCase):
                 sStat0[i].accum((fit2[0].value() - sFit0[0])/fit2[0].uncertainty())
                 sStat1[i].accum((fit2[1].value() - sFit1[0])/fit2[1].uncertainty())
 
-        with open('./Python/Output/MovingLineFitStat.txt', 'w') as f:
+        with open(f'{OUTDIR}/Python/Output/MovingLineFitStat.txt', 'w') as f:
             f.write('Time Index\tInput Value\tInput Uncertainty'
                     '\tFit 0 Deviation\tFit 0 Mean\tFit 0 Minimum\tFit 0 Maxium'
                     '\tFit 1 Deviation\tFit 1 Mean\tFit 1 Minimum\tFit 1 Maxium'
@@ -203,7 +206,7 @@ class TestMovingLineFitImprecise (unittest.TestCase):
                 f.write('\n')
 
 
-        with open('./Python/Output/MovingLineFit.txt', 'w') as f:
+        with open(f'{OUTDIR}/Python/Output/MovingLineFit.txt', 'w') as f:
             f.write('Time Index\tInput Value\tInput Uncertainty'
                     '\tLocal 0 Value\tLocal 0 Uncertainty\tLocal 1 Value\tLocal 1 Uncertainty'
                     '\tUnadjusted 0 Value\tUnadjusted 0 Uncertainty\tUnadjusted 1 Value\tUnadjusted 1 Uncertainty'

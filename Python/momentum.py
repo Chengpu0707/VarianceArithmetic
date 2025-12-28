@@ -6,6 +6,7 @@ import scipy.special
 import scipy.stats
 import sympy
 
+from indexSin import OUTDIR
 import varDbl
 
 class Momentum (abc.ABC):
@@ -38,16 +39,6 @@ class Normal (Momentum):
     __slots__ = ('_sMomentum', '_maxOrder', '_bounding')
 
     @staticmethod
-    def getPath(bounding:float):
-        if os.getcwd().endswith('VarianceArithmetic'):
-            return f'./Python/NormalMomentum_{bounding}.txt'
-        elif os.getcwd().endswith('Python'):
-            return f'./NormalMomentum_{bounding}.txt'
-        else:
-            raise ValueError(f'Invalid cwd {os.getcwd()}')
-        
-
-    @staticmethod
     def readPreciseNorm(filePath:str):
         sMomentum = []
         with open(filePath) as f:
@@ -67,7 +58,7 @@ class Normal (Momentum):
 
     @staticmethod
     def calcPreciseNorm(bounding:float=5.0, maxOrder:int=1000000):
-        filePath = Normal.getPath(bounding)
+        filePath = f'{OUTDIR}/Python/NormalMomentum_{bounding}.txt'
         HEADER = f'n\tMomentum\tBounding={bounding}'
         b, sMomentum = Normal.readPreciseNorm(filePath)
         if b != bounding:
@@ -87,12 +78,7 @@ class Normal (Momentum):
 
     def __init__(self, bounding:float=5, maxOrder:int=1000000, withVariance:bool=False):
         self._bounding = bounding
-        if os.getcwd().endswith('VarianceArithmetic'):
-            filePath = f'./Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
-        elif os.getcwd().endswith('Python'):
-            filePath = f'./Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
-        else:
-            raise ValueError(f'Invalid cwd {os.getcwd()}')
+        filePath = f'{OUTDIR}/Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
         HEADER = 'Order\tValue\tUncertainty\n'
         if os.path.isfile(filePath):
             try:

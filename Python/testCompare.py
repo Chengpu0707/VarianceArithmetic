@@ -9,11 +9,13 @@ import re
 import sys
 import traceback
 
+from fft import SinSource, SignalType, TestType, FFT_Order, FFT_Step
 from histo import Histo, Stat
+from indexSin import OUTDIR
 from taylor import Taylor
 from varDbl import VarDbl, assertVarDblEqual
+
 from testManual import TestConvergence
-from fft import SinSource, SignalType, TestType, FFT_Order, FFT_Step
 
 
 class TestIndexSine (unittest.TestCase):
@@ -69,41 +71,41 @@ class TestIndexSine (unittest.TestCase):
         self.assertAlmostEqual(histo.stat().dev(), dev)
             
     def test_cpp_vs_python(self):
-        dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Cpp/Output/IndexSin_Quart_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_18_Cpp_Python.txt'
+        dumpPathBase = f'{OUTDIR}/Python/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Cpp/Output/IndexSin_Quart_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_18_Cpp_Python.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart C++ vs Python', 0.1815195,)
 
     def test_java_vs_python(self):
-        dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Java/Output/IndexSin_Quart_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_18_Java_Python.txt'
+        dumpPathBase = f'{OUTDIR}/Python/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Java/Output/IndexSin_Quart_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_18_Java_Python.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs Python', 0.1821751)
 
     def test_cpp_vs_java(self):
-        dumpPathBase = './Cpp/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Java/Output/IndexSin_Quart_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_18_Java_Cpp.txt'
+        dumpPathBase = f'{OUTDIR}/Cpp/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Java/Output/IndexSin_Quart_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_18_Java_Cpp.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart Java vs C++', 0.0354802)
 
     def test_quart_vs_prec_python(self):
-        dumpPathBase = './Python/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Python.txt'
+        dumpPathBase = f'{OUTDIR}/Python/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Cpp/Output/IndexSin_Prec_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_Prec_18_Python.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Python', 0.6431504,
                   compareUncertainty=False)
 
     def test_quart_vs_prec_cpp(self):
-        dumpPathBase = './Cpp/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Cpp.txt'
+        dumpPathBase = f'{OUTDIR}/Cpp/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Cpp/Output/IndexSin_Prec_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_Prec_18_Cpp.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec C++', 0.6207008,
                   compareUncertainty=False)
 
     def test_quart_vs_prec_java(self):
-        dumpPathBase = './Java/Output/IndexSin_Quart_18.txt'
-        dumpPathCode = './Cpp/Output/IndexSin_Prec_18.txt'
-        dumpPathDiff = './Python/Output/IndexSin_Quart_Prec_18_Java.txt'
+        dumpPathBase = f'{OUTDIR}/Java/Output/IndexSin_Quart_18.txt'
+        dumpPathCode = f'{OUTDIR}/Cpp/Output/IndexSin_Prec_18.txt'
+        dumpPathDiff = f'{OUTDIR}/Python/Output/IndexSin_Quart_Prec_18_Java.txt'
         self.diff(dumpPathBase, dumpPathCode, dumpPathDiff, 'Quart vs Prec Java', 0.6210673,
                   compareUncertainty=False)
 
@@ -161,66 +163,66 @@ class TestDumpPath (unittest.TestCase):
     
 
     def test_inversion(self):
-        self.dumpPath('./Python/Output/Pow_1_0.2_-1.txt', 
-                      './Java/Output/pow_1.0_0.2_-1.0.txt')
-        self.dumpPath('./Python/Output/Pow_1_0.2_-1.txt', 
-                      './Cpp/Output/pow_1_0.2_-1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/Pow_1_0.2_-1.txt', 
+                      f'{OUTDIR}/Java/Output/pow_1.0_0.2_-1.0.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/Pow_1_0.2_-1.txt', 
+                      f'{OUTDIR}/Cpp/Output/pow_1_0.2_-1.txt')
         
     def test_inversion_NotMonotonic(self):
-        self.dumpPath('./Python/Output/Pow_1_0.2_-2.txt', 
-                      './Java/Output/pow_1.0_0.2_-2.0.txt')
-        self.dumpPath('./Python/Output/Pow_1_0.2_-2.txt', 
-                      './Cpp/Output/pow_1_0.2_-2.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/Pow_1_0.2_-2.txt', 
+                      f'{OUTDIR}/Java/Output/pow_1.0_0.2_-2.0.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/Pow_1_0.2_-2.txt', 
+                      f'{OUTDIR}/Cpp/Output/pow_1_0.2_-2.txt')
         
     def test_exp(self):
-        self.dumpPath('./Python/Output/exp_1_0.1.txt',
-                      './Java/Output/exp_1.0_0.1.txt')
-        self.dumpPath('./Python/Output/exp_1_0.1.txt',
-                      './Cpp/Output/exp_1_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/exp_1_0.1.txt',
+                      f'{OUTDIR}/Java/Output/exp_1.0_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/exp_1_0.1.txt',
+                      f'{OUTDIR}/Cpp/Output/exp_1_0.1.txt')
 
     def test_log(self):
-        self.dumpPath('./Python/Output/log_1_0.1.txt',
-                      './Java/Output/log_1.0_0.1.txt')
-        self.dumpPath('./Python/Output/log_1_0.1.txt',
-                      './Cpp/Output/log_1_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/log_1_0.1.txt',
+                      f'{OUTDIR}/Java/Output/log_1.0_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/log_1_0.1.txt',
+                      f'{OUTDIR}/Cpp/Output/log_1_0.1.txt')
 
     def test_sin_0(self):
-        self.dumpPath('./Python/Output/sin_0_0.1.txt',
-                      './Java/Output/sin_0_0.1.txt')
-        self.dumpPath('./Python/Output/sin_0_0.1.txt',
-                      './Cpp/Output/sin_0_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0_0.1.txt',
+                      f'{OUTDIR}/Java/Output/sin_0_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0_0.1.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_0_0.1.txt')
         
-        self.dumpPath('./Python/Output/sin_0_1.0.txt',
-                      './Java/Output/sin_0_1.txt')
-        self.dumpPath('./Python/Output/sin_0_1.0.txt',
-                      './Cpp/Output/sin_0_1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0_1.0.txt',
+                      f'{OUTDIR}/Java/Output/sin_0_1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0_1.0.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_0_1.txt')
 
     def test_sin_half_pi(self):
         '''
         math.sin(pi/2) and math.cos(pi/2) seems to have larger rounding error
         '''
-        self.dumpPath('./Python/Output/sin_0.5_0.1.txt',
-                      './Java/Output/sin_0.5_0.1.txt')
-        self.dumpPath('./Python/Output/sin_0.5_0.1.txt',
-                      './Cpp/Output/sin_1.5708_0.1.txt',
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.5_0.1.txt',
+                      f'{OUTDIR}/Java/Output/sin_0.5_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.5_0.1.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_1.5708_0.1.txt',
                       valPrec=1e-4, uncPrec=1e-4)
         
-        self.dumpPath('./Python/Output/sin_0.5_1.txt',
-                      './Java/Output/sin_0.5_1.txt')
-        self.dumpPath('./Python/Output/sin_0.5_1.txt',
-                      './Cpp/Output/sin_1.5708_1.txt',
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.5_1.txt',
+                      f'{OUTDIR}/Java/Output/sin_0.5_1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.5_1.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_1.5708_1.txt',
                       valPrec=1e-4, uncPrec=1e-4)
 
     def test_sin_quad_pi(self):
-        self.dumpPath('./Python/Output/sin_0.25_0.1.txt',
-                      './Java/Output/sin_0.25_0.1.txt')
-        self.dumpPath('./Python/Output/sin_0.25_0.1.txt',
-                      './Cpp/Output/sin_0.785398_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.25_0.1.txt',
+                      f'{OUTDIR}/Java/Output/sin_0.25_0.1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.25_0.1.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_0.785398_0.1.txt')
         
-        self.dumpPath('./Python/Output/sin_0.25_1.txt',
-                      './Java/Output/sin_0.25_1.txt')
-        self.dumpPath('./Python/Output/sin_0.25_1.txt',
-                      './Cpp/Output/sin_0.785398_1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.25_1.txt',
+                      f'{OUTDIR}/Java/Output/sin_0.25_1.txt')
+        self.dumpPath(f'{OUTDIR}/Python/Output/sin_0.25_1.txt',
+                      f'{OUTDIR}/Cpp/Output/sin_0.785398_1.txt')
 
 
 class TestConvergeEdge (unittest.TestCase):
@@ -249,22 +251,22 @@ class TestConvergeEdge (unittest.TestCase):
                         raise
         
     def test_PowEdge(self):
-        self.convergeEdge('./Python/Output/PowEdge.txt', 
-                          './Java/Output/PowEdge.txt',
+        self.convergeEdge(f'{OUTDIR}/Python/Output/PowEdge.txt', 
+                          f'{OUTDIR}/Java/Output/PowEdge.txt',
                           prec=1e-9)
-        self.convergeEdge('./Python/Output/PowEdge.txt', 
-                          './Cpp/Output/PowEdge.txt',
+        self.convergeEdge(f'{OUTDIR}/Python/Output/PowEdge.txt', 
+                          f'{OUTDIR}/Cpp/Output/PowEdge.txt',
                           prec=1e-9)
 
     def test_SinEdge(self):
         '''
         cos(PI/2)=6.12323399573676E-17 in Python differs from cos(PI/2)=6.12303176911189E-17 from Java or C++
         '''
-        self.convergeEdge('./Python/Output/SinEdge.txt', 
-                          './Java/Output/SinEdge.txt', 
+        self.convergeEdge(f'{OUTDIR}/Python/Output/SinEdge.txt', 
+                          f'{OUTDIR}/Java/Output/SinEdge.txt', 
                           prec=5e-3)
-        self.convergeEdge('./Java/Output/SinEdge.txt', 
-                          './Cpp/Output/SinEdge.txt', 
+        self.convergeEdge(f'{OUTDIR}/Java/Output/SinEdge.txt', 
+                          f'{OUTDIR}/Cpp/Output/SinEdge.txt', 
                           prec=5e-5)
         
 
@@ -272,14 +274,14 @@ class Test_FFT_Step_Prec (unittest.TestCase):
 
     def test_java(self):
         for order in range(2, 6):
-            dumpPathPy = f'./Python/Output/FFT_Step_{order}_Prec.txt'
-            dumpPathCode = f'./Java/Output/FFT_Step_{order}_Prec.txt'
+            dumpPathPy = f'{OUTDIR}/Python/Output/FFT_Step_{order}_Prec.txt'
+            dumpPathCode = f'{OUTDIR}/Java/Output/FFT_Step_{order}_Prec.txt'
             FFT_Step.compare(self, SinSource.Prec, order, dumpPathPy, dumpPathCode, precDiff=-1)
 
     def test_cpp(self):
         for order in range(2, 6):
-            dumpPathPy = f'./Python/Output/FFT_Step_{order}_Prec.txt'
-            dumpPathCode = f'./Cpp/Output/FFT_Step_{order}_Prec.txt'
+            dumpPathPy = f'{OUTDIR}/Python/Output/FFT_Step_{order}_Prec.txt'
+            dumpPathCode = f'{OUTDIR}/Cpp/Output/FFT_Step_{order}_Prec.txt'
             FFT_Step.compare(self, SinSource.Prec, order, dumpPathPy, dumpPathCode, precDiff=-1)
 
 
@@ -288,8 +290,8 @@ class Test_FFT_Step_Quart (unittest.TestCase):
     def test_java(self):
         sOrder_precDiff = {}
         for order in range(2, 6):
-            dumpPathPy = f'./Python/Output/FFT_Step_{order}_Quart.txt'
-            dumpPathCode = f'./Java/Output/FFT_Step_{order}_Quart.txt'
+            dumpPathPy = f'{OUTDIR}/Python/Output/FFT_Step_{order}_Quart.txt'
+            dumpPathCode = f'{OUTDIR}/Java/Output/FFT_Step_{order}_Quart.txt'
             for precDiff in range(-1, 10):
                 try:
                     FFT_Step.compare(self, SinSource.Quart, order, dumpPathPy, dumpPathCode, precDiff=precDiff)
@@ -302,8 +304,8 @@ class Test_FFT_Step_Quart (unittest.TestCase):
     def test_cpp(self):
         sOrder_precDiff = {}
         for order in range(2, 6):
-            dumpPathPy = f'./Python/Output/FFT_Step_{order}_Quart.txt'
-            dumpPathCode = f'./Cpp/Output/FFT_Step_{order}_Quart.txt'
+            dumpPathPy = f'{OUTDIR}/Python/Output/FFT_Step_{order}_Quart.txt'
+            dumpPathCode = f'{OUTDIR}/Cpp/Output/FFT_Step_{order}_Quart.txt'
             for precDiff in range(-1, 10):
                 try:
                     FFT_Step.compare(self, SinSource.Quart, order, dumpPathPy, dumpPathCode, precDiff=precDiff)
@@ -341,7 +343,7 @@ class Test_FFT_Order (unittest.TestCase):
                     print(f'{sinSource}\t{test}\t{context}\tmin={stat.min()}, {stat.minAt()}\tmax={stat.max()}, {stat.maxAt()}\tmean={stat.mean()}\tdev{stat.dev()}')
 
     def test_Cpp_Aggr(self):
-        sssDiff = FFT_Order.compare(self, './Java/Output/FFT_2_19.txt', './Cpp/Output/FFT_2_19.txt')
+        sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Cpp/Output/FFT_2_19.txt')
         try:
             for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
                 for test in TestType:
@@ -355,7 +357,7 @@ class Test_FFT_Order (unittest.TestCase):
             raise ex
 
     def test_Cpp_Linear(self):
-        sssDiff = FFT_Order.compare(self, './Java/Output/FFT_2_19.txt', './Cpp/Output/FFT_2_19.txt', SignalType.Linear)
+        sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Cpp/Output/FFT_2_19.txt', SignalType.Linear)
         try:
             for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
                 for test in TestType:
@@ -418,21 +420,21 @@ class Test_Exe_Time (unittest.TestCase):
                 f.write(f'{order}\t{stat.count()}\t{stat.mean()}\t{stat.dev()}\t{stat.min()}\t{stat.minAt()}\t{stat.max()}\t{stat.maxAt()}\n')
 
     def test_Adjugate(self):
-        self.readExeTime('./Python/Output/testAdjugate.log', 
+        self.readExeTime(f'{OUTDIR}/Python/Output/testAdjugate.log', 
                           '^Start size=(\d+), noise=(\d+e-\d+|\d+.\d+|\d+)$', 1, 2)
 
     def test_FFT_Order_Cpp(self):
-        self.readExeTime('./Cpp/Output/FFT_2_19.txt.log', 
+        self.readExeTime(f'{OUTDIR}/Cpp/Output/FFT_2_19.txt.log', 
                           '^Start calulation order=(\d+), sinSource=(Prec|Quart|Lib), noiseType=(Gaussian|White), noise=(\d+e-\d+|\d+.\d+|\d+)$',
                           1, 4, 2)
     
     def test_FFT_Order_Java(self):
-        self.readExeTime('./Java/Output/FFT_2_19.txt.log', 
+        self.readExeTime(f'{OUTDIR}/Java/Output/FFT_2_19.txt.log', 
                           '^Starting noiseType=(Gaussian|White) noise=(\d+e-\d+|\d+.\d+|\d+) order=(\d+) sinSource=(Prec|Quart|Lib)$',
                           3, 2, 4)
     
     def test_FFT_Order_Python(self):
-        self.readExeTime('./Python/Output/FFT_2_19.txt.log', 
+        self.readExeTime(f'{OUTDIR}/Python/Output/FFT_2_19.txt.log', 
                           '^Start calulation order=(\d+), sinSource=(Prec|Quart|Lib), noiseType=(Gaussian|White), noise=(\d+e-\d+|\d+.\d+|\d+)$',
                           1, 4, 2)
 
