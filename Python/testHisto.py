@@ -70,25 +70,6 @@ class TestHisto (unittest.TestCase):
         self.assertListEqual([1]*7, histo.histogram())
         self.assertEqual('"Stat: 9, 0.0+/-1.2909944487358056"', str(histo))
 
-    def testAdd(self):
-        histo = Histo(2, 1.5)
-        self.assertListEqual([-3/2,-1,-1/2,0.0,1/2,1,3/2], histo.buckets())
-        for i in range(-4,0):
-            self.assertTrue(histo.accum(i/2))
-        histo1 = Histo(2, 1.5)
-        self.assertListEqual([-3/2,-1,-1/2,0.0,1/2,1,3/2], histo1.buckets())
-        for i in range(0,5):
-            self.assertTrue(histo1.accum(i/2))
-        histo += histo1
-        self.assertEqual(9, histo.stat().count())
-        self.assertEqual(-2, histo.stat().min())
-        self.assertEqual(+2, histo.stat().max())
-        self.assertEqual(0,  histo.stat().mean())
-        self.assertEqual(math.sqrt(5/3),  histo.stat().dev())
-        self.assertEqual(1,  histo.less())
-        self.assertEqual(1,  histo.more())
-        self.assertListEqual([1]*7, histo.histogram())
-        self.assertEqual('"Stat: 9, 0.0+/-1.2909944487358056"', str(histo))
 
 
 

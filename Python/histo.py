@@ -23,27 +23,6 @@ class Stat:
             case _:
                 return f'"Stat: {self._count}, {self.mean()}+/-{self.dev()}"'
             
-    def __add__(self, other):
-        if not isinstance(other, Stat):
-            return NotImplemented(f'{self} + {type(other)}: {other}')
-        ret = Stat()
-        ret._count = self._count + other._count
-        if self._min > other._min:
-            self._min = other._min
-            self._minAt = other._minAt
-        elif self._min == other._min:
-            if (self._minAt is None) and (other._minAt is not None):
-                self._minAt = other._minAt
-        if self.max < other.max:
-            self._max = other._max
-            self._maxAt = other._maxAt
-        elif self._max == other._max:
-            if (self._maxAt is None) and (other._maxAt is not None):
-                self._maxAt = other._maxAt
-        ret._sum = self._sum + other._sum
-        ret._sum2 = self._sum2 + other._sum2
-        return ret
-
     def accum(self, value:float, at=None) ->bool:
         value = float(value)
         if not math.isfinite(value):
@@ -105,22 +84,6 @@ class Histo:
 
     def __str__(self) -> str:
         return str(self._stat)
-    
-    def __add__(self, other):
-        if not isinstance(other, Histo):
-            return NotImplemented(f'{self} + {type(other)}: {other}')
-        if self._divids != other._divids:
-            raise ValueError(f'Histo.divids {self._divids} + {other._divids}')
-        if self._devs != other._devs:
-            raise ValueError(f'Histo.devs {self._devs} + {other._devs}')
-        if len(self._sHisto) != len(other._sHisto):
-            raise ValueError(f'Histo.len {len(self._sHisto)} + {other._sHisto}')
-        ret = Histo(self._divids, self._half /self._divids)
-        ret.stat = self.stat + other.stat
-        ret.less = self.less + other.less
-        ret.more = self.more + other.more
-        ret._sHisto = [it1 + it2 for it1, it2 in zip(self._sHisto, other._sHisto)]
-        return ret
     
     def range(self):
         return self._devs
