@@ -73,11 +73,16 @@ The full FFT test took 17.9 hours:
 ```
     ...\VarianceArithmetic\Cpp> .\TestFFT.exe Test
 ```
+For other compilation options, please change .vscode/tasks.json and rerun the C++ FFT test.
+The full FFT test took about 3 hours with the following compilation flag: -O3 march=native
 
 For Python, run the manual command:
 ``` 
     ...\VarianceArithmetic\Python> Python -m unittest testManual.Test_FFT_Order.test_Gaussian
+    ...\VarianceArithmetic\Python> Python -m unittest testManual.Test_FFT_Order.test_White
 ```
+The full FFT test took about a week.
+
 
 ## Last Unit tests to run
 
@@ -100,6 +105,11 @@ For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=32769, norma
 For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=65536, normaliized error outlier -8604408562923685.0 between 0.000000e+00~0.000e+00 and 1.224647e-16~1.423e-32
 For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, normaliized error outlier -8604408562923685.0 between -6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
 ```
+
+# Failure of unit test
+
+Because of using random variable in the test, occassionally, some test can fail due to sampling.
+Usually rerun the test will pass.
 
 
 # Fuction Description and Related files
@@ -335,3 +345,52 @@ taylor.py                306     50    84%   21, 66, 82-102, 156, 159, 163, 243-
 varDbl.py                192     10    95%   59, 75-76, 167-168, 200, 248, 260-261, 275
 '''
 
+## C++
+
+In .vscode/tasks.json, each file should be compiled with the following options:
+```
+"-ftest-coverage",
+"-fprofile-arcs",
+```
+These options will slow down the execution.
+
+'''
+...\VarianceArithmetic\Cpp> .\TestFFT.exe
+...\VarianceArithmetic\Cpp> gcov .\TestFFT.cpp
+PS C:\Users\Cheng\OneDrive\Documents\Github\VarianceArithmetic\Cpp> gcov .\TestFFT.cpp
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/TestFFT.cpp'
+Lines executed:86.26% of 444
+Creating 'TestFFT.cpp.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/IndexSin.h'
+Lines executed:54.26% of 129
+Creating 'IndexSin.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Taylor.h'
+Lines executed:36.14% of 249
+Creating 'Taylor.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Momentum.h'
+Lines executed:100.00% of 31
+Creating 'Momentum.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/VarDbl.h'
+Lines executed:84.87% of 119
+Creating 'VarDbl.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/VarDbl.h'
+Lines executed:84.87% of 119
+Creating 'VarDbl.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Stat.h'
+Lines executed:100.00% of 92
+Creating 'Stat.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Test.h'
+Lines executed:29.23% of 65
+Creating 'Test.h.gcov'
+
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/FFT.h'
+Lines executed:100.00% of 74
+Creating 'FFT.h.gcov'
+'''

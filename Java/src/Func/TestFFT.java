@@ -409,7 +409,7 @@ class FFT_Order extends FFT_Signal {
     static boolean dump(String dumpPath, int maxOrder) {
         return dump(dumpPath, IndexSin.MIN_ORDER + 1, maxOrder, 
             List.of(1, 2,3,4,5,6,7), 
-            List.of(SinSource.Prec, SinSource.Quart, SinSource.Lib), 
+            List.of(SinSource.Quart, SinSource.Lib), 
             List.of(NoiseType.Gaussian, NoiseType.White),
             List.of(0., 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 
                     1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.));

@@ -1099,7 +1099,7 @@ Figure \ref{fig: Bounding_Factor_Leakage} further demonstrates that for smaller 
 Figure \ref{fig: Bounding_Factor_Leakage} also indicates that when $N \geq 30$, the difference between $\epsilon(4, N)$ and $\epsilon(5, N)$ is less than $10^{-3}$, suggesting that $\kappa(\kappa_s, N)$ becomes stable when $\kappa_s \geq 4$.
 Moreover, according to  the 5-$\sigma$ rule, $\kappa(5, N)$ in Figure \ref{fig: Normal_Bounding_Leakage} should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
 
-$\kappa_s = \sqrt{3}$ and $\kappa_s = 5$ are defined as the ideal bounding ranges for the uniform and Gaussian distributions respectively.
+$\kappa_s = \sqrt{3}$ and $\kappa_s = 5$ are defined as the ideal bounding ranges $\hat{\kappa}$ for the uniform and Gaussian distributions respectively.
 
 
 \subsection{Ideal Statistics}
@@ -2801,11 +2801,36 @@ Because the the Quart sine function strictly preserves the symmetry and periodic
 Therefore, the linear spectrum in Formula \eqref{eqn: Fourier spec for linear} may contain significant numerical errors when computed using library sine functions.
 \end{itemize}
 
-For both sine functions, the uncertainty of each $\sin(x)$ is assumed to equal its ULP, which is displayed in Figure \ref{fig: Sin_Diff}. 
-Because the Quart sine function has minimal Taylor expansion error due to its minimal range of $x$ in calls to the library $\sin(x)$, its true numerical errors are likely smaller than ULP, therefore its uncertainty is sightly overestimated.
-In contrast, Figure \ref{fig: Sin_Diff} indicates that the Library sine function exhibits underestimated uncertainties.
+
+\subsection{Refine Quart Sine Function}
+
+\begin{figure}[p]
+\includegraphics[height=2.5in]{Sin_Error_Quart_Prec.pdf} 
+\captionof{figure}{
+Value errors of $\sin(x)^2 + \cos(x)^2 - 1, x = \pi j  /2^L$ (y-axis) versus $x$ (x-axis) and $L$ computed using either the Prec or the Quart sine function (legend).
+}
+\label{fig: Sin_Error_Quart_Prec}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[height=2.5in]{Sin_Error_Prec_ULP.pdf} 
+\captionof{figure}{
+The value error histogram for the Quart sine function when it is calculated using 128-bit floating-point arithmetic and cast to 64-bit floating-point representation.
+}
+\label{fig: Sin_Error_Prec_ULP}
+\end{figure}
 
 
+If the Quart sine function is constructed using the 128-bit floating-point library of gcc and then converted to 64-bit values, the resulting indexed sine function is referred to as the \emph{Prec} sine function.
+\begin{itemize}
+\item 
+Figure \ref{fig: Sin_Error_Quart_Prec} compares the value errors and the uncertainties of $\sin(x)^2 + \cos(x)^2 - 1$ between the Prec sine function and the Quart sine function, and demonstrates that the Prec sine functions has smaller uncertainties numerically than the Quart sine functions, but larger value errors statically, presumably due to rounding errors introduced by the casting.
+As suggested in Figure \ref{fig: Sin_Error_Quart_Prec}, the Prec sine function has about $5\%$ more non-zero $\sin(x)^2 + \cos(x)^2 - 1$ value errors, and  $14\%$ non-zero $\sin(x)^2 + \cos(x)^2 - 1$ value errors exceeding the corresponding uncertainties.
+These difference indicate that casting a 128-bit floating-point value to a 64-bit floating-point value is less accurate in the 64-bit floating-point arithmetic.
+
+\item Figure \ref{fig: Sin_Error_Prec_ULP} demonstrates that the value errors of the Prec sine function after normalized by the corresponding value ULP is uniform distributed with in the half bit of ULP.
+Because variance arithmetic assumes that the value error is uniformly distributed within ULP of each value, the Quart sine function overestimates value errors by one times.
+\end{itemize}
 
 
 
@@ -3212,10 +3237,8 @@ Such deterioration in calculation accuracy is not easily detectable when using c
 In contrast, for Linear signals computed using the Quart sine functions, Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} show the results for the forward and reverse transformations, respectively. 
 The ideal coverage region is significantly larger, and proper coverage is also achieved in adjacent regions.
 The forward transformation exhibits a broader ideal coverage region than the reverse transformations.
-While the forward transformation shows consistent over-estimation of the value errors in the proper coverage region, the reverse transformation demonstrates both over-estimation and under-estimation of the value errors in the proper coverage region. 
-
-As a comparison, because Sin/Cos signals have fewer numerical calculation errors, using either Quart or the Library sine functions, the ideal coverage region is achieved once the added noise is large enough to cover the effect of rounding errors, and this condition is almost independent of FFT orders. 
-The key difference is that when using the Quart sine functions, the error deviations within the proper coverage region differ from $1$ only marginally.
+While the forward transformation shows consistent over-estimation of the value errors in the proper coverage region, the reverse transformation demonstrates both over-estimation and under-estimation of the value errors in the proper coverage region.
+Figure \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} shows that the rounding errors balances the over-estimation of value errors in the Quart sine function in Figure \ref{fig: Sin_Error_Prec_ULP}, so that the error deviations within the proper coverage region differ from $1$ only marginally.
 
 Adding noises has another obvious benefit: Different implementations of the variance arithmetic have almost identical result when the input noise is larger than $10^{-16}$. 
 For example, Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} are almost identical using either C++, or Java, or Python. 
@@ -3257,70 +3280,6 @@ In both cases, error deviations decreases with the strength of the added noise.
 
 
 
-\subsection{Prec Sine Function}
-
-\begin{figure}[p]
-\includegraphics[height=2.5in]{Sin_Error_Quart_Prec.pdf} 
-\captionof{figure}{
-Value errors of $\sin(x)^2 + \cos(x)^2 - 1, x = \pi j  /2^L$ (y-axis) versus $x$ (x-axis) and $L$ computed using either the Prec or the Quart sine function (legend).
-}
-\label{fig: Sin_Error_Quart_Prec}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_SinCos_Clean_vs_Order_Prec.pdf} 
-\captionof{figure}{
-Error deviations (left y-axis) and uncertainty mean (right y-axis) of Linear signals versus FFT orders (x-axis) and transformation types (legend) computed using the the Prec sine function.
-}
-\label{fig: FFT_SinCos_Clean_vs_Order_Prec}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_Clean_Histo_Prec.pdf} 
-\captionof{figure}{
-Histograms of normalized errorsfor forward, reverse and roundtrip transformations (legend) of Linear signals computed using the the Prec sine function.
-}
-\label{fig: FFT_Linear_Clean_Histo_Prec}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{FFT_Linear_Prec_Reverse_ErrorDev_vs_Noise_Order.pdf} 
-\captionof{figure}{
-Error deviation (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis) for reverse transformations of Linear signals computed using the the Prec sine function.
-}
-\label{fig: FFT_Linear_Prec_Reverse_ErrorDev_vs_Noise_Order}
-\end{figure}
-
-
-
-The Quart sine function slightly overestimates the uncertainty, while the Library sine function underestimates it significantly.
-This raises the question of whether a sine function with a more accurate uncertainty quantification can be developed.
-If the Quart sine function is constructed using the 128-bit floating-point library of gcc and then converted to 64-bit values, the difference between each 128-bit value and its corresponding 64-bit value can be used as the uncertainty for the 64-bit representation.
-The resulting indexed sine function is referred to as the \emph{Prec} sine function.
-
-Figure \ref{fig: Sin_Error_Quart_Prec} compares the value errors and the uncertainties of  $\sin(x)^2 + \cos(x)^2 - 1$ between the Prec sine function and the Quart sine function, and demonstrates that the Prec sine functions has smaller uncertainties numerically than the Quart sine functions, but larger value errors statically, presumably due to rounding errors introduced by the casting.
-This difference indicates that casting a 128-bit floating-point value to a 64-bit floating-point value is less accurate in the 64-bit floating-point arithmetic, and the Prec sine function is expected to under-perform the Quart sine function due to under-estimation of the value errors by the uncertainties.
-
-For Sin/Cos signals, Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Prec} is very similar Figure \ref{fig: FFT_SinCos_Clean_vs_Order_Indexed}, provided that the error deviations using Prec sine functions are about $1.7$ times larger than their counterparts using the Quart sine functions.
-
-For Linear signals, when comparing Figure \ref{fig: FFT_Linear_Clean_Histo_Prec} and \ref{fig: FFT_Linear_Clean_Histo_Indexed} for the normalized error distributions:
-\begin{itemize}
-\item For the forward transformations, using either Prec or Quart sine function has very similar distributions.
-
-\item For the reverse transformations, using Prec sine function results in wider distributions that using Quart sine function.
-\end{itemize}
-Although the ideal coverage regions for the reverse transformations remains identical in Figure \ref{fig: FFT_Linear_Prec_Reverse_ErrorDev_vs_Noise_Order} when compared with Figure \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}, using Prec sine function results in larger error deviations in the proper coverage regions.
-Thus, using Prec sine function is slightly inferior than using Quart sine function.
-In another word, casting values from higher floating-point representation to a lower floating-point arithmetic is not necessarily superior.
-
-
-
-
-
-
 \subsection{Calculation Response}
 
 \begin{figure}
@@ -3336,7 +3295,7 @@ Without such optimization, the C++ \textit{-O0} implementation is about a order 
 Figure \ref{fig: FFT_Performance} plots the execution time for the roundtrip FFT calculations using either C++, Java, or Python.
 As expected, in Figure \ref{fig: FFT_Performance}, the execution time increases exponentially with the FFT order $L$ as $2^L$ for all the three implementations when the FFT order $L > 10$, validating the calculation response.
 
-At first, it is surprising that in Figure \ref{fig: FFT_Performance} the Java implementation is 3 times faster than the C++ implementation which has been fully optimized for speed.
+At first, it is surprising that in Figure \ref{fig: FFT_Performance} the Java implementation is 2 times faster than the C++ implementation which has been fully optimized for speed.
 Because FFT contains a large amount of independent and logically identical branches, the dynamic just-in-time Java compiler \cite{J9VM} can optimize according to data in real-time, compile the bytecodes into native machine codes, and parallelize the execution to the multiple cores and GPUs on a modern computer.
 Perhaps it is necessary to rethink multi-threading as a way to manually increase the time performance, because the dynamic just-in-time optimization of Java is superior to the static optimization of C++ for repeated and heavy computations with preload data such as FFT. 
 
@@ -3495,9 +3454,10 @@ Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions
 Its asymptotic behavior $2n \rightarrow +\infty: \zeta(2n) \rightarrow \kappa^{2n} / (2n)$ needs to be generalized.
 Perhaps the asymptotic behavior implies a generic new requirements on the probability distributions.
 
-The choice of ideal bounding range needs further study.
-For example, the choice of $\kappa_s = 5$ for Normal distribution is based on the $5-\sigma$ rule in practice only.
+The choice of ideal bounding range $\hat{\kappa}$ needs further study.
+For example, the choice of $\hat{\kappa} = 5$ for Normal distribution is based on the $5-\sigma$ rule in practice only.
 Such choice certainly can not be applied to other distributions.
+Also, the choice of ideal bounding range $\hat{\kappa}$ determines the convergence of both $\log(x)$ and $x^c$ as $P(x) \lesssim 1/\hat{\kappa}$, which needs better mathematical understanding.
 
 Cases where $\delta^2 f < \widehat{\delta^2} f$ due to low sample count require further theoretical study and experimental verification.
 

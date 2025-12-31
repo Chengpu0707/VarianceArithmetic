@@ -161,6 +161,9 @@ cython_debug/
 
 .metadata/*
 Cpp/*.exe
+Cpp/*.gcov
+Cpp/*.gcda
+Cpp/&.gcno
 Cpp/Output/*
 IPyNb/.ipynb_checkpoints/*
 Java/bin/*

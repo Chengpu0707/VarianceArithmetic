@@ -103,7 +103,7 @@ struct FFT_Order : public FFT_Signal
 
     static bool dump(std::string dumpPath = "",
                     unsigned minOrder=IndexSin::MIN_ORDER + 1, unsigned maxOrder=IndexSin::MAX_ORDER + 1,
-                    std::initializer_list<IndexSin::SinSource> sSinSource = {IndexSin::SinSource::Prec, IndexSin::SinSource::Quart, IndexSin::SinSource::Lib},
+                    std::initializer_list<IndexSin::SinSource> sSinSource = {IndexSin::SinSource::Quart, IndexSin::SinSource::Lib},
                     std::initializer_list<NoiseType> sNoiseType = {NoiseType::Gaussian, NoiseType::White}, 
                     std::initializer_list<double> sNoise = {0., 1e-17, 1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.},
                     std::initializer_list<int> sFreq = {1,2,3,4,5,6,7} 

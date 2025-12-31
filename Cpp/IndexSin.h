@@ -7,7 +7,7 @@ This function has minimal float error when "withUncertainty"==False.
 When "withUncertainty"==True, use regression to calculate the sin
 
 */
-
+#include "Stat.h"
 #include "VarDbl.h"
 
 #include <cassert>
@@ -218,17 +218,24 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
     const size_t quart = size / 4;
     if (_sSinPrec.empty()) {
         if (dumpDir.empty()) {
+            Histogram histo(1.0, 20);
             for (size_t i = 0; i < size; ++i) {
                 const double value = std::sin(std::numbers::pi * i /size);
                 if (i <= quart) {
                     const long double val = std::sin(IndexSin::PI * i /size);
                     _sSinPrec.emplace_back(val, std::abs(val - ((double) val)));
                     _sSinQuart.emplace_back(value);
+                    const double ulpVal = ulp((double) val);
+                    if (ulpVal > 0)
+                        histo.addAt((val - ((double) val)) /ulpVal, i);
                 }  else if (i <= half) {
                     const double value = std::cos(std::numbers::pi * (half - i) /size);
                     const long double val = std::cos(PI * (half - i) /size);
                     _sSinPrec.emplace_back(val, std::abs(val - value));
                     _sSinQuart.emplace_back(value);
+                    const double ulpVal = ulp((double) val);
+                    if (ulpVal > 0)
+                        histo.addAt((val - ((double) val)) /ulpVal, half - i);
                 }
                 _sSinFull.emplace_back(value);
                 _sSinFixed.emplace_back(value, VarDbl::ulp(1.));
@@ -237,6 +244,13 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
             assert(_sSinQuart.size() == (half + 1));
             assert(_sSinFull.size() == size);
             assert(_sSinFixed.size() == size);
+            std::ofstream ofs("Output/Prec.histo.txt");
+            ofs << "Count\tMean\tDev\tMin\tMinAt\tMax\tMaxAt\tLower Count\tUpper Count" << histo.header() << "\n";
+            ofs << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
+                << '\t' << histo.min() << '\t' << histo.minAt().value() 
+                << '\t' << histo.max() << '\t' << histo.maxAt().value()
+                << '\t' << histo.lowers() << '\t' << histo.uppers() << histo.formatted();
+            ofs.flush();
         } else {
             read(_sSinPrec, Prec, dumpDir);
             read(_sSinQuart, Quart, dumpDir);
