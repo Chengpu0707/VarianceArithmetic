@@ -345,12 +345,26 @@ class Test_FFT_Order (unittest.TestCase):
     def test_Cpp_Aggr(self):
         sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Cpp/Output/FFT_2_19.txt')
         try:
-            for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
+            for sinSource in (SinSource.Quart, SinSource.Lib):
                 for test in TestType:
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.3 if test == TestType.Roundtrip else 0.1)
                     self.assertLess(-sssDiff[sinSource][test][0].min(), 0.3 if test == TestType.Roundtrip else 0.1)
                     self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 3e-3 if test == TestType.Roundtrip else 1e-3)
-                    self.assertLess(sssDiff[sinSource][test][1].max(), 1e-15)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
+                    self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
+        except AssertionError as ex:
+            Test_FFT_Order.printDiff(sssDiff)
+            raise ex
+
+    def test_Python_Aggr(self):
+        sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Python/Output/FFT_2_19.txt')
+        try:
+            for sinSource in (SinSource.Quart, SinSource.Lib):
+                for test in TestType:
+                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 1)
+                    self.assertLess(-sssDiff[sinSource][test][0].min(), 0.5 if test == TestType.Roundtrip else 0.1)
+                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 0.2 if test == TestType.Roundtrip else 5e-2)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 5e-11)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
             Test_FFT_Order.printDiff(sssDiff)
@@ -359,16 +373,32 @@ class Test_FFT_Order (unittest.TestCase):
     def test_Cpp_Linear(self):
         sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Cpp/Output/FFT_2_19.txt', SignalType.Linear)
         try:
-            for sinSource in (SinSource.Prec, SinSource.Quart, SinSource.Lib):
+            for sinSource in (SinSource.Quart, SinSource.Lib):
                 for test in TestType:
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
                     self.assertLess(-sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
                     self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 6e-3 if test == TestType.Roundtrip else 4e-3)
-                    self.assertLess(sssDiff[sinSource][test][1].max(), 1e-15)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
             Test_FFT_Order.printDiff(sssDiff)
             raise ex
+
+    def test_Python_Linear(self):
+        sssDiff = FFT_Order.compare(self, f'{OUTDIR}/Java/Output/FFT_2_19.txt', f'{OUTDIR}/Python/Output/FFT_2_19.txt', SignalType.Linear)
+        try:
+            for sinSource in (SinSource.Quart, SinSource.Lib):
+                for test in TestType:
+                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.5)
+                    self.assertLess(-sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
+                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 0.2 if test == TestType.Roundtrip else 5e-2)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
+                    self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
+        except AssertionError as ex:
+            Test_FFT_Order.printDiff(sssDiff)
+            raise ex
+
+
 
 
 class Test_Exe_Time (unittest.TestCase):

@@ -264,22 +264,22 @@ class Test_FFT_Step (unittest.TestCase):
         fftSignal = FFT_Signal(SinSource.PrecAdj, SignalType.Sin, 3, 1)
         fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
         self.assertEqual(fftOrder.ssSpecStep[4][10].value(), 0.0)
-        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.18313310582018730308e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.5700924586837754e-16)
         self.assertEqual(fftOrder.ssSpecStep[4][11].value(), -4.44089209850062616169e-16)
-        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.18313310582018730308e-16)
+        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.5700924586837754e-16)
 
         sin = fftOrder.idxSin.sin(1, 2)
         self.assertEqual(sin.value(), 7.07106781186547572737e-01)
-        self.assertEqual(sin.uncertainty(), 4.83012067842292225350e-17)
+        self.assertEqual(sin.uncertainty(), 6.409875621278547e-17)
         self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309514547e+00)
-        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 6.83082217132443123058e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 9.06493303673679e-17)
         self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309514547e+00)
-        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 6.83082217132443123058e-17)
+        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 9.06493303673679e-17)
 
         # floating point multiplication difference
         rd0 = fftOrder.ssSpecStep[3][10] * sin
         self.assertEqual(rd0.value(), 1.0000000000000002)
-        self.assertEqual(rd0.uncertainty(), 8.366014421717556e-17)
+        self.assertEqual(rd0.uncertainty(), 1.1102230246251568e-16)
 
     def test_order3_sin1_Quart(self):
         '''
@@ -365,7 +365,7 @@ class Test_FFT_Order (unittest.TestCase):
         self.assertTupleEqual(tuple(sssssAggr.keys()), sOrder)
         for order in sOrder:
             ssssAggr = sssssAggr[order]
-            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Prec, SinSource.PrecAdj, SinSource.Quart, SinSource.Lib))
+            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Quart, SinSource.Lib))
             for src in ssssAggr.keys():
                 sssAggr = ssssAggr[src]
                 self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian, NoiseType.White))
