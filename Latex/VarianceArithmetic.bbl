@@ -191,6 +191,11 @@ C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 \newblock Numerical 'health' check for scientific codes: the cadna approach.
 \newblock {\em Computer Physics Communications}, 176(8):501--527, 2007.
 
+\bibitem{Double_Factorial}
+Double factorial.
+\newblock \url{http://mathworld.wolfram.com/DoubleFactorial.html}, 2014.
+\newblock Wolfram MathWorld.
+
 \bibitem{J9VM}
 J9 vm reference.
 \newblock

@@ -415,3 +415,10 @@ title = "Rounding Errors in Algebraic Processes",
 publisher = "SIAM",
 year = "1961",
 }		
+
+@misc{J9VM,
+title = "J9 VM reference",
+note = "IBM SDK, Java Technology Edition",
+howpublished = "\url{https://www.ibm.com/docs/en/sdk-java-technology/8?topic=j9-vm-reference}",
+year = "2024",
+}		
