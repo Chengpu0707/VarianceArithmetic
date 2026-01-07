@@ -817,32 +817,19 @@ Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \
 \iffalse
 
 \begin{align*}
-\zeta(n, \kappa) &= \zeta(n, +\infty) - \int_{\kappa}^{+\infty} \tilde{z}^{2n} \rho(\tilde{z}) d \tilde{z}
-		=  \rho(\kappa)\frac{\kappa^{n+1}}{n+1} + 
-			\lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{2n} \rho(\tilde{z}) d \tilde{z} - \frac{\tau^{n+1}}{n+1} \rho(\tau) \right); \\
-n \rightarrow +\infty &:\eqspace \frac{\kappa^{n+1}}{n+1} \ll \kappa^{2n}; \\
-\kappa \rightarrow +\infty &:\eqspace \rho(\kappa) \simeq \frac{d}{d \kappa} \rho(\kappa); \\
-n \rightarrow +\infty, \; \kappa \rightarrow +\infty &: \eqspace
-	\frac{d}{d \kappa} \frac{\kappa^{n+1}}{n+1} \rho(\kappa) = \kappa^{2n} \rho(\kappa) + \frac{\kappa^{n+1}}{n+1} \frac{d}{d \kappa} \rho(\kappa)
-		\simeq \kappa^{2n} \rho(\kappa) ; \\
+\zeta(n, \kappa) &= \lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} 
+		- \int_{\kappa}^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} \right); \\
+	&= \rho(\kappa) \frac{\kappa^{n+1}}{n+1} + 
+			\lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} - \frac{\tau^{n+1}}{n+1} \rho(\tau)
+				+ \int_{\kappa}^{\tau} \frac{\tilde{z}^{n + 1}}{n + 1} d \rho(\tilde{z}) \right); \\
+\frac{d}{d \kappa} \zeta(n, \kappa) &= \rho(\kappa) \kappa^n;
 \end{align*}
 
 \fi
 
-Formula \eqref{eqn: bound asymptote} and \eqref{eqn: order asymptote} suggests Formula \eqref{eqn: bound moment asymptote}.
 Formula \eqref{eqn: symmetric bound moment asymptote} is a special case of Formula \eqref{eqn: bound moment asymptote} for symmetric probability distribution.
-Empirically:
-\begin{itemize}
-\item Formula \eqref{eqn: symmetric bound moment asymptote} is confirmed by Formula \eqref{eqn: Gaussian moment}, \eqref{eqn: uniform moment}, and \eqref{eqn: Laplace moment}.
-
-\item Formula \eqref{eqn: bound moment asymptote} is confirmed by Formula \eqref{eqn: exponential moment} and \eqref{eqn: Gamma asymptotic moment}.
-\end{itemize}
+Empirically, Formula \eqref{eqn: symmetric bound moment asymptote} is confirmed by Formula \eqref{eqn: Gaussian moment}, \eqref{eqn: uniform moment}, and \eqref{eqn: Laplace moment}, and Formula \eqref{eqn: bound moment asymptote} is confirmed by Formula \eqref{eqn: exponential moment} and \eqref{eqn: Gamma asymptotic moment}.
 \begin{align}
-\label{eqn: bound asymptote}
-\zeta(n, \kappa) &= \rho(\kappa)\frac{\kappa^{n+1}}{n+1} + 
-			\lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} - \frac{\tau^{n+1}}{n+1} \rho(\tau) \right); \\
-\label{eqn: order asymptote}
-&\lim_{n \rightarrow +\infty} \frac{d}{d \tau} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} - \frac{\tau^{n+1}}{n+1} \rho(\tau) \right) = 0; \\
 \label{eqn: bound moment asymptote}
 \kappa \ll n &:\eqspace \zeta(n, \kappa) \simeq \rho(\kappa) \frac{\kappa^{n}}{n}; \\
 \label{eqn: symmetric bound moment asymptote}
@@ -3520,7 +3507,7 @@ How to compute and validate these new uncertainty-bearing library functions will
 For example, the uncertainty of a 64-bit value can not directly determined by its difference with the corresponding 128-bit value,
 
 Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions.
-The necessary and sufficient conditions for Formula \eqref{eqn: bound moment asymptote} need to be found.
+The necessary and sufficient conditions for Formula \eqref{eqn: bound moment asymptote} need to be found, to extend the applicable types of distributions for the statistical Taylor expansion from the most common ones as enumerated in Section \ref{sec: statistical Taylor expansion}.
 The statistical bounding to find the bounding range $\kappa$ for the bounded moment needs to be extended to discrete distributions.
 
 The choice of ideal bounding range $\hat{\kappa}$ needs further study.
