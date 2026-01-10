@@ -814,27 +814,28 @@ Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \
 
 \subsection{Asymptotic Behavior for Bound Moment}
 
-\iffalse
-
-\begin{align*}
-\zeta(n, \kappa) &= \lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} 
-		- \int_{\kappa}^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} \right); \\
-	&= \rho(\kappa) \frac{\kappa^{n+1}}{n+1} + 
-			\lim_{\tau \rightarrow +\infty} \left( \int^{\tau} \tilde{z}^{n} \rho(\tilde{z}) d \tilde{z} - \frac{\tau^{n+1}}{n+1} \rho(\tau)
-				+ \int_{\kappa}^{\tau} \frac{\tilde{z}^{n + 1}}{n + 1} d \rho(\tilde{z}) \right); \\
-\frac{d}{d \kappa} \zeta(n, \kappa) &= \rho(\kappa) \kappa^n;
-\end{align*}
-
-\fi
-
-Formula \eqref{eqn: symmetric bound moment asymptote} is a special case of Formula \eqref{eqn: bound moment asymptote} for symmetric probability distribution.
-Empirically, Formula \eqref{eqn: symmetric bound moment asymptote} is confirmed by Formula \eqref{eqn: Gaussian moment}, \eqref{eqn: uniform moment}, and \eqref{eqn: Laplace moment}, and Formula \eqref{eqn: bound moment asymptote} is confirmed by Formula \eqref{eqn: exponential moment} and \eqref{eqn: Gamma asymptotic moment}.
+Except the trivial case $\rho(\tilde{z}) = 0, \tilde{z} \in [0, \kappa]$, when $\frac{d \rho(\tilde{z})}{d \tilde{z}}$ is bounded in $\tilde{z} \in [0, \kappa]$, Formula \eqref{eqn: bound moment asymptote deduction left} and \eqref{eqn: bound moment asymptote deduction right} leads to Formula \eqref{eqn: symmetric bound moment asymptote limit}.
+ Formula \eqref{eqn: bound moment asymptote deduction} and \eqref{eqn: symmetric bound moment asymptote limit} conclude Formula \eqref{eqn: symmetric bound moment asymptote} and \eqref{eqn: bound moment asymptote}.
 \begin{align}
-\label{eqn: bound moment asymptote}
-\kappa \ll n &:\eqspace \zeta(n, \kappa) \simeq \rho(\kappa) \frac{\kappa^{n}}{n}; \\
+\label{eqn: bound moment asymptote deduction}
+\int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} &= \rho(\kappa) \frac{\kappa^{n+1}}{n+1} 
+			- \frac{1}{n+1} \int_{0}^{\kappa} \tilde{z}^{n+1} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z}; \\
+\label{eqn: bound moment asymptote deduction left}
+\forall \kappa > 1&:\;\; 
+		\int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} \geq \int_{0}^{\kappa} \rho(\tilde{z}) d \tilde{z}\; \frac{\kappa^{n+1}}{n+1}; \\
+\label{eqn: bound moment asymptote deduction right}
+\tau = \max\{ |\frac{d \rho(\tilde{z})}{d \tilde{z}}|&: \tilde{z} \in [0, \kappa] \}:\;\; 
+\frac{1}{n+1} \int_{0}^{\kappa} \tilde{z}^{n+1} |\frac{d \rho(\tilde{z})}{d \tilde{z}}| d \tilde{z} <
+		\tau \frac{\kappa^{n+1}}{n+1}\frac{\kappa}{n+2}; \\
+\label{eqn: symmetric bound moment asymptote limit}
+\lim_{n \rightarrow +\infty}& \int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} = \rho(\kappa) \frac{\kappa^{n+1}}{n+1}; \\
 \label{eqn: symmetric bound moment asymptote}
-\rho(-\tilde{z}) = -\rho(\tilde{z}) &:\eqspace \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+|\varrho| = \kappa &:\eqspace \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1}; \\
+\label{eqn: bound moment asymptote}
+|\varrho| < \kappa&:\eqspace \lim_{n \rightarrow +\infty} \zeta(n, \kappa) = \rho(\varrho) \frac{\varrho^{n+1}}{n+1} + \rho(\kappa) \frac{\kappa^{n+1}}{n+1} 
+		\simeq \rho(\kappa) \frac{\kappa^{n+1}}{n+1};
 \end{align}
+
 
 
 \subsubsection{Gaussian Input Uncertainty}
@@ -895,10 +896,10 @@ Figure \ref{fig: Gaussian_5_Moment} shows the transition to Formula \eqref{eqn: 
 \label{eqn: double factorial} 
 & \sum_{j=0}^{+\infty} \frac{\kappa^{2j + 1}}{(2j + 1)!!} = \sqrt{\frac{\pi}{2}} \xi (\frac{\kappa}{\sqrt{2}}) e^{\frac{1}{2} \kappa^2}; \\
 \label{eqn: Gaussian moment} 
-\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{x}^{2n} N(\tilde{x}) d \tilde{x}
+\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z}
 		= 2 N(\kappa) \kappa^{2n} \sum_{j=1}^{\infty} \kappa^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!} \\
 \label{eqn: Gaussian asymptotic moment} 
-& 1 < \kappa^2 \ll 2n:\eqspace \zeta(2n, \kappa) = 2 N(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+\lim_{n \rightarrow +\infty}& \zeta(2n, \kappa) = 2 N(\kappa) \frac{\kappa^{2n+1}}{2n+1};
 \end{align}
 
 
@@ -918,129 +919,15 @@ For uniform distribution, the bounding range $\kappa$ is less than the maximal r
 Formula \eqref{eqn: uniform moment} provides $\zeta(2n)$ while $\zeta(2n + 1) = 0$.
 \begin{equation}
 \label{eqn: uniform moment}
-\zeta(2n) = \int_{-\kappa}^{+\kappa} \tilde{x}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{x} = 2 \frac{1}{2 \sqrt{3}} \frac{\kappa^{2n+1}}{2n + 1}, \;\; 0 \leq \kappa \leq \sqrt{3}; 
+\zeta(2n) = \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{z} = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n + 1}, \;\; 0 \leq \kappa \leq \sqrt{3}; 
 \end{equation}
 
 
 
 
-\subsubsection{Laplace Input Uncertainty}
-
-\iffalse
-
-\begin{align*}
-\rho(\tilde{x}) &= \frac{1}{2} e^{-|\tilde{x}|}; \\
-\zeta(0) &= 1 - e^{-\kappa}; \\
-\zeta(2n) &= \int_{0}^{\kappa} \tilde{x}^{2n}  e^{-\tilde{x}} d \tilde{x} = 2n \int_{0}^{\kappa} \tilde{x}^{2n - 1}  e^{-\tilde{x}} d \tilde{x} - \kappa^{2n}  e^{-\kappa} \\
-	&= 2n (2n-1) \zeta(2n-2) -  e^{-\kappa} (2n \kappa^{2n -1} + \kappa^{2n}) \\
-	&= 2n (2n-1) \left( (2n-2) (2n-3) \zeta(2n-4) -  e^{-\kappa} ((2n-2) \kappa^{2n -3} + \kappa^{2n - 2}) \right) -  e^{-\kappa} (2n \kappa^{2n -1} + \kappa^{2n}) \\
-	& = 2n (2n-1)(2n-2) (2n-3) \zeta(2n-4) - e^{-\kappa} \left(2n (2n-1)(2n-2) \kappa^{2n -3} + 2n (2n-1) \kappa^{2n - 2} + 2n \kappa^{2n -1} + \kappa^{2n} \right) \\
-	&= (2n)! \left( 1 - e^{-\kappa} \sum_{j=0}^{2n} \kappa^j \frac{1}{j!} \right) = e^{-\kappa} (2n)! \sum_{2n+1}^{\infty} \frac{\kappa^j}{j!}
-		= e^{-\kappa} \sum_{j = 1}^{\infty} \kappa^{2n + j} \frac{(2n)!}{(2n + j)!};
-\end{align*}
-
-\fi
-
-For Laplace distribution \cite{Probability_Statistics}, Formula \eqref{eqn: Laplace moment} provides $\zeta(2n, \kappa)$ while $\zeta(2n + 1, \kappa) = 0$, and Formula \eqref{eqn: Laplace asymptotic moment} demonstrates its asymptotic behavior.
-\begin{align}
-\label{eqn: Laplace moment} 
-\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{x}^{2n} \frac{1}{2} e^{-|\tilde{x}|} d \tilde{x}
-		= e^{-\kappa} \kappa^{2n} \sum_{\kappa = 1}^{\infty} \kappa^j \frac{(2n)!}{(2n + j)!}; \\
-\label{eqn: Laplace asymptotic moment} 
-& 1 < \kappa^2 \ll 2n:\eqspace \zeta(2n, \kappa) = 2 \frac{1}{2} e^{-\kappa} \frac{\kappa^{2n+1}}{2n+1};
-\end{align}
 
 
 
-\subsubsection{Exponential Input Uncertainty}
-
-\iffalse
-
-\begin{align*}
-\mu &= \int_{0}^{\infty} \tilde{x} e^{-\tilde{x}} d \tilde{x} = - \int_{0}^{\infty} \tilde{x} d e^{-\tilde{x}} = \int_{0}^{\infty} e^{-\tilde{x}} d \tilde{x} = 1; \\
-\sigma^2 &= \int_{0}^{\infty} \tilde{x}^2 e^{-\tilde{x}} d \tilde{x} - 1 = 2 \int_{0}^{\infty} \tilde{x} d e^{-\tilde{x}} - 1 = 1; \\
-\rho(\tilde{z}) &= e^{-\tilde{z} + 1}, \tilde{z} \in [-1, +\infty); \\
-\zeta(n) &= \int_{\varrho}^{\kappa} (\tilde{x} - 1)^{n} e^{-\tilde{x}} d\tilde{x} 
-		=  n \zeta(n - 1) + (\varrho - 1)^{n}  e^{-\varrho} - (\kappa - 1)^{n} e^{-\kappa} \\
-	& =  n (n - 1) \zeta(n - 2) + n (\varrho - 1)^{n - 1}  e^{-\varrho} - n (\kappa - 1)^{n - 1} e^{-\kappa} + (\varrho - 1)^{n}  e^{-\varrho} - (\kappa - 1)^{n} e^{-\kappa} \\
-	&= (n)! \left( e^{-\varrho} \sum_{j=0}^{n} \frac{(\varrho - 1)^j}{j!} - e^{-\kappa} \sum_{j=0}^{n} \frac{(\kappa - 1)^j}{j!} \right) \\
-	&=  (2n)! e^{-\varrho} \left(e^{-\varrho + 1} - \sum_{j = n+1}^{\infty} \frac{(\varrho - 1)^j}{j!} \right)
-		- (2n)! e^{-\kappa} \left(e^{-\kappa + 1} - \sum_{j = n+1}^{\infty} \frac{(\kappa - 1)^j}{j!} \right) \\
-	&= e^{-\kappa} (\kappa - 1)^{n} \sum_{j = 1}^{\infty} (\kappa - 1)^j \frac{(n)!}{(n + j)!} 
-		- e^{-\varrho} (\varrho - 1)^{n} \sum_{j = 1}^{\infty} (\varrho - 1)^j \frac{(n)!}{(n + j)!}; \\
-&0 = \zeta(1) = e^{-\varrho} + e^{-\varrho} (\varrho - 1) - e^{-\kappa} - e^{-\kappa} (\kappa - 1) =  e^{-\varrho} \varrho - e^{-\kappa} \kappa; \\
-&\eqspace \Longrightarrow \varrho e^{-\varrho} = \kappa e^{-\kappa}; \Longrightarrow \varrho < 1 < \kappa; \\
-&\kappa^2 \ll 2n:\eqspace \zeta(n) \simeq e^{-\kappa} \frac{(\kappa - 1)^{n + 1}}{n + 1};  
-\end{align*}
-
-\fi
-
-An exponential distribution \cite{Probability_Statistics} is no longer symmetric.
-Formula \eqref{eqn: exponential moment} provides $\zeta(2n, \kappa)$, Formula \eqref{eqn: exponential mean preserving} shows the equation for the mean preserving condition, and Formula \eqref{eqn: exponential asymptotic moment} demonstrates its asymptotic behavior.
-\begin{align}
-\label{eqn: exponential moment} 
-\zeta(n, \kappa) &= \int_{\varrho}^{\kappa} (\tilde{x} - 1)^{n} e^{-\tilde{x}} d \tilde{x} \\
-	&= e^{-\kappa} (\kappa - 1)^{n} \sum_{j = 1}^{\infty} (\kappa - 1)^j \frac{n!}{(n + j)!} 
-		- e^{-\varrho} (\varrho - 1)^{n} \sum_{j = 1}^{\infty} (\varrho - 1)^j \frac{n!}{(n + j)!}; \nonumber \\
-\label{eqn: exponential mean preserving}
-& \varrho e^{-\varrho} = \kappa e^{-\kappa} \Longrightarrow 0 < \varrho < 1 < \kappa; \\
-\label{eqn: exponential asymptotic moment} 
-& 1 < \kappa \ll n:\eqspace \zeta(n, \kappa) = e^{-\kappa} \frac{\kappa^{n + 1}}{n + 1}; 
-\end{align}
-
-
-
-\subsubsection{Simplified Gamma Input Uncertainty}
-
-\iffalse
-
-\begin{align*}
-\rho(\tilde{x}) &\equiv \frac{1}{m!} \tilde{x}^{m} e^{-\tilde{x}},\eqspace x \in [0, +\infty); \\
-	&\int_{0}^{+\infty} \rho(\tilde{x}) d \tilde{x} = 1; \\
-	&\int_{0}^{+\infty} \tilde{x} \rho(\tilde{x}) d \tilde{x} = m + 1; \\
-	&\int_{0}^{+\infty} \tilde{x}^2 \rho(\tilde{x}) d \tilde{x} - \left(\int_{0}^{+\infty} \tilde{x} \rho(\tilde{x}) d \tilde{x} \right)^2 = (m + 2)(m+1) - (m + 1)^2 = m + 1; \\
-\tilde{z} &= \frac{\tilde{x} - (m + 1)}{\sqrt{m + 1}}, \tilde{z} \in [-\sqrt{m + 1}, +\infty); 
-\end{align*}
-
-\begin{align*}
-\eta(m) &\equiv \int_{\varrho}^{\kappa} \tilde{z}^{m} e^{-\tilde{z}} d \tilde{z} = m \eta(m - 1) + e^{-\varrho} \varrho^{m} - e^{-\kappa} \kappa^{m} \\
-	&= m (m - 1) \eta(m - 2) + e^{-\varrho} m \varrho^{m - 1} - e^{-\kappa} m \kappa^{m - 1} + e^{-\varrho} \varrho^{m} - e^{-\kappa} \kappa^{m} \\
-	&= m! \left( e^{-\varrho} \sum_{j=0}^{m} \frac{\varrho^j}{j!} - e^{-\kappa} \sum_{j=0}^{m} \frac{\kappa^j}{j!} \right) 
-		= m! \left( e^{-\kappa} \sum_{j=m+1}^{+\infty} \frac{\kappa^j}{j!} - e^{-\varrho} \sum_{j=m+1}^{+\infty} \frac{\varrho^j}{j!} \right) \\
-	&=  e^{-\kappa} \kappa^{m} \sum_{j=1}^{+\infty} \frac{m!}{(m+j)!} \kappa^j
-		- e^{-\varrho} \varrho^{m} \sum_{j=1}^{+\infty} \frac{m!}{(m+j)!} \varrho^j;
-\end{align*}
-
-\begin{align*}
-\zeta(n)_m &= \int_{\varrho}^{\kappa} \frac{1}{m!} \left( \frac{\tilde{x} - (m+1)}{\sqrt{m+1}} \right)^n \tilde{x}^{m} e^{-\tilde{x}} d \tilde{x} \\
-	&= \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \int_{\varrho}^{\kappa} \tilde{x}^{m + i} e^{-\tilde{x}} d \tilde{x} \\
-	&= e^{-\varrho} \sum_{i = 0}^{n} \frac{(-1)^i n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \frac{(m + i)!}{m!} \sum_{j=0}^{m+i} \frac{\varrho^j}{j!} 
-	 	- e^{-\kappa} \sum_{i = 0}^{n} \frac{(-1)^i n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \frac{(m + i)!}{m!} \sum_{j=0}^{m+i} \frac{\kappa^j}{j!}; \\
-& 0 = \zeta(1)_m = e^{-\varrho} \sqrt{m + 1} \sum_{j=0}^{m} \frac{\varrho^j}{j!} - e^{-\varrho} \sqrt{m + 1} \sum_{j=0}^{m + 1} \frac{\varrho^j}{j!} 
-		- e^{-\kappa} \sqrt{m + 1} \sum_{j=0}^{m} \frac{\kappa^j}{j!} + e^{-\kappa} \sqrt{m + 1} \sum_{j=0}^{m + 1} \frac{\kappa^j}{j!} \\
-	&\eqspace = \sqrt{m + 1} e^{-\kappa} \frac{\kappa^{m+1}}{(m+1)!} - \sqrt{m + 1} e^{-\varrho} \frac{\varrho^{m+1}}{(m+1)!};
-		\Longrightarrow e^{-\varrho} \varrho^{m+1} = e^{-\kappa} \kappa^{m+1}; \Longrightarrow 0 < \varrho < m+ 1 < \kappa; \\
-\zeta(n)_m &= \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} e^{-\kappa} \kappa^{m+i} \sum_{j=1}^{+\infty} \frac{(m+i)!}{(m+i+j)!} \kappa^j \\
-	&\eqspace - \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} e^{-\varrho} \varrho^{m+i} \sum_{j=1}^{+\infty} \frac{(m+i)!}{(m+i+j)!} \varrho^j\\
-& \lim_{n \rightarrow +\infty} \zeta(n)_m = e^{-\kappa} \frac{1}{m!} \sum_{i = 0}^{n} 
-		\frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \kappa^{m+i} \frac{(m+i)!}{(m+n+1)!} \kappa^{n + 1 - i} \\
-&\eqspace = \frac{1}{m!} e^{-\kappa} \frac{\kappa^{m+n+1}}{(m+n+1)} \frac{1}{\sqrt{(m+1)^n}};
-\end{align*}
-
-\fi
-
-The gamma distribution \cite{Probability_Statistics} $\rho(\tilde{x}) = x^{\alpha - 1} e^{- x /\lambda} \lambda^{\alpha} /\Gamma(\alpha), \tilde{x}, \alpha, \lambda > 0$ is simplified as Formula \eqref{eqn: Gamma probability density}, whose mean and deviation are $m + 1$ and $\sqrt{m + 1}$, respectively.
-Formula \eqref{eqn: Gamma moment} provides $\zeta(2n, \kappa)$, Formula \eqref{eqn: Gamma mean preserving} shows the equation for the mean preserving condition, and Formula \eqref{eqn: Gamma asymptotic moment} demonstrates its asymptotic behavior.
-\begin{align}
-\label{eqn: Gamma probability density}
-\rho(\tilde{x}) &= \frac{1}{m!} \tilde{x}^m e^{-\tilde{x}}, x \in [0, +\infty), m = 0,1,...; \\
-\label{eqn: Gamma moment} 
-\zeta(n, \kappa) &= \int_{\varrho}^{\kappa} \left(\frac{\tilde{x} - (m+1)}{\sqrt{m+1}} \right)^n \rho(\tilde{x}) d \tilde{x} \\
-\label{eqn: Gamma mean preserving}
-& e^{-\varrho} \varrho^{m+1} = e^{-\kappa} \kappa^{m+1}; \Longrightarrow 0 < \varrho < m+1 < \kappa; \\
-\label{eqn: Gamma asymptotic moment} 
-& 1 < \kappa \ll n:\eqspace \zeta(n, \kappa) = \frac{1}{m!} e^{-\kappa} \frac{\kappa^{m+n+1}}{m+n+1}; 
-\end{align}
 
 
 \subsection{Convergence of Variance}
@@ -1261,11 +1148,7 @@ When $(f g)^{(n)} = f^{(n)} g^{(n)}$, $\overline{f^n g^n} = \overline{f^n} \over
 \label{eqn: composite variance}
 \delta^2 f(g) =&\; \overline{f(g)^2} - \overline{f(g)}^2; \\
 \label{eqn: linear variance}
-\delta^2 (c_1 f + c_0) =&\; c_1^2 \delta^2f; \\
-\label{eqn: Taylor inner dependency}
-\delta^2 \left( \frac{f^{(m)}_x \tilde{x}^m}{m!} + \frac{f^{(n)}_x \tilde{x}^n}{n!} \right) =&\;
-    \sigma^{2m} (\frac{f^{(m)}_x }{m!})^2 \eta(2m) + \sigma^{2n} (\frac{f^{(n)}_x }{n!})^2 \eta(2n) \\
-&+ 2 \sigma^{m+n} \left( \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \eta(m+n) - \frac{f^{(m)}_x}{m!} \eta(m) \;\frac{f^{(n)}_x}{n!}  \eta(n) \right);  \nonumber 
+\delta^2 (c_1 f + c_0) =&\; c_1^2 \delta^2f;
 \end{align}
 
 
@@ -3097,7 +2980,7 @@ Error deviation (z-axis) of FFT reverse transformation of $sin(f \frac{2 \pi}{2^
 In the reverse transformation, value errors exhibit a clear trend of increasing with the time index, as shown in Figure \ref{fig: Lib_Forward_Error_vs_Freq_Order}. 
 These large value errors appear systematic rather than random and visually resemble a resonant pattern.
 Similar increases are observed at in other frequencies and FFT orders, as well as in computational results obtained using mathematical libraries such as \textit{SciPy}.
-For example, Figure \ref{fig: FFT_Cost_Clean_6_6_Wave_Lib} shows that the FFT value error waveform of $\cos(6 \frac{2 \pi}{2^6} j)$ has  much stronger resonant pattern than that of $\sin(3 \frac{2 \pi}{2^6} j)$ in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
+For example, Figure \ref{fig: FFT_Cos_Clean_6_6_Wave_Lib} shows that the FFT value error waveform of $\cos(6 \frac{2 \pi}{2^6} j)$ has  much stronger resonant pattern than that of $\sin(3 \frac{2 \pi}{2^6} j)$ in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
 In the forward transformation, although there is no visible resonant pattern in FFT value error specturm, the intensity of value errors increase with FFT order.
 In contrast, such resonance is absent for the roundtrip transformation as shown in Figure \ref{fig: FFT_Sin_Clean_6_3_Roundtrip_Lib}.
 Also, it is completely absent when using the Quart sine function, as seen in Figure \ref{fig: FFT_Sin_Clean_6_3_Spec_Indexed} and \ref{fig: FFT_Sin_Clean_6_3_Wave_Indexed}.
@@ -3507,7 +3390,6 @@ How to compute and validate these new uncertainty-bearing library functions will
 For example, the uncertainty of a 64-bit value can not directly determined by its difference with the corresponding 128-bit value,
 
 Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions.
-The necessary and sufficient conditions for Formula \eqref{eqn: bound moment asymptote} need to be found, to extend the applicable types of distributions for the statistical Taylor expansion from the most common ones as enumerated in Section \ref{sec: statistical Taylor expansion}.
 The statistical bounding to find the bounding range $\kappa$ for the bounded moment needs to be extended to discrete distributions.
 
 The choice of ideal bounding range $\hat{\kappa}$ needs further study.

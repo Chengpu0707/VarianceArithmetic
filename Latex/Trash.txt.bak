@@ -1,0 +1,2784 @@
+
+Formula \eqref{eqn: uncertainty momentum} defines uncertainty momentum $M(k)$.
+\begin{align}
+\label{eqn: uncertainty momentum}
+P < \hat{P}: \eqspace 
+M(k) \equiv \frac{1}{\sqrt{2 \pi}} \int_{- \frac{\Delta x}{\delta x}}^{+ \frac{\Delta x}{\delta x}} 
+  z^{2k} e^{-\frac{z^2}{2}} dz = (2k-1)!!\; P^{2k}, \eqspace k=0,1,2,..;
+\end{align}
+
+
+\subsection{Result Uncertainty For Square Root}
+
+\iffalse
+\begin{align}
+\rho_{sqrt}(\tilde{y}) 
+= \frac{d}{d \tilde{y}} \int_{-\tilde{y}^2 - x}^{\tilde{y}^2 - x} \rho(\tilde{x}) d \tilde{x} 
+ = 2 \tilde{y} \frac{d}{d \tilde{y}^2} 
+   \left( \int_{-\infty}^{\tilde{y}^2 - x} \rho(\tilde{x}) d \tilde{x}  - \int_{-\infty}^{-\tilde{y}^2 - x} \rho(\tilde{x}) d \tilde{x} \right) \\
+ = 2 \tilde{y} \frac{1}{\sqrt{2 \pi} \delta x} e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} 
+ + 2 \tilde{y} \frac{1}{\sqrt{2 \pi} \delta x} e^{-\frac{1}{2} \frac{(\tilde{y}^2 + x)^2}{(\delta x)^2}};
+\end{align}
+
+\begin{align}
+& z \equiv \frac{\tilde{y}^2 -1}{\delta x}: \eqspace \tilde{y}^2 = x (1 + z P); \eqspace
+	d \tilde{y} = \delta x \frac{1}{2 \tilde{y}} dz; \\
+& \mu(\sqrt{x \pm (\delta x)^2}) 
+  = \int_{|\tilde{y}^2 \pm x| < \frac{\Delta x}{\delta x}} \tilde{y} \rho_{sqrt}(\tilde{y}) d \tilde{y} \\
+& = \frac{1}{\sqrt{2 \pi} \delta x} \int_{|\tilde{y}^2 - x| < \frac{\Delta x}{\delta x}} 
+      2 \tilde{y}^2 e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} d \tilde{y}
+  + \frac{1}{\sqrt{2 \pi} \delta x} \int_{|\tilde{y}^2 + x| < \frac{\Delta x}{\delta x}}
+      2 \tilde{y}^2 e^{-\frac{1}{2} \frac{(\tilde{y}^2 + x)^2}{(\delta x)^2}} d \tilde{y} \\
+& = \frac{1}{\sqrt{2 \pi} \delta x} \int_{x - \frac{\Delta x}{\delta x}}^{x + \frac{\Delta x}{\delta x}}
+    2 \tilde{y}^2 e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} d \tilde{y} 
+  = \sqrt{x} \frac{1}{\sqrt{2 \pi}} \int_{-\Delta x/\delta x}^{+\Delta x/\delta x} \sqrt{1 + P z} e^{-\frac{1}{2} z^2} dz \\
+& = \sqrt{x} \frac{1}{\sqrt{2 \pi}} \int_{-\Delta x/\delta x}^{+\Delta x/\delta x}
+    \left( 1 + \sum_{k=1} (-1)^{k-1} \frac{(2k-3)!!}{2^k k!} P^k \right) e^{-\frac{1}{2} z^2} dz \\
+& = \sqrt{x} + \sqrt{x} \sum_{k=1} \frac{1}{(2k-1) 2^k k!} M(k);
+\end{align}
+\fi
+
+\begin{align}
+& (\delta(\sqrt{x \pm (\delta x)^2}))^2 + \mu(\sqrt{x \pm (\delta x)^2})^2
+  = \int_{|\tilde{y}^2 \pm x| < \frac{\Delta x}{\delta x}} \tilde{y}^2 \rho_{sqrt}(\tilde{y}) d \tilde{y} \\
+& = \frac{1}{\sqrt{2 \pi} \delta x} \int_{\sqrt{x - \frac{\Delta x}{\delta x}}}^{\sqrt{x + \frac{\Delta x}{\delta x}}}
+    2 \tilde{y}^3 e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} d \tilde{y} 
+  = \frac{1}{\sqrt{2 \pi} \delta x} \int_{x - \frac{\Delta x}{\delta x}}^{x + \frac{\Delta x}{\delta x}}
+    \tilde{y}^2 e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} d \tilde{y}^2 \\
+& = x + (\delta x)^2;
+\end{align}
+
+The probability density function $\rho_{sqrt}(\tilde{y})$ for $y \pm (\delta y)^2 = \sqrt{x \pm (\delta x)^2)}$ is calculated as Formula \eqref{eqn: squre root uncertainty distribution}, which identifies two sources for $\tilde{y}$ near $\tilde{y} =  \sqrt{\pm x}$:
+\begin{align}
+\label{eqn: squre root uncertainty distribution}
+\rho_{sqrt}(\tilde{y}) 
+ = 2 \tilde{y} \frac{1}{\sqrt{2 \pi} \delta x} e^{-\frac{1}{2} \frac{(\tilde{y}^2 - x)^2}{(\delta x)^2}} 
+ + 2 \tilde{y} \frac{1}{\sqrt{2 \pi} \delta x} e^{-\frac{1}{2} \frac{(\tilde{y}^2 + x)^2}{(\delta x)^2}};
+\end{align}
+The mean of $\rho_{sqrt}(\tilde{y})$ is calculated as Formula \eqref{eqn: squre root uncertainty mean}:
+\begin{align}
+\label{eqn: squre root uncertainty mean}
+& \mu(\sqrt{x \pm (\delta x)^2}) = \sqrt{x} + \sum_{k=1} \frac{1}{(2k-1) 2^k k!} M(k); \\
+\end{align}
+The variance is calculated as:
+\begin{multline}
+\label{eqn: squre root uncertainty variance}
+(\delta((x \pm (\delta x)^2)^2))^2 + \mu((x \pm (\delta x)^2)^2)^2
+  = \int_{|\sqrt{y} \pm x| < \frac{\Delta x}{\delta x}} \tilde{y}^2 \rho_{sqrt}(\tilde{y}) d \tilde{y} \\
+= \frac{1}{\sqrt{2 \pi} \delta x} \int_{x - \frac{\Delta x}{\delta x}}^{x + \frac{\Delta x}{\delta x}} 
+    \sqrt{\tilde{y}}^4 e^{-\frac{1}{2} \frac{(\sqrt{\tilde{y}} - x)^2}{(\delta x)^2}} d \sqrt{\tilde{y}} 
+= x^4 + 6 x^2 (\delta x)^2 + 3 (\delta x)^4;
+\end{multline}
+Applying the accurate value-output principle by removing $(\delta x)^2$ from Formula \eqref{eqn: squre root uncertainty mean} and adding $(\delta x)^4$ to Formula \eqref{eqn: squre root uncertainty variance}, the $(x \pm (\delta x)^2)^2$ is calculated as \eqref{eqn: squre root}.
+The output precision vs input precision is calculated as Formula \eqref{eqn: squre root precision}, which shows that squre root worsen the precision by about 2-fold.
+The limiting precision for squre root is half of $\hat{P}$ according to Formula \eqref{eqn: squre root limiting precision}, in accordance with Formula \eqref{eqn: squre root precision}.
+\begin{align}
+\label{eqn: squre root}
+& (x \pm (\delta x)^2)^2 = x^2 \pm 4 x^2 (\delta x)^2 + 3 (\delta x)^4; \\
+\label{eqn: squre root precision}
+& {P_{sq}}^2 = 4 P^2 + 3 P^4;  \\
+\label{eqn: squre root limiting precision}
+& \hat{P_{sq}} = \sqrt{\frac{\sqrt{16 + \frac{2}{V_N}} - 4}{6}} \simeq \frac{1}{2} \hat{P} \left(1 - \frac{3}{8} \hat{P} \right); \\
+\label{eqn: squre root bias ratio}
+& \hat{B_{sq}} = 2 \hat{P} \sqrt{1 + \frac{3}{4} \hat{P}};
+\end{align}
+
+
+\subsection{Result Uncertainty For Inversion}
+
+The probability density function $\rho_{inv}(\tilde{y})$ for $y \pm (\delta y)^2 = 1/(x \pm (\delta x)^2)$ is calculated as \cite{Probability_Statistics}:
+\begin{equation}
+\label{eqn: inversion uncertainty distribution}
+\rho_{inv}(\tilde{y}) = \frac{1}{\tilde{y}^2} \rho(\frac{1}{\tilde{y}});
+\end{equation}
+The mean of $1/(x \pm (\delta x)^2)$ is calculated as Formula \eqref{eqn: inversion mean}:
+\begin{multline}
+\label{eqn: inversion mean}
+z \equiv \frac{\frac{1}{y} - x}{\delta x}: \eqspace dy = - \frac{P}{x} \frac{1}{(1 + z P)^2} dz; \\
+\mu(\frac{1}{x \pm (\delta x)^2}) 
+ = \frac{1}{x} \frac{1}{\sqrt{2 \pi}} \int_{- \frac{\Delta x}{\delta x}}^{+ \frac{\Delta x}{\delta x}}
+       \frac{1}{1 + z P} e^{-\frac{z^2}{2}} dz
+ = \frac{1}{x} - \frac{1}{x} \sum_{k=1} M(k);
+\end{multline}
+Applying the accurate value-output principle, the variance of $1/(x \pm (\delta x)^2)$ is calculated as Formula \eqref{eqn: inversion variance}:
+\begin{multline}
+\label{eqn: inversion variance}
+(\delta(\frac{1}{x \pm (\delta x)^2}))^2
+  = \frac{1}{x^2} + \frac{1}{x^2} \sum_{k=1} (2k+1)M(k) - \frac{1}{x^2} \left( 1 - \sum_{k=1} M(k) \right)^2 \\
+    + \frac{1}{x^2} \left( \sum_{k=1} M(k) \right)^2 
+= \frac{1}{x^2} \sum_{k=1} (2k+3)M(k); 
+\end{multline}
+The result of $1/(x \pm (\delta x)^2)$ is calculated as Formula \eqref{eqn: inversion}
+\begin{equation}
+\label{eqn: inversion}
+\frac{1}{x \pm (\delta x)^2} = \frac{1}{x} \pm \frac{(\delta x)^2}{x^2} \sum_{k=1} (2k+3)M(k);
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+
+The square and square root should both obeys.
+
+If $x$ is $N(x)$ distributed, $x^2$ is $\chi^2$-distributed with freedom 1 \cite{Probability_Statistics}, which has mean 1 and variance of 2.  
+$N(x)$ and $\chi^2(x)$ have quite different characteristics, e.g., $\chi^2(x)$ only roughly resembles half of $N(x)$.  The bounding goal of statistical precision arithmetic extends $\chi^2$ distribution to the other side of the mathematically expected value, and absorb the square of mean of the $\chi^2$ distribution into final variance:
+\begin{equation}
+\label{eqn: square uncertainty}
+(S_1\tilt R_1 2^{E_1})^2 \equiv {S_1}^2 2^{2 E_1} + 0\tilt 4 R_1 {S_1}^2 2^{2 E_1} + 0\tilt 3 {R_1}^2 2^{2 E_1};
+\end{equation}
+The result precision of square is:
+\begin{equation}
+\label{eqn: square precision}
+P^2 = \frac{4 R_1 {S_1}^2 + 3 {R_1}^2}{{S_1}^4} = 4 {P_1}^2 + 3 {P_1}^4;
+\end{equation}
+
+Similar to Formula \eqref{eqn: inversion deviation 1}, with $z=(y - x)/\delta x$ the deviation for $x^2$ is calculated as Formula \eqref{eqn: square deviation 1}, which confirms Formula \eqref{eqn: square precision}:
+\begin{equation}
+\begin{split}
+\label{eqn: square deviation 1}
+(\delta x^2)^2
+& = \frac{1}{\sqrt{2 \pi}\delta x} \int_{|y^2 - x| < \Delta x} (y^2 - x^2)^2 \rho(y) dy \\
+& = \frac{x^4}{\sqrt{2 \pi}} \int_{-\bar{R}}^{+\bar{R}} e^{-\frac{z^2}{2}} ((1 + z P(x))^2 - 1)^2 dz; \\
+P(x^2)^2 & = 4 M(2) P(x)^2 + 4 M(3) P(x)^3 + M(4) P(x)^4 = 4 P(x)^2 + 3 P(x)^4;
+\end{split}
+\end{equation}
+And the deviation for $\sqrt{x}$ is calculated as Formula \eqref{eqn: sqrt deviation 1}.
+\begin{equation}
+\begin{split}
+\label{eqn: sqrt deviation 1}
+(\delta \sqrt{x})^2
+& = \frac{1}{\sqrt{2 \pi}\delta x} \int_{|\sqrt{y} - x| < \Delta x} (\sqrt{y} - \sqrt{x})^2 \rho(y) dy \\
+& = \frac{|x|}{\sqrt{2 \pi}} \int_{-\bar{R}}^{+\bar{R}} e^{-\frac{z^2}{2}} (\sqrt{1 + z P(x)} - 1)^2 dz \\
+& = \frac{|x|}{\sqrt{2 \pi}} \int_{-\bar{R}}^{+\bar{R}} e^{-\frac{z^2}{2}} (\frac{z P(x)}{2} - \frac{z^2 P(x)^2}{8} + \frac{z^3 P(x)^3}{16} + ...)^2 dz; \\
+P(\sqrt{x})^2 & = \frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4 + ...;
+\end{split}
+\end{equation}
+The above Taylor-expansion method can be extended to calculate power $x^n$ and root $\sqrt[n]{x}$ for any integer $n$.
+
+The combination of Formula \eqref{eqn: square deviation 1} and Formula \eqref{eqn: sqrt deviation 1} as Formula \eqref{eqn: sqrt deviation 2} shows again that the uncertainty deviation obeys the recovery principle only approximately when $P(x)^2 \ll 1$.  Furthermore, the result of $\sqrt{x^2}$ and $(\sqrt{x})^2$ are different in Formula \eqref{eqn: sqrt deviation 2}, showing dependency problem.  The reason why the uncertainty deviation can not obey the recovery principle strictly is not clear at this moment. 
+\begin{equation}
+\begin{split}
+\label{eqn: sqrt deviation 2}
+P(\sqrt{x^2})^2 & = \frac{1}{4} (4 P(x)^2 + 3 P(x)^4) + \frac{15}{64} (4 P(x)^2 + 3 P(x)^4) + ... \\
+& = P(x)^2 + \frac{9}{2} P(x)^4 + ...; \\
+P((\sqrt{x})^2)^2 & = 4(\frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4 + ...)
+    + 3 (\frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4 + ...)^2; \\
+& = P(x)^2 + \frac{9}{8} P(x)^4 + ...;
+\end{split}
+\end{equation}
+
+
+
+
+
+
+\subsection{Calculate Inside Uncertainty}
+
+
+The conventional 64-bit floating-point standard IEEE-754 \cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} has:
+\begin{itemize}
+\item  11 bits for storing exponent $E$.
+\item  52 bits for storing significand $S$ so that the accuracy is about $10^{-16}$ with a hidden MSB.
+\item  1 bit for storing sign.
+\end{itemize}
+
+To be compatible with the above standard, an 64-bit implementation of statistical precision arithmetic with 3-bit calculated inside uncertainty has:
+\begin{itemize}
+\item  12 bits for storing exponent $E$.  
+\item  44 bits for storing significand $S$ so that $S_{norm} \equiv 2^{42}$.  The result significand accuracy is about $0.5 \times 10^{-12}$. 
+\item  1 bit for storing sign.
+\item  1 bits for storing $\sim$.
+\item  6 bits for storing $R$ so that $R_{norm} \equiv 2^{5}$.
+\end{itemize}
+
+The calculation principle for statistical precision arithmetic is:
+\begin{enumerate}
+\item Round up to the same $E$ for addition and subtraction,
+\item Calculation by range, and
+\item Normalization by deviation
+\end{enumerate}
+
+
+In a 96-bit statistical precision representation, to be compatible with the conventional 64-bit floating standard \cite{Floating_Point_Standard}, the bit counts for $S$ and $E$ are 53 and 11, respectively.
+To represent a value $1 \pm 2^{-p}$:
+\begin{enumerate}
+\item $V$ is normalized as $2^{\eta + \chi - 1}$, in which $\chi$ is the bits calculated inside the uncertainty of $V$.
+
+\item According to Formula \eqref{eqn: uncertainty deviation}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = - \frac{\eta + \chi - 1}{2} - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^{2E} \Rightarrow S = \frac{\eta + \chi - 1}{2} + p$.  
+
+\item To achieve the finest precision of $2^{-40} \simeq 10^{-12}$ when $V$ is still normalized, $\eta + \chi \le 27$.  
+Thus, 27 bits are used to store $V$, with $\chi = 27 - \eta$.
+
+\item The representation needs 1 bit for sign, 2 bits for the rounding error signs for $S$ and $V$ respectively.
+It also needs 2 bits to store the choice of $\eta$.
+
+\item The total allocated bits are $53 + 11 + 27 + 1 + 2 + 2 = 96$.
+\end{enumerate} 
+This 96-bit statistical precision representation is compatible with the conventional 64-bit floating standard \cite{Floating_Point_Standard}.
+Its precision $2^{-p}$ determines its significance bit count $p + 13$ when $p \le 40$. 
+When $40 < p < 52$, the significance bit count is kept at 53, and the variance significand $V$ decreases toward 0 for larger $p$.
+
+
+
+Some property of $x \pm \delta x^2$ are:
+\begin{align}
+\label{eqn: statistical precision}
+& P^2 = \frac{(\delta x)^2}{x^2} = \frac{V}{S^2}; \\
+\label{eqn: general limiting precision}
+& \hat{P} \equiv \frac{\delta x}{\Delta x} = \frac{1}{\sqrt{6 V}}  \simeq = 2.3\; 10^{8}; 
+\end{align}
+
+
+The probability of $\tilde{x}$ to be outside $(-\Delta x, +\Delta x)$ in Formula \eqref{eqn: central limit theorem} is the \emph{bounding leakage}, which can be calculated by Formula \eqref{eqn: round-up leakage}:
+\begin{equation}
+\label{eqn: round-up leakage}
+1 - \zeta(\frac{\Delta x}{\delta x}/ \sqrt{2}) = 1 - \zeta(\sqrt{3V});
+\end{equation}
+To minimize the bounding leakage, $V$ has to be maximized in its representation in the \emph{normalization} process for $S\tilt V@E$. 
+
+$V_N$ is the minimal value for $V$ after normalization, which is determined by the $\eta \in [2, 5]^N$ count of bits to store $V$, as $V_N = 2^{\eta - 2}$.
+$V_N$ can replace $V$ in Formula {eqn: general limiting precision} and \eqref{eqn: round-up leakage}.
+A larger $V_N$ has smaller bounding leakage, but smaller limiting precision, so $V_N$ should be chosen as a balance.
+Table \ref{tab: Errors for different V_N} shows the bounding leakage and different limiting precision for different $V_N$.
+
+\begin{table}[h]
+\label{tab: Errors for different V_N}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline 
+$\eta$ & 1 & 2 & 3 & 4 & 5 \\ 
+\hline 
+$V_N$ & 1 & 2 & 4 & 8 & 16 \\ 
+\hline 
+Bounding leakage & 1.4\% & $0.5\;10^{-3}$ & $10^{-6}$ & $0.4\;10^{-12}$ & almost 0 \\ 
+\hline 
+General limiting precision $\hat{P}$ & 40.8\% & 28.9\% & 20.4\% & 14.4\% & 10.2\% \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The bounding leakages and general limiting precisions for different $V_N$.}
+\end{table}
+
+In a 96-bit statistical precision representation, to be compatible with the conventional 64-bit floating standard \cite{Floating_Point_Standard}, the bit counts for $S$ and $E$ are 53 and 11, respectively.
+To represent a value $1 \pm 2^{-p}$:
+\begin{enumerate}
+\item $V$ is normalized as $2^{\eta + \chi - 1}$, in which $\chi$ is the bits calculated inside the uncertainty of $V$.
+
+\item According to Formula \eqref{eqn: uncertainty deviation}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = - \frac{\eta + \chi - 1}{2} - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^{2E} \Rightarrow S = \frac{\eta + \chi - 1}{2} + p$.  
+
+\item To achieve the finest precision of $2^{-40} \simeq 10^{-12}$ when $V$ is still normalized, $\eta + \chi \le 27$.  
+Thus, 27 bits are used to store $V$, with $\chi = 27 - \eta$.
+
+\item The representation needs 1 bit for sign, 2 bits for the rounding error signs for $S$ and $V$ respectively.
+It also needs 2 bits to store the choice of $\eta$.
+
+\item The total allocated bits are $53 + 11 + 27 + 1 + 2 + 2 = 96$.
+\end{enumerate} 
+This 96-bit statistical precision representation is compatible with the conventional 64-bit floating standard \cite{Floating_Point_Standard}.
+Its precision $2^{-p}$ determines its significance bit count $p + 13$ when $p \le 40$. 
+When $40 < p < 52$, the significance bit count is kept at 53, and the variance significand $V$ decreases toward 0 for larger $p$.
+
+
+
+Such reducing of $R$ introduces bounding leakage, which is the possibility that a value locates outside the bounding range. 
+In Figure \ref{fig: Prec_RndByDev_Dist}, the 8/2 distribution of the rounding error outside the range (-2, +2) contributes to a round-up leakage of $0.06\%$. 
+The bounding leakage can be calculated by $\zeta(\frac{R}{\sqrt{V}} \frac{1}{\sqrt{3}})/2 = \zeta(\sqrt{3V})$, in which $\zeta()$ is the Gaussian error function \cite{Probability_Statistics}.
+
+
+When the rounding error distribution is replace by the Gaussian distribution with a large variance $V$, the limited bounding range $R$ introduces \emph{bounding leakage}, which is the possibility that a round error locates outside the bounding range. 
+The bounding leakage can be calculated by $\zeta(\frac{R}{\sqrt{V} \frac{1}{\sqrt{2}}} = \zeta(\sqrt{3V})$, in which $\zeta()$ is the Gaussian error function \cite{Probability_Statistics}.
+
+The variance representation $S\tilt V@E$ also tracks the variance $V$ of the uncertainty distribution.
+To minimize the bounding leakage, $V$ has to be maximized in a digital representation of the imprecise values which is the \emph{variance representation}.
+$S\tilt V@E$ needs to be fit into the confinement of the floating-point representation of the Variance arithmetic, so it needs to be rounded up or down.
+The $n$ in Formula \eqref{eqn: rounding error range vs deviation} needs to be extended to fraction number.  
+
+
+When the uncertainty distribution $P_R(x)$ is multiplied by $1/2$ along the $x$ axis, according to the precision scaling principle, the deviation $\sqrt{V}$ is reduced to 1/2-fold, so that $R=6V$ is reduced to 1/4-fold according to Formula \eqref{eqn: rounding error range vs deviation}.
+
+$N(\tilde{x})$ be the density function of a normal distribution
+
+Is the limiting precision in Formula \eqref{eqn: square limiting precision} necessary for square?
+
+The result uncertainty distributions are scaled along the $x$ direction by $\tilde{x} = \sqrt{\tilde{y}}$, and manually along the $y$ direction, so that the result uncertainty distributions can be compared directly with the input uncertainty distributions, respectively.
+Figure \ref{fig: Square_Distribution} also plots the case of $(0 \pm \delta x)^2$, which correspond 0 in the legend.
+$(0 \pm \delta x2$ has a $\chi^2$ distribution of freedom 1 \cite{Probability_Statistics}, and it is the source of the $(\delta x)^2$ bias.
+When $V_N$ increases, the scaled $\rho_{sq}(\tilde{y})$ resembles $\rho(\tilde{x})$ more and more, so that the uncertainty distribution for $x \pm \delta x$ can be approximated by the uncertainty distribution for $x^2 \pm 2 x \delta x$.
+Figure \ref{fig: Square_Distribution} shows that only when $V_N \ge 2$, the bounding distribution can be regarded as Gaussian.
+Figure \ref{fig: Square_Distribution} also shows that $\hat{B_{sq}}$ measures how off-centered the result uncertainty distributes, which becomes smaller when $V_N$ increases.
+In the extreme case of $(0 \pm \delta x)^2$, the uncertainty distributed only on one side of the accurate output without uncertainty, so that the output can no longer serve as the mean for the distribution.
+Thus, the variance arithmetic can no longer track the result uncertainty effectively, and need to reject a calculation when the input precision is worse than the limiting precision of the calculation.
+
+
+For pure numerical calculations in which the analytic $f(x)$ and $g(x)$ are not known, Formula \eqref{eqn: function sum} and \eqref{eqn: function product} can be further approximated as Formula \eqref{eqn: approx function sum} and \eqref{eqn: approx function product}, respectively.
+\begin{align}
+\label{eqn: approx function sum}
+\delta^2 (f + g) \simeq &\; (\delta f)^2 + (\delta g)^2 + (\delta f) (\delta g); \\
+\label{eqn: approx function product}
+P(f g)^2 \simeq &\; P(f)^2 + P(g)^2 + P(f) P(g) + \left( \frac{11}{4} P(f)^4 + \frac{11}{4} P(g)^4 + 2 P(f)^2 P(g)^2 \right);
+\end{align}
+%For simplicity, the $(\delta^2 x)^2$ terms can be dropped in Formula \eqref{eqn: function sum} and \eqref{eqn: function product}.
+
+
+
+
+ uncertainty variance $(\delta x)^2$ of each imprecise value in addition to  n during calculations using specially designed arithmetic rules,
+with the following assumptions or principles.  
+\begin{itemize}
+\item The : 
+The Variance arithmetic assumes  
+, and it is much more achievable than assuming the two inputs themselves to be uncorrelated of each other.
+
+\item The :
+In Variance arithmetic, .
+One consequence of the precision scaling principle is that the actual value can be outside the \emph{bounding range} $(x - \Delta x, x + \Delta x)$ with a small probability called the \emph{bounding leakage}.
+As shown later in this paper, except averaging, the input uncertainties contributes to the degradation of the result precisions, while the bounding leakage remains the same approximately.
+
+\item :
+For each imprecise value, the Variance arithmetic tracks variance $(\delta x)^2$ for its \emph{bounding distribution} whose mean is the value $x$ when there were no uncertainty.
+If the input uncertainties add a bias $b$ to an output value $x$, the bias is $b$ removed from the output value $x$, and added to the corresponding variance $(\delta x)^2$ as $b^2$. 
+$\hat{b} \equiv |b/x|$ is defined as the \emph{bias ratio}.
+
+\item The \emph{limiting precision principle}:
+Many calculation has conceptual difficult when the bounding range $(x - \Delta x, x + \Delta x)$ contains 0.
+The \emph{general limiting precision} is defined as $\hat{P} \equiv \delta x / \Delta x$, to describe the situation when 0 is on one edge of the bounding range $(x - \Delta x, x + \Delta x)$.
+Each calculation has its own limiting precision, e.g., as shown later in this paper, square has a limiting precision less than $\hat{P}/2$.
+To measure the performance when the bounding range $(x - \Delta x, x + \Delta x)$ contains 0 for each calculation, \emph{the worst-case bias ratio} $\hat{B}$ is defined as the $\hat{b}$ when $P = \hat{P}$.
+The precision arithmetic regards a imprecise value with precision coarser than the general limiting precision to be too imprecise to participate in most calculations.
+It also uses the general limiting precision in the difference to judge if two imprecise values are equal.
+\end{itemize}
+
+
+
+Contrary to interval arithmetic, variance arithmetic:
+\begin{itemize}
+\item sees no need to branch $\sqrt{2 \pm 1}$ into two bounding ranges, because the probability need to do so is less than $10^{-4}$,
+
+\item but can not calculate $(0 \pm 1)^2$, because the bounding distribution can no longer track the uncertainty distribution.
+From statistical perspective, $0 \pm 1$ can either be a measurement of a value at 0, or a very poor measurement of a value not at zero.
+In another word, the information content of $0 \pm 1$ is minimal statistically.
+\end{itemize}
+
+Variance arithmetic uses a \emph{bounding distribution} to track the uncertainty of $x \pm \delta x$. 
+The bounding distribution is a Gaussian distribution which has approximately the same mode and variance of the uncertainty distribution.
+The discrepancy between the bounding distribution and the uncertainty distribution is measured by a \emph{distribution difference} in $[0, 1]$, with $0$ meaning perfect match between the two distributions.
+To guarantee the result distribution difference to be within a threshold, variance arithmetic may reject inputs whose precision are not fine enough.
+
+
+
+
+
+
+
+However, obtaining $\varrho(\tilde{x}, x)$ is generally not easy, so the bounding leakage can be used as a proxy for the distribution difference.
+
+The input uncertainty may also affects the output, which is defined as the \emph{variance bias} $\hat{x}$.
+A variance bias $\hat{x}$ is more likely to be generated by the tail of the uncertainty distribution, while the bounding distribution matches the the uncertainty distribution on the mode \cite{Probability_Statistics}.
+Experimentally, the $\hat{x}$ and the mode of the uncertainty distribution are always on the opposite of $x$.
+Thus, $\rho(\tilde{x}, x, \delta x)$ centers on $x$ rather than $x + \hat{x}$, and cuts off the distribution tails with $\tilde{x} \in (-\Delta x, +\Delta x)$.  
+This is the \emph{accurate output-value principle}.
+
+
+It is generally more difficult to calculate the bounding range than the bounding variance, so variance arithmetic does not track bounding ranges in general.
+In special cases, when bounding range is easy to obtain, the range ratio $\overline{x} \equiv \Delta x / \delta x$ leads to the bounding leakage directly, which indicates how well the bounding distribution follows the uncertainty distribution.
+For example, in many calculations $f()$ are cut off by 0 either in the input such as square root, or in the output such as square, the result bounding range is $f$, and the range ratio is $\overline{f} = 1/P(f)$.
+
+
+
+
+
+\subsection{Square}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
+Each square density function is compared with the corresponding bounding distribution in the dash line of the same color, respectively. 
+Each bounding distribution is labeled with its distribution difference.
+}
+\label{fig: Square_Distribution}
+\end{figure}
+
+\iffalse
+\begin{align*}
+\rho_{sq}(\tilde{y}, y, \delta y) 
+&= \frac{d}{d \tilde{y}} \int_{(x + \tilde{x})^2 < \tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+= \frac{d}{d \tilde{y}} \int_{-\sqrt{\tilde{y}} - x}^{\sqrt{\tilde{y}} - x} \rho(\tilde{x}, x, \delta x) d \tilde{x} \\
+&= \frac{1}{2 \sqrt{\tilde{y}}} \frac{d}{d \sqrt{\tilde{y}}} 
+   \left( \int_{-\infty}^{\sqrt{\tilde{y}} - x} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+   - \int_{-\infty}^{-\sqrt{\tilde{y}} - x} \rho(\tilde{x}, x, \delta x) d \tilde{x} \right) \\
+&= \frac{1}{2 \sqrt{\tilde{y}}} \frac{d}{d \sqrt{\tilde{y}}} 
+   \left( \int_{-\infty}^{\sqrt{\tilde{y}} - x} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+   + \int_{-\infty}^{\sqrt{\tilde{y}} + x} \rho(-\tilde{x}, x, \delta x) d \tilde{x} \right) \\
+&= \frac{1}{2 \sqrt{\tilde{y}}} \rho(\sqrt{\tilde{y}}, +x, \delta x)
+ + \frac{1}{2 \sqrt{\tilde{y}}} \rho(\sqrt{\tilde{y}}, -x, \delta x);
+\end{align*}
+
+\begin{align*}
+& \mu((x \pm \delta x)^2) 
+  = \int_{|\sqrt{y} \pm x| < \frac{\Delta x}{\delta x}} \tilde{y} \rho_{sq}(\tilde{y}) d \tilde{y} 
+  = \int_{|\sqrt{y} \pm x| < \frac{\Delta x}{\delta x}} 2 \sqrt{\tilde{y}}^3 \rho_{sq}(\sqrt{\tilde{y}}) d \sqrt{\tilde{y}} \\
+& = \frac{1}{\sqrt{2 \pi} \delta x} \int_{|\sqrt{y} - x| < \frac{\Delta x}{\delta x}} 
+      \sqrt{\tilde{y}}^2 e^{-\frac{1}{2} \frac{(\sqrt{\tilde{y}} - x)^2}{(\delta x)^2}} d \sqrt{\tilde{y}}
+  + \frac{1}{\sqrt{2 \pi} \delta x} \int_{|\sqrt{y} + x| < \frac{\Delta x}{\delta x}}^{+ \infty}
+      \sqrt{\tilde{y}}^2 e^{-\frac{1}{2} \frac{(\sqrt{\tilde{y}} + x)^2}{(\delta x)^2}} d \sqrt{\tilde{y}} \\
+& = \frac{1}{\sqrt{2 \pi} \delta x} \int_{x - \frac{\Delta x}{\delta x}}^{x + \frac{\Delta x}{\delta x}}
+    \sqrt{\tilde{y}}^2 e^{-\frac{1}{2} \frac{(\sqrt{\tilde{y}} - x)^2}{(\delta x)^2}} d \sqrt{\tilde{y}} 
+  = \mu((x \pm \delta x)^2) = x^2 + (\delta x)^2;
+\end{align*}
+
+\begin{multline*}
+\delta^2 ((x \pm \delta x)) + \mu((x \pm \delta x)^2)^2
+  = \int_{|\sqrt{y} \pm x| < \frac{\Delta x}{\delta x}} \tilde{y}^2 \rho_{sq}(\tilde{y}) d \tilde{y} \\
+= \frac{1}{\sqrt{2 \pi} \delta x} \int_{x - \frac{\Delta x}{\delta x}}^{x + \frac{\Delta x}{\delta x}} 
+    \sqrt{\tilde{y}}^4 e^{-\frac{1}{2} \frac{(\sqrt{\tilde{y}} - x)^2}{(\delta x)^2}} d \sqrt{\tilde{y}} 
+= x^4 + 6 x^2 (\delta x)^2 + 3 (\delta x)^4;
+\end{multline*}
+
+\fi
+
+The probability density function $\rho_{sq}(\tilde{y})$ for $y \pm \delta y = (x \pm \delta x)^2$ is calculated as Formula \eqref{eqn: square uncertainty distribution}, which identifies two sources for $\tilde{y}$ near $x = \pm \sqrt{\tilde{y}}$.
+The mean is calculated as $x^2 + \delta^2 x$,  and the variance are calculated as $4 x^2 \delta^2 x + 2 (\delta^2 x)^2$.
+Applying Formula \eqref{eqn: bounding distribution variance 1}, the result variance and precision are calculated as Formula \eqref{eqn: square} and \eqref{eqn: square precsion}, respectively.
+Table 1 shows the corresponding bounding leakages and distribution differences.
+\begin{align}
+\label{eqn: square uncertainty distribution}
+\rho_{sq}(\tilde{y}, y, \delta y)
+&= \frac{1}{2 \sqrt{\tilde{y}}} \rho(\sqrt{\tilde{y}}, x, \delta x) 
+ + \frac{1}{2 \sqrt{\tilde{y}}} \rho(\sqrt{\tilde{y}}, -x, \delta x); \\
+\label{eqn: square}
+\delta^2 x^2 &= 4 x^2 (\delta^2 x) + 3 (\delta^2 x)^2; \\
+\label{eqn: square precsion}
+P(x^2)^2 &= 4 P(x)^2 + 3 P(x)^4;
+\end{align}
+
+\begin{table}[h]
+\label{tab: square bounding}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline 
+$x$ & 1 & 2 & 3 & 4 & 5 \\ 
+\hline 
+input precision & 100\% & 50\% & 33\% & 25\% & 20\% \\ 
+\hline 
+result precision & 265\% & 109\% & 69.4\% & 51.2\% & 40.6\% \\ 
+\hline 
+bounding leakage & 70.5\% & 35.9\% & 15.0\% & 5.10\% & 1.38\% \\ 
+\hline 
+distribution difference & 69.5\% & 41.8\% & 22.0\% & 15.5\% & 12.2\% \\ 
+\hline 
+calculation cost [\%] & 32.3\% & 8.97\% & 4.08\% & 2.32\% & 1.49\% \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The bounding leakages for different $(x \pm 1)^2$.}
+\end{table}
+
+Figure \ref{fig: Square_Distribution} plots the result uncertainty distributions of square when the input is $x \pm 1$ for different $x$, as indicated by the legend.
+Each square density function is compared with the corresponding bounding distribution according to Formula \eqref{eqn: central limit theorem} in the dash line of the same color, respectively.
+
+The newly generated variance bias $\delta^2 x$ is due to tails of each square density function, which is on the opposite side of the mode when compared with the bounding distribution.
+This shows the validity of the accurate value-output principle.
+
+How well the bounding distribution fits the uncertainty distribution corresponds to how small the distribution difference, which is proportional to how small the result bounding leakage, according to Table 1.
+The bounding distribution missed the $(0 \pm 1)^2$ and $(1 \pm 1)^2$ completely, and it is very marginal for the $(2 \pm 1)^2$.
+To obtain the result with smaller enough bounding leakage, the input precision is required to be finer than a precision threshold, such as a 5\% maximal threshold for the result bounding leakage to reject the input precision $P(x) > 24\%$.
+
+
+\subsection{Square Root}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
+\captionof{figure}{
+The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
+Each square density function is compared with the corresponding bounding distribution in the dash line of the same color, respectively. 
+Each bounding distribution is labeled with its distribution difference.
+}
+\label{fig: Square_Root_Distribution}
+\end{figure}
+
+
+\iffalse
+\begin{align*}
+& z \equiv \frac{\tilde{y}^2 - x}{\delta x}: \eqspace \tilde{y}^2 = x (1 + z P(x)); \\
+\int \tilde{y} \rho_{rt}(\tilde{y}) d \tilde{y} &= \sqrt{x} \int \sqrt{1 + z P(x)} N(z) dz = \sqrt{x} \int (1 + \sum_{n=1} (-1)^{n+1} \frac{(2n-3)!!}{2^n n!} N(z) dz \\
+&= \sqrt{x} (1 - \sum_{n=1} \frac{(4n-3)!!}{2^{2n} (2n)!!} P(x)^{2n}) \simeq \sqrt{x} (1 - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4); \\
+\int \tilde{y}^2 \rho_{rt}(\tilde{y}) d \tilde{y} &= x \int (1 + z P(x)) N(z) dz = x; \\
+\delta^2 x &= 2 x (1 - \sum_{n=1} \frac{(4n-3)!!}{2^{2n} (2n)!!} P(x)^{2n});
+\end{align*}
+\fi
+
+
+The probability density function $\rho_{rt}(\tilde{y})$ for $(y \pm \delta y)^2 = (x \pm \delta x)$ is calculated as Formula \eqref{eqn: square root uncertainty distribution}.
+Applying Formula \eqref{eqn: bounding distribution variance 2}, the result precision is calculated as Formula \eqref{eqn: square root precision}.
+Table 2 shows the corresponding bounding leakages and distribution differences.
+\begin{align}
+\label{eqn: square root uncertainty distribution}
+\rho_{rt}(\tilde{y}, y, \delta y) &= 2 \tilde{y}\; \rho(\tilde{y}^2, x, \delta x); \\
+\label{eqn: square root precision}
+x \neq 0: \eqspace P(\sqrt{x})^2 &= 2 \sum_{n=1} \frac{(4n-3)!!}{2^{2n} (2n)!!} P(x)^{2n} \simeq \frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4; 
+\end{align}
+
+\begin{table}[h]
+\label{tab: square root bounding}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|} 
+\hline 
+$x$ & 1 & 2 & 3 & 4 & 5 \\ 
+\hline 
+input precision & 100\% & 50\% & 33\% & 25\% & 20\% \\ 
+\hline 
+result precision & 52.7\% & 25.3\% & 16.8\% & 12.5\% & 10.0\% \\ 
+\hline 
+bounding leakage & 5.79\% & $7.88\;10^{-5}$ & $2.44\;10^{-9}$ & $\simeq 0$ & $\simeq 0$ \\ 
+\hline 
+distribution difference & 29.9\% & 13.3\% & 9.86\% & 7.37\% & 5.93\% \\ 
+\hline 
+calculation cost [\%] & 5.47\% & 1.32\% & 0.582\% & 0.327\% & 0.209\% \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The bounding leakages for different $\sqrt{x \pm 1}$.}
+\end{table}
+
+Figure \ref{fig: Square_Root_Distribution} plots the result uncertainty distributions of square root when the input is $x \pm 1$ for different $x$, as indicated by the legend.
+Each square density function is compared with the corresponding bounding distribution according to Formula \eqref{eqn: central limit theorem} in the dash line of the same color, respectively.
+The variance bias is also in the opposite direction to the mode, when compared with the corresponding bounding distributions.
+
+How well the bounding distribution fits the uncertainty distribution corresponds to how small the distribution difference, which is proportional to how small the result bounding leakage, according to Table 2.
+
+When compared with square, the bounding distributions are more closer to the corresponding uncertainty distribution of square root, as shown in Figure \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distribution}, because square root has smaller result precision according to Table 1 and 2.
+Using 5\% result bounding leakage as the threshold, $\sqrt{x \pm 1}, x > 1.03$ are acceptable, while $(x \pm 1)^2, x > 4.1$ are acceptable.
+
+
+
+\subsection{Exponential}
+
+\begin{align*}
+\rho_{sq}(\tilde{y}, y, \delta y) 
+&= \frac{d}{d \tilde{y}} \int_{e^{x + \tilde{x}} < \tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+= \frac{d}{\tilde{y}\; d \log(\tilde{y})} \int_{-\infty}^{\log({\tilde{y}}) - x} \rho(\tilde{x}, x, \delta x) d \tilde{x} \\
+&= \frac{1}{\tilde{y}} \rho(\log(\tilde{y}), x, \delta x)
+= \frac{1}{\tilde{y}} \frac{1}{2 \sqrt{\pi} \delta x} e^{-\frac{1}{2} \frac{(\log(\tilde{y}) - x)^2}{(\delta x)^2} } \\
+&= \frac{1}{\tilde{y}} \frac{1}{2 \sqrt{\pi} \delta x} e^{-\frac{1}{2 } \frac{(\log(\tilde{y}) - x)^2}{(\delta x)^2} };
+\end{align*}
+
+
+For example, $y = x^2$ has only one minimum at $x = 0$: 
+\begin{itemize}
+\item When $P(x) \geq 2$, $\varrho(\tilde{y}, y, \delta y)$ can not match $\rho(\tilde{y}, y, \delta y)$ effectively because $\rho(\tilde{y}, y, \delta y)$ no longer resembles Gaussian.
+At $x = 0$, $\rho(\tilde{y}, y, \delta y)$ becomes $\chi^2$ distribution \cite{Probability_Statistics}.
+
+\item When $P(x) < 2$, the match of $\varrho(\tilde{y}, y, \delta y)$ to $\rho(\tilde{y}, y, \delta y)$ improves when $P(x)$ becomes finer.
+\end{itemize}
+
+Table 1 calculates the distribution of a few examples, which shows that the distribution difference always improves when the input precision becomes finer.
+Figure \ref{fig: Square_Root_Distribution} and \ref{fig: Square_Distribution} show the probability distribution density function for $\sqrt{x}$ and $x^2$, respectively.
+
+
+\begin{itemize}
+\item Table 1 and Table 2 show the calculation cost as a percentage of the result precision for calculating $(x \pm 1)^2$ and $\sqrt{x \pm 1}$, respectively.
+They show that the calculation costs are worse in $(x \pm 1)^2$ than in $\sqrt{x \pm 1}$, and it is larger for worse input precision, in accordance with the result bounding leakage.
+
+\item Table 3 shows the result differences for calculating $\sqrt{x \pm 1}^2$ and $\sqrt{(x \pm 1)^2}$.
+It shows that the calculation costs depend strongly on the path of calculation, and it is much larger for worse input precision.
+\end{itemize}
+
+
+
+
+\begin{table}[h]
+\label{tab: calculation cost}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline 
+$x$ & 1 & 2 & 3 & 4 & 5 \\ 
+\hline 
+$P(x)$ & 100\% & 50\% & 33\% & 25\% & 20\% \\ 
+\hline 
+$P((\sqrt{x \pm 1})^2)$ & 116\% & 51.9\% & 33.9\% & 25.2\% & 20.1\% \\ 
+\hline 
+$P(\sqrt{(x \pm 1)^2})$ & 202\% & 58.1\% & 35.6\% & 25.9\% & 20.5\% \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The calculation costs of $(\sqrt{x \pm 1})^2$ and $\sqrt{(x \pm 1)^2}$.}
+\end{table}
+
+For another example, it is tempting to add a constant $c$ to $x \pm \delta x$ to improve the input precision from $\delta x/x$ to $\delta x/(x + c)$, such as to reduce the calculation cost.
+When the $c$ is removed from \eqref{eqn: square with offset}, Formula \eqref{eqn: square with offset removed} shows that the precision is worse than without the $c$ for square.
+The variance widening in Formula \eqref{eqn: square with offset removed} is due to applying the independent uncertainty assumption between $(x \pm (\delta x)^2 + c)^2$ and $(2 c x + c^2) \pm (2 c x + c^2) (\delta x)^2)$.
+Even if $(8 c x + 4 c^2) (\delta^2 x)$ is removed from the variance of Formula \eqref{eqn: square with offset} by violating the uncorrelated uncertainty assumption, the result is $\delta^2 x^2$.
+So it is not worthwhile to manipulate offset to improve the precision.
+\begin{align}
+\label{eqn: square with offset} 
+& \delta^2 (x + c)^2 = 4 x^2 (\delta^2 x) + (\delta^2 x)^2 + (8 c x + 4 c^2) (\delta^2 x); \\
+\label{eqn: square with offset removed} 
+& \delta^2 (x + c)^2 - (8 c x + 4 c^2) (\delta^2 x) = (4 x^2 + 16 cx + 8c^2) (\delta^2 x) + (\delta^2 x)^2;
+\end{align}
+
+
+\subsection{Calculation Cost and Dependence Problem}
+
+
+
+Extra steps also increase variance needlessly, which is another form of the calculation cost.
+
+Extra calculations also leads to the violation of the uncorrelated uncertainty assumption, and the wrong output precision.
+The amount of error depends on the details of the extra calculations, such as the difference between $(\sqrt{x \pm 1})^2$ and $\sqrt{(x \pm 1)^2}$ in Table 3.
+This is called the \emph{the dependency problem}, which has its counterpart in the interval mathematics \cite{Interval_Analysis}  \cite{Interval_Arithmetic}.
+Unlike interval arithmetic, when the analytic solution is known, variance arithmetic can avoid the dependency problem by using Taylor expansion, such as by Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}, or by Formula \eqref{eqn: sum dependency} and \eqref{eqn: product dependency}.
+Also contrary to interval arithmetic, the dependence problem in variance arithmetic under-estimates the result uncertainty.
+
+
+
+\subsection{A Relaxed Form of Variance Arithmetic}
+
+\iffalse
+
+\begin{align*}
+(x + \tilde{x})^c - x^c & =
+  c x^{c-1} \tilde{x} + \frac{1}{2} c (c-1) x^{c-2} \tilde{x}^2 + \frac{1}{6} c (c-1) (c-2) x^{c-3} \tilde{x}^3; \\
+\delta^2 x^c & = c^2 x^{2c-2} \delta^2 x + \frac{1}{4} c^2 (c-1)^2 x^{2c-4} 3 \delta^4 + \frac{1}{3} c^2 (c-1) (c-2) x^{2c-4} 3 \delta^4 x \\
+& = x^{2c} c^2 x^{-2} (\delta^2 x) \left(1 + \frac{(c - 1)(7c - 11)}{4}  x^{-2} (\delta^2 x) \right);  \\
+P(x^c)^2 & = \frac{\delta^2 x^c}{x^{2c}} = c^2 (P_x)^2 \left(1 + \frac{(c - 1)(7c - 11)}{4}  (P_x)^2 \right);  \\
+P(x^2)^2 & = \frac{\delta^2 x^2}{x^2} = 4 (P_x)^2 \left(1 + \frac{3}{4} (P_x)^2 \right) = 4 (P_x)^2 + 3 (P_x)^4; \\
+P(\sqrt{x})^2 & = \frac{1}{4} P(x)^2 \left(1 + \frac{15}{16} P(x)^2) \right); \\
+P(1/x)^2 & = x^2 \delta^2 \frac{1}{x} = (P_x)^2 + 9 (P_x)^4;
+\end{align*}
+
+\begin{align*}
+& \log(x + \tilde{x}) - \log(x) = x^{-1} \tilde{x} - 1/2 x^{-2} \tilde{x}^2 + 1/3 x^{-3} \tilde{x}^3; \\
+& \delta^2 \log(x) = x^{-2} \delta^2 x + 1/4 x^{-4} 3 \delta^4 x + 2/3 x^{-4} 3 \delta^4 x = {P_x}^2 + \frac{11}{4} {P_x}^4;
+\end{align*}
+
+\begin{align*}
+& e^{x + \tilde{x}} - e^x = e^x \tilde{x} + 1/2 e^x \tilde{x}^2 + 1/6 e^x \tilde{x}^3; \\
+& \delta^2 e^x = e^{2x} \delta^2 x + 1/4 e^{2x} 3 \delta^4 x + 1/3 e^{2x} x^{-4} 3 \delta^4 x = e^{2x} (\delta^2 x + \frac{7}{4} \delta^4 x); \\ 
+& P(e^x)^2 = \frac{\delta^2 e^x}{e^{2x}} = (\delta^2 x) + \frac{7}{4} (\delta^2 x)^2;
+\end{align*}
+
+\begin{align*}
+& P(x/y)^2 = P(x)^2 + P(1/y)^2 + P(x)^2 P(1/y)^2 = P(x)^2 + (P_y)^2 + 9 (P_y)^4 + P(x)^2 (P_y)^2;
+\end{align*}
+
+\begin{align}
+& \delta^2 (f(x) + g(x)) - (\delta^2 f(x) + \delta^2 g(x)) =
+    2 \sum_{n=1}^{\infty} \left( \frac{f^{(n)}_x g^{(n)}_x}{n! n!}  
+        + \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x g^{(j)}_x}{(n - j)! j!} \right) V(x, n); \\
+& = 2 f^{(1)}_x g^{(1)}_x (\delta^2 x) + \frac{f^{(2)}_x g^{(2)}_x}{2} 3 (\delta^2 x)^2
+        + \frac{f^{(1)}_x g^{(3)}_x}{3} 3 (\delta^2 x)^2 + \frac{f^{(3)}_x g^{(1)}_x}{3} 3 (\delta^2 x)^2; \\
+& = 2 f^{(1)}_x g^{(1)}_x (\delta^2 x) 
+      + \left( f^{(1)}_x g^{(3)}_x + \frac{3}{2} f^{(2)}_x g^{(2)}_x + f^{(3)}_x g^{(1)}_x \right) (\delta^2 x)^2;
+\end{align}
+
+\begin{align*}
+\log(f)^{(1)} =&\; f^{(1)}/f; \\
+\log(f)^{(2)} =&\; f^{(2)}/f - f^{(1)} /f^2; \\
+\log(f)^{(3)} =&\; f^{(3)}/f - f^{(2)} /f^2 + 2 f^{(1)} /f^3;\\
+\delta^2 \log(fg) = &\; \delta^2 \log(f) + \delta^2 \log(g)
+   + 2 \frac{f^{(1)}}{f} \frac{g^{(1)}}{g} (\delta^2 x) + \frac{1}{2} \beta (\delta^2 x)^2; \\
+\beta = &\; \frac{f^{(1)}}{f} \frac{g^{(1)}}{g} \frac{4f^2 + 3fg + 4g^2}{f^2 g^2}
+  - \frac{f^{(1)}}{f} \frac{g^{(2)}}{g} \frac{4f^2 + 3fg}{f^2 g^2}
+  - \frac{f^{(2)}}{f} \frac{g^{(1)}}{g} \frac{3fg + 4g^2}{f^2 g^2} + \\
+& 2 \frac{f^{(1)}}{f} \frac{g^{(3)}}{g} + 2 \frac{f^{(3)}}{f} \frac{g^{(1)}}{g} + 3 \frac{f^{(2)}}{f} \frac{g^{(2)}}{g}; \\
+P(fg)^2 \simeq &\; (\delta^2 \log(fg))\left(1 + \frac{7}{4} (\delta^2 \log(fg)) \right); \\
+\simeq &\; (P(f) + P(g))^2 + \left( \frac{7}{4} (P(f) + P(g))^4 + \frac{11}{4} (P(f)^2 + P(g)^2)^2 - \frac{11}{2} P(f)^2 P(g)^2 \right);
+\end{align*}
+
+\begin{align*}
+\log(f)^{(1)} =&\; f^{(1)}/f; \\
+\log(f)^{(2)} =&\; f^{(2)}/f - f^{(1)} /f^2; \\
+\log(f)^{(3)} =&\; f^{(3)}/f - f^{(2)} /f^2 + 2 f^{(1)} /f^3;\\
+\delta^2 \log(fg) = &\; \delta^2 \log(f) + \delta^2 \log(g)
+   + 2 \frac{f^{(1)}}{f} \frac{g^{(1)}}{g} (\delta^2 x) + \frac{1}{2} \beta (\delta^2 x)^2; \\
+\beta = &\; \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} \frac{2f^2 + 3fg + 2g^2}{f^2 g^2}
+  - \frac{f_x^{(1)}}{f} \frac{g_x^{(2)}}{g} \frac{f + 3 g}{f g}
+  - \frac{f_x^{(2)}}{f} \frac{g_x^{(1)}}{g} \frac{3 f + g}{f g} + \nonumber \\
+& \frac{f^{(1)}}{f} \frac{g^{(3)}}{g} + \frac{f^{(3)}}{f} \frac{g^{(1)}}{g} + 3 \frac{f^{(2)}}{f} \frac{g^{(2)}}{g}; \nonumber \\
+\delta^2 \log(fg) \simeq &\; P(f)^2 + P(g)^2 + 2 \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} (\delta^2 x) + 
+   \left( \frac{11}{4} P(f)^4 + \frac{11}{4} P(g)^4 + \frac{1}{2} \beta (\delta^2 x)^2 \right); \nonumber \\
+\simeq &\; P(f)^2 + P(g)^2 + P(f) P(g) + \left( \frac{11}{4} P(f)^4 + \frac{11}{4} P(g)^4 \right); \nonumber \\
+P(f g)^2 \simeq &\; (\delta^2 \log(fg))\left(1 + \frac{7}{4} (\delta^2 \log(fg)) \right) \simeq P(f)^2 + P(g)^2 + P(f) P(g) + \nonumber \\
+& \left( \frac{7}{4}(P(f)^4 + P(g)^4) + (P(f)^2 + P(g)^2 + P(f) P(g))^2 \right); 
+\end{align*}
+
+The $2 \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} (\delta^2 x)$ is less than $2 P(x) P(y)$.  
+If it is used directly, $f$ and $g$ are scaled of each other, which is too much.
+Thus $2 \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} (\delta^2 x) + \frac{1}{2} \beta (\delta^2 x)^2 \simeq = P(x) P(y)$
+
+\begin{align*}
+f(x) &= \sum_{n=0}^{N} a_n x^n; \\
+f^{-1}(x) &= \sum_{n=1}^{N} a_n n x^{n - 1}; \\
+f^{-2}(x) &= \sum_{n=2}^{N} a_n n (n - 1) x^{n - 2}; \\
+f^{-3}(x) &= \sum_{n=3}^{N} a_n n (n - 1) (n - 2) x^{n - 3}; \\
+\delta^2 f(x) &= \left(\sum_{n=1}^{N} a_n n x^{n - 1}\right)^2 \delta^2 x
+  + \frac{3}{4} \left( \sum_{n=2}^{N} a_n n (n - 1) x^{n - 2} \right)^2 (\delta^2 x)^2 + \\
+&\eqspace 2 \left( \sum_{n=1}^{N} a_n n x^{n - 1} \right) \left( \sum_{n=3}^{N} a_n n (n - 1) (n - 2) x^{n - 3} \right)  (\delta^2 x)^2;
+\end{align*}
+
+\begin{multline}
+\label{eqn: approx }
+\delta^2 \sum_{n=0}^{N} a_n x^n = \left(\sum_{n=1}^{N} a_n n x^{n - 1}\right)^2 \delta^2 x
+  + \frac{3}{4} \left( \sum_{n=2}^{N} a_n n (n - 1) x^{n - 2} \right)^2 (\delta^2 x)^2 + \\
+ \left( \sum_{n=1}^{N} a_n n x^{n - 1} \right) \left( \sum_{n=3}^{N} a_n n (n - 1) (n - 2) x^{n - 3} \right)  (\delta^2 x)^2;
+\end{multline}
+
+
+\fi
+
+
+
+In reality, it is difficult to find the convergence condition for Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions to higher dimensions, let along there are usually no analytic expressions between all inputs and all outputs for most calculations.
+It is also very difficult to avoid the dependency problem altogether.
+On the other hand, the extra increase of the variance due to the dependency problem and the under-estimation of the variance due to the dependency problem may cancel each other somewhat.
+
+Thus, a relaxed form of the variance arithmetic will only keep the $(\delta x)^4$ term in Formula \eqref{eqn: Taylor 1d variance}, to result in the following basic arithmetic formulas in addition:
+\begin{align}
+\label{eqn: approx power}
+P(x^c)^2 & \simeq c^2 {P(x)}^2 \left(1 + \frac{(c - 1)(7c - 11)}{4} {P(x)}^2 \right); \\
+\label{eqn: approx log}
+\delta^2 \log(x) & \simeq {P(x)}^2 \left(1 + \frac{11}{4} {P(x)}^2 \right); \\
+\label{eqn: approx exponential}
+P(e^x)^2 & \simeq (\delta^2 x)\left(1 + \frac{7}{4} (\delta^2 x) \right);  \\
+\label{eqn: approx division}
+P(x/y)^2& \simeq {P(x)}^2 + {P(y)}^2 + {P(x)}^2 {P(y)}^2 + 9 {P(y)}^4;
+\end{align}
+
+Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance} become Formula \eqref{eqn: approx Taylor 1d} and \eqref{eqn: approx Taylor 2d}, respectively.
+\begin{align}
+\label{eqn: approx Taylor 1d}
+\delta^2 f(x) \simeq &\; (f_x^{(1)})^2 (\delta^2 x) + \left( f_x^{(1)} f_x^{(3)} + \frac{3}{4} f_x^{(2)} f_x^{(2)} \right) (\delta^2 x)^2; \\
+\label{eqn: approx Taylor 2d}
+\delta^2 f(x, y) \simeq &\; (f_{(x,y)}^{(1,0)})^2 (\delta^2 x) + (f_{(x,y)}^{(0,1)})^2 (\delta^2 y) \\ \nonumber
+&\;   + \left( f_{(x,y)}^{(1,1)})^2 (\delta^2 x) (\delta^2 y) + \frac{3}{2} f_{(x,y)}^{(2,0)} (\delta^2 x)^2 + \frac{3}{2} f_{(x,y)}^{(0,2)} (\delta^2 y)^2 \right);
+\end{align}
+Formula \eqref{eqn: sum dependency} and \eqref{eqn: product dependency} become Formula \eqref{eqn: function sum} and \eqref{eqn: function product}, respectively:
+\begin{align}
+\delta^2 (f + g) \simeq &\; (\delta^2 f) + (\delta^2 g) + \nonumber \\ 
+\label{eqn: function sum}
+& 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 
+  \left( \frac{1}{3} f^{(1)}_x g^{(3)}_x + \frac{3}{2} f^{(2)}_x g^{(2)}_x + \frac{1}{3} f^{(3)}_x g^{(1)}_x \right) (\delta^2 x)^2; \\
+\beta = &\; \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} \frac{2f^2 + 3fg + 2g^2}{f^2 g^2}
+  - \frac{f_x^{(1)}}{f} \frac{g_x^{(2)}}{g} \frac{f + 3 g}{f g} - \frac{f_x^{(2)}}{f} \frac{g_x^{(1)}}{g} \frac{3 f + g}{f g} + \nonumber \\
+& \frac{f^{(1)}}{f} \frac{g^{(3)}}{g} + \frac{f^{(3)}}{f} \frac{g^{(1)}}{g} + 3 \frac{f^{(2)}}{f} \frac{g^{(2)}}{g}; \nonumber \\
+\delta^2 \log(fg) \simeq &\; P(f)^2 + P(g)^2 + 2 \frac{f_x^{(1)}}{f} \frac{g_x^{(1)}}{g} (\delta^2 x) + 
+   \left( \frac{11}{4} P(f)^4 + \frac{11}{4} P(g)^4 + \frac{1}{2} \beta (\delta^2 x)^2 \right); \nonumber \\
+\label{eqn: function product}
+P(f g)^2 \simeq &\; (\delta^2 \log(fg))\left(1 + \frac{7}{4} (\delta^2 \log(fg)) \right); 
+\end{align}
+Formula \eqref{eqn: function sum} and \eqref{eqn: function product} are different from their counterparts \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication}, respectively, due to the differences in the underlying uncertainty correlations.
+Formula \eqref{eqn: function sum} and \eqref{eqn: function product} can be extended to sum or production of multiple functions, respectively.
+
+All basic assumptions and principles still apply to the relax form of variance arithmetic.
+The dependency problem are removed as a best effort, but can not be eliminated completely. 
+The bounding leakage  becomes unspecified theoretically, but it can be found numerically by the accurate value-output principle: by testing on the models with accurately known output values for each calculation \cite{Statistical_Methods}.
+
+If the $(\delta x)^4$ terms in Formula \eqref{eqn: Taylor 1d variance} is also dropped, the underlying assumption is that any two imprecise values are independent of each other, not just their uncertainties.  
+Mathematically, it is equivalent to Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, and \eqref{eqn: stat /} with $\gamma = 0$.
+
+
+Both variance arithmetic and independence arithmetic have no uncertainty bounding range, while interval arithmetic has no uncertainty deviation.  
+To be able to compare all the three arithmetics, $[x - 6\delta x, x + 6\delta x]$ is used artificially as the bounding range for an average value $x$ with deviation $\delta x$ for independence arithmetic.
+
+The statistical assumption of variance arithmetic is weaker than that of independence arithmetic but stronger than that of interval arithmetic, so after executing the same algorithm on the same input data, the output deviation and the bounding range of variance arithmetic are expected to be larger than those of independence arithmetic but smaller than those of interval arithmetic.
+\begin{itemize}
+
+\item According to Formula \eqref{eqn: rounding error +-} and Formula \eqref{eqn: rounding error range vs deviation}, the result deviation of addition and subtraction by variance arithmetic propagates in the same way as that of independence arithmetic, while the result bounding range propagates in the same way as that of interval arithmetic. Hence addition and subtraction cannot differentiate the three arithmetics.
+
+\item According to Formula \eqref{eqn: uncertainty *} and Formula \eqref{eqn: uncertainty /}, the result precision of multiplication and division by variance arithmetic is always larger than that by independence arithmetic.  However, if both operands have precisions much less than 1, the result precision of multiplication and division is very close to that of independence arithmetic.  Thus, the result of variance arithmetic should be much closer to that of independence arithmetic.
+
+\item The uncertainty distribution of variance arithmetic is a truncated Gaussian distribution according to Formula \eqref{eqn: uncertainty distribution}.  When an imprecise value is multiplied by a constant, because its uncertainty bounding range and its uncertainty distribution deviation cannot be scaled linearly simultaneously according to Formula \eqref{eqn: uncertainty variance} and Formula \eqref{eqn: uncertainty range}, variance arithmetic chooses to preserve the distribution deviation rather than the bounding range, thus introducing bounding leakages.  Figure \ref{fig: Prec_RndByDev_Dist} suggests that the bounding range of variance arithmetic should be much narrower than that of interval arithmetic, while the shape of Gaussian distribution suggests that such introduced bounding leakage should be small when the truncation range is much larger than the distribution deviation, e.g., less than $10^{-6}$ for the chosen normalization method whose truncation range is about $\pm 5$ deviations.
+
+\item  Formula \eqref{eqn: variance Taylor 1d} and its multi-dimensional expansions such as Formula \eqref{eqn: Taylor 2d uncertainty} are mathematically strict so that variance arithmetic has no dependence problem on expression differences.  In contrast, there seems no similar solution for generic Taylor expansion using interval arithmetic, because there seems no general analytic solution to find maxima and minima for generic polynomial at any range \cite{Numerical_Recipes}.  In this respect, variance arithmetic is mathematically simpler than interval arithmetic.
+
+\end{itemize}
+
+
+Formula \eqref{eqn: function distribution} also shows that near the local $\tilde{y}$ with $\frac{d f^{-1}(\tilde{y})}{d \tilde{y}} = 0$ that separates the two regions, $\rho(\tilde{y}, y, \delta y)$ may have dual modes, such as $\sqrt[3]{x}$ across $x = 0$.
+
+
+\begin{align}
+\label{eqn: function distribution mode}
+\tilde{y}_m:& \eqspace \frac{d^2 f^{-1}(\tilde{y})}{d^2 \tilde{y}} \delta^2 x
+ = (\frac{d f^{-1}(\tilde{y})}{d \tilde{y}})^2 \frac{d}{d f^{-1}(\tilde{y})} \rho(f^{-1}(\tilde{y}), x, \delta x);
+\end{align}
+
+
+
+The mode \cite{Probability_Statistics} of the distribution $\tilde{y}_m$ is given by Formula \eqref{eqn: function distribution mode}.
+Formula \eqref{eqn: function distribution} shows that the result uncertainty distribution is Gaussian modulated by $d f^{-1}(\tilde{y})/d \tilde{y}$, with the mode close to $f(x)$.
+
+
+
+\subsection{The Accurate Output Principle}
+
+\iffalse
+\begin{align*}
+& e^{x + \tilde{x}} - e^x = e^x \sum_{j=1}^{\infty} \frac{\tilde{x}^j}{j!}: \\
+P(e^x)^2 &= \sum_{n = 2}^{\infty} V(x, \delta x, n) \sum_{j=1}^{n-1} \frac{1}{j!(n-j)!} =
+ \frac{\delta^2 e^x}{e^{2x}} \simeq \delta^2 x + 3 (\delta^2 x)^2 (2 \frac{1}{6} + \frac{1}{4}) \\
+  &\;\; + 15 (\delta^2 x)^3 (2 \frac{1}{120} + 2 \frac{1}{2} \frac{1}{24} + \frac{1}{6} \frac{1}{6})
+ = \delta^2 x + \frac{7}{4} (\delta^2 x)^2 +  \frac{24}{31} (\delta^2 x)^3; \\
+& \ln(x + \tilde{x}) - \ln(x) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}: \\
+\delta^2 \ln(x) &= \sum_{n = 2}^{\infty} \frac{V(x, \delta x, n)}{x^n} \sum_{j=1}^{n-1} \frac{1}{j(n-j)} = P(x)^2 + 3 P(x)^4 (2\frac{1}{3} + \frac{1}{2} \frac{1}{2}) \\
+ &\;\; + 15 P(x)^6 (2\frac{1}{5} + 2 \frac{1}{2} \frac{1}{4} + \frac{1}{3} \frac{1}{3}) = P(x)^2 + \frac{11}{4} P(x)^4 + \frac{137}{12} P(x)^6; \\
+& (x + \tilde{x})^c - x^c = x^c ((1 + \frac{\tilde{x}}{x})^c - 1) = x^c \sum_{j=1}^{\infty} (\frac{\tilde{x}}{x})^j \prod_{k=1}^{j} \frac{c + 1 - k}{k}; \\
+P(x^c)^2 &= \sum_{n = 2}^{\infty} \frac{V(x, \delta x, n)}{x^n} \sum_{j=1}^{n-1} \prod_{k=1}^{j} \frac{c + 1 - k}{k} \prod_{k=1}^{n-j} \frac{c + 1 - k}{k} \\
+ &\simeq P(x)^2 c^2 + 3 P(x)^4 (2 c^2 \frac{c-1}{2} \frac{c-2}{3} + (c \frac{c-1}{2})^2) \\
+ &\;\; + 15 P(x)^6 (2 c^2 \frac{c-1}{2} \frac{c-2}{3} \frac{c-3}{4} \frac{c-4}{5} + 2 c^2 (\frac{c-1}{2})^2 \frac{c-2}{3} \frac{c-3}{4} + (c \frac{c-1}{2} \frac{c-2}{3})^2) \\
+ &= c^2 P(x)^2 + c^2 (c-1) \frac{7c - 11}{4} P(x)^4 + c^2 (c-1) (c-2) \frac{31 c^2 - 132 c + 137}{24} P(x)^6;
+\end{align*}
+\fi
+
+Even a uncertainty distribution does not resemble Gaussian, Formula \eqref{eqn: function distribution} still contains its variance.  
+
+The question is: What should be the output value of $f(x \pm \delta x)$?
+The conventional statistical choice is the mean of the result uncertainty distribution \cite{Probability_Statistics}, but the mean can be affected strongly by the tail behavior of the result uncertainty distribution, which is usually not the focus of normal scientific and engineering calculations.
+In variance arithmetic:
+\begin{itemize}
+\item The value of $f(x \pm \delta x)$ is $f(x)$, as if there were no uncertainty in the input.
+This is the \emph{accurate output principle}.
+
+\item The value difference between the mean of $f(x \pm \delta x)$ and $f(x)$ is defined as the \emph{variance bias} $\widehat{f(x)}$ in Formula \eqref{eqn: variance bias}, whose square is added to the variance of the bounding distribution, as shown in Formula \eqref{eqn: bounding distribution variance}.
+\begin{align}
+\label{eqn: variance bias} 
+\widehat{f(x)} &= \int f(x + \tilde{x}) \rho(\tilde{x}, x, \delta x) d \tilde{x} - f(x); \\
+\delta^2 f(x) &= \int f(x + \tilde{x})^2 \rho(\tilde{x}, x, \delta x) d \tilde{x} - (\widehat{f(x)} + f(x))^2 + \widehat{f(x)}^2 \nonumber \\
+\label{eqn: bounding distribution variance} 
+&= \int (f(x + \tilde{x}) - f(x))^2 \rho(\tilde{x}, x, \delta x) d \tilde{x};
+\end{align}
+
+\end{itemize}
+
+In Formula \eqref{eqn: bounding distribution variance}, when $P(x) \leq 1/5$, $f(x + \tilde{x})$ can be Taylor expanded at $f(x)$ as Formula \eqref{eqn: Taylor 1d variance}.
+The result variance is calculate as Formula \eqref{eqn: Taylor 1d variance}, in which the \emph{n-th variance momentum} $V(x,n)$ is calculated as Formula \eqref{eqn: nth variance}.
+\begin{align}
+\label{eqn: Taylor 1d}
+P(x) \leq 1/5:& \eqspace f(x + \tilde{x}) - f(x) = \sum_{n=1}^{\infty} f^{(n)}_x \frac{1}{n!}  \tilde{x}^{n}; \\
+\label{eqn: nth variance}
+& V(x, \delta x, n) \equiv \int (\tilde{x} - x)^{n} \rho(\tilde{x}, x, \delta x) d\tilde{x}; \\
+\label{eqn: Taylor 1d variance}
+\delta^2 f(x) &= \sum_{n=2}^{\infty} V(x, \delta x, n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x}{(n-j)!} \frac{f^{(j)}_x}{j!};
+\end{align}
+When the distribution difference is less than 10\%, $\rho(\tilde{x}, x, \delta x)$ can be regarded as Gaussian:  $V(x, \delta x, 2n) \simeq (2n - 1)!! (\delta^2 x)^n$ and $V(x, \delta x, 2n+1) = 0$.
+\begin{align}
+\label{eqn: exp precsion}
+P(e^x)^2 &= \sum_{n=2}^{\infty} V(x, \delta x, n) \sum_{j=1}^{n-1} \frac{1}{(n - j)! j!} \simeq \delta^2 x + \frac{7}{4} (\delta^2 x)^2; \\
+\label{eqn: log precsion}
+\delta^2 \ln(x) &= \sum_{n = 2}^{\infty} \frac{V(x, \delta x, n)}{x^n} \sum_{j=1}^{n-1} \frac{1}{j(n-j)} \simeq P(x)^2 + \frac{11}{4} P(x)^4; \\
+\label{eqn: power precsion}
+P(x^c)^2 &= \sum_{n = 2}^{\infty} \frac{V(x, \delta x, n)}{x^n} \sum_{j=1}^{n-1} \prod_{k=1}^{j} \frac{c + 1 - k}{k} \prod_{k=1}^{n-j} \frac{c + 1 - k}{k} \\
+ &\simeq c^2 P(x)^2 + \frac{c^2 (c-1) (7c - 11)}{4} P(x)^4; \nonumber 
+\end{align}
+Some special cases for Formula \eqref{eqn: power precsion} are:
+\begin{align}
+\label{eqn: square precsion}
+P(x^2)^2 &= 4 P(x)^2 + 3 P(x)^4; \\
+\label{eqn: square root precision}
+P(\sqrt{x})^2 &\simeq \frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4; \\
+\label{eqn: inversion precsion}
+P(1/x)^2 &\simeq P(x)^2 + 9 P(x)^4;
+\end{align}
+
+Due to uncorrelated uncertainty assumption, Taylor expansion can also be used to track the uncertainty of the function $f(x, y)$, as Formula \eqref{eqn: Taylor 2d variance}.
+\begin{align}
+%\label{eqn: Taylor 2d}
+& P(x), P(y) < 1: \;\; f(x + \tilde{x} ,y + \tilde{y}) - f(x ,y) 
+ = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^{m} \tilde{y}^{n} - f(x ,y); \nonumber \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \int \int (f(x + \tilde{x}, y + \tilde{y}) - f(x, y))^2
+	 \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \nonumber \\
+&= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} V(x,m) V(y,n) 
+  \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)!i!} \frac{f^{(i,j)}_{(x,y)}}{(n-j)!j} - f(x,y)^2;
+\end{align}
+Such an approach can be extended to a function of an arbitrary number of input variables.  
+Formula \eqref{eqn: addition and subtraction} and \eqref{eqn: multiplication} are special cases of Formula \eqref{eqn: Taylor 2d variance}.
+
+If two functions contain the same imprecise value, the uncorrelated uncertainty may no longer holds between them.
+Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions can still be used to calculate the arithmetic calculations of the two functions, such as sum and product in Formula \eqref{eqn: sum dependency}, \eqref{eqn: sum dependency 2d}, and \eqref{eqn: product dependency}, respectively.
+\begin{align}
+\label{eqn: sum dependency}
+\delta^2 (f(x)+g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=0}^{\infty} V(x,n) \sum_{j=1}^{n-1} \frac{f^{(2n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!} \\
+& \simeq 2f^{(1)}_x g^{(1)}_x (\delta^2 x) + 
+  \left( \frac{1}{3} f^{(1)}_x g^{(3)}_x + \frac{3}{2} f^{(2)}_x g^{(2)}_x + \frac{1}{3} f^{(3)}_x g^{(1)}_x \right) (\delta^2 x)^2; \nonumber \\
+\label{eqn: sum dependency 2d}
+\delta^2 (f(x, y)+g(x, y)) &= \delta^2 f(x, y) + \delta^2 g(x, y) + \nonumber \\
+& \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} V(x,m) V(y,n) \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(m-i,n-j)}_{(x,y)}}{(m-i)! (n-j)!} \frac{g^{(i,j)}_{(x,y)}}{i! j!}; \\
+\label{eqn: product dependency}
+\delta^2 (fg) = &\; \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
+
+
+\iffalse
+
+\begin{align*}
+\delta^2 fg =&\; \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{(fg)^{(2n-j)}_x}{(2n-j)!} \frac{(fg)^{(j)}_x}{j!} \\
+=&\; \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{\sum_{i=0}^{2n-j} \frac{(2n-j)!}{i! (2n-j-i)!} f^{(i)} g^{(2n-j-i)}}{(2n-j)!}
+     \frac{ \sum_{k=0}^{j} \frac{j!}{k! (j-k)!} f^{(k)} g^{(j-k)}}{j!} \\
+=&\; \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} 
+     \left( \sum_{i=0}^{2n-j} \frac{f^{(i)}}{i!} \frac{g^{(2n-j-i)}}{(2n-j-i)!}  \right)
+     \left( \sum_{k=0}^{j} \frac{f^{(k)}}{k!} \frac{g^{(j-k)}}{(j-k)!} \right); \\
+=&\; \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \sum_{i=0}^{2n-j} \sum_{k=0}^{j}
+        \frac{f^{(i)}}{i!}\frac{f^{(k)}}{k!} \frac{g^{(2n-j-i)}}{(2n-j-i)!}\frac{g^{(j-k)}}{(j-k)!} 
+\end{align*}
+
+\begin{align*}
+& \delta^2 (x + 1)^2 = 4 (x + 1)^2 (\delta^2 x) + 3 (\delta^2 x)^2; \\
+& \delta^2 (x^2 + 2x + 1) = (2x + 2)^2 (\delta^2 x) + \frac{2}{2} 3 (\delta^2 x)^2 = \delta^2 (x + 1)^2; \\
+& \delta^2 x^2 = 4 x^2 (\delta^2 x) + 3 (\delta^2 x)^2; \eqspace \delta^2 2x = 4 (\delta^2 x); \\
+& \delta^2 (x^2 + 2 x) = (\delta^2 x^2) + (\delta^2 2x) + 2 (2 x) 2 (\delta^2 x)
+ = \left( 4 x^2 (\delta^2 x) + 3 (\delta^2 x)^2 \right) + 4 (\delta^2 x) + 8x (\delta^2 x); \\
+& \delta^2 \log(x^2) = \delta^2 (\log(x) + \log(x)) = 
+\end{align*}
+
+
+\begin{align*}
+\delta^2 f(x) = & \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{f^{(2n-j)}_x f^{(j)}_x}{(2n-j)!j!} \\
+\simeq &\; V(x,1)(f^{(1)}_x f^{(1)}_x) + V(x, 2)(f^{(1)}_x f^{(3)}_x + f^{(2)}_x f^{(2)}_x); \\
+\delta^2 g(x) = & \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{g^{(2n-j)}_x g^{(j)}_x}{(2n-j)!j!}; \\
+\simeq &\; V(x,1)(g^{(1)}_x g^{(1)}_x) + V(x, 2)(g^{(1)}_x g^{(3)}_x + g^{(2)}_x g^{(2)}_x); \\
+\delta^2 (f(x)+g(x)) = & \sum_{n=1}^{\infty} V(x, n) 
+    \sum_{j=1}^{2n-1} \frac{(f^{(2n-j)}_x + g^{(2n-j)}_x)(f^{(j)}_x + g^{(j)}_x)}{(2n-j)!j!} \\
+= &\; \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{f^{(2n-j)}_x g^{(j)}_x}{(2n-j)!j!}; \\
+\delta^2 (f(x)g(x)) = & \sum_{n=1}^{\infty} V(x, n) \sum_{j=1}^{2n-1} \frac{(fg)^{(2n-j)} (fg)^{(j)}}{(2n-j)!j!} \\
+\simeq &\; V(x,1)(f g^{(1)} + f^{(1)} g)^2 + V(x, 2)(\frac{1}{6} ) \\
+& (fg)^{(1)} = f g^{(1)} + f^{(1)} g; 
+\end{align*}
+
+\begin{align*}
+\delta^2 (c \pm 1)x &= (c \pm 1)^2 (\delta x)^2 = (\delta cx)^2 x \pm 2 \delta cx \delta x + (\delta x)^2 = (\delta c x \pm \delta x)^2; \\
+P(cx\;x)^2 &= \frac{ c^2 \delta^2 x^2}{c^2 x^4} = 4 P(x)^2 + 3P(x)^4; \\
+\delta^2 (cx) + \delta^2 x &= c^2 (\delta x)^2 + 2 ;
+\end{align*}
+
+\fi
+
+
+
+&= \sum_{n=1}^{\infty} (\delta^2 x)^n (2n - 1)! \left( (\frac{f^{(n)}_x}{(n)!})^2! + \sum_{j=1}^{n-j} 2 \frac{f^{(j)}_x}{j!} \frac{f^{(2n-j)}_x}{(2n-j)!} \right) 
+ - \sum_{j=1}^{n-j} \frac{f^{(2j)}_x}{2j!} \frac{f^{(2n-2j)}_x}{(2n-2j)!} (2j-1)!! (2n - 2j - 1)!!;
+&\simeq (f_x^{(1)})^2 \delta^2 x
+ + (\delta^2 x)^2 \left( (\frac{f^{(2)}_x}{2})^2 3 + 2 \frac{f^{(1)}_x f^{(3)}_x}{6} 3 - (\frac{f^{(2)}_x}{4})^2 \right) \\
+&\;\; + (\delta^2 x)^3 \left( (\frac{f^{(3)}_x}{6})^2 15 + 2 \frac{f^{(1)}_x f^{(5)}_x}{120} 15 + 2 \frac{f^{(2)}_x f^{(4)}_x}{48} 15
+    - 2 \frac{f^{(2)}_x}{2} \frac{f^{(4)}_x}{24} 3 \right)\\
+&= \delta^2 x (f_x^{(1)})^2 + (\delta^2 x)^2 \left( \frac{3}{16} (f^{(2)}_x)^2 + f^{(1)}_x f^{(3)}_x \right)
+ + (\delta^2 x)^3 \left( \frac{5}{12} (f^{(3)}_x)^2 + \frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x \right);
+
+
+
+To solve for mode:
+\begin{align*}
+\tilde{z} =&\; \frac{f^{-1}(\tilde{y}) - x}{\delta x}: \eqspace 
+ \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}); \\
+& \tilde{y} = f(x + \tilde{z} \delta x); \eqspace
+\frac{d \tilde{y}}{d \tilde{z}} = f_x^{(1)} \delta x; \eqspace
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{d}{d \tilde{y}} = \frac{1}{f_x^{(1)}(\tilde{y}) \delta x} \\
+0 =&\; \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}): \eqspace 
+0 = N(\tilde{z}) \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}- \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}) \tilde{z} \frac{d \tilde{z}}{d \tilde{y}}; \eqspace
+\frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} = (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z}; \\
+\tilde{z} =&\; \frac{1}{(\frac{d \tilde{z}}{d \tilde{y}})^2} \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}
+ = - \frac{d}{d \tilde{y}} \frac{d \tilde{y}}{d \tilde{z}} = 0;\eqspace \tilde{y}_m = f(x); \\
+d \frac{d \tilde{z}}{d \tilde{y}} &= (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z} d \tilde{y}
+ = \frac{d \tilde{z}}{d \tilde{y}} d\frac{1}{2} \tilde{z}^2; \eqspace 
+\frac{1}{2}\tilde{z}^2 = \ln(\frac{d \tilde{z}}{d \tilde{y}}) + c = -\ln(f_x^{(1)} \delta x) + c;
+\end{align*}
+
+
+\begin{itemize}
+\item Method 1:
+\begin{align*}
+\frac{g_y^{(2)}}{\delta x} = \frac{(g_y^{(1)})^2}{(\delta x)^2} \frac{g_y - x}{\delta x}; \eqspace (\delta x)^2 g_y^{(2)} = (g_y^{(1)})^2(g_y - x);
+\end{align*}
+
+\item Method 2, which is identical to Method 1:
+\begin{align*}
+\tilde{z} = \frac{1}{(\frac{d \tilde{z}}{d \tilde{y}})^2} \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}
+ = - \frac{d}{d \tilde{y}} \frac{d \tilde{y}}{d \tilde{z}} = - \frac{d}{d \tilde{y}} \frac{\delta x}{g_y^{(1)}}
+ = \frac{\delta x}{(g_y^{(1)})^2} g_y^{(2)};
+\end{align*}
+
+\item Method 3, which is identical to Method 4:
+\begin{align*}
+d \frac{d \tilde{z}}{d \tilde{y}} &= (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z} d \tilde{y}
+ = \frac{d \tilde{z}}{d \tilde{y}} d\frac{1}{2} \tilde{z}^2; \eqspace 
+\frac{1}{2}\tilde{z}^2 + c = \ln(\frac{d \tilde{z}}{d \tilde{y}}) = \ln(\frac{g_y^{(1)}}{\delta x});
+\end{align*}
+
+\item Method 4:
+\begin{align*}
+& 0 = \tilde{z} f^{(1)}(x + \tilde{z}_m \delta x) + (\delta x) f^{(2)}(x + \tilde{z}_m \delta x); \\
+& f^{(1)}(x + \tilde{z} \delta x) = (\delta x) \frac{d \tilde{y}}{d \tilde{z}}; \eqspace
+\tilde{z} \frac{d \tilde{y}}{d \tilde{z}} = (\delta x) \frac{d}{d \tilde{z}} \frac{d \tilde{y}}{d \tilde{z}}; \eqspace
+\frac{d \tilde{y}}{d \tilde{z}} = A \frac{1}{\delta x} e^{-\frac{1}{2}\tilde{z}^2};  \\
+& \rho(\tilde{y}_m, y, \delta y) = N(\tilde{z}) / \frac{d \tilde{y}}{d \tilde{z}} = 1/A; 
+\end{align*}
+
+\end{itemize}
+
+\begin{align*}
+f(x) = x^c:& \eqspace 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} + (c - 1) (\delta x); \\
+& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \eqspace 
+f^{-1}(\tilde{y}_m) = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2}; \\
+f(x) = \ln(x):& \eqspace 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} - (\delta x); \\
+& \tilde{z} = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 + 4 (\delta x)^2}}{2} - x); \\
+f(x) = e^x:& \eqspace 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \\
+& \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
+\end{align*}
+
+\begin{align*}
+g(\tilde{y}) &= f^{-1}(\tilde{y}): \eqspace \tilde{z} = \frac{g(\tilde{y}) - x}{\delta x}: \eqspace 
+ \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}); \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{g_y^{(1)}}{\delta x}; \\
+0 =&\; \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}): \eqspace 
+0 = N(\tilde{z}) \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}- \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}) \tilde{z} \frac{d \tilde{z}}{d \tilde{y}}; \eqspace
+\frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} = (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z}; \\
+& d \frac{d \tilde{z}}{d \tilde{y}} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z} d \tilde{z}; \eqspace 
+ \frac{d \tilde{z}}{d \tilde{y}} = A e^{\frac{1}{2} \tilde{z}^2}; \\
+0 =&\; \frac{d}{d \tilde{z}} \frac{N(\tilde{z})}{f^{(1)}(x + \tilde{z} \delta x)) \delta x}
+ = - \frac{N(\tilde{z}) \tilde{z}}{f^{(1)}(x + \tilde{z} \delta x) \delta x}
+   - \frac{N(\tilde{z}) f^{(2)}(x + \tilde{z} \delta x)^2}{(f^{(1)}(x + \tilde{z} \delta x))^2}; \\
+& 0 = f^{(1)}(x + \tilde{z} \delta x) \tilde{z} + (\delta x) f^{(2)}(x + \tilde{z} \delta x); \eqspace 
+\frac{d \tilde{y}}{d \tilde{z}} = A e^{-\frac{1}{2} \tilde{z}^2}; \\
+\tilde{z} &= \frac{1}{(\frac{d \tilde{z}}{d \tilde{y}})^2} \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}
+ = - \frac{d}{d \tilde{y}} \frac{d \tilde{y}}{d \tilde{z}} = \tilde{z} A e^{-\frac{1}{2} \tilde{z}^2} \frac{d \tilde{z}}{d \tilde{y}}; 
+\end{align*}
+
+The probability density function $\rho(\tilde{y}, y, \delta y)$ for $f(x \pm \delta x)$ is given by Formula \eqref{eqn: function distribution}, in which $\rho(\tilde{x}, x, \delta x)$ is the input uncertainty distribution, and $f^{-1}(y)$ is the reverse function of $y = f(x)$.
+Formula \eqref{eqn: function distribution} shows that the monotonic region on each side of a minimum or maximum has its own $\rho(\tilde{y}, y, \delta y)$, such as $x = \pm \sqrt{y}$ for $y = x^2$ across $x = 0$.
+\begin{align}
+\label{eqn: function distribution}
+\rho(\tilde{y}, y, \delta y) 
+&= \frac{d}{d \tilde{y}} \int_{f(\tilde{x}) \leq \tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+ = \frac{d f^{-1}(\tilde{y})}{d \tilde{y}} \frac{d}{d f^{-1}(y)} \int^{f^{-1}(y)} \rho(\tilde{x}, x, \delta x) d \tilde{x} \nonumber \\
+&= \frac{d f^{-1}(\tilde{y})}{d \tilde{y}} \rho(f^{-1}(\tilde{y}), x, \delta x); \\
+\label{eqn: function distribution 2}
+\rho(\tilde{y}, y, \delta y) 
+&= \frac{d}{d \tilde{y}} \int_{f(\tilde{x}) \leq \tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x}
+ = \frac{d f^{-1}(\tilde{y})}{d \tilde{y}} \frac{d}{d f^{-1}(y)} 
+     \int_{-f^{-1}(y)}^{f^{-1}(y)} \rho(\tilde{x}, x, \delta x) d \tilde{x} \nonumber \\
+&= \frac{d f^{-1}(\tilde{y})}{d \tilde{y}} \rho(f^{-1}(\tilde{y}), x, \delta x)
+ + \frac{d f^{-1}(\tilde{y})}{d \tilde{y}} \rho(f^{-1}(\tilde{y}), -x, \delta x);
+\end{align}
+In Formula \eqref{eqn: function distribution} and \eqref{eqn: function distribution 2}, $\rho(\tilde{x}, x, \delta x)$ can be any probability density function.
+It is possible to apply Formula \eqref{eqn: function distribution} and \eqref{eqn: function distribution 2} repeatedly to track the uncertainty distribution.
+For example, on a strictly monotonic region, the uncertainty distribution of $f(f^{-1})$ is completely recovered.
+However, such approach may not fit well with the habits of normal scientific and engineering calculation, and it needs to be simplified.
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Square_Root_Distribution.png} 
+\captionof{figure}{
+The probability density function for $\sqrt{x \pm 1}$, for different $x$ as shown in the legend. 
+Each probability density function is compared with the corresponding bounding distribution in the dash line of the same color, respectively. 
+Each bounding distribution is labeled with its distribution difference.
+}
+\label{fig: Square_Root_Distribution}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Cubic_Root_Distribution.png} 
+\captionof{figure}{
+The probability density function for $\sqrt[3]{x \pm 1}$, for different $x$ as shown in the legend. 
+Each probability density function is compared with the corresponding bounding distribution in the dash line of the same color, respectively. 
+Each bounding distribution is labeled with its distribution difference.
+}
+\label{fig: Cublic_Root_Distribution}
+\end{figure}
+
+
+
+
+\begin{table}[h]
+\label{tab: distribution difference}
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline 
+$x$ & 1 & 2 & 3 & 4 & 5 \\ 
+\hline 
+input precision & 100\% & 50\% & 33\% & 25\% & 20\% \\ 
+\hline 
+$y = e^x$ & 0 & 0 & 0 & 0 & 0 \\ 
+\hline 
+$y = \log(x)$ & 25.0\% & 10.14\% & 4.85\% & 2.95\% & 1.90\% \\ 
+\hline 
+$y = \sqrt{x}$ & 30.0\% & 8.98\% & 2.75\% & 1.39\% & 0.87\% \\ 
+\hline 
+$y = x^2$ &  & 41.4\% & 16.8\% & 4.13\% & 2.18\% \\ 
+\hline 
+$y = 1/x$ &  &  & 78.8\% & 18.8\% & 5.38\% \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The distribution difference for different $f(x \pm 1)$.}
+\end{table}
+
+Figure \ref{fig: Square_Distribution}, \ref{fig: Square_Root_Distribution}, and \ref{fig: Cublic_Root_Distribution} shows that $\rho(\tilde{x}, x, \delta x)$ can be approximated well by a Gaussian distribution $\varrho(\tilde{y}, y, \delta y)$ of the same variance and the same mode when $x \pm \delta$ is away from where $f_x^{(1)} \equiv \frac{d f}{d x}$ approach either $0$ or $\infty$. 
+$\varrho(\tilde{y}, y, \delta y)$ is called the \emph{bounding distribution} for $\rho(\tilde{x}, x, \delta x)$.
+The difference between $\varrho(\tilde{y}, y, \delta y)$ and $\rho(\tilde{y}, y, \delta y)$ is calculated as $\int |\rho(\tilde{y}, y, \delta y) - \varrho(\tilde{y}, y, \delta y)| d \tilde{y}$ which is defined as the \emph{distribution difference}.
+The distribution difference is in the range of $[0, 2]$, with $0$ for perfect match, $1$ for $\rho(\tilde{x}, x, \delta x) = 0$, and $2$ for no overlap at all.
+Table 1 calculates the distribution differences of a few typical examples.
+The bounding distribution $\varrho(\tilde{y}, y, \delta y)$ in Figure \ref{fig: Square_Distribution}, \ref{fig: Square_Root_Distribution}, and \ref{fig: Cublic_Root_Distribution} are labeled by the corresponding distribution difference, respectively, which shows that visually when the distribution difference is less than 10\%, $\varrho(\tilde{y}, y, \delta y)$ can replace $\rho(\tilde{y}, y, \delta y)$.
+
+Figure \ref{fig: Square_Distribution}, \ref{fig: Square_Root_Distribution}, and \ref{fig: Cublic_Root_Distribution} also shows that near where $f_x^{(1)}$ approach either $0$ or $\infty$, $\varrho(\tilde{x}, x)$ deviates from $\rho(\tilde{y}, y, \delta y)$ significantly:
+\begin{itemize}
+\item When $f^{(1)}_x \rightarrow 0$, $\rho \rightarrow \infty$.
+Near this point $\rho$ no longer has mode when Formula \eqref{eqn: power distribution} has no real solution for $\tilde{y}_m$, so that $\varrho$ can no longer locate $\rho$, such as $(0 \pm 1)^2$ and $(1 \pm 1)^2$ in Figure \ref{fig: Square_Distribution}.
+
+\item When $f^{(1)}_x \rightarrow \infty$, $\rho \rightarrow 0$.
+If this point is also the range limit, $\varrho$ can still cover $\rho$ although $\varrho$ may violate the range limit, such as $\sqrt{0 \pm 1}$ and $\sqrt{1 \pm 1}$ in Figure \ref{fig: Square_Root_Distribution}.
+Otherwise, $\varrho$ can match one of the dual modes of $\rho$, such as $\sqrt[3]{0 \pm 1}$ and $\sqrt[3]{1 \pm 1}$ in Figure \ref{fig: Cublic_Root_Distribution}.
+
+\end{itemize}
+Thus, near $x$ where $f^{(1)}_x$ is $0$ or $\infty$, $\rho$ should be used directly to analyze the statistical behavior of uncertainty.
+
+For example:
+\begin{align}
+(+1 \pm 0.2) \times (+2 \pm 0.1) &= +2.02 \pm 0.5; \\
+(+1 \pm 0.2) \times (-2 \pm 0.1) &= -2.1 \pm 0.42; \\
+(-1 \pm 0.2) \times (+2 \pm 0.1) &= -1.9 \pm 0.38; \\
+(-1 \pm 0.2) \times (-2 \pm 0.1) &= +2.02 \pm 0.5;
+\end{align}
+
+
+\subsection{Uncertainty Distribution}
+
+\iffalse
+
+To solve for mode:
+\begin{align*}
+\tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}:& \eqspace 
+ \tilde{y} = f(x + \tilde{z} \delta x); \eqspace
+ \frac{d \tilde{y}}{d \tilde{z}} = f_x^{(1)} (\delta x); \\
+& \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
+ = \frac{1}{\delta x} \frac{N(\tilde{z})}{f_x^{(1)}};  \\
+0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}}: & \eqspace
+ \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}} = (\frac{d \tilde{z}}{d \tilde{y}})^2 \tilde{z}; \eqspace
+ \tilde{z} = - \frac{d}{d \tilde{y}} \frac{d \tilde{y}}{d \tilde{z}}
+  = - f_x^{(2)} (\delta x)^2 \frac{d \tilde{z}}{d \tilde{y}}; \\
+& \tilde{z} \frac{d \tilde{y}}{d \tilde{z}} = \tilde{z} f_x^{(1)} (\delta x) = - f_x^{(2)} (\delta x)^2; \\
+& \frac{1}{f_x^{(1)}} \frac{d f_x^{(1)}}{dx} = - \frac{\tilde{z}}{\delta x}; \eqspace 
+ f_x^{(1)} = A e^{- \frac{\tilde{z} x}{\delta x}}; \\
+0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}}:& \eqspace \frac{d}{d \tilde{y}} \frac{d \tilde{z}}{d \tilde{y}}
+   = \frac{d \tilde{z}}{d \tilde{y}} \frac{d}{d \tilde{y}} \frac{\tilde{z}^2}{2}; \eqspace
+ \frac{d \tilde{z}}{d \tilde{y}} = B e^{\frac{\tilde{z}^2}{2}}; \eqspace
+ f_x^{(1)} = \frac{B}{\delta x} e^{-\frac{\tilde{z}^2}{2}};
+\end{align*}
+None of $f_x^{(1)}$ is in the format of $g(x + \tilde{z} \delta x)$ so both seems wrong.
+
+The exponential function:
+\begin{align*}
+f(x) = e^x:& \eqspace 
+\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \eqspace \\
+\frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
+&= e^{-\log(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2}{2 \delta^2 x}}
+ = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2 + 2 \log(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
+& = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
+ = N(\frac{\log(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
+& 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \eqspace
+ \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
+\end{align*}
+
+The log function $f(x) = \ln(x)$:
+\begin{align*}
+& \tilde{z} = \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} e^{\tilde{y}} = \frac{1}{\delta x} (x + \tilde{z} \delta x)
+ = \frac{1}{\frac{d}{d \tilde{z}} \ln(x + \tilde{z} \delta x)}; \\
+& \frac{1}{\delta x} e^{\tilde{y}} = (\frac{1}{\delta x} e^{\tilde{y}})^2 \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+(e^{\tilde{y}})^2 - x e^{\tilde{y}} - \delta^2 x = 0; \\
+e^{\tilde{y}_m} &= \frac{x + \sqrt{x^2 + 4 \delta^2 x}}{2}; \\
+& \eqspace 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} - (\delta x); \\
+& \tilde{z} = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 + 4 (\delta x)^2}}{2} - x);
+\end{align*}
+
+The power mode $f(x) = x^{\frac{1}{p}}$:
+\begin{align*}
+& \tilde{z} = \frac{\tilde{y}^p - x}{\delta x}; \eqspace 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} p \tilde{y}^{p-1}; \\
+& \frac{1}{\delta x} p (p - 1) \tilde{y}^{p-2} = (\frac{1}{\delta x} p \tilde{y}^{p-1})^2 \frac{\tilde{y}^p - x}{\delta x}; \\
+& \tilde{y}^{2p} - x \tilde{y}^{p} - \frac{p - 1}{p} \delta^2 x = 0; \\
+\tilde{y}_m^p &= \frac{1}{2} (x + \sqrt{x^2 + 4 \frac{p - 1}{p} \delta^2 x}); \\
+& 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \eqspace
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} + (c - 1) (\delta x); \\
+& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \eqspace 
+f^{-1}(\tilde{y}_m) = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2}; \\
+p = 2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 2 \tilde{y}; \eqspace 
+  \tilde{y}_m^{\frac{1}{2}} = \frac{1}{2} \left( x + \sqrt{x^2 + 2 \delta^2 x} \right); \\
+p = 3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 3 \tilde{y}^2; \eqspace  
+  \tilde{y}_m^{\frac{1}{3}} = \frac{1}{2} \left( x \pm \sqrt{x^2 + \frac{8}{3} \delta^2 x} \right); \\
+p = 1/2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{2} \tilde{y}^{-\frac{1}{2}}; \eqspace 
+  \tilde{y}_m^2 = \frac{1}{2} \left( x + \sqrt{x^2 - 4 \delta^2 x} \right); \\
+p = 1/3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{3} \tilde{y}^{-\frac{2}{3}}; \eqspace
+  \tilde{y}_m^2 = \frac{1}{2} \left( x \pm \sqrt{x^2 - 8 \delta^2 x} \right); \\
+p = -1:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = - \frac{1}{\delta x} \tilde{y}^{-2}; \eqspace 
+  \tilde{y}_m^{-1} = \frac{1}{2} \left( x + \sqrt{x^2 + 8 \delta^2 x} \right); 
+\end{align*}
+
+
+The distribution difference:
+\begin{align*}
+&\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}: \eqspace 
+ N(\frac{f^{-1}(\tilde{y}) - f^{-1}(\tilde{y}_m)}{\delta x} )
+ = N(\tilde{z} + \nu) = N(\tilde{z}) e^{-\tilde{z} \nu} e^{-\frac{1}{2} \nu^2}; \\
+\eta &\equiv \int |\varrho(\tilde{y}, y, \delta y) - \rho(\tilde{y}, y, \delta y)| d \tilde{y}
+ =  \int |\rho(f^{-1}(\tilde{y}), f^{-1}(\tilde{y_m}), \delta x) - \rho(f^{-1}(\tilde{y}), x, \delta x)| d f^{-1}(\tilde{y}) \\
+&= \int |N(\tilde{z} + \nu) - N(\tilde{z})| d \tilde{z} 
+ = \int |e^{-\frac{1}{2} \nu^2} e^{-\tilde{z} \nu} - 1| N(\tilde{z}) d \tilde{z}; \\
+&= | \int |\sum_{m=0}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=0}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n - 1| 
+   N(\tilde{z}) d \tilde{z} | \\
+&= | \int \left(\sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n
+  - \frac{1}{2} \nu^2 - \nu \tilde{z} \right) N(\tilde{z}) d \tilde{z} | \\
+&= \frac{1}{2} \nu^2 - \sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{\nu^{2n}}{2^n n!}
+ = \frac{1}{2} \nu^2 - \sum_{m=2}^{\infty} \sum_{n=1}^{m-1} \frac{(-1)^m}{2^m (m - n)! n!} \nu^{2m} \\
+&\simeq \frac{1}{2} \nu^2 - \frac{1}{4} \nu^4 + \frac{1}{8} \nu^6 - \frac{7}{192} \nu^8;
+\end{align*}
+When $f(x)=x^c$:
+\begin{align*}
+\nu &= \frac{x - \frac{1}{2} (x + \sqrt{x^2 + (1 - c) 4 \delta^2 x})}{\delta x} = \frac{1 - \sqrt{1 + (1 - c) 4 P(x)^2}}{2 P(x)} \\
+&= - \sum_{m=1} \frac{(1 - c)^m (2P(x))^{2m - 1}}{m!} \prod_{n=1}^{m} \frac{\frac{3}{2} -n}{n} \\
+&\simeq -(1 - c) P(x) + \frac{1}{4} (1 - c)^2 P(x)^3 - \frac{1}{4} (1 - c)^3 P(x)^5; \\
+\eta &= \frac{1}{2} (1-c)^2 P(x)^2 - \frac{1}{4} (1-c)^3 (2-c) P(x)^4 + 1/8 (1-c)^4 (c^2-4c+7) P(x)^6
+\end{align*}
+
+\fi
+
+
+Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that $\tilde{x} = f^{-1}(\tilde{y})$ exist.
+In formula \eqref{eqn: function distribution}, the same distribution can be expressed in either $\tilde{x}$ or $\tilde{y}$.
+\begin{equation}
+\label{eqn: function distribution}
+\rho(\tilde{x}, x, \delta x) d\tilde{x} = \rho(f^{-1}(\tilde{y}), x, \delta x) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} \\
+= \rho(\tilde{y}, y, \delta y) d\tilde{y};
+\end{equation}
+
+Because addition and subtraction converges the uncertainty distribution toward Gaussian, it is reasonable to assume that $\rho(\tilde{x}, x, \delta x)$ obeys Formula \eqref{eqn: central limit theorem}.
+Under this assumption, Formula \eqref{eqn: function distribution} can be simplified as Formula \eqref{eqn: Gaussian function distribution}.
+Formula \eqref{eqn: function mode} gives the equation for the mode of the result the uncertainty distribution.
+\begin{align}
+\label{eqn: Gaussian function distribution}
+\tilde{z} \equiv \frac{f^{-1}(\tilde{y}) - x}{\delta x}:&\eqspace 
+ \tilde{y} = f(x + \tilde{z} \delta x); \eqspace 
+ \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}) = \frac{N(\tilde{z})}{f_x^{(1)} \delta x}; \\
+\label{eqn: function mode}
+0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}}: &\eqspace
+ 0 = \tilde{z} f_x^{(1)} + (\delta x) f_x^{(2)}; 
+\end{align}
+For example, Formula \eqref{eqn: exp distribution}, \eqref{eqn: log distribution}, and \eqref{eqn: power distribution} give the uncertainty distribution $\rho = \rho(\tilde{y}, y, \delta y)$ and the mode $\tilde{y}_m$ for $e^x$, $\ln(x)$, and $x^c$, respectively:
+\begin{align}
+\label{eqn: exp distribution}
+y = e^x: &\eqspace \rho = \frac{1}{\tilde{y}} \frac{1}{\delta x} N(\frac{\log(\tilde{y}) - x}{\delta x}); 
+ \eqspace \tilde{y}_m = e^{x - \delta^2 x}; \\
+\label{eqn: log distribution}
+y = \ln(x): &\eqspace \rho = e^{\tilde{y}} \frac{1}{\delta x} N(\frac{e^{\tilde{y}} - x}{\delta x}); 
+ \eqspace \tilde{y}_m = \ln(x \frac{1 + \sqrt{1 + 4 P(x)^2}}{2}); \\
+\label{eqn: power distribution}
+y = x^c: &\eqspace \rho = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\delta x} N(\frac{\tilde{y}^\frac{1}{c} - x}{\delta x}); 
+ \eqspace \tilde{y}_m = \left( x \frac{1 + \sqrt{1 + (1 - c) 4 P(x)^2}}{2} \right)^c; 
+\end{align}
+
+Near where $f_x^{(1)}$ approach either $0$ or $\infty$, Formula \eqref{eqn: Gaussian function distribution} deviate significantly from Gaussian. 
+Away from this point, $\rho(\tilde{y}, y, \delta y)$ can be approximated by a corresponding \emph{bounding distribution} $\varrho(\tilde{y}, y, \delta y)$ which is a Gaussian of the same variance and the same mode in Formula \eqref{eqn: bounding distribution}.
+The difference between $\rho(\tilde{y}, y, \delta y)$ and $\varrho(\tilde{y}, y, \delta y)$ is calculated as the \emph{distribution different} $\eta$ in Formula \eqref{eqn: distribution different}.
+For the special case of $y = x^c$, Formula \eqref{eqn: power distribution different} shows that $\eta$ is small when $P(x)$ is fine or when $c$ is close to 1.
+\begin{align}
+\label{eqn: bounding distribution}
+\varrho(\tilde{y}, y, \delta y)&\; d \tilde{y} = N(\tilde{z} + \nu) d \tilde{z}; \eqspace
+\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}; \\
+\label{eqn: distribution different}
+\eta &\equiv \int |N(\tilde{z} + \nu) - N(\tilde{z})| d \tilde{z}
+ = \int |e^{-\frac{1}{2} \nu^2} e^{-\tilde{z} \nu} - 1| N(\tilde{z}) d \tilde{z} \\
+\label{eqn: power distribution different}
+&= \frac{1}{2} \nu^2 - \sum_{m=2}^{\infty} \sum_{n=1}^{m-1} \frac{(-1)^m}{2^m (m - n)! n!} \nu^{2m} 
+ \simeq \frac{1}{2} \nu^2 - \frac{1}{4} \nu^4 + \frac{1}{8} \nu^6 - \frac{7}{192} \nu^8; \nonumber \\
+y = x^c:&\eqspace \eta \simeq \frac{1}{2} (1-c)^2 P(x)^2 - \frac{1}{4} (1-c)^4 P(x)^4 + \frac{1}{8} (1-c)^6 P(x)^6;
+\end{align}
+Figure \ref{fig: Square_Distribution} compares $\rho(\tilde{y}, y, \delta y)$ and $\varrho(\tilde{y}, y, \delta y)$ for $(x \pm 1)^2$.
+It shows that distribution approaches Gaussian when $P(x) \leq 1/4$.
+Visually, when $\eta \leq 10\%$, $\varrho(\tilde{y}, y, \delta y)$ is a good fit for $\rho(\tilde{y}, y, \delta y)$.
+In contrast, when $1/3<P(x)$, the distribution is quite different from Gaussian, e.g., when $x = 0$, it is a $\chi^2$ distribution \cite{Probability_Statistics}.
+
+\begin{figure}%[p]
+\centering
+\includegraphics[height=2.5in]{Square_Distribution.png} 
+\captionof{figure}{
+The probability density function for $(x \pm 1)^2$, for different $x$ as shown in the legend. 
+Each probability density function is compared with the corresponding bounding distribution in the dash line of the same color, respectively. 
+Each bounding distribution is labeled with its distribution difference.
+}
+\label{fig: Square_Distribution}
+\end{figure}
+
+
+Formula \eqref{eqn: function distribution} can be used trace the uncertainty distribution during calculation.
+However, such approach is quite different from normal scientific and engineering calculations.
+It is desirable to keep the uncertainty distribution to be approximately Gaussian.
+For this reason, variance arithmetic may have a maximal threshold on each input deviation or precision, e.g, requiring the input precision to be finer than $1/3$ for $(x \pm 1)^2$.
+
+
+
+
+A linear signal with the slope $\lambda, h[k] = \lambda k$, provides a generic test for input frequencies other than index frequencies, whose Fourier spectrum is:
+\begin{equation}
+H[n] = -\lambda \frac{N}{2} \left(1 + \frac{i}{\tan(\pi n / N)}\right);
+\end{equation}
+
+
+
+\begin{align}
+\label{eqn: Gaussian nth variance}
+M(x, n) &= (\delta x)^n \int_{0}^{\infty} \tilde{z}^n N(\tilde{z}) d \tilde{z} = \nonumber \\
+&\begin{cases}
+\left(- \sum_{j=1}^{n/2} \frac{x^{2j-1}}{(2j-1)!!} N(x) + \frac{1 + \xi(\frac{x}{\sqrt{2}})}{2} \right) (n-1)!! (\delta x)^n, 
+  &\text{if $n$ is even} \\
+- \sum_{j=1}^{n/2} \frac{x^{2j-1}}{(2j-1)!!} N(x) (\delta x)^n, &\text{if $n$ is odd}
+\end{cases}; \\
+&P(x) \ll 1: \eqspace M(x, n) \simeq \begin{cases} 
+(n-1)!! (\delta x)^n, &\text{if $n$ is even} \\
+0, &\text{if $n$ is odd}
+\end{cases};
+\end{align}
+
+
+If [$x-\Delta$x, $x+\Delta x$] crosses 0, $x$ is neither positive nor negative for certainty due to the following two possibilities: 
+\begin{itemize}
+\item  Either $\Delta x$ is too large to give a precise measurement of $x$;
+\item  Or $x$ itself is a measurement of zero.
+\end{itemize}
+To distinguish which case it is, additional information is required so that the measurement $x \pm$ $\Delta x$ itself is \emph{insignificant} if $[x - \Delta x, x + \Delta x]$ crosses 0.  
+An insignificant value also has conceptual difficulty in participating in many mathematical operations, such as calculating the square root or acting as a divisor.
+
+
+
+Usually $\widehat{f(x)}^2$ is much smaller than $\delta^2 f(x)$, so that in the \emph{accurate output approximation} of variance arithmetic, the calculation variance is used to replace the corresponding statistical variance $\delta^2 f(x)$.
+
+Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \eqref{eqn: inversion precision} shows that for different power $c$, Formula \eqref{eqn: power precision} has different convergence condition for $P(x)$.
+
+The  is defined as the \emph{calculation cost} in variance arithmetic.
+If only the first term in Formula \eqref{eqn: Taylor 1d variance} existed, after the $f^{-1}(f(x))$ calculation, the original imprecise value $x \pm \delta x$ can be recovered completely.
+\begin{itemize}
+\item The calculation cost increases with $P(x)^4$.
+
+\item Formula \eqref{eqn: log precision} and \eqref{eqn: exp precision} shows that the calculation cost is larger in $e^x$ than in $\ln(x)$.
+
+\item Formula \eqref{eqn: square root precision}, \eqref{eqn: square precision}, and \eqref{eqn: inversion precision} shows that the calculation cost is larger in $x^2$ than in $\sqrt{x}$, but they are both smaller than the calculation cost of $1/x$.
+
+\item Formula \eqref{eqn: power precision} shows that the calculation cost increases with $c^4$ for $x^c$.
+\end{itemize}
+
+The calculation cost also extends to Formula \eqref{eqn: Taylor 2d variance} for the sum beyond $\delta^2 x$ and $\delta^2 y$, which also prevents the uncertainty to recover completely when calculating $f^{-1}(f)$.
+\begin{itemize}
+\item Formula \eqref{eqn: addition and subtraction} shows that addition and subtraction has no calculation cost.
+It suggests that the result precision for addition and subtraction generally degrades except during averaging.
+
+\item Formula \eqref{eqn: multiplication precision} shows that the cross term is the calculation cost for multiplication.
+It suggests that the result precision for multiplication is worse than either input precision.
+\end{itemize}
+
+Generally, the calculation is a process to incorporate all input precision, and to accumulate calculation costs.
+
+To contrast variance arithmetic on the calculation cost, an \emph{independence arithmetic} implements the variance arithmetic but ignoring all calculation cost.
+
+
+\subsection{Dependency Problem}
+
+\iffalse
+
+\begin{align*}
+P((\sqrt{x})^2) &\simeq \frac{1}{4} (4 P(x)^2 + 3 P(x)^4) + \frac{15}{64} (4 P(x)^2)^2 = P(x)^2 + \frac{9}{2} P(x)^4; \\
+P(\sqrt{x^2}) &\simeq 4 (\frac{1}{4} P(x)^2 + \frac{15}{64} P(x)^4) + 3 (\frac{1}{4} P(x)^2)^2 = P(x)^2 + \frac{9}{8} P(x)^4;
+\end{align*}
+
+\begin{align*}
+(y \pm \delta y) &= a (x \pm \delta x):  \delta y = a \delta x \\
+\delta^2 (x + y) &= \delta^2 (a x + x) = (a + 1)^2 \delta^2 x = \delta^2 a x + 2 (\delta ax) (\delta x) + \delta^2 x
+ = (\delta y + \delta x)^2; \\
+\delta^2 x y &= a^2 \delta^2 x = 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2
+ \neq a^2 x^2 \delta^2 x + x^2 \delta^2 ax + \delta^2 x \delta^2 ax
+\end{align*}
+
+\fi
+
+When a variance calculations deviates from Formula \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d variance}, and their extensions, the result depends on the actual steps of calculation, which is called the \emph{dependency problem}.
+The dependency problem can be attributed to two major reasons:
+\begin{itemize}
+\item Due to the calculation cost of extra calculations.
+For example, Formula \eqref{eqn: square root} and \eqref{eqn: root square} shows that the calculation cost of $\sqrt{x}^2$ is greater by more than 4-fold than that of $\sqrt{x^2}$.
+\begin{align}
+\label{eqn: square root}
+P(\sqrt{x}^2)^2 &\simeq P(x)^2 + \frac{9}{2} P(x)^4; \\
+\label{eqn: root square}
+P(\sqrt{x^2})^2 &\simeq P(x)^2 + \frac{9}{8} P(x)^4;
+\end{align}
+
+\item Due to applying the uncorrelated uncertainty assumption improperly.
+For example, when $(y \pm \delta y) = a (x \pm \delta x)$, Formula \eqref{eqn: addition and subtraction} is wrong for Formula \eqref{eqn: identical add and subtraction}, while Formula \eqref{eqn: multiplication} underestimates Formula \eqref{eqn: identical multiplication} by more than 2-fold.
+\begin{align}
+\label{eqn: identical add and subtraction} 
+\delta^2 (x \pm y) &= ((\delta x) + (\delta y))^2; \\
+\label{eqn: identical multiplication} 
+\delta^2 x y &= 4 x y (\delta x)(\delta y) + 3 (\delta x)^2 (\delta y)^2;
+\end{align}
+
+\end{itemize} 
+In variance arithmetic, the calculation cost of extra calculations overestimates the result variance, while applying the uncorrelated uncertainty assumption improperly generally underestimates the result variance.
+
+It is already a common practice to assume that the uncertainties from different measurements are uncorrelated of each other \cite{Statistical_Methods} \cite{Precisions_Physical_Measurements}.  
+For these measurements with fine enough precisions, variance arithmetic provides a good statistical tracking of the result precisions or uncertainty deviations for calculations.
+
+
+The precision scaling principle also allows the uncertainty to be outside the bounding range with a small probability which is called \emph{bounding leakage}. 
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+Generally, the bounding leakage outside the range of $(-R, +R)$ is $\xi(\frac{1}{\sqrt{2}} \frac{R}{\sqrt{V}}) = \xi(\sqrt{3V})$, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+To minimize the bounding leakage, $V$ has to be maximized in its bit confinement, which is the \emph{normalization} process for the variance representation.
+When $4 < V$, the bounding leakage is less than $5 \times 10^{-8}$, which means the bounding leakage for the variance representation is virtually 0.
+
+
+The variance representation contains the following simplification of the full variance arithmetic:
+\begin{itemize}
+\item Because in most cases $\widehat{f}^2 \ll \delta^2 f$, the calculation bias is not tracked, and the calculation variance is used as the proxy for the statistical variance. 
+
+\item The calculation variance is only expanded up to $(\delta^2 x)^{100}$ when calculating $f(x)$.
+This rule also extends to calculating functions with multiple variables, such as $f(x, y)$.
+
+\item $M(x,n)$ is calculated by always assuming $-\infty < x < +\infty$.
+\end{itemize}
+
+Counting linear deviation only is equivalent to Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, \eqref{eqn: stat /} by assuming $\gamma = 0$. 
+
+
+ both contains \emph{variance momentum} which is defined in Formula \eqref{eqn: variance momentum}.
+The integration range of Formula \eqref{eqn: variance momentum} is limited by $f(x)$, such as $0 \le x + \tilde{x}$ in $\sqrt{x}$.  
+$M(x, n)$ has different values for different ranges, as show in Formula \eqref{eqn: nth variance momentum} \cite{Gaussian_Integals}, in which $\varsigma(\sigma, n)$ is defined as the momentum residual, $\xi(\sigma)$ is the cumulative probability density function for normal distribution, and $\sigma \equiv x /\delta x$ is the bounding factor:
+\begin{align}
+\label{eqn: nth variance momentum}
+& \varsigma(\sigma, n) \equiv  
+\begin{cases}
+\text{$n$ is even}: &N(\sigma)\; \sum_{j=0}^{n/2 - 1} \frac{\sigma^{2j}}{(2j)!!} \\
+\text{$n$ is odd}:  &N(\sigma)\; \sum_{j=0}^{n/2 - 1} \frac{\sigma^{2j + 1}}{(2j + 1)!!} 
+\end{cases};	 \nonumber \\
+M(x, n) &= (\delta x)^n (n-1)!!
+\begin{cases}
+\sigma < +\infty:  
+&\begin{cases}
+\text{$n$ is even}: &\xi(\sigma) - \varsigma(\sigma, n) \\
+\text{$n$ is odd}:  &\varsigma(\sigma, n) 
+\end{cases} \\
+\sigma = +\infty:   
+&\begin{cases}
+\text{$n$ is even}:  &1 \\
+\text{$n$ is odd}:   &0
+\end{cases}
+\end{cases};
+\end{align}
+Figure \ref{fig: Momentum_Residual} shows the momentum residual function $\varsigma(\sigma, n)$ vs the bounding factor $\sigma$, for different $n$.  
+
+
+
+
+
+The convergence of Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} is conditional:
+\begin{itemize}
+\item When $-\infty = \sigma$, $M(x,2n) = (2n-1)!!$ and $M(x,2n+1) = 0$. 
+
+\item When $-\infty < \sigma$, only approximate result is possible.
+  
+If the full $\tilde{x}$ range $(-x, +\infty)$ were used, Formula \eqref{eqn: momentum odd diverge} and \eqref{eqn: momentum even diverge} show that $M(x, n)$ diverges with $n$ as $(n - 1)!!$, so that Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} also diverge.
+The divergence is caused by $\lim_{x \rightarrow +\infty} M(x, n)$, which is usually not important for the characterization of $f(x)$ when $x$ is limited, so that there should also be an upper limit on $\tilde{x}$.
+Another problem is that the asymmetric integration range $(-x, +\infty)$ around $x$ for $\tilde{x}$ will lead to artificial variance bias.
+
+\begin{align}
+\label{eqn: momentum odd diverge}
+&  M(x, 2n+1) = (\delta x)^{2n+1} (2n)!! \left( \frac{1}{\sqrt{2 \pi}} - N(\sigma) \sum_{j=n+1}^{\infty} \frac{\sigma^{2j}}{(2j)!!} \right);  \\
+\label{eqn: momentum even diverge}
+& M(x, 2n+2) = (\delta x)^{2n+2} (2n + 1)!! \left( \frac{1}{2} + N(\sigma) \sum_{j=n+1}^{\infty} \frac{\sigma^{2j+1}}{(2j+1)!!} \right); 
+\end{align}
+
+Thus, the $\tilde{x}$ range is reduced to the symmetric range $(-x, +x) = (-\sigma \delta x, +\sigma \delta x)$ around $x$, which has a bounding leakage of $\epsilon = 2 - 2 \xi(\frac{1}{2} + \sigma)$.
+With the symmetric range, Formula \eqref{eqn: momentum even} and \eqref{eqn: momentum odd} shows that $M(x, n)$ approaches 0 fast, so that Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converges.
+
+\end{itemize}
+
+
+
+
+\subsection{Bounding Leakage}
+
+Each imprecise value in the variance representation carries its binding leakage $\epsilon$.
+If $\epsilon_1$ and $\epsilon_2$ are involved in one calculation, such as when calculating $\sqrt{x + \tilde{x}}$ in which $\tilde{x}$ already has non-zero bounding leakage, the result bounding leakage is $\epsilon_1 + \epsilon_2 - \epsilon_1 \epsilon_2$.
+
+Formula \eqref{eqn: power bias} and \eqref{eqn: power precision} give the result for $x^c$ when $c$ is a natural number, respectively.
+\begin{align}
+\label{eqn: power n bias}
+&\frac{\widehat{x^c}}{x^c} = \sum_{n=1}^{c} P(x)^{2n} (2n-1)!! \begin{pmatrix} c \\ 2n \end{pmatrix}; \\
+\label{eqn: power n precision}
+P(x^c)^2 &= \sum_{n=1}^{c} P(x)^{2n} (2n-1)!! \sum_{j=1}^{n-1} \begin{pmatrix} c \\ 2j \end{pmatrix} \begin{pmatrix} c \\ 2n - 2j \end{pmatrix}
+ - \left(\frac{\widehat{x^c}}{x^c}\right)^2;
+\end{align}
+
+
+\subsection{Uncertainty Statistics and Bounding Leakage}
+
+For this purpose, the distribution should be close enough to Gaussian in one of its representation. 
+\begin{itemize}
+
+\item Many functions $f(x)$ are not defined for either $x = 0$ or $x < 0$ or both, such as $\sqrt{x}$.
+For these functions, the statistical nature of variance arithmetic means that there is a probability for $f(x + \tilde{x})$ to be not defined when $\tilde{x} < -x$.
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}$.
+$\sqrt{3 \pm 1}$ looks quite Gaussian, while $\sqrt{0 \pm 1}$ deviates from Gaussian significantly.
+The result resembles Gaussian more when less data is cut off by $\tilde{x} < -x$.
+
+\item Even when functions $f(x)$ are defined for all $x$, the distribution of $f(x \pm \delta x)$ deviates significantly from Gaussian near $x=0$. 
+
+\end{itemize}
+For $f(x + \tilde{x})$ to be defined, or close to Gaussian-distributed, it is necessary to cut the range of $\tilde{x}$ to $-x < \tilde{x}$.
+Such cut introduce a \emph{bounding leakage} $\epsilon = 1 - \xi(\frac{1}{2} + \frac{1}{P(x)})$, in which $\xi(\tilde{z})$ is the cumulative density function of $N(\tilde{z})$ \cite{Probability_Statistics}.
+Different $f(x)$ requires different upper bound for $P(x)$, e.g., $(x \pm \delta x)^2$ with $P(x)=1/5$ and $\sqrt{x \pm \delta x}$ with $P(x)=1/3$ has very similar resemblance to the corresponding Gaussian distribution of the same deviation.
+
+
+
+\subsection{Expansion Boundary}
+
+When Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} has $P(x)$ as the input, such as for $\ln(x)$ or $x^c$, both break down at $0 \pm \delta x$.
+$0 \pm \delta x$ thus forms a Taylor expansion boundary for $f(x \pm \delta x)$.
+Above the applicable threshold, the result uncertainty distribution starts to deviate from Gaussian.
+
+Figure \ref{fig: Square_Distribution} shows the probability density function for $(x \pm 1)^2$ according to Formula \eqref{eqn: power distribution}:
+\begin{itemize}
+
+\item $(0 \pm 1)^2$ is a $\chi^2$ distribution \cite{Probability_Statistics}.
+
+\item Visually, $(1 \pm 1)^2$ and $(2 \pm 1)^2$ deviates from Gaussian significantly.
+
+\item Visually, $(3 \pm 1)^2$ starts to look close to Gaussian, but still has a significant peak at $x + \tilde{x} = 0$.
+
+\item $(5 \pm 1)^2$ is quite comparable to the corresponding Gaussian distribution of the same mode and deviation, which is shown in the dash line of the same color.
+The quantitative difference between the two distributions is 2.18%.
+
+\end{itemize}
+
+Figure \ref{fig: Square_Root_Distribution} shows the probability density function for $\sqrt{x \pm 1}^2$ according to Formula \eqref{eqn: power distribution}.  
+It shows that $\sqrt{3 \pm 1}^2$ is as close to Gaussian as $(5 \pm 1)^2$, e.g., the quantitative difference between the $\sqrt{3 \pm 1}^2$ distribution with Gaussian is 2.75%.
+Even though $x^2$ is defined across 0, the uncertainty distribution of $(x \pm \delta x)^2$ deviates from Gaussian more than that of $\sqrt{x \pm \delta x}$ when $x \rightarrow 0$.
+
+The first derivative of $x^c$ is either 0 or $\infty$ at $x = 0$.
+Formula \eqref{eqn: function distribution} shows that when $f^{(1)}_x \rightarrow 0$ or $f^{(1)}_x \rightarrow \infty$, the uncertainty distribution deviates significantly from Gaussian.
+Thus, $f^{(1)}_x \rightarrow 0$ or $f^{(1)}_x \rightarrow \infty$ forms the Taylor expansion boundary for Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance}.
+
+
+Thus, each $f^{(1)}_x = \infty$ or $f^{(1)}_x = 0$ is also expected to serve as a separation boundary for Formula \eqref{eqn: Taylor 1d variance}, and the applicable precision threshold should be defined against this boundary, e.g., against $a$ rather than $0$ for $(x+a)^c$.
+
+\begin{table}[h]
+\label{tab: bounding leakage}
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline 
+$\sigma$ & 3 & 4 & 5 & 6 \\ 
+\hline 
+$\lambda$ & 2.947726 & 3.913554 & 4.855937 & 5.758552 \\ 
+\hline 
+%$1 / \lambda$ & 0.339245 & 0.255522 & 0.205933 & 0.173655 \\ 
+%\hline 
+%$\zeta(2)$ & 0.970709 & 0.998866 & 0.999985 & 1 \\ 
+%\hline 
+$\epsilon$ & $3 \times 10^{-3}$ & $6 \times 10^{-5}$ & $6 \times 10^{-7}$ & $2 \times 10^{-9}$ \\ 
+\hline 
+\end{tabular}
+\captionof{table}{The fitted $\lambda$ in $\zeta(2n) \sim \lambda^{2n}$, and the bounding leakage $\epsilon$ as a function of bound factor $\sigma$.}
+\end{table}
+
+Figure \ref{fig: Momentum_Factor_Expansion} shows that when $5 \leq \sigma$, $M(\sigma, 2n) \simeq (2n-1)!!$ when $2n < 20$, which means that if Formula \eqref{eqn: calc bias} and \eqref{eqn: Taylor 1d variance} converge, their results are not sensitive to the actual value of $\sigma$.
+
+
+\subsection{Probability Distribution of Rounding Errors}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_Rnd_ErrDist.png}
+\captionof{figure}{
+Measured probability distribution of rounding errors of precision round-up rule for the minimal significand thresholds 0, 1, 2, 4, and 8 respectively.  
+}
+\label{fig: Prec_Rnd_Err_Dist}
+\end{figure}
+
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Standard}\cite{Precise_Numerical_Methods}\cite{Stochastic_Arithmetic}.  
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.  
+
+To estimate the rounding error distribution within its bounding range (-1/2, +1/2), a large number of positive random integers are converted into precision values and then rounded up once at a step time until each of them has a significand smaller than a predefined minimal significand threshold.  
+The precision value at each step is compared with the original value for the rounding error.  
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows the result histogram of rounding errors for the minimal significand thresholds 0, 1, 4, 8, 16, respectively. 
+For example, when the sigificand threshold is 0 or 1, the last steps of rounding are fixed, as $ ... \rightarrow 1+ \rightarrow 1- \rightarrow 0+$, while $1+$ can be reached in two ways, either $3- \rightarrow 1+$ or $2+ \rightarrow 1+$, so that the rounding errors deviate from the uniformly distributed when the sigificand threshold is small.
+Thus, the logic LSB of the significand to store value should be at the $\chi$-th bit from the true LSB of the significand, to increase the minimal significand to $2^{\chi}$.
+$\chi$ is the \emph{bits calculated inside uncertainty}.
+Figure \ref{fig: Prec_Rnd_Err_Dist} shows that $\chi \geq 3$. 
+
+\begin{align}
+\label{eqn: sum dependency}
+\delta^2 (f(x) + g(x)) &= \delta^2 f(x) + \delta^2 g(x) + 
+  2 \sum_{n=1}^{\infty} M(x,n) \sum_{j=1}^{n-1} \frac{f^{(n-j)}_x }{(n-j)!} \frac{g^{(j)}_x}{j!}; \\
+\label{eqn: product dependency}
+\delta^2 (fg) &= \delta^2 e^{\log(fg)} = \delta^2 e^z |_{e^z = fg,\;\; \delta^2 z = \delta^2 (\log(f) + \log(g))};
+\end{align}
+
+One fundamental difference between variance arithmetic and statistical propagation of uncertainty is that variance arithmetic tracks the correlation between uncertainties, while statistical propagation of uncertainty tracks the the correlation between the two values. 
+According to \eqref{eqn: uncertainty level} and \eqref{eqn: uncertainty correlation}, the correlation at the level of uncertainty is much less than the correlation between the two values overall.
+
+
+
+\subsection{Dependency Tracing}
+
+\begin{align*}
+\delta^2 &(f(x)+g(x)) = \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1} \frac{f^{(j)}_x + g^{(j)}_x}{j!} \frac{f^{(2n-j)}_x + g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) \\
+ &\eqspace  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x + g^{(2j)}_x}{(2j)!} \zeta(2j) \frac{f^{(2n-2j)}_x + g^{(2n-2j)}_x}{(2n-2j)!} \zeta(2n-2j) ) \\
+&= \delta^2 f(x) + \delta^2 g(x) + 2 \sum_{n=1}^{\infty} (\delta x)^{2n} \left(
+    \sum_{j=1}^{2n-1} \frac{f^{(j)}_x}{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) 
+  - \sum_{j=1}^{n-1} \frac{f^{(2j)}_x \zeta(2j)}{(2j)!} \frac{g^{(2n-2j)}_x \zeta(2n-2j)}{(2n-2j)!} \right) \\
+&\equiv \delta^2 f(x) + \delta^2 g(x) + 2 \hat{c} (f(x), g(x)); \\
+\hat{c} &(f(x), g(x)) = (\delta x)^2 f^{(1)}_x g^{(1)}_x 
+    + (\delta x)^4 \frac{1}{2} (f^{(1)}_x g^{(3)}_x + f^{(2)}_x g^{(2)}_x + f^{(3)}_x g^{(1)}_x) + o((\delta x)^6);
+\end{align*}
+
+\begin{align*}
+\delta^2 &(f(x, y) + g(x,y)) = \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
+ &\eqspace (
+  \sum_{i=0}^{2m} \sum_{j=0}^{2n} 
+      \frac{f^{(i,j)}_{(x,y)}+g^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}+g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} 
+      \frac{f^{(2i,2j)}_{(x,y)}+g^{(2i,2j)}_{(x,y)}}{(2i)!(2j)!} \zeta(2i) \zeta(2j)\;
+      \frac{f^{(2m-2i,2n-2j)}_{(x,y)}+g^{(2m-2i,2n-2j)}_{(x,y)}}{(2m-2i)!(2n-2j)!}\zeta(2m-2i) \zeta(2n-2j)); \\ 
+&= \delta^2 f(x, y) + \delta^2 g(x, y) + 2 \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} \\
+&\eqspace (\sum_{i=0}^{2m} \sum_{j=0}^{2n} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+&\eqspace - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)!(2j)!}\;
+     \frac{g^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)!(2n-2j)!}); \\
+&\equiv \delta^2 f(x,y) + \delta^2 g(x,y) + 2 \hat{c} (f(x,y), g(x,y)); \\
+\hat{c} &(f(x,y), g(x,y)) = (\delta x)^2 (f^{(0,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(0,1)}_{(x,y)} 
+      - f^{(0,0)}_{(x,y)} g^{(2,0)}_{(x,y)} - f^{(2,0)}_{(x,y)} g^{(0,1)}_{(x,y)}) \\
+&\eqspace + (\delta y)^2 f^{(0,1)} g^{(0,1)}_{(x,y)} \\
+&\eqspace + (\delta x)^2 (\delta y)^2 (f^{(0,0)}_{(x,y)} g^{(2,2)}_{(x,y)} \frac{1}{4} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} \frac{1}{2} 
+     + f^{(0,2)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)} \frac{1}{2} + f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)}
+     + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} \frac{1}{2} \\
+&\eqspace \eqspace  + f^{(2,0)}_{(x,y)} g^{(0,2)}_{(x,y)} \frac{1}{4} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \frac{1}{2} + f^{(2,2)}_{(x,y)} g^{(0,0)}_{(x,y)} \frac{1}{4} 
+     - f^{(0,0)}_{(x,y)} g^{(2,2)}_{(x,y)} \frac{1}{4} - f^{(0,2)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4} - f^{(2,0)}_{(x,y)} g^{(0,2)}_{(x,y)} \frac{1}{4}
+     - f^{(2,2)}_{(x,y)} g^{(0,0)}_{(x,y)} \frac{1}{4} ) \\
+&\eqspace + (\delta x)^4 (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} \frac{1}{2} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)} \frac{1}{2}
+     + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{3}{4} - f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} \frac{1}{4}) \\
+& = (\delta x)^2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + (\delta y)^2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \\
+&\eqspace     + (\delta x)^4 \frac{1}{2} (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)})
+     + (\delta y)^4 \frac{1}{2} (f^{(0,1)}_{(x,y)} g^{(0,3)}_{(x,y)} + f^{(0,2)}_{(x,y)} g^{(0,2)}_{(x,y)} + f^{(0,3)}_{(x,y)} g^{(0,1)}_{(x,y)}) \\
+&\eqspace + (\delta x)^2 (\delta y)^2 \frac{1}{2} (2 f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)}
+    + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)});
+\end{align*}
+
+\begin{align*}
+\delta^2 (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1}
+    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
+    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) \zeta(2n)  \\
+ &\eqspace - \sum_{j=1}^{n-1}
+    \left( \sum_{k=0}^{2j} \frac{f^{(k)}_x}{k!} \frac{g^{(2j-k)}_x}{(2j-k)!} \zeta(2j) \right)
+    \left( \sum_{l=0}^{2n-2j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-2j-l)}_x}{(2n-2j-l)!} \zeta(2n-2j) \right))  \\
+&= \sum_{n=1}^{\infty} (\delta x)^{2n} (\sum_{j=1}^{2n-1} \sum_{k=0}^{j} \sum_{l=0}^{2n-j} 
+     \frac{f^{(k)}_x}{k!} \frac{f^{(l)}_x}{l!} \frac{g^{(j-k)}_x}{(j-k)!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \zeta(2n) \\
+&\eqspace - \sum_{j=1}^{n-1} \sum_{k=0}^{2j} \sum_{l=0}^{2n-2j} 
+     \frac{f^{(k)}_x}{k!} \frac{f^{(l)}_x}{l!} \frac{g^{(2j-k)}_x}{(2j-k)!} \frac{g^{(2n-2j-l)}_x}{(2n-2j-l)!} \zeta(2j) \zeta(2n-2j)) \\
+\end{align*}
+
+
+
+\iffalse
+
+\begin{align*}
+f^{(n)}_x = -(-f)^{(n)}_x&:\eqspace \hat{b}(f(x)-f(x)) = 0;\eqspace \hat{v} (f(x)-f(x)) = 0;\eqspace \delta^2 (f(x)-f(x)) = 0;
+\end{align*}
+
+\begin{align*}
+\hat{b} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \frac{(f g)^{(2n)}_x}{(2n)!} 
+ = \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=0}^{2n} \frac{(2n)!}{(2n-j)! \;j!} \frac{f^{(j)}_x g^{(2n-j)}_x}{(2n)!} \\
+ &= f(x) \hat{b} (g(x)) + \hat{b} (f(x)) g(x) + 2 \hat{c} (f(x) g(x)); \\
+\hat{v} (f(x)g(x)) &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{(fg)^{(j)}_x}{j!} \frac{(fg)^{(2n-j)}_x}{(2n-j)!} \\
+ &= \sum_{n=1}^{\infty} (\delta x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1}
+    \left( \sum_{k=0}^{j} \frac{f^{(k)}_x}{k!} \frac{g^{(j-k)}_x}{(j-k)!} \right)
+    \left( \sum_{l=0}^{2n-j} \frac{f^{(l)}_x}{l!} \frac{g^{(2n-j-l)}_x}{(2n-j-l)!} \right) ;
+\end{align*}
+
+\begin{align*}
+& (f^{-1})^{(1)}_x = - f^{-2} f^{(1)}_x;\\
+& (f^{-1})^{(2)}_x = - f^{-2} f^{(2)}_x + 2 f^{-3} (f^{(1)}_x)^2;\\
+& (f^{-1})^{(3)}_x = - f^{-2} f^{(3)}_x + 6 f^{-3} f^{(2)}_x f^{(1)}_x - 6 f^{-4} (f^{(1)}_x)^3; \\
+& (f^{-1})^{(4)}_x = - f^{-2} f^{(4)}_x + 8 f^{-3} f^{(3)}_x f^{(1)}_x + 6 f^{-3} (f^{(2)}_x)^2 - 36 f^{-4} f^{(2)}_x (f^{(1)}_x)^2
+  + 24 f^{-5} (f^{(1)}_x)^4; \\
+& f^{(1)}_x f^{-1} + f (f^{-1})^{(1)}_x = f^{(1)}_x f^{-1} - f^{(1)}_x f^{-1} = 0; \\
+& f^{(2)}_x f^{-1} + 2 f^{(1)}_x (f^{-1})^{(1)}_x + f (f^{-1})^{(2)}_x = f^{-1} f^{(2)}_x -2 f^{-2} (f^{(1)}_x)^2
+  - f^{-1} f^{(2)}_x + 2 f^{-2} (f^{(1)}_x)^2 = 0; \\
+& f^{(3)}_x f^{-1} + 3 f^{(2)}_x (f^{-1})^{(1)}_x + 3 f^{(1)}_x (f^{-1})^{(2)}_x + f (f^{-1})^{(3)}_x \\
+&\eqspace =  f^{-1} f^{(3)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x - 3 f^{-2} f^{(2)}_x f^{(1)}_x + 6 f^{-3} (f^{(1)}_x)^3
+ - f^{-1} f^{(3)}_x + 6 f^{-2} f^{(2)}_x f^{(1)}_x - 6 f^{-3} (f^{(1)}_x)^3 \\
+&\eqspace = 0;
+\end{align*}
+
+\begin{align*}
+f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
+& t1 = f(g(x))^{(1)}_g g(x)^{(1)}_x; \\
+& t2 = f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \\
+& t3 = f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \\
+& t4 = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + \\
+&\eqspace\eqspace\eqspace 3 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + \\
+&\eqspace\eqspace\eqspace f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x; \\
+&\eqspace = f(g(x))^{(4)}_g (g(x)^{(1)}_x)^4 + 6 f(g(x))^{(3)}_g (g(x)^{(1)}_x)^2 g(x)^{(2)}_x + 3 f(g(x))^{(2)}_g (g(x)^{(2)}_x)^2 \\
+&\eqspace\eqspace\eqspace + 4 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(3)}_x + f(g(x))^{(1)}_g g(x)^{(4)}_x;
+\end{align*}
+
+For $f(x) = g^{-1}(x)$:
+\begin{align*}
+ 1 &= \frac{d x}{d x} = \frac{d x}{d g} \frac{d g}{d x}; \\
+f(g(x))^{(1)}_g &= 1/g(x)^{(1)}_x; \\
+ 0 &= \frac{d^2 x}{d g^2} \frac{d g}{d x} + \frac{d x}{d g} \frac{d^2 g}{d x^2} \frac{d x}{d g}; \\
+ \frac{d^2 x}{d g^2} &= - \frac{d^2 g}{d x^2} (\frac{d x}{d g})^3; \\
+f(g(x))^{(2)}_g &= - g(x)^{(2)}_x / (g(x)^{(1)}_x)^3; \\
+ \frac{d^3 x}{d g^3}& = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 - 3 \frac{d^2 g}{d x^2} (\frac{d x}{d g})^2 \frac{d^2 x}{d g^2}
+ = - \frac{d^3 g}{d x^3} (\frac{d x}{d g})^4 + 3 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^5 ; \\
+f(g(x))^{(3)}_g &= - g(x)^{(3)}_x / (g(x)^{(1)}_x)^4 + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^5; \\
+ \frac{d^4 x}{d g^4} &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 - 4 \frac{d^3 g}{d x^3} (\frac{d x}{d g})^3 \frac{d^2 x}{d g^2}
+    + 6 \frac{d^2 g}{d x^2} \frac{d^3 g}{d x^3} (\frac{d x}{d g})^6 + 15 (\frac{d^2 g}{d x^2})^2 (\frac{d x}{d g})^4 \frac{d^2 x}{d g^2}; \\
+ &= - \frac{d^4 g}{d x^4} (\frac{d x}{d g})^5 + 10 \frac{d^3 g}{d x^3} \frac{d^2 g}{d x^2} (\frac{d x}{d g})^6 - 15 (\frac{d^2 g}{d x^2})^3 (\frac{d x}{d g})^7; \\ 
+f(g(x))^{(4)}_g &= - g(x)^{(4)}_x / (g(x)^{(1)}_x)^5 + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^6 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^7; \\
+f(g(x+\tilde{x})) &= f(g(x)) + t1 \tilde{x} + t2 \frac{\tilde{x}^2}{2!} + t3 \frac{\tilde{x}^3}{3!} + t4 \frac{\tilde{x}^4}{4!} + ... \\
+& t1 = 1; \\
+& t2 = - g(x)^{(2)}_x / g(x)^{(1)}_x + g(x)^{(2)}_x / g(x)^{(1)}_x = 0; \\
+& t3 = - g(x)^{(3)}_x / g(x)^{(1)}_x + 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^2 - 3 (g(x)^{(2)}_x)^2 / (g(x)^{(1)}_x)^ + g(x)^{(3)}_x / g(x)^{(1)}_x = 0; \\
+& t4 = - g(x)^{(4)}_x / g(x)^{(1)}_x + 10 g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 - 15 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
+&\eqspace\eqspace\eqspace - 6 g(x)^{(3)}_x  g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + 18 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 \\
+&\eqspace\eqspace\eqspace - 3 (g(x)^{(2)}_x)^3 / (g(x)^{(1)}_x)^3 - 4  g(x)^{(3)}_x g(x)^{(2)}_x / (g(x)^{(1)}_x)^2 + g(x)^{(4)}_x / g(x)^{(1)}_x = 0;\\
+\end{align*}
+
+Formula \eqref{eqn: cross dependency} is already part of Formula \eqref{eqn: Taylor 1d variance}.
+For example, for $f(x + \tilde{x}) = a \tilde{x}^m$ and $g(x + \tilde{x}) = b \tilde{x}^n$:
+\begin{align*}
+m \neq n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2m} \zeta(2m-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{m+n} \zeta(m+n-1) 2 a b; \\
+m = n: &\eqspace \hat{c} (f(x) g(x)) = (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+&\delta^2 (f(x) + g(x)) = (\delta x)^{2n} \zeta(2n-1) a^2 + (\delta x)^{2n} \zeta(2n-1) b^2 + (\delta x)^{2n} \zeta(2n-1) 2 a b; \\
+\delta^2 (f(x) g(x)) &= (\delta x)^{2m+2n} \zeta(2m+2n-1) a b;
+\end{align*}
+
+\fi
+
+By convention, variance arithmetic treats different input variables as imprecise values satisfying uncorrelated uncertainty assumption.
+When the inputs obeys the uncorrelated uncertainty assumption, variance arithmetic uses statistics to account for cross dependency between uncertainties.
+
+The cross dependency between $f$ and $g$ is defined as $\hat{c} (f,g)$, as Formula \eqref{eqn: cross dependency 1d} and \eqref{eqn: cross dependency 2d}:
+\begin{align}
+\label{eqn: cross dependency 1d}
+\hat{c} & (f(x), g(x)) \equiv \sum_{n=1}^{\infty} (\delta x)^{2n} ( \sum_{j=1}^{2n-1} \frac{f^{(j)}_x }{j!} \frac{g^{(2n-j)}_x}{(2n-j)!} \zeta(2n) 
+    - \sum_{j=1}^{n-1} \frac{f^{(j)}_x \zeta(2j)}{(2j)!} \frac{g^{(2n-2j)}_x \zeta(2n-2j)}{(2n-2j)!} ) \\
+&\eqspace = (\delta x)^2 f^{(1)}_x g^{(1)}_x 
+    + (\delta x)^4 \frac{1}{2} (f^{(1)}_x g^{(3)}_x + f^{(2)}_x g^{(2)}_x + f^{(3)}_x g^{(1)}_x) + o((\delta x)^6); \\
+\hat{c} & (f(x,y), g(x,y)) \equiv \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{2m} (\delta y)^{2n} (
+    \sum_{i=1}^{2m-1} \sum_{j=1}^{2n-1} \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{g^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \zeta(2m) \zeta(2n) \nonumber \\
+\label{eqn: cross dependency 2d}
+&\eqspace\eqspace  - \sum_{i=1}^{m-1} \sum_{j=1}^{n-1} \frac{f^{(2i,2j)}_{(x,y)} \zeta(2i) \zeta(2j)}{(2i)! (2j)!} \; \frac{g^{(2m-2i,2n-2j)}_{(x,y)} \zeta(2m-2i) \zeta(2n-2j)}{(2m-2i)! (2n-2j)!}) \\
+&\eqspace \simeq (\delta x)^2 f^{(1,0)}_{(x,y)} g^{(1,0)}_{(x,y)} + (\delta y)^2 f^{(0,1)}_{(x,y)} g^{(0,1)}_{(x,y)} \nonumber \\
+&\eqspace\eqspace  + (\delta x)^4 \frac{1}{2} (f^{(1,0)}_{(x,y)} g^{(3,0)}_{(x,y)} + f^{(2,0)}_{(x,y)} g^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)} g^{(1,0)}_{(x,y)}) \nonumber \\
+&\eqspace\eqspace + (\delta y)^4 \frac{1}{2} (f^{(0,1)}_{(x,y)} g^{(0,3)}_{(x,y)} + f^{(0,2)}_{(x,y)} g^{(0,2)}_{(x,y)} + f^{(0,3)}_{(x,y)} g^{(0,1)}_{(x,y)}) \nonumber \\
+&\eqspace\eqspace + (\delta x)^2 (\delta y)^2 \frac{1}{2} (2 f^{(1,1)}_{(x,y)} g^{(1,1)}_{(x,y)} + f^{(0,1)}_{(x,y)} g^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} g^{(1,2)}_{(x,y)}
+    + f^{(1,2)}_{(x,y)} g^{(1,0)}_{(x,y)} + f^{(2,1)}_{(x,y)} g^{(0,1)}_{(x,y)});
+\end{align} 
+By definition, $\hat{c} (f,g)$ has the following properties:
+\begin{itemize}
+\item Reflective: $\hat{c} (f,g) = \hat{c} (g,f)$;
+\item Identity: $\hat{c} (f,f) = \delta^2 f$;
+\item Independent: $\hat{c} (f(x), g(y)) = 0$;
+\item Linear: $\hat{c} (f, c_0 + c_1 g) = 0 + c_1 \hat{c} (f,g)$, in which $c_0$ and $c_1$ are two constants.
+\end{itemize}
+
+Using $\hat{c} (f,g)$, Formula \eqref{eqn: sum variance} calculates the sum of any two functions according to either Formula \eqref{eqn: Taylor 1d variance} or \eqref{eqn: Taylor 2d variance}.  
+\begin{align}
+\label{eqn: sum variance}
+\delta^2 (f + g) &= \delta^2 f + \delta^2 g + 2 \hat{c} (f,g);
+\end{align}
+The following two special cases of Formula \eqref{eqn: sum variance} suggest that $\hat{c} (f,g)$ properly captures the cross dependency between $f$ and $f$:
+\begin{itemize}
+\item $\delta^2 (f + f) = 4 \delta^2 f =\delta^2 2f;$
+\item $\delta^2 (f - f) = 0;$
+\end{itemize}
+
+For the composite function $f(g(x))$, Formula \eqref{eqn: Taylor 1d variance} becomes complicated quickly, as shown by their corresponding Taylor expansion of Formula \eqref{eqn: composite taylor}.
+However, because the reverse function satisfies Formula \eqref{eqn: reverse}, the original variance $(\delta x)^2$ is restored in Formula \eqref{eqn: reverse variance} when applying Formula \eqref{eqn: Taylor 1d variance}, which is another case of dependency tracing in variance arithmetic.
+\begin{align}
+\label{eqn: composite taylor}
+f(g(x + \tilde{x})) &= f(g(x)) + t_1 \tilde{x} + t_2 \frac{\tilde{x}^2}{2!} + t_3 \frac{\tilde{x}^3}{3!} + ... \\
+ t_1 &= f(g(x))^{(1)}_g g(x)^{(1)}_x; \nonumber \\
+ t_2 &= f(g(x))^{(2)}_g (g(x)^{(1)}_x)^2 + f(g(x))^{(1)}_g g(x)^{(2)}_x; \nonumber \\
+ t_3 &= f(g(x))^{(3)}_g (g(x)^{(1)}_x)^3 + 3 f(g(x))^{(2)}_g g(x)^{(1)}_x g(x)^{(2)}_x + f(g(x))^{(1)}_g g(x)^{(3)}_x; \nonumber \\
+\label{eqn: reverse}
+f^{-1}(f(x + \tilde{x})) &= x + \tilde{x}; \\
+\label{eqn: reverse variance}
+\delta^2 f^{-1}(f(x)) &= (\delta x)^2;
+\end{align}
+
+Due to dependency tracing using Taylor expansion, variance arithmetic does not suffer from the dependency problem for analytic expressions \cite{Interval_Arithmetic} which has plague interval arithmetic.
+
+
+
+\subsection{Avoiding Dependency Problem}
+
+However, variance arithmetic may still suffer from \emph{dependency problem} when an imprecise input is used multiple times without dependency tracing.
+For example, Table 1 shows the dependency problem when applying Formula \eqref{eqn: addition and subtraction}, \eqref{eqn: multiplication}, and \eqref{eqn: square precision} as separated and independent arithmetic operations to calculate $x^2 - x$ when the input variance is $(\delta x)^2$.
+\begin{table}
+\label{eqn: dependency example}
+\centering
+\begin{tabular}{|l|l|l|} 
+\hline 
+Formula & Over-estimation & Wrong Independency \\ 
+\hline 
+\eqref{eqn: interval depend 1} & $0$ & \\
+\hline 
+\eqref{eqn: interval depend 2} & $+(\delta x)^2$ & between $x^2$ and $x$ \\
+\hline 
+\eqref{eqn: interval depend 3} & $-(2 x^2 + 2x - 1)(\delta x)^2 - (\delta x)^4$ & between $x-1$ and $x$ \\
+\hline 
+\end{tabular}
+\captionof{table}{The dependency problem when applying variance arithmetic without dependency tracing for $x^2 - x$ when the input variance is $(\delta x)^2$.
+The correct result variance is $4 x^2 (\delta x)^2 + 2 (\delta x)^4$.}
+\end{table}
+
+To avoid the dependency problem, the conventional numerical algorithms need to be reevaluated.
+\begin{itemize}
+\item   
+Traditional computer numerical algorithms are designed to choose an execution path to minimize rounding errors of the conventional floating-point calculations, such as the Gaussian elimination for the first-order solving linear equation \cite{Numerical_Recipes}.
+The existence of different execution paths suggests that the solution itself is designed with dependency problem.
+In contrast, variance arithmetic should be used on the analytic expression for the solution, to trace dependencies of each input when it appears multiple times in the analytic solution.
+Section \ref{sec: matrix} will compare matrix inversion using either strict variance arithmetic or Gaussian elimination.
+
+\item  
+Traditional time-series data processing uses one input multiple times, which may also cause the dependency problem.
+Section \ref{sec: Comparison Using Progressive Moving-Window Linear Regression} will compare time-series linear regression using either strict variance arithmetic or a traditional progressive approach.
+
+\item
+The usages of intermediate variable and conditional execution need to be examined because they may upset the dependency tracing. 
+
+\end{itemize}
+
+
+It is the scenario demonstrated by Formula \eqref{eqn: float num calc} that is the major problem, when the rounding errors are saved as part of the data.
+Thus, the carry sign $\sim$ bit is part of the variance arithmetic representation.
+%In other calculation, the carry sign bits of both operand determine how to round the result significand. 
+
+An ideal floating-point calculation is carried out conceptually to infinitesimal precision before it is rounded up to representation precision \cite{Floating_Point_Arithmetic}. 
+Thus, rounding up should be a process independent of any calculation, and it should be evaluated separately.
+
+
+\subsection{The Precision Scaling Principle  \cite{Prev_Precision_Arithmetic}}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Prec_RndByDev_Dist.png} 
+\captionof{figure}{
+The result uncertainty distribution density function $P_{8/2}$ (which is $P_8$ scaled by 1/2 in the x-direction) is compared with $P_2$ and the $P_4$, with the distribution range shown in then legend.
+When $P_{8/2}$ is replaced by $P_2$, the measured bounding leakage is 0.06\%.
+}
+\label{fig: Prec_RndByDev_Dist}
+\end{figure}
+
+
+Similar to how the conventional floating-point representation \cite{Floating_Point_Standard} saves each value as $S\times 2^E$ commonly in 32-bits or 64-bits, a value and its uncertainty variances are saved using \emph{variance representation} which is another floating-point representation.
+To fit into their bit confinements, $S$ and $V$ need to be rounded up once for each increment of $E$.
+According to the precision scaling principle:
+\begin{itemize}
+\item During each round up, $V$ is reduced to 1/4-fold. 
+
+\item During each round down, $V$ is increased to 4-fold.
+\end{itemize}
+Using the precision scaling principle, the variance representation represents $x \pm \delta x$ as:
+\begin{align}
+\label{eqn: accurate value}
+x =&\; S \; 2^{E};\\
+\label{eqn: uncertainty variance}
+(\delta x)^2 =&\; V \; 2^{2E};
+\end{align}
+
+However, such round-up or round-down of $V$ conflicts with the accuracy of $R$ according to Formula \eqref{eqn: rounding error range vs deviation}.
+When $P_8$ is rounded up, Figure \ref{fig: Prec_RndByDev_Dist} shows that $P_{8/2}$ is much closer to $P_2$ than $P_4$ in distribution, with the former follows the logic of variance arithmetic, while the latter follows the logic of interval arithmetic. 
+The precision scaling principle chooses to scarify $R$ in favor of $V$.
+This choice introduces the probability for the actual value to be outside the range of $(x - R, x + R)$, which is defined as the \emph{bounding leakage}, e.g., the bounding leakage is $6\;10^{-4}$ When $P_{8/2}$ is replaced by $P_2$.
+To reduce the representation bounding leakage to virtually 0, $V$ is maximized in its bit confinement in the \emph{normalization} process of the variance representation.
+
+
+
+\subsection{A Variance Representation}
+
+To be compatible with the conventional 64-bit floating-point standard \cite{Floating_Point_Standard}, a variance representation has the following bit assignment for Formula \eqref{eqn: accurate value} and \eqref{eqn: uncertainty variance}:
+\begin{itemize}
+\item The bit count for $E$ is 11.
+
+\item The bit counts for $S$ and $V$ are 53 respectively.
+
+\item The representation needs 1 bit for sign, 1 bit for the carry error sign for $S$, and 1 bit for the carry error sign for $V$, respectively.
+
+\item The representation stores the bounding leakage $\epsilon$ as an 8-bit floating-point value, with 4-bit for the exponent.
+The maximal value for $\epsilon$ is $15\;2^{15-19} = 15/16$, while the minimal non-zero value for $\epsilon$ is $2^{-19} = 1.907 10^{-6}$ which is equivalent to $\sigma=4.763$.
+The result bounding leakage is approximated as $\epsilon = \epsilon_1 + \epsilon_2 - \epsilon_1 \epsilon_2$ in which $\epsilon_1$ and $\epsilon_2$ are the bounding leakages of the two operands for a calculation, respectively.
+\end{itemize}
+The total bit count of each imprecise value in the variance representation is 128.
+
+In this variance representation, the precision $2^{-p}$ of an imprecise value determines the \emph{significance bit count} which is the bit count to record $S$ besides the leading 0s:
+\begin{enumerate}
+\item To represent a value $1 \pm 2^{-p}$, $V$ is normalized as $2^{52}$.
+
+\item According to Formula \eqref{eqn: uncertainty variance}, $\delta^2 x = (2^{-p})^2 = V \; 2^{2E} \Rightarrow E = -26 - p$.
+
+\item According to Formula \eqref{eqn: accurate value}, $ x = 1 = S \; 2^E \Rightarrow S = 2^{26 + p}$.  
+\end{enumerate}
+Thus, the effective bit counts for $S$ and $V$ depend on the statistical precision $P \equiv \delta x / |x|$ of an imprecise value $x$:
+\begin{itemize}
+\item When $P \geq 2^{-26} \simeq 1.5\;10^{-8}$, the significance bit count is $26 - \log_{2} P$, which means maximally 26-bit calculated inside uncertainty.
+
+\item When $2^{-26} > P > 2^{-53} \simeq 1.1\;10^{-16}$, the maximal significance bit count is kept at 53, and $V$ decreases toward 0 for larger $P$.
+
+\item When $2^{-53} \geq P$, $V$ becomes 0, so that the variance representation represents a precise value which is identical to the conventional 64-bit floating-point value.
+\end{itemize}
+Thus, variance arithmetic is a modern implementation of significance arithmetic \cite{Significance_Arithmetic} \cite{Digital_Significance_Arithmetic} \cite{Unnormalized_Arithmetic}.
+
+
+\item In Gaussian elimination for linear equation \cite{Numerical_Recipes}, the execution is carried out progressively in the path to minimize rounding errors using conventional floating-point calculations, without any consideration for dependency tracing.
+The existence of different execution paths suggests that the solution itself is designed with dependency problem.
+Instead, in Section \ref{sec: matrix}, variance arithmetic uses the matrix inversion formula by the determinants of sub-matrices, which is advised against by traditional numerical algorithm \cite{Numerical_Recipes}.
+
+
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Indexed.png} 
+\captionof{figure}{
+The result error deviation and uncertainty mean for Sin/Cos signals of order 16 using indexed sin/cos functions vs. input uncertainties for forward, reverse and roundtrip transformations for FFT order $18$.
+The  y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+}
+\label{fig: FFT_SinCos_vs_Noise_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_SinCos_vs_Noise_Lib.png} 
+\captionof{figure}{
+The result error deviation and uncertainty mean for Sin/Cos signals of order 16 using library sin/cos functions vs. input uncertainties for forward, reverse and roundtrip transformations for FFT order $18$.
+The  y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+}
+\label{fig: FFT_SinCos_vs_Noise_Lib}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Indexed.png} 
+\captionof{figure}{
+The result error deviation and uncertainty mean using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip  transformations for FFT order $18$.
+The  y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+}
+\label{fig: FFT_Linear_vs_Noise_Indexed}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_vs_Noise_Lib.png} 
+\captionof{figure}{
+The result error deviation and uncertainty mean using Linear signals of order 18 vs. input uncertainties for forward, reverse and roundtrip  transformations for FFT order $18$.
+The  y-axis on the left is for error deviation, while the y-axis on the right is for uncertainty mean.
+}
+\label{fig: FFT_Linear_vs_Noise_Lib}
+\end{figure}
+
+\begin{table} %[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|} 
+\hline 
+$8+$ & $4+$ & $2+$ & $1+$ & $1^-$  & $0+$ \\
+\hline 
+& $8-$ & $4-$ & $2-$ & $1^-$  & $0+$ \\
+\hline 
+& $7+$ & $4-$ & $2-$ & $1-$ & $0+$ \\
+\hline 
+& $7-$ & $3+$ & $2-$ & $1-$ & $0+$ \\
+\hline 
+& $6+$ & $3+$ & $2-$ & $1-$ & $0+$ \\
+\hline 
+& $6-$ & $3-$ & $1+$ & $1-$ & $0+$ \\
+\hline 
+& $5+$ & $3-$ & $1+$ & $1-$ & $0+$ \\
+\hline 
+& $5^-$  & $2+$ & $1+$ & $1-$ & $0+$ \\
+\hline 
+\end{tabular}
+\captionof{table}{
+The rounding pattern of positive integers when they are repeatedly divided by $2$ and after each division the result is rounded to the nearest.
+Each row contains such a process from left to right.
+Each cell in the table contains an integer $P$ with its rounding error sign bit $r$ \cite{Prev_Precision_Arithmetic}, as $Pr$.
+$r$ indicates the sign of the current rounding error, to achieve round to nearest in each step, such as $7+/2 \rightarrow 4-$ and $7-/2 \rightarrow 3+$.
+If the rounding error is no more than half of $LSV$ initially, it will never exceed half of $LSV$ of $P$ in the above process.
+}
+\label{tbl: rounding pattern}
+\end{table}
+
+
+
+\subsubsection{Uncertainty of Uncertainty}
+
+\begin{align*}
+\overline{(f(x) - \overline{f(x)})^2} &= \overline{f(x)^2} -  \overline{f(x)}^2 = \delta^2 f(x);
+		\eqspace \overline{f(x)^2} = \overline{f(x)}^2 + \delta^2 f(x); \\
+\overline{(f(x) - \overline{f(x)})^3} &= 0:\eqspace \overline{f(x)^3} = 3 \overline{f(x)^2} \; \overline{f(x)} - 2 \overline{f(x)}^3
+		= \overline{f(x)}^3 + 3 \overline{f(x)} \delta^2 f(x); \\
+\overline{(f(x) - \overline{f(x)})^4} &= \overline{f(x)^4} - 4 \overline{f(x)^3}\; \overline{f(x)} + 6 \overline{f(x)^2}\; \overline{f(x)}^2 
+		- 3 \overline{f(x)}^4 \\
+	&= \overline{f(x)^4} - 4 \overline{f(x)}^4 - 12 \overline{f(x)}^2 \delta^2 f(x)  + 6 \overline{f(x)}^4  + 6 \overline{f(x)}^2 \delta^2 f(x) - 3 \overline{f(x)}^4 \\
+	&=  \overline{f(x)^4} - \overline{f(x)}^4 - 6 \overline{f(x)}^2 \delta^2 f(x) = \kappa (\delta^2 f(x))^2; \\
+\delta^4 f(x) &\equiv \overline{\left( (f(x) - \overline{f(x)})^2 - \delta^2 f(x) \right)^2} 
+		= 
+\end{align*}
+
+In Formula \eqref{eqn: Taylor 1d variance} shows the uncertainty $\delta x$ of $f(x)$.
+But $\delta x$ itself also has uncertainty, which can be measured by the 4th momentum of the distribution according to Formula \eqref{eqn: 4th momentum}.
+\begin{align}
+\label{eqn: 4th momentum}
+\delta^4 f(x) &= \overline{(f(x)^2 - \delta^2 f(x))^2} = \overline{f(x)^4} -  (\delta^2 f(x))^2; \\
+\kappa &\equiv \frac{\overline{(f(x) - \overline{f(x)})^4}}{(\delta^2 f(x))^2}
+\end{align}
+
+
+
+
+As special cases for Formula \eqref{eqn: power mean} and \eqref{eqn: power precision}, \eqref{eqn: square mean}, \eqref{eqn: square precision}, \eqref{eqn: square root mean}, \eqref{eqn: square root precision}, \eqref{eqn: inversion mean}, \eqref{eqn: inversion precision}, \eqref{eqn: inversion square mean}, and \eqref{eqn: inversion square precision} give the mean and variance for $x^2$, $\sqrt{x}$, $1/x$, and $1/x^2$, respectively: 
+\begin{align}
+\label{eqn: square mean}
+\overline{x^2} &\simeq x^2 + (\delta x)^2; \\
+\label{eqn: square precision}
+\delta^2 x^2 &\simeq 4 x^2 (\delta x)^2 + 2 (\delta x)^4; \\
+\label{eqn: square root mean}
+\frac{\overline{\sqrt{x}}}{\sqrt{x}} &\simeq 1 - \frac{1}{8} P(x)^2 - \frac{15}{128} P(x)^4 - \frac{315}{1024} P(x)^6 + o(P(x)^8); \\
+\label{eqn: square root precision}
+\frac{\delta^2 \sqrt{x}}{(\sqrt{x})^2} &\simeq \frac{1}{4} P(x)^2 + \frac{7}{32} P(x)^4 + \frac{75}{128} P(x)^6 + o(P(x)^8);  \\
+\label{eqn: inversion mean}
+\frac{\overline{1/x}}{1/x} &\simeq 1 + P(x)^2 + 3 P(x)^4 + 15 P(x)^6 + o(P(x)^8); \\
+\label{eqn: inversion precision}
+\frac{\delta^2 1/x}{(1/x)^2} &\simeq P(x)^2 + 8 P(x)^4 + 69 P(x)^6 + o(P(x)^8);
+\end{align}
+\begin{align}
+\label{eqn: inversion square mean}
+\frac{\overline{1/x^2}}{1/x^2} &\simeq 3 P(x)^2 + 15 P(x)^4 + 105 P(x)^6 + o(P(x)^8); \\
+\label{eqn: inversion square precision}
+\frac{\delta^2 1/x^2}{(1/x^2)^2} &\simeq 4 P(x)^2 + 66 P(x)^4 + 960 P(x)^6 + o(P(x)^8);
+\end{align}
+
+
+
+\subsection{Addition and Subtraction}
+
+The Lyapunov form of the central limit theorem \cite{Probability_Statistics} states that if $X_i$ is a random variable with mean $\mu_i$ and variance $V_i$ for each $i$ among a series of $n$ mutually independent random variables, then with increased $n$, the sum $\sum\limits_{i}^{n} X_i$ converges in distribution to the Gaussian distribution with mean $\sum\limits_{i}^{n} \mu_i$ and variance $\sum\limits_{i}^{n} V_i$. 
+In the context of the uncorrelated uncertainty assumption, uncertainty in general is expected to be Gaussian distributed \cite{Statistical_Methods} \cite{Probability_Statistics}. 
+
+Even if rounding error is the sole source of uncertainty:
+\begin{itemize} 
+\item The rounding error of rounding to nearest is shown to be uniformly distributed between half of the least significant bit of an integer  \cite{Prev_Precision_Arithmetic}.
+
+\item The central limit theorem converges the result distribution of addition and subtraction to a Gaussian distribution \cite{Prev_Precision_Arithmetic}.
+Such convergence to Gaussian distribution is very quick, e.g., after 4 rounds of addition and subtraction, the result distribution is already close to the corresponding Gaussian distribution with the same mean and deviation  \cite{Prev_Precision_Arithmetic}.
+
+\item The application of center limit theorem to rounding error is not limited to addition and subtraction, because a multiplication operation contains multiple additions, while a division operation contains multiple subtractions \cite{Arithmetic_Digital_Computers}.
+Thus, rounding error is Gaussian distributed in practice.
+
+\end{itemize} 
+Generally, uncertainty due to measurement are assumed to be Gaussian distributed by default \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, unless in special cases.
+
+For simplicity, define operator $\delta^2 f(x) \equiv (\delta f(x))^2$. 
+Formula \eqref{eqn: addition and subtraction} gives the result variance of addition and subtraction.
+Formula \eqref{eqn: central limit theorem} gives the probability density function $\rho$ for $x \pm \delta x$ in general, in which $N(x)$ is the density function of the  Normal distribution \cite{Probability_Statistics}.
+Formula \eqref{eqn: central limit theorem} can be normalized as Formula \eqref{eqn: normalized distribution}.
+\begin{align}
+\label{eqn: addition and subtraction}
+\delta^2 (x \pm y) &= (\delta x)^2 + (\delta y)^2; \\
+\label{eqn: central limit theorem}
+\rho(\tilde{x}, x, \delta x) & = \frac{1}{\delta x} N(\frac{\tilde{x} - x}{\delta x}); \\
+\label{eqn: normalized distribution}
+\tilde{z} \equiv \frac{\tilde{x} - x}{\delta x}:\eqspace & \rho(\tilde{x}, x, \delta x) d \tilde{x} = N(\tilde{z}) d \tilde{z};
+\end{align}
+
+
+
+\subsection{Multiplication}
+
+\iffalse
+\begin{align*}
+0 \leq |x| - \Delta x, 0 \leq |y| - \Delta y: &\eqspace 
+	(|x||y| - |x| \Delta y - |y| \Delta x + \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |x| \Delta y + |y| \Delta x; \\
+|x| - \Delta x \leq 0 \leq |y| - \Delta y: &\eqspace 
+    (|x||y| + |x| \Delta y - |y| \Delta x - \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |y| \Delta x + \Delta x \Delta y; \\
+|x| - \Delta x \leq 0, \; |y| - \Delta y \leq 0: &\eqspace
+	(|x||y| + |x| \Delta y - |y| \Delta x - \Delta x \Delta y, |x||y| + |x| \Delta y + |y| \Delta x + \Delta x \Delta y) \\
+&\eqspace \Delta xy = |y| \Delta x + \Delta x \Delta y;
+\end{align*}
+But the range needs to be centered at $|x||y|$.
+\fi
+
+The result variance of multiplying $x \pm \delta x$ by a precise value $y$ is $ y^2 \delta^2 x$ \cite{Probability_Statistics}.
+The result of multiplying $0 \pm \delta x$ by $0 \pm \delta y$ is a normal production distribution \cite{Probability_Statistics}, which centers at $0$ with variance $(\delta x)^2 (\delta y)^2$.
+The general multiplication can be decomposed as Formula \eqref{eqn: multiplication decomposed}, which leads to Formula \eqref{eqn: multiplication}  \cite{Prev_Precision_Arithmetic}.
+\begin{align}
+\label{eqn: multiplication decomposed}
+& (x \pm \delta x) \times (y \pm \delta y) = (x + (0 \pm \delta x)) \times (y + (0 \pm \delta y)); \\
+\label{eqn: multiplication}
+\delta^2 (x y) &= x^2 (\delta y)^2 + y^2 (\delta x)^2 + (\delta x)^2 (\delta y)^2;
+\end{align}
+
+\ifdefined\VERBOSE
+Formula \eqref{eqn: multiplication} is identical to Formula \eqref{eqn: stat *} for statistical propagation of uncertainty except their cross term, representing difference in their statistical requirements, respectively.  
+Formula \eqref{eqn: multiplication} is simpler and more elegant than Formula \eqref{eqn: interval *} for interval arithmetic multiplication, because the latter looks more like a wish.
+.  
+The result of Formula \eqref{eqn: float num calc} calculated by statistical Taylor expansion is $2 \pm 2\sqrt{5}$.
+It is $2 \pm 9$ for interval arithmetic.
+\fi
+
+
+
+\begin{align}
+\label{eqn: Taylor 1d variance approx}
+\delta^2 f(x) &\simeq (\delta x)^2 (f^{(1)}_x)^2 + (\delta x)^4 \left(f^{(1)}_x f^{(3)}_x + \frac{1}{2} (f^{(2)}_x)^2 \right) \\
+  &\eqspace + (\delta x)^6 \left(\frac{1}{4} f^{(1)}_x f^{(5)}_x + \frac{1}{2} f^{(2)}_x f^{(4)}_x + \frac{5}{12} (f^{(3)}_x)^2 \right); \nonumber \\
+\label{eqn: Taylor 2d variance approx}
+\delta^2 f(x, y)&\simeq (\delta x)^2 (f^{(1,0)}_{(x,y)})^2 + (\delta y)^2 (f^{(0,1)}_{(x,y)})^2 \\
+&\eqspace + \left(\delta x)^4 f^{(1,0)}_{(x,y)} (\frac{1}{2} f^{(2,0)}_{(x,y)} + f^{(3,0)}_{(x,y)}\right)
+      + (\delta y)^4 \left(\frac{1}{2} f^{(0,2)}_{(x,y)} + f^{(0,1)}_{(x,y)} f^{(0,3)}_{(x,y)}\right) \nonumber \\
+&\eqspace + (\delta x)^2 (\delta y)^2 \left((f^{(1,1)}_{(x,y)})^2 + f^{(0,1)}_{(x,y)} f^{(2,1)}_{(x,y)} + f^{(1,0)}_{(x,y)} f^{(1,2)}_{(x,y)}\right); \nonumber
+\end{align}
+
+\ifdefined\VERBOSE
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Variance_Momentum.pdf}
+\captionof{figure}{
+The value of variance momentum $\zeta(2n)$ vs the expansion order $2n$ when $\sigma = 5$.
+Also included are the uncertainty of the $\zeta(2n)$ due to rounding errors,  $2(n -1)!!$, and the linear fit of the $\zeta(2n)$ value, which use y-axis on the left.
+The percentage difference between the linear fit and $\zeta(2n)$ also included, which use y-axis on the right.
+}
+\label{fig: Variance_Momentum}
+\end{figure}
+
+\fi
+
+
+Figure \ref{fig: Variance_Momentum} shows the value and uncertainties of the corresponding $\zeta(2n)$, as well as its linear increase with $2n$ when $\sigma^2 \ll 2n$.
+The difference between $\zeta(2n)$ and the linear fit suggests systematic error, confirming Formula \eqref{eqn: momentum factor higher}.
+When $2n < 20$, $\zeta(2n)$ can be well approximated by $(2n -1)!!$, so that both uncertainty and uncertainty bias are almost independent of  $\sigma$ except for their convergence.  
+Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance} can be approximated as Formula \eqref{eqn: Taylor 1d variance approx} and \eqref{eqn: Taylor 2d variance approx}, respectively.
+
+\fi
+
+
+\iffalse
+
+\begin{align*}
+\tilde{y} =& f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
+\overline{f(x)} \equiv& \int \tilde{y} \rho(\tilde{y}, y, \delta y) d \tilde{y}
+ = \int \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n \rho(\tilde{z}) d \tilde{z}
+ = \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} (\delta x)^{n} \int \tilde{z}^n \rho(\tilde{z}) d \tilde{z} \\
+=& \sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} (\delta x)^{n} \zeta(n)
+ = \sum_{n=0}^{\infty} \frac{f^{(2n)}_x}{(2n)!} (\delta x)^{2n} \zeta(2n); \\
+\delta^2 f(x) \equiv& \int \tilde{y}^2 \rho(\tilde{y}, y, \delta y) d \tilde{y} - \overline{f(x)}^2
+ = \int (\sum_{n=0}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n)^2 \rho(\tilde{z}) d \tilde{z} - \overline{f(x)}^2 \\
+=& \sum_{n=0}^{\infty} \sum_{j=0}^{n} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} (\delta x)^{n} \zeta(n)
+ - \sum_{n=0}^{\infty} \sum_{j=0}^{n} \frac{f^{j}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} (\delta x)^{n} \zeta(j) \zeta(n - j);
+\end{align*}
+
+
+\begin{align*}
+f(x + \tilde{x}, y + \tilde{y}) =& \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+\overline{f(x,y)} =& \int \int f(x + \tilde{x}, y + \tilde{y}) \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} \\
+=& \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{m} (\delta y)^{n} \zeta(m) \zeta(n)  \frac{f^{(m,n)}_{(x,y)}}{(m! n!} \\
+\delta^2 f(x, y) =& \int \int f(x + \tilde{x}, y + \tilde{y})^2 
+    \rho(\tilde{x}, x, \delta x) \rho(\tilde{y}, y, \delta y)\; d \tilde{x} d \tilde{y} - \overline{f(x, y)}^2 \\
+=& \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{m} (\delta y)^{n} \left(
+  \sum_{i=0}^{2m} \sum_{j=0}^{2n} \zeta(2m) \zeta(2n) \frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(2m-i,2n-j)}_{(x,y)}}{(2m-i)!\;(2n-j)!} \right. \\
+&\left. - \sum_{i=0}^{m} \sum_{j=0}^{n} \frac{f^{(i,j)}_{(x,y)} \zeta(i) \zeta(j)}{i!\;j!} \frac{f^{(m-i,n-j)}_{(x,y)} \zeta(m-i) \zeta(n-j)}{(m-i)!\;(n-j)!} \right);
+\end{align*}
+
+\fi
+
+\ifdefined\VERBOSE
+For example, Formula \eqref{eqn: interval +}, \eqref{eqn: interval -}, \eqref{eqn: interval *}, and \eqref{eqn: interval /} gives the result of addition, subtraction, multiplication, and division, in which $\underbar{x}$ and $\bar{x}$ are lower and upper bounds for $x$, respectively \cite{Interval_Analysis_Notations}\cite{Interval_Analysis_Theory_Applications}.
+\begin{align}
+\label{eqn: interval +} & 
+\left[x_1\right] + \left[x_2\right] = \left[\underbar{x}_{1} + \underbar{x}_{2}, \bar{x}_{1} + \bar{x}_{2}\right]; \\
+\label{eqn: interval -} & 
+\left[x_1\right] - \left[x_2\right] = \left[\underbar{x}_{1} - \bar{x}_{2}, \bar{x}_{1} - \underbar{x}_{2}\right]; \\
+\label{eqn: interval *} &
+\left[x_1\right] \times \left[x_2\right] = \left[min(\underbar{x}_{1}  \underbar{x}_{2}, \underbar{x}_{1}  \bar{x}_{2}, \bar{x}_{1}  \underbar{x}_{2}, \bar{x}_{1}  \bar{x}_{2}), max(\underbar{x}_{1}  \underbar{x}_{2}, \underbar{x}_{1}  \bar{x}_{2}, \bar{x}_{1}  \underbar{x}_{2}, \bar{x}_{1}  \bar{x}_{2})\right]; \\
+\label{eqn: interval /} & 0 \notin \left[x_2\right]: \;
+\left[x_1\right] / \left[x_2\right] = \left[x_1\right] \times \left[1/\bar{x}_{2}, 1/\underbar{x}_{2}\right];
+\end{align}
+\fi
+
+\ifdefined\VERBOSE
+For example, Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, and \eqref{eqn: stat /} gives the result of addition, subtraction, multiplication, and division,  in which $\sigma$ is the deviation of a measured value $x$, $P$ is its precision, and $\gamma$ is the correlation between the two imprecise values:
+\begin{align}
+\label{eqn: stat +} 
+(x \pm \delta x) + (y \pm \delta y) & = (x + y) & \pm \sqrt{\delta x^{2} + \delta y^{2} + 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat -} 
+(x \pm \delta x) - (y \pm \delta y) & = (x - y) & \pm \sqrt{\delta x^{2} + \delta y^{2} - 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat *} 
+(x \pm \delta x) \times (y \pm \delta y) & = (x \times y) & \pm |x \times y| \sqrt{{P_x}^2 + {P(y)}^2 + 2 P_x P(y) \gamma}; \\
+\label{eqn: stat /} 
+(x \pm \delta x) / (y \pm \delta y) & = (x/y) & \pm |x / y| \sqrt{{P_x}^2 + {P(y)}^2 - 2 P_x P(y) \gamma};
+\end{align}
+\fi
+
+\begin{align}
+\label{eqn: composite mean 1d}
+\overline{f(g(x))} =&\; o((\delta x)^4) + f(g(x)) + (\delta x)  f^{(1)} g^{(1)} \zeta(1) 
+		+ (\delta x)^2 \frac{1}{2} \left( f^{(2)} (g^{(1)})^2 +  f^{(1)} g^{(2)} \right) \zeta(2) \nonumber  \\
+	&+ (\delta x)^3 \frac{1}{6} \left( f^{(3)} (g^{(1)})^3 + 3 f^{(2)} g^{(1)} g^{(2)} +  f^{(1)} g^{(3)} \right) \zeta(3);  \\
+\label{eqn: progressive mean}
+\overline{f(g)|_{g(x)}} - f(g(x)) =& o((\delta g)^4) + (\delta x)^2 \frac{1}{2} f^{(2)}_x (g^{(1)}_x)^2; \\
+\label{eqn: composite variance 1d}
+\delta^2 f(g(x)) =&\; o((\delta x)^4) + (\delta x)^2 \frac{1}{4} (f^{(1)})^2 (g^{(1)})^2 \left( \zeta(2) - \zeta(1)^2 \right) \nonumber \\
+   &+ (\delta x)^3 \frac{1}{18} \left(f^{(1)} f^{(2)} (g^{(1)})^3 +  (f^{(1)})^2 g^{(1)} g^{(2)} \right) 
+   		\left( \zeta(3) - \zeta(1) \zeta(2) \right); \\ 
+\label{eqn: progressive variance}
+\delta^2 f(g))|_{g(x)} =& o((\delta x)^6) + (\delta x)^2 (f^{(1)}_x g^{(1)}_x)^2 + \\
+	& (\delta x)^4 \left( f^{(1)}_x f^{(3)}_x (g^{(1)}_x)^2 + \frac{1}{2} (f^{(2)}_x)^2 (g^{(1)}_x)^2 \right);  \nonumber
+\end{align}
+
+
+
+\ifdefined\VERBOSE
+For example, Formula \eqref{eqn: interval +}, \eqref{eqn: interval -}, \eqref{eqn: interval *}, and \eqref{eqn: interval /} gives the result of addition, subtraction, multiplication, and division, in which $\underbar{x}$ and $\bar{x}$ are lower and upper bounds for $x$, respectively \cite{Interval_Analysis_Notations}\cite{Interval_Analysis_Theory_Applications}.
+\begin{align}
+\label{eqn: interval +} & 
+\left[x_1\right] + \left[x_2\right] = \left[\underbar{x}_{1} + \underbar{x}_{2}, \bar{x}_{1} + \bar{x}_{2}\right]; \\
+\label{eqn: interval -} & 
+\left[x_1\right] - \left[x_2\right] = \left[\underbar{x}_{1} - \bar{x}_{2}, \bar{x}_{1} - \underbar{x}_{2}\right]; \\
+\label{eqn: interval *} &
+\left[x_1\right] \times \left[x_2\right] = \left[min(\underbar{x}_{1}  \underbar{x}_{2}, \underbar{x}_{1}  \bar{x}_{2}, \bar{x}_{1}  \underbar{x}_{2}, \bar{x}_{1}  \bar{x}_{2}), max(\underbar{x}_{1}  \underbar{x}_{2}, \underbar{x}_{1}  \bar{x}_{2}, \bar{x}_{1}  \underbar{x}_{2}, \bar{x}_{1}  \bar{x}_{2})\right]; \\
+\label{eqn: interval /} & 0 \notin \left[x_2\right]: \;
+\left[x_1\right] / \left[x_2\right] = \left[x_1\right] \times \left[1/\bar{x}_{2}, 1/\underbar{x}_{2}\right];
+\end{align}
+\fi
+
+
+\ifdefined\VERBOSE
+For example, Formula \eqref{eqn: stat +}, \eqref{eqn: stat -}, \eqref{eqn: stat *}, and \eqref{eqn: stat /} gives the result of addition, subtraction, multiplication, and division,  in which $\sigma$ is the deviation of a measured value $x$, $P$ is its precision, and $\gamma$ is the correlation between the two imprecise values:
+\begin{align}
+\label{eqn: stat +} 
+(x \pm \delta x) + (y \pm \delta y) & = (x + y) & \pm \sqrt{\delta x^{2} + \delta y^{2} + 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat -} 
+(x \pm \delta x) - (y \pm \delta y) & = (x - y) & \pm \sqrt{\delta x^{2} + \delta y^{2} - 2 \delta x \delta y \gamma}; \\
+\label{eqn: stat *} 
+(x \pm \delta x) \times (y \pm \delta y) & = (x \times y) & \pm |x \times y| \sqrt{{P_x}^2 + {P(y)}^2 + 2 P_x P(y) \gamma}; \\
+\label{eqn: stat /} 
+(x \pm \delta x) / (y \pm \delta y) & = (x/y) & \pm |x / y| \sqrt{{P_x}^2 + {P(y)}^2 - 2 P_x P(y) \gamma};
+\end{align}
+\fi
+
+
+\begin{align*}
+\int^z \tilde{z}^{n} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} &= -\int^z \tilde{z}^{n - 1} e^{-\frac{\tilde{z}^2}{2}} d {-\frac{\tilde{z}^2}{2}}
+  = - z^{n-1} e^{-\frac{z^2}{2}} + (n-1) \int^z \tilde{z}^{n-2} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+ &= - z^{n-1} e^{-\frac{z^2}{2}} - (n-1) z^{n-3} e^{-\frac{z^2}{2}} 
+  + (n-1) (n-3) \int^z \tilde{z}^{n -3} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+ &= - \frac{(n-1)!!}{(n-1)!!} z^{n-1} e^{-\frac{z^2}{2}} - \frac{(n-1)!!}{(n-3)!!} z^{n-3} e^{-\frac{z^2}{2}} 
+  + (n-1) (n-3) \int \tilde{z}^{n -3} e^{-\frac{\tilde{z}^2}{2}} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z}; \\
+\int^z \tilde{z}^{2n + 1} \rho(\tilde{z}) d \tilde{z} &= - (2n)!! N(z) \sum_{j=0}^{n} \frac{z^{2j}}{(2j)!!}; \\
+\int^z \tilde{z}^{2n + 2} \rho(\tilde{z}) d \tilde{z} &= (2n + 1)!! \xi(z) - (2n + 1)!! N(z) \sum_{j=0}^{n} \frac{z^{2j + 1}}{(2j + 1)!!};
+\end{align*}
+
+\begin{align*}
+N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j+1}}{(2j+1)!!} 
+ & = N(\sigma) \left( \sqrt{\frac{\pi}{2}} e^{\frac{\sigma^2}{2}} (2 \xi(\sigma) - 1) - \sum_{j=n+1}^{\infty} \frac{\sigma^{2j+1}}{(2j+1)!!} \right) \\
+ &= \xi(\sigma) - \frac{1}{2} - N(\sigma) \sum_{j=n+1}^{\infty} \frac{\sigma^{2j+1}}{(2j+1)!!} 
+  = \xi(\sigma) - \frac{1}{2} - N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \frac{\sigma^{2j+1}}{(2n + 2j+1)!!}; \\
+\int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} \rho(\tilde{z}) d \tilde{z} 
+ &= (2n+1)!! - (2n+1)!! \left(\xi(\sigma) - N(\sigma) \sum_{j=0}^{n} \frac{\sigma^{2j + 1}}{(2j + 1)!!} \right) \\
+ &= (2n+1)!! - (2n+1)!! \left(\frac{1}{2} + N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \frac{\sigma^{2j+1}}{(2n + 2j+1)!!} \right) \\
+ &= \frac{1}{2} (2n+1)!! - N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
+\int_{-\infty}^{-\sigma} \tilde{z}^{2n + 2} \rho(\tilde{z}) d \tilde{z} &= \int_{+\sigma}^{+\infty} \tilde{z}^{2n + 2} \rho(\tilde{z}) d \tilde{z}; \\
+\int_{-\sigma}^{+\sigma} \tilde{z}^{2n + 2} \rho(\tilde{z}) d \tilde{z} &= 2 N(\sigma) \sigma^{2n} \sum_{j=1}^{\infty} \sigma^{2j+1} \frac{(2n+1)!!}{(2n + 2j+1)!!}; \\
+ &= 2 N(\sigma) \sigma^{2(n+1)-2} \sum_{j=1}^{\infty} \sigma^{2(j-1) + 3} \frac{(2(n+1)-1)!!}{(2(n+1) + 2(j-1) + 1)!!};
+\end{align*}
+
+
+
+
+
+\iffalse
+
+\begin{align*}
+\int_{0}^{+\infty}& \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} 
+		= (2 \lambda^2)^n \int_{0}^{+\infty} \tilde{z}^{n} e^{- \tilde{z}} d \tilde{z}
+		= (2 \lambda^2)^n \left( n\; \int_{0}^{+\infty} \tilde{z}^{n - 1} e^{- \tilde{z}} d \tilde{z} - \tilde{z}^{n} e^{- \tilde{z}} \Big |_{0}^{+\infty}  \right) \\
+	&= (2 \lambda^2)^n\; n!  \int_{0}^{+\infty} \e^{- \tilde{z}} d \tilde{z} 
+		= (2 \lambda^2)^n\; n! ;; \\
+\int_{0}^{+\infty}& \tilde{x}^{2n + 1} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x}
+		= \lambda^{2n + 1} \int_{0}^{+\infty} \tilde{z}^{2n + 2} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+	&= \lambda^{2n + 1} \frac{1}{2} \left( (2n + 1) \int_{0}^{+\infty} \tilde{z}^{2n} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} 
+			- \tilde{z}^{2n + 2} e^{-\frac{\tilde{z}^2}{2}} \Big |_{0}^{+\infty} \right) = \lambda^{2n + 1} \sqrt{\frac{\pi}{2}} (2n + 2)!!; \\
+\overline{x} &=  \sqrt{\frac{\pi}{2}} \lambda; \\
+\delta^2 x &= (2 - \frac{\pi}{2}) \lambda^2; \\
+\int_{\frac{\lambda}{\sigma}}^{\sigma\lambda}& \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} 
+		= (2 \lambda^2)^n \int_{\frac{1}{2 \sigma^2}}^{\frac{\sigma^2}{2}} \tilde{z}^{n} e^{- \tilde{z}} d \tilde{z}
+		= (2 \lambda^2)^n \left( n \int_{\frac{1}{2 \sigma^2}}^{\frac{\sigma^2}{2}} \tilde{z}^{n - 1} e^{- \tilde{z}} d \tilde{z} 
+			- \tilde{z}^{n} e^{- \tilde{z}} \Big |_{\frac{1}{2 \sigma^2}}^{\frac{\sigma^2}{2}}  \right) \\
+		&= (2 \lambda^2)^n n! \left( \int_{\frac{1}{2 \sigma^2}}^{\frac{\sigma^2}{2}} e^{- \tilde{z}} d \tilde{z} 
+	   		- e^{- \tilde{z}} \sum_{j = 1}^{n} \frac{\tilde{z}^{j}}{j!} \Big |_{\frac{1}{2 \sigma^2}}^{\frac{\sigma^2}{2}} \right)
+	   	=  (2 \lambda^2)^n n!\; e^{- \tilde{z}} \sum_{j = 0}^{n} \frac{\tilde{z}^{j}}{j!} \Big |_{\frac{\sigma^2}{2}}^{\frac{1}{2\sigma^2}} \\
+	   	&= (2 \lambda^2)^n n! \sum_{j=0}^{n} \frac{1}{j!} \left( e^{-\frac{1}{2\sigma^2}} (\frac{1}{2\sigma^2})^j - e^{-\frac{\sigma^2}{2}} (\frac{\sigma^2}{2})^j \right);
+\end{align*}
+	
+\fi
+
+Formula \eqref{eqn: Rayleigh distribution} is Rayleigh distribution density function.
+Formula \eqref{eqn: Rayleigh momentum even} and \eqref{eqn: Rayleigh momentum odd} shows that when $n \rightarrow +\infty$, $\zeta(2n) \ll \zeta(2n + 1)$, or $\zeta(2n) \simeq 0$.
+\begin{align}
+\label{eqn: Rayleigh distribution}
+\rho(\tilde{x}, x, \delta x) &= \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}};
+		\eqspace x = \sqrt{\frac{\pi}{2}} \lambda; \eqspace \delta^2 x = (2 - \frac{\pi}{2}) \lambda^2; \\
+\label{eqn: Rayleigh momentum even}
+\int_{0}^{+\infty}& \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} = (2 \lambda^2)^n\; n!; \\
+\label{eqn: Rayleigh momentum odd}
+\int_{0}^{+\infty}& \tilde{x}^{2n + 1} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} = \lambda^{2n + 1} \sqrt{\frac{\pi}{2}} (2n + 2)!!;
+\end{align}
+
+
+Formula \eqref{eqn: fat-tail distribution} shows a distribution density function whose tail is much fatter than that of Formula \eqref{eqn: Rayleigh distribution}.
+Formula \eqref{eqn: fat-tail momentum} shows that the corresponding variance momentum $\zeta(n)$ are comparable in strength for all $n$.
+\begin{align}
+\label{eqn: fat-tail distribution}
+\rho(\tilde{x}, x, \delta x) &= \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}}{\lambda}};
+		\eqspace x = 2 \lambda; \eqspace \delta^2 x = 2 \lambda^2; \\
+\label{eqn:  fat-tail momentum}
+\int_{0}^{+\infty}& \tilde{x}^{n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}}{\lambda}} d \tilde{x} = (\lambda)^n\; n!;
+\end{align}
+
+
+\begin{align}
+\label{eqn: theoretical bounding leakage}
+\epsilon =&\; P(\kappa < \frac{|x - \mu|}{\sigma}) = \int_{\kappa < \frac{|x - \mu|}{\sigma}} \rho(x, \mu, \sigma) dx \\
+\label{eqn: Gaussian theoretical bounding leakage}
+   \simeq&\; 2 \int_{\kappa}^{+\infty} n(x) dx = 2(1 - \xi(\kappa)); \\
+\label{eqn: experimental bounding leakage}
+\epsilon_s =&\; P(\kappa < \frac{|x - \overline{x}|}{\delta x}) 
+	= P(\kappa^2 < \left( \frac{x - \overline{x}}{\sigma} \right)^2 \frac{\sigma^2}{(\delta x)^2}) \\
+\label{eqn: Gaussian experimental bounding leakage}
+	\simeq& \int_{0}^{+\infty} \int_{-\infty}^{+\infty} \int_{\kappa < \frac{x - \mu}{\sigma}} 
+		\chi^2_1(\frac{x - \mu}{\sigma}) d\frac{x - \mu}{\sigma} \;n(\mu) d\mu \;\frac{\chi^2_{N-1}(\sigma)}{N \frac{\sigma}{\sqrt{N}}} d \sigma 
+	= \frac{\int_{\kappa}^{+\infty} \chi^2_1(z) dz}{\sqrt{N}(N - 1)}; \\
+\label{eqn: effective bounding leakage}
+\sqrt{N^3} \simeq&\; \frac{\int_{\kappa}^{+\infty} \chi^2_1(z) dz}{2(1 - \xi(\kappa))}, \;\;2 < \kappa;
+\end{align}
+
+\begin{align*}
+\int_{0}^{+\infty} \frac{\chi^2_{N-1}(\sigma)}{\sigma} d \sigma
+ = \int_{0}^{+\infty} \frac{\sigma^{\frac{N - 3}{2}} e^{-\frac{\sigma}{2}}}{2^{\frac{N - 1}{2}} \Gamma(\frac{N - 1}{2})} \frac{1}{\sigma} d \sigma
+ = \frac{2^{\frac{N - 3}{2}} \Gamma(\frac{N - 3}{2})}{2^{\frac{N - 1}{2}} \Gamma(\frac{N - 1}{2})} = \frac{1}{N - 1}
+\end{align*}
+
+\begin{align}
+\label{eqn: theoretical bounding leakage}
+\epsilon =&\; P(\kappa < \frac{|x - \mu|}{\sigma}) = \int_{\kappa < \frac{|x - \mu|}{\sigma}} \rho(x, \mu, \sigma) dx \\
+\label{eqn: Gaussian theoretical bounding leakage}
+   \simeq&\; 2 \int_{\kappa}^{+\infty} n(x) dx = 1 - \xi(\frac{\kappa}{2})); \\
+\label{eqn: experimental bounding leakage}
+\epsilon_s =&\; P(\kappa < \frac{|x - \overline{x}|}{\delta x}) 
+	= P(\kappa^2 < \left(\frac{x - \mu}{\sigma} + \frac{\mu - \overline{x}}{\sigma} \right)^2 \frac{\sigma^2}{(\delta x)^2}) \\
+\label{eqn: Gaussian experimental bounding leakage}
+	\simeq& \int_{0}^{+\infty} \int_{-\infty}^{+\infty} \int_{\kappa < \frac{x - \mu}{\sigma}} 
+		\chi^2_1(\frac{x - \mu}{\sigma}) d\frac{x - \mu}{\sigma} \;n(\mu) d\mu \;\frac{\chi^2_{N-1}(\sigma)}{N \frac{\sigma}{\sqrt{N}}} d \sigma 
+	= \frac{\int_{\kappa}^{+\infty} \chi^2_1(z) dz}{\sqrt{N}(N - 1)}; \\
+\label{eqn: effective bounding leakage}
+\sqrt{N^3} \simeq&\; \frac{\int_{\kappa}^{+\infty} \chi^2_1(z) dz}{2(1 - \xi(\kappa))}, \;\;2 < \kappa;
+\end{align}
+
+
+\subsection{Minimal Sample Count}
+
+\iffalse
+\begin{align*}
+\delta^2 x =&\; \overline{(x - \overline{x})^2} = \overline{x^2} - \overline{x}^2; \\
+\delta^2 \delta^2 x =&\; \overline{\left( (x - \overline{x})^2 - \overline{(x - \overline{x})^2} \right)^2} 
+		= \overline{(x - \overline{x})^4 + (\overline{x^2} - \overline{x}^2)^2 - 2 (x - \overline{x})^2 (\overline{x^2} - \overline{x}^2)} \\
+	=&\; \overline{x^4} - 4 \overline{x^3} \overline{x} + 6 \overline{x^2} \overline{x}^2 - 3 \overline{x}^4
+			+ \overline{x^2}^2 - 2 \overline{x^2} \overline{x}^2 + \overline{x}^4
+			- 2 \overline{x^2}^2 + 2 \overline{x^2} \overline{x}^2 + 2 \overline{x^2} \overline{x}^2 - 2 \overline{x}^4 \\
+	=&\; \overline{x^4} - 4 \overline{x^3} \overline{x} + 8 \overline{x^2} \overline{x}^2 - 4 \overline{x}^4 - \overline{x^2}^2
+		= \overline{(x - \overline{x})^4} + 2 \overline{x^2} \overline{x}^2 - \overline{x}^4 - \overline{x^2}^2 \\
+	=&\; \overline{(x - \overline{x})^4} - \overline{(x - \overline{x})^2}^2 = \overline{(x - \overline{x})^4} - (\delta^2 x)^2;
+\end{align*}
+
+\fi
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Leakage.pdf} 
+\captionof{figure}{
+The measured bounding leakage (as shown by the y-axis) for the different bounding factor $\kappa$ (as shown by the x-axis) and sample count $N$ (as shown by the legend).
+The curve labeled sigma-rule corresponds to  Formula \eqref{eqn: Gaussian theoretical bounding leakage} when $\varrho = \kappa$.
+}
+\label{fig: Normal_Bounding_Leakage}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Precision.pdf} 
+\captionof{figure}{
+The measured bounding leakage precision (as shown by the y-axis) for the different bounding factor $\kappa$ (as shown by the x-axis) and sample count $N$ (as shown by the legend).
+}
+\label{fig: Normal_Bounding_Precision}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Uniform_Bounding_Leakage_Precision.pdf} 
+\captionof{figure}{
+The measured bounding leakage (as shown by the y-axis on the left) and the bounding leakage precision (as shown by the y-axis on the right) for the different sample count $N$ (as shown by the x-axis).
+The bounding leakage precision decays to a constant about $0.95$ with $N^{-1.1}$.
+}
+\label{fig: Uniform_Bounding_Leakage_Precision}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Range.pdf} 
+\captionof{figure}{
+The measured bounding factor $\kappa$ (as shown by the y-axis) for the different sample count $N$ (as shown by the x-axis) and the precision of $\epsilon(\kappa, N)$ (as shown by the legend).
+Also included is the relation $\zeta(2, \kappa) = N/(N - 1)$, which is labeled "Adjustment".
+}
+\label{fig: Normal_Bounding_Range}
+\end{figure}
+
+Because the sample mean $\overline{x}$ and the sample deviation $\delta x$ approaches the mean $\mu$ and the deviation $\sigma$ of the underlying uncertainty distribution with the increase of the sample count $N$, $N$ has to be sufficient large for the statistical Taylor expansion for $4 \leq \kappa$.
+
+\begin{align}
+\label{eqn: theoretical bounding leakage}
+\epsilon(\kappa) \equiv&\; 1 - P(-\varrho \leq \frac{x - \mu}{\sigma} \leq \kappa)
+	= 1 - \int_{\frac{x - \mu}{\sigma} < -\varrho}^{\kappa < \frac{x - \mu}{\sigma}} \rho dx \\
+\label{eqn: Gaussian theoretical bounding leakage}
+   \simeq&\; 1 - \frac{1}{2} \xi(\frac{\varrho}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{\kappa}{\sqrt{2}}); \\
+\label{eqn: experimental bounding leakage}
+\epsilon(\kappa, N) \equiv&\; 1 - P(-\varrho \leq \frac{x - \overline{x}}{\delta x} < \kappa);
+\end{align}
+
+For an uncertainty distribution with density $\rho$, Formula \eqref{eqn: theoretical bounding leakage} shows the bounding leakage $\epsilon(\kappa)$. 
+When the uncertainty distribution is Gaussian, Formula \eqref{eqn: theoretical bounding leakage} becomes Formula \eqref{eqn: Gaussian theoretical bounding leakage}, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+When $\varrho = \kappa$,  Formula \eqref{eqn: Gaussian theoretical bounding leakage} is the familiar sigma-rule on $\kappa$ \cite{Probability_Statistics}.
+
+Similarly, Formula \eqref{eqn: experimental bounding leakage} shows the bounding leakage $\epsilon(\kappa, N)$ for sample mean $\overline{x}$ and sample deviation $\delta x$.
+To measure $\epsilon(\kappa, N)$ when the underlying distribution is Gaussian so that $\varrho = \kappa$:
+\begin{enumerate}
+\item Draw $N$ samples from normal distribution ($\mu = 0, \sigma = 1$) to calculate $\overline{x}$ and $\delta x$.
+
+\item The corresponding bounding range of the sampling is $[\overline{x} - \kappa \delta x, \overline{x} + \kappa \delta x]$, which has the bounding leakage of $1 - \frac{1}{2} \xi(\frac{1}{\sqrt{2}} |\kappa \delta x + \overline{x}|) - \frac{1}{2} \xi(\frac{1}{\sqrt{2}} |\kappa \delta x - \overline{x}|)$.
+
+\item Repeat the above measurement for $10,000$ times to get the mean, the standard deviation, and the precision for $\epsilon(\kappa, N)$.
+\end{enumerate}
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\lim_{N \rightarrow \infty} \epsilon(\kappa, N) = \epsilon(\kappa)$.
+Figure \ref{fig: Normal_Bounding_Precision} shows that the precision of $\epsilon(\kappa, N)$ decreases with $N$, and increases with $\kappa$ for each $N$.
+Increasing the repeat count from $10,000$ to $100,000$ will bring no change to Figure \ref{fig: Normal_Bounding_Leakage} and \ref{fig: Normal_Bounding_Precision}, suggesting that the repeat count is sufficiently large statistically.
+
+As a comparison, when the underlying uncertainty distribution is uniform, %Figure \ref{fig: Uniform_Bounding_Leakage_Precision} shows that 
+while the bounding leakage $\epsilon(\kappa, N)$ decreases exponentially with the sample count $N$, the bounding leakage precision decreases to a constant near $0.95$.
+It suggests that the practical bounding leakage precision should be close to $1$.
+
+When the underlying uncertainty distribution is Gaussian, Figure \ref{fig: Normal_Bounding_Range} measured the relation between the sample count $N$ and the bounding factor $\kappa$ for the given bounding leakage precision of $0.378$, $0.5$, and $1$, in which $0.378$ is the least bounding leakage precision when $N \leq 5$, so that any less bounding leakage precision has missing data for $N \leq 5$.
+When the bounding leakage precision is $1$, the bounding factor $\kappa$ decreases with $N$ when $N \leq 5$, which is undesirable.
+From the $\kappa(N)$ when the bounding leakage precision is $0.378$ in Figure \ref{fig: Normal_Bounding_Range}, $\kappa = 4: 1000 \lesssim N$ and $\kappa = 5: 3000 \lesssim N$.
+
+It is tempting to associate an effective $\kappa$ for each sample count $N$, to apply the 1st-order adjustment when $\kappa < 4$.
+To justify the enlargement of the result variance, the sample variance (which is biased) instead of the standard variance (which is unbiased) \cite{Probability_Statistics} is input into statistical Taylor expansion, so that the result variance after normalized by $\zeta(2, \kappa)$ becomes the standard variance for $f(x) = x$.
+Figure \ref{fig: Normal_Bounding_Range} shows such relation of $\zeta(n, \kappa) = (N-1)/N$ which is labeled as "Adjustment".
+According to the curve, $\kappa = 4: 880 \leq N$ and $\kappa = 5: 64764 \lesssim N$.
+
+Using both methods, the minimal sample count $N$ to apply statistical Taylor expansion directly is about $1000$.
+
+
+\subsection{Variable $\kappa$ Variance Arithmetic}
+
+As a proof of concept, the variance arithmetic in this paper requires the sample count $2000 \leq N$ for direct application, and $20 \leq N$ for at least $95\%$ approximation of $5 \leq \kappa$.
+
+Figure \ref{fig: Normal_Function} suggests that the bounding factor $\kappa$ or the bounding leakage $\epsilon$ indicates the data quality of each sampling, and the true deviation or precision can be obtained by normalizing using $\kappa$.
+Thus, in a more ideal variance arithmetic, in addition to the mean $\overline{x}$, and the deviation $\delta x$, each imprecise input $x$ also carries it statistical bounding factor $\kappa$.
+$\kappa$ is also required in the intermediate steps to break one large analytic expression to smaller ones using dependence tracing.
+However, it is not clear how to calculate the result $\kappa$ for statistical Taylor expansion, and such approaches need new theoretical foundation in statistics.
+
+The difference between $\epsilon(\kappa)$ and $\epsilon(\kappa, N)$ may have indicated a fundamental issue of the conventional statistical theory: to disregard the sample count $N$ when processing sampled data beyond the the sampling context.
+For example, suppose there are two measurements of a same random value with sample count $N_1$ and $N_2$, respectively, to obtain the sample variances $v_1$ and $v_2$, respectively.  
+When these two measurements are pooled together, the result sample variance is $\frac{N_1}{N_1 + N_2} v_1 + \frac{N_2}{N_1 + N_2} v_2$, in which $N_1$ and $N_2$ are used as weights in the sum.
+However, when not in the sampling context, the current statistical theory treats this two measurements equally, so that the result is $v_1 + v_2$. It is reasonable that the sampling count should be used in other context in statistical analysis to reflect the result data quality in terms of $\epsilon(\kappa, N)$.
+
+
+
+\subsection{Statistical Bounding}
+
+\iffalse
+\begin{align*}
+\delta^2 x =&\; \overline{(x - \overline{x})^2} = \overline{x^2} - \overline{x}^2; \\
+\delta^2 \delta^2 x =&\; \overline{\left( (x - \overline{x})^2 - \overline{(x - \overline{x})^2} \right)^2} 
+		= \overline{(x - \overline{x})^4 + (\overline{x^2} - \overline{x}^2)^2 - 2 (x - \overline{x})^2 (\overline{x^2} - \overline{x}^2)} \\
+	=&\; \overline{x^4} - 4 \overline{x^3} \overline{x} + 6 \overline{x^2} \overline{x}^2 - 3 \overline{x}^4
+			+ \overline{x^2}^2 - 2 \overline{x^2} \overline{x}^2 + \overline{x}^4
+			- 2 \overline{x^2}^2 + 2 \overline{x^2} \overline{x}^2 + 2 \overline{x^2} \overline{x}^2 - 2 \overline{x}^4 \\
+	=&\; \overline{x^4} - 4 \overline{x^3} \overline{x} + 8 \overline{x^2} \overline{x}^2 - 4 \overline{x}^4 - \overline{x^2}^2
+		= \overline{(x - \overline{x})^4} + 2 \overline{x^2} \overline{x}^2 - \overline{x}^4 - \overline{x^2}^2 \\
+	=&\; \overline{(x - \overline{x})^4} - \overline{(x - \overline{x})^2}^2 = \overline{(x - \overline{x})^4} - (\delta^2 x)^2;
+\end{align*}
+
+\fi
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Leakage.pdf} 
+\captionof{figure}{
+The measured bounding leakage (as shown by the y-axis) for the different bounding factor $\kappa$ (as shown by the x-axis) and sample count $N$ (as shown by the legend).
+The curve labeled sigma-rule corresponds to  Formula \eqref{eqn: Gaussian theoretical bounding leakage} when $\varrho = \kappa$.
+}
+\label{fig: Normal_Bounding_Leakage}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Precision.pdf} 
+\captionof{figure}{
+The measured bounding leakage precision (as shown by the y-axis) for the different bounding factor $\kappa$ (as shown by the x-axis) and sample count $N$ (as shown by the legend).
+}
+\label{fig: Normal_Bounding_Precision}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Uniform_Bounding_Leakage_Precision.pdf} 
+\captionof{figure}{
+The measured bounding leakage (as shown by the y-axis on the left) and the bounding leakage precision (as shown by the y-axis on the right) for the different sample count $N$ (as shown by the x-axis).
+The bounding leakage precision decays to a constant about $0.95$ with $N^{-1.1}$.
+}
+\label{fig: Uniform_Bounding_Leakage_Precision}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Bounding_Range.pdf} 
+\captionof{figure}{
+The measured bounding factor $\kappa$ (as shown by the y-axis) for the different sample count $N$ (as shown by the x-axis) and the precision of $\epsilon(\kappa, N)$ (as shown by the legend).
+Also included is the relation $\zeta(2, \kappa) = N/(N - 1)$, which is labeled "Adjustment".
+}
+\label{fig: Normal_Bounding_Range}
+\end{figure}
+
+Because the sample mean $\overline{x}$ and the sample deviation $\delta x$ approaches the mean $\mu$ and the deviation $\sigma$ of the underlying uncertainty distribution with the increase of the sample count $N$, $N$ has to be sufficient large for the statistical Taylor expansion for $4 \leq \kappa$.
+
+\begin{align}
+\label{eqn: theoretical bounding leakage}
+\epsilon(\kappa) \equiv&\; 1 - P(-\varrho \leq \frac{x - \mu}{\sigma} \leq \kappa)
+	= 1 - \int_{\frac{x - \mu}{\sigma} < -\varrho}^{\kappa < \frac{x - \mu}{\sigma}} \rho dx \\
+\label{eqn: Gaussian theoretical bounding leakage}
+   \simeq&\; 1 - \frac{1}{2} \xi(\frac{\varrho}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{\kappa}{\sqrt{2}}); \\
+\label{eqn: experimental bounding leakage}
+\epsilon(\kappa, N) \equiv&\; 1 - P(-\varrho \leq \frac{x - \overline{x}}{\delta x} < \kappa);
+\end{align}
+
+For an uncertainty distribution with density $\rho$, Formula \eqref{eqn: theoretical bounding leakage} shows the bounding leakage $\epsilon(\kappa)$. 
+When the uncertainty distribution is Gaussian, Formula \eqref{eqn: theoretical bounding leakage} becomes Formula \eqref{eqn: Gaussian theoretical bounding leakage}, in which $\xi()$ is the Gaussian error function \cite{Probability_Statistics}.
+When $\varrho = \kappa$,  Formula \eqref{eqn: Gaussian theoretical bounding leakage} is the familiar sigma-rule on $\kappa$ \cite{Probability_Statistics}.
+
+Similarly, Formula \eqref{eqn: experimental bounding leakage} shows the bounding leakage $\epsilon(\kappa, N)$ for sample mean $\overline{x}$ and sample deviation $\delta x$.
+To measure $\epsilon(\kappa, N)$ when the underlying distribution is Gaussian so that $\varrho = \kappa$:
+\begin{enumerate}
+\item Draw $N$ samples from normal distribution ($\mu = 0, \sigma = 1$) to calculate $\overline{x}$ and $\delta x$.
+
+\item The corresponding bounding range of the sampling is $[\overline{x} - \kappa \delta x, \overline{x} + \kappa \delta x]$, which has the bounding leakage of $1 - \frac{1}{2} \xi(\frac{1}{\sqrt{2}} |\kappa \delta x + \overline{x}|) - \frac{1}{2} \xi(\frac{1}{\sqrt{2}} |\kappa \delta x - \overline{x}|)$.
+
+\item Repeat the above measurement for $10,000$ times to get the sample mean, the sample deviation, and the precision of $\epsilon(\kappa, N)$.
+\end{enumerate}
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\lim_{N \rightarrow \infty} \epsilon(\kappa, N) = \epsilon(\kappa)$.
+Figure \ref{fig: Normal_Bounding_Precision} shows that the precision of $\epsilon(\kappa, N)$ decreases with $N$, and increases with $\kappa$ for each $N$.
+
+When the underlying uncertainty distribution is uniform, Figure \ref{fig: Uniform_Bounding_Leakage_Precision} shows that 
+while the bounding leakage $\epsilon(\kappa, N)$ decreases exponentially with the sample count $N$, the bounding leakage precision decreases to a constant near $0.95$.
+It suggests that the practical bounding leakage precision should be close to $1$.
+
+When the underlying uncertainty distribution is Gaussian, Figure \ref{fig: Normal_Bounding_Range} measured the relation between the sample count $N$ and the bounding factor $\kappa$ for the given bounding leakage precision of $0.368948671$, $0.5$, and $1$, in which $0.368948671$ is the measured bounding leakage precision for $N = 2, \kappa = 1$.
+When the bounding leakage precision is $1$, the bounding factor $\kappa$ decreases with $N$ when $N \leq 5$, which is undesirable.
+Such decreasing also exists when the bounding leakage precision is $0.5$, but to a less degree.
+The usage of the bounding leakage precision is somewhat subjective, but Figure \ref{fig: Normal_Bounding_Range} shows that each $N$ corresponds to one bounding factor $\kappa$, such that larger $N$ leads to larger $\kappa$ and smaller error in Figure \ref{fig: Normal_Function_Adjusted}.
+
+When the variance is normalized by $\zeta(2, \kappa)$, $f(x) = x$ is adjusted perfectly, and such enlargement of the variance can correspond to converting a biased sample variance to the corresponding unbiased standard variance \cite{Probability_Statistics} as $\zeta(2, \kappa) = (N-1)/N$.
+Figure \ref{fig: Normal_Bounding_Range} shows such relation of $\kappa$ vs $N$ which is labeled as "Adjustment".
+Figure \ref{fig: Normal_Bounding_Range} show that when $880 \leq N \Longrightarrow 4 \leq \kappa$, the result variance error is less than $10^{-3}$ for the functions in Figure \ref{fig: Normal_Function_Adjusted}.
+In Formula \eqref{eqn: Taylor 1d variance} and \eqref{eqn: Taylor 2d variance}, $\zeta(n) \equiv \zeta(n, \kappa) / \zeta(2, \kappa)$ so that $\delta^2 x = (\delta x)^2$ for all $\kappa$.
+Such normalization determines that statistical Taylor expansion inputs biased sample variance, and outputs unbiased standard variance.
+
+
+
+
+\subsection{Different Floating-Point Representation for Variance}
+
+In variance representation $x \pm \delta x$, $\delta x$ is comparable in value with $x$, but $(\delta x)^2$ is calculated.
+This limits the effective range for $x \pm \delta x$ to be much smaller than the full range of the standard 64-bit floating-point representation.
+Ideally, $(\delta x)^2$ should be calculated and stored in an unsigned 64-bit floating-point representation in which the sign bit reused for the exponent, so that $\delta x$ has exactly the same range as the standard 64-bit floating-point representation.  
+
+\footnote{
+$\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$ and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ suggest that the definition of probability \cite{Probability_Statistics} needs a new statistical condition: the sampled properties should always improve monotonically with the sample count $N$.
+}
+
+
+
+\ifdefined\VERBOSE
+
+\subsection{Imprecise Taylor Coefficients}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Imprecise_Taylor_Coeff.pdf}
+\captionof{figure}{
+The result deviation of '$\sum_{n = 0}^{\infty} ((-1)^n \pm \delta y) y^n$ vs $\delta y$ for difference $\delta x$ in the legend, in which $\frac{1}{1 + y} = \sum_{n = 0}^{\infty} (-1)^n  y^n$ is the Taylor expansion without added uncertainty $\delta y$ to each Taylor coefficients.
+}
+\label{fig: Imprecise_Taylor_Coeff}
+\end{figure}
+
+In Figure \ref{fig: Imprecise_Taylor_Coeff}, the coefficients for Taylor expansion $\frac{1}{1 + y} = \sum_{n = 0}^{\infty} (-1)^n  y^n$ are added with uncertainty $\delta y$.
+The result uncertainty of $\sum_{n = 0}^{\infty} ((-1)^n \pm \delta y) y^n, y \in N(0, \delta x)$ increases approximately linearly with both $\delta x$ and $\delta y$.
+This paper limits the Taylor coefficients to precise values, except that the Taylor coefficient $t[n]$ for $(x \pm \delta x)^c$ is calculate as $t[n+1] = t[n] (c - n)/(n + 1)$ with $t[1] = c$ using variance arithmetic, to capture the accumulated rounding errors in this inductive process.
+
+
+
+\subsection{bound Moment Calculation}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Normal_Momentum_Precision.pdf}
+\captionof{figure}{
+The precision of  the bound moment $\zeta(2n, 5)$ vs the order $2n$ for floating-point arithmetic calculation vs variance arithmetic calculation.
+}
+\label{fig: Normal_Moment_Precision}
+\end{figure}
+
+Another important question is: Is it worth to calculate $\zeta(2n, \kappa)$ using variance arithmetic? 
+In Figure \ref{fig: Normal_Moment_Precision}, the precision of calculating $\zeta(2n, \kappa)$ using variance arithmetic is compared with that of using floating-point arithmetic when the uncertainty is assumed to be the ULP for each $2n$.
+Figure \ref{fig: Normal_Moment_Precision} shows that when $2n < 250$, the results are quite comparable in magnitude.
+Because the variance is stored in the numerical representation, when $2n \geq 250$, the variance of $\zeta(2n, \kappa)$ overflows for the 64-bit IEEE floating-point representation.
+$\zeta(2n, \kappa)$ is calculated using floating-point arithmetic.
+
+
+\fi
+
+
+\begin{align*}
+\int_{0}^{+\infty} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}}{\lambda}} d \tilde{x} &= \int_{0}^{+\infty} \tilde{z} e^{-\tilde{z}} d \tilde{z} 
+	= - \tilde{z} e^{-\tilde{z}} \Big |_{0}^{+\infty} + \int_{0}^{+\infty} e^{-\tilde{z}} d \tilde{z} = - e^{-\tilde{z}} \Big |_{0}^{+\infty} = 1; \\
+\int_{0}^{+\infty} \tilde{x}^n \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}}{\lambda}} d \tilde{x} 
+	&= \lambda^n \int_{0}^{+\infty} \tilde{z}^{n+1} e^{-\tilde{z}} d \tilde{z} 
+	= \lambda^n \left( (n+1)  \int_{0}^{+\infty} \tilde{z}^{n} e^{-\tilde{z}} d \tilde{z} -  \tilde{z}^{n+1} e^{-\tilde{z}} \Big |_{0}^{+\infty} \right) \\
+	&= \lambda^n (n + 1)!; \\
+ 	&\overline{x}= 2 \lambda; \eqspace (\delta x)^2 = 6 \lambda^2 - 4 \lambda^2 = 2 \lambda^2;  
+ 		\eqspace \Longrightarrow \tilde{z} = \frac{\tilde{x} - 2 \lambda}{\sqrt{2} \lambda}; 
+\end{align*}
+
+\begin{align*}
+\rho(\tilde{z}) &= \sqrt{2} (\sqrt{2} \tilde{z} + 2) e^{-(\sqrt{2} \tilde{z} + 2)}, \tilde{z} \in [-\sqrt{2}, +\infty); \\
+\zeta(n) &= \int_{-\sqrt{2}}^{+\infty} \tilde{z}^n \sqrt{2} (\sqrt{2} \tilde{z} + 2) e^{-(\sqrt{2} \tilde{z} + 2)} d \tilde{z}
+		= \frac{1}{\sqrt{2^n}} \int_{0}^{+\infty} (\tilde{z} - 2)^n \tilde{z} e^{-\tilde{z}} d \tilde{z}; \\
+&\zeta(0) = 1; \\
+&\zeta(1) = \frac{1}{\sqrt{2}} \int_{0}^{+\infty} \tilde{z}^2 e^{-\tilde{z}} d \tilde{z} - \sqrt{2} \int_{0}^{+\infty} \tilde{z} e^{-\tilde{z}} d \tilde{z} = \sqrt{2} - \sqrt{2} = 0; \\
+&\zeta(2) = \frac{1}{2} \int_{0}^{+\infty} \tilde{z}^3 e^{-\tilde{z}} d \tilde{z} - 2 \int_{0}^{+\infty} \tilde{z}^2 e^{-\tilde{z}} d \tilde{z} 
+				+ 2 \int_{0}^{+\infty} \tilde{z} e^{-\tilde{z}} d \tilde{z} = 3 - 4  + 2 = 1 
+		= \sqrt{2} e^{-\varrho} \left( \right) - ;
+\end{align*}
+
+\begin{align*}
+0 &= \frac{1}{\sqrt{2}} \int_{\varrho}^{\kappa} (\tilde{z} - 2) \tilde{z} e^{-\tilde{z}} d \tilde{z}
+\end{align*}
+
+\begin{align*}
+\zeta(n) &= \frac{1}{\sqrt{2^n}} \int_{\varrho}^{\kappa} \sum_{k = 0}^{n} \frac{n!}{k! (n-k)!} (-2)^{n - \kappa} \tilde{z}^{k+1} e^{-\tilde{z}} d \tilde{z} \\
+	&= \frac{1}{\sqrt{2^n}} \sum_{k = 0}^{n} \frac{n!}{k! (n-k)!} (-2)^{n - \kappa} \left( 
+				e^{-\kappa} \kappa^{k + 1} \sum_{j=1}^{+\infty} \frac{(k+1)!}{(k + 1 +j)!} \kappa^j
+				- e^{-\varrho} \varrho^{k + 1} \sum_{j=1}^{+\infty} \frac{(k+1)!}{(k + 1 +j)!} \varrho^j \right) \\
+	&= \frac{1}{\sqrt{2^n}} \sum_{j=1}^{+\infty} \sum_{k = 0}^{n} \frac{n! (k + 1)}{(k + 1 +j)! (n-k)!} (-2)^{n - \kappa} \kappa^{k + 1 + j}; \\
+\end{align*}
+
+
+\begin{align*}
+\int_{\varrho}^{\kappa} e^{-\tilde{z}} d \tilde{z} &= e^{-\varrho} - e^{-\kappa}; \\
+\int_{\varrho}^{\kappa} \tilde{z} e^{-\tilde{z}} d \tilde{z} &= e^{-\varrho} (1 + \varrho) - e^{-\kappa} (1 + \kappa); \\
+\int_{\varrho}^{\kappa} \tilde{z}^2 e^{-\tilde{z}} d \tilde{z} 
+	&= 2 e^{-\varrho}(1 + \varrho + \frac{\varrho^2}{2!}) - 2 e^{-\kappa}(1 + \kappa + \frac{\kappa^2}{2!}); \\
+\int_{\varrho}^{\kappa} \tilde{z}^3 e^{-\tilde{z}} d \tilde{z} 
+	&= 6 e^{-\varrho}(1 + \varrho + \frac{\varrho^2}{2!} + \frac{\varrho^3}{3!}) - 6 e^{-\kappa}(1 + \kappa + \frac{\kappa^2}{2!} + \frac{\kappa^3}{3!}); \\
+\zeta(n) &= \frac{1}{\sqrt{2^n}} \int_{\varrho}^{\kappa} (\tilde{z} - 2)^n \tilde{z} e^{-\tilde{z}} d \tilde{z}
+ 	= \frac{1}{\sqrt{2^n}} \sum_{i = 0}^{n} (-1)^i \frac{n!}{i!\; (n - i)!} \int_{\varrho}^{\kappa} \tilde{z}^{i + 1} e^{-\tilde{z}} d \tilde{z}; \\
+\zeta(1) &= \sqrt{2} e^{-\varrho}(1 + \varrho + \frac{\varrho^2}{2!}) - \sqrt{2} e^{-\kappa}(1 + \kappa + \frac{\kappa^2}{2!})
+		- \sqrt{2} e^{-\varrho} (1 + \varrho) + \sqrt{2} e^{-\kappa} (1 + \kappa);
+\end{align*}
+
+%\fi
+
+\begin{align}
+\label{eqn: fat-tail distribution}
+\rho(\tilde{x}, \mu, \sigma) &= \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}}{\lambda}};
+		\eqspace \mu = 2 \lambda; \eqspace \sigma = \sqrt{2} \lambda; \\
+\label{eqn: fat-tail mean-preserving}
+e^{-\varrho} \varrho^2 &= e^{-\kappa} \kappa^2; \\
+\label{eqn: fat-tail moment limit}
+\lim_{n \rightarrow +\infty} \zeta(n, \kappa) &= \frac{\frac{\kappa}{\sqrt{2}}^n}{n + 2} e^{-\kappa}; 
+\end{align}
+
+Formula \eqref{eqn: fat-tail distribution} shows a probability density function with $\tilde{x} \in [0, +\infty)$, whose bounding range $[\varrho \lambda, \kappa \lambda]$ satisfying $0 < \varrho < 2 < \kappa$.
+Formula \eqref{eqn: fat-tail mean-preserving} gives its mean preserving equation.
+And Formula \eqref{eqn: fat-tail moment limit} describes its asymptotic behavior.
+
+%\iffalse
+
+\begin{align*}
+\int_{0}^{+\infty}& \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} 
+		= (2 \lambda^2)^n \int_{0}^{+\infty} \tilde{z}^{n} e^{- \tilde{z}} d \tilde{z}
+		= (2 \lambda^2)^n \left( n\; \int_{0}^{+\infty} \tilde{z}^{n - 1} e^{- \tilde{z}} d \tilde{z} - \tilde{z}^{n} e^{- \tilde{z}} \Big |_{0}^{+\infty}  \right) \\
+	&= (2 \lambda^2)^n\; n!  \int_{0}^{+\infty} \e^{- \tilde{z}} d \tilde{z} 
+		= (2 \lambda^2)^n\; n! ;; \\
+\int_{0}^{+\infty}& \tilde{x}^{2n + 1} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x}
+		= \lambda^{2n + 1} \int_{0}^{+\infty} \tilde{z}^{2n + 2} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} \\
+	&= \lambda^{2n + 1} \frac{1}{2} \left( (2n + 1) \int_{0}^{+\infty} \tilde{z}^{2n} e^{-\frac{\tilde{z}^2}{2}} d \tilde{z} 
+			- \tilde{z}^{2n + 2} e^{-\frac{\tilde{z}^2}{2}} \Big |_{0}^{+\infty} \right) = \lambda^{2n + 1} \sqrt{\frac{\pi}{2}} (2n + 2)!!; \\
+\overline{x} &=  \sqrt{\frac{\pi}{2}} \lambda; \\
+\delta^2 x &= (2 - \frac{\pi}{2}) \lambda^2; \\
+\int_{\varrho \lambda}^{\kappa \lambda}& \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} 
+		= (2 \lambda^2)^n \int_{\frac{\varrho^2}{2}}^{\frac{\kappa^2}{2}} \tilde{z}^{n} e^{- \tilde{z}} d \tilde{z} 
+		= \lambda^{2n} 2^n \left( n \int_{\frac{\varrho^2}{2}}^{\frac{\kappa^2}{2}} \tilde{z}^{n - 1} e^{- \tilde{z}} d \tilde{z} 
+			- \tilde{z}^{n} e^{- \tilde{z}} \Big |_{\frac{\varrho^2}{2}}^{\frac{\kappa^2}{2}} \right) \\
+ 		&= \lambda^{2n} 2^n n! \left( \int_{\frac{\varrho^2}{2}}^{\frac{\kappa^2}{2}} e^{- \tilde{z}} d \tilde{z} 
+	   		- e^{- \tilde{z}} \sum_{j = 1}^{n} \frac{\tilde{z}^{j}}{j!} \Big |_{\frac{\varrho^2}{2}}^{\frac{\kappa^2}{2}} \right)
+	   	=  \lambda^{2n} 2^n n!\; e^{- \tilde{z}} \sum_{j = 0}^{n} \frac{\tilde{z}^{j}}{j!} \Big |_{\frac{\kappa^2}{2}}^{\frac{\varrho^2}{2}} \\
+	   	&= \lambda^{2n} 2^n n! \left( e^{-\frac{\varrho^2}{2}} \sum_{j=0}^{n} \frac{(\frac{\varrho^2}{2})^j}{j!} 
+	   		- e^{-\frac{\kappa^2}{2}} \sum_{j=0}^{n} \frac{(\frac{\kappa^2}{2})^j}{j!} \right); \\
+&\lim_{n \rightarrow +\infty} \int_{\varrho \lambda}^{\kappa \lambda} \tilde{x}^{2n} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x} 
+		= \lambda^{2n} \frac{1}{2} \kappa^{2n + 1} e^{-\frac{\kappa^2}{2}} \sum_{j=0}^{n} \frac{n!}{(n + 1 + j)!} (\frac{\kappa^2}{2})^j \\
+\int_{\varrho \lambda}^{\kappa \lambda}& \tilde{x}^{2n - 1} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x}
+		= \lambda^{2n-1} \int_{\varrho}^{\kappa} \tilde{z}^{2n} e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z}; \\
+&\lim_{n \rightarrow +\infty} \int_{\varrho \lambda}^{\kappa \lambda} \tilde{x}^{2n - 1} \frac{\tilde{x}}{\lambda^2} e^{-\frac{\tilde{x}^2}{2\lambda^2}} d \tilde{x}
+		= \lambda^{2n - 1} N(\kappa) \frac{\kappa^{2n + 1}}{2n + 1};
+\end{align*}
+
+
+
+
+
