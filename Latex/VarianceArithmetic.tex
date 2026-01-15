@@ -814,15 +814,15 @@ Formula \eqref{eqn: square precision}, \eqref{eqn: square root precision}, and \
 
 \subsection{Asymptotic Behavior for Bound Moment}
 
-Except the trivial case $\rho(\tilde{z}) = 0, \tilde{z} \in [0, \kappa]$, when $\frac{d \rho(\tilde{z})}{d \tilde{z}}$ is bounded in $\tilde{z} \in [0, \kappa]$, Formula \eqref{eqn: bound moment asymptote deduction left} and \eqref{eqn: bound moment asymptote deduction right} leads to Formula \eqref{eqn: symmetric bound moment asymptote limit}.
+When $\rho(\tilde{z}) > 0$ and $\frac{d \rho(\tilde{z})}{d \tilde{z}}$ is bounded in $\tilde{z} \in [0, \kappa]$, Formula \eqref{eqn: bound moment asymptote deduction left} and \eqref{eqn: bound moment asymptote deduction right} leads to Formula \eqref{eqn: symmetric bound moment asymptote limit}.
  Formula \eqref{eqn: bound moment asymptote deduction} and \eqref{eqn: symmetric bound moment asymptote limit} conclude Formula \eqref{eqn: symmetric bound moment asymptote} and \eqref{eqn: bound moment asymptote}.
 \begin{align}
 \label{eqn: bound moment asymptote deduction}
 \int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} &= \rho(\kappa) \frac{\kappa^{n+1}}{n+1} 
 			- \frac{1}{n+1} \int_{0}^{\kappa} \tilde{z}^{n+1} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z}; \\
 \label{eqn: bound moment asymptote deduction left}
-\forall \kappa > 1&:\;\; 
-		\int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} \geq \int_{0}^{\kappa} \rho(\tilde{z}) d \tilde{z}\; \frac{\kappa^{n+1}}{n+1}; \\
+\rho = \min\{ \rho(\tilde{z}) \}&: \tilde{z} \in [0, \kappa] \}:\;\; 
+		\int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} \geq \rho \frac{\kappa^{n+1}}{n+1}; \\
 \label{eqn: bound moment asymptote deduction right}
 \tau = \max\{ |\frac{d \rho(\tilde{z})}{d \tilde{z}}|&: \tilde{z} \in [0, \kappa] \}:\;\; 
 \frac{1}{n+1} \int_{0}^{\kappa} \tilde{z}^{n+1} |\frac{d \rho(\tilde{z})}{d \tilde{z}}| d \tilde{z} <
@@ -971,16 +971,9 @@ Formula \eqref{eqn: uniform moment} provides $\zeta(2n)$ while $\zeta(2n + 1) = 
 
 \fi
 
-
-When $n \rightarrow \infty$, $\zeta(j, \kappa) \zeta(n - j, \kappa)$ will be ignored in Formula \eqref{eqn: Taylor 1d variance} because $\zeta(j, \kappa) \zeta(n - j, \kappa) \ll \zeta(n, \kappa)$.
-The asymptotic behavior of $\zeta(n, \kappa)$ when $n \rightarrow \infty$ determines if Formula \eqref{eqn: Taylor 1d variance} will converge.
-
-Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
-However, as shown later in this pap, $\delta^2 \sin(x \pm \delta x)$ can become negative for large $\delta x$, which imposes an upper-bound constraint on the input $\delta x$.
-
-Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence} as $n \rightarrow \infty$,
-which converges when $P(x) < 1/\kappa$.
 \begin{align}
+\label{eqn: variance asymptotic}
+\lim_{n \rightarrow +\infty}& \zeta(n) - \zeta(j) \zeta(n-j) = \frac{\kappa^n}{n}; \\
 \label{eqn: log convergence}
 \delta^2 \log(x \pm \delta x) \simeq& \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j} \frac{1}{2n-j} 
 		= \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n) \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}  \nonumber \\
@@ -988,17 +981,26 @@ which converges when $P(x) < 1/\kappa$.
 		\begin{cases}		
  			\text{Gaussian}:	\nu(\kappa) = N(\kappa) \kappa\\
  			\text{Uniform}:	\nu(\kappa) = 1,\eqspace \kappa = \sqrt{3}
-		\end{cases};
-\end{align}
-
-Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence} after applying Vandermonde's identity $\sum_{k=0}^{r} \begin{pmatrix} m \\ k \end{pmatrix} \begin{pmatrix} n \\ r - k \end{pmatrix} = \begin{pmatrix} m + n \\ r \end{pmatrix}$ .  
-This expression converges when $P(x) \lesssim 1/\kappa$ although the precis upper bound for $P(x)$ varies with $c$.
-\begin{align}
+		\end{cases}; \\
 \label{eqn: pow convergence}
 \frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \simeq& \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) 
  	\sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
 	\simeq \nu(\kappa) \sum_{n = 1}^{+\infty} (P(x) \kappa)^{2n} \frac{\begin{pmatrix} 2c \\ 2n \end{pmatrix}}{2n};
 \end{align}
+
+For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge, e.g., when the input uncertainty is Laplace \cite{Probability_Statistics} so that $\zeta(2n) = (2n)!$.
+Thus, it is necessary that the input uncertainty is bounded.
+Formula \eqref{eqn: variance asymptotic} shows that the asymptotic behavior of $\zeta(n, \kappa)$ when $n \rightarrow \infty$ determines if Formula \eqref{eqn: Taylor 1d variance} will converge.
+
+Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
+However, as shown later in this pap, $\delta^2 \sin(x \pm \delta x)$ can become negative for large $\delta x$, which imposes an upper-bound constraint on the input $\delta x$.
+
+Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence} as $n \rightarrow \infty$,
+which converges when $P(x) < 1/\kappa$.
+
+Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence} after applying Vandermonde's identity $\sum_{k=0}^{r} \begin{pmatrix} m \\ k \end{pmatrix} \begin{pmatrix} n \\ r - k \end{pmatrix} = \begin{pmatrix} m + n \\ r \end{pmatrix}$ .  
+This expression converges when $P(x) \lesssim 1/\kappa$ although the precis upper bound for $P(x)$ varies with $c$.
+
 
 
 \subsection{Statistical Bounding}
@@ -1025,10 +1027,6 @@ When sampling from a distribution, the sample mean $\overline{x}$ and sample dev
 This yields the \emph{sample bounding leakage} $\epsilon(\kappa, N)$ for the interval $[\overline{x} - \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional bounding leakage} $\epsilon(\kappa)$ for the interval $[\mu - \varrho \sigma, \mu + \kappa \sigma]$.
 Because $\epsilon(\kappa) \neq \epsilon(\kappa, N)$ for finite $N$, let $\epsilon(\kappa) = \epsilon(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bonding range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bounding range}.
 
-When the underlying distribution is uniform, the portion of sampled range $[\overline{x} - \sqrt{3} \delta x, \overline{x} + \sqrt{3} \delta x]$ outside the actual range $[\mu - \sqrt{3} \sigma, \mu + \sqrt{3} \sigma]$ contributes to bounding leakage $\epsilon(N)$. 
-Figure \ref{fig: Bounding_Factor_Leakage} shows that $0 < \epsilon(N) \sim N^{-0.564}$ empirically.
-The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$, which should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
-
 \begin{align}
 \label{eqn: Gaussian theoretical bounding leakage} 
 \epsilon(\kappa) =&\; 1 - \xi(\frac{\kappa}{\sqrt{2}}); \\
@@ -1036,13 +1034,18 @@ The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$, which shou
 \epsilon(\kappa_s, N) = &\; 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
 \end{align}
 When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
-Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$.
-It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$. 
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ along the y-axis direction.
+It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
 Figure \ref{fig: Bounding_Factor_Leakage} further demonstrates that for smaller $\kappa_s$, $\kappa(\kappa_s, N)$ approaches $\kappa_s$ more rapidly as $N$ increases (e.g., $\kappa(2, 100) \simeq 2$ vs $\kappa(5, 1000) \simeq 5$), but converges to a larger stable bounding leakage (e.g., $\epsilon(2) = 4.55\;10^{-2}$ vs $\epsilon(5) = 5.73\;10^{-7}$).
 Figure \ref{fig: Bounding_Factor_Leakage} also indicates that when $N \geq 30$, the difference between $\epsilon(4, N)$ and $\epsilon(5, N)$ is less than $10^{-3}$, suggesting that $\kappa(\kappa_s, N)$ becomes stable when $\kappa_s \geq 4$.
 Moreover, according to  the 5-$\sigma$ rule, $\kappa(5, N)$ in Figure \ref{fig: Normal_Bounding_Leakage} should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
 
-$\kappa_s = \sqrt{3}$ and $\kappa_s = 5$ are defined as the ideal bounding ranges $\hat{\kappa}$ for the uniform and Gaussian distributions respectively.
+When the underlying distribution is uniform, the portion of sampled range $[\overline{x} - \sqrt{3} \delta x, \overline{x} + \sqrt{3} \delta x]$ outside the actual range $[\mu - \sqrt{3} \sigma, \mu + \sqrt{3} \sigma]$ contributes to bounding leakage $\epsilon(N)$. 
+Figure \ref{fig: Bounding_Factor_Leakage} shows that $0 < \epsilon(N) \sim N^{-0.564}$ empirically.
+The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$, which should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
+
+$\kappa_s = 5$ and $\kappa_s = \sqrt{3}$ are defined as the \emph{ideal bounding ranges} $\hat{\kappa}$ for the uniform and Gaussian distributions respectively.
+The bound moment $\zeta(n, \hat{\kappa})$ calculated by the ideal bounding range $\hat{\kappa}$ is defined as the \emph{ideal bound moment}.
 
 
 \subsection{Ideal Statistics}
@@ -1084,9 +1087,7 @@ Therefore it is sufficient to compute the stable variances $\widehat{\delta^2} f
 When the underlying uncertainty distribution is Uniform, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances are reached only when $N > 10^4$.
 The stable variance $\widehat{\delta^2} f$ is computed using Formula \eqref{eqn: uniform moment}.
 \end{itemize}
-
 Define the stable variance when the sample count $N$ is sufficient large as the \emph{ideal variance} $\widehat{\delta^2} f$, which assumes that the sample count $N$ is effectively infinite for each input.
-Ideal variances are consistent with traditional variances \cite{Probability_Statistics}.
 
 In both Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, the bonding leakage $\epsilon(N)$ decreases as the sample count $N$ increases.
 The stable resulting variances $\delta^2 f$ is reached only when $\epsilon(s, N) < 10^{-3}$.
@@ -1100,7 +1101,13 @@ An ideal ratio also applies to the corresponding uncertainty bias.
 The trends of uncertainty biases $\overline{f} - f$ versus sample count $N$ are exactly as those in Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, except that  $\overline{x} - x = 0$.
 This similarity is expected because the first-order approximation in both Formula \eqref{eqn: Taylor 1d mean} and Formula \eqref{eqn: Taylor 1d variance} contains $\sigma^2 \zeta(2)$. 
 
-Statistical Taylor expansion outputs ideal uncertainty, ideal uncertainty bias, and ideal ratio for the chosen ideal bounding ranges, in which the ideal ratio quantifies the reliability of the ideal uncertainty and ideal uncertainty bias.
+In statistical Taylor expansion, every calculation should be carried out twice:
+\begin{enumerate}
+\item With the ideal $\zeta(n, \hat{\kappa})$ of each input, to obtain the ideal variances and ideal uncertainty offset.
+Ideal variance is consistent with traditional variance \cite{Probability_Statistics}.
+
+\item With the real $\zeta(n, \kappa)$ of each input given the sample count and input uncertainty distribution, to obtain the ideal ratio to quantify the reliability of the ideal variance and ideal uncertainty bias as a value in the range of $[0, 1)$.
+\end{enumerate}
 
 
 
@@ -3396,6 +3403,7 @@ The choice of ideal bounding range $\hat{\kappa}$ needs further study.
 For example, the choice of $\hat{\kappa} = 5$ for Normal distribution is based on the $5-\sigma$ rule in practice only.
 Such choice certainly can not be applied to other distributions.
 Also, the choice of ideal bounding range $\hat{\kappa}$ determines the convergence of both $\log(x)$ and $x^c$ as $P(x) \lesssim 1/\hat{\kappa}$, which needs better mathematical understanding.
+The condition for Formula \eqref{eqn: variance asymptotic} seems to be as generic as the definition in Formula \eqref{eqn: bound moment} which needs further proof.
 
 Cases where $\delta^2 f < \widehat{\delta^2} f$ due to low sample count require further theoretical study and experimental verification.
 
