@@ -991,15 +991,16 @@ Formula \eqref{eqn: uniform moment} provides $\zeta(2n)$ while $\zeta(2n + 1) = 
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge, e.g., when the input uncertainty is Laplace \cite{Probability_Statistics} so that $\zeta(2n) = (2n)!$.
 Thus, it is necessary that the input uncertainty is bounded.
 Formula \eqref{eqn: variance asymptotic} shows that the asymptotic behavior of $\zeta(n, \kappa)$ when $n \rightarrow \infty$ determines if Formula \eqref{eqn: Taylor 1d variance} will converge.
-
-Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
+\begin{itemize}
+\item Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
 However, as shown later in this pap, $\delta^2 \sin(x \pm \delta x)$ can become negative for large $\delta x$, which imposes an upper-bound constraint on the input $\delta x$.
 
-Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence} as $n \rightarrow \infty$,
+\item Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence} as $n \rightarrow \infty$,
 which converges when $P(x) < 1/\kappa$.
 
-Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence} after applying Vandermonde's identity $\sum_{k=0}^{r} \begin{pmatrix} m \\ k \end{pmatrix} \begin{pmatrix} n \\ r - k \end{pmatrix} = \begin{pmatrix} m + n \\ r \end{pmatrix}$ .  
+\item Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence} after applying Vandermonde's identity $\sum_{k=0}^{r} \begin{pmatrix} m \\ k \end{pmatrix} \begin{pmatrix} n \\ r - k \end{pmatrix} = \begin{pmatrix} m + n \\ r \end{pmatrix}$ .  
 This expression converges when $P(x) \lesssim 1/\kappa$ although the precis upper bound for $P(x)$ varies with $c$.
+\end{itemize}
 
 
 
@@ -1037,15 +1038,10 @@ When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian theoret
 Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ along the y-axis direction.
 It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
 Figure \ref{fig: Bounding_Factor_Leakage} further demonstrates that for smaller $\kappa_s$, $\kappa(\kappa_s, N)$ approaches $\kappa_s$ more rapidly as $N$ increases (e.g., $\kappa(2, 100) \simeq 2$ vs $\kappa(5, 1000) \simeq 5$), but converges to a larger stable bounding leakage (e.g., $\epsilon(2) = 4.55\;10^{-2}$ vs $\epsilon(5) = 5.73\;10^{-7}$).
-Figure \ref{fig: Bounding_Factor_Leakage} also indicates that when $N \geq 30$, the difference between $\epsilon(4, N)$ and $\epsilon(5, N)$ is less than $10^{-3}$, suggesting that $\kappa(\kappa_s, N)$ becomes stable when $\kappa_s \geq 4$.
-Moreover, according to  the 5-$\sigma$ rule, $\kappa(5, N)$ in Figure \ref{fig: Normal_Bounding_Leakage} should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
 
 When the underlying distribution is uniform, the portion of sampled range $[\overline{x} - \sqrt{3} \delta x, \overline{x} + \sqrt{3} \delta x]$ outside the actual range $[\mu - \sqrt{3} \sigma, \mu + \sqrt{3} \sigma]$ contributes to bounding leakage $\epsilon(N)$. 
 Figure \ref{fig: Bounding_Factor_Leakage} shows that $0 < \epsilon(N) \sim N^{-0.564}$ empirically.
 The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$, which should be used as $\kappa$ in Formula \eqref{eqn: bound moment}.
-
-$\kappa_s = 5$ and $\kappa_s = \sqrt{3}$ are defined as the \emph{ideal bounding ranges} $\hat{\kappa}$ for the uniform and Gaussian distributions respectively.
-The bound moment $\zeta(n, \hat{\kappa})$ calculated by the ideal bounding range $\hat{\kappa}$ is defined as the \emph{ideal bound moment}.
 
 
 \subsection{Ideal Statistics}
@@ -1079,27 +1075,28 @@ When sample count $N \rightarrow \infty$, $\zeta(0) \rightarrow 1$, $\zeta(2) \r
 Such relationship of $\delta^2 f$ versus sample count $N$ is general:
 \begin{itemize}
 \item
-When the underlying uncertainty distribution is Gaussian, Figure \ref{fig: Normal_Function} shows that the resulting variance $\delta^2 f$ for a selected functions rise with $N$ until reaching the corresponding stable values $\widehat{\delta^2} f$ when $N \geq 50$.
-When $N = 20$ and $\kappa_s = 5$, $\kappa = 3.8$ according to Figure \ref{fig: Normal_Bounding_Leakage}.
-Therefore it is sufficient to compute the stable variances $\widehat{\delta^2} f$ with $\zeta(n, 5)$.
+When the underlying uncertainty distribution is Gaussian and $\kappa_s = 5$, Figure \ref{fig: Normal_Function} shows that the resulting variance $\delta^2 f$ for a selected functions rise with $N$ until reaching the corresponding stable values $\widehat{\delta^2} f$ when $N \geq 50$.
 
 \item
-When the underlying uncertainty distribution is Uniform, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances are reached only when $N > 10^4$.
-The stable variance $\widehat{\delta^2} f$ is computed using Formula \eqref{eqn: uniform moment}.
+When the underlying uncertainty distribution is Uniform, $\kappa_s = \sqrt{3}$, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances are reached only when $N > 10^4$.
 \end{itemize}
-Define the stable variance when the sample count $N$ is sufficient large as the \emph{ideal variance} $\widehat{\delta^2} f$, which assumes that the sample count $N$ is effectively infinite for each input.
+The trends of uncertainty biases $\overline{f} - f$ versus sample count $N$ are exactly as those in Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, except that  $\overline{x} - x = 0$.
+This similarity is expected because the first-order approximation in both Formula \eqref{eqn: Taylor 1d mean} and Formula \eqref{eqn: Taylor 1d variance} contains $\sigma^2 \zeta(2)$. 
 
 In both Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, the bonding leakage $\epsilon(N)$ decreases as the sample count $N$ increases.
 The stable resulting variances $\delta^2 f$ is reached only when $\epsilon(s, N) < 10^{-3}$.
 All functions approach their corresponding ideal variances with exactly the same trend.
-These observations suggest that bounding leakage is the reason for $\delta^2 f < \widehat{\delta^2} f$ and it is justified to infer confidential interval range $\kappa$ from bounding leakage $\epsilon(N)$.
+These observations suggest that bounding leakage is the reason for $\delta^2 f < \widehat{\delta^2} f$ and it is justified to infer the confidential interval range $\kappa$ from bounding leakage $\epsilon(N)$.
+
+Define the stable variance when the sample count $N$ is sufficient large as the \emph{ideal variance} $\widehat{\delta^2} f$.
 Define $\alpha \equiv \delta^2 f/\widehat{\delta^2} f \in [0, 1]$ as the \emph{ideal ratio}, which quantifies the reliability for $\widehat{\delta^2} f$  due to insufficient sample count $N$ for the given underlying distribution.
 Define the ideal ratio to be zero when the sample count $N$ is $1$.
 When there are multiple inputs each with its own ideal ratio $\alpha=\zeta(2, \kappa)$, Formula \eqref{eqn: sum leakage} demonstrates an example on how to calculate the resulting ideal ratio $\alpha$ for $x \pm y$.
 
-An ideal ratio also applies to the corresponding uncertainty bias.  
-The trends of uncertainty biases $\overline{f} - f$ versus sample count $N$ are exactly as those in Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, except that  $\overline{x} - x = 0$.
-This similarity is expected because the first-order approximation in both Formula \eqref{eqn: Taylor 1d mean} and Formula \eqref{eqn: Taylor 1d variance} contains $\sigma^2 \zeta(2)$. 
+The choice of $\kappa_s$ to calculate  $\widehat{\delta^2} f$ and $\alpha$ is defined as the ideal bounding range $\hat{\kappa}$.
+For Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
+When the input distribution is unbounded, the choice of $\hat{\kappa}$ is a trade-off: a larger $\hat{\kappa}$ means a better reliability for the result but a narrower convergence range for the inputs.
+For Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements},  $\hat{\kappa} = 5$.
 
 In statistical Taylor expansion, every calculation should be carried out twice:
 \begin{enumerate}
@@ -1344,20 +1341,24 @@ When $c$ is a natural number, $\delta x$ has no upper bound; however, such cases
 \label{fig: Pow_Conv_Edge_Uniform}
 \end{figure}
 
-From Formula \eqref{eqn: log convergence}, the convergence condition applied to $\log(x \pm \delta x)$ is $P(x) \leq 1/\kappa = 1/5$, which is numerically confirmed as $P(x) \lesssim 0.20086$.
-Beyond this upper bound, the expansion is no longer monotonic.
-Variance arithmetic rejects the distributional zero of $\log(x)$ in the range of $[x - \delta x, x + \delta x]$ statistically due to the divergence of Formula \eqref{eqn: log precision} mathematically, with $\zeta(2n)$ providing the connection between these two perspectives.
+Beyond an upper bound $\delta x$, the expansion is no longer monotonic for $e^{x \pm \delta x}$, $\log(x \pm \delta x)$, and $(x \pm \delta x)^c$.
+Variance arithmetic rejects the distributional zero of $\log(x)$ or $(x \pm \delta x)^c$ in the range of $P(x) \lesssim 1/\hat{\kappa}$ statistically due to the divergence of Formula \eqref{eqn: log precision} mathematically, with $\zeta(2n, \kappa)$ providing the connection between these two perspectives.
 
-For $e^{x \pm \delta x}$ the convergence holds for $\delta x \lesssim 19.864$ regardless of $x$, while the result $\delta \log(x \pm \delta x) \lesssim 0.213$  regardless of $x$.
-These limits follow directly from the relationship $\delta x \rightarrow P(e^x)$ and $P(x) \rightarrow \delta \log(x)$, as indicated in  Formula \eqref{eqn: exp precision} and \eqref{eqn: log precision}.
+For Gaussian input uncertainty with $\hat{\kappa} = 5$:
+\begin{itemize}
+\item 
+For $e^{x \pm \delta x}$, $\delta x \lesssim 19.864$ and $(e^{x \pm \delta x}) \lesssim 1681.767$ regardless of $x$.
+These limits follow directly from the relationship $\delta x \rightarrow P(e^x)$, as indicated in Formula \eqref{eqn: exp precision}.
 
-From Formula \eqref{eqn: pow convergence}, and except when $c$ is a natural number, Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ converges near $P(x) \simeq 1/\kappa = 1/5$, with the upper bound $P(x)$ increasing with $c$. 
-This trend is approximately confirmed in Figure \ref{fig: Pow_Conv_Edge}, and the expansion is no longer monotonic beyond the upper bound $P(x)$.
-Qualitatively, $\delta^2 1/x$ converges more slowly than $\delta^2 \sqrt{x}$,  consistent with Formula \eqref{eqn: inversion precision} and \eqref{eqn: square root precision}.
+\item 
+For $\log(x \pm \delta x)$, $P(x) \lesssim 0.20086$ and $\delta \log(x \pm \delta x) \lesssim 0.213$ regardless of $x$.
+These limits follow directly from the relationship $P(x) \rightarrow \delta \log(x)$, as indicated in Formula \eqref{eqn: log precision}.
+\end{itemize}
+For $(x \pm \delta x)^c$, except when $c$ is a natural number, the upper bound $P(x)$ is close to $\hat{\kappa}$ but increasing with $c$. 
+This trend is confirmed in Figure \ref{fig: Pow_Conv_Edge} for Gaussian input distribution and Figure \ref{fig: Pow_Conv_Edge_Uniform} for uniform input distribution.
+The bounded momentum $\zeta(2n, \hat{\kappa})$ for Uniform distribution is much less than that for Normal distribution, such that the expansion contains $652$ terms instead of $448$ terms.
+When normalized by the respective $\kappa$, the upper bounds of input uncertainty in Figure \ref{fig: Pow_Conv_Edge} and \ref{fig: Pow_Conv_Edge_Uniform} looks identical, however, the resulting uncertainty biases and uncertainties in Figure \ref{fig: Pow_Conv_Edge} are $3$ order-of-magnitude smaller than those in Figure \ref{fig: Pow_Conv_Edge_Uniform} when the exponent $c$ is less than $0$, showing the effect of input uncertainty distribution.
 
-When the input uncertainty is Uniformly distributed, Figure \ref{fig: Pow_Conv_Edge_Uniform} illustrates that the input uncertainty upper bound is close to $1/\kappa=/\sqrt{3}$ according to Formula \eqref{eqn: pow convergence}.
-The bounded momentum $\zeta(2n)$ for Uniform distribution is much less than that for Normal distribution, such that the expansion contains $652$ terms instead of $448$ terms.
-The upper bounds of input uncertainty in Figure \ref{fig: Pow_Conv_Edge} and \ref{fig: Pow_Conv_Edge_Uniform} looks identical, however, the resulting uncertainty biases and uncertainties in Figure \ref{fig: Pow_Conv_Edge} are $3$ order-of-magnitude smaller than those in Figure \ref{fig: Pow_Conv_Edge_Uniform} when the exponent $c$ is less than $0$.
 Even a result converges, it can still be abandoned due to too large uncertainty bias or uncertainty.
 
 
@@ -1389,10 +1390,10 @@ The x-axis is expressed in units of $\pi$.
 
 
 In some cases, the variance expansion may yield negative results, as in Formula \eqref{eqn: sin precision} for $sin(x \pm \delta x)$.
-Figure \ref{fig: Sin_Conv_Edge} shows that the upper bound of $\delta x$ for $sin(x \pm \delta x)$ varies periodically between $0.318 \pi$ and $0.416 \pi$.
+Figure \ref{fig: Sin_Conv_Edge} shows that the upper bound of $\delta x$ for $sin(x \pm \delta x)$ varies periodically between $0.318 \pi$ and $0.416 \pi$ for Gaussian input uncertainty.
 Beyond this upper bound, the expansion is no longer positive.
 
-In Figure \ref{fig: Sin_Conv_Edge_Uniform}, when the bounded momentum $\zeta(2n)$ for Uniform distribution is used instead of that for Normal distribution, the input uncertainty upper bound is $4$ times larger than that in Figure \ref{fig: Sin_Conv_Edge} but is still periodic.
+In Figure \ref{fig: Sin_Conv_Edge_Uniform} for Uniform input uncertainty, the input uncertainty upper bound is $4$ times larger than that in Figure \ref{fig: Sin_Conv_Edge} but is still periodic.
 The resulting uncertainty increases not much and still remains less than $1$.
 
 
@@ -1652,15 +1653,6 @@ The residual error magnitude increases as $|x| \rightarrow 1$, reaching approxim
 
 \subsection{Continuity}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Pow_at_x=0.pdf} 
-\captionof{figure}{
-Histograms of normalized errors for $(x \pm 0.2)^n$, with $x = 0, -0.2, +0.2$, and $n = 2, 3$, as indicated in the legend.
-}
-\label{fig: Poly_Continuity}
-\end{figure}
-
 \begin{table}
 \centering
 \resizebox{\textwidth}{!}{
@@ -1689,7 +1681,20 @@ For example, $\delta x$ has an upper bound for $(x \pm \delta x)^c$ to converge 
 The result mean, variance and histogram of $(x \pm \delta x)^c$ remain continuous around $c = n$.
 Table \ref{tbl: power continuity} shows that the result of $(1 \pm \delta x)^{n \pm d}$ where $0 < d \ll 1$ is very close to that of $(1 \pm \delta x)^n$, even though the former has an upper bound for $\delta x$, while the latter does not.
 
-A statistical bounding range in variance arithmetic can include a distributional pole if the analytic function is defined in its vicinity.
+
+
+\subsection{Distributional Hole}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Pow_at_x=0.pdf} 
+\captionof{figure}{
+Histograms of normalized errors for $(x \pm 0.2)^n$, with $x = 0, -0.2, +0.2$, and $n = 2, 3$, as indicated in the legend.
+}
+\label{fig: Poly_Continuity}
+\end{figure}
+
+A statistical bounding range in variance arithmetic can include a distributional pole if the analytic function is defined in its vicinity, such as around $(0 \pm \delta x)^c, c > 1$.
 The presence of such poles does not disrupt the continuity of the result mean, variance, or histogram.
 Figure \ref{fig: Poly_Continuity} illustrates the histograms of $(x \pm 0.2)^n$ when $x = 0, -0.2, +0.2$ and $n = 2, 3$.
 \begin{itemize}
@@ -1830,7 +1835,9 @@ Figure \ref{fig: Log_Dev} shows that the uncertainties calculated using Formula 
 \subsection{Power}
 
 Figure \ref{fig: Pow_Dev} shows that the uncertainties calculated for $(1 \pm \delta x)^c$ using Formula \eqref{eqn: power precision} fit closely with the measured value deviations for $(1 + \delta x)^c$, with the error deviations remaining near $1$.
-Figure \ref{fig: Pow_Exp_Dev} reveals that the error deviations of $\sin(x + \delta x)$ remain close to $1$ for all input exponents $c$ and input uncertainties $\delta x > 10^{15}$.
+Figure \ref{fig: Pow_Exp_Dev} reveals that the error deviations of $(x + \delta x)^c$ remain close to $1$ for all input exponents $c$ and input uncertainties $\delta x > 10^{15}$.
+
+Figure \ref{fig: Pow_Exp_Dev} shows a typical desired relation of error deviation versus input noise deviation $\delta x$ and another parameter, with the error deviations always close to $1$ when the result variance of Formula \ref{eqn: Taylor 1d variance} and \ref{eqn: Taylor 2d variance} tracks the corresponding value errors closely, except when $\delta x$ is close to $0$ so that input noise can no longer overpower floating-point rounding errors.
 
 
 
@@ -3398,12 +3405,12 @@ For example, the uncertainty of a 64-bit value can not directly determined by it
 
 Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions.
 The statistical bounding to find the bounding range $\kappa$ for the bounded moment needs to be extended to discrete distributions.
-
-The choice of ideal bounding range $\hat{\kappa}$ needs further study.
-For example, the choice of $\hat{\kappa} = 5$ for Normal distribution is based on the $5-\sigma$ rule in practice only.
-Such choice certainly can not be applied to other distributions.
-Also, the choice of ideal bounding range $\hat{\kappa}$ determines the convergence of both $\log(x)$ and $x^c$ as $P(x) \lesssim 1/\hat{\kappa}$, which needs better mathematical understanding.
+The choice of ideal bounding range $\hat{\kappa}$ needs further study to extend to other distributions.
 The condition for Formula \eqref{eqn: variance asymptotic} seems to be as generic as the definition in Formula \eqref{eqn: bound moment} which needs further proof.
+
+The convergence of statistical Taylor expansion is quite similar to the re-normalization in quantum field theory: 
+The result diverges for a theoretical distribution, but converges after introducing sampling.
+This similarity needs further study.
 
 Cases where $\delta^2 f < \widehat{\delta^2} f$ due to low sample count require further theoretical study and experimental verification.
 
