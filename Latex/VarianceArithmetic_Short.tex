@@ -140,7 +140,7 @@ It also shows that for a reversible transformation, the original input uncertain
 
 \subsection{The Uncorrelated Uncertainty Condition}
 
-When there is no systematic error \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements} among the inputs, the uncertainties of the inputs are uncorrelated of each other, even though there may be significant correlations among the inputs.
+When there is no systematic error \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements} among the inputs, the uncertainties of the inputs are uncorrelated to each other, even though there may be significant correlations among the inputs.
 This condition can be characterized quantitatively in statistics as the \emph{uncorrelated uncertainty condition} \cite{Prev_Precision_Arithmetic}.
 
 
@@ -168,6 +168,7 @@ The horizontal axis is scaled as $\tilde{y}^2$.
 \label{fig: Square_Root_Distribution}
 \end{figure}
 
+Let $\rho(\tilde{x}, \mu, \sigma)$ denote the probability density function of a random variable $\tilde{x}$ with the distribution mean $\mu$ and distribution deviation $\sigma$.
 Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, so that its inverse function $\tilde{x} = f^{-1}(\tilde{y})$ exists.
 Formula \eqref{eqn: function distribution} shows the probability density function of $\tilde{y}$ \cite{Statistical_Methods}\cite{Probability_Statistics}.
 In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in terms of either $\tilde{x}$ or $\tilde{y}$, which are simply different representations of the same underlying random variable.
@@ -197,7 +198,6 @@ In both Figure \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distribu
 
 \subsection{Statistical Taylor Expansion}
 
-Let $\rho(\tilde{x}, \mu, \sigma)$ denote the probability density function of a random variable $\tilde{x}$ with the distribution mean $\mu$ and distribution deviation $\sigma$.
 Define $\tilde{z} \equiv (\tilde{x} - \mu)/\sigma$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, \mu, \sigma)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$.
 
 \begin{align}
@@ -260,7 +260,7 @@ When $N \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kap
 Formula \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and variance for $e^x$, respectively:
 \begin{align}
 \label{eqn: exp mean}
-\frac{\overline{e^x}}{e^x}  &= \sum_{n=0}^{\infty} \sigma^n \zeta(n) \frac{1}{n!}; \\
+\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=1}^{\infty} \sigma^n \zeta(n) \frac{1}{n!}; \\
 \label{eqn: exp precision}
 \frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} \sigma^n \sum_{j=1}^{n-1} \frac{\zeta(n) - \zeta(j) \zeta(n - j)}{j!\;(n - j)!};
 \end{align}
@@ -511,12 +511,12 @@ Consequently, the following numerical rules are introduced:
 
 \item \emph{monotonic}: As a necessary condition for convergence, the last $20$ terms of the expansion must decrease monotonically in absolute value, ensuring that the probability of the expansion exhibiting an absolute increase is no more than $2^{-20} = 9.53\; 10^{-7}$.
 
-\item \emph{positive}: The variance must be positive.
+\item \emph{positive}: At every order, the expansion variance must be positive.
 
 \item \emph{stable}: To avoid truncation error \cite{Numerical_Recipes}, the value of the last expansion term must be less than $\epsilon$ times of both the result uncertainty and the result absolute value, in which $\epsilon \simeq5.73\;10^{-7}$ is the bounding leakage for Gaussian distribution with ideal bounding range $\hat{\kappa} = 5$.
 This rule ensures sufficiently fast convergence in the context of monotonic convergence.
 
-\item \emph{reliable}: At every order, the uncertainty of the variance must be less than $1/5$ times of the value of the variance.
+\item \emph{reliable}: At every order, the uncertainty of the variance must be less than $1/5$ times the value of the variance.
 
 \end{itemize}
 
@@ -563,7 +563,7 @@ For $(x \pm \delta x)^c$, except when $c$ is a natural number, the upper bound $
 This trend is confirmed in Figure \ref{fig: Pow_Conv_Edge}.
 \end{itemize}
 Similar trends holds when the input uncertainty is uniform but with different values.
-For example, after the respective upper bound $P(x)$ for $(x \pm \delta x)^c$ are normalized by the corresponding $\hat{\kappa}$, they shows almost the same trends of increasing with $c$.
+For example, after the respective upper bound $P(x)$ for $(x \pm \delta x)^c$ are normalized by the corresponding $\hat{\kappa}$, they show almost the same trends of increasing with $c$.
 
 
 \subsection{Positive}
@@ -583,7 +583,7 @@ The x-axis is expressed in units of $\pi$.
 In some cases, the variance expansion may yield negative results, as in Formula \eqref{eqn: sin precision} for $sin(x \pm \delta x)$.
 Figure \ref{fig: Sin_Conv_Edge} shows that the upper bound of $\delta x$ for $sin(x \pm \delta x)$ varies periodically between $0.318 \pi$ and $0.416 \pi$ for Gaussian input uncertainty.
 Beyond this upper bound, the expansion is no longer positive.
-Similar trends holds when the input uncertainty is uniform but with larger upper bound $\delta x$.
+Similar trend holds when the input uncertainty is uniform but with larger upper bound $\delta x$.
 
 
 
@@ -617,7 +617,7 @@ However, if the input uncertainty is known only to order of magnitude, \emph{pro
 
 When an input contains unspecified errors, such as numerical errors in library functions or floating-point rounding errors, Gaussian noise with progressively increasing deviations can be added, until ideal coverage is attained.
 The minimal noise deviation required provides a good estimate of the magnitude of the unspecified input uncertainty deviations, for example, empirically, $10^{-15}$ such noise is enough if floating-point rounding errors is the only unspecified uncertainty.
-Achieving ideal coverage serves as a necessary verification step to ensure that statistical Taylor expansion have been applied correctly within the given context.
+Achieving ideal coverage serves as a necessary verification step to ensure that statistical Taylor expansion has been applied correctly within the given context.
 The input noise range that yields ideal coverage defines the ideal application range for input uncertainties.
 
 
@@ -755,7 +755,7 @@ Normalized errors of $(x^p)^{\frac{1}{p}} - x$ as functions of $x$ and $p$.
 \end{figure}
 
 
-Table \ref{tbl: basic functions} shows that Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} provides almost perfect deviation for the result values which are calculated using corresponding math library functions by sampling from Gaussian input noise with $\delta x$ as distributional deviation.
+Table \ref{tbl: basic functions} shows that Formula \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} provide almost perfect deviation for the result values which are calculated using corresponding math library functions by sampling from Gaussian input noise with $\delta x$ as distributional deviation.
 Table \ref{tbl: basic functions} shows the results from Python, which differs slightly from those from either C++ or Java.
 
 Figure \ref{fig: Pow_Exp_Dev} shows that the error deviations of $(1 + \delta x)^c$ are very close to $1$ for all input exponents $c$ and input uncertainties $\delta x > 10^{15}$.
@@ -803,7 +803,7 @@ The legend shows the size of the matrix, as well as the type of the matrix as \t
 
 
 Let $[j_1, j_{2} \dots j_m]_n$ denote a permutation of length $m$ from the vector $(1,2\dots n)$, and let $<j_1, j_{2} \dots j_m>_n$ for the ordered permutation of length $m$ \cite{Linear_Algebra}.  
-Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant of a a square matrix $\mathbf{M}$ of size $n$, when the uncertainties of matrix elements are all independent of each other.
+Formula \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant of a square matrix $\mathbf{M}$ of size $n$, when the uncertainties of matrix elements are all independent of each other.
 In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is the sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indices, and $[j_1 \dots j_m]_n$ contains the column indices. 
 \begin{align}
 \label{eqn: determinant mean}
@@ -859,9 +859,9 @@ Thus, determinant precision can replace matrix condition number.
 
 \begin{align}
 \label{eqn: Fourier forward}
-& H[n]=\sum_{k=0}^{N-1} h[k] \; e^{\frac{i 2\pi}{N} k n}; \\
+H[n] &=\sum_{k=0}^{N-1} h[k] \; e^{\frac{i 2\pi}{N} k n}; \\
 \label{eqn: Fourier reverse}
-& h[k]=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{-\frac{i 2\pi}{N} n k};
+h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{-\frac{i 2\pi}{N} n k};
 \end{align}
 For each signal sequence $h[k]$, where $k = 0, 1 \dots  N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1 \dots  N-1$, along with its inverse transformation, is defined by Formula \eqref{eqn: Fourier forward} as the forward transformation, and \eqref{eqn: Fourier reverse} as the reverse transformation, respectively \cite{Numerical_Recipes}.
 In these expressions, $k$ denotes the \emph{time index} while $n$ represents the \emph{frequency index}.
@@ -875,37 +875,11 @@ To avoid the modeling errors inherent in DFT, only Formula \eqref{eqn: Fourier f
 
 \subsection{FFT (Fast Fourier Transformation)}
 
-\iffalse
-
-Forward:
-\begin{align*}
-L = 1:\;& o=0: & [0, 1]; \\
- & o = 1: & F = [0 + 1, 0 - 1]; \\
-L = 2:\;& o=0: & [0, 2, 1, 3]; \\
- & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
- & o = 2: & [0 + 1 + 2 + 3, 0 + i 1 - 2 - i 3 , 0 - 1 + 2 - 3, 0 - i 1 - 2 + i 3; \\
- & [0, 1, 0, -1]:& [0, i 2, 0, - i 2]; \\
- & [1, 0, -1, 0]:& [0, 2, 0, 2];
-\end{align*}
-
-Reverse:
-\begin{align*}
-L = 1:\;& o=0: & [0, 1]; \\
- & o = 1: & F = [0 + 1, 0 - 1]; \\
-L = 2:\;& o=0: & [0, 2, 1, 3]; \\
- & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
- & o = 2: & [0 + 1 + 2 + 3, 0 - i 1 - 2 + i 3 , 0 - 1 + 2 - 3, 0 + i 1 - 2 - i 3; \\
- & [0, i 2, 0, - i 2]:& [0, 4, 0, -4]; \\
- & [0, 2, 0, 2]:& [4, 0, -4, 0];
-\end{align*}
-
-\fi
-
 
 When $N = 2^{L}$, where $L$ is a natural number, the generalized Danielson-Lanczos lemma can be applied to DFT to produce  FFT \cite{Numerical_Recipes}. 
 \begin{itemize}
 
-\item For each output, each input is used only once, therefore no dependency problem arises when decomposing FFT into arithmetic operations as Formula \eqref{eqn: addition mean}, \eqref{eqn: addition variance}, \eqref{eqn: multiplication mean}, and \eqref{eqn: multiplication variance}.
+\item For each output, each input is used only once, therefore no dependency problem arises when decomposing FFT into arithmetic operations such as Formula \eqref{eqn: addition mean}, \eqref{eqn: addition variance}, \eqref{eqn: multiplication mean}, and \eqref{eqn: multiplication variance}.
 
 \item When $L$ is large, the substantial volume of input and output data enables high-quality statistical analysis.
 
@@ -1001,7 +975,7 @@ To minimize numerical errors in computing $\sin(x)$, the following \emph{indexed
 The constructed indexed $\sin(x)$ is referred to as the \emph{Quart} indexed sine function.
 In contrast, the direct use of the standard library $\sin(x)$ is referred to as the \emph{Library} sine function.
 
-Because the the Quart sine function strictly preserves the symmetry and periodicity of sine function, it provides superior numerical accuracy compared to Library function.
+Because the Quart sine function strictly preserves the symmetry and periodicity of sine function, it provides superior numerical accuracy compared to Library function.
 \begin{itemize}
 \item Figure \ref{fig: Sin_Diff} shows that the value difference between the Quart and Library $\sin(x)$ and the Quart $\sin(x)$ increases approximately linearly with $|x|$.
 
@@ -1025,9 +999,9 @@ The FFT order is $18$.
 
 The error deviations resemble Figure \ref{fig: Pow_Exp_Dev} but with FFT order as the specific dimension, independent of Sin or Cos signals, or frequency of the signals.
 Therefore, the results for Sin and Cos signals across all frequencies are pooled together for statistical analysis, under the unified category \emph{Sin/Cos} signals.
-When the FFT order $L$ is less than 8, the error deviations deviates from $1$ due to insufficient sample count of $2^L$.
+When the FFT order $L$ is less than 8, the error deviations deviate from $1$ due to insufficient sample count of $2^L$.
 
-Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows that the error distribution of Sin/Cos signal resemble Gaussian distribution, with an additional Delta-like distribution at zero.
+Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows that the error distributions of Sin/Cos signal resemble Gaussian distribution, with an additional Delta-like distribution at zero.
 Detailed analysis reveals that the Delta-like distribution is caused by floating-point rounding errors.
 Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} further demonstrates that the reverse transformation is more sensitive to imperfections in Quart sine function, because its error distribution is structured.
 
@@ -1047,9 +1021,9 @@ The FFT order is $18$.
 \begin{figure}[p]
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Spec_Lib.pdf} 
 \captionof{figure}{
-FFT value error specturm of $\sin(3 \frac{2 \pi}{2^6} j)$ computed using either the Library sine function or \textit{SciPy} after the forward transformation.
-The legend distinguishes between the uncertainty and the value error.
-The x-axis represents the frequency index, while the y-axis represents both the uncertainty and the value error.
+FFT value error spectrum of $\sin(3 \frac{2 \pi}{2^6} j)$ computed using either the Library sine function or \textit{SciPy} after the forward transformation.
+The legend distinguishes between uncertainty and value error.
+The x-axis represents the frequency index, while the y-axis represents both uncertainty and value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Spec_Lib}
 \end{figure}
@@ -1058,8 +1032,8 @@ The x-axis represents the frequency index, while the y-axis represents both the 
 \includegraphics[height=2.5in]{FFT_Sin_Clean_6_3_Wave_Lib.pdf} 
 \captionof{figure}{
 FFT value error waveform of $\sin(3 \frac{2 \pi}{2^6} j)$ computed using either the Library sine function or \textit{SciPy} after the reverse transformation.
-The legend distinguishes between the uncertainty and the value error.
-The x-axis represents the time index, while the y-axis represents both the uncertainty and the value error.
+The legend distinguishes between uncertainty and value error.
+The x-axis represents the time index, while the y-axis represents both uncertainty and value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Wave_Lib}
 \end{figure}
@@ -1069,7 +1043,7 @@ The x-axis represents the time index, while the y-axis represents both the uncer
 \captionof{figure}{
 FFT value error waveform of $\sin(3 \frac{2 \pi}{2^6} j)$ computed using either the Library sine function or \textit{SciPy} after the roundtrip transformation.
 The legend distinguishes between the uncertainty and the value error.
-The x-axis represents the frequency index, while the y-axis represents both the uncertainty and the value error.
+The x-axis represents the frequency index, while the y-axis represents both uncertainty and value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Roundtrip_Lib}
 \end{figure}
@@ -1101,7 +1075,7 @@ Figure \ref{fig: Lib_Reverse_Error_vs_Freq_Order} demonstrates that the error de
 Figure \ref{fig: Sin_Diff} indicates that the numerical errors using the Library sine function increase with a periodicity of $\pi$, which may resonate with a signal whose periodicity of an integer multiply of $\pi$, producing the resonant pattern in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
 At higher frequency, the resonant beats between the signal and the numerical errors in the Library sine function become stronger.
 To suppress this numerical error resonances, an input noise level of approximately $10^{-14}$ input noise must be added to the sine or cosine signals.
-Such resonance of numerical errors seem to have not been discussed before in the literature.
+Such resonance of numerical errors seems to have not been discussed before in the literature.
 
 
 
@@ -1137,12 +1111,12 @@ The FFT order is $18$.
 
 Figure \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} show the error deviation for the forward and reverse transformations, respectively. 
 The forward transformation exhibits a broader ideal coverage area than the reverse transformations when $\delta x \rightarrow 0$, which is consistent with more sensitivity of the reverse transformation to calculation errors.
-In other areas, both transformation achieve proper coverage with error values around $1$.
+In other areas, both transformations achieve proper coverage with error values around $1$.
 
-When $\delta x \rightarrow 0$, the error distribution of reverse transformation in Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} is narrower than that in Figure \ref{fig: FFT_SinCos_Clean_Histo_Lib}.
+When $\delta x = 0$, the error distribution of reverse transformation in Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} is narrower than that in Figure \ref{fig: FFT_SinCos_Clean_Histo_Lib}.
 The corresponding error deviations are $1.5 < 6.2$, respectively.
 
-The error deviations for the round-trip transformation resembles Figure \ref{fig: Forward_Error_vs_Size_Noise} but with FFT order as the specific dimension.
+The error deviations for the round-trip transformation resemble Figure \ref{fig: Forward_Error_vs_Size_Noise} but with FFT order as the specific dimension.
 
 
 
@@ -1187,7 +1161,7 @@ Error deviation (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis
 \end{figure}
 
 
-Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse error distribution when $\delta x = 0$ is no longer bounded.
+Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse error distribution when $\delta x = 0$ is no longer bound.
 The difference between Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} and Figure \ref{fig: FFT_Linear_Clean_Histo_Indexed} is consistent with the large numerical errors as demonstrated in Figure \ref{fig: Cot_Diff}.
 Variance arithmetic fails because of the large amount of unspecified input uncertainties without added noise.
 
@@ -1199,7 +1173,7 @@ At sufficiently high FFT orders, visually beyond FFT order $25$ for the reverse 
 Although FFT is widely regarded as one of the most robust numerical algorithms, and generally insensitive to input errors, it can still fail due to numerical errors in the Library sine function.
 Such deterioration in calculation accuracy is not easily detectable when using conventional floating-point arithmetic.
 
-Figure \ref{fig: FFT_Linear_Lib_Roudtrip_ErrorDev_vs_Noise_Order} shows that, even when variance arithmetic arithmetic can no longer effectively track the value errors for neither the forward nor the reverse transformation, it can still effectively track the value errors for the round-trip transformation, as the plateau region in the figure.
+Figure \ref{fig: FFT_Linear_Lib_Roudtrip_ErrorDev_vs_Noise_Order} shows that, even when variance arithmetic can no longer effectively track the value errors for neither the forward nor the reverse transformation, it can still effectively track the value errors for the round-trip transformation, as the plateau region in the figure.
 Such error cancellation is due to dependence tracing in statistical Taylor expansion.
 
 
@@ -1219,15 +1193,15 @@ Adding noise to the input can suppress unspecified input errors.
 After adding a Gaussian input noise of $\delta x = 10^{-3}$ to a Linear signal when using the Library sine function, the error distributions for both forward and reverse transformations become Gaussian, while the error distribution for the round-trip transformation becomes Delta.
 Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} illustrates the corresponding error deviations and uncertainty deviations versus FFT order:
 \begin{itemize}
-\item As expected, the result uncertainty deviations for the forward transformations increase with FFT order $L$ as $\sqrt{2}^L$.
+\item As expected, the resulting uncertainty deviations for forward transformations increase with FFT order $L$ as $\sqrt{2}^L$.
 
-\item As expected, the result uncertainty deviations for the reverse transformations decrease with FFT order $L$ as $1/\sqrt{2}^L$.
+\item As expected, the resulting uncertainty deviations for reverse transformations decrease with FFT order $L$ as $1/\sqrt{2}^L$.
 
-\item As expected, the result uncertainty deviations for the round-trip transformations remains equal to the corresponding input uncertainties of $10^{-3}$.
+\item As expected, the resulting uncertainty deviations for round-trip transformations remains equal to the corresponding input uncertainties of $10^{-3}$.
 
-\item As expected, the result error deviations for the forward and reverse transformations remain constant at $1$.
+\item As expected, the resulting error deviations for forward and reverse transformations remain constant at $1$.
 
-\item As expected, the result error deviation for the round-trip transformations is far less than $1$ but increases with FFT order $L$ exponentially due to increasing calculation.
+\item As expected, the resulting error deviations for round-trip transformations are far less than $1$ but increase with FFT order $L$ exponentially due to increasing calculation.
 \end{itemize}
 
 
@@ -1253,7 +1227,7 @@ A more detailed description of this paper is presented at  \url{https://arxiv.or
 
 \subsection{Improvements Needed}
 
-This paper presents statistical Taylor expansion and variance arithmetic which is still in early stage of development, with several important questions remaining.
+This paper presents statistical Taylor expansion and variance arithmetic, which is still in early stage of development, with several important questions remaining.
 
 Library mathematical functions should be recalculated using variance arithmetic, so that each output value is accompanied by its corresponding uncertainty.
 Without this refinement, the value errors in the library functions can produce unpredictable and potentially significant effects on numerical results.
@@ -1288,7 +1262,7 @@ Reconciling these two paradigms may present a significant and ongoing challenge.
 
 Establishing theoretical foundation for applying statistical Taylor expansion in the absence of a closed-form analytic solution, or when only limited low-order numerical derivatives are available, as in solving differential equations, remains an important  direction for future research.
 
-\subsection{In Boarder Context}
+\subsection{9.3	Possible Connections To Quantum Physics}
 
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge, for example, when the input uncertainty is Laplace \cite{Probability_Statistics} so that $\zeta(2n) = (2n)!$.
 It is necessary that the input uncertainty is bounded due to sampling, which resembles the need for re-normalization in quantum field theory.
