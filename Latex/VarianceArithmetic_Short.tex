@@ -64,7 +64,7 @@ Statistical Taylor expansion may standardize numerical computations for analytic
 This study also introduces the implementation of statistical Taylor expansion termed variance arithmetic and presents corresponding test results across a wide range of mathematical applications.
 
 Another important conclusion of this study is that numerical errors in library functions can significantly affect results. 
-It is desirable that each value from library functions be accomplished by a uncertainty deviation.  
+It is desirable that each value from library functions be accomplished by an uncertainty deviation.  
 \end{abstract}
 
 % Put keywords appropriate to your paper here, as shown
@@ -133,6 +133,12 @@ It also distinguishes between a distribution test and a value test.
 
 \item Section \ref{sec: Math Library} evaluates variance arithmetic on common mathematical library functions.
 It also shows that the error deviation should be close to $1$ except near a distributional pole.
+
+\ifdefined\Verbose
+\item Section \ref{sec: Moving-Window Linear Regression} reveals the accumulation of numerical errors by reusing an input multiple time in a moving-window progressive algorithm.
+
+\item Section \ref{sec: recursion} showcases variance arithmetic in catching catastrophic cancellation in a regression algorithm.
+\fi
 
 \item Section \ref{sec: FFT} examines the impact of numerical library errors and shows that these errors can be significant.
 
@@ -861,7 +867,7 @@ The x-axis is expressed in units of $\pi$.
 Besides convergence, the variance expansion may yield negative results, as in Formula \eqref{eqn: sin precision} for $sin(x \pm \delta x)$.
 Figure \ref{fig: Sin_Conv_Edge} shows that the upper bound of $\delta x$ for $sin(x \pm \delta x)$ varies periodically between $0.318 \pi$ and $0.416 \pi$ for Gaussian input uncertainty.
 Beyond this upper bound, the result deviation is no longer positive at some expansion order.
-Conceptually, the upper-bound for $\delta x$ should be less than $\pi/2$ to make the result meaningful, which Figure \ref{fig: Sin_Conv_Edge} satisfies.
+Conceptually, the upper-bound for $\delta x$ should not be much more than $\pi/2$ to make the result meaningful, which Figure \ref{fig: Sin_Conv_Edge} satisfies.
 \ifdefined\Verbose
 Similar trend holds when the input uncertainty is uniform but with larger upper bound $\delta x$, as shown in Figure \ref{fig: Sin_Conv_Edge_Uniform}.
 \else
@@ -1337,6 +1343,40 @@ To determine the error deviations of $\alpha$ and $\beta$, the fitting procedure
 Figure \ref{fig: Moving_Linear_Fit_Error} illustrates the resulting error deviation as a function of the time index $j$, which remains close to $1$ except within the range $j = 10 \dots 19$ where the actual noise is ten times greater than the specified value.
 This observation suggests that an error deviation exceeding 1 may indicate the presence of unspecified additional input errors beyond rounding errors, such as numerical errors in mathematical library functions.
 
+
+\section{Regressive Generation of Sin and Cos}
+\label{sec: recursion}
+
+\begin{figure}
+\centering
+\includegraphics[height=2.5in]{Regression_Sin.pdf}
+\captionof{figure}{
+The uncertainties (y-axis) of $\sin(\pi j/2^{18})$ versus $j$ (x-axis) and $L$ using either Quart or regressive sine function (legend).
+}
+\label{fig: Regression_Sin}
+\end{figure}
+
+
+
+Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} calculate $\sin(\pi j/2^L), \cos(\pi j/2^L), j = 0 \dots 2^{L - 2}$ repressively for regression order $L = 0 \dots 17$ starting from Formula \eqref{eqn: phase boundary}.
+Formula \eqref{eqn: regr error} shows that such regression guarantees both $\sin(x)^2 + \cos(x)^2 = 1$ and $\sin(2x) = 2\sin(x) \cos(x)$, so that value errors will not accumulate when the regression order increases.
+\begin{align}
+\label{eqn: phase boundary}
+& \sin(0) = \cos(\frac{\pi}{2}) = 0;\eqspace \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+\label{eqn: phase sin}
+& \sin(\frac{\alpha + \beta}{2}) = \sqrt{\frac{1 - \cos(\alpha + \beta)}{2}} = \sqrt{\frac{1 - \cos(\alpha) \cos(\beta) + \sin(\alpha) \sin(\beta)}{2}}; \\
+\label{eqn: phase cos}
+& \cos(\frac{\alpha + \beta}{2}) = \sqrt{\frac{1 + \cos(\alpha + \beta)}{2}} = \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}}; \\
+\label{eqn: regr error}
+& \sin(\alpha + \beta) = 2 \sin(\frac{\alpha + \beta}{2}) \cos(\frac{\alpha + \beta}{2}) = \sqrt{1 - \cos(\frac{\alpha + \beta}{2})^2};
+\end{align}
+
+Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation, resulting in excessive uncertainty.
+In Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits uncertainties proportional to $\sin(\frac{\pi}{2^L})$, whereas the regression sine function shows increasing uncertainties as $x \rightarrow 0$.
+Unlike catastrophic cancellation in floating-point arithmetic, variance arithmetic uses very coarse precision to signal that the regression algorithm is unfit to compute $\sin(x \rightarrow 0)$.
+
+
+
 \fi
 
 
@@ -1780,40 +1820,6 @@ It is worth investigating if such empirical histogram has similar power to revea
 
 
 
-\ifdefined\Verbose
-\section{Regressive Generation of Sin and Cos}
-\label{sec: recursion}
-
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Regression_Sin.pdf}
-\captionof{figure}{
-The uncertainties (y-axis) of $\sin(\pi j/2^{18})$ versus $j$ (x-axis) and $L$ using either Quart or regressive sine function (legend).
-}
-\label{fig: Regression_Sin}
-\end{figure}
-
-
-
-Formula \eqref{eqn: phase sin} and Formula \eqref{eqn: phase cos} calculate $\sin(\pi j/2^L), \cos(\pi j/2^L), j = 0 \dots 2^{L - 2}$ repressively for regression order $L = 0 \dots 17$ starting from Formula \eqref{eqn: phase boundary}.
-Formula \eqref{eqn: regr error} shows that such regression guarantees both $\sin(x)^2 + \cos(x)^2 = 1$ and $\sin(2x) = 2\sin(x) \cos(x)$, so that value errors will not accumulate when the regression order increases.
-\begin{align}
-\label{eqn: phase boundary}
-& \sin(0) = \cos(\frac{\pi}{2}) = 0;\eqspace \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
-\label{eqn: phase sin}
-& \sin(\frac{\alpha + \beta}{2}) = \sqrt{\frac{1 - \cos(\alpha + \beta)}{2}} = \sqrt{\frac{1 - \cos(\alpha) \cos(\beta) + \sin(\alpha) \sin(\beta)}{2}}; \\
-\label{eqn: phase cos}
-& \cos(\frac{\alpha + \beta}{2}) = \sqrt{\frac{1 + \cos(\alpha + \beta)}{2}} = \sqrt{\frac{1 + \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)}{2}}; \\
-\label{eqn: regr error}
-& \sin(\alpha + \beta) = 2 \sin(\frac{\alpha + \beta}{2}) \cos(\frac{\alpha + \beta}{2}) = \sqrt{1 - \cos(\frac{\alpha + \beta}{2})^2};
-\end{align}
-
-Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation, resulting in excessive uncertainty.
-In Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits uncertainties proportional to $\sin(\frac{\pi}{2^L})$, whereas the regression sine function shows increasing uncertainties as $x \rightarrow 0$.
-Unlike catastrophic cancellation in floating-point arithmetic, variance arithmetic uses very coarse precision to signal that the regression algorithm is unfit to compute $\sin(x \rightarrow 0)$.
-
-
-\fi
 
 
 \section{Conclusion and Discussion}
@@ -1877,12 +1883,12 @@ Establishing theoretical foundation for applying statistical Taylor expansion in
 \subsection{Possible Connections to Quantum Physics}
 
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge, for example, when the input uncertainty is Laplace \cite{Probability_Statistics} so that $\zeta(2n) = (2n)!$.
-Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded due to sampling, which resembles the need for re-normalization in quantum field theory.
+Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded due to sampling, which resembles the need for re-normalization in quantum field theory \cite{Quantum Field}.
 The quantitative dependence of convergence on the choice of ideal bounding range $\hat{\kappa}$ is similar to the principle of quantum physics: what it is depends on how it is measured.
-For example, because mathematical divergence seems to correspond to distributional zero, it is even tempting to postulate if a localized experiment changes $\hat{\kappa}$ to produce distributional zero and the quantum result as ``waveform collapse". 
+For example, because mathematical divergence seems to correspond to distributional zero, it is even tempting to postulate if a localized experiment changes $\hat{\kappa}$ to produce distributional zero and the quantum result as ``waveform collapse" \cite{Quantum Field}. 
 Both resemblances are worth further investigation.
 
-It is also worthwhile investigating if uncertainty bias produces Lamb shift.
+It is also worthwhile investigating if uncertainty bias produces Lamb shift \cite{Quantum Field}.
 
 
 
@@ -2021,6 +2027,10 @@ J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
 
+\bibitem{Quantum Field}
+Michel Le Bellac, G Barton.
+\newblock Quantum and statistical Field Theory.
+\newblock Oxford University Press, 1992, ISBN 9781383026535.
 
 
 \end{thebibliography}
