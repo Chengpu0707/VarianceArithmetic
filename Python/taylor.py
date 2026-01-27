@@ -113,7 +113,7 @@ class Taylor:
     @staticmethod
     def taylor1d(input:VarDbl, name:str, s1dTaylor:tuple[typing.Union[float, VarDbl]], 
                  inPrec:bool, outPrec:bool, 
-                 momentum=momentum.IDEAL,
+                 momentum=momentum.NORMAL,
                  checkMinMonotonic=True, checkStability=True, checkReliablity=True, checkPositive=True, checkLSB=False,
                  dumpPath:str=None):
         '''
@@ -367,7 +367,7 @@ class Taylor:
 
     @staticmethod
     def polynominal1d(input:VarDbl, sCoeff:tuple[float], 
-                      momentum=momentum.IDEAL,
+                      momentum=momentum.NORMAL,
                       dumpPath:str=None):
         '''
         1d Taylor expansion for polynominal at "input" with "sCoeff".
@@ -395,7 +395,7 @@ class Taylor:
                 dumpPath = dumpPath, checkMinMonotonic = False, checkStability = False)
 
     @staticmethod
-    def exp(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
+    def exp(input:VarDbl, momentum=momentum.NORMAL, dumpPath:str=None) -> VarDbl:
         sTaylor = [math.exp(input.value()), 1.0]
         for i in range(2, momentum.maxOrder):
             sTaylor.append(sTaylor[-1]/i)
@@ -403,7 +403,7 @@ class Taylor:
                                momentum=momentum, dumpPath=dumpPath)
     
     @staticmethod
-    def log(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
+    def log(input:VarDbl, momentum=momentum.NORMAL, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         sTaylor.append(math.log(input.value()))
         for i in range(1, momentum.maxOrder):
@@ -412,7 +412,7 @@ class Taylor:
                                momentum=momentum, dumpPath=dumpPath)
 
     @staticmethod
-    def sin(input:VarDbl, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
+    def sin(input:VarDbl, momentum=momentum.NORMAL, dumpPath:str=None) -> VarDbl:
         sTaylor = []
         x = input.value()
         sTaylor.append( math.sin(x) )
@@ -432,7 +432,7 @@ class Taylor:
                                momentum=momentum, dumpPath=dumpPath)
     
     @staticmethod
-    def pow(input:VarDbl, exp:float, momentum=momentum.IDEAL, dumpPath:str=None) -> VarDbl:
+    def pow(input:VarDbl, exp:float, momentum=momentum.NORMAL, dumpPath:str=None) -> VarDbl:
         match exp:
             case 0:
                 return VarDbl(1, 0)

@@ -65,10 +65,10 @@ class TestBoundingFactor (unittest.TestCase):
                     '\tOutput Bias\tOutput Variance\tBias Ratio\tVariance Ratio'
                     '\tAdjust\tAdjusted Bias\tAdjusted Variance\tNormalized Bias\tNormalized Variance\n')
             for calc, func in sFunc.items():
-                val = func(momentum.IDEAL, zero)
+                val = func(momentum.NORMAL, zero)
                 match fileName:
                     case 'Normal':
-                        stable = func(momentum.IDEAL, var)
+                        stable = func(momentum.NORMAL, var)
                     case 'Uniform':
                         stable = func(momentum.UNIFORM, var)
                 bias = stable.value() - val.value()

@@ -169,8 +169,11 @@ IPyNb/.ipynb_checkpoints/*
 Java/bin/*
 Java/Output/*
 Latex/*.aux
+Latex/*.bak
+Latex/*.bbl
 Latex/*.blg
 Latex/*.dvi
+Latex/*.pdf
 Latex/*.pdf.dox
 Latex/*.log
 Latex/*.out
@@ -187,3 +190,4 @@ Latex/VarianceArithmetic.pdf.docx
 Latex/VarianceArithmetic.pdf
 Latex/VarianceArithmetic.zip
 Latex/VarianceArithmetic_Short/*
+Latex/VarianceArithmetic.bib.bak

@@ -552,9 +552,9 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
-        self.assertEqual(len(sExpansion), momentum.IDEAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
+        self.assertEqual(len(sExpansion), momentum.NORMAL.maxOrder)
         self.assertEqual(sExpansion[-1].monotonics, 222)
 
     def test_NotMonotonicException(self):
@@ -568,9 +568,9 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
-        self.assertEqual(len(sExpansion), momentum.IDEAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
+        self.assertEqual(len(sExpansion), momentum.NORMAL.maxOrder)
         self.assertEqual(sExpansion[-1].monotonics, 0)
 
     def test_NotPositiveException(self):
@@ -584,8 +584,8 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], False)
         self.assertEqual(sInput['outPrec'], False)
-        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
         self.assertEqual(len(sExpansion), 7)
         self.assertLess(sExpansion[-1].var, 0)
 
@@ -600,8 +600,8 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.IDEAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.IDEAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
         self.assertEqual(len(sExpansion), 429)
         self.assertEqual(sExpansion[-1].monotonics, 0)
 
@@ -728,7 +728,7 @@ class TestImpreciseCoeff (unittest.TestCase):
         with self.assertRaises(NotMonotonicException):
             Taylor.pow(VarDbl(1, 0.20003), -1)
 
-        sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, 0.5) for i in range(momentum.IDEAL.maxOrder)]
+        sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, 0.5) for i in range(momentum.NORMAL.maxOrder)]
         Taylor.taylor1d(VarDbl(1, 0.20002), 'Imprecise_Coeff Upper', sTaylor, True, True)
         with self.assertRaises(NotMonotonicException):
             Taylor.taylor1d(VarDbl(1, 0.20003), 'Imprecise_Coeff NotMonotonic', sTaylor, True, True)
@@ -738,7 +738,7 @@ class TestImpreciseCoeff (unittest.TestCase):
             for dx in (0.05, 0.1, 0.15, 0.20002):
                 for i in range(0, 51, 2):
                     dy = i / 100
-                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(momentum.IDEAL.maxOrder)]
+                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(momentum.NORMAL.maxOrder)]
                     res = Taylor.taylor1d(VarDbl(1, dx), 'Imprecise_Coeff', sTaylor, True, True)
                     f.write(f'{dy}\t{dx}\t{res.value()}\t{res.uncertainty()}\n')
                     f.flush()

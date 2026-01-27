@@ -216,7 +216,7 @@ class Uniform:
         return self._sMomentum[n >> 1]
     
 
-IDEAL = Normal(bounding=5.0)
+NORMAL = Normal(bounding=5.0)
 
 UNIFORM = Uniform()
 

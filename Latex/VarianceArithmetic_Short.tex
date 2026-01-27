@@ -1844,13 +1844,16 @@ Without this refinement, the value errors in the library functions can produce u
 The code and analysis framework for variance arithmetic are available as an open-source project at \url{https://github.com/Chengpu0707/VarianceArithmetic}.
 A more detailed description of this paper is presented at  \url{https://arxiv.org/abs/2410.01223}.
 
+
+
 \subsection{Improvements Needed}
 
 This paper presents statistical Taylor expansion and variance arithmetic, which is still in early stage of development, with several important questions remaining.
 
-Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions.
+Bound momentum $\zeta(2n, \kappa)$ needs to be extended to all probability distributions.
+Statistical bounding needs to be recalculated using $1 - \zeta(2, \kappa)$ instead of $1 - \zeta(0, \kappa)$
 The statistical bounding to find the bounding range $\kappa$ for a sample count needs to be extended to discrete distributions.
-The choice of ideal bounding range $\hat{\kappa}$ needs to extend to other distributions.
+The choice of ideal bounding range $\hat{\kappa}$ needs to extend to other distributions using the same value of $1 - \zeta(2, \kappa)$.
 The statistical meaning for ideal ratio $\alpha$ in the context of its choice of ideal bounding range $\hat{\kappa}$ needs further investigation: Is $\alpha$ the possibility for the result to be bound by $\hat{\kappa}$?
 
 The performance of variance arithmetic must be improved for broader practical adoption.
