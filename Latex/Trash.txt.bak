@@ -2780,5 +2780,85 @@ And Formula \eqref{eqn: fat-tail moment limit} describes its asymptotic behavior
 
 
 
+I need to work out the asymptotic behavior of a bounded moment for continuous probability distribution for my paper at https://arxiv.org/pdf/2410.01223.  The question is the following: Given a continuous probability distribution $\rho(x)$ satisfying:
+
+ - Normalized: $\int \rho(x) dx = 1$
+ - mean: $\int x \rho(x) dx = 0$
+ - deviation: $\int x^2 \rho(x) dx = 1$
+
+The bounded moment between $[\varrho, \kappa]$ is defined as 
+$\zeta(n, \varrho, \kappa) \equiv \int_{\varrho}^{\kappa} x^n \rho(x) dx$, which further satisfy $\zeta(1, \varrho, \kappa) = 0$ so that $\zeta(n, \varrho, \kappa) = \zeta(n, \kappa)$.
+
+I have tried some special cases, all satisfies:
+\begin{equation}
+\lim_{n \rightarrow +\infty} \zeta(n, \kappa) \rightarrow  \rho(\kappa) \frac{\kappa^n}{n};
+\end{equation}
+
+For example, 
+
+ - For Normal distribution, $\zeta(2n+1, \kappa) = 0$. With $\xi(x)$ as the error function, and with the relation $\sum_{j=0}^{+\infty} \frac{\kappa^{2j + 1}}{(2j + 1)!!} = \sqrt{\frac{\pi}{2}} \xi (\frac{\kappa}{\sqrt{2}}) e^{\frac{1}{2} \kappa^2}$ from https://mathworld.wolfram.com/DoubleFactorial.html:
+\begin{align}
+\label{eqn: Gaussian moment} 
+\zeta(2n, \kappa) &=2 N(\kappa) \kappa^{2n} \sum_{j=1}^{\infty} \kappa^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!} \\
+\label{eqn: Gaussian asymptotic moment} 
+&\kappa^2 \ll 2n:\;\;\;\; \zeta(2n, \kappa) = 2 N(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+\end{align}
+
+ - For uniform distribution $\rho(x) = \frac{1}{2 \sqrt{3}}, x \in [-\sqrt{3}, +\sqrt{3}]$, $\zeta(2n+1, \kappa) = 0$. $\kappa \leq \sqrt{3}$.
+\begin{equation}
+\label{eqn: uniform moment}
+\zeta(2n) = \frac{1}{\sqrt{3}} \frac{\kappa^{2n + 1}}{2n + 1}; 
+\end{equation}
+
+ - For Laplace distribution $\rho(x) = \frac{1}{\sqrt{2}} e^{-\sqrt{2}|x|}, x \in (-\infty, +\infty)$, $\zeta(2n+1, \kappa) = 0$. 
+\begin{align}
+\label{eqn: Laplace moment} 
+\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{x}^{2n} \frac{1}{\sqrt{2}} e^{-\sqrt{2} |\tilde{x}|} d \tilde{x}
+		= \frac{1}{2^{n}} e^{-\sqrt{2}\kappa} \sum_{j = 1}^{\infty} \sqrt{2^{2n + j}} \kappa^{2n + j} \frac{(2n)!}{(2n + j)!}; \\
+\label{eqn: Laplace asymptotic moment} 
+& 1 < \kappa^2 \ll 2n:\;\;\;\; \zeta(2n, \kappa) = 2 \frac{1}{\sqrt{2}} e^{-\sqrt{2}\kappa} \frac{\kappa^{2n+1}}{2n+1};
+\end{align}
+
+ - For exponential distribution $e^{-x}, x \in [0, +\infty)$. $\zeta(1, \kappa)$ leads to $\varrho e^{-\varrho} = \kappa e^{-\kappa}$:
+\begin{align}
+\label{eqn: exponential moment} 
+\zeta(n, \kappa) &= e^{-\kappa} (\kappa - 1)^{n} \sum_{j = 1}^{\infty} (\kappa - 1)^j \frac{(n)!}{(n + j)!} 
+		- e^{-\varrho} (\varrho - 1)^{n} \sum_{j = 1}^{\infty} (\varrho - 1)^j \frac{(n)!}{(n + j)!}; \\
+\label{eqn: exponential asymptotic moment} 
+& 1 \ll \kappa \ll 2n:\;\;\;\; \zeta(n, \kappa) \simeq e^{-\kappa} \frac{\kappa^{n + 1}}{n + 1}; 
+\end{align}
+
+- For a simplified Gamma distribution:
+\begin{align}
+\label{eqn: Gamma probability density}
+\rho(\tilde{x}) &= \frac{1}{m!} \tilde{x}^m e^{-\tilde{x}}, x \in [0, +\infty), m = 0,1,...; \\
+\label{eqn: Gamma moment} 
+\zeta(n, \kappa) &= \int_{\varrho}^{\kappa} \left(\frac{\tilde{x} - (m+1)}{\sqrt{m+1}} \right)^n \rho(\tilde{x}) d \tilde{x} \\
+\label{eqn: Gamma asymptotic moment} 
+& m + 1 < \kappa \ll 2n:\;\;\;\; \zeta(n, \kappa) \simeq \frac{1}{m!} e^{-\kappa} \frac{\kappa^{m+n+1}}{m+n+1}; 
+\end{align}
+
+
+**My question is: What is the necessary and sufficient conditions for $n \rightarrow +\infty$, $\zeta(n, \kappa) \rightarrow \kappa^n / n$?**
+
+It seems that the only consequence of the condition $\zeta(1, \varrho, \kappa) = 0$ is to place $\varrho$ closer to $0$, so that the asymptotic behavior is determined by $\kappa$.
+
+It seems easier to start with the additional assumption $\rho(-x)=\rho(x)$ so that $\zeta(2n+1, \kappa)=0$ and $\lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1}$. Because:
+\begin{align}
+\zeta(n, \kappa) &= \int_{0}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z} 
+		= \rho(\kappa) \frac{\kappa^{n+1}}{n+1} - \int_{0}^{\kappa} \frac{\tilde{z}^{n+1}}{n+1} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z};
+\end{align}
+The question becomes how to prove:
+\begin{align}
+\lim_{n \rightarrow +\infty} \int_{0}^{\kappa} \frac{\tilde{z}^{n+1}}{n+1} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z} = 0;
+\end{align}
+given:
+\begin{align}
+\exists \zeta(n) &:\;\;\;\; \lim_{\kappa \rightarrow +\infty} \kappa^n \rho(\kappa) = 0; \\
+\frac{1}{2} &= \int_{0}^{+\infty} \rho(\tilde{z}) d \tilde{z} = - \int_{0}^{+\infty} \frac{\tilde{z}}{1} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z}; \\
+\frac{1}{2} &= \int_{0}^{+\infty} \tilde{z}^2 \rho(\tilde{z}) d \tilde{z} = - \int_{0}^{+\infty} \frac{\tilde{z}^3}{3} \frac{d \rho(\tilde{z})}{d \tilde{z}} d \tilde{z}; \\
+\end{align}
+
+Please let me know your affiliation so that I can acknowledge you properly in my paper.
 
 

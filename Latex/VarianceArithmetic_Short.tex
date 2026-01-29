@@ -323,7 +323,6 @@ Define $\tilde{z} \equiv (\tilde{x} - \mu)/\sigma$ and let $\rho(\tilde{z})$ be 
 Let $\tilde{z} \in [\varrho, \kappa]$ where $\varrho, \kappa$ specify the \emph{bounding ranges}. 
 Formula \eqref{eqn: bound moment} defines the corresponding \emph{bound moment} $\zeta(n)$, which further satisfies the \emph{mean-reverting condition} of Formula \eqref{eqn: mean-reverting bounding} so that $\kappa$ determines $\varrho$.
 For any symmetric $\rho(-\tilde{z}) = \rho(\tilde{z}): \varrho = -\kappa, \zeta(2n+1) = 0$.
-The probability of $\tilde{z} \not \in [\varrho, \kappa]$ is defined as the \emph{bounding leakage} $\epsilon(\kappa) = 1 - \zeta(0, \kappa)$.
 
 \begin{align}
 \label{eqn: Taylor 1d} 
@@ -590,11 +589,23 @@ Statistical Taylor expansion rejects the distributional zero of $\log(x)$ or $(x
 
 \subsection{Statistical Bounding}
 
+\iffalse
+\begin{align}
+\label{eqn: Uniform moment} 
+\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \frac{1}{2 \sqrt{3}} \tilde{z}^{2n} d \tilde{z} = \frac{1}{\sqrt{3}} \frac{\kappa^{2n+1}}{2n + 1}; \\
+\label{eqn: Gaussian moment} 
+\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z}
+		= 2 N(\kappa) \kappa^{2n} \sum_{j=1}^{\infty} \kappa^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!} \\
+	& \zeta(2, \kappa) = \zeta(0, \kappa) - 2 N(\kappa) \kappa;
+\end{align}
+\fi
+
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{Normal_Bounding_Leakage.pdf} 
 \captionof{figure}{
-Measured bounding leakage $\epsilon(\kappa_s, N)$ (y-axis) for varying measuring bounding range $\kappa_s$ (x-axis) and sample count $N$ (legend).
+Measured result leakage $\varepsilon(\kappa_s, N)$ (y-axis) for varying measuring range $\kappa_s$ (x-axis) and sample count $N$ (legend).
+$\zeta(2, \kappa)$ decreases when $\kappa < 1.5$, which causes the cutoff in the figure.
 }
 \label{fig: Normal_Bounding_Leakage}
 \end{figure}
@@ -603,88 +614,70 @@ Measured bounding leakage $\epsilon(\kappa_s, N)$ (y-axis) for varying measuring
 \centering
 \includegraphics[height=2.5in]{Bounding_Factor_Leakage.pdf} 
 \captionof{figure}{
-Measured bounding range $\kappa$ (left y-axis) and corresponding measured bounding leakage $\epsilon(\kappa)$ (right y-axis) for varying sample count $N$ (x-axis) when the underlying distribution is uniform or normal (legend), with different measuring bounding range $\kappa_s$ for the normal distribution.
+Measured result range $\kappa$ (left y-axis) and corresponding measured result leakage $\varepsilon(\kappa)$ (right y-axis) for varying sample count $N$ (x-axis) when the underlying distribution is uniform or normal (legend), with different measuring bounding range $\kappa_s$ for the normal distribution.
+The similar trend for uniform distribution is due to a common artifact in statistics: the $N - 1$ denominator is only unbiased for Gaussian distribution, but it underestimates variances for uniform distribution.
 }
 \label{fig: Bounding_Factor_Leakage}
 \end{figure}
 
-When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
-This yields the \emph{sample bounding leakage} $\epsilon(\kappa, N)$ for the interval $[\overline{x} - \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional bounding leakage} $\epsilon(\kappa)$ for the interval $[\mu - \varrho \sigma, \mu + \kappa \sigma]$.
-Because $\epsilon(\kappa) \neq \epsilon(\kappa, N)$ for finite $N$, let $\epsilon(\kappa) = \epsilon(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bonding range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bounding range}.
-
-\begin{align}
-\label{eqn: Gaussian theoretical bounding leakage} 
-\epsilon(\kappa) =&\; 1 - \xi(\frac{\kappa}{\sqrt{2}}); \\
-\label{eqn: Gaussian experimental bounding leakage}
-\epsilon(\kappa_s, N) = &\; 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
-\end{align}
-When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
-Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ along the y-axis direction.
-It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
-Figure \ref{fig: Bounding_Factor_Leakage} further demonstrates that for smaller $\kappa_s$, $\kappa(\kappa_s, N)$ approaches $\kappa_s$ more rapidly as $N$ increases, but converges to a larger stable bounding leakage $\epsilon(\kappa_s)$.
-
-When the underlying distribution is uniform, the portion of sampled range $[\overline{x} - \sqrt{3} \delta x, \overline{x} + \sqrt{3} \delta x]$ outside the actual range $[\mu - \sqrt{3} \sigma, \mu + \sqrt{3} \sigma]$ contributes to the bounding leakage $\epsilon(N)$. 
-Figure \ref{fig: Bounding_Factor_Leakage} shows that $0 < \epsilon(N) \sim N^{-0.564}$ empirically.
-The measured bounding range $\kappa(N) = \sqrt{3} (1 - \epsilon(N))$.
-
-
-
-\subsection{Ideal Statistics}
-
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[height=2.5in]{Normal_Function.pdf} 
 \captionof{figure}{
-The ratio of resulting variance $\delta^2 f$ to the ideal variance $\widehat{\delta^2} f$ (left y-axis) and the bounding leakage (right y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when the uncertainty distribution is Gaussian.
+The ideal ratio (y-axis) for varying measuring bounding leakage $\kappa_s$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 6$.
 }
 \label{fig: Normal_Function}
 \end{figure}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Uniform_Function.pdf} 
-\captionof{figure}{
-The ratio of resulting variance $\delta^2 f$ to the ideal variance $\widehat{\delta^2} f$ (left y-axis) and the bounding leakage (right y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when the uncertainty distribution is Uniform.
-}
-\label{fig: Uniform_Function}
-\end{figure}
+
+
 
 \begin{align}
-\label{eqn: identity leakage}
-\zeta(2, \kappa) =& \frac{\delta^2 x}{(\delta x)^2}; \\
-\label{eqn: sum leakage}
-\alpha(x \pm y) =& \frac{\zeta_x(2, \kappa_x) (\delta x)^2 + \zeta_y(2, \kappa_y) (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
+\label{eqn: offset approximation}
+f(x) - \overline{f(x)} &\simeq (\delta x)^2 \zeta(2, \kappa) f_x^{(2)}; \\
+\label{eqn: variance approximation}
+\delta^2 f(x) &\simeq (\delta x)^2 \zeta(2, \kappa) (f_x^{(1)})^2;
 \end{align}
 
-When sample count $N \rightarrow \infty$, $\zeta(0) \rightarrow 1$, $\zeta(2) \rightarrow 1$ and $\delta^2 x \rightarrow (\delta x)^2$ in Formula \eqref{eqn: identity leakage}.
-Such relationship of $\delta^2 f$ versus sample count $N$ is general:
-\begin{itemize}
-\item
-When the underlying uncertainty distribution is Gaussian and $\kappa_s = 5$, Figure \ref{fig: Normal_Function} shows that the resulting variances $\delta^2 f$ for a selected functions rise with $N$ until reaching the corresponding stable values $\widehat{\delta^2} f$ when $N \geq 50$.
-
-\item
-When the underlying uncertainty distribution is Uniform, $\kappa_s = \sqrt{3}$, Figure \ref{fig: Uniform_Function} shows the same trend, however the stable variances $\widehat{\delta^2} f$ are reached only when $N \geq 10^4$.
-\end{itemize}
-The trends of uncertainty biases $\overline{f} - f$ versus sample count $N$ are exactly as those in Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function} respectively, except that  $\overline{x} - x = 0$.
-This similarity is expected because the first-order approximation in both Formula \eqref{eqn: Taylor 1d mean} and Formula \eqref{eqn: Taylor 1d variance} contains $\sigma^2 \zeta(2, \kappa)$. 
-
-In both Figure \ref{fig: Normal_Function} and \ref{fig: Uniform_Function}, the bonding leakage $\epsilon(N)$ decreases as the sample count $N$ increases.
-The stable resulting variances $\widehat{\delta^2} f$ is reached only when $\epsilon(s, N) < 10^{-3}$.
-All functions approach their corresponding stable variances with exactly the same trend in each figure.
-These observations suggest that bounding leakage is the reason for $\delta^2 f < \widehat{\delta^2} f$ and it is justified to infer the confidential interval range $\kappa$ from bounding leakage $\epsilon(\kappa_s) = 1  - \zeta(0, \kappa_s)$ in Figure \ref{fig: Normal_Bounding_Leakage},  or more precisely $1  - \zeta(2, \kappa_s)$ for $\delta^2 f$.
-
-Define the stable variance when the sample count $N$ is sufficiently large as the \emph{ideal variance} $\widehat{\delta^2} f$.
-The choice of $\kappa_s$ to calculate  $\widehat{\delta^2} f$ is defined as the ideal bounding range $\hat{\kappa}$.
+Figure \eqref{eqn: offset approximation} and \eqref{eqn: variance approximation} show the first-order approximation of Formula \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance}, respectively.
+As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$ so that $\delta^2 f(x)$ reaches a stable value but the convergence range of $\delta^2 f(x)$ reduces toward zero.
+As a trade-off, the choice of $\kappa$ to calculate the stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal range} $\hat{\kappa}$, and the result is the \emph{ideal variance} $\hat{\delta^2} f(x)$.
 For Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
-When the input distribution is unbounded, the choice of $\hat{\kappa}$ is a trade-off: a larger $\hat{\kappa}$ means a smaller bounding leakage for the result but a narrower convergence range for the input.
-For Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$.
+For Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
 
-When the sample count $N$ is insufficient, $\widehat{\delta^2} f$ is calculated using $\hat{\kappa}$, to assume that $N$ is sufficient.
-$\delta^2 f$ is calculated with the actual $N$.
-Define the \emph{ideal ratio} as $\alpha \equiv \delta^2 f/\widehat{\delta^2} f$, which is $0$ when $N = 1$ and $1$ when $N$ is sufficiently large.
-The ideal ratio $\alpha$ quantifies the reliability of $\widehat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formula \eqref{eqn: sum leakage} as  an example for $\alpha(x \pm y)$ .
+Define \emph{result leakage} $\varepsilon(\kappa) \equiv 1 - \zeta(2, \kappa)$.
+When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
+This yields the \emph{sample result leakage} $\varepsilon(\kappa, N)$ for the interval $[\overline{x} - \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional result leakage} $\varepsilon(\kappa)$ for the interval $[\mu - \varrho \sigma, \mu + \kappa \sigma]$.
+Because $\varepsilon(\kappa) \neq \varepsilon(\kappa, N)$ for finite $N$, let $\varepsilon(\kappa) = \varepsilon(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring range}, and $\kappa(\kappa_s, N)$ is the \emph{measured range}.
+
+\begin{align}
+\label{eqn: Gaussian result bounding leakage} 
+\epsilon(\kappa) &= \varepsilon(\kappa) + 2 N(\kappa) \kappa; \\
+\label{eqn: Gaussian theoretical bounding leakage} 
+\epsilon(\kappa) &= 1 - \xi(\frac{\kappa}{\sqrt{2}}); \\
+\label{eqn: Gaussian experimental bounding leakage}
+\epsilon(\kappa_s, N) &= 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
+\end{align}
+
+Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$.
+When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the result leakage $\varepsilon(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, while Formula \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ along the y-axis direction.
+It also shows that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
+Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows the $\kappa(\kappa_s, N)$ which is used in $\zeta(n, \kappa)$.
+It shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$.
 
 
+\begin{align}
+\label{ideal ratio}
+\alpha &\equiv \frac{\delta^2 f(x)}{\hat{\delta^2} f} = \frac{\zeta(2, \kappa)}{\zeta(2, \hat{\kappa})}; \\
+\label{eqn: sum leakage}
+\alpha(x \pm y) &= \frac{\zeta_x(2, \kappa_x) (\delta x)^2 + \zeta_y(2, \kappa_y) (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
+\end{align}
+
+Define \emph{ideal ratio} as $\alpha \equiv \delta^2 f/\widehat{\delta^2} f$.
+The ideal ratio $\alpha$ quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formula \eqref{eqn: sum leakage} as  an example for $\alpha(x \pm y)$ .
+Figure \ref{fig: Bounding_Factor_Leakage} shows that the ideal ratio converges to $1$ with increasing sample count $N$ faster when $\hat{\kappa}$ is larger.
+Figure \ref{fig: Normal_Function} demonstrates that for Gaussian distribution, ideal variance $\hat{\delta^2} f(x)$ stabilizes with increasing $\hat{\kappa}$, for example, with absolute value changes less than $10^{-4}$ when $\hat{\kappa} \geq 5$.
 
 
 
@@ -1888,11 +1881,11 @@ Establishing theoretical foundation for applying statistical Taylor expansion in
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge, for example, when the input uncertainty is Laplace \cite{Probability_Statistics} so that $\zeta(2n) = (2n)!$.
 Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded due to sampling, which resembles the need for re-normalization in quantum field theory \cite{Quantum Field}.
 The quantitative dependence of convergence on the choice of ideal bounding range $\hat{\kappa}$ is similar to the principle of quantum physics: what it is depends on how it is measured.
-For example, because mathematical divergence seems to correspond to distributional zero, it is even tempting to postulate if a localized experiment changes $\hat{\kappa}$ to produce distributional zero and the quantum result as ``waveform collapse" \cite{Quantum Field}. 
+For example, because mathematical divergence seems to correspond to distributional zero, it is even tempting to postulate if a localized experiment changes $\hat{\kappa}$ to produce distributional zero and the quantum result as ``wave function collapse" \cite{Quantum Field}. 
 Both resemblances are worth further investigation.
-
-It is also worthwhile investigating if uncertainty bias produces Lamb shift \cite{Quantum Field}.
-
+Could Feynman integration and summation \cite{Quantum Field} be a statistical Taylor expansion of an analytic expression?
+Could Lamb shift \cite{Quantum Field} be an uncertainty offset?
+These naive questions are entertaining to ponder.
 
 
 \section{Statements and Declarations}
