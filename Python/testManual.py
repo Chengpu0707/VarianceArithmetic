@@ -308,7 +308,7 @@ class TestBoundingRange (unittest.TestCase):
                         f.write(f'\t{stable.variance()}\t{res.variance()}')
                         f.write(f'\t{res.variance()/stable.variance()}\t{1 - res.variance()/stable.variance()}\n')
 
-    #@unittest.skipIf(SKIP_TEST, 'Ran 1 tests in 178s')
+    @unittest.skipIf(SKIP_TEST, 'Ran 1 tests in 178s')
     def test_Normal(self):
         self.assert_func('Normal')
 
