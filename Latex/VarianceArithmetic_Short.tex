@@ -342,7 +342,7 @@ f(x + \tilde{x}, y + \tilde{y}) &= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac
 		\frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \nonumber \\
 	&\big( \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y) - \zeta_x(i, \kappa_x)\zeta_x(m-i, \kappa_x)\; \zeta_y(j, \kappa_y)\zeta_y(n-j, \kappa_y) \big);
 \end{align}
-Under the uncorrelated uncertainty condition, Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} compute the mean and variance of the Taylor expansion given in Formula \eqref{eqn: Taylor 2d}, where $\zeta_x(m)$ and $\zeta_y(n)$ denote the bound moments for $x$ and $y$, respectively.
+Under the uncorrelated uncertainty condition, Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} compute the mean and variance of the Taylor expansion given in Formula \eqref{eqn: Taylor 2d}, where $\zeta_x(m, \kappa_x)$ and $\zeta_y(n, \kappa_y)$ denote the bound moments for $x$ and $y$, respectively.
 Although Formula \eqref{eqn: Taylor 2d variance} is only 2-dimensional problem space, it can be extended easily to any dimension.
 
 With the mean reverting condition of Formula \eqref{eqn: mean-reverting bounding}:
@@ -395,17 +395,17 @@ When $N \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kap
 Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and variance for $e^x$, respectively:
 \begin{align}
 \label{eqn: exp mean}
-\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=1}^{\infty} (\delta x)^n \zeta(n) \frac{1}{n!}; \\
+\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=1}^{\infty} (\delta x)^n \zeta(n, \kappa) \frac{1}{n!}; \\
 \label{eqn: exp precision}
-\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\zeta(n) - \zeta(j) \zeta(n - j)}{j!\;(n - j)!};
+\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j!\;(n - j)!};
 \end{align}
 
 Formulas \eqref{eqn: log mean} and \eqref{eqn: log precision} give the mean and variance for $\log(x)$, respectively:
 \begin{align}
 \label{eqn: log mean}
-\overline{\log(x)}  &= \log(x) + \sum_{n=1}^{+\infty} P(x)^{n} \frac{(-1)^{n+1} \zeta(n)}{n}; \\
+\overline{\log(x)}  &= \log(x) + \sum_{n=1}^{+\infty} P(x)^{n} \frac{(-1)^{n+1} \zeta(n, \kappa)}{n}; \\
 \label{eqn: log precision}
-\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} \sum_{j=1}^{n-1} \frac{\zeta(n) - \zeta(j) \zeta(n - j)}{j (n-j)};
+\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j (n-j)};
 \end{align}
 
 Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and variance for $\sin(x)$, respectively:
@@ -416,19 +416,19 @@ Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and 
 		n = 4j: \eqspace  sin(x); \\ n = 4j + 1: \eqspace  cos(x); \\ n = 4j + 2: \eqspace  -sin(x); \\ n = 4j +3: \eqspace  -cos(x); 
 	\end{cases} \\
 \label{eqn: sin mean}
-\overline{\sin(x)} =& \sum_{n=0}^{\infty} (\delta x)^n \eta(n, x) \frac{\zeta(n)}{n!}; \\
+\overline{\sin(x)} =& \sum_{n=0}^{\infty} (\delta x)^n \eta(n, x) \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
 \delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\eta(j, x)\eta(n - j, x)}{j! (n-j)!}
-      	\big(\zeta(n) - \zeta(j) \zeta(n - j)\big); 
+      	\big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)\big); 
 \end{align}
 
 Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and variance for $x^c$, respectively:
 \begin{align}
 \label{eqn: power mean}
-\frac{\overline{x^c}}{x^c}  &= 1 + \sum_{n=1}^{\infty} P(x)^{n} \zeta(n) \begin{pmatrix} c \\ n \end{pmatrix}; \\
+\frac{\overline{x^c}}{x^c}  &= 1 + \sum_{n=1}^{\infty} P(x)^{n} \zeta(n, \kappa) \begin{pmatrix} c \\ n \end{pmatrix}; \\
 \label{eqn: power precision}
 \frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=2}^{\infty} P(x)^{n} \sum_{j=1}^{n-1}
-  \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ n - j \end{pmatrix} \big( \zeta(n) - \zeta(j) \zeta(n - j) \big);
+  \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ n - j \end{pmatrix} \big( \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \big);
 \end{align}
 
 The input and output in statistical Taylor expansion reflects the inherent characteristics of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow \delta \log(x)$, $\delta x \rightarrow \delta \sin(x)$, and $P(x) \rightarrow P(x^c)$.
@@ -516,17 +516,17 @@ Thus:
 
 \begin{align}
 \label{eqn: variance asymptotic}
-\lim_{n \rightarrow +\infty}& \zeta(n) - \zeta(j) \zeta(n-j) = \frac{\kappa^n}{n}; \\
+\lim_{n \rightarrow +\infty}& \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n}; \\
 \label{eqn: log convergence}
-\delta^2 \log(x \pm \delta x) \simeq& \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n) \sum_{j=1}^{2n-1} \frac{1}{j} \frac{1}{2n-j} 
-		= \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n) \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}  \nonumber \\
+\delta^2 \log(x \pm \delta x) \simeq& \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n, \kappa) \sum_{j=1}^{2n-1} \frac{1}{j} \frac{1}{2n-j} 
+		= \sum_{n = 1}^{+\infty} P(x)^{2n} \zeta(2n, \kappa) \frac{1}{n} \sum_{j=1}^{2n-1} \frac{1}{j}  \nonumber \\
 	\simeq&\; 2\nu(\kappa) \log(2) \sum_{n = 1}^{+\infty} \frac{(P(x) \kappa)^{2n}}{(2n)^2},
 		\begin{cases}		
  			\text{Gaussian}:	\nu(\kappa) = N(\kappa) \kappa\\
  			\text{Uniform}:	\nu(\kappa) = 1,\eqspace \kappa = \sqrt{3}
 		\end{cases}; \\
 \label{eqn: pow convergence}
-\frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \simeq& \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n) 
+\frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \simeq& \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n, \kappa) 
  	\sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix}
 	\simeq \nu(\kappa) \sum_{n = 1}^{+\infty} (P(x) \kappa)^{2n} \frac{\begin{pmatrix} 2c \\ 2n \end{pmatrix}}{2n};
 \end{align}
@@ -555,7 +555,7 @@ When $\kappa = 5$, the value of bound moment  $\zeta(2n, \kappa)$ (left y-axis) 
 
 \begin{align}
 \label{eqn: variance asymptotic}
-\forall j&: \lim_{n \rightarrow +\infty} \zeta(n) - \zeta(j) \zeta(n-j) = \frac{\kappa^n}{n};
+\forall j&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n};
 \end{align}
 Formula \eqref{eqn: variance asymptotic} shows that the asymptotic behavior of $\zeta(n, \kappa)$ when $n \rightarrow \infty$ determines if Formula \eqref{eqn: Taylor 1d variance} will converge.
 \ifdefined\Verbose
@@ -611,7 +611,11 @@ Measured linear leakage $\omega(\kappa, N)$ (left y-axis) and corresponding meas
 \label{fig: Bounding_Factor_Leakage}
 \end{figure}
 
+\ifdefined\Verbose
+\begin{figure}[p]
+\else
 \begin{figure}
+\fi
 \centering
 \includegraphics[height=2.5in]{Normal_Function.pdf} 
 \captionof{figure}{
@@ -620,8 +624,15 @@ Ideal leakage (y-axis) for varying sample count $\kappa_s$ (x-axis) for the sele
 \label{fig: Normal_Function}
 \end{figure}
 
-
-
+\ifdefined\Verbose
+\begin{figure}[p]
+\includegraphics[height=2.5in]{Normal_Function_Bounding.pdf} 
+\captionof{figure}{
+Ideal leakage (y-axis) for varying bound range $\kappa$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 6$ for Gaussian input uncertainties.
+}
+\label{fig: Normal_Function_Bounding}
+\end{figure}
+\fi
 
 \begin{align}
 \label{eqn: offset approximation}
@@ -632,7 +643,7 @@ f(x) - \overline{f(x)} &\simeq (\delta x)^2 \zeta(2, \kappa) f_x^{(2)}; \\
 
 Figures \eqref{eqn: offset approximation} and \eqref{eqn: variance approximation} show that the first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
 As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$ such that $\delta^2 f(x)$ reaches a stable value but the convergence range of $\delta^2 f(x)$ reduces toward zero for Formulas \eqref{eqn: log precision} and \eqref{eqn: power precision}.
-As a trade-off, the choice of $\kappa$ to calculate the stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal bound range} $\hat{\kappa}$, and the result is the \emph{ideal variance} $\hat{\delta^2} f(x)$.
+As a trade-off, the choice of $\kappa$ to calculate the stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal bound range} $\hat{\kappa}$, and the result is the \emph{ideal uncertainty bias} $\widehat{\overline{f(x)}} - f(x)$ and \emph{ideal variance} $\hat{\delta^2} f(x)$.
 For a Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
 For a Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
 
@@ -660,8 +671,10 @@ It also shows that linear leakage converges to $0$ with increasing sample count 
 \varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
 \end{align}
 Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f \simeq \omega$, which quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formula \eqref{eqn: sum leakage} as  an example.
-Figure \ref{fig: Normal_Function} shows that the ideal leakages for the selected functions are less than $10^{-4}$, which is small enough for most applications. 
-
+Figure \ref{fig: Normal_Function} shows that the stable ideal leakages for the selected functions are less than $10^{-4}$ for $\hat{\delta^2} f$, which is small enough for most applications. 
+\ifdefined\Verbose
+Figure \ref{fig: Normal_Function_Bounding} compares the ideal leakages for $\hat{\delta^2} f$ for the selected functions when different $\hat{\kappa}$ is used. 
+\fi
 
 
 
@@ -804,7 +817,7 @@ This trend is shown in Figure \ref{fig: Pow_Conv_Edge}.
 \ifdefined\Verbose
 Similar trends holds when the input uncertainty follows other distribution.
 Figure \ref{fig: Pow_Conv_Edge_Uniform} shows the upper bound $P(x)$ for $(x \pm \delta x)^c$ when the input uncertainty distribution is Uniform.
-It has almost the same trend of upper bounds $P(x)$ increasing with $c$ as shown in Figure \ref{fig: Pow_Conv_Edge_Uniform} but just with different y-scaling: $1/\sqrt{3}$ instead of by $\1/5$.
+It has almost the same trend of upper bounds $P(x)$ increasing with $c$ as shown in Figure \ref{fig: Pow_Conv_Edge_Uniform} but just with different y-scaling: $1/\sqrt{3}$ instead of by $1/5$.
 \else
 Similar trends holds when the input uncertainty follows Uniform distribution.
 \fi 
@@ -902,11 +915,11 @@ Thus,
 \label{eqn: x < y}
 & p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) = 
   \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
-      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}, \kappa) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x}, \kappa)\right) N(z) d z; \\
 \label{eqn: x > y}
 & p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) =     
   \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
-      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}, \kappa) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}, \kappa)\right) N(z) d z; \\
 \label{eqn: no =}
 & p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) + p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) = 1;
 \end{align}
@@ -1836,8 +1849,10 @@ Without this refinement, the value errors in the library functions can produce u
 
 Bound momentum $\zeta(n, \kappa)$ should be extended to all probability distributions.
 The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions, perhaps by using the same value of $1 - \zeta(2, \kappa)$.
-The procedure to find the bound moments for each sample count should be developed for discrete distributions.
+The procedure to find the bound moments $\kappa$ for each sample count $N$ should be developed for discrete distributions.
+\ifdefined\Verbose
 The statistical meaning for ideal leakage $\varepsilon \in [0, 1]$ in the context of its choice of ideal bounding range $\hat{\kappa}$ needs further investigation: Is $\varepsilon$ the possibility for the result to be not bound by $\hat{\kappa}$?
+\fi
 
 The performance of variance arithmetic must be improved for broader practical adoption.
 The fundamental formulas of statistical Taylor expansion, Formulas \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, and \eqref{eqn: Taylor 2d variance}, contain many independent summations, making them excellent candidates for parallel processing.
@@ -1869,7 +1884,7 @@ Establishing theoretical foundation for applying statistical Taylor expansion in
 \ifdefined\Verbose
 \subsection{Possible Connections to Quantum Physics}
 
-For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge at all, for example, when the input uncertainty is Laplace \cite{Probability_Statistics}, $\zeta(2n) = (2n)!$.
+For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge at all, for example, when the input uncertainty is Laplace \cite{Probability_Statistics}, $\zeta(2n, \infty) = (2n)!$.
 Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded because of sampling, which resembles the need for re-normalization in quantum field theory \cite{Quantum Field}.
 Furthermore, the quantitative dependence of convergence on the choice of ideal bounding range $\hat{\kappa}$ is similar to the principle of quantum physics: What it is depends on how it is measured.
 For example, it is possible that an experimental measurement reduces $\hat{\kappa}$ for a wave function, to cause the wave function to collapse.
