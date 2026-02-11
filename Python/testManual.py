@@ -342,7 +342,7 @@ class TestAdjugateManually (TestAdjugate):
                          f'\t{det.value()}\t{detUnc}\t{detUnc/abs(det.value())}\n')  
                 fc.flush()
 
-            for size in range(4, Adjugate.MAX_SIZE):
+            for size in range(2, Adjugate.MAX_SIZE):
                 ssHilbert = createHilbertMatrix(size)
                 for noise in (0, 1e-20, 1e-18, 1e-16, 1e-14):
                     write(addNoise(ssHilbert, noise), 'Hilbert', noise)

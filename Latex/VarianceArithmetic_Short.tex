@@ -96,7 +96,7 @@ Statistical Taylor expansion generalizes these effects as uncertainty bias, as s
 \item
 The traditional variance-covariance framework accounts only for linear interactions between random variables through an analytic function \cite{Lower_Order_Variance_Expansion}\cite{Probability_Statistics}\cite{Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance} in this study.
 
-\item Calculating the reliability $\alpha \in [0, 1]$ of $f \pm \delta f$ seems completely new.
+\item Calculating the reliability $[0, 1]$ of $f \pm \delta f$ from input uncertainty distributions and sample counts seems completely new.
 \end{itemize}
 
 As a new approach, statistical Taylor expansion is superior to all existing numerical arithmetic.
@@ -127,7 +127,7 @@ The remainder of this paper is organized as follows:
 
 \item Section \ref{sec: matrix} describes the applications of variance arithmetic to matrix inversion, distinguishing between distribution tests and value tests.
 
-\item Section \ref{sec: Math Library} discusses the evaluation of variance arithmetic on common mathematical library functions, showing the effect of distribution pole.
+\item Section \ref{sec: Math Library} discusses the evaluation of variance arithmetic on common mathematical library functions, showing the effect of distributional pole.
 
 \ifdefined\Verbose
 \item Section \ref{sec: Moving-Window Linear Regression} reveals the accumulation of numerical errors by reusing an input multiple time in a moving-window progressive algorithm.
@@ -662,16 +662,16 @@ Because $\omega(\kappa) \neq \omega(\kappa, N)$ for finite $N$, let $\omega(\kap
 \end{align}
 Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$.
 When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the linear leakage $\omega(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, while Formulas \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
-Figure \ref{fig: Normal_Bounding_Leakage} shows that $\epsilon(\kappa_s) < \epsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \epsilon(\kappa_s, N) = \epsilon(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
-Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable result bounding leakage is smaller for larger bounding range $\kappa$.
-It also shows that linear leakage converges to $0$ with increasing sample count $N$ faster when $\hat{\kappa}$ is larger.
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\varepsilon(\kappa_s) < \varepsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \varepsilon(\kappa_s, N) = \varepsilon(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
+Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable result bounding leakage is smaller for larger measuring bounding range $\kappa_s$.
+It also shows that linear leakage converges to $0$ with increasing sample count $N$ faster when $\kappa_s$ is larger.
 
 \begin{align}
 \label{eqn: sum leakage}
 \varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
 \end{align}
 Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f \simeq \omega$, which quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formula \eqref{eqn: sum leakage} as  an example.
-Figure \ref{fig: Normal_Function} shows that the stable ideal leakages for the selected functions are less than $10^{-4}$ for $\hat{\delta^2} f$, which is small enough for most applications. 
+Figure \ref{fig: Normal_Function} compares ideal leakage $\varepsilon$ and linear leakage $\omega$ for the selected functions when the input uncertainty distribution is Gaussian, and shows that the stable ideal leakages are less than $10^{-4}$ when $\hat{\kappa} = 5$, which is small enough for most applications. 
 \ifdefined\Verbose
 Figure \ref{fig: Normal_Function_Bounding} compares the ideal leakages for $\hat{\delta^2} f$ for the selected functions when different $\hat{\kappa}$ is used. 
 \fi
@@ -696,7 +696,7 @@ For example:
 \item The dependence tracing of $\delta^2 (f g)$ is illustrated by $\delta^2 (f/f) = 0$, $\delta^2 (f f) = \delta^2 f^2$, and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter corresponding to Formula \eqref{eqn: multiplication variance}.  
 
 \item The dependency tracing of $\delta^2 f(g(x))$ is demonstrated by $\delta^2 (f^{-1}(f(x))) = (\delta x)^2$.  
-For a reversible transformation such as matrix reversion or FFT (Fast Fourier Transformation), after a \emph{round-trip transformation} which is a forward transformation followed by a reverse transformation, the original input should be restored.
+For a reversible transformation such as matrix reversion or FFT (Fast Fourier Transformation), after a \emph{round-trip transformation} which is a forward transformation followed by a reverse transformation, the original inputs should be restored.
 
 \item Formula \eqref{eqn: linear variance} gives the variance of the linear transformation of a function, which can be applied to other formulas for more general dependency tracing.
 
@@ -712,28 +712,22 @@ Dependency tracing requires applying statistical Taylor expansion on an analytic
 This requirement often conflicts with conventional numerical methods for analytic functions:
 \begin{itemize}
 
-\item
-Traditionally, intermediate variables are widely used in computations; however, this practice disrupts dependency tracing by obscuring the relationships among the original input variables.
-
-\item
-Similarly, conditional executions are often employed to optimize performance and minimize rounding errors, for example, using Gaussian elimination to minimize floating-point rounding errors in matrix inversion \cite{Linear_Algebra}.  
-For dependency tracing, such conditional executions should instead be replaced by direct matrix inversion as described in Section \ref{sec: matrix}.
-
 \item 
 In conventional practice, an analytic expression is often decomposed into simpler, ostensibly independent arithmetic operations such as negation, addition, multiplication, division, square root, and library calls.
 However, this decomposition introduces dependency problems.
 For example, if $x^2 - x$ is calculated as $x^2 - x$, $x(x - 1)$, and $(x - \frac{1}{2})^2 - \frac{1}{4}$, only $(x - \frac{1}{2})^2 - \frac{1}{4}$ gives the correct result, while the other two give wrong results for wrong independence assumptions between $x^2$ and $x$, or between $x -1$ and $x$, respectively.
 
 \item
-Similarly, large calculations are often divided into sequential steps, such as computing $f(g(x))$ as $f(y)|_{y = g(x)}$.
+Large calculations are often divided into sequential steps, such as computing $f(g(x))$ as $f(y)|_{y = g(x)}$.
 This approach also introduces the dependency problem by ignoring dependency tracing within $g(x)$ affecting $f(g(x))$, such as $\overline{(\sqrt{x})^2} > \overline{\sqrt{x^2}}$ and $\delta^2 (\sqrt{x})^2 > \delta^2 \sqrt{x^2}$.
 
-\iffalse
-\item 
-Furthermore, traditional approaches frequently apply approximations to result values during execution.
-Under the statistical Taylor expansion, Formula \eqref{eqn: Taylor 1d variance} shows that the variance converges more slowly than value in statistical Taylor expansion.
-Consequently, approximation strategies should prioritize variances before values.
-\fi
+\item
+Conditional executions are often employed to optimize performance and minimize rounding errors, for example, using Gaussian elimination to minimize floating-point rounding errors in matrix inversion \cite{Linear_Algebra}.  
+For dependency tracing, such conditional executions should instead be replaced by direct matrix inversion as described in Section \ref{sec: matrix}.
+
+\item
+Traditionally, intermediate variables are widely used in computations; however, this practice disrupts dependency tracing by obscuring the relationships among the original input variables.
+
 \end{itemize}
 Dependency tracing therefore removes nearly all flexibility from traditional numerical executions, effectively eliminating the associated dependency problems.
 Consequently, all conventional numerical algorithms must be reevaluated or redesigned to align with the principles of statistical Taylor expansion.
@@ -777,7 +771,7 @@ For simplicity of discussion, the Taylor coefficients in Formulas \eqref{eqn: Ta
 \includegraphics[height=2.5in]{Pow_Conv_Edge.pdf} 
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $(1 \pm \delta x)^c$ across different values of $c$ (x-axis) for Gaussian uncertainty.
-The corresponding uncertainty bias and uncertainty are also shown (right y-axis).
+The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
 When $c$ is a natural number, $\delta x$ has no upper bound; however, such cases are omitted in the figure.
 }
 \label{fig: Pow_Conv_Edge}
@@ -790,7 +784,7 @@ When $c$ is a natural number, $\delta x$ has no upper bound; however, such cases
 \includegraphics[height=2.5in]{Pow_Conv_Edge.Uniform.pdf} 
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $(1 \pm \delta x)^c$ across different values of $c$ (x-axis) for uniform uncertainty.
-The corresponding uncertainty bias and uncertainty are also shown (right y-axis).
+The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
 When $c$ is a natural number, $\delta x$ has no upper bound; however, such cases are omitted in the figure.
 When $c \in [0, 1]$, uncertainty bias is negative so it does not show up in the plot.
 }
@@ -831,7 +825,7 @@ Similar trends holds when the input uncertainty follows Uniform distribution.
 \includegraphics[height=2.5in]{Sin_Conv_Edge.pdf} 
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $\sin(x \pm \delta x)$ across different values of $x$ (x-axis) for Gaussian uncertainty.
-The corresponding uncertainty bias and uncertainty are also shown (right y-axis).
+The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
 The x-axis is expressed in units of $\pi$. 
 }
 \label{fig: Sin_Conv_Edge}
@@ -843,7 +837,7 @@ The x-axis is expressed in units of $\pi$.
 \includegraphics[height=2.5in]{Sin_Conv_Edge.Uniform.pdf} 
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $\sin(x \pm \delta x)$ across different values of $x$ (x-axis) for uniform uncertainty.
-The corresponding uncertainty bias and uncertainty are also shown (right y-axis).
+The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
 The x-axis is expressed in units of $\pi$. 
 }
 \label{fig: Sin_Conv_Edge_Uniform}
@@ -1063,7 +1057,7 @@ Error deviations (z-axis) of adjugate matrix $\widetilde{\mathbf{M}}^A - \mathbf
 \centering
 \includegraphics[height=2.5in]{Forward_Error_vs_Size_Noise.pdf} 
 \captionof{figure}{
-Error deviations (z-axis) as a function of matrix size (x-axis) and input noise precision (y-axis) for the difference of the two sides of Formula \eqref{eqn: adjugate matrix}.
+Error deviations (z-axis) as a function of input noise precision (x-axis) and matrix size (y-axis) for the difference of the two sides of Formula \eqref{eqn: adjugate matrix}.
 }
 \label{fig: Forward_Error_vs_Size_Noise}
 \end{figure}
@@ -1094,7 +1088,7 @@ The legend shows the size of the matrix, as well as the type of the matrix as \t
 
 Let $[j_1, j_{2} \dots j_m]_n$ denote a permutation of length $m$ from the vector $(1,2\dots n)$, and let $<j_1, j_{2} \dots j_m>_n$ for the ordered permutation of length $m$ \cite{Linear_Algebra}. 
 Let $\mathbf{M}$ be a square matrix of size $n$ with element $x_{i,j} \pm \delta x_{i,j}, i, j = 1,2,\dots n$ at row index $i$ and column index $j$. 
-Fourmula \eqref{eqn: determinant Taylor expansion} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant $|\mathbf{M}|$ \cite{Linear_Algebra}.
+Fourmula \eqref{eqn: determinant Taylor expansion} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant $|\mathbf{M}|$.
 In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is a sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indices, and $[j_1 \dots j_m]_n$ contains the column indices  \cite{Linear_Algebra}. 
 
 The square matrix whose element is $(-1)^{i+j}|M_{j,i}|$ is defined as the \emph{adjugate matrix} \cite{Linear_Algebra} $\mathbf{M}^A$ to the original square matrix $\mathbf{M}$. 
@@ -1220,7 +1214,7 @@ Figure \ref{fig: Bounding_Factor_Leakage} also suggests that using linear approx
 \ifdefined\Verbose
 
 \section{Moving-Window Linear Regression}
-\label{sec: Moving-Window Linear Regression}
+%\label{sec: Moving-Window Linear Regression}
 
 \subsection{Moving-Window Linear Regression Algorithm}
 
@@ -1556,7 +1550,7 @@ Therefore, the results for Sin and Cos signals across all frequencies are pooled
 When the FFT order $L$ is less than 8, the error deviations oscillate around $1$ because of an insufficient sample count of $2^L$.
 Even data for forward and reverse transformations are drastically different, variance arithmetic works effectively in all cases.
 
-When $L=18$ and $\delta x = 0$, Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows that the error distributions of Sin/Cos signal resemble Normal distributions, with an additional Delta-like distribution at $\tilde{z} = 0$.
+When $L=18$ and $\delta x = 0$, Figure \ref{fig: FFT_SinCos_Clean_Histo_Indexed} shows that the error distributions of Sin/Cos signal resemble Normal distributions, with an additional Delta-like distribution at $\tilde{z} = 0$ for the forward transformation.
 The error distribution of the reverse transformation is structured on top of the Normal distribution, suggesting that the reverse transformation is more sensitive to numerical errors in the sine function.
 
 
@@ -1848,7 +1842,7 @@ Library mathematical functions should be recalculated using variance arithmetic,
 Without this refinement, the value errors in the library functions can produce unpredictable and potentially significant result errors.
 
 Bound momentum $\zeta(n, \kappa)$ should be extended to all probability distributions.
-The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions, perhaps by using the same value of $1 - \zeta(2, \kappa)$.
+The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions, perhaps by using the same value of linear leakage $\varepsilon \equiv 1 - \zeta(2, \kappa)$.
 The procedure to find the bound moments $\kappa$ for each sample count $N$ should be developed for discrete distributions.
 \ifdefined\Verbose
 The statistical meaning for ideal leakage $\varepsilon \in [0, 1]$ in the context of its choice of ideal bounding range $\hat{\kappa}$ needs further investigation: Is $\varepsilon$ the possibility for the result to be not bound by $\hat{\kappa}$?
@@ -1867,7 +1861,7 @@ This approach effectively limits the range of deviations to the square root of t
 If the sign bit of the floating type can be re-purposed as an exponent bit in a new unsigned floating-point representation, the range of the deviations will be identical to that of the values.
 
 When an analytic expression undergoes statistical Taylor expansion, the resulting expression can become highly complex, as in the case of matrix inversion.
-Modern symbolic computation tools such as \textit{SymPy} and \text{Mathematica} can significantly facilitate such calculations.
+Modern symbolic computation tools such as \textit{SymPy} and \textit{Mathematica} can significantly facilitate such calculations.
 This observation suggests that it may be time to shift from purely numerical programming toward analytic programming, particularly for problems that possess  inherently analytic formulations.
 
 As an enhancement to dependency tracing, source tracing identifies each input’s contribution to the overall result uncertainty.
