@@ -25,7 +25,7 @@
 
 \newcommand{\eqspace}{\;\;\;}
 \newcommand{\largespace}{\;\;\;\;\;\;\;\;\;\;\;\;}
-%\newcommand{\Verbose}{}
+\newcommand{\Verbose}{}
 \newcommand{\ManualReference}{}
 
 
@@ -57,7 +57,7 @@
 \maketitle
 \begin{abstract}
 
-As a rigorous extension of conventional Taylor expansion, statistical Taylor expansion replaces precise input variables with random input variables of known distributions and sample counts, to compute the mean, standard deviation, and reliability of each result.
+As a rigorous extension of conventional Taylor expansion, statistical Taylor expansion replaces precise input variables with random input variables of known distributions and sample counts, to compute the mean, deviation, and reliability of each result.
 This approach tracks the propagation of input uncertainties through intermediate steps, making the final result path independent.
 Therefore, it differs fundamentally from conventional approaches that are usually path dependent, such that it may standardize numerical computations for analytic expressions.
 This study further presents an implementation of statistical Taylor expansion termed variance arithmetic, and demonstrates its performance across diverse mathematical applications.
@@ -95,6 +95,7 @@ Statistical Taylor expansion generalizes these effects as uncertainty bias, as s
 
 \item
 The traditional variance-covariance framework accounts only for linear interactions between random variables through an analytic function \cite{Lower_Order_Variance_Expansion}\cite{Probability_Statistics}\cite{Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance} in this study.
+A full expansion illuminates the convergence of the result.
 
 \item Calculating the reliability $[0, 1]$ of $f \pm \delta f$ from input uncertainty distributions and sample counts seems completely new.
 \end{itemize}
@@ -102,7 +103,7 @@ The traditional variance-covariance framework accounts only for linear interacti
 As a new approach, statistical Taylor expansion is superior to all existing numerical arithmetic.
 
 Conventional floating-point arithmetic \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} computes only the result value $f$.
-Because $f$ contains unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a floating-point representation with $10^{-16}$ resolution may not be good enough for inputs with $10^{-2}$ to $10^{-6}$ precision.
+Because $f$ contains unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be good enough for inputs with $10^{-2}$ to $10^{-6}$ precision.
 However, statistical Taylor expansion can account for rounding errors as part of the result deviation $\delta f$.
 
 The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair and it tends to over-estimate the result uncertainty because of its worst-case assumption \cite{Prev_Precision_Arithmetic}.
@@ -292,11 +293,11 @@ In Formula \eqref{eqn: function distribution}, the same distribution can be expr
 Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, \mu_y, \sigma_y)$ is $\rho(\tilde{x}, \mu, \sigma)$ multiplied by $1/f^{(1)}_x$, in which $f^{(1)}_x$ is the first derivative of $f(x)$ with respect to $x$.
 \begin{itemize}
 \item 
-A \emph{distributional pole} occurs when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = \infty$.
+A \emph{distributional pole} occurs when $y^{(1)}_x=0 \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = \infty$.
 For example, $(\mu \pm 1)^2$ has a distributional pole at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Distribution}.
 
 \item 
-A \emph{distributional zero} occurs when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = 0$.
+A \emph{distributional zero} occurs when $y^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = 0$.
 For example  $\sqrt{\mu \pm 1}$ has a distributional zero at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Root_Distribution}.
 
 \end{itemize}
@@ -308,6 +309,7 @@ In both Figures \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distrib
 \subsection{Statistical Taylor Expansion}
 
 Define $\tilde{z} \equiv (\tilde{x} - x)/\delta x$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, x, \delta x)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$.
+For example, Normal distribution is the normalized form of Gaussian distributions.
 
 \begin{align}
 \label{eqn: bound moment}
@@ -323,10 +325,9 @@ For any symmetric probability distribution: $\rho(-\tilde{z}) = \rho(\tilde{z})$
 \label{eqn: Taylor 1d} 
 f(x + \tilde{x}) &= f(x + \tilde{z} \delta x) = f(x) + \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
 \label{eqn: Taylor 1d mean}
-\overline{f(x)} &= \int_{-\varrho}^{+\kappa} f(x + \tilde{z}) \rho(\tilde{z}) d \tilde{z} = f(x) + \sum_{n=1}^{\infty}(\delta x)^n \frac{f^{(n)}_x}{n!} \zeta(n, \kappa); \\
+\overline{f(x)} &= f(x) + \sum_{n=2}^{\infty}(\delta x)^n \frac{f^{(n)}_x}{n!} \zeta(n, \kappa); \\
 \label{eqn: Taylor 1d variance}
-\delta^2 f(x) &= \overline{(f(x) - \overline{f(x)})^2} = \overline{f(x)^2} - \overline{f(x)}^2 \nonumber \\
-	&= \sum_{n=1}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \big);
+\delta^2 f(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \big);
 \end{align}
 An analytic function $f(x)$ can be accurately evaluated in a range using the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
 Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} yield the mean $\overline{f(x)}$ and variance $\delta^2 f(x)$ of $f(x)$, respectively.
@@ -348,13 +349,13 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only 2-dimensional problem s
 With the mean reverting condition of Formula \eqref{eqn: mean-reverting bounding}:
 \begin{align}
 \label{eqn: addition mean}
-\overline{x \pm y} &= \zeta(0, \kappa_x) x \pm \zeta(0, \kappa_x) y; \\
+\overline{x \pm y} &= \zeta_x(0, \kappa_x) x \pm \zeta_y(0, \kappa_x) y; \\
 \label{eqn: addition variance}
-\delta^2 (x \pm y) &= \zeta(2, \kappa_x) (\delta x)^2 + \zeta(2, \kappa_y) (\delta y)^2; \\
+\delta^2 (x \pm y) &= \zeta_x(2, \kappa_x) (\delta x)^2 + \zeta_y(2, \kappa_y) (\delta y)^2; \\
 \label{eqn: multiplication mean}
-\overline{x y} &= \zeta(0, \kappa_x) x \; \zeta(0, \kappa_y) y; \\
+\frac{\overline{x y}}{xy} &= \zeta_x(0, \kappa_x)\zeta_y(0, \kappa_y); \\
 \label{eqn: multiplication variance}
-\delta^2 (x y) &= \zeta(2, \kappa_x) (\delta x)^2 y^2 + x^2 \zeta(2, \kappa_y) (\delta y)^2 + \zeta(2, \kappa_x) (\delta x)^2 \; \zeta(2, \kappa_y) (\delta y)^2;
+P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(2, \kappa_x) P(x)^2 \zeta_y(2, \kappa_y) P(y)^2;
 \end{align}
 When $N \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kappa) \rightarrow 1$, making Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
 
@@ -395,7 +396,7 @@ When $N \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kap
 Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and variance for $e^x$, respectively:
 \begin{align}
 \label{eqn: exp mean}
-\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=1}^{\infty} (\delta x)^n \zeta(n, \kappa) \frac{1}{n!}; \\
+\frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=2}^{\infty} (\delta x)^n \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: exp precision}
 \frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j!\;(n - j)!};
 \end{align}
@@ -410,16 +411,10 @@ Formulas \eqref{eqn: log mean} and \eqref{eqn: log precision} give the mean and 
 
 Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and variance for $\sin(x)$, respectively:
 \begin{align}
-\label{eqn: sin Taylor}
-\sin(x + \tilde{x}) &= \sum_{n=0}^{\infty} \eta(n, x) \frac{\tilde{x}^{n}}{n!};
-	\eqspace \eta(n, x) \equiv \begin{cases} 
-		n = 4j: \eqspace  sin(x); \\ n = 4j + 1: \eqspace  cos(x); \\ n = 4j + 2: \eqspace  -sin(x); \\ n = 4j +3: \eqspace  -cos(x); 
-	\end{cases} \\
 \label{eqn: sin mean}
-\overline{\sin(x)} =& \sum_{n=0}^{\infty} (\delta x)^n \eta(n, x) \frac{\zeta(n, \kappa)}{n!}; \\
+\overline{\sin(x)} =& \sum_{n=0}^{\infty} (\delta x)^n \sin(x)_x^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\eta(j, x)\eta(n - j, x)}{j! (n-j)!}
-      	\big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)\big); 
+\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)_x^{(j)}\sin(x)_x^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!}; 
 \end{align}
 
 Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and variance for $x^c$, respectively:
@@ -541,25 +536,30 @@ Thus:
 \includegraphics[height=2.5in]{Gaussian_5_Moment.pdf} 
 \captionof{figure}{
 When $\kappa = 5$, the value of bound moment  $\zeta(2n, \kappa)$ (left y-axis) for Gaussian distribution with order $2n$ (x-axis) versus $2 N(\kappa) \frac{\kappa^{2n+1}}{2n+1}$ (left y-axis), and their ratio (right y-axis).
+The value of bound moment  $\zeta(2n, \kappa)$ for Uniform distribution is also provided as an comparison.
 }
 \label{fig: Gaussian_5_Moment}
 \end{figure}
 
 \begin{align}
+\label{eqn: variance asymptotic}
+\forall j&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n}; \\
 \label{eqn: uniform moment}
 \zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{z} = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n + 1}, \;\; 0 \leq \kappa \leq \sqrt{3}; \\
 \label{eqn: symetric asymptotic moment} 
-\lim_{n \rightarrow +\infty}& \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1};
 \end{align}
-\fi
-
+\else
 \begin{align}
 \label{eqn: variance asymptotic}
 \forall j&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n};
 \end{align}
+\fi
+
 Formula \eqref{eqn: variance asymptotic} shows that the asymptotic behavior of $\zeta(n, \kappa)$ when $n \rightarrow \infty$ determines if Formula \eqref{eqn: Taylor 1d variance} will converge.
 \ifdefined\Verbose
-For example, Formula \eqref{eqn: uniform moment} gives $\zeta(2n, \kappa)$ for Uniform distributions, Formula \eqref{eqn: symetric asymptotic moment} shows the asymptoticity for any symmetric distribution $\rho(\tilde{z})$, and Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n, 5)$ for Normal distribution when $2n \rightarrow +\infty$.
+For example, Formula \eqref{eqn: uniform moment} gives $\zeta(2n, \kappa)$ for Uniform distributions, Formula \eqref{eqn: symetric asymptotic moment} shows the asymptoticity for any symmetric distribution $\rho(\tilde{z})$.
+Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for Uniform distribution, $\zeta(2n, 5)$ for Normal distribution. and the asymptote for Normal distribution.
 \fi
 \begin{itemize}
 \item Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
@@ -570,9 +570,9 @@ For example, Formula \eqref{eqn: uniform moment} gives $\zeta(2n, \kappa)$ for U
 \end{itemize}
 \begin{align}
 \label{eqn: log convergence}
-\rho(-\tilde{z}) =\rho(\tilde{z})&: \delta^2 \log(x \pm \delta x) \sim \sum_{n = 1}^{+\infty} \frac{(P(x) \kappa)^{2n}}{(2n)^2}; \\
+\rho(-\tilde{z}) =\rho(\tilde{z})&: \delta^2 \log(x \pm \delta x) \simeq \sum_{n = 1}^{+\infty} (P(x) \kappa)^{2n}\frac{\log(n)}{n}; \\
 \label{eqn: pow convergence}
-\rho(-\tilde{z}) =\rho(\tilde{z})&: \frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \sim \sum_{n = 1}^{+\infty} (P(x) \kappa)^{2n} \frac{\begin{pmatrix} 2c \\ 2n \end{pmatrix}}{2n};
+\rho(-\tilde{z}) =\rho(\tilde{z})&: \frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \simeq \sum_{n = 1}^{+\infty} (P(x) \kappa)^{2n} \frac{\begin{pmatrix} 2c \\ 2n \end{pmatrix}}{2n};
 \end{align}
 Statistical Taylor expansion rejects the distributional zero of $\log(x)$ or $(x \pm \delta x)^c$ in the range of $P(x) > 1/\kappa$ statistically because of the divergence of Formulas \eqref{eqn: log convergence} and \eqref{eqn: pow convergence} mathematically, with $\zeta(2n, \kappa)$ providing the connection between these two perspectives.
 
@@ -611,94 +611,78 @@ Measured linear leakage $\omega(\kappa, N)$ (left y-axis) and corresponding meas
 \label{fig: Bounding_Factor_Leakage}
 \end{figure}
 
-\ifdefined\Verbose
 \begin{figure}[p]
-\else
-\begin{figure}
-\fi
 \centering
 \includegraphics[height=2.5in]{Normal_Function.pdf} 
 \captionof{figure}{
-Ideal leakage (y-axis) for varying sample count $\kappa_s$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 5$ for Gaussian input uncertainties.
+Ideal leakage $\varepsilon$ (y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 5$ for Gaussian input uncertainties.
+When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 }
 \label{fig: Normal_Function}
 \end{figure}
 
-\ifdefined\Verbose
 \begin{figure}[p]
-\includegraphics[height=2.5in]{Normal_Function_Bounding.pdf} 
+\centering
+\includegraphics[height=2.5in]{Uniform_Function.pdf} 
 \captionof{figure}{
-Ideal leakage (y-axis) for varying bound range $\kappa$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 6$ for Gaussian input uncertainties.
+Ideal leakage $\varepsilon$ (y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) for Uniform input uncertainties.
+When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 }
-\label{fig: Normal_Function_Bounding}
+\label{fig: Uniform_Function}
 \end{figure}
-\fi
 
-\begin{align}
-\label{eqn: offset approximation}
-f(x) - \overline{f(x)} &\simeq (\delta x)^2 \zeta(2, \kappa) f_x^{(2)}; \\
-\label{eqn: variance approximation}
-\delta^2 f(x) &\simeq (\delta x)^2 \zeta(2, \kappa) (f_x^{(1)})^2;
-\end{align}
-
-Figures \eqref{eqn: offset approximation} and \eqref{eqn: variance approximation} show that the first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
+The first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
 As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$ such that $\delta^2 f(x)$ reaches a stable value but the convergence range of $\delta^2 f(x)$ reduces toward zero for Formulas \eqref{eqn: log precision} and \eqref{eqn: power precision}.
-As a trade-off, the choice of $\kappa$ to calculate the stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal bound range} $\hat{\kappa}$, and the result is the \emph{ideal uncertainty bias} $\widehat{\overline{f(x)}} - f(x)$ and \emph{ideal variance} $\hat{\delta^2} f(x)$.
+As a trade-off, the choice of $\kappa$ to calculate the stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal bound range} $\hat{\kappa}$, and the result is the  \emph{ideal variance} $\hat{\delta^2} f(x)$.
 For a Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
 For a Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
 
 Define \emph{linear leakage} $\omega(\kappa) \equiv 1 - \zeta(2, \kappa)$.
+In $\delta^x x = \zeta(2, \kappa) (\delta x)^2$, the result variance $\delta^x$ is less than input variance $(\delta x)^2$ due to linear leakage.
 When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
 This yields the \emph{sample linear leakage} $\omega(\kappa, N)$ for the interval $[\overline{x} - \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional linear leakage} $\omega(\kappa)$ for the interval $[\mu - \varrho \sigma, \mu + \kappa \sigma]$.
 Because $\omega(\kappa) \neq \omega(\kappa, N)$ for finite $N$, let $\omega(\kappa) = \omega(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bound range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bound range}, with the latter used in calculating $\zeta(n, \kappa)$.
 
 \begin{align}
 \label{eqn: Gaussian result bounding leakage} 
-\epsilon(\kappa) &= \omega(\kappa) + 2 N(\kappa) \kappa; \\
+\epsilon(\kappa) &= \omega(\kappa) + 2 \rho(\kappa) \kappa; \\
 \label{eqn: Gaussian theoretical bounding leakage} 
 \epsilon(\kappa) &= 1 - \xi(\frac{\kappa}{\sqrt{2}}); \\
 \label{eqn: Gaussian experimental bounding leakage}
 \epsilon(\kappa_s, N) &= 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
 \end{align}
 Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$.
-When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the linear leakage $\omega(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, while Formulas \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
-Figure \ref{fig: Normal_Bounding_Leakage} shows that $\varepsilon(\kappa_s) < \varepsilon(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \varepsilon(\kappa_s, N) = \varepsilon(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N) < \kappa_s$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
-Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable result bounding leakage is smaller for larger measuring bounding range $\kappa_s$.
-It also shows that linear leakage converges to $0$ with increasing sample count $N$ faster when $\kappa_s$ is larger.
+When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the linear leakage $\omega(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, whereas Formulas \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\omega(\kappa_s, N + 1) < \omega(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \omega(\kappa_s, N) = \omega(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N + 1) < \kappa(\kappa_s, N)$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
+Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable resulting linear leakage $\omega$ is smaller for larger measuring bounding range $\kappa_s$.
+It also shows that linear leakage converges toward $0$ with increasing sample count $N$ faster when $\kappa_s$ is larger.
 
 \begin{align}
 \label{eqn: sum leakage}
-\varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
+\varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2}; \\
+\label{eqn: product leakage}
+\varepsilon(x y) &= \frac{2\omega_x P(x)^2 + 2 \omega_y P(y)^2 - \omega_x P(x)^2 \omega_y P(y)^2}{P(x)^2 + P(y)^2 + P(x)^2 P(y)^2};
 \end{align}
-Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f \simeq \omega$, which quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formula \eqref{eqn: sum leakage} as  an example.
-Figure \ref{fig: Normal_Function} compares ideal leakage $\varepsilon$ and linear leakage $\omega$ for the selected functions when the input uncertainty distribution is Gaussian, and shows that the stable ideal leakages are less than $10^{-4}$ when $\hat{\kappa} = 5$, which is small enough for most applications. 
-\ifdefined\Verbose
-Figure \ref{fig: Normal_Function_Bounding} compares the ideal leakages for $\hat{\delta^2} f$ for the selected functions when different $\hat{\kappa}$ is used. 
-\fi
+Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f \simeq \omega$, which quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formulas \eqref{eqn: sum leakage} and \ref{eqn: product leakage} as two examples.
+Figure \ref{fig: Normal_Function} compares ideal leakage $\varepsilon$ and linear leakage $\omega$ for the selected functions when the input uncertainty distribution is Gaussian, and shows that the example stable ideal leakages are less than $10^{-4}$ when $\hat{\kappa} = 5$, which is small enough for most applications. 
 
+The unbiased bounding range $[\kappa_{min}, \kappa_{max}]$ of Uniform distribution is estimated as $1 + \frac{1}{N}$ times of the minimal and maximal values in sampled data set \cite{Uniform_Distrobution Estimator}.
+The bounding leakage $\epsilon$ is the percentage of $[\kappa_{min}, \kappa_{max}]$ outside the true bounding range $[\mu - \sqrt{3}\sigma, \mu + \sqrt{3}\sigma]$.
+Because $\zeta(2n)$ for Uniform distribution increases much slower than $\zeta(2n, 5)$ for Gaussian distribution, Figure \ref{fig: Uniform_Function} shows that for the selected functions, ideal leakage equals linear leakage for Uniform input uncertainty, and both decrease linearly with sample count $N$.
+The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_Function} shows the effect of input uncertainty distribution to the output deviation $\delta f$.
 
 
 \subsection{Dependency Tracing}
 
-\begin{align}
-\label{eqn: sum variance}
-\delta^2 (f + g) =&\; \delta^2 f + \delta^2 g + 2 (\overline{fg} - \overline{f}\overline{g}); \\
-\label{eqn: linear variance}
-\delta^2 (c_1 f + c_0) =&\; c_1^2 \delta^2f;
-\end{align}
-
-
-When all inputs satisfy the uncorrelated uncertainty assumption, statistical Taylor expansion traces dependencies through the intermediate steps.
-For example:
+When all inputs satisfy the uncorrelated uncertainty condition, statistical Taylor expansion traces dependencies through the intermediate steps.
+For example, when the sample count $N$ is sufficiently large:
 \begin{itemize}
-\item Formula \eqref{eqn: sum variance} expresses $\delta^2 (f + g)$, The dependency tracing of is illustrated by $\delta^2 (f - f) = 0$, and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter corresponding to Formula \eqref{eqn: addition variance}.   
+\item The dependency tracing of $\delta^2 (f + g)$ is illustrated by $\delta^2 (f - f) = 0$, and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter corresponding to Formula \eqref{eqn: addition variance}.   
 
 \item The dependence tracing of $\delta^2 (f g)$ is illustrated by $\delta^2 (f/f) = 0$, $\delta^2 (f f) = \delta^2 f^2$, and $\delta^2 (f(x) g(y)) = \overline{f}^2 (\delta^2 g) + (\delta^2 f) \overline{g}^2 +  (\delta^2 f) (\delta^2 g)$, with the latter corresponding to Formula \eqref{eqn: multiplication variance}.  
 
 \item The dependency tracing of $\delta^2 f(g(x))$ is demonstrated by $\delta^2 (f^{-1}(f(x))) = (\delta x)^2$.  
 For a reversible transformation such as matrix reversion or FFT (Fast Fourier Transformation), after a \emph{round-trip transformation} which is a forward transformation followed by a reverse transformation, the original inputs should be restored.
-
-\item Formula \eqref{eqn: linear variance} gives the variance of the linear transformation of a function, which can be applied to other formulas for more general dependency tracing.
 
 \end{itemize}
 Statistical Taylor expansion employs dependency tracing to ensure that the calculated mean and variance satisfy statistics rigorously.
@@ -719,7 +703,7 @@ For example, if $x^2 - x$ is calculated as $x^2 - x$, $x(x - 1)$, and $(x - \fra
 
 \item
 Large calculations are often divided into sequential steps, such as computing $f(g(x))$ as $f(y)|_{y = g(x)}$.
-This approach also introduces the dependency problem by ignoring dependency tracing within $g(x)$ affecting $f(g(x))$, such as $\overline{(\sqrt{x})^2} > \overline{\sqrt{x^2}}$ and $\delta^2 (\sqrt{x})^2 > \delta^2 \sqrt{x^2}$.
+This approach also introduces the dependency problem by ignoring dependency tracing within $g(x)$ affecting $f(g(x))$, such as $\overline{(\sqrt{x})^2} > \overline{\sqrt{x^2}} > \overline{x}$ and $\delta^2 (\sqrt{x})^2 > \delta^2 \sqrt{x^2} > \delta^2 x$.
 
 \item
 Conditional executions are often employed to optimize performance and minimize rounding errors, for example, using Gaussian elimination to minimize floating-point rounding errors in matrix inversion \cite{Linear_Algebra}.  
@@ -811,9 +795,9 @@ This trend is shown in Figure \ref{fig: Pow_Conv_Edge}.
 \ifdefined\Verbose
 Similar trends holds when the input uncertainty follows other distribution.
 Figure \ref{fig: Pow_Conv_Edge_Uniform} shows the upper bound $P(x)$ for $(x \pm \delta x)^c$ when the input uncertainty distribution is Uniform.
-It has almost the same trend of upper bounds $P(x)$ increasing with $c$ as shown in Figure \ref{fig: Pow_Conv_Edge_Uniform} but just with different y-scaling: $1/\sqrt{3}$ instead of by $1/5$.
+It has almost the same trend of upper bounds $P(x)$ increasing with $c$ as shown in Figure \ref{fig: Pow_Conv_Edge_Uniform} but just with different y-scaling: $1/\sqrt{3}$ instead of  $1/5$.
 \else
-Similar trends holds when the input uncertainty follows Uniform distribution.
+Similar trends holds around $\hat{\kappa} = \sqrt{3}$ when the input uncertainty follows Uniform distribution.
 \fi 
 
 
@@ -826,7 +810,6 @@ Similar trends holds when the input uncertainty follows Uniform distribution.
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $\sin(x \pm \delta x)$ across different values of $x$ (x-axis) for Gaussian uncertainty.
 The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
-The x-axis is expressed in units of $\pi$. 
 }
 \label{fig: Sin_Conv_Edge}
 \end{figure}
@@ -838,26 +821,24 @@ The x-axis is expressed in units of $\pi$.
 \captionof{figure}{
 Measured upper bound $\delta x$ (left y-axis) for $\sin(x \pm \delta x)$ across different values of $x$ (x-axis) for uniform uncertainty.
 The corresponding resulting uncertainty bias and deviation are also shown (right y-axis).
-The x-axis is expressed in units of $\pi$. 
 }
 \label{fig: Sin_Conv_Edge_Uniform}
 \end{figure}
 \fi
 
-In addition to convergence, the variance expansion may yield negative results, as in Formula \eqref{eqn: sin precision} for $sin(x \pm \delta x)$.
+In addition to convergence, the variance expansion may yield negative results when the expansion is terminated arbitrarily, as in Formula \eqref{eqn: sin precision} for $sin(x \pm \delta x)$, such that an upper bound for $\delta x$ is need to guarantee non-negative variance.
 Figure \ref{fig: Sin_Conv_Edge} shows that the upper bound of $\delta x$ for $sin(x \pm \delta x)$ varies periodically between $0.318 \pi$ and $0.416 \pi$ for Gaussian input uncertainty.
-Beyond this upper bound, the result deviation is no longer positive at some expansion order.
-Conceptually, the upper-bound for $\delta x$ should not be much more than $\pi/2$ to make the result meaningful, which is satisfied as shown in Figure \ref{fig: Sin_Conv_Edge}.
+Because $\sin(x) \in [-1, +1]$, $\overline{\sin(x)} \pm \delta \sin(x)$ should also follow this range, as indicated in \ref{fig: Sin_Conv_Edge}.
 \ifdefined\Verbose
 Similar trend holds when the input uncertainty is uniform but with larger upper bound $\delta x$, as shown in Figure \ref{fig: Sin_Conv_Edge_Uniform}.
 \else
-Similar trend holds when the input uncertainty is uniform but with larger upper bound $\delta x$ still less than $\pi/2$.
+Similar trend holds when the input uncertainty is uniform but with larger upper bound $\delta x$.
 \fi
 
 
 \subsection{Floating-Point Rounding Errors}
 
-Variance arithmetic incorporates floating-point rounding errors as the $\delta x$ when converting a floating-point value $x$ into $x \pm \delta x$. 
+Variance arithmetic incorporates floating-point rounding errors as $\delta x$ when converting a floating-point value $x$ into $x \pm \delta x$. 
 Unless all the least 20 bits of the significand of $x$ are zero, $\delta x$ is assumed to be $1/\sqrt{3}$ times of the ULP (Unit in the Last Place \cite{Floating_Point_Standard}) of $x$, because rounding errors are shown to be uniformly distributed within ULP \cite{Prev_Precision_Arithmetic}.
 
 
@@ -924,14 +905,13 @@ Two imprecise values can be compared statistically based on their difference.
 
 When the value difference is zero, the two imprecise values are considered equal.  
 In statistics, such two values have a $50\%$ possibility of being either less than or greater to each other but zero probability of being exactly equal \cite{Probability_Statistics}.
-In variance arithmetic, however, they are treated as neither less nor greater than each other and therefore are considered equal.
+In variance arithmetic, however, they are considered equal.
 
 Otherwise, the standard z-statistic method \cite{Probability_Statistics} is applied to determine whether two imprecise values are statistically equal, less than, or greater than each other.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.00224$, yielding $z = 0.002 / 0.00224$.
 The probability that they are not equal is $\xi(|z|/\sqrt{2}) = 62.8\%$, in which $\xi(z)$ is the cumulative distribution function for Normal distribution \cite{Probability_Statistics}.
 If the threshold probability for inequality is set at $50\%$, then $1.000 \pm 0.002 < 1.002 \pm 0.001$.
-Alternatively, an equivalent bounding range for z can be used, such as $|z| \leq 0.67448975$ for an equal probability threshold of $50\%$.
-
+%Alternatively, an equivalent bounding range for z can be used, such as $|z| \leq 0.67448975$ for an equal probability threshold of $50\%$.
 Because the result of comparison depends on threshold probability which is application specific, comparison is not part of variance arithmetic.
 
 \fi
@@ -967,8 +947,8 @@ For example, a round-trip test is a value test.
 
 However, if the input uncertainty is known only to order of magnitude, \emph{proper coverage} is achieved when the error deviations fall within the range $[0.1, 10]$.
 
-When an input contains unspecified errors, such as numerical errors in library functions or floating-point rounding errors, Gaussian noise with progressively increasing deviations can be added, until ideal coverage is attained.
-The minimal noise deviation required provides a good estimate of the magnitude of the unspecified input uncertainty deviations.
+When an input contains unspecified errors, such as numerical errors in library functions or floating-point rounding errors, Gaussian noise with progressively increasing deviations can be added to inputs, until ideal coverage is attained.
+The minimal noise deviation required for the ideal coverage provides a good estimate of the magnitude of the unspecified input uncertainty deviations.
 Achieving ideal coverage serves as a necessary verification step to ensure that statistical Taylor expansion has been applied correctly within the given context.
 The input noise range that yields ideal coverage defines the ideal application range for the analytic function.
 
@@ -984,7 +964,7 @@ Formula \eqref{eqn: polynomial Taylor} presents polynomial Taylor expansion:
 \sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \eqspace
 	P_j \equiv \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{align}
-Because the maximal expansion term using Formula \eqref{eqn: polynomial Taylor} is $\tilde{x}^{2N}$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $224 = 448/2$ when the input uncertainty is assumed to be Gaussian, and $\hat{\kappa} = 5$.
+Because the maximal expansion term using Formula \eqref{eqn: polynomial Taylor} is $\tilde{x}^{2N}$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $2j=224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
 
 \subsection{Residual Error}
 
@@ -1036,13 +1016,16 @@ Figure \ref{fig: Poly_Continuity} illustrates the error distributions of $(x \pm
 \item When the second derivative is negative, the resulting distribution is left-sided and Delta-like, such as when $n = 3, x = -0.2$, which is the mirror image of the distribution when $n = 3, x = 0.2$.
 
 \end{itemize}
-In each case, the transition from $x = 0$ to $x = \pm 0.2$ is continuous for the resulting mean, deviation and error distribution.
 
 
 
 
 \section{Matrix Calculations}
 \label{sec: matrix}
+
+\iffalse
+
+\fi
 
 \begin{figure}[p]
 \centering
@@ -1075,25 +1058,22 @@ The legend shows the size of the matrix, as well as the type of the matrix as \t
 
 \begin{align}
 \label{eqn: random determinant}
-|\widetilde{\mathbf{M}}| &\equiv \sum_{[p_1\dots p_n]_n} \$ [p_1\dots p_n]_n  \prod_{i=1 \dots n} (x_{i,p_i} + \tilde{x}_{i,p_{i}}) \\
-\label{eqn: determinant Taylor expansion}
-	&= \sum_{m=1 \dots n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_{m}]_n} 
-		\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_{m}]_n} \prod_{i=1 \dots m}^{i \in \{i_1 \dots i_m\}} \tilde{x}_{i,p_{i}}; \\
+|\widetilde{\mathbf{M}}| &\equiv \sum_{[j_1\dots j_n]_n} \$ [j_1\dots j_n]_n  \prod_{i=1 \dots n} (x_{i,j_i} + \tilde{x}_{i,j_{i}}) \\
 \label{eqn: determinant mean}
 \overline{|\mathbf{M}|} &= |\mathbf{M}|; \\
 \label{eqn: determinant variance}
 \delta^2 |\mathbf{M}| &= \sum_{m=1}^{n} \sum_{<i_1 \dots i_m>_n} \sum_{[j_1 \dots j_m]_n}
-  	|\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}|^2 \prod _{k=1 \dots n}^{i_k \in \{i_1 \dots i_m\}} (\delta x_{i_k, j_k})^2; 
+  	|\mathbf{M}_{<i_1 \dots i_m>_n, <[j_1 \dots j_m]>_n}|^2 \prod _{k=1 \dots m} \zeta_{i,j}(2, \kappa_{i,j})(\delta x_{i_k, j_k})^2; 
 \end{align}
-
-Let $[j_1, j_{2} \dots j_m]_n$ denote a permutation of length $m$ from the vector $(1,2\dots n)$, and let $<j_1, j_{2} \dots j_m>_n$ for the ordered permutation of length $m$ \cite{Linear_Algebra}. 
-Let $\mathbf{M}$ be a square matrix of size $n$ with element $x_{i,j} \pm \delta x_{i,j}, i, j = 1,2,\dots n$ at row index $i$ and column index $j$. 
-Fourmula \eqref{eqn: determinant Taylor expansion} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant $|\mathbf{M}|$.
+Let $<j_1, j_{2} \dots j_m>_n$ denote a selection of $m$ numbers from the sequence of natural numbers $1,2 \dots n$ in sequence, which is named as the \emph{ordered permutation}.
+Let $[j_1, j_{2} \dots j_m]_n$ and $(-1)^{[j_1, j_{2} \dots j_m]_n}$ denote a permutation of $<[j_1, j_{2} \dots j_m]>_n$ and the corresponding sign \cite{Linear_Algebra}, in which $<[j_1, j_{2} \dots j_m]>_n$ denote the corresponding ordered permutation.
+Let $\mathbf{M}$ be a square matrix of size $n$ with element $x_{i,j} \pm \delta x_{i,j}, i, j = 1,2\dots n$ at row index $i$ and column index $j$. 
+Fourmula \eqref{eqn: random determinant} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} gives the statistical Taylor expansion of the determinant $|\mathbf{M}|$.
 In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is a sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indices, and $[j_1 \dots j_m]_n$ contains the column indices  \cite{Linear_Algebra}. 
 
 The square matrix whose element is $(-1)^{i+j}|M_{j,i}|$ is defined as the \emph{adjugate matrix} \cite{Linear_Algebra} $\mathbf{M}^A$ to the original square matrix $\mathbf{M}$. 
 By assigning a random integer between $[-2^8, +2^8]$ to each element, $\mathbf{M}$ is created such that $\mathbf{M}^A$ can be calculated precisely using floating-point arithmetic when $n \leq 7$.
-By adding Gaussian noise $\tilde{x}_{i,j}$ of deviation $\delta x$ to each element of $\mathbf{M}$, $\widetilde{\mathbf{M}}$ is created and $|\widetilde{\mathbf{M}}|$ is calculated as shown in Formula \eqref{eqn: random determinant}.
+By adding Gaussian noise $\tilde{x}_{i,j}$ of deviation $\delta x$ to each element of $\mathbf{M}$, $\widetilde{\mathbf{M}}$ is created as shown in Formula \eqref{eqn: random determinant}.
 The value error of $\mathbf{M}^A$ is the difference between $\widetilde{\mathbf{M}^A}$ and $\mathbf{M}^A$, whereas the result deviation is calculated using Formula \eqref{eqn: determinant variance}, such that $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ is a distribution test.
 Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the error deviations of $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ are very close to $1$ except when the matrix size is $8$ and the input uncertainty is $\delta x = 10^{-17}$.
 This abnormality is caused by floating-point rounding errors only at this point, to result in a error deviation of $3.2$. 
@@ -1131,29 +1111,6 @@ Thus, determinant precision can replace matrix condition number to quantify over
 \section{Mathematical Library Functions}
 \label{sec: Math Library}
 
-\begin{table}
-\centering
-\resizebox{\textwidth}{!}{
-\begin{tabular}{|c|c|c|c|c|} 
-\hline 
-Basic Function  & $e^{x \pm \delta x}$           & $\log(x \pm \delta x)$              & $(1 \pm \delta x)^c$             & $\sin(x \pm \delta x)$ \\ 
-\hline 
-Range             & $x \in [-100, +100]$            & $x \in [1/32, 32]$                     & $c \in [-3, +3]$                     & $x \in [-\pi, +\pi]$     \\
-\hline 
-Uncertainty      & $\delta x \in [10^{-15}, 1]$ & $\delta x \in [10^{-15}, 0.2 x]$ & $\delta x \in [10^{-15}, 0.2]$ & $\delta x \in [10^{-15}, 1]$     \\
-\hline 
-Error Deviation & $1.000 \pm 0.010$              & $0.999 \pm 0.011$                  & $0.989 \pm 0.104$                 & $0.978 \pm 0.150$ \\
-\hline 
-\end{tabular}
-}
-\captionof{table}{
-The result error deviations of selected basic functions with Gaussian input noise $x \pm \delta x$ when $\delta x > 10^{-15}$, obtained by variance arithmetic.
-The error deviation for $(1 \pm \delta x)^c$ can be improved to $0.998 \pm 0.034$ if diverging regions are excluded.
-The error deviation for $\sin(x \pm \delta x)$ can be improved to $1.000 \pm 0.010$ if pole regions are excluded.
-}
-\label{tbl: basic functions}
-\end{table}
-
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{Sin_X_Dev.pdf} 
@@ -1185,6 +1142,29 @@ Normalized errors of $(x^p)^{\frac{1}{p}} - x$ as functions of $x$ and $p$.
 \label{fig: Power_Error}
 \end{figure}
 
+\begin{table}
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c|} 
+\hline 
+Basic Function  & $e^{x \pm \delta x}$           & $\log(x \pm \delta x)$          & $(1 \pm \delta x)^c$         & $\sin(x \pm \delta x)$ \\ 
+\hline 
+Range             & $x \in [-100, +100]$            & $x \in [1/32, 32]$                 & $c \in [-3, +3]$                 & $x \in [-\pi, +\pi]$     \\
+\hline 
+Uncertainty      & $\delta x \in [10^{-15}, 1]$ & $P(x) \in [10^{-15}x, 0.2 x]$ & $P(x) \in [10^{-15}, 0.2]$ & $\delta x \in [10^{-15}, 1]$     \\
+\hline 
+Error Deviation & $1.000 \pm 0.010$              & $0.999 \pm 0.011$               & $0.989 \pm 0.104$            & $0.997 \pm 0.027$ \\
+\hline 
+\end{tabular}
+}
+\captionof{table}{
+The result error deviations of selected basic functions with Gaussian input noise $x \pm \delta x$ when $\delta x > 10^{-15}$, obtained by variance arithmetic.
+The error deviation for $(1 \pm \delta x)^c$ can be improved to $1.000 \pm 0.007$ if diverging regions are excluded.
+The error deviation for $\sin(x \pm \delta x)$ can be improved to $1.000 \pm 0.010$ if pole regions are excluded.
+}
+\label{tbl: basic functions}
+\end{table}
+
 
 Table \ref{tbl: basic functions} shows that by sampling random input $\tilde{x}$ from Gaussian noise $x + \delta x$, Formulas \eqref{eqn: exp precision}, \eqref{eqn: log precision}, \eqref{eqn: sin precision}, and \eqref{eqn: power precision} provide almost perfect characterization $f(x) \pm \delta f$ for the result distributions of $f(\tilde{x})$ in which $f(\tilde{x})$ is the corresponding math library functions.
 Table \ref{tbl: basic functions} shows the results from Python, which differs slightly from those from either C++ or Java.
@@ -1194,7 +1174,6 @@ The coverage is proper when $ \delta x < 10^{-15}$.
 
 Figure \ref{fig: Sin_X_Dev} shows that the error deviation for $\sin(x + \delta x)$ is $1.000 \pm 0.010$, except approaching $0$ when $x=\pm \pi/2$ and $\delta x < 10^{-8}$.
 Near a distributional pole, the input uncertainty is suppressed, resulting in zero error deviation.
-As expected, $\delta^2 \sin(x)$ exhibits the same periodicity as $\sin(x)$.
 The numerical errors of the library functions $\sin(x)$ and $\cos(x)$ over a larger range of $x$ are examined in greater detail in Section \ref{sec: FFT}.
 
 To test $f^{-1}(f(x)) - x = 0$ when $\delta x = 0$ for the library functions:
@@ -1205,7 +1184,7 @@ For $\log(e^x) - x$, the error deviation is $0.41$ when $|x| \leq 1$, or $0$ oth
 \item Figure \ref{fig: Power_Error} shows that the error deviation for $(x^p)^{1/p} - x$ is $0.56$,  dependent on neither $x$ nor $p$.
 \end{itemize}
 The reasons why $(x^p)^{1/p} - x$ has larger value errors than $\log(e^x) - x$, and $e^{\log(x)} - x$ has nearly no value error, are not clear.
-It could relate to floating-point representation which stores each value $x$ as $\log_2(x)$.
+It could relate to floating-point representation.
 Figure \ref{fig: Bounding_Factor_Leakage} also suggests that using linear approximation $e^{x \pm \delta x}$ and $\log(x \pm \delta x)$ have less error than $(x \pm \delta x)^p$.
 
 
@@ -1214,7 +1193,7 @@ Figure \ref{fig: Bounding_Factor_Leakage} also suggests that using linear approx
 \ifdefined\Verbose
 
 \section{Moving-Window Linear Regression}
-%\label{sec: Moving-Window Linear Regression}
+\label{sec: Moving-Window Linear Regression}
 
 \subsection{Moving-Window Linear Regression Algorithm}
 
@@ -1235,6 +1214,17 @@ Figure \ref{fig: Bounding_Factor_Leakage} also suggests that using linear approx
 		 - 2 \sum_{X=-H}^{H} 2 X (\delta Y_{j-H+X})^2 - \delta^2 \alpha_{j} \\
 	&= \delta^2 \beta_{j - 1} - H^2 (\delta Y_{j-2H-1})^2 + (H^2 + 2H) (\delta Y_{j})^2 - 2 \delta^2 \hat{\beta}_{j}  - \delta^2 \alpha_{j};
 \end{align*}
+\fi
+
+\iffalse
+Formulas \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} provide the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, where $j$ is an integer index identifying $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
+\begin{align}
+\label{eqn: linear regression 0}
+\alpha &= \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
+\label{eqn: linear regression 1}
+\beta &= \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
+    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
+\end{align}
 \fi
 
 \begin{figure}[p]
@@ -1263,35 +1253,24 @@ For reference, the input time-series signal $Y$ is also plotted, with its values
 \end{figure}
 
 
-
-Formulas \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} provide the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, where $j$ is an integer index identifying $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
-\begin{align}
-\label{eqn: linear regression 0}
-\alpha &= \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
-\label{eqn: linear regression 1}
-\beta &= \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
-    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
-\end{align}
-
-In many applications, data set ${Y_j}$ denotes an input data stream where $j$ represents the time index or sequence index.
-${Y_j}$ is thus referred to as a time-series input, with $j$ corresponding to $X_j$.  
-A moving window algorithm \cite{Numerical_Recipes} is applied within a small window centered on each $j$.  
-For each calculation window, ${X_j = -H, -H+1 \dots H-1, H}$ where $H$ is an integer constant specifying the half width of the window.
-This choice ensures $\sum_{j} X_{j} = 0$, which simplifies Formulas \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} into Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1}, respectively \cite{Prev_Precision_Arithmetic}.
-
 \begin{align}
 \label{eqn: time-series linear regression 0}
 \alpha _{j} &= \alpha \; 2 H = \sum_{X=-H+1}^{H} Y_{j-H+X}; \\
 \label{eqn: time-series linear regression 1}
 \beta _{j} &= \beta \; \frac{H (H+1)(2H+1)}{3} = \sum_{X=-H}^{H} X Y_{j-H+X}; 
 \end{align}
-The values of $(\alpha _{j}, \beta _{j})$ can be derived from the previous values $(\alpha _{j-1}, \beta _{j-1})$, allowing Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} to be reformulated into the progressive moving-window calculation given by Formulas \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1}, respectively \cite{Prev_Precision_Arithmetic}.
+In many applications, data set ${Y_j}$ denotes an input data stream where $j$ represents the time index or sequence index.
+${Y_j}$ is thus referred to as a time-series input.  
+A moving window algorithm \cite{Numerical_Recipes} is applied within a small window centered on each $j$.  
+For each calculation window, Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} present the least-square line-fit of $Y = \alpha + \beta j$ \cite{Prev_Precision_Arithmetic}.
+
 \begin{align}
 \label{eqn: moving-window linear regression 0}
 \beta _{j} &= \beta _{j-1} - \alpha _{j-1} + H \left(Y_{j-2H-1} + Y_{j} \right); \\
 \label{eqn: moving-window linear regression 1}
 \alpha_{j} &= \alpha _{j-1} - Y_{j-2H-1} + Y_{j};
 \end{align}
+The values of $(\alpha _{j}, \beta _{j})$ can be derived from the previous values $(\alpha _{j-1}, \beta _{j-1})$, allowing Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} to be reformulated into the progressive moving-window calculation given by Formulas \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1}, respectively \cite{Prev_Precision_Arithmetic}.
 
 
 \subsection{Variance Adjustment} 
@@ -1360,6 +1339,16 @@ H[n] &= \sum_{k=0}^{N-1} \sin(f \frac{2 \pi}{N} k) \; e^{\frac{i 2\pi}{N} k n}
 
 \fi
 
+\ifdefined\Verbose
+\begin{figure}
+\includegraphics[height=2.5in]{FFT_Unfaithful.pdf} 
+\captionof{figure}{
+The DFT spectrum $H[n]$ of signal $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, as intensity (y-axis) and phase (embedded y-axis) versus frequency index $n \in [0, 18]$ (x-axis and embedded x-axis) for different signal frequency $f$ (legend).
+This result agrees with both theoretical formula \cite{Prev_Precision_Arithmetic} and numerical computation from any mathematical libraries such as \textit{SciPy}.
+}
+\label{fig: FFT_Unfaithful}
+\end{figure}
+
 \begin{align}
 \label{eqn: Fourier forward}
 H[n] &=\sum_{k=0}^{N-1} h[k] \; e^{\frac{i 2\pi}{N} k n}; \\
@@ -1370,25 +1359,17 @@ h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{-\frac{i 2\pi}{N} n k};
 For each signal sequence $h[k]$, where $k = 0, 1 \dots  N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1 \dots  N-1$, along with its inverse transformation, is defined by Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse}, respectively \cite{Numerical_Recipes}.
 As a convention, $k$ denotes the \emph{time index} for $h[k]$ as a waveform, whereas $n$ represents the \emph{frequency index} for $H[n]$ as a spectrum.
 
-\ifdefined\Verbose
-\begin{figure}
-\includegraphics[height=2.5in]{FFT_Unfaithful.pdf} 
-\captionof{figure}{
-The DFT spectrum $H[n]$ of signal $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, as intensity (y-axis) and phase (embedded y-axis) versus frequency index $n \in [0, 18]$ (x-axis and embedded x-axis) for different signal frequency $f$ (legend).
-This result agrees with both theoretical formula \cite{Prev_Precision_Arithmetic} and numerical computation from any mathematical libraries such as \textit{SciPy}.
-}
-\label{fig: FFT_Unfaithful}
-\end{figure}
+However, DFT if not a faithful digital implementation of continuous Fourier transform (FT) \cite{Numerical_Recipes}.
 For example, the FT spectrum of a sine function is a Delta function at the signal frequency $f$ with a phase $\pi/2$ \cite{Numerical_Recipes}.
 Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, where $f$ is its signal frequency. 
-If DFT is regarded as the digital implementation of FT, the spectra exhibit no modeling error only when the input signal frequency $f$ is an integer, and display varying degrees of modeling errors otherwise.
-Because of these modeling errors, the use of DFT as the digital implementation of FT is questionable, even though such usage is ubiquitous, and fundamental to many areas of applied mathematics 
+The DFT spectra exhibit no modeling error only when the input signal frequency $f$ is an integer, and display varying degrees of modeling errors otherwise.
+Because of these modeling errors, the use of DFT as the digital implementation of FT is questionable, even though such usage is ubiquitous, and fundamental to many areas of applied mathematics \cite{Numerical_Recipes}.
 
 To avoid the modeling errors inherent in DFT, only Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are used in this study.
 
 \else
 
-Although mathematically self-consistent, DFT implies a periodic boundary condition in the time domain \cite{Prev_Precision_Arithmetic}.
+Although mathematically self-consistent, DFT implies a periodically repeats in the time domain \cite{Prev_Precision_Arithmetic}.
 Consequently, it is only an approximation for the mathematically defined continuous Fourier transform (FT) \cite{Prev_Precision_Arithmetic}.
 To avoid the modeling errors inherent in DFT, only Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are used in this study.
 
@@ -1438,8 +1419,6 @@ When $N = 2^{L}$, where $L$ is a natural number called the \emph{FFT order}, the
 Because the reverse transformation divides the result by $2^L$, its uncertainty deviation decreases with $L$ as $\sqrt{1/2}^L$.
 Consequently, the uncertainty deviation for the round-trip transformation is therefore $\sqrt{2}^L \times \sqrt{1/2}^L = 1$.
 
-\item The forward and reverse transformations are identical except for a sign difference, implying that they are essentially the same algorithm, and any observed difference arises solely from the input data.  
-
 \end{itemize}
 
  
@@ -1478,11 +1457,12 @@ H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \
 \end{align}
 
 \end{itemize}
-For Sin or Cos signals, forward and reverse DFT transforms differ in their data prospective of time domain versus frequency domain:
+The forward and reverse transformations are identical except for a sign difference, implying that they are essentially the same algorithm, and any observed difference arises mainly from the input data. 
+For Sin or Cos signals:
 \begin{itemize}
-\item The forward transformation converts a time-domain sine or cosine signal into a frequency-domain spectrum in which most values are zero, causing its uncertainties to grow more rapidly during cancellation. 
+\item The forward transformation converts a time-domain sine or cosine signal into a frequency-domain spectrum in which most values are zero, causing its uncertainties to grow more rapidly during mutual cancellation of input data. 
 
-\item In contrast, the reverse transformation spreads the precise frequency-domain spectrum (where most values are zero) back into a time-domain sine or cosine signal, causing its uncertainties to grow more slowly. 
+\item The reverse transformation spreads the precise frequency-domain spectrum (where most values are zero) back into a time-domain sine or cosine signal, causing its uncertainties to grow more slowly. 
 \end{itemize}
 The question is whether variance arithmetic can work properly in these two contrary cases.
 
@@ -1513,7 +1493,7 @@ To minimize numerical errors in computing $\sin(x)$, the following \emph{indexed
 \begin{enumerate}
 \item Instead of a floating-point value $x$ as input for $\sin(x)$, an integer index $j$ defines the input as $\sin(\pi j/2^L)$, thereby eliminating the floating-point rounding error of $x$.
 
-\item The values of $\sin(\pi j/2^L), j \in [0, 2^{L-2}]$ are the library sine directly, whereas the values of $\sin(\pi j/2^L), j \in [2^{L-2}, 2^{L-1}]$ are computed from the library $\cos(\pi (2^{L - 1} - j)/2^L)$.
+\item The values of $\sin(\pi j/2^L), j \in [0, 2^{L-2}]$ are the library sine directly, whereas the values of $\sin(\pi j/2^L), j \in [2^{L-2}, 2^{L-1}]$ are computed from the library $\cos(\pi (2^{L - 1} - j)/2^L), j \in [0, 2^{L-2}]$.
 
 \item The values of $\sin(\pi j/2^L)$ are extended from $j \in [0, 2^{L-1}]$ to $j \in [0, 2^{L + 1}]$ by exploiting the symmetry of $\sin(\pi j/2^L)$.
 
@@ -1525,7 +1505,7 @@ In contrast, the direct use of the standard library $\sin(x)$ is referred to as 
 
 Because the Quart sine function strictly preserves the symmetry and periodicity of the sine function, it provides better numerical accuracy than the Library sine function.
 \begin{itemize}
-\item Figure \ref{fig: Sin_Diff} shows that the absolute value difference between the Library $\sin(x)$ and the Quart $\sin(x)$ increases approximately linearly with $|x|$.
+\item Figure \ref{fig: Sin_Diff} shows that the value difference between the Library $\sin(x)$ and the Quart $\sin(x)$ increases approximately linearly with $|x|$.
 
 \item Figure \ref{fig: Cot_Diff} shows the value difference between the Quart and Library $\cos(x)/\sin(x)$ also increases roughly linearly with $|x|$, but is $10^2$ times larger than that observed for $\sin(x)$.
 Therefore, the linear spectrum in Formula \eqref{eqn: Fourier spec for linear} contains significantly larger numerical errors when computed using the Library sine functions.
@@ -1538,7 +1518,7 @@ Therefore, the linear spectrum in Formula \eqref{eqn: Fourier spec for linear} c
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Indexed.pdf} 
 \captionof{figure}{
-Error distributions of normalized errors of Sin/Cos signals for forward, reverse and round-trip transformations (legend) using the Quart sine function.
+Error distributions of normalized errors of Sin/Cos signals without added input noise for forward, reverse and round-trip transformations (legend) using the Quart sine function.
 The FFT order is $18$.  
 }
 \label{fig: FFT_SinCos_Clean_Histo_Indexed}
@@ -1560,7 +1540,7 @@ The error distribution of the reverse transformation is structured on top of the
 \centering
 \includegraphics[height=2.5in]{FFT_SinCos_Clean_Histo_Lib.pdf} 
 \captionof{figure}{
-Error distributions of normalized errors of Sin/Cos signal for forward, reverse and round-trip transformations (legend) computed using the Library sine function.
+Error distributions of normalized errors of Sin/Cos signal without added input noise for forward, reverse and round-trip transformations (legend) computed using the Library sine function.
 The FFT order is $18$.
 }
 \label{fig: FFT_SinCos_Clean_Histo_Lib}
@@ -1591,7 +1571,7 @@ The x-axis represents the time index, and the y-axis represents both uncertainty
 \captionof{figure}{
 FFT value error waveform of $\sin(3 \frac{2 \pi}{2^6} j)$ computed using either the Library sine function or \textit{SciPy} after the round-trip transformation.
 The legend distinguishes between the uncertainty and the value error.
-The x-axis represents the frequency index, and the y-axis represents both uncertainty and value error.
+The x-axis represents the time index, and the y-axis represents both uncertainty and value error.
 }
 \label{fig: FFT_Sin_Clean_6_3_Roundtrip_Lib}
 \end{figure}
@@ -1619,7 +1599,7 @@ These large value errors appear systematic rather than random and visually resem
 Similar increases are observed at other frequencies and FFT orders, as well as in computational results obtained using mathematical libraries such as \textit{SciPy}.
 In contrast, such resonance is absent from the round-trip transformation shown in Figure \ref{fig: FFT_Sin_Clean_6_3_Roundtrip_Lib}, as well as when using the Quart sine function.
 Figure \ref{fig: Lib_Reverse_Error_vs_Freq_Order} demonstrates that the error deviations increase with sine or cosine frequency, regardless of FFT order $L$ when $L > 8$.
-Figure \ref{fig: Sin_Diff} indicates that the numerical errors of $cos(x)/sin(x)$ obtained using the Library sine function increase with a periodicity of $\pi$, which can resonate with a signal whose periodicity is an integer multiply of $\pi$, producing the resonant pattern shown in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
+Figure \ref{fig: Sin_Diff} indicates that the numerical errors of $sin(x)$ obtained using the Library sine function increase with a periodicity of $\pi$, which can resonate with a signal whose periodicity is an integer multiply of $\pi$, producing the resonant pattern shown in Figure \ref{fig: FFT_Sin_Clean_6_3_Wave_Lib}.
 At higher frequency, the resonant beats between the signal and the numerical errors in the Library sine function become stronger.
 To suppress this numerical error resonance, an input noise of $\delta x = 10^{-14}$ must be added to the sine or cosine signals.
 Such \emph{resonance of numerical errors} can easily and mistakenly be taken as signals.
@@ -1656,7 +1636,7 @@ The FFT order is $18$.
 \label{fig: FFT_Linear_Clean_Histo_Indexed}
 \end{figure}
 
-Figures \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} show the error deviations for the forward and the reverse transformations, respectively. 
+Figures \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order} show the error deviations for the forward and the reverse transformations, respectively, both of which resemble Figure \ref{fig: Adjugate_Error_vs_Size_Noise}. 
 The forward transformation exhibits a larger ideal coverage area than the reverse transformations: $\delta x > 10^{-12}$ for the forward transformation, and $\delta x > 10^{-8}$ for the reverse transformation.
 In other areas, both transformations achieve proper coverage with error values around $1$.
 
@@ -1710,7 +1690,7 @@ Figure \ref{fig: FFT_Linear_Clean_Histo_Lib} shows that the reverse error distri
 The difference between Figures \ref{fig: FFT_Linear_Clean_Histo_Lib} and \ref{fig: FFT_Linear_Clean_Histo_Indexed} is consistent with the large numerical errors as demonstrated in Figure \ref{fig: Cot_Diff}.
 Variance arithmetic fails because of the large amount of unspecified numerical errors from the Library sine function.
 
-Figures \ref{fig: FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order} show much smaller ideal coverage areas than those shown in Figures \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}.
+Figures \ref{fig: FFT_Linear_Lib_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Lib_Reverse_ErrorDev_vs_Noise_Order} show much smaller ideal coverage areas than those shown in Figures \ref{fig: FFT_Linear_Indexed_Forward_ErrorDev_vs_Noise_Order} and \ref{fig: FFT_Linear_Indexed_Reverse_ErrorDev_vs_Noise_Order}, respectively.
 Because uncertainty deviations grow more slowly in the reverse transformation than in the forward transformation, the former exhibits a smaller ideal coverage region.
 Outside of the ideal coverage region, proper coverage cannot be achieved for the reverse transformation.
 Furthermore, the range of input noise that produces ideal coverage decreases with increasing FFT order.
@@ -1718,12 +1698,24 @@ At sufficiently high FFT orders (visually beyond FFT order $25$ for the reverse 
 Although FFT is widely regarded as one of the most robust numerical algorithms \cite{Numerical_Recipes}\cite{Precise_Numerical_Methods}, and is generally insensitive to input errors, it can still fail because heavy calculation can amplify numerical errors in the Library sine function to completely obscure true signals.
 Such deterioration in calculation is not easily detectable when using conventional floating-point arithmetic.
 
-Figure \ref{fig: FFT_Linear_Lib_Roudtrip_ErrorDev_vs_Noise_Order} shows that, even when variance arithmetic can no longer effectively track the value errors for either the forward or the reverse transformations, it can still effectively track the value errors for the round-trip transformation, as shown by the plateau region at high $L$ and low $\delta x$.
+Figure \ref{fig: FFT_Linear_Lib_Roudtrip_ErrorDev_vs_Noise_Order} shows that, even when variance arithmetic can no longer effectively track the value errors for either the forward or the reverse transformations, it can still effectively track the value errors for the round-trip transformation, as shown by the plateau region of error deviations at high $L$ and low $\delta x$.
 Such error cancellation arises from dependence tracing in statistical Taylor expansion.
 
 
 
 \subsection{Ideal Coverage}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Linear_1e-3_Histo_Lib.pdf} 
+\captionof{figure}{
+Error distributions for Linear signals with $10^{-3}$ input noise for forward, reverse and roundtrip transformations (legend) computed using the Library sine function.
+The input noise is either Gaussian or white (legend).
+The FFT order is $18$.
+}
+\label{fig: FFT_Linear_1e-3_Histo_Lib}
+\end{figure}
+
 
 \begin{figure}[p]
 \centering
@@ -1734,8 +1726,17 @@ Error deviation (left y-axis) and uncertainty deviation (right y-axis) of Linear
 \label{fig: FFT_Linear_1e-3_vs_Order_Lib}
 \end{figure}
 
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Regression_Sin.pdf}
+\captionof{figure}{
+The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(\pi j/2^{18})$ versus index $j$ (x-axis) using either Quart or regressive sine function (legend).
+}
+\label{fig: Regression_Sin}
+\end{figure}
+
 Adding noise to the input can suppress unspecified input errors.
-After adding a Gaussian input noise of $\delta x = 10^{-3}$ to a Linear signal when using the Library sine function, the error distributions for both the forward and the reverse transformations become Normal, whereas the error distribution for the round-trip transformation becomes Delta.
+After adding a Gaussian input noise of $\delta x = 10^{-3}$ to a Linear signal when using the Library sine function, the error distributions for both the forward and the reverse transformations become Normal, whereas the error distribution for the round-trip transformation becomes Delta, as shown in Figure \ref{fig: FFT_Linear_1e-3_Histo_Lib}.
 Figure \ref{fig:  FFT_Linear_1e-3_vs_Order_Lib} illustrates the corresponding error deviations and uncertainty deviations versus FFT order:
 \begin{itemize}
 \item As expected, the resulting uncertainty deviations for the forward transformations increase with FFT order $L$ as $\sqrt{2}^L$.
@@ -1780,16 +1781,6 @@ It is worth investigating if such an empirical histogram has similar power to re
 \section{Regressive Generation of Sine}
 \label{sec: recursion}
 
-\begin{figure}
-\centering
-\includegraphics[height=2.5in]{Regression_Sin.pdf}
-\captionof{figure}{
-The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(\pi j/2^{18})$ versus index $j$ (x-axis) using either Quart or regressive sine function (legend).
-}
-\label{fig: Regression_Sin}
-\end{figure}
-
-
 \begin{align}
 \label{eqn: phase boundary}
 & \sin(0) = \cos(\frac{\pi}{2}) = 0;\eqspace \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
@@ -1800,14 +1791,12 @@ The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(
 \label{eqn: regr error}
 & \sin(\alpha + \beta) = 2 \sin(\frac{\alpha + \beta}{2}) \cos(\frac{\alpha + \beta}{2}) = \sqrt{1 - \cos(\frac{\alpha + \beta}{2})^2};
 \end{align}
-Formulas \eqref{eqn: phase sin} and \eqref{eqn: phase cos} calculate $\sin(\pi j/2^L), \cos(\pi j/2^L), j = 0 \dots 2^{L - 2}$ repressively for regression order $L = 0 \dots 17$ starting from Formula \eqref{eqn: phase boundary}.
+Formulas \eqref{eqn: phase sin} and \eqref{eqn: phase cos} calculate $\sin(j \pi/2^L), \cos(j \pi/2^L), j = 0 \dots 2^{L - 2}$ repressively for regression order $L = 0 \dots 17$ starting from Formula \eqref{eqn: phase boundary}.
 Formula \eqref{eqn: regr error} shows that such regression guarantees both $\sin(x)^2 + \cos(x)^2 = 1$ and $\sin(2x) = 2\sin(x) \cos(x)$, such that value errors will not accumulate when the regression order $L$ increases.
-
 
 Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation \cite{Rounding_Error}\cite{Precise_Numerical_Methods}.
 As shown in Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits a constant precision around $10^{-16}$, whereas the regression sine function shows increasing precision up to $10^{-7}$ as $x \rightarrow 0$.
 Unlike the sneaky catastrophic cancellation in floating-point arithmetic, variance arithmetic uses coarser precision to demonstrate where and by how much the regression algorithm becomes unfit to compute $\sin(x)$.
-
 
 
 
@@ -1844,9 +1833,6 @@ Without this refinement, the value errors in the library functions can produce u
 Bound momentum $\zeta(n, \kappa)$ should be extended to all probability distributions.
 The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions, perhaps by using the same value of linear leakage $\varepsilon \equiv 1 - \zeta(2, \kappa)$.
 The procedure to find the bound moments $\kappa$ for each sample count $N$ should be developed for discrete distributions.
-\ifdefined\Verbose
-The statistical meaning for ideal leakage $\varepsilon \in [0, 1]$ in the context of its choice of ideal bounding range $\hat{\kappa}$ needs further investigation: Is $\varepsilon$ the possibility for the result to be not bound by $\hat{\kappa}$?
-\fi
 
 The performance of variance arithmetic must be improved for broader practical adoption.
 The fundamental formulas of statistical Taylor expansion, Formulas \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, and \eqref{eqn: Taylor 2d variance}, contain many independent summations, making them excellent candidates for parallel processing.
@@ -1866,7 +1852,7 @@ This observation suggests that it may be time to shift from purely numerical pro
 
 As an enhancement to dependency tracing, source tracing identifies each input’s contribution to the overall result uncertainty.
 This capability enables engineers to pinpoint the primary sources of measurement inaccuracy and guides them to targeted improvements in data acquisition and processing strategies.
-For example, Formula \eqref{eqn: sum leakage} can provide guidance on improving the ideal leakage of $x \pm y$.
+For example, Formulas \eqref{eqn: sum leakage} and \eqref{eqn: product leakage} can provide guidance on improving the ideal leakage of $x \pm y$ and $xy$ respectively.
 
 Because conventional numerical approaches are based on floating-point arithmetic and path dependent in general, they must be reexamined or even reinvented within the framework of variance arithmetic.
 For instance, most conventional numerical algorithms aim to identify optimal computational paths, whereas statistical Taylor expansion conceptually rejects all path-dependent calculations.
@@ -1881,7 +1867,7 @@ Establishing theoretical foundation for applying statistical Taylor expansion in
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge at all, for example, when the input uncertainty is Laplace \cite{Probability_Statistics}, $\zeta(2n, \infty) = (2n)!$.
 Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded because of sampling, which resembles the need for re-normalization in quantum field theory \cite{Quantum Field}.
 Furthermore, the quantitative dependence of convergence on the choice of ideal bounding range $\hat{\kappa}$ is similar to the principle of quantum physics: What it is depends on how it is measured.
-For example, it is possible that an experimental measurement reduces $\hat{\kappa}$ for a wave function, to cause the wave function to collapse.
+For example, it is possible that an experimental measurement reduces $\hat{\kappa}$ for a wave function, to cause the wave function to collapse when the uncertainty deviation reduces from infinite to finite.
 Both resemblances are worthy of further investigation.
 \fi
 
@@ -2015,6 +2001,10 @@ J.~Vignes.
 C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 \newblock Numerical 'health' check for scientific codes: the cadna approach.
 \newblock {\em Computer Physics Communications}, 176(8):501--527, 2007.
+
+\bibitem{Uniform_Distrobution Estimator}
+\newblock Unbiased estimator of a uniform distribution.
+\newblock \url{https://math.stackexchange.com/questions/2246222/unbiased-estimator-of-a-uniform-distribution}, 2018.
 
 \bibitem{Linear_Algebra}
 J.~Hefferon.
