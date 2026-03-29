@@ -3,8 +3,7 @@
 ## Purpose
 
 A floating-point arithmetic with value and uncertainty (variance) pair.
-The arithmetic is described in Latex/VarianceArithmetic,pdf.
-It is also published at http://arxiv.org/abs/2410.01223.
+The arithmetic is described as a PDF in http://arxiv.org/abs/2410.01223, and as a presentation in https://www.youtube.com/watch?v=dfSihfKt7Xc.
 The code and analysis associated with the paper will be pointed out here.
 
 ## Target
