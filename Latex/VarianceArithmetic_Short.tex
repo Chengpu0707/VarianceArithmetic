@@ -536,7 +536,7 @@ Thus:
 \includegraphics[height=2.5in]{Gaussian_5_Moment.pdf} 
 \captionof{figure}{
 When $\kappa = 5$, the value of bound moment  $\zeta(2n, \kappa)$ (left y-axis) for Gaussian distribution with order $2n$ (x-axis) versus $2 N(\kappa) \frac{\kappa^{2n+1}}{2n+1}$ (left y-axis), and their ratio (right y-axis).
-The value of bound moment  $\zeta(2n, \kappa)$ for Uniform distribution is also provided as an comparison.
+The value of moment  $\zeta(2n)$ for Uniform distribution is also provided as an comparison.
 }
 \label{fig: Gaussian_5_Moment}
 \end{figure}
@@ -564,7 +564,7 @@ Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for Uniform distribution, 
 \begin{itemize}
 \item Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
 
-\item Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence}, which converges when $P(x) < 1/\kappa$.
+\item Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence}, which converges when $P(x) \leq 1/\kappa$.
 
 \item Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence}, which converges when $P(x) \lesssim 1/\kappa$ although the precise upper bound for $P(x)$ varies with $c$.
 \end{itemize}
@@ -638,10 +638,10 @@ For a Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
 For a Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
 
 Define \emph{linear leakage} $\omega(\kappa) \equiv 1 - \zeta(2, \kappa)$.
-In $\delta^x x = \zeta(2, \kappa) (\delta x)^2$, the result variance $\delta^x$ is less than input variance $(\delta x)^2$ due to linear leakage.
+In $\delta^2 x = \zeta(2, \kappa) (\delta x)^2$, the result variance $\delta^2 x$ is less than input variance $(\delta x)^2$ due to linear leakage.
 When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
 This yields the \emph{sample linear leakage} $\omega(\kappa, N)$ for the interval $[\overline{x} - \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional linear leakage} $\omega(\kappa)$ for the interval $[\mu - \varrho \sigma, \mu + \kappa \sigma]$.
-Because $\omega(\kappa) \neq \omega(\kappa, N)$ for finite $N$, let $\omega(\kappa) = \omega(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bound range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bound range}, with the latter used in calculating $\zeta(n, \kappa)$.
+Let $\omega(\kappa) = \omega(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bound range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bound range}, with the latter used in calculating $\zeta(n, \kappa)$.
 
 \begin{align}
 \label{eqn: Gaussian result bounding leakage} 
@@ -653,7 +653,7 @@ Because $\omega(\kappa) \neq \omega(\kappa, N)$ for finite $N$, let $\omega(\kap
 \end{align}
 Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$.
 When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the linear leakage $\omega(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, whereas Formulas \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
-Figure \ref{fig: Normal_Bounding_Leakage} shows that $\omega(\kappa_s, N + 1) < \omega(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \omega(\kappa_s, N) = \omega(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N + 1) < \kappa(\kappa_s, N)$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
+Figure \ref{fig: Normal_Bounding_Leakage} shows that $\omega(\kappa_s, N + 1) < \omega(\kappa_s, N)$, and $\lim_{N \rightarrow \infty} \omega(\kappa_s, N) = \omega(\kappa_s)$ along the y-axis direction, and that $\kappa(\kappa_s, N + 1) > \kappa(\kappa_s, N)$ and $\lim_{N \rightarrow \infty} \kappa(\kappa_s, N) = \kappa_s$ along the x-axis direction. 
 Figure \ref{fig: Bounding_Factor_Leakage} sections Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis direction for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable resulting linear leakage $\omega$ is smaller for larger measuring bounding range $\kappa_s$.
 It also shows that linear leakage converges toward $0$ with increasing sample count $N$ faster when $\kappa_s$ is larger.
 
@@ -666,9 +666,9 @@ It also shows that linear leakage converges toward $0$ with increasing sample co
 Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f \simeq \omega$, which quantifies the reliability of $\hat{\delta^2} f$ from the underlying distributions and the corresponding sample counts of all inputs, with Formulas \eqref{eqn: sum leakage} and \ref{eqn: product leakage} as two examples.
 Figure \ref{fig: Normal_Function} compares ideal leakage $\varepsilon$ and linear leakage $\omega$ for the selected functions when the input uncertainty distribution is Gaussian, and shows that the example stable ideal leakages are less than $10^{-4}$ when $\hat{\kappa} = 5$, which is small enough for most applications. 
 
-The unbiased bounding range $[\kappa_{min}, \kappa_{max}]$ of Uniform distribution is estimated as $1 + \frac{1}{N}$ times of the minimal and maximal values in sampled data set \cite{Uniform_Distrobution Estimator}.
-The bounding leakage $\epsilon$ is the percentage of $[\kappa_{min}, \kappa_{max}]$ outside the true bounding range $[\mu - \sqrt{3}\sigma, \mu + \sqrt{3}\sigma]$.
-Because $\zeta(2n)$ for Uniform distribution increases much slower than $\zeta(2n, 5)$ for Gaussian distribution, Figure \ref{fig: Uniform_Function} shows that for the selected functions, ideal leakage equals linear leakage for Uniform input uncertainty, and both decrease linearly with sample count $N$.
+The unbiased bounding range $[\varrho, \kappa]$ of Uniform distribution is estimated as $1 + \frac{1}{N}$ times of the minimal and maximal values in sampled data set \cite{Uniform_Distrobution Estimator}.
+The bounding leakage $\epsilon$ is the percentage of $[\varrho, \kappa]$ outside the true bounding range $[\mu - \sqrt{3}\sigma, \mu + \sqrt{3}\sigma]$.
+Because $\zeta(2n)$ for Uniform distribution increases with $2n$ much slower than $\zeta(2n, 5)$ for Gaussian distribution, Figure \ref{fig: Uniform_Function} shows that for the selected functions, ideal leakage equals linear leakage for Uniform input uncertainty, and both decrease linearly with sample count $N$.
 The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_Function} shows the effect of input uncertainty distribution to the output deviation $\delta f$.
 
 
@@ -1220,9 +1220,9 @@ Figure \ref{fig: Bounding_Factor_Leakage} also suggests that using linear approx
 Formulas \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} provide the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, where $j$ is an integer index identifying $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
 \begin{align}
 \label{eqn: linear regression 0}
-\alpha &= \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
+\alpha &= \alpha \; 2 H = \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
 \label{eqn: linear regression 1}
-\beta &= \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
+\beta &= \beta \; \frac{H (H+1)(2H+1)}{3} = \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
     {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
 \end{align}
 \fi
