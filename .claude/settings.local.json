@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "PowerShell(& \"C:\\\\msys64\\\\mingw64\\\\bin\\\\python3.14.exe\" -c \"import scipy; import sympy; print\\('OK'\\)\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Cheng\\\\AppData\\\\Roaming\\\\Code\\\\User\\\\workspaceStorage\\\\4a6819233ff7399519d7f1cf4f52809b\" -Force | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Cheng\\\\AppData\\\\Roaming\\\\Code\\\\User\\\\workspaceStorage\\\\4a6819233ff7399519d7f1cf4f52809b\\\\ms-python.python\" -Force | ForEach-Object { $_.FullName })",
+      "Bash(grep -v \"^dist-info$\")",
+      "Bash(C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\bin\\\\python.exe *)",
+      "PowerShell(& \"C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\bin\\\\python.exe\" -c \"import scipy; import sympy; import pytest; print\\('OK'\\)\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\bin\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell([System.IO.Directory]::GetFiles\\(\"C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\bin\"\\))",
+      "PowerShell(cmd /c \"dir /s /a C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv 2>&1\" | Select-Object -First 40)",
+      "PowerShell(cmd /c \"dir /a C:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\Scripts 2>&1\")",
+      "Bash(grep -qE \"^Ran [0-9]+|^FAILED|^OK$\" \"C:/Users/Cheng/AppData/Local/Temp/claude/C--Users-Cheng-OneDrive-Documents-Github-VarianceArithmetic/6977d5a1-523a-41b7-af1c-9325758ef0b3/tasks/b1denkhxi.output\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Cheng\\\\AppData\\\\Roaming\\\\Code\\\\User\\\\workspaceStorage\\\\4a6819233ff7399519d7f1cf4f52809b\\\\testResults\" -Force -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })",
+      "Bash(.venv/bin/python.exe -m unittest discover -s Python -p \"test*.py\")",
+      "Bash(echo \"Discovery started in background, PID: $!\")",
+      "Bash(.venv/bin/python.exe -c ' *)",
+      "Bash(../.venv/bin/python.exe -c ' *)",
+      "Bash(../.venv/bin/python.exe -m unittest discover -s . -p \"test*.py\")",
+      "Bash(.venv/bin/python.exe -m unittest discover -s Python -p \"test*.py\" --locals)",
+      "Bash(python3 -c ' *)",
+      "Bash(awk -F. '{print $1\".\"$2}')",
+      "Bash(sort -k2)"
+    ]
+  }
+}

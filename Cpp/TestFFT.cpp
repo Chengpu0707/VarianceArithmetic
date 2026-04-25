@@ -213,7 +213,7 @@ void FFT_Order::accum(TestType testType, size_t index, const VarDbl& res, const 
         } else
             std::cerr << "For signal=" << signalTypeName(signalType) << " order=" << order << " freq=" << freq 
                       << " NoiseType=" << noiseTypeName(noiseType) << " noise=" << noise << " test=" << testTypeName(testType)
-                      << " index=" << index << ", normaliized error outlier " << norm << " for " << err << " from " << res << std::endl;
+                      << " index=" << index << ", normalized error outlier " << norm << " for " << err << " from " << res << std::endl;
     }
 }
   

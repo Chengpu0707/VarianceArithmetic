@@ -73,16 +73,16 @@ class TestUniform (unittest.TestCase):
 
     def testUniform(self):
         mmt = momentum.Uniform()
-        self.assertEqual(mmt.maxOrder, 653)
-        self.assertEqual(mmt[0], 1)
+        self.assertEqual(mmt.maxOrder, 647)
+        self.assertAlmostEqual(mmt[0], 1, places=13)
         self.assertEqual(mmt[1], 0)
-        self.assertEqual(mmt[2], 3**1 /3)
+        self.assertAlmostEqual(mmt[2], 3**1 /3, places=13)
         self.assertEqual(mmt[3], 0)
-        self.assertEqual(mmt[4], 3**2 /5)
+        self.assertAlmostEqual(mmt[4], 3**2 /5, places=13)
         self.assertEqual(mmt[5], 0)
-        self.assertEqual(mmt[6], 3**3 /7)
+        self.assertAlmostEqual(mmt[6], 3**3 /7, places=13)
         self.assertEqual(mmt[7], 0)
-        self.assertEqual(mmt[8], 3**4 /9)
+        self.assertAlmostEqual(mmt[8], 3**4 /9, places=13)
 
 
 if __name__ == '__main__':

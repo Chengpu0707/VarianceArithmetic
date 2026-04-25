@@ -285,7 +285,7 @@ class FFT_Order extends FFT_Signal {
             if (Math.abs(norm) < NORMALIZED_ERROR_OUTLIER) 
                 measure.sHisto.get(test).accum(norm, index);
             else if (sinSource != SinSource.Lib && actual.value() != 0 && actual.uncertainty() != 0)
-                System.out.println(String.format("For signal=%s freq=%d noiseType=%s noise=%e test=%s index=%d, normaliized error outlier %e for error %s and actual %s",
+                System.out.println(String.format("For signal=%s freq=%d noiseType=%s noise=%e test=%s index=%d, normalized error outlier %e for error %s and actual %s",
                         signalType, freq, noiseType, noise, test, index, norm, error, actual));
         }
     }

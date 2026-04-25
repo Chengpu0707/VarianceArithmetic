@@ -328,7 +328,11 @@ class TestIndexSin (unittest.TestCase):
 
 
 class TestPrec (TestIndexSin):
-    indexSin = IndexSin(SinSource.Prec)
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.Prec)
 
     def test_index(self):
         self.assert_get_half_index_1(TestPrec.indexSin)
@@ -347,7 +351,11 @@ class TestPrec (TestIndexSin):
 
 
 class TestPrecAdj (TestIndexSin):
-    indexSin = IndexSin(SinSource.PrecAdj)
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.PrecAdj)
 
     def test_index(self):
         self.assert_get_half_index_1(TestPrecAdj.indexSin)
@@ -372,7 +380,11 @@ class TestPrecAdj (TestIndexSin):
 
 
 class TestQuart (TestIndexSin):
-    indexSin = IndexSin()
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin()
 
     def test_index(self):
         self.assert_get_half_index_1(TestQuart.indexSin)
@@ -398,7 +410,11 @@ class TestQuart (TestIndexSin):
 
 
 class TestFull (TestIndexSin):
-    indexSin = IndexSin(SinSource.Full)
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.Full)
 
     def test_get_index(self):
         self.assert_get_index_1(TestFull.indexSin)
@@ -421,7 +437,11 @@ class TestFull (TestIndexSin):
 
 
 class TestFixed (TestIndexSin):
-    indexSin = IndexSin(SinSource.Fixed)
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.Fixed)
 
     def test_get_index(self):
         self.assert_get_index_1(TestFixed.indexSin)
@@ -441,8 +461,12 @@ class TestFixed (TestIndexSin):
 
 
 class TestLimit (TestIndexSin):
-    indexSin = IndexSin(SinSource.Limit, 
-                        sCosSin=[VarDbl(v) for v in (1,0, q3,q1, q2,q2, q1,q3, 0,1, -q1,q3, -q2,q2, -q3,q1)])
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.Limit,
+                                sCosSin=[VarDbl(v) for v in (1,0, q3,q1, q2,q2, q1,q3, 0,1, -q1,q3, -q2,q2, -q3,q1)])
 
     def test_get_index(self):
         self.assert_get_index_1(TestLimit.indexSin) 
@@ -458,7 +482,11 @@ class TestLimit (TestIndexSin):
         TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
 
 class TestLib (TestIndexSin):
-    indexSin = IndexSin(SinSource.Lib)
+    indexSin = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.indexSin = IndexSin(SinSource.Lib)
 
     def test_sin(self):
         self.assert_sin_1(TestLib.indexSin)
@@ -503,10 +531,17 @@ class TestIndexSinDiff (unittest.TestCase):
     '''
     Compare between different SinSource of IndexSin
     '''
-    quart = IndexSin(SinSource.Quart)
-    full = IndexSin(SinSource.Full)
-    prec = IndexSin(SinSource.Prec)
-    precAdj = IndexSin(SinSource.PrecAdj)
+    quart = None
+    full = None
+    prec = None
+    precAdj = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.quart = IndexSin(SinSource.Quart)
+        cls.full = IndexSin(SinSource.Full)
+        cls.prec = IndexSin(SinSource.Prec)
+        cls.precAdj = IndexSin(SinSource.PrecAdj)
 
     def profile(self, testName:str, 
                 funcIdx:typing.Callable[[int, int], VarDbl], funcLib:typing.Callable[[int, int], VarDbl],

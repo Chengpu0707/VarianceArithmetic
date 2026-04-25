@@ -332,7 +332,7 @@ class FFT_Order (FFT_Signal):
                 if self.aggr:
                     self.aggr.sHisto[test].accum(norm, index)
             else:
-                print(f'For signal={self.signalType} freq={self.freq} noiseType={self.noiseType} noise={self.noise} test={test} index={index}, normaliized error outlier {norm} between {actual} and {expected}')
+                print(f'For signal={self.signalType} freq={self.freq} noiseType={self.noiseType} noise={self.noise} test={test} index={index}, normalized error outlier {norm} between {actual} and {expected}')
 
     @staticmethod
     def title(divids, devs) -> str:

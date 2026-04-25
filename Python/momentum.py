@@ -185,7 +185,7 @@ class Uniform:
     '''
     __slots__ = ('_bounding', '_sMomentum', '_maxOrder')
 
-    def __init__(self, bounding=1):
+    def __init__(self, bounding=math.sqrt(3)):
         self._bounding = bounding
         self._sMomentum = []
         fac = 1
@@ -194,8 +194,10 @@ class Uniform:
                 mmt = fac/(2*n + 1)
             except OverflowError:
                 break
+            if not math.isfinite(mmt):
+                break
             self._sMomentum.append(mmt)
-            fac *= 3 * bounding**2
+            fac *= bounding**2
         self._maxOrder = len(self._sMomentum)
 
     @property

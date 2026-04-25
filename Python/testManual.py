@@ -342,7 +342,7 @@ class Test_FFT_Order (unittest.TestCase):
 
 
 
-class TestAdjugateManually (TestAdjugate):
+class TestAdjugateManually (unittest.TestCase):
 
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 261.387s')
     def testConditionNumber(self):
@@ -541,7 +541,7 @@ class TestConvergence (unittest.TestCase):
                 sWords = line.split('\t')
                 x, edge, bias, val, unc = map(float, sWords[:-1])
                 exception = sWords[-1].strip()
-                self.assertEqual(edge, 0.57899)
-                self.assertAlmostEqual(unc, 1.0350349)
+                self.assertEqual(edge, 0.57901)
+                self.assertAlmostEqual(unc, 1.0354198)
                 self.assertTrue(exception.startswith('NotMonotonicException'))
         

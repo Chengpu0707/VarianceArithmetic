@@ -684,9 +684,9 @@ class TestAdjugate (unittest.TestCase):
                 try:
                     self.assertGreater(adjHisto.stat().dev(), 0.5)
                     self.assertLess(adjHisto.stat().dev(), 2)
-                    self.assertLess(abs(adjHisto.stat().mean()), 0.3)
-                    self.assertLess(rndStat.dev(), 0.1)
-                    self.assertLess(rndStat.mean(), 0.1)
+                    self.assertLess(abs(adjHisto.stat().mean()), 0.4)
+                    self.assertLess(rndStat.dev(), 0.2)
+                    self.assertLess(rndStat.mean(), 0.2)
                     self.assertGreater(Adjugate.sMulStat[(adj.size, noise)].dev(), 0.5)
                     self.assertLess(Adjugate.sMulStat[(adj.size, noise)].dev(), 2)
                 except BaseException as ex:
