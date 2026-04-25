@@ -14,6 +14,7 @@ When "withUncertainty"==True, use regression to calculate the sin
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <numbers>
 #include <sstream>
 #include <vector>
 
@@ -53,8 +54,6 @@ public:
         // get the sin source according to {sinSource}, and throw invalid_argument otherwise
     static unsigned char getOrder(size_t size);
         // get the order so that {size} = 2^{order}, and throw invalid_argument otherwise
-    constexpr static const long double PI = 3.1415926535897932384626433832795029L;
-
     VarDbl sin(long long freq, unsigned char order) const;
         // sin(pi * freq / (1 << order))
     VarDbl cos(long long freq, unsigned char order) const;
@@ -222,7 +221,7 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
             for (size_t i = 0; i < size; ++i) {
                 const double value = std::sin(std::numbers::pi * i /size);
                 if (i <= quart) {
-                    const long double val = std::sin(IndexSin::PI * i /size);
+                    const long double val = std::sin(std::numbers::pi_v<long double> * i /size);
                     _sSinPrec.emplace_back(val, std::abs(val - ((double) val)));
                     _sSinQuart.emplace_back(value);
                     const double ulpVal = ulp((double) val);
@@ -230,7 +229,7 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
                         histo.addAt((val - ((double) val)) /ulpVal, i);
                 }  else if (i <= half) {
                     const double value = std::cos(std::numbers::pi * (half - i) /size);
-                    const long double val = std::cos(PI * (half - i) /size);
+                    const long double val = std::cos(std::numbers::pi_v<long double> * (half - i) /size);
                     _sSinPrec.emplace_back(val, std::abs(val - value));
                     _sSinQuart.emplace_back(value);
                     const double ulpVal = ulp((double) val);

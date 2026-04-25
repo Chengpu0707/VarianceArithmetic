@@ -24,7 +24,7 @@ struct AssertException : public std::runtime_error
     explicit AssertException(const std::string& what_arg) : runtime_error(what_arg) 
     {
         std::cout << what() << '\n';
-#if _HAS_CXX23
+#if __cplusplus >= 202302L
         std::stacktrace st;
         std::cout << st << '\n';
 #endif

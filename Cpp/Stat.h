@@ -1,9 +1,8 @@
 #include <algorithm>
 #include <cmath>
-#include <optional>
-#include <sstream>
-#include <random>
 #include <format>
+#include <optional>
+#include <random>
 
 
 #ifndef __Stat_h__
@@ -250,10 +249,10 @@ inline unsigned Histogram<T, HINT>::add(InputIt begin, InputIt end)
 template <typename T, typename HINT> requires std::floating_point<T>
 inline std::string Histogram<T, HINT>::header() const
 {
-    std::ostringstream oss;
+    std::string result;
     for (double i = -(int) _center; i <= (int) _center; ++i)
-        oss << "\t" << i / divids;
-    return oss.str();
+        result += std::format("\t{}", i / divids);
+    return result;
 }
 
 
@@ -261,10 +260,10 @@ template <typename T, typename HINT> requires std::floating_point<T>
 inline std::string Histogram<T, HINT>::formatted(bool normalized) const
 {
     const double cnt = Stat<T, HINT>::count() - lowers() - uppers();
-    std::ostringstream oss;
+    std::string result;
     for (size_t i = 0; i < _sHistogram.size(); ++i)
-        oss << "\t" << (((cnt == 0) || !normalized)? _sHistogram[i] : _sHistogram[i]/cnt);
-    return oss.str();
+        result += std::format("\t{}", ((cnt == 0) || !normalized) ? _sHistogram[i] : _sHistogram[i]/cnt);
+    return result;
 }
 
 

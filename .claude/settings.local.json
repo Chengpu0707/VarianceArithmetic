@@ -22,7 +22,8 @@
       "Bash(.venv/bin/python.exe -m unittest discover -s Python -p \"test*.py\" --locals)",
       "Bash(python3 -c ' *)",
       "Bash(awk -F. '{print $1\".\"$2}')",
-      "Bash(sort -k2)"
+      "Bash(sort -k2)",
+      "WebSearch"
     ]
   }
 }

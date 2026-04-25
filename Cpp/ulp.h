@@ -1,6 +1,7 @@
 /*
 The ulp function
 */
+#include <bit>
 #include <cmath>
 #include <concepts>
 #include <limits>
@@ -26,10 +27,10 @@ double ulp(T x)
         round_error *= 0.5;
         if ((val & 1) == 1) {
             if (posi) {
-                round_error += 1;
+                round_error += 0.5;
                 posi = false;
             } else {
-                round_error -= 1;
+                round_error -= 0.5;
                 posi = true;
             }
         }
@@ -59,25 +60,17 @@ double ulp(T value, unsigned precise_tail_bits)
 {
     if (precise_tail_bits > 0) {
         unsigned long mask = (1 << precise_tail_bits) - 1;
-        if (sizeof(T) == sizeof(unsigned long long)) {
-            unsigned long long u;
-            memcpy( &u, &value, sizeof(u));
-            if ((u & mask) == 0)
+        if constexpr (sizeof(T) == sizeof(unsigned long long)) {
+            if ((std::bit_cast<unsigned long long>(value) & mask) == 0)
                 return 0;
-        } else if (sizeof(T) == sizeof(unsigned long)) {
-            unsigned long u;
-            memcpy( &u, &value, sizeof(u));
-            if ((u & mask) == 0)
+        } else if constexpr (sizeof(T) == sizeof(unsigned long)) {
+            if ((std::bit_cast<unsigned long>(value) & mask) == 0)
                 return 0;
-        } else if (sizeof(T) == sizeof(unsigned int)) {
-            unsigned int u;
-            memcpy( &u, &value, sizeof(u));
-            if ((u & mask) == 0)
+        } else if constexpr (sizeof(T) == sizeof(unsigned int)) {
+            if ((std::bit_cast<unsigned int>(value) & mask) == 0)
                 return 0;
-        } else if (sizeof(T) == sizeof(unsigned short)) {
-            unsigned short u;
-            memcpy( &u, &value, sizeof(u));
-            if ((u & mask) == 0)
+        } else if constexpr (sizeof(T) == sizeof(unsigned short)) {
+            if ((std::bit_cast<unsigned short>(value) & mask) == 0)
                 return 0;
         }
     }

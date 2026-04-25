@@ -33,9 +33,9 @@ void test_int_size()
 void test_floating_size()
 {
     // casting long double to double does not result in the same value
-    test::assertEqual(sizeof(IndexSin::PI), 16);
+    test::assertEqual(sizeof(std::numbers::pi_v<long double>), 16);
     test::assertEqual(sizeof(std::numbers::pi), 8);
-    const long double lsin = std::sin(IndexSin::PI / 4);
+    const long double lsin = std::sin(std::numbers::pi_v<long double> / 4);
     test::assertEqual(lsin, 0.707106781186547524436L, "lsin");
     const double sin = std::sin(std::numbers::pi / 4);
     test::assertEqual(sin,           0.70710678118654746, "sin");
@@ -390,8 +390,8 @@ void dump_prec_indexSin()
     ofs << "index\tsin\tcos\terror\tlerror\tdsin\tdcos\n";
     const size_t size = (1 << IndexSin::MAX_ORDER);
     for (size_t i = 0; i < (size >> 1); ++i) {
-        const long double lsin = std::sin(IndexSin::PI * i / size);
-        const long double lcos = std::cos(IndexSin::PI * i / size);
+        const long double lsin = std::sin(std::numbers::pi_v<long double> * i / size);
+        const long double lcos = std::cos(std::numbers::pi_v<long double> * i / size);
         const double sin = std::sin(std::numbers::pi * i / size);
         const double cos = std::cos(std::numbers::pi * i / size);
         ofs << i << '\t' << sin << '\t' << cos << '\t'
