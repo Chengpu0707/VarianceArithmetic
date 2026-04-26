@@ -2,7 +2,9 @@
 #include "TestFFT.h"
 #include "ulp.h"
 
+#if __cplusplus >= 201103L
 #include <chrono>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -11,8 +13,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#if __cplusplus >= 201103L
 #include <unordered_map>
 #include <unordered_set>
+#endif
 #include <vector>
 
 using namespace var_dbl;
@@ -23,69 +27,110 @@ void validate(const std::vector<VarDbl>& sExpected, const std::vector<VarDbl>& s
         test::assertAlmostEqual(sExpected[i].value(), sRes[i].value(), (delta > 0)? delta : sRes[i].uncertainty());
 }
 
-void testFFTOrder2Sin(const IndexSin::SinSource src, double delta) 
+void testFFTOrder2Sin(const IndexSin::SinSource src, double delta)
 {
     FFT fft(src);
+#if __cplusplus >= 201103L
     const std::vector<VarDbl> sFrwd{0,0, 1,0, 0,0, -1,0};
-    const std::vector<VarDbl> sSpec{0,0, 0,2, 0,0, 0,-2}; 
+    const std::vector<VarDbl> sSpec{0,0, 0,2, 0,0, 0,-2};
+#else
+    VarDbl _fa[] = {VarDbl(0),VarDbl(0), VarDbl(1),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(-1),VarDbl(0)};
+    const std::vector<VarDbl> sFrwd(_fa, _fa+8);
+    VarDbl _fb[] = {VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(2), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(-2)};
+    const std::vector<VarDbl> sSpec(_fb, _fb+8);
+#endif
     try {
         validate( sSpec, fft.transform(sFrwd, true, true), delta);
         validate( sFrwd, fft.transform(sSpec, false, true), delta );
     } catch (std::runtime_error e) {
         test::fail(e.what());
-    }       
+    }
 }
 
-void testFFTOrder2Cos(const IndexSin::SinSource src, double delta) 
+void testFFTOrder2Cos(const IndexSin::SinSource src, double delta)
 {
     FFT fft(src);
+#if __cplusplus >= 201103L
     const std::vector<VarDbl> sFrwd{1,0, 0,0, -1,0, 0,0};
-    const std::vector<VarDbl> sSpec{0,0, 2,0, 0,0, 2,0}; 
+    const std::vector<VarDbl> sSpec{0,0, 2,0, 0,0, 2,0};
+#else
+    VarDbl _fa[] = {VarDbl(1),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(-1),VarDbl(0), VarDbl(0),VarDbl(0)};
+    const std::vector<VarDbl> sFrwd(_fa, _fa+8);
+    VarDbl _fb[] = {VarDbl(0),VarDbl(0), VarDbl(2),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(2),VarDbl(0)};
+    const std::vector<VarDbl> sSpec(_fb, _fb+8);
+#endif
     try {
         validate( sSpec, fft.transform(sFrwd, true, true),  delta );
         validate( sFrwd, fft.transform(sSpec, false, true), delta );
     } catch (std::runtime_error e) {
         test::fail(e.what());
-    }       
+    }
 }
 
-void testFFTOrder3Sin(const IndexSin::SinSource src, double delta) 
-{ 
+void testFFTOrder3Sin(const IndexSin::SinSource src, double delta)
+{
     const double q = std::sqrt(0.5);
     FFT fft(src);
+#if __cplusplus >= 201103L
     const std::vector<VarDbl> sFrwd{0.,0., q,0., 1.,0., q,0., 0,0, -q,0., -1,0, -q,0.};
-    const std::vector<VarDbl> sSpec{0,0, 0,4, 0,0, 0,0, 0,0, 0,0, 0,0, 0,-4}; 
+    const std::vector<VarDbl> sSpec{0,0, 0,4, 0,0, 0,0, 0,0, 0,0, 0,0, 0,-4};
+#else
+    VarDbl _fa[] = {VarDbl(0.),VarDbl(0.), VarDbl(q),VarDbl(0.), VarDbl(1.),VarDbl(0.), VarDbl(q),VarDbl(0.),
+                    VarDbl(0),VarDbl(0), VarDbl(-q),VarDbl(0.), VarDbl(-1),VarDbl(0), VarDbl(-q),VarDbl(0.)};
+    const std::vector<VarDbl> sFrwd(_fa, _fa+16);
+    VarDbl _fb[] = {VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(4), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0),
+                    VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(-4)};
+    const std::vector<VarDbl> sSpec(_fb, _fb+16);
+#endif
     try {
         validate( sSpec, fft.transform(sFrwd, true, true),  delta );
         validate( sFrwd, fft.transform(sSpec, false, true), delta );
     } catch (std::runtime_error e) {
         test::fail(e.what());
-    }       
+    }
 }
 
-void testFFTOrder3Cos(const IndexSin::SinSource src, double delta) 
-{ 
+void testFFTOrder3Cos(const IndexSin::SinSource src, double delta)
+{
     const double q = std::sqrt(0.5);
     FFT fft(src);
+#if __cplusplus >= 201103L
     const std::vector<VarDbl> sFrwd{1.,0., q,0., 0,0, -q,0., -1,0, -q,0., 0.,0., q,0.};
-    const std::vector<VarDbl> sSpec{0,0, 4,0, 0,0, 0,0, 0,0, 0,0, 0,0, 4,0}; 
+    const std::vector<VarDbl> sSpec{0,0, 4,0, 0,0, 0,0, 0,0, 0,0, 0,0, 4,0};
+#else
+    VarDbl _fa[] = {VarDbl(1.),VarDbl(0.), VarDbl(q),VarDbl(0.), VarDbl(0),VarDbl(0), VarDbl(-q),VarDbl(0.),
+                    VarDbl(-1),VarDbl(0), VarDbl(-q),VarDbl(0.), VarDbl(0.),VarDbl(0.), VarDbl(q),VarDbl(0.)};
+    const std::vector<VarDbl> sFrwd(_fa, _fa+16);
+    VarDbl _fb[] = {VarDbl(0),VarDbl(0), VarDbl(4),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0),
+                    VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(0),VarDbl(0), VarDbl(4),VarDbl(0)};
+    const std::vector<VarDbl> sSpec(_fb, _fb+16);
+#endif
     try {
         validate( sSpec, fft.transform(sFrwd, true, true),  delta );
         validate( sFrwd, fft.transform(sSpec, false, true), delta );
     } catch (std::runtime_error e) {
         test::fail(e.what());
-    }       
+    }
 }
 
 
 void testBitReversion()
 {
-    test::assertEquals( FFT::bitReversedIndices(2), 
-        std::vector{0, 2, 1, 3}, "FFT::3" );
-    test::assertEquals( FFT::bitReversedIndices(3), 
-        std::vector{0, 4, 2, 6, 1, 5, 3, 7}, "FFT::3");
-    test::assertEquals( FFT::bitReversedIndices(4), 
-        std::vector{0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15}, "FFT::4" );
+#if __cplusplus >= 201103L
+    test::assertEquals( FFT::bitReversedIndices(2),
+        std::vector<int>{0, 2, 1, 3}, "FFT::3" );
+    test::assertEquals( FFT::bitReversedIndices(3),
+        std::vector<int>{0, 4, 2, 6, 1, 5, 3, 7}, "FFT::3");
+    test::assertEquals( FFT::bitReversedIndices(4),
+        std::vector<int>{0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15}, "FFT::4" );
+#else
+    { int _v[] = {0, 2, 1, 3};
+      test::assertEquals( FFT::bitReversedIndices(2), std::vector<int>(_v, _v+4), "FFT::3" ); }
+    { int _v[] = {0, 4, 2, 6, 1, 5, 3, 7};
+      test::assertEquals( FFT::bitReversedIndices(3), std::vector<int>(_v, _v+8), "FFT::3"); }
+    { int _v[] = {0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15};
+      test::assertEquals( FFT::bitReversedIndices(4), std::vector<int>(_v, _v+16), "FFT::4" ); }
+#endif
 }
 
 
@@ -153,14 +198,15 @@ FFT_Signal::FFT_Signal(const FFT_Signal& other) :
 }
 
 
-std::map<unsigned, std::map<FFT_Order::NoiseType, std::map<double, std::map<IndexSin::SinSource, FFT_Order::Measure>>>> FFT_Order::ssssAggr;
+std::map<unsigned, std::map<FFT_Order::NoiseType, std::map<double, std::map<IndexSin::SinSource, FFT_Order::Measure> > > > FFT_Order::ssssAggr;
 
 
 FFT_Order::Measure& FFT_Order::aggr(unsigned order, NoiseType noiseType, double noise, IndexSin::SinSource sinSource)
 {
+#if __cplusplus >= 201103L
     auto it1 = ssssAggr.find(order);
     if (it1 == ssssAggr.end()) {
-        auto res = ssssAggr.insert({order, 
+        auto res = ssssAggr.insert({order,
             std::map<NoiseType, std::map<double, std::map<IndexSin::SinSource, Measure>>>()});
         it1 = res.first;
     }
@@ -180,6 +226,33 @@ FFT_Order::Measure& FFT_Order::aggr(unsigned order, NoiseType noiseType, double 
         it4 = res.first;
     }
     return it4->second;
+#else
+    typedef std::map<IndexSin::SinSource, Measure> _M4;
+    typedef std::map<double, _M4> _M3;
+    typedef std::map<NoiseType, _M3> _M2;
+    typedef std::map<unsigned, _M2> _M1;
+    _M1::iterator it1 = ssssAggr.find(order);
+    if (it1 == ssssAggr.end()) {
+        std::pair<_M1::iterator, bool> _r = ssssAggr.insert(std::make_pair(order, _M2()));
+        it1 = _r.first;
+    }
+    _M2::iterator it2 = it1->second.find(noiseType);
+    if (it2 == it1->second.end()) {
+        std::pair<_M2::iterator, bool> _r = it1->second.insert(std::make_pair(noiseType, _M3()));
+        it2 = _r.first;
+    }
+    _M3::iterator it3 = it2->second.find(noise);
+    if (it3 == it2->second.end()) {
+        std::pair<_M3::iterator, bool> _r = it2->second.insert(std::make_pair(noise, _M4()));
+        it3 = _r.first;
+    }
+    _M4::iterator it4 = it3->second.find(sinSource);
+    if (it4 == it3->second.end()) {
+        std::pair<_M4::iterator, bool> _r = it3->second.insert(std::make_pair(sinSource, Measure()));
+        it4 = _r.first;
+    }
+    return it4->second;
+#endif
 }
 
 
@@ -281,23 +354,47 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
 
 void FFT_Order::dump(std::ofstream& ofs, SignalType signalType, const Measure& measure) const
 {
-    for (unsigned testType = 0; testType < FFT_Order::sTestType.size(); ++testType) {
+    for (unsigned testType = 0; testType < (sizeof(FFT_Order::sTestType)/sizeof(FFT_Order::sTestType[0])); ++testType) {
         const Stat<double, size_t>& uncStat( measure.sUncStat[testType] );
         const Stat<double, size_t>& errStat( measure.sUncStat[testType] );
         const Histogram<double, size_t>& histo( measure.sHisto[testType] );
+#if __cplusplus >= 201103L
         ofs << IndexSin::sinSourceName(sinSource) << '\t' << FFT_Order::noiseTypeName(noiseType) << '\t' << noise
             << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType]
-            << '\t' << uncStat.count()<< '\t' << uncStat.mean() << '\t' << uncStat.std() 
-                << '\t' << uncStat.min() << '\t' << (uncStat.minAt().has_value()? std::to_string(uncStat.minAt().value()) : "") 
-                << '\t' << uncStat.max() << '\t' << (uncStat.maxAt().has_value()? std::to_string(uncStat.maxAt().value()) : "")  
-            << '\t' << errStat.count()<< '\t' << errStat.mean() << '\t' << errStat.std() 
-                << '\t' << errStat.min() << '\t' << (errStat.minAt().has_value()? std::to_string(errStat.minAt().value()) : "") 
-                << '\t' << errStat.max() << '\t' << (errStat.maxAt().has_value()? std::to_string(errStat.maxAt().value()) : "")  
-            << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std() 
-                << '\t' << histo.min() << '\t' << (histo.minAt().has_value()? std::to_string(histo.minAt().value()) : "")  
+            << '\t' << uncStat.count()<< '\t' << uncStat.mean() << '\t' << uncStat.std()
+                << '\t' << uncStat.min() << '\t' << (uncStat.minAt().has_value()? std::to_string(uncStat.minAt().value()) : "")
+                << '\t' << uncStat.max() << '\t' << (uncStat.maxAt().has_value()? std::to_string(uncStat.maxAt().value()) : "")
+            << '\t' << errStat.count()<< '\t' << errStat.mean() << '\t' << errStat.std()
+                << '\t' << errStat.min() << '\t' << (errStat.minAt().has_value()? std::to_string(errStat.minAt().value()) : "")
+                << '\t' << errStat.max() << '\t' << (errStat.maxAt().has_value()? std::to_string(errStat.maxAt().value()) : "")
+            << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
+                << '\t' << histo.min() << '\t' << (histo.minAt().has_value()? std::to_string(histo.minAt().value()) : "")
                 << '\t' << histo.max() << '\t' << (histo.maxAt().has_value()? std::to_string(histo.maxAt().value()) : "")
             << '\t' << histo.lowers() << '\t' << histo.uppers()
             << histo.formatted() << "\n";
+#else
+        std::ostringstream _o;
+        std::string _unc_min, _unc_max, _err_min, _err_max, _h_min, _h_max;
+        if (uncStat.minAt().has_value()) { _o << uncStat.minAt().value(); _unc_min = _o.str(); _o.str(""); }
+        if (uncStat.maxAt().has_value()) { _o << uncStat.maxAt().value(); _unc_max = _o.str(); _o.str(""); }
+        if (errStat.minAt().has_value()) { _o << errStat.minAt().value(); _err_min = _o.str(); _o.str(""); }
+        if (errStat.maxAt().has_value()) { _o << errStat.maxAt().value(); _err_max = _o.str(); _o.str(""); }
+        if (histo.minAt().has_value()) { _o << histo.minAt().value(); _h_min = _o.str(); _o.str(""); }
+        if (histo.maxAt().has_value()) { _o << histo.maxAt().value(); _h_max = _o.str(); _o.str(""); }
+        ofs << IndexSin::sinSourceName(sinSource) << '\t' << FFT_Order::noiseTypeName(noiseType) << '\t' << noise
+            << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType]
+            << '\t' << uncStat.count()<< '\t' << uncStat.mean() << '\t' << uncStat.std()
+                << '\t' << uncStat.min() << '\t' << _unc_min
+                << '\t' << uncStat.max() << '\t' << _unc_max
+            << '\t' << errStat.count()<< '\t' << errStat.mean() << '\t' << errStat.std()
+                << '\t' << errStat.min() << '\t' << _err_min
+                << '\t' << errStat.max() << '\t' << _err_max
+            << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
+                << '\t' << histo.min() << '\t' << _h_min
+                << '\t' << histo.max() << '\t' << _h_max
+            << '\t' << histo.lowers() << '\t' << histo.uppers()
+            << histo.formatted() << "\n";
+#endif
     }
 }
 
@@ -313,16 +410,17 @@ std::string FFT_Order::defaultDumpPath(unsigned minOrder, unsigned maxOrder)
     return oss.str();
 }
 
+#if __cplusplus >= 201103L
 bool FFT_Order::dump(
             std::string dumpPath,
-            unsigned minOrder, unsigned maxOrder, 
+            unsigned minOrder, unsigned maxOrder,
             std::initializer_list<IndexSin::SinSource> sSinSource,
-            std::initializer_list<NoiseType> sNoiseType, 
+            std::initializer_list<NoiseType> sNoiseType,
             std::initializer_list<double> sNoise,
-            std::initializer_list<int> sFreq 
-    ) 
+            std::initializer_list<int> sFreq
+    )
 {
-    Histogram histo;
+    Histogram<> histo;
     std::ostringstream oss;
     oss << "SinSource\tNoiseType\tNoise\tSignal\tOrder\tFreq\tTest"
         << "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Minimum At\tUncertainty Maximum\tUncertainty Maximum At"
@@ -459,9 +557,21 @@ bool FFT_Order::dump(
     }
     return true;
 }
+#else
+bool FFT_Order::dump(std::string dumpPath,
+                unsigned minOrder, unsigned maxOrder,
+                const IndexSin::SinSource* sSinSource, size_t nSinSource,
+                const NoiseType* sNoiseType, size_t nNoiseType,
+                const double* sNoise, size_t nNoise,
+                const int* sFreq, size_t nFreq)
+{
+    return false;
+}
+#endif
 
 void FFT_Step::dump(std::ofstream& ofs, const std::vector<VarDbl>& sData, const std::string& context)
 {
+#if __cplusplus >= 201103L
     for (int imag: {0, 1}) {
         for (int value: {1, 0}) {
             ofs << context << '\t' << imag << '\t' << value;;
@@ -474,12 +584,30 @@ void FFT_Step::dump(std::ofstream& ofs, const std::vector<VarDbl>& sData, const 
             ofs << '\n';
         }
     }
+#else
+    const int _imag_vals[] = {0, 1};
+    for (int _ii = 0; _ii < 2; ++_ii) {
+        const int imag = _imag_vals[_ii];
+        const int _value_vals[] = {1, 0};
+        for (int _vi = 0; _vi < 2; ++_vi) {
+            const int value = _value_vals[_vi];
+            ofs << context << '\t' << imag << '\t' << value;;
+            for (size_t i = imag; i < sData.size(); i += 2) {
+                if (value)
+                    ofs << '\t' << sData[i].value();
+                else
+                    ofs << '\t' << sData[i].uncertainty();
+            }
+            ofs << '\n';
+        }
+    }
+#endif
     ofs.flush();
 }
 
 
 void FFT_Step::dump(std::ofstream& ofs, TestType testType,
-        const std::vector<std::vector<VarDbl>>& ssStep) const
+        const std::vector<std::vector<VarDbl> >& ssStep) const
 {
     std::ostringstream oss;
     for (size_t step = 0; step < ssStep.size(); ++step) {
@@ -489,15 +617,15 @@ void FFT_Step::dump(std::ofstream& ofs, TestType testType,
             << FFT_Order::testTypeName(testType) << '\t' << step;
         dump(ofs, ssStep[step], oss.str());
     }
-    const std::vector<VarDbl>& sCompare((testType == TestType::Forward)? sFreq : (testType == TestType::Reverse)? sWave : sFrwd);
+    const std::vector<VarDbl>& sCompare((testType == Forward)? sFreq : (testType == Reverse)? sWave : sFrwd);
 }
 
 
 void FFT_Step::dump(std::ofstream& ofs) const
 {
-    dump(ofs, TestType::Forward, ssSpecStep);
-    dump(ofs, TestType::Roundtrip, ssRoundStep);
-    dump(ofs, TestType::Reverse, ssRevStep);
+    dump(ofs, Forward, ssSpecStep);
+    dump(ofs, Roundtrip, ssRoundStep);
+    dump(ofs, Reverse, ssRevStep);
 }
 
 
@@ -508,9 +636,10 @@ std::string FFT_Step::defaultDumpPath(IndexSin::SinSource sinSource, unsigned or
     return oss.str();
 }
 
+#if __cplusplus >= 201103L
 bool FFT_Step::dump(
-        IndexSin::SinSource sinSource, unsigned order, std::string dumpPath, 
-        std::initializer_list<int> sFreq, 
+        IndexSin::SinSource sinSource, unsigned order, std::string dumpPath,
+        std::initializer_list<int> sFreq,
         std::initializer_list<NoiseType> sNoiseType, std::initializer_list<double> sNoise,
         std::string dumpOrderPath
     )
@@ -577,6 +706,16 @@ bool FFT_Step::dump(
     std::cout << "Start dump FFT order to " << dumpOrderPath << std::endl;
     return FFT_Order::dump(dumpOrderPath, order, order + 1, {sinSource}, sNoiseType, sNoise, sFreq);
 }
+#else
+bool FFT_Step::dump(IndexSin::SinSource sinSource, unsigned order, std::string dumpPath,
+                    const int* sFreq, size_t nFreq,
+                    const NoiseType* sNoiseType, size_t nNoiseType,
+                    const double* sNoise, size_t nNoise,
+                    std::string dumpOrderPath)
+{
+    return false;
+}
+#endif
 
 struct FFT_Test: public FFT_Order {
     FFT_Test(const FFT_Signal& signal, NoiseType noiseType, double noise) :
@@ -584,13 +723,18 @@ struct FFT_Test: public FFT_Order {
     {}
 
     IndexSin getIndexSin() const { return _sin; }
-    std::vector<std::vector<VarDbl>> getSpecStep() const {return ssSpecStep; }
+    std::vector<std::vector<VarDbl> > getSpecStep() const {return ssSpecStep; }
 };
 
 
 int main(int argc, char* argv[])
 {
+#if __cplusplus >= 201103L
     for (auto name: IndexSin::sSinSource) {
+#else
+    for (size_t _ni = 0; _ni < sizeof(IndexSin::sSinSource)/sizeof(IndexSin::sSinSource[0]); ++_ni) {
+        const char* name = IndexSin::sSinSource[_ni];
+#endif
         IndexSin::SinSource src = IndexSin::toSinSource(name);
         testFFTOrder2Sin(src, ulp(2.0));
         testFFTOrder2Cos(src, ulp(2.0));
@@ -600,6 +744,7 @@ int main(int argc, char* argv[])
 
     testBitReversion();
 
+#if __cplusplus >= 201103L
     if (argc == 1) {
         std::cout << "Start calculate FFT step" << std::endl;
         for (size_t order = 2; order < 7; ++order) {
@@ -623,11 +768,11 @@ int main(int argc, char* argv[])
         IndexSin::SinSource sinSource = (3 < argc)? IndexSin::toSinSource(argv[3]) : IndexSin::SinSource::Quart;
         const int freq = (4 < argc)? atoi(argv[4]): 1;
         std::ostringstream oss;
-        oss << "./Output/FFT_Step_" << order << '_' << freq << '_' 
+        oss << "./Output/FFT_Step_" << order << '_' << freq << '_'
             << IndexSin::sinSourceName(sinSource) << '_' << noise << ".txt";
         const std::string dumpStepPath = oss.str();
         oss.str("");
-        oss << "./Output/FFT_Order_" << order << '_' << freq << '_' 
+        oss << "./Output/FFT_Order_" << order << '_' << freq << '_'
             << IndexSin::sinSourceName(sinSource) << '_' << noise << ".txt";
         const std::string dumpOrderPath = oss.str();
         FFT_Step::dump(sinSource, order,
@@ -640,6 +785,7 @@ int main(int argc, char* argv[])
         }
         std::cout << '\n';
     }
+#endif
 
     std::cout << "All FFT tests are successful" << std::endl;
     return 0;

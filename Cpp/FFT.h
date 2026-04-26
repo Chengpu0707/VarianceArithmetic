@@ -1,8 +1,11 @@
 
-#include <numbers>
+#if __cplusplus >= 201103L
+#include <unordered_map>
+#else
+#include <map>
+#endif
 #include <sstream>
 #include <vector>
-#include <unordered_map>
 
 #include "IndexSin.h"
 #include "Taylor.h"
@@ -10,7 +13,7 @@
 
 #ifndef __FFT_h__
 #define __FFT_h__
-namespace var_dbl 
+namespace var_dbl
 {
 
 /*
@@ -25,13 +28,17 @@ public:
         // FFT of input {sData} of (real + imag) of size (2 << order)
         // When {traceSteps} is true, {ssStep} contains the data for intermediate steps,
         //  with [order + 1] for the result, and [order + 2] for the value error which could be non-exist
+#if __cplusplus >= 202002L
     template<typename T> requires std::floating_point<T> || std::integral<T>
-    std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward, 
+#else
+    template<typename T>
+#endif
+    std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward,
                                   bool traceSteps=false) const;
     // intermediate steps for the transform() when {traceSteps} is true
-    mutable std::vector<std::vector<VarDbl>> ssStep;
+    mutable std::vector<std::vector<VarDbl> > ssStep;
 
-    FFT(IndexSin::SinSource sinSource = IndexSin::SinSource::Quart, const std::string& dumpDir = "") 
+    FFT(IndexSin::SinSource sinSource = IndexSin::Quart, const std::string& dumpDir = "")
         : _sin(sinSource, dumpDir) {}
         // if {dumpDir} is not empty, read sin value from the file in the {dumpDir}
 
@@ -41,11 +48,16 @@ protected:
 
 
 
-inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order) 
+inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order)
 {
     IndexSin::validateOrder(order);
-    static std::unordered_map<unsigned char, std::vector<size_t>> _ssBitReversedIndex; 
+#if __cplusplus >= 201103L
+    static std::unordered_map<unsigned char, std::vector<size_t>> _ssBitReversedIndex;
     auto it = _ssBitReversedIndex.find(order);
+#else
+    static std::map<unsigned char, std::vector<size_t> > _ssBitReversedIndex;
+    std::map<unsigned char, std::vector<size_t> >::iterator it = _ssBitReversedIndex.find(order);
+#endif
     if (it != _ssBitReversedIndex.end())
         return it->second;
     std::vector<size_t> sRes(1 << order, 0);
@@ -53,25 +65,29 @@ inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order)
     const size_t M = N >> 1;
     int i, j, k;
     j = 0;
-    for (i = 0; i < N; i++) {
+    for (i = 0; i < (int)N; i++) {
         sRes[i] = j;
         // next j from NumericalRecipesinC.pdf
-        k = M; 
+        k = M;
         while ((k != 0) && (j >= k)) {
             j -= k;
             k >>= 1;
         }
         j += k;
     }
+#if __cplusplus >= 201103L
     _ssBitReversedIndex.insert({order, sRes});
+#else
+    _ssBitReversedIndex.insert(std::make_pair(order, sRes));
+#endif
     return sRes;
 }
 
 /*
     * 1-dimentional Fast Fourier Transformation (FFT)
-    * 
+    *
     * @param sData     an array of size (2<<order), with each datum contains (real, image)
-    * 
+    *
     * @return      an array of size (2<<order), with each datum contains (real, image)
     */
 inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool forward, bool traceSteps) const
@@ -83,9 +99,9 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
     ssStep.clear();
     if (traceSteps)
         ssStep.push_back(sData);
-    
+
     const std::vector<size_t> sIndex = bitReversedIndices(order);
-    for (int i = 0; i < sIndex.size(); i++) {
+    for (int i = 0; i < (int)sIndex.size(); i++) {
         const int j = sIndex[i];
         sRes[(i << 1)] = sData[j << 1];
         sRes[(i << 1) + 1] = sData[(j << 1) + 1];
@@ -93,7 +109,7 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
     if (traceSteps)
         ssStep.push_back(sRes);
 
-    for (int i = 0; i < (sIndex.size() - 1); i += 2 ) {
+    for (int i = 0; i < (int)(sIndex.size() - 1); i += 2 ) {
         const VarDbl rt = sRes[(i << 1)], it = sRes[(i << 1) + 1];
         sRes[(i << 1)] += sRes[(i << 1) + 2];
         sRes[(i << 1) + 1] += sRes[(i << 1) + 3];
@@ -104,18 +120,18 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
         ssStep.push_back(sRes);
 
     for (unsigned o = 1, k = 4; o < order; ++o, k <<= 1) {
-        for (long j = 0; j < (k >> 1); j++) {
+        for (long j = 0; j < (long)(k >> 1); j++) {
             const VarDbl vcos = _sin.cos(j, o);
             const VarDbl vsin = _sin.sin(forward? j : -j, o);
-            for (int i = 0; i < sIndex.size(); i += k ) {
+            for (int i = 0; i < (int)sIndex.size(); i += k ) {
                 const int idx0 = (i + j) << 1;
                 const int idx1 = idx0 + k;
                 const VarDbl& r1 = sRes[idx1];
                 const VarDbl& i1 = sRes[idx1 + 1];
-        
+
                 const VarDbl rd = r1 * vcos - i1 * vsin;
                 const VarDbl id = i1 * vcos + r1 * vsin;
-        
+
                 sRes[idx1] = sRes[idx0] - rd;
                 sRes[idx1 + 1] = sRes[idx0 + 1] - id;
                 sRes[idx0] += rd;
@@ -125,9 +141,9 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
         if (traceSteps)
             ssStep.push_back(sRes);
     }
-    
+
     if (!forward) {
-        for (int i = 0; i < (sIndex.size() << 1); i ++ ) {
+        for (int i = 0; i < (int)(sIndex.size() << 1); i ++ ) {
             sRes[i] *= 1.0/size;
         }
     }
@@ -136,10 +152,14 @@ inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool
     return sRes;
 }
 
+#if __cplusplus >= 202002L
 template<typename T> requires std::floating_point<T> || std::integral<T>
+#else
+template<typename T>
+#endif
 inline std::vector<VarDbl> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
 {
-    return transform(std::vector<VarDbl>{sData}, forward, traceSteps);
+    return transform(std::vector<VarDbl>(sData.begin(), sData.end()), forward, traceSteps);
 }
 
 

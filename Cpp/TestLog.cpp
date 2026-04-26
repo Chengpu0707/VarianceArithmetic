@@ -2,6 +2,19 @@
 
 using namespace var_dbl;
 
+#if __cplusplus < 201103L
+struct _LogVarFunctor {
+    VarDbl operator()(double value, double uncertainty) const {
+        return Taylor::log(VarDbl(value, uncertainty));
+    }
+};
+struct _LogDblFunctor {
+    double operator()(double value, double noise) const {
+        return std::log(value + noise);
+    }
+};
+#endif
+
 TestResult test_log(double value, double uncertainty, std::ostringstream& oss) {
     TestResult res;
     res.input = VarDbl(value, uncertainty);
@@ -41,8 +54,18 @@ int main()
         }
     }
     test::assertEqual(i, 20087);
+#if __cplusplus >= 201103L
     std::vector<double> sX{1., 2., 1./2, 4., 1./4, 8., 1./8, 16., 1./16, 64., 1./64};
+#else
+    std::vector<double> sX;
+    { const double _arr[] = {1., 2., 1./2, 4., 1./4, 8., 1./8, 16., 1./16, 64., 1./64};
+      sX.assign(_arr, _arr + sizeof(_arr)/sizeof(_arr[0])); }
+#endif
+#if __cplusplus >= 201103L
     for (double value: sX) {
+#else
+    for (size_t _i = 0; _i < sX.size(); ++_i) { const double value = sX[_i];
+#endif
         validate_log(value, 0);
         validate_log(value, 0.1 * value);
         validate_log(value, 0.15 * value);
@@ -51,9 +74,13 @@ int main()
         test::assertAlmostEqual(res.uncertainty(), 0.2130506, 1e-6);
     } 
 
-    stat_func("Log", 
+#if __cplusplus >= 201103L
+    stat_func("Log",
             [](double value, double uncertainty){ return Taylor::log(VarDbl(value, uncertainty)); },
             [](double value, double noise){ return std::log(value + noise); },
             sX);
+#else
+    stat_func("Log", _LogVarFunctor(), _LogDblFunctor(), sX);
+#endif
     std::cout << "All log tests are successful";
 }

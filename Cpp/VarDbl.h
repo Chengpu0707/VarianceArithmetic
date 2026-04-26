@@ -11,11 +11,17 @@ It relies only on Momentum.h, which is also in the var_dbl namespace.
 
 #ifndef __ValDbl_h__
 #define __ValDbl_h__
-namespace var_dbl 
+#if __cplusplus >= 202002L
+#define VDBL_TMPL template <typename T> requires std::floating_point<T> || std::integral<T>
+#else
+#define VDBL_TMPL template <typename T>
+#endif
+namespace var_dbl
 {
 
 
-class VarDbl { 
+class VarDbl {
+#if __cplusplus >= 201103L
     constexpr static const double DEVIATION_OF_LSB = 1.0 / sqrt(3);
         // assume uniform distribution within ulp()
     constexpr static const double BINDING_FOR_EQUAL = 0.67448975;
@@ -24,14 +30,34 @@ class VarDbl {
         // If the last 23 bits of significand are zero, the value is 2's fractional.
     constexpr static const long long DOUBLE_MAX_SIGNIFICAND = (1LL << std::numeric_limits<double>::digits) - 1;
         // max significand for double
+#else
+    static const double DEVIATION_OF_LSB;
+    static const double BINDING_FOR_EQUAL;
+    static const long PRECISE_SIGNIFICAND_TAIL_BITS;
+    static const long long DOUBLE_MAX_SIGNIFICAND;
+#endif
 
+#if __cplusplus >= 201103L
     double _value = 0;
     double _uncertainty = 0;
+#else
+    double _value;
+    double _uncertainty;
+#endif
 
     void init(double value, double uncertainty, const std::string what);
 
 public:
+#if __cplusplus >= 202002L
     template <typename T> requires std::floating_point<T> static double ulp(T value);
+#elif __cplusplus >= 201103L
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    static double ulp(T value);
+#else
+    template <typename T>
+    static typename _enable_if_c03<_is_floating_point_c03<T>::value, double>::type
+    ulp(T value);
+#endif
 
     double value() const { return _value; }
     double uncertainty() const { return _uncertainty; }
@@ -41,10 +67,22 @@ public:
     VarDbl();
     VarDbl(const VarDbl& other);
     VarDbl(double value, double uncertainty);
-    
+
     // conversion constructors
+#if __cplusplus >= 202002L
     template <typename T> requires std::floating_point<T> VarDbl(T value);
     template <typename T> requires std::integral<T> VarDbl(T value);
+#elif __cplusplus >= 201103L
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    VarDbl(T value);
+    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    VarDbl(T value);
+#else
+    template <typename T>
+    VarDbl(T value, typename _enable_if_c03<_is_floating_point_c03<T>::value, _C03FloatTag>::type = _C03FloatTag());
+    template <typename T>
+    VarDbl(T value, typename _enable_if_c03<_is_integral_c03<T>::value, _C03IntTag>::type = _C03IntTag());
+#endif
 
     // i/o
     std::string to_string() const;
@@ -54,44 +92,32 @@ public:
     // +
     VarDbl operator+(const VarDbl& other) const;
     VarDbl operator+=(const VarDbl& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator+(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator+=(const T& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        VarDbl operator+(const T& first, const VarDbl& second);
+    VDBL_TMPL VarDbl operator+(const T& other) const;
+    VDBL_TMPL VarDbl operator+=(const T& other);
+    VDBL_TMPL friend VarDbl operator+(const T& first, const VarDbl& second);
 
     // -
     void negate() { _value = - _value; }
     VarDbl operator-() const;
     VarDbl operator-(const VarDbl& other) const;
     VarDbl operator-=(const VarDbl& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator-(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator-=(const T& other);
-    template<typename T>  requires std::floating_point<T> || std::integral<T> friend 
-        VarDbl operator-(const T& first, const VarDbl& second);
+    VDBL_TMPL VarDbl operator-(const T& other) const;
+    VDBL_TMPL VarDbl operator-=(const T& other);
+    VDBL_TMPL friend VarDbl operator-(const T& first, const VarDbl& second);
 
     // *
     VarDbl operator*(const VarDbl& other) const;
     VarDbl operator*=(const VarDbl& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator*(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator*=(const T& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        VarDbl operator*(const T& first, const VarDbl& second);
+    VDBL_TMPL VarDbl operator*(const T& other) const;
+    VDBL_TMPL VarDbl operator*=(const T& other);
+    VDBL_TMPL friend VarDbl operator*(const T& first, const VarDbl& second);
 
     // /
     VarDbl operator/(const VarDbl& other) const;
     VarDbl operator/=(const VarDbl& other);
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator/(const T& other) const;
-    template<typename T>  requires std::floating_point<T> || std::integral<T> 
-        VarDbl operator/=(const T& other);
-    template<typename T>  requires std::floating_point<T> || std::integral<T> 
-        friend VarDbl operator/(const T& first, const VarDbl& second);
+    VDBL_TMPL VarDbl operator/(const T& other) const;
+    VDBL_TMPL VarDbl operator/=(const T& other);
+    VDBL_TMPL friend VarDbl operator/(const T& first, const VarDbl& second);
 
     // compare
     bool operator==(const VarDbl& other) const;
@@ -100,30 +126,18 @@ public:
     bool operator>(const VarDbl& other) const;
     bool operator<=(const VarDbl& other) const;
     bool operator>=(const VarDbl& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        bool operator==(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        bool operator!=(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        bool operator<(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> 
-        bool operator>(const T& other) const;
-    template<typename T>  requires std::floating_point<T> || std::integral<T> 
-        bool operator<=(const T& other) const;
-    template<typename T>  requires std::floating_point<T> || std::integral<T> 
-        bool operator>=(const T& other) const;
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator==(const T& first, const VarDbl& second);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator!=(const T& first, const VarDbl& second);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator<(const T& first, const VarDbl& second);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator>(const T& first, const VarDbl& second);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator<=(const T& first, const VarDbl& second);
-    template<typename T> requires std::floating_point<T> || std::integral<T> friend 
-        bool operator>=(const T& first, const VarDbl& second);
+    VDBL_TMPL bool operator==(const T& other) const;
+    VDBL_TMPL bool operator!=(const T& other) const;
+    VDBL_TMPL bool operator<(const T& other) const;
+    VDBL_TMPL bool operator>(const T& other) const;
+    VDBL_TMPL bool operator<=(const T& other) const;
+    VDBL_TMPL bool operator>=(const T& other) const;
+    VDBL_TMPL friend bool operator==(const T& first, const VarDbl& second);
+    VDBL_TMPL friend bool operator!=(const T& first, const VarDbl& second);
+    VDBL_TMPL friend bool operator<(const T& first, const VarDbl& second);
+    VDBL_TMPL friend bool operator>(const T& first, const VarDbl& second);
+    VDBL_TMPL friend bool operator<=(const T& first, const VarDbl& second);
+    VDBL_TMPL friend bool operator>=(const T& first, const VarDbl& second);
 
     static void assertEqual(const VarDbl& var, double value, double uncertainty, const std::string& msg = "",
                      double valueDelta = 0, double uncertaintyDelta = 0);
@@ -131,6 +145,13 @@ public:
 };
 
 
+#if __cplusplus < 201103L
+// C++03: out-of-class definitions for non-integral static constants (header-only; one def per TU via include guards)
+const double VarDbl::DEVIATION_OF_LSB = 1.0 / sqrt(3.0);
+const double VarDbl::BINDING_FOR_EQUAL = 0.67448975;
+const long VarDbl::PRECISE_SIGNIFICAND_TAIL_BITS = 23;
+const long long VarDbl::DOUBLE_MAX_SIGNIFICAND = (1LL << std::numeric_limits<double>::digits) - 1;
+#endif
 
 
 struct InitException : public std::runtime_error
@@ -138,7 +159,7 @@ struct InitException : public std::runtime_error
     const double value;
     const double uncertainty;
 
-    explicit InitException(double value, double uncertainty, const std::string what) : 
+    explicit InitException(double value, double uncertainty, const std::string what) :
         runtime_error(what), value(value), uncertainty(uncertainty)
     {}
 };
@@ -157,37 +178,62 @@ inline VarDbl::VarDbl() {
     _uncertainty = 0;
 }
 
-inline VarDbl::VarDbl(const VarDbl& other) 
+inline VarDbl::VarDbl(const VarDbl& other)
 {
     _value = other._value;
     _uncertainty = other._uncertainty;
 }
 
-inline VarDbl::VarDbl(double value, double uncertainty) 
+inline VarDbl::VarDbl(double value, double uncertainty)
 {
     std::ostringstream ss;
     ss << "VarDbl( " << value << ", " << uncertainty << ")";
     init(value, uncertainty, ss.str());
 }
 
-template <typename T> requires std::floating_point<T> 
+#if __cplusplus >= 202002L
+template <typename T> requires std::floating_point<T>
 inline double VarDbl::ulp(T value) {
+#elif __cplusplus >= 201103L
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type N>
+inline double VarDbl::ulp(T value) {
+#else
+template <typename T>
+inline typename _enable_if_c03<_is_floating_point_c03<T>::value, double>::type
+VarDbl::ulp(T value) {
+#endif
     return var_dbl::ulp(value, VarDbl::PRECISE_SIGNIFICAND_TAIL_BITS) * VarDbl::DEVIATION_OF_LSB;
 }
 
-template <typename T> requires std::floating_point<T> 
+#if __cplusplus >= 202002L
+template <typename T> requires std::floating_point<T>
 inline VarDbl::VarDbl(T value) {
+#elif __cplusplus >= 201103L
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type N>
+inline VarDbl::VarDbl(T value) {
+#else
+template <typename T>
+inline VarDbl::VarDbl(T value, typename _enable_if_c03<_is_floating_point_c03<T>::value, _C03FloatTag>::type) {
+#endif
     std::ostringstream ss;
     ss << "VarDbl(fp " << value << ")";
     const double uncertainty = VarDbl::ulp(value);
     init(value, uncertainty, ss.str());
 }
 
-template <typename T> requires std::integral<T> 
+#if __cplusplus >= 202002L
+template <typename T> requires std::integral<T>
 inline VarDbl::VarDbl(T value) {
+#elif __cplusplus >= 201103L
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type N>
+inline VarDbl::VarDbl(T value) {
+#else
+template <typename T>
+inline VarDbl::VarDbl(T value, typename _enable_if_c03<_is_integral_c03<T>::value, _C03IntTag>::type) {
+#endif
     std::ostringstream ss;
     ss << "VarDbl(i " << value << ")";
-    const double uncertainty = var_dbl::ulp(value);
+    const double uncertainty = std::abs(var_dbl::ulp(value));
     init(value, uncertainty, ss.str());
 }
 
@@ -197,13 +243,13 @@ inline std::string VarDbl::to_string() const {
     return os.str();
 }
 
-inline std::ostream & operator <<(std::ostream& out, const VarDbl& v) 
+inline std::ostream & operator <<(std::ostream& out, const VarDbl& v)
 {
     out << std::scientific << v.value() << '~' << v.uncertainty();
     return out;
 }
 
-inline std::istream & operator >>(std::istream& in, VarDbl& v) 
+inline std::istream & operator >>(std::istream& in, VarDbl& v)
 {
     double value, uncertainty;
     char sep;
@@ -219,14 +265,14 @@ inline std::istream & operator >>(std::istream& in, VarDbl& v)
 }
 
 
-inline VarDbl VarDbl::operator-() const 
+inline VarDbl VarDbl::operator-() const
 {
     VarDbl ret(*this);
     ret.negate();
     return ret;
 }
 
-inline VarDbl VarDbl::operator+=(const VarDbl& other) 
+inline VarDbl VarDbl::operator+=(const VarDbl& other)
 {
     const double uncertainty = (this->uncertainty() ==0)? other.uncertainty() :
             (other.uncertainty() == 0)? this->uncertainty() :
@@ -244,7 +290,7 @@ inline VarDbl VarDbl::operator-=(const VarDbl& other)
     return *this;
 }
 
-inline VarDbl VarDbl::operator*=(const VarDbl& other) 
+inline VarDbl VarDbl::operator*=(const VarDbl& other)
 {
     const double uncertainty = std::sqrt(
             this->variance() * other.value() * other.value() +
@@ -296,75 +342,75 @@ inline VarDbl VarDbl::operator/(const VarDbl& other) const
 }
 
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator+(const T& other) const
 {
     return *this + VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator-(const T& other) const
 {
     return *this - VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator*(const T& other) const
 {
     return *this * VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator/(const T& other) const
 {
     return *this / VarDbl(other);
 }
 
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator+=(const T& other)
 {
     return *this += VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator-=(const T& other)
 {
     return *this -= VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator*=(const T& other)
 {
     return *this *= VarDbl(other);
 }
 
-template <typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl VarDbl::operator/=(const T& other)
 {
     return *this /= VarDbl(other);
 }
 
 
-template<typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl operator+(const T& first, const VarDbl& second)
 {
     return VarDbl(first) + second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T>  
-inline VarDbl operator-(const T& first, const VarDbl& second) 
+VDBL_TMPL
+inline VarDbl operator-(const T& first, const VarDbl& second)
 {
     return VarDbl(first) - second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T>  
+VDBL_TMPL
 inline VarDbl operator*(const T& first, const VarDbl& second) {
     return VarDbl(first) * second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T>  
-inline VarDbl operator/(const T& first, const VarDbl& second) 
+VDBL_TMPL
+inline VarDbl operator/(const T& first, const VarDbl& second)
 {
     return VarDbl(first) / second;
 }
@@ -372,7 +418,7 @@ inline VarDbl operator/(const T& first, const VarDbl& second)
 
 inline bool VarDbl::operator==(const VarDbl& other) const
 {
-    VarDbl res(*this);    
+    VarDbl res(*this);
     res-= other;
     return std::abs(res.value()) <= (VarDbl::BINDING_FOR_EQUAL * res.uncertainty());
 }
@@ -411,81 +457,81 @@ inline bool VarDbl::operator>=(const VarDbl& other) const
 }
 
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator==(const T& other) const
 {
     return *this == VarDbl(other);
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator!=(const T& other) const
 {
     return *this != VarDbl(other);
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator<(const T& other) const
 {
     return *this < VarDbl(other);
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator>(const T& other) const
 {
     return *this > VarDbl(other);
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator>=(const T& other) const
 {
     return *this >= VarDbl(other);
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool VarDbl::operator<=(const T& other) const
 {
     return *this <= VarDbl(other);
 }
 
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator==(const T& first, const VarDbl& second)
 {
     return VarDbl(first) == second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator!=(const T& first, const VarDbl& second)
 {
     return VarDbl(first) != second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator<(const T& first, const VarDbl& second)
 {
     return VarDbl(first) < second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator>(const T& first, const VarDbl& second)
 {
     return VarDbl(first) > second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator<=(const T& first, const VarDbl& second)
 {
     return VarDbl(first) <= second;
 }
 
-template<typename T> requires std::floating_point<T> || std::integral<T> 
+VDBL_TMPL
 inline bool operator>=(const T& first, const VarDbl& second)
 {
-    return VarDbl(first) >= second; 
+    return VarDbl(first) >= second;
 }
 
 
-inline void VarDbl::assertEqual(const VarDbl& var, double value, double uncertainty, 
+inline void VarDbl::assertEqual(const VarDbl& var, double value, double uncertainty,
             const std::string& msg,
             double deltaValue, double deltaUncertainty) {
     std::ostringstream oss;

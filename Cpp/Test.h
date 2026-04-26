@@ -7,21 +7,25 @@ To get the stack trace, break inside AssertException::AssertException()
 #include <cmath>
 #include <cassert>
 #include <iostream>
+#if __cplusplus >= 202002L
 #include <ranges>
+#endif
 #include <sstream>
+#if __cplusplus >= 202302L
 #include <stacktrace>
+#endif
 #include <string>
 
 #include "ulp.h"
 
 #ifndef __Test_h__
 #define __Test_h__
-namespace test 
+namespace test
 {
 
-struct AssertException : public std::runtime_error 
+struct AssertException : public std::runtime_error
 {
-    explicit AssertException(const std::string& what_arg) : runtime_error(what_arg) 
+    explicit AssertException(const std::string& what_arg) : runtime_error(what_arg)
     {
         std::cout << what() << '\n';
 #if __cplusplus >= 202302L
@@ -37,7 +41,11 @@ static void fail(std::string msg = "");
 static void assertTrue(bool expression, std::string msg = "");
 static void assertFalse(bool expression, std::string msg = "");
 
+#if __cplusplus >= 202002L
 template<typename T> requires std::floating_point<T>
+#else
+template<typename T>
+#endif
 static void assertAlmostEqual(T x, T y, T delta = 0, std::string msg = "");
     // ulp comparison when delta == 0
 
@@ -48,18 +56,23 @@ template<typename T, typename U> static void assertLess(const T& x, const U& y, 
 template<typename T, typename U> static void assertLessEqual(const T& x, const U& y, std::string msg = "");
 
 // generic container comparison
+#if __cplusplus >= 202002L
 template <typename T>
 concept StdContainer =
-    std::ranges::range<T> &&                      // Must be iterable
+    std::ranges::range<T> &&
     requires(T a) {
-        typename T::value_type;                   // Must have value_type
-        typename T::allocator_type;               // Must have allocator_type
-        typename T::size_type;                    // Must have size_type
-        { a.size() } -> std::convertible_to<typename T::size_type>; // Must have size()
+        typename T::value_type;
+        typename T::allocator_type;
+        typename T::size_type;
+        { a.size() } -> std::convertible_to<typename T::size_type>;
     };
-template<typename T, typename U> 
+template<typename T, typename U>
 requires StdContainer<T> && StdContainer<U>
 static void assertEquals(const T& sX, const U& sY, std::string msg = "");
+#else
+template<typename T, typename U>
+static void assertEquals(const T& sX, const U& sY, std::string msg = "");
+#endif
 
 
 inline void fail(std::string msg) {
@@ -71,21 +84,25 @@ inline void fail(std::string msg) {
 }
 
 
-inline void assertTrue(bool expression, std::string msg) 
+inline void assertTrue(bool expression, std::string msg)
 {
-    if (expression) 
+    if (expression)
         return;
     std::ostringstream os;
     os << "assertTrue(" << msg << ")";
     throw AssertException(os.str());
 }
 
-inline void assertFalse(bool expression, std::string msg) 
+inline void assertFalse(bool expression, std::string msg)
 {
     return assertTrue(!expression, msg);
 }
 
+#if __cplusplus >= 202002L
 template<typename T> requires std::floating_point<T>
+#else
+template<typename T>
+#endif
 inline void assertAlmostEqual(T x, T y, T delta, std::string msg)
 {
     if (std::isfinite(x) != std::isfinite(y)) {
@@ -110,7 +127,7 @@ inline void assertAlmostEqual(T x, T y, T delta, std::string msg)
     throw AssertException(os.str());
 }
 
-template<typename T, typename U> 
+template<typename T, typename U>
 inline void assertEqual(const T& x, const U& y, std::string msg)
 {
     if (x == y)
@@ -123,7 +140,7 @@ inline void assertEqual(const T& x, const U& y, std::string msg)
     throw AssertException(os.str());
 }
 
-template<typename T, typename U> 
+template<typename T, typename U>
 inline void assertNotEqual(const T& x, const U& y, std::string msg)
 {
     if (x != y)
@@ -136,7 +153,7 @@ inline void assertNotEqual(const T& x, const U& y, std::string msg)
     throw AssertException(os.str());
 }
 
-template<typename T, typename U> 
+template<typename T, typename U>
 inline void assertLess(const T& x, const U& y, std::string msg)
 {
     if (x < y)
@@ -150,7 +167,7 @@ inline void assertLess(const T& x, const U& y, std::string msg)
 }
 
 
-template<typename T, typename U> 
+template<typename T, typename U>
 inline void assertLessEqual(const T& x, const U& y, std::string msg)
 {
     if (x <= y)
@@ -164,7 +181,8 @@ inline void assertLessEqual(const T& x, const U& y, std::string msg)
 }
 
 
-template<typename T, typename U> 
+#if __cplusplus >= 202002L
+template<typename T, typename U>
 requires StdContainer<T> && StdContainer<U>
 inline void assertEquals(const T& sX, const U& sY, std::string msg)
 {
@@ -177,6 +195,7 @@ inline void assertEquals(const T& sX, const U& sY, std::string msg)
         throw AssertException(os.str());
     }
     size_t i = 0;
+#if __cplusplus >= 202302L
     for (auto [x, y]: std::ranges::views::zip(sX, sY)) {
         if (x != y) {
             os << "assertEquals(" << i << ": " << sX[i] << " != " << sY[i];
@@ -187,7 +206,46 @@ inline void assertEquals(const T& sX, const U& sY, std::string msg)
         }
         ++i;
     }
+#else
+    typename T::const_iterator xit = sX.begin();
+    typename U::const_iterator yit = sY.begin();
+    for (; xit != sX.end(); ++xit, ++yit, ++i) {
+        if (*xit != *yit) {
+            os << "assertEquals(" << i << ": " << sX[i] << " != " << sY[i];
+            if (!msg.empty())
+                os << ", " << msg;
+            os << ")";
+            throw AssertException(os.str());
+        }
+    }
+#endif
 }
+#else
+template<typename T, typename U>
+inline void assertEquals(const T& sX, const U& sY, std::string msg)
+{
+    std::ostringstream os;
+    if (sX.size() != sY.size()) {
+        os << "assertEquals(size: " << sY.size() << " != " << sX.size();
+        if (!msg.empty())
+            os << ", " << msg;
+        os << ")";
+        throw AssertException(os.str());
+    }
+    size_t i = 0;
+    typename T::const_iterator xit = sX.begin();
+    typename U::const_iterator yit = sY.begin();
+    for (; xit != sX.end(); ++xit, ++yit, ++i) {
+        if (*xit != *yit) {
+            os << "assertEquals(" << i << ": " << *xit << " != " << *yit;
+            if (!msg.empty())
+                os << ", " << msg;
+            os << ")";
+            throw AssertException(os.str());
+        }
+    }
+}
+#endif
 
 
 } // namespace test

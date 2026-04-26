@@ -6,13 +6,22 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#if __cplusplus >= 202002L
 #include <numbers>
+#endif
 
 using namespace var_dbl;
 
+#if __cplusplus >= 202002L
 const double q1 = std::sin(std::numbers::pi*1/8);
 const double q2 = std::sin(std::numbers::pi*2/8);
 const double q3 = std::cos(std::numbers::pi*1/8);
+#else
+static const double _pi = 3.14159265358979323846;
+const double q1 = std::sin(_pi*1/8);
+const double q2 = std::sin(_pi*2/8);
+const double q3 = std::cos(_pi*1/8);
+#endif
 
 
 void test_int_size()
@@ -33,11 +42,22 @@ void test_int_size()
 void test_floating_size()
 {
     // casting long double to double does not result in the same value
+#if __cplusplus >= 202002L
     test::assertEqual(sizeof(std::numbers::pi_v<long double>), 16);
     test::assertEqual(sizeof(std::numbers::pi), 8);
     const long double lsin = std::sin(std::numbers::pi_v<long double> / 4);
+#else
+    static const long double _pi_ld = 3.14159265358979323846264338327950288L;
+    test::assertEqual(sizeof(_pi_ld), 16);
+    test::assertEqual(sizeof(_pi), 8);
+    const long double lsin = std::sin(_pi_ld / 4);
+#endif
     test::assertEqual(lsin, 0.707106781186547524436L, "lsin");
+#if __cplusplus >= 202002L
     const double sin = std::sin(std::numbers::pi / 4);
+#else
+    const double sin = std::sin(_pi / 4);
+#endif
     test::assertEqual(sin,           0.70710678118654746, "sin");
     test::assertEqual((double) lsin, 0.70710678118654757, "(double) lsin");
     const long double unc = lsin - ((double) lsin);
@@ -390,10 +410,18 @@ void dump_prec_indexSin()
     ofs << "index\tsin\tcos\terror\tlerror\tdsin\tdcos\n";
     const size_t size = (1 << IndexSin::MAX_ORDER);
     for (size_t i = 0; i < (size >> 1); ++i) {
+#if __cplusplus >= 202002L
         const long double lsin = std::sin(std::numbers::pi_v<long double> * i / size);
         const long double lcos = std::cos(std::numbers::pi_v<long double> * i / size);
         const double sin = std::sin(std::numbers::pi * i / size);
         const double cos = std::cos(std::numbers::pi * i / size);
+#else
+        static const long double _pi_ld = 3.14159265358979323846264338327950288L;
+        const long double lsin = std::sin(_pi_ld * i / size);
+        const long double lcos = std::cos(_pi_ld * i / size);
+        const double sin = std::sin(_pi * i / size);
+        const double cos = std::cos(_pi * i / size);
+#endif
         ofs << i << '\t' << sin << '\t' << cos << '\t'
             << sin * sin + cos * cos - 1 << '\t' << lsin * lsin + lcos * lcos - 1 << '\t'
             << lsin - sin << '\t' << lcos - cos << "\n";

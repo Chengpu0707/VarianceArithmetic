@@ -2,6 +2,19 @@
 
 using namespace var_dbl;
 
+#if __cplusplus < 201103L
+struct _ExpVarFunctor {
+    VarDbl operator()(double value, double uncertainty) const {
+        return Taylor::exp(VarDbl(value, uncertainty));
+    }
+};
+struct _ExpDblFunctor {
+    double operator()(double value, double noise) const {
+        return std::exp(value + noise);
+    }
+};
+#endif
+
 TestResult test_exp(double value, double uncertainty, std::ostringstream& oss) {
     TestResult res;
     const VarDbl input(value, uncertainty);
@@ -41,8 +54,18 @@ int main()
     }
     test::assertEqual(i, 19865);
 
+#if __cplusplus >= 201103L
     std::vector<double> sX{0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50};
+#else
+    std::vector<double> sX;
+    { const double _arr[] = {0, 1, -1, 2, -2, 5, -5, 10, -10, 20, -20, 50, -50};
+      sX.assign(_arr, _arr + sizeof(_arr)/sizeof(_arr[0])); }
+#endif
+#if __cplusplus >= 201103L
     for (int value: sX) {
+#else
+    for (size_t _i = 0; _i < sX.size(); ++_i) { const int value = (int) sX[_i];
+#endif
         validate_exp(value, 0);
         validate_exp(value, 0.1);
         validate_exp(value, 1, 3e-4, 4e-1);
@@ -51,9 +74,13 @@ int main()
         test::assertAlmostEqual(res.uncertainty() / res.value(), 1681.7672, 1e-3);
     }  
 
-    stat_func("Exp", 
+#if __cplusplus >= 201103L
+    stat_func("Exp",
             [](double value, double uncertainty){ return Taylor::exp(VarDbl(value, uncertainty)); },
             [](double value, double noise){ return std::exp(value + noise); },
             sX);
+#else
+    stat_func("Exp", _ExpVarFunctor(), _ExpDblFunctor(), sX);
+#endif
     std::cout << "All exp tests are successful";
 }

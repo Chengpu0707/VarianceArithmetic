@@ -4,7 +4,9 @@ It is a constexpr class.
 */
 
 #include <cmath>
+#if __cplusplus >= 202002L
 #include <numbers>
+#endif
 #include <vector>
 
 
@@ -41,13 +43,22 @@ public:
 
 inline double NormalMomentum::pdf(double z) {
     const double x2 = z * z;
+#if __cplusplus >= 202002L
     return std::exp(-0.5 * x2) / sqrt(2 * std::numbers::pi);
+#else
+    static const double pi = 3.14159265358979323846;
+    return std::exp(-0.5 * x2) / sqrt(2 * pi);
+#endif
 }
 
 
 
-inline NormalMomentum::NormalMomentum(double bounding) 
-        : Momentum(NormalMomentum::init(bounding), bounding, 1 - std::erf(bounding/std::sqrt(2))) { 
+inline NormalMomentum::NormalMomentum(double bounding)
+#if __cplusplus >= 201103L
+        : Momentum(NormalMomentum::init(bounding), bounding, 1 - std::erf(bounding/std::sqrt(2))) {
+#else
+        : Momentum(NormalMomentum::init(bounding), bounding, 1 - ::erf(bounding/std::sqrt(2.0))) {
+#endif
 }
 
 inline std::vector<double> NormalMomentum::init(double bounding) {

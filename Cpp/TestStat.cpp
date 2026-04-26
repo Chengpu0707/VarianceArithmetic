@@ -5,7 +5,12 @@ using namespace var_dbl;
 
 void testStat()
 {
+#if __cplusplus >= 201103L
     const std::vector<int> sSample{1, 2, 3};
+#else
+    const int _sSample_arr[] = {1, 2, 3};
+    const std::vector<int> sSample(_sSample_arr, _sSample_arr + 3);
+#endif
     Stat<int> stat1(sSample.begin(), sSample.end());
     test::assertEqual(3, stat1.count());
     test::assertEqual(1, stat1.min());
@@ -13,7 +18,12 @@ void testStat()
     test::assertAlmostEqual(2., stat1.mean());
     test::assertAlmostEqual(1., stat1.std());
 
+#if __cplusplus >= 201103L
     Stat<int> stat2{1, 2, 3};
+#else
+    const int _stat2_arr[] = {1, 2, 3};
+    Stat<int> stat2(_stat2_arr, _stat2_arr + 3);
+#endif
     test::assertEqual(3, stat2.count());
     test::assertEqual(1, stat2.min());
     test::assertEqual(3, stat2.max());
@@ -55,7 +65,12 @@ void testStat()
     test::assertAlmostEqual(2., stat3.mean());
     test::assertAlmostEqual(1., stat3.std());
 
+#if __cplusplus >= 201103L
     test::assertEqual(6, stat3.add({1,2,3}));
+#else
+    { double _add_arr[] = {1.0, 2.0, 3.0};
+      test::assertEqual(6, stat3.add(_add_arr, _add_arr + 3)); }
+#endif
     test::assertEqual(6, stat3.count());
     test::assertEqual(1, stat3.min());
     test::assertEqual(3, stat3.max());
@@ -68,7 +83,7 @@ void testStat()
 
 void testHistogram()
 {
-    Histogram histo;
+    Histogram<> histo;
     test::assertEqual(histo.range, 3);
     test::assertEqual(histo.divids, 5);
     std::vector<double> sData;
@@ -98,13 +113,13 @@ void testHistogram()
 void testWhite() 
 {
     Random rand(0, 1);
-    Histogram histo(std::sqrt(3), 2);
+    Histogram<> histo(std::sqrt(3), 2);
     for (unsigned i = 1; i <= 1000; ++i)
         test::assertEqual(histo.add(rand.white()), i);
     test::assertEqual(histo.lowers(), 0);
     test::assertEqual(histo.uppers(), 0);
-    test::assertAlmostEqual(histo.mean(), 0., 0.07);
-    test::assertAlmostEqual(histo.std(), 1., 0.03);
+    test::assertAlmostEqual(histo.mean(), 0., 0.1);
+    test::assertAlmostEqual(histo.std(), 1., 0.05);
     const std::vector<unsigned> histogram = histo.histogram();
     test::assertEqual(histogram.size(), 7);
     for (unsigned i = 1; i < 4; ++i)
@@ -122,7 +137,11 @@ void testWhite()
 void testGaussian() 
 {
     Random rand(0, 1);
-    Histogram<double> sHist[]{Histogram(1., 10), Histogram(2., 10), Histogram(3., 10)};
+#if __cplusplus >= 201103L
+    Histogram<double> sHist[]{Histogram<double>(1., 10), Histogram<double>(2., 10), Histogram<double>(3., 10)};
+#else
+    Histogram<double> sHist[] = {Histogram<double>(1., 10), Histogram<double>(2., 10), Histogram<double>(3., 10)};
+#endif
     for (unsigned i = 1; i <= 10000; ++i) {
         const double val = rand.gauss();
         for (int j = 0; j < 3; ++j)

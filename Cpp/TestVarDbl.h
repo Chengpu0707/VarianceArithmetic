@@ -4,14 +4,14 @@
 
 #ifndef __TestValDbl_h__
 #define __TestValDbl_h__
-namespace var_dbl 
+namespace var_dbl
 {
 
 /*
-{val}:      the double result of the function   
+{val}:      the double result of the function
 {var}:      the VarDbl result of the function
 {err}:      the difference between var and val
-{expn}:     the lower order expansion of err 
+{expn}:     the lower order expansion of err
 */
 struct TestResult {
     VarDbl input, var;
@@ -24,9 +24,16 @@ If {exception} is not empty, expect {func} to throw the corresponding exception.
 
 Otherwise, compare the result {err} and {expn} to the desired {precVal} and {precVar}
 */
-VarDbl validate_func(double value, double uncertainty, 
+#if __cplusplus >= 201103L
+VarDbl validate_func(double value, double uncertainty,
         std::function<TestResult(double, double, std::ostringstream& oss)> func,
         double precVal, double precVar, const std::string exception)
+#else
+template<typename FuncT>
+VarDbl validate_func(double value, double uncertainty,
+        FuncT func,
+        double precVal, double precVar, const std::string exception)
+#endif
 {
     std::ostringstream oss;
     try {
@@ -51,26 +58,47 @@ VarDbl validate_func(double value, double uncertainty,
 }
 
 /*
-Search the convergence edge for {func}, for x in {sX}, 
+Search the convergence edge for {func}, for x in {sX},
     and dx between [sSearch[0]/sSearch[2], sSearch[1]/sSearch[2]]
 Output result to file {dumpPath}
 
 If {exception} is not "", {exception} must be thrown for each x in {sX}.
 */
+#if __cplusplus >= 201103L
 void search_edge(const char* const dumpPath, std::function<VarDbl(double, double)> func,
         std::vector<double> sX, std::array<int, 3> sSearch, bool allowNoEdge,
-        const std::string exception = "") 
+        const std::string exception = "")
+#else
+template<typename FuncT>
+void search_edge(const char* const dumpPath, FuncT func,
+        std::vector<double> sX, int sSearch[3], bool allowNoEdge,
+        const std::string exception = "")
+#endif
 {
     std::ostringstream oss;
     oss << "x in [";
+#if __cplusplus >= 201103L
     for (double x: sX)
+#else
+    for (size_t _xi = 0; _xi < sX.size(); ++_xi) { double x = sX[_xi];
+#endif
         oss << x << ", ";
+#if __cplusplus < 201103L
+    }
+#endif
     oss << "]";
     test::assertLess(0, sX.size(), oss.str());
     oss.str("");
     oss << "search in [";
+#if __cplusplus >= 201103L
     for (int i: sSearch)
+#else
+    for (int _si = 0; _si < 3; ++_si) { int i = sSearch[_si];
+#endif
         oss << i << ",";
+#if __cplusplus < 201103L
+    }
+#endif
     oss << "]";
     test::assertLess(sSearch[0] + 1, sSearch[1], oss.str());
     test::assertLess(0, sSearch[2], oss.str());
@@ -81,11 +109,15 @@ void search_edge(const char* const dumpPath, std::function<VarDbl(double, double
     test::assertTrue(ofs.is_open(), oss.str());
     ofs << "X\tEdge\tBias\tValue\tUncertainty\tException\n";
 
+#if __cplusplus >= 201103L
     for (double x: sX) {
-        double edge;
+#else
+    for (size_t _xi = 0; _xi < sX.size(); ++_xi) { double x = sX[_xi];
+#endif
+        double edge = 0;
         VarDbl res, bias;
         std::string except;
-        int i = sSearch[0], j = sSearch[1]; 
+        int i = sSearch[0], j = sSearch[1];
         while (i + 1 < j) {
             const int k = (i + j)/2;
             const double dx = ((double) k) / sSearch[2];
@@ -116,15 +148,30 @@ Calculate statistics for {test} using {samples} for dx from 1e-1 to 1e-18, for x
     {dblFunc} to calculate the actual value given a value and a noise
     {samples} is the sample count to construct a stat on the dblFunc using either Gaussian or Uniform sampling
 */
-void stat_func(std::string test, 
+#if __cplusplus >= 201103L
+void stat_func(std::string test,
         std::function<VarDbl(double, double)> varFunc, std::function<double(double, double)> dblFunc,
         std::vector<double> sX, std::vector<double> sDx = std::vector<double>(),
-        unsigned samples=10000) 
+        unsigned samples=10000)
+#else
+template<typename VarFuncT, typename DblFuncT>
+void stat_func(std::string test,
+        VarFuncT varFunc, DblFuncT dblFunc,
+        std::vector<double> sX, std::vector<double> sDx = std::vector<double>(),
+        unsigned samples=10000)
+#endif
 {
     std::ostringstream oss;
     oss << "x in [";
+#if __cplusplus >= 201103L
     for (double x: sX)
+#else
+    for (size_t _xi = 0; _xi < sX.size(); ++_xi) { double x = sX[_xi];
+#endif
         oss << x << ", ";
+#if __cplusplus < 201103L
+    }
+#endif
     oss << "]";
     test::assertLess(0, sX.size(), oss.str());
 
@@ -143,7 +190,7 @@ void stat_func(std::string test,
     }
 
     Stat<double> stat;
-    Histogram histo;
+    Histogram<double> histo;
 
     oss.str("");
     oss << "./Output/" << test << "Stat.txt";
@@ -152,35 +199,45 @@ void stat_func(std::string test,
     oss.str("");
     oss << "Inalid path " << dumpPath;
     test::assertTrue(ofs.is_open(), oss.str());
-    ofs << "NoiseType\tNoise\tX\t" << test 
+    ofs << "NoiseType\tNoise\tX\t" << test
         << "\tError Deviation\tError Minimum\tError Maximum\tValue Deviation\tUncertainty\tMean\tBias"
         << histo.header() << "\n";
 
+#if __cplusplus >= 201103L
     for (double x: sX) {
         for (double dx: sDx) {
+#else
+    for (size_t _xi = 0; _xi < sX.size(); ++_xi) { double x = sX[_xi];
+        for (size_t _di = 0; _di < sDx.size(); ++_di) { double dx = sDx[_di];
+#endif
             Random rand(0, dx);
             const double dbl = dblFunc(x, 0);
             if (!std::isfinite(dbl)) {
                 std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx
-                        << " because the result value is infinitive." << std::endl; 
+                        << " because the result value is infinitive." << std::endl;
                 continue;
             }
             VarDbl v;
             try {
                 v = varFunc(x, dx);
                 if (v.variance() == 0) {
-                    std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx 
-                            << " because the result uncertainty is 0." << std::endl; 
+                    std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx
+                            << " because the result uncertainty is 0." << std::endl;
                     continue;
                 }
             } catch (const std::exception& ex) {
-                std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx 
-                        << " because " << ex.what() << std::endl; 
+                std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx
+                        << " because " << ex.what() << std::endl;
                 continue;
             }
             const double bias = v.value() - dbl;
             const double unc = v.uncertainty();
+#if __cplusplus >= 201103L
             for (bool gauss: {true, false}) {
+#else
+            { bool _gauss_vals[2] = {true, false};
+            for (int _gi = 0; _gi < 2; ++_gi) { bool gauss = _gauss_vals[_gi];
+#endif
                 stat.clear();
                 histo.clear();
                 bool finite = true;
@@ -189,8 +246,8 @@ void stat_func(std::string test,
                     const double err = dblFunc(x, noise) - dbl;
                     if (!std::isfinite(err)) {
                         finite = false;
-                        std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx << " gauss=" << gauss << " noise=" << noise 
-                                << " because the result contains infinitive after sampling=" << i << "/" << samples << std::endl; 
+                        std::cout << "Ignore " << test << " for x=" << x << " dx=" << dx << " gauss=" << gauss << " noise=" << noise
+                                << " because the result contains infinitive after sampling=" << i << "/" << samples << std::endl;
                         break;
                     }
                     stat.add(err);
@@ -198,18 +255,22 @@ void stat_func(std::string test,
                 }
                 if (!finite)
                     continue;
-                ofs << (gauss? "Gaussian" : "Uniform") 
+                ofs << (gauss? "Gaussian" : "Uniform")
                     << "\t" << dx << "\t" << x << "\t" << dbl
                     << "\t" << histo.std() << "\t" << histo.min() << "\t" << histo.max()
-                    << "\t" << stat.std() << "\t" << unc 
+                    << "\t" << stat.std() << "\t" << unc
                     << "\t" << stat.mean() << "\t" << bias
                     << histo.formatted() << "\n";
                 ofs.flush();
+#if __cplusplus < 201103L
+            }} // for _gi, gauss_vals block
+#else
             }
+#endif
         }
     }
 
 }
 
-}   // namespace var_dbl 
+}   // namespace var_dbl
 #endif //__TestValDbl_h__

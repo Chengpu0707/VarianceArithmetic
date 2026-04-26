@@ -27,6 +27,7 @@ The C++ implementation is under ./Cpp, as *.h files, for easier souce code shari
 The cpp files contains tests using a self-made simple unit test framework provided by test.h.
 There is no project file so each cpp file should be complied to be executed by itself.
 Run all unit test will generate txt files under ./Cpp/Output
+All files are built and tested against C++23, C++20, C++17, C++11 and C++03 standards. 
 
 The Java implementation is under ./Java, containing both source code and test code.
 The needed 3 jar libraries is under ./Java/lib.
@@ -100,9 +101,9 @@ Outliers is applied only when in FFT calculation
  * the value is error deviation whose average value is 1, and
  * An outlier minimal threshold of 1e14 is applied, to filter out 1e-16+/-1e-32 vs 0~0, such as:
 ```
-For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=32769, normaliized error outlier 8604408562923685.0 between 6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
-For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=65536, normaliized error outlier -8604408562923685.0 between 0.000000e+00~0.000e+00 and 1.224647e-16~1.423e-32
-For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, normaliized error outlier -8604408562923685.0 between -6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=32769, normalized error outlier 8604408562923685.0 between 6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=65536, normalized error outlier -8604408562923685.0 between 0.000000e+00~0.000e+00 and 1.224647e-16~1.423e-32
+For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, normalized error outlier -8604408562923685.0 between -6.123234e-17~7.116e-33 and 0.000000e+00~0.000e+00
 ```
 
 # Failure of unit test

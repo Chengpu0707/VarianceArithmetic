@@ -2,6 +2,14 @@
 
 using namespace var_dbl;
 
+#if __cplusplus < 201103L
+struct _PowEdgeFunctor {
+    VarDbl operator()(double value, double uncertainty) const {
+        return Taylor::pow(VarDbl(1, uncertainty), value);
+    }
+};
+#endif
+
 TestResult test_pow(double value, double uncertainty, std::ostringstream& oss) {
     TestResult res;
     res.input = VarDbl(1, uncertainty);
@@ -78,9 +86,14 @@ int main()
     sX.reserve(DIVIDS * 7 + 1);
     for (int j = -DIVIDS * 3; j <= DIVIDS * 4; ++j)
         sX.push_back(((double) j) /DIVIDS);
-    search_edge("./Output/PowEdge.txt", 
+#if __cplusplus >= 201103L
+    search_edge("./Output/PowEdge.txt",
         [](double value, double uncertainty) { return Taylor::pow(VarDbl(1, uncertainty), value); },
         sX, {19000, 21000, 100000}, true, "NotMonotonicException");
+#else
+    { int _sSearch[] = {19000, 21000, 100000};
+      search_edge("./Output/PowEdge.txt", _PowEdgeFunctor(), sX, _sSearch, true, "NotMonotonicException"); }
+#endif
 
      std::cout << "All pow tests are successful";
 }

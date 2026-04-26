@@ -9,10 +9,10 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-O0",
-                "-march=native",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-lstdc++exp"
             ],
             "options": {
                 "cwd": "${fileDirname}"

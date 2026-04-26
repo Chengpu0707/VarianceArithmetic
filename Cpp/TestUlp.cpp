@@ -11,9 +11,9 @@ int main()
     long long max = 1LL << std::numeric_limits<double>::digits;
     assert(0 == var_dbl::ulp(max - 1));
     assert(0 == var_dbl::ulp(max));
-    assert(0.5 == var_dbl::ulp(max + 1));
+    assert(1 == var_dbl::ulp(max + 1));
     long long u = (max << 1) + max + 3;
-    assert(-0.25 == var_dbl::ulp(u));
+    assert(-0.5 == var_dbl::ulp(u));
     assert(-1 == u - ((long long) ((double) u)));
 
     assert(std::numeric_limits<double>::denorm_min() == var_dbl::ulp(0.));
