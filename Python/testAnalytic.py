@@ -21,7 +21,7 @@ The 1D classes also verify Formulas (2.14)–(2.21) of the Short paper:
   TestSinXdivX           — f = sin(x)/x:        rational mixture of sin/cos/powers.
 
 Multi-variable tests (Uniform on every variable):
-  TestXaddY              — f = x + y:           bias and variance vanish under symmetry.
+  TestXaddY              — f = x + y:           Formula (2.10) bias, (2.11) variance.
   TestXmulY              — f = x·y:             Formula (2.12) bias, (2.13) variance.
   TestXdivY              — f = x/y:             linear in x; rational/alternating in y.
   TestXpowY              — f = x^y:             non-separable, mixes x^y and log(x).
