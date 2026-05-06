@@ -1,3 +1,33 @@
+"""Unit tests for analytic.py (statistical Taylor expansion).
+
+Validation tests:
+  TestInVar              — InVar construction, defaults, immutability, type checks.
+  TestInVarMoment        — InVar.moment() for Gaussian (symbolic ζ) and Uniform (numeric).
+  TestTaylor             — Taylor construction, properties, immutability, type checks.
+  TestTaylorMethod       — Taylor.at() argument validation and small structural cases.
+  TestTaylorVarAt        — varAt(*orders) argument validation and 1D/2D structural cases.
+  TestTaylorVarOrder     — varOrder(n) argument validation and structural sums.
+  TestTaylorBiasAt       — biasAt(*orders) argument validation (incl. all-zero rejection).
+  TestTaylorBiasOrder    — biasOrder(n) argument validation.
+
+Function-specific tests (all use Uniform default κ=√3 so ζ(0)=1, ζ(odd)=0).
+The 1D classes also verify Formulas (2.14)–(2.21) of the Short paper:
+  TestLinear             — f = x:               trivial coeffs/var/bias.
+  TestQuadratic          — f = x²:              all bias/var collapse to single terms.
+  TestExp                — f = e^x:             (2.14) exp mean, (2.15) exp precision.
+  TestLog                — f = log(x):          (2.16) log mean, (2.17) log precision.
+  TestSine               — f = sin(x):          (2.18) sin mean, (2.19) sin precision.
+  TestPow                — f = x^c (c=1.5):     (2.20) power mean, (2.21) power precision.
+  TestSinXdivX           — f = sin(x)/x:        rational mixture of sin/cos/powers.
+
+Multi-variable tests (Uniform on every variable):
+  TestXaddY              — f = x + y:           bias and variance vanish under symmetry.
+  TestXmulY              — f = x·y:             Formula (2.12) bias, (2.13) variance.
+  TestXdivY              — f = x/y:             linear in x; rational/alternating in y.
+  TestXpowY              — f = x^y:             non-separable, mixes x^y and log(x).
+  TestXaddYaddZ          — f = x + y + z:       3D extension of TestXaddY.
+"""
+
 import math
 import sympy
 import unittest
@@ -811,6 +841,104 @@ class TestPow(_Base):
         self._check(self.t.biasAt(4),
                     self.dx**4 * c * (c - 1) * (c - 2) * (c - 3) / 24
                     * self.x**(c - 4) * self.vx.moment(4))
+
+    def test_orders_match_at_2(self):
+        self._check_orders_match_at(2)
+
+    def test_orders_match_at_4(self):
+        self._check_orders_match_at(4)
+
+
+# f(x) = sin(x)/x: 1D rational mixture of sin(x), cos(x), and powers of x.
+class TestSinXdivX(_Base):
+
+    def setUp(self):
+        super().setUp()
+        self.f = sympy.sin(self.x) / self.x
+        self.t = analytic.Taylor(self.f, (self.vx,), max_order=4)
+
+    # at: derivatives of sin(x)/x divided by n!
+
+    def test_order0(self):
+        self._check(self.t.at(0), self.f)
+
+    def test_order1(self):
+        # f'(x) = cos(x)/x - sin(x)/x²
+        self._check(self.t.at(1),
+                    sympy.cos(self.x) / self.x
+                    - sympy.sin(self.x) / self.x**2)
+
+    def test_order2(self):
+        # f''(x)/2! = (-sin(x)/x - 2cos(x)/x² + 2sin(x)/x³)/2
+        self._check(self.t.at(2),
+                    (-sympy.sin(self.x) / self.x
+                     - 2 * sympy.cos(self.x) / self.x**2
+                     + 2 * sympy.sin(self.x) / self.x**3) / 2)
+
+    def test_order3(self):
+        # f'''(x)/3! = (-cos(x)/x + 3sin(x)/x² + 6cos(x)/x³ - 6sin(x)/x⁴)/6
+        self._check(self.t.at(3),
+                    (-sympy.cos(self.x) / self.x
+                     + 3 * sympy.sin(self.x) / self.x**2
+                     + 6 * sympy.cos(self.x) / self.x**3
+                     - 6 * sympy.sin(self.x) / self.x**4) / 6)
+
+    def test_order4(self):
+        # f''''(x)/4! = (sin(x)/x + 4cos(x)/x² - 12sin(x)/x³ - 24cos(x)/x⁴ + 24sin(x)/x⁵)/24
+        self._check(self.t.at(4),
+                    (sympy.sin(self.x) / self.x
+                     + 4 * sympy.cos(self.x) / self.x**2
+                     - 12 * sympy.sin(self.x) / self.x**3
+                     - 24 * sympy.cos(self.x) / self.x**4
+                     + 24 * sympy.sin(self.x) / self.x**5) / 24)
+
+    def test_coeffs_length(self):
+        self.assertEqual(len(self.t.coeffs), 5)
+
+    # biasAt: ζ(odd) = 0 for symmetric distributions
+
+    def test_biasAt_order1_is_zero(self):
+        self._check_biasAt_odd_zero(1)
+
+    def test_biasAt_order3_is_zero(self):
+        self._check_biasAt_odd_zero(3)
+
+    def test_biasAt_order2(self):
+        # δx² · coeffs[(2,)] · ζ(2)
+        self._check(self.t.biasAt(2),
+                    self.dx**2 * self.t.at(2) * self.vx.moment(2))
+
+    def test_biasAt_order4(self):
+        # δx⁴ · coeffs[(4,)] · ζ(4)
+        self._check(self.t.biasAt(4),
+                    self.dx**4 * self.t.at(4) * self.vx.moment(4))
+
+    # varAt
+
+    def test_varAt_order1_is_zero(self):
+        self._check_varAt_order1_zero()
+
+    def test_varAt_order3_is_zero(self):
+        # ζ(3)=ζ(1)=0 → all (j∈{1,2}) terms vanish
+        self._check(self.t.varAt(3), sympy.Integer(0))
+
+    def test_varAt_order2(self):
+        # only j=1 contributes: coeffs[(1,)]² · (ζ(2) - ζ(1)²) = coeffs[(1,)]² · ζ(2)
+        # Equals our impl when ζ(0)=1 (Uniform default).
+        self._check(self.t.varAt(2),
+                    self.dx**2 * self.t.at(1)**2 * self.vx.moment(2))
+
+    def test_varAt_order4(self):
+        # j=1,3: coeffs[(1,)]·coeffs[(3,)]·ζ(4); j=2: coeffs[(2,)]²·(ζ(4)-ζ(2)²)
+        m2 = self.vx.moment(2)
+        m4 = self.vx.moment(4)
+        c1 = self.t.at(1)
+        c2 = self.t.at(2)
+        c3 = self.t.at(3)
+        self._check(self.t.varAt(4),
+                    self.dx**4 * (c1 * c3 * m4
+                                  + c2**2 * (m4 - m2**2)
+                                  + c3 * c1 * m4))
 
     def test_orders_match_at_2(self):
         self._check_orders_match_at(2)
