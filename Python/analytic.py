@@ -1,4 +1,6 @@
+import enum
 import functools
+import itertools
 import math
 import operator
 import sympy
@@ -6,190 +8,231 @@ import typing
 
 import momentum
 
-class momentum (sympy.Function):
-    '''
-    Variance momentum for momentum.Normal distribution
-    '''
-    is_negative = False
-    mmt = momentum.Normal()
+
+class EDistrType(enum.Enum):
+    Uniform = enum.auto()
+    Gaussian = enum.auto()
+
+
+class zeta(sympy.Function):
+    """Symbolic bounded moment ζ(n, κ) of the truncated Normal distribution."""
+    nargs = 2
 
     @classmethod
-    def eval(cls, n):
-        if not isinstance(n, sympy.Integer):
-            raise TypeError(f'Invalid type {type(n)} for input n={n}')
-        if n.is_negative:
-            raise TypeError(f'Invalid int value input n={n}')
+    def eval(cls, n, _):
         if n.is_odd:
-            return 0
-        
-    def _eval_evalf(self, prec):
-        '''
-        TODO: not find dps argment for evalf() to convert prec
-        '''
-        n = self.args[0]
-        #return sympy.Integer(math.prod(range(n - 1, 0, -2)))
-        return sympy.Float(momentum.mmt[int(n)])
+            return sympy.Integer(0)
+
+    def _eval_evalf(self, _):
+        n, kappa = self.args
+        if n.is_integer and kappa.is_number:
+            return sympy.Float(momentum.Normal(bounding=float(kappa))[int(n)])
 
 
-
-def _key_momentum(key:tuple[int]) -> sympy.Function:
-    return functools.reduce(operator.mul, [momentum(k) for k in key if k > 0])
-
-def _is_iterable(obj) -> bool:
-    try:
-        iter(obj)
-        return True
-    except TypeError:
-        return False
-    
-
-def _taylor_matrix_series(matx: sympy.Matrix, 
-            sX: tuple[sympy.Symbol], 
-            maxOrder:int=448) \
-    -> sympy.Matrix:
-    '''
-    Calculate Taylor expansion of {func} to a set of variables in the matrix {sX}, 
-        up tp {maxOrder} of Taylor expansion
-    return the matrix Taylor series, the bias series, and the variance series,
-        with each indexed as the power of the variable set
-    '''
-    f = functools.partial(taylor_series, sX=sX, maxOrder=maxOrder) 
-    sMat = matx.applyfunc(f)
-    return sMat.applyfunc(lambda e: e[0]), sMat.applyfunc(lambda e: e[1]), sMat.applyfunc(lambda e: e[2])
+class InVarException(Exception):
+    pass
 
 
-def taylor_series(func: sympy.Function, 
-        sX: tuple[sympy.Symbol], 
-        maxOrder:int=448) \
-    -> tuple[dict[typing.Union[tuple[int],int], sympy.Function]]:
-    '''
-    Calculate Taylor expansion of {func} to a set of variables {sX}, 
-        up to {maxOrder} of Taylor expansion.
-    return the Taylor series, the bias series, and the variance series,
-        within each indexed as the power of the variable set
-    '''
-    if not sX:
-        raise ValueError(f'No variable {sX} for {func}')
-    if not _is_iterable(sX):
-        raise ValueError(f'Variable {sX} is not iterable for {func}')
-    if isinstance(func, sympy.Matrix):
-        return _taylor_matrix_series(func, sX, maxOrder=maxOrder) 
-    sDiff = {tuple([0]*len(sX)): func}
-    sBias = {}
-    sVar = {}
-    for n in range(1, maxOrder):
-        sKey = [k for k in sDiff if sum(k) == (n - 1)]
-        if not sKey:
-            break
-        for k in sKey:
-            for i, x in enumerate(sX):
-                diff = sympy.diff(sDiff[k], x)
-                if not diff:
-                    continue
-                key = list(k)
-                key[i] += 1
-                key = tuple(key)
-                sDiff[key] = diff / key[i]
-    
-    del sDiff[tuple([0]*len(sX))]
-    for key1 in sDiff:
-        if not [k for k in key1 if (k % 2)]:
-            sBias[key1] = sDiff[key1] * momentum(sum(key1))
-        for key2 in sDiff:
-            key = tuple(map(operator.add, key1, key2))
-            if [k for k in key if (k % 2)]:
-                continue
-            if sum(key) >= maxOrder:
-                continue
-            if key not in sVar:
-                sVar[key] = 0
-            sVar[key] += sDiff[key1] * sDiff[key2] * _key_momentum(key)
-            if [k for k in key1 if (k % 2)] and [k for k in key2 if (k % 2)]:
-                continue
-            sVar[key] -= sDiff[key1] * _key_momentum(key1) * sDiff[key2] * _key_momentum(key2)
-    sDiff[tuple([0]*len(sX))] = func
+class InVar:
+    __slots__ = ('_value', '_deviation', '_distr_type', '_kappa', '_samples')
 
-    return sDiff, sBias, sVar
+    def __init__(self, value: sympy.Symbol, deviation: sympy.Symbol,
+                 distr_type: EDistrType, kappa: float = None, samples: int = 10000):
+        if not isinstance(value, sympy.Symbol):
+            raise InVarException(f'value must be a sympy.Symbol, got {type(value)}')
+        if not isinstance(deviation, sympy.Symbol):
+            raise InVarException(f'deviation must be a sympy.Symbol, got {type(deviation)}')
+        if not isinstance(distr_type, EDistrType):
+            raise InVarException(f'distr_type must be an EDistrType, got {type(distr_type)}')
+        if kappa is None:
+            kappa = 5.0 if distr_type == EDistrType.Gaussian else math.sqrt(3)
+        if not isinstance(kappa, float):
+            raise InVarException(f'kappa must be a float, got {type(kappa)}')
+        if kappa <= 0:
+            raise InVarException(f'kappa must be positive, got {kappa}')
+        if distr_type == EDistrType.Uniform and kappa > math.sqrt(3):
+            raise InVarException(f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
+        if not isinstance(samples, int) or samples <= 0:
+            raise InVarException(f'samples must be a positive int, got {samples}')
+        self._value = value
+        self._deviation = deviation
+        self._distr_type = distr_type
+        self._kappa = kappa
+        self._samples = samples
 
+    @property
+    def value(self) -> sympy.Symbol:
+        return self._value
 
-def taylor(func: sympy.Function, 
-        sXnVar: tuple[tuple[sympy.Symbol]], 
-        maxOrder:int=448,
-        minTermimationOrder:int=20) \
-    -> tuple[sympy.Function]:
-    '''
-    Calculate Taylor expansion of {func} to a set of variables {sXnVar}, 
-        up to {maxOrder} of Taylor expansion
-    The input is a tupel for mutiple dimension of input.
-    Each input contains:
-        symbolic x, 
-        variance(x), which could either be a symbol or a value
-        optional value(x).
-    The result is four part: sDiff, bias, variance, convergency, 
-        with convergency be either true or false or None
-    '''
-    if not sXnVar:
-        raise ValueError(f'No variable {sXnVar} for {func}')
-    if _is_iterable(sXnVar):
-        sX = []
-        sVarX = []
-        sValX = []
-        for i, XnVar in enumerate(sXnVar):
-            if not _is_iterable(sXnVar):
-                raise ValueError(f'Invalid #{i} variable {XnVar} in {sXnVar} for {func}')
-            match len(XnVar):
-                case 0:
-                    sX.append(XnVar)
-                    sVarX.append(0)
-                    sValX.append(None)
-                case 1:
-                    sX.append(XnVar[0])
-                    sVarX.append(0)
-                    sValX.append(None)
-                case 2:
-                    sX.append(XnVar[0])
-                    sVarX.append(XnVar[1])
-                    sValX.append(None)
-                case 3:
-                    sX.append(XnVar[0])
-                    sVarX.append(XnVar[1])
-                    sValX.append(XnVar[2])
-                case _:
-                    raise ValueError(f'Invalid # {i} input variable {sXnVar} for {func}')
-    else:
-        sX = (sXnVar,)
-        sVarX = (0,)
-        sValX = (None,)
-    assert len(sX) == len(sVarX) == len(sValX)
-    sDiff, sBias, sVar = taylor_series(func, sX, maxOrder=maxOrder)
-    sSub = {x: val for x, val in zip(sX, sValX) if val is not None}
-    if sSub:
-        sDiff = {k: v.subs(sSub) for k,v in sDiff.items()}
-        sBias = {k: v.subs(sSub) for k,v in sBias.items()}
-        sVar =  {k: v.subs(sSub) for k,v in sVar.items()}
-    bias = 0
-    for k,v in sBias.items():
-        bias += v.evalf() * functools.reduce(operator.mul, [x**pw for pw,x in zip(k, sVarX)])
-    sExpand = [0]
-    for k,v in sVar.items():
-        idx = sum(k) //2
-        if len(sExpand) <= idx:
-            sExpand.extend([0] * (idx - len(sExpand) + 1))
-        sExpand[idx] += v.evalf() * functools.reduce(operator.mul, [x**(pw//2) for pw,x in zip(k, sVarX)])
-    convergency = True
-    if (minTermimationOrder > 0) and (len(sDiff) >= momentum.Normal.MAX_ORDER):
-        for i in range(1, minTermimationOrder //2):
-            try:
-                if bool((sExpand[-i] / sExpand[-i - 1]) > 1):
-                    convergency = False
-                    break
-            except TypeError:
-                convergency = None
-                break
-    return sDiff, bias, sum(sExpand), convergency
+    @property
+    def deviation(self) -> sympy.Symbol:
+        return self._deviation
+
+    @property
+    def distr_type(self) -> EDistrType:
+        return self._distr_type
+
+    @property
+    def kappa(self) -> float:
+        return self._kappa
+
+    @property
+    def samples(self) -> int:
+        return self._samples
+
+    def moment(self, order: int) -> typing.Union[float, typing.Callable[[int, float], float]]:
+        if self._distr_type == EDistrType.Gaussian:
+            return zeta(order, self._kappa)
+        if order % 2 == 1:
+            return 0.0
+        # Formula (2.22): ζ(n) = 2ρ(κ) · κ^(n+1) / (n+1), 2ρ(κ) = 1/√3
+        return self._kappa ** (order + 1) / (math.sqrt(3) * (order + 1))
 
 
+def _multi_indices(n: int, k: int):
+    """Yield all length-n tuples of non-negative ints summing to k."""
+    if n == 1:
+        yield (k,)
+        return
+    for i in range(k + 1):
+        for rest in _multi_indices(n - 1, k - i):
+            yield (i,) + rest
 
 
+def _multi_indices_with_min1(n_vars: int, total: int):
+    """Yield length-n_vars tuples with each element >= 1 summing to total."""
+    if total < n_vars:
+        return
+    for p in _multi_indices(n_vars, total - n_vars):
+        yield tuple(pk + 1 for pk in p)
 
+
+class TaylorException(Exception):
+    pass
+
+
+class Taylor:
+    __slots__ = ('_function', '_in_vars', '_max_order', '_coeffs')
+
+    def __init__(self, function: sympy.Expr, in_vars: tuple, max_order: int = 200):
+        if not isinstance(function, sympy.Expr):
+            raise TaylorException(f'function must be a sympy.Expr, got {type(function)}')
+        if not isinstance(in_vars, tuple):
+            raise TaylorException(f'in_vars must be a tuple, got {type(in_vars)}')
+        if len(in_vars) == 0:
+            raise TaylorException('in_vars must have at least one element')
+        for i, v in enumerate(in_vars):
+            if not isinstance(v, InVar):
+                raise TaylorException(f'in_vars[{i}] must be an InVar, got {type(v)}')
+        deviation_symbols = {v.deviation for v in in_vars}
+        if function.free_symbols & deviation_symbols:
+            raise TaylorException(
+                f'function must not contain deviation symbols: {function.free_symbols & deviation_symbols}')
+        if not isinstance(max_order, int) or isinstance(max_order, bool) or max_order < 0:
+            raise TaylorException(f'max_order must be a non-negative int, got {max_order}')
+        self._function = function
+        self._in_vars = in_vars
+        self._max_order = max_order
+        symbols = [v.value for v in in_vars]
+        n_vars = len(symbols)
+        zero = (0,) * n_vars
+        self._coeffs = {zero: function}
+        for k in range(1, max_order + 1):
+            for alpha in _multi_indices(n_vars, k):
+                for i, ai in enumerate(alpha):
+                    if ai > 0:
+                        parent = alpha[:i] + (ai - 1,) + alpha[i + 1:]
+                        self._coeffs[alpha] = sympy.diff(self._coeffs[parent], symbols[i]) / ai
+                        break
+
+    @property
+    def function(self) -> sympy.Expr:
+        return self._function
+
+    @property
+    def in_vars(self) -> tuple:
+        return self._in_vars
+
+    @property
+    def max_order(self) -> int:
+        return self._max_order
+
+    @property
+    def coeffs(self) -> dict:
+        return self._coeffs
+
+    def at(self, *orders: int) -> sympy.Expr:
+        if len(orders) != len(self._in_vars):
+            raise TaylorException(
+                f'expected {len(self._in_vars)} orders, got {len(orders)}')
+        for o in orders:
+            if not isinstance(o, int) or isinstance(o, bool) or o < 0:
+                raise TaylorException(f'each order must be a non-negative int, got {o}')
+        total = sum(orders)
+        if total > self._max_order:
+            raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
+        return self._coeffs[orders]
+
+    def varAt(self, *orders: int) -> sympy.Expr:
+        if len(orders) != len(self._in_vars):
+            raise TaylorException(
+                f'expected {len(self._in_vars)} orders, got {len(orders)}')
+        for o in orders:
+            if not isinstance(o, int) or isinstance(o, bool) or o < 1:
+                raise TaylorException(f'each order must be a positive int, got {o}')
+        total = sum(orders)
+        if total > self._max_order:
+            raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
+        N = len(self._in_vars)
+        p = orders
+        dev_prod = functools.reduce(operator.mul,
+                                    (self._in_vars[k].deviation ** p[k] for k in range(N)),
+                                    sympy.Integer(1))
+        full_moment = functools.reduce(operator.mul,
+                                       (self._in_vars[k].moment(p[k]) for k in range(N)), 1.0)
+        result = sympy.Integer(0)
+        for nn in itertools.product(*[range(pk + 1) for pk in p]):
+            pn = tuple(p[k] - nn[k] for k in range(N))
+            split_moment = functools.reduce(operator.mul,
+                                            (self._in_vars[k].moment(nn[k]) *
+                                             self._in_vars[k].moment(pn[k]) for k in range(N)), 1.0)
+            result = result + self._coeffs[nn] * self._coeffs[pn] * (full_moment - split_moment)
+        return dev_prod * result
+
+    def varOrder(self, n: int) -> sympy.Expr:
+        if not isinstance(n, int) or isinstance(n, bool) or n < 1:
+            raise TaylorException(f'n must be a positive int, got {n}')
+        if n > self._max_order:
+            raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
+        N = len(self._in_vars)
+        return sum((self.varAt(*p) for p in _multi_indices_with_min1(N, n)), sympy.Integer(0))
+
+    def biasAt(self, *orders: int) -> sympy.Expr:
+        if len(orders) != len(self._in_vars):
+            raise TaylorException(
+                f'expected {len(self._in_vars)} orders, got {len(orders)}')
+        for o in orders:
+            if not isinstance(o, int) or isinstance(o, bool) or o < 0:
+                raise TaylorException(f'each order must be a non-negative int, got {o}')
+        total = sum(orders)
+        if total < 1:
+            raise TaylorException(f'at least one order must be positive, got {orders}')
+        if total > self._max_order:
+            raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
+        N = len(self._in_vars)
+        p = orders
+        dev_prod = functools.reduce(operator.mul,
+                                    (self._in_vars[k].deviation ** p[k] for k in range(N)),
+                                    sympy.Integer(1))
+        moment_prod = functools.reduce(operator.mul,
+                                       (self._in_vars[k].moment(p[k]) for k in range(N)), 1.0)
+        return dev_prod * self._coeffs[p] * moment_prod
+
+    def biasOrder(self, n: int) -> sympy.Expr:
+        if not isinstance(n, int) or isinstance(n, bool) or n < 1:
+            raise TaylorException(f'n must be a positive int, got {n}')
+        if n > self._max_order:
+            raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
+        N = len(self._in_vars)
+        return sum((self.biasAt(*p) for p in _multi_indices(N, n)), sympy.Integer(0))
 
