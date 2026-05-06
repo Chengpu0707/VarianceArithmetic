@@ -178,9 +178,11 @@ class Taylor:
             raise TaylorException(
                 f'expected {len(self._in_vars)} orders, got {len(orders)}')
         for o in orders:
-            if not isinstance(o, int) or isinstance(o, bool) or o < 1:
-                raise TaylorException(f'each order must be a positive int, got {o}')
+            if not isinstance(o, int) or isinstance(o, bool) or o < 0:
+                raise TaylorException(f'each order must be a non-negative int, got {o}')
         total = sum(orders)
+        if total < 1:
+            raise TaylorException(f'at least one order must be positive, got {orders}')
         if total > self._max_order:
             raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
@@ -205,7 +207,7 @@ class Taylor:
         if n > self._max_order:
             raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
-        return sum((self.varAt(*p) for p in _multi_indices_with_min1(N, n)), sympy.Integer(0))
+        return sum((self.varAt(*p) for p in _multi_indices(N, n)), sympy.Integer(0))
 
     def biasAt(self, *orders: int) -> sympy.Expr:
         if len(orders) != len(self._in_vars):
