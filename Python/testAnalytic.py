@@ -3,12 +3,12 @@
 Validation tests:
   TestInVar              — InVar construction, defaults, immutability, type checks.
   TestInVarMoment        — InVar.moment() for Gaussian (symbolic ζ) and Uniform (numeric).
-  TestTaylor             — Taylor construction, properties, immutability, type checks.
-  TestTaylorMethod       — Taylor.at() argument validation and small structural cases.
-  TestTaylorVarAt        — varAt(*orders) argument validation and 1D/2D structural cases.
-  TestTaylorVarOrder     — varOrder(n) argument validation and structural sums.
-  TestTaylorBiasAt       — biasAt(*orders) argument validation (incl. all-zero rejection).
-  TestTaylorBiasOrder    — biasOrder(n) argument validation.
+  TestStatTaylor         — StatTaylor construction, properties, immutability, type checks.
+  TestStatTaylorMethod   — StatTaylor.at() argument validation and small structural cases.
+  TestStatTaylorVarAt    — varAt(*orders) argument validation and 1D/2D structural cases.
+  TestStatTaylorVarOrder — varOrder(n) argument validation and structural sums.
+  TestStatTaylorBiasAt   — biasAt(*orders) argument validation (incl. all-zero rejection).
+  TestStatTaylorBiasOrder — biasOrder(n) argument validation.
 
 Function-specific tests (all use Uniform default κ=√3 so ζ(0)=1, ζ(odd)=0).
 The 1D classes also verify Formulas (2.14)–(2.21) of the Short paper:
@@ -211,7 +211,7 @@ class TestInVarMoment(unittest.TestCase):
         self.assertEqual(v.moment(3), 0)
 
 
-class TestTaylor(unittest.TestCase):
+class TestStatTaylor(unittest.TestCase):
 
     def setUp(self):
         self.x = sympy.Symbol('x')
@@ -222,77 +222,77 @@ class TestTaylor(unittest.TestCase):
         self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform)
 
     def test_single_var(self):
-        t = analytic.Taylor(sympy.sin(self.x), (self.vx,), max_order=2)
+        t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=2)
         self.assertEqual(t.function, sympy.sin(self.x))
         self.assertEqual(t.in_vars, (self.vx,))
 
     def test_two_vars(self):
-        t = analytic.Taylor(self.x + self.y, (self.vx, self.vy), max_order=2)
+        t = analytic.StatTaylor(self.x + self.y, (self.vx, self.vy), max_order=2)
         self.assertEqual(len(t.in_vars), 2)
 
     def test_default_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=200)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=200)
         self.assertEqual(t.max_order, 200)
 
     def test_custom_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=5)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=5)
         self.assertEqual(t.max_order, 5)
 
     def test_readonly_function(self):
-        t = analytic.Taylor(sympy.sin(self.x), (self.vx,), max_order=2)
+        t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=2)
         with self.assertRaises(AttributeError):
             t.function = sympy.cos(self.x)
 
     def test_readonly_in_vars(self):
-        t = analytic.Taylor(sympy.sin(self.x), (self.vx,), max_order=2)
+        t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=2)
         with self.assertRaises(AttributeError):
             t.in_vars = (self.vy,)
 
     def test_readonly_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=5)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=5)
         with self.assertRaises(AttributeError):
             t.max_order = 10
 
     def test_readonly_coeffs(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=2)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
         with self.assertRaises(AttributeError):
             t.coeffs = (self.x,)
 
     def test_no_extra_attributes(self):
-        t = analytic.Taylor(sympy.sin(self.x), (self.vx,), max_order=2)
+        t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=2)
         with self.assertRaises(AttributeError):
             t.extra = 42
 
     def test_invalid_function_type(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor('sin(x)', (self.vx,))
+            analytic.StatTaylor('sin(x)', (self.vx,))
 
     def test_invalid_in_vars_not_tuple(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(sympy.sin(self.x), [self.vx])
+            analytic.StatTaylor(sympy.sin(self.x), [self.vx])
 
     def test_invalid_in_vars_empty(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(sympy.sin(self.x), ())
+            analytic.StatTaylor(sympy.sin(self.x), ())
 
     def test_invalid_in_vars_element(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(sympy.sin(self.x), (self.x,))
+            analytic.StatTaylor(sympy.sin(self.x), (self.x,))
 
     def test_invalid_max_order_float(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(self.x, (self.vx,), max_order=2.0)
+            analytic.StatTaylor(self.x, (self.vx,), max_order=2.0)
 
     def test_invalid_max_order_bool(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(self.x, (self.vx,), max_order=True)
+            analytic.StatTaylor(self.x, (self.vx,), max_order=True)
 
     def test_invalid_max_order_negative(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(self.x, (self.vx,), max_order=-1)
+            analytic.StatTaylor(self.x, (self.vx,), max_order=-1)
 
 
-class TestTaylorMethod(unittest.TestCase):
+class TestStatTaylorMethod(unittest.TestCase):
 
     def setUp(self):
         self.x = sympy.Symbol('x')
@@ -307,37 +307,37 @@ class TestTaylorMethod(unittest.TestCase):
 
     def test_two_vars_order1(self):
         # f(x,y)=xy: at(1,0)=∂f/∂x=y, at(0,1)=∂f/∂y=x
-        t = analytic.Taylor(self.x*self.y, (self.vx, self.vy), max_order=2)
+        t = analytic.StatTaylor(self.x*self.y, (self.vx, self.vy), max_order=2)
         self._check(t.at(1, 0), self.y)
         self._check(t.at(0, 1), self.x)
 
     def test_two_vars_order2(self):
         # f(x,y)=xy: pure partials ∂²f/∂x²=0, ∂²f/∂y²=0 (mixed term not stored)
-        t = analytic.Taylor(self.x*self.y, (self.vx, self.vy), max_order=2)
+        t = analytic.StatTaylor(self.x*self.y, (self.vx, self.vy), max_order=2)
         self._check(t.at(2, 0), sympy.Integer(0))
         self._check(t.at(0, 2), sympy.Integer(0))
 
     def test_invalid_function_contains_deviation(self):
         with self.assertRaises(analytic.TaylorException):
-            analytic.Taylor(self.x + self.dx, (self.vx,), max_order=2)
+            analytic.StatTaylor(self.x + self.dx, (self.vx,), max_order=2)
 
     def test_taylor_exceeds_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=2)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
         with self.assertRaises(analytic.TaylorException):
             t.at(3)
 
     def test_invalid_order_float(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=2)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
         with self.assertRaises(analytic.TaylorException):
             t.at(1.0)
 
     def test_invalid_order_bool(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=2)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
         with self.assertRaises(analytic.TaylorException):
             t.at(True)
 
     def test_invalid_order_negative(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=2)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
         with self.assertRaises(analytic.TaylorException):
             t.at(-1)
 
@@ -376,106 +376,106 @@ class _Base(unittest.TestCase):
         self._check(self.t.varOrder(n), self.t.varAt(n))
         self._check(self.t.biasOrder(n), self.t.biasAt(n))
 
-class TestTaylorVarAt(_Base):
+class TestStatTaylorVarAt(_Base):
 
     def test_invalid_wrong_num_orders(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(1, 1)
 
     def test_invalid_order_float(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(2.0)
 
     def test_invalid_order_bool(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(True)
 
     def test_invalid_order_exceeds_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(5)
 
     def test_2d_product_order2_2(self):
         # f(x,y)=x*y: p=(2,2), nn=(1,1) contributes (mixed partials beyond order 1 are 0)
-        t = analytic.Taylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
         self._check(t.varAt(2, 2),
                     self.vx.moment(2) * self.vy.moment(2) * self.dx**2 * self.dy**2)
 
 
-class TestTaylorVarOrder(_Base):
+class TestStatTaylorVarOrder(_Base):
 
     def test_invalid_n_float(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varOrder(2.0)
 
     def test_invalid_n_bool(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varOrder(True)
 
     def test_invalid_n_exceeds_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.varOrder(5)
 
     def test_2d_product_order4(self):
         # f(x,y)=x*y: only varAt(2,2) contributes among (1,3),(2,2),(3,1)
-        t = analytic.Taylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
         self._check(t.varOrder(4),
                     self.vx.moment(2) * self.vy.moment(2) * self.dx**2 * self.dy**2)
 
 
-class TestTaylorBiasAt(_Base):
+class TestStatTaylorBiasAt(_Base):
 
     def test_invalid_wrong_num_orders(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(1, 1)
 
     def test_invalid_order_float(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(2.0)
 
     def test_invalid_order_bool(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(True)
 
     def test_invalid_order_negative(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(-1)
 
     def test_invalid_order_exceeds_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(5)
 
     def test_2d_partial_zero_allowed(self):
         # biasAt(1,0)=δx · ∂f/∂x · ζ_x(1) · ζ_y(0); for f=x and symmetric x, ζ_x(1)=0
-        t = analytic.Taylor(self.x, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx, self.vy), max_order=4)
         self._check(t.biasAt(1, 0), sympy.Integer(0))
 
 
-class TestTaylorBiasOrder(_Base):
+class TestStatTaylorBiasOrder(_Base):
 
     def test_invalid_n_float(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(2.0)
 
     def test_invalid_n_bool(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(True)
 
     def test_invalid_n_exceeds_max_order(self):
-        t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(5)
 
@@ -485,7 +485,7 @@ class TestLinear(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
 
     def test_at_order0(self):
         self._check(self.t.at(0), self.x)
@@ -541,7 +541,7 @@ class TestQuadratic(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x**2, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x**2, (self.vx,), max_order=4)
 
     def test_at_order0(self):
         self._check(self.t.at(0), self.x**2)
@@ -647,7 +647,7 @@ class TestExp(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(sympy.exp(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.exp(self.x), (self.vx,), max_order=4)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.exp(self.x))
@@ -708,7 +708,7 @@ class TestLog(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(sympy.log(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.log(self.x), (self.vx,), max_order=4)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.log(self.x))
@@ -770,7 +770,7 @@ class TestSine(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(sympy.sin(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=4)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.sin(self.x))
@@ -836,7 +836,7 @@ class TestPow(_Base):
     def setUp(self):
         super().setUp()
         self.c = 1.5
-        self.t = analytic.Taylor(self.x**self.c, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x**self.c, (self.vx,), max_order=4)
 
     def test_order0(self):
         self._check(self.t.at(0), self.x**self.c)
@@ -908,7 +908,7 @@ class TestSinXdivX(_Base):
     def setUp(self):
         super().setUp()
         self.f = sympy.sin(self.x) / self.x
-        self.t = analytic.Taylor(self.f, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.f, (self.vx,), max_order=4)
 
     # at: derivatives of sin(x)/x divided by n!
 
@@ -1000,7 +1000,7 @@ class TestXaddY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x + self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x + self.y, (self.vx, self.vy), max_order=4)
 
     def test_at_order_0_0(self):
         self._check(self.t.at(0, 0), self.x + self.y)
@@ -1096,7 +1096,7 @@ class TestXmulY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
 
     def test_at_order_0_0(self):
         self._check(self.t.at(0, 0), self.x * self.y)
@@ -1199,7 +1199,7 @@ class TestXdivY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x / self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x / self.y, (self.vx, self.vy), max_order=4)
 
     # at / coeffs
 
@@ -1353,7 +1353,7 @@ class TestXpowY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(self.x**self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x**self.y, (self.vx, self.vy), max_order=4)
 
     # at / coeffs
 
@@ -1466,7 +1466,7 @@ class TestXaddYaddZ(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.Taylor(
+        self.t = analytic.StatTaylor(
             self.x + self.y + self.z, (self.vx, self.vy, self.vz), max_order=4)
 
     def test_at_order_0_0_0(self):
@@ -1552,6 +1552,226 @@ class TestXaddYaddZ(_Base):
                     self.vx.moment(2) * self.dx**2
                     + self.vy.moment(2) * self.dy**2
                     + self.vz.moment(2) * self.dz**2)
+
+
+class TestStatMatrix(unittest.TestCase):
+    """Validates analytic.StatMatrix construction with mixed InVar/value entries
+    and inheritance of index/pos/subMatrix/determ/item from the base."""
+
+    def setUp(self):
+        self.m00 = sympy.Symbol('m00')
+        self.dm00 = sympy.Symbol('dm00')
+        self.m11 = sympy.Symbol('m11')
+        self.dm11 = sympy.Symbol('dm11')
+        self.v00 = analytic.InVar(self.m00, self.dm00, analytic.EDistrType.Uniform)
+        self.v11 = analytic.InVar(self.m11, self.dm11, analytic.EDistrType.Uniform)
+
+    def test_unassigned_defaults_to_symbolic_zero(self):
+        # Every (row, col) not in items resolves to sympy.S.Zero (the symbolic
+        # Integer(0) singleton), and is a sympy expression rather than a Python int.
+        M = analytic.StatMatrix(3, {(1, 1): self.v00})
+        for r in range(3):
+            for c in range(3):
+                if (r, c) == (1, 1):
+                    continue
+                cell = M.matrix[r, c]
+                self.assertIs(cell, sympy.S.Zero)
+                self.assertIsInstance(cell, sympy.Expr)
+
+    def test_mixed_entries(self):
+        # 2x2 matrix: diagonal InVars, off-diagonal values 7 and 0 (default).
+        M = analytic.StatMatrix(2, {(0, 0): self.v00,
+                                (0, 1): 7,
+                                (1, 1): self.v11})
+        self.assertEqual(M.N, 2)
+        self.assertEqual(len(M.in_vars), 2)
+        self.assertEqual(M.matrix.tolist(),
+                         [[self.m00, sympy.Integer(7)],
+                          [sympy.Integer(0), self.m11]])
+
+    def test_invalid_N(self):
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(0, {(0, 0): self.v00})
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(-1, {(0, 0): self.v00})
+
+    def test_no_invar_rejected(self):
+        # All-value matrix: no in_vars → reject (Taylor needs at least one).
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, {(0, 0): 1, (1, 1): 2})
+
+    def test_items_key_out_of_range(self):
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, {(0, 0): self.v00, (5, 5): self.v11})
+
+    def test_items_must_be_dict(self):
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, [(0, 0), self.v00])
+
+    def test_determ_with_constants(self):
+        # det of [[v00, 7], [0, v11]] = v00*v11 - 0 = v00*v11
+        M = analytic.StatMatrix(2, {(0, 0): self.v00,
+                                (0, 1): 7,
+                                (1, 1): self.v11})
+        det = M.determ().function
+        self.assertEqual(sympy.simplify(det - self.m00 * self.m11), 0)
+
+    def test_item_invar_returns_taylor(self):
+        M = analytic.StatMatrix(2, {(0, 0): self.v00, (1, 1): self.v11})
+        T = M.item((1, 1))
+        self.assertIsInstance(T, analytic.StatTaylor)
+        self.assertEqual(T.function, self.m11)
+
+    def test_item_value_position_raises(self):
+        # (1, 0) is the default 0 value, not an InVar.
+        M = analytic.StatMatrix(2, {(0, 0): self.v00, (1, 1): self.v11})
+        with self.assertRaises(analytic.TaylorException):
+            M.item((1, 0))
+
+    def test_subMatrix_preserves_value_entries(self):
+        # 3x3 with 1 InVar and 2 nonzero value entries; drop row 0 + col 0.
+        v = analytic.InVar(sympy.Symbol('a'), sympy.Symbol('da'),
+                           analytic.EDistrType.Uniform)
+        M = analytic.StatMatrix(3, {(1, 1): v,
+                                (1, 2): 5,
+                                (2, 1): 3})
+        sub = M.subMatrix([(0, 0)])
+        self.assertEqual(sub.N, 2)
+        self.assertEqual(sub.matrix.tolist(),
+                         [[sympy.Symbol('a'), sympy.Integer(5)],
+                          [sympy.Integer(3), sympy.Integer(0)]])
+
+    def test_worstmatrix_is_matrix(self):
+        # Inheritance check.
+        self.assertTrue(issubclass(analytic.WorstMatrix, analytic.StatMatrix))
+        M = analytic.WorstMatrix(2)
+        self.assertIsInstance(M, analytic.StatMatrix)
+
+
+class TestWorstMatrix(unittest.TestCase):
+    """Validates analytic.WorstMatrix construction, index/pos round-trips,
+    subMatrix row/col deletion, and determinant equivalence with Laplace
+    (cofactor) expansion along an arbitrary row or column."""
+
+    def test_construction_2x2(self):
+        M = analytic.WorstMatrix(2)
+        self.assertEqual(M.N, 2)
+        self.assertEqual(len(M.in_vars), 4)
+        self.assertEqual(M.matrix.tolist(),
+                         [[sympy.Symbol('m_0_0'), sympy.Symbol('m_0_1')],
+                          [sympy.Symbol('m_1_0'), sympy.Symbol('m_1_1')]])
+
+    def test_index_pos_roundtrip(self):
+        M = analytic.WorstMatrix(4)
+        for r in range(M.N):
+            for c in range(M.N):
+                idx = M.index(r, c)
+                self.assertEqual(idx, r * M.N + c)
+                self.assertEqual(M.pos(idx), (r, c))
+
+    def test_subMatrix_drops_row_and_col(self):
+        M = analytic.WorstMatrix(3)
+        sub = M.subMatrix([(0, 1)])
+        self.assertEqual(sub.N, 2)
+        self.assertEqual(sub.matrix.tolist(),
+                         [[sympy.Symbol('m_1_0'), sympy.Symbol('m_1_2')],
+                          [sympy.Symbol('m_2_0'), sympy.Symbol('m_2_2')]])
+
+    def test_subMatrix_requires_square_result(self):
+        M = analytic.WorstMatrix(3)
+        with self.assertRaises(analytic.TaylorException):
+            M.subMatrix([(0, 0), (1, 0)])
+
+    def test_item_returns_single_var_Taylor(self):
+        M = analytic.WorstMatrix(3)
+        T = M.item((1, 2))
+        self.assertIsInstance(T, analytic.StatTaylor)
+        self.assertEqual(T.function, sympy.Symbol('m_1_2'))
+        self.assertEqual(len(T.in_vars), 1)
+        self.assertIs(T.in_vars[0], M.in_vars[M.index(1, 2)])
+
+    def test_item_default_coeffs(self):
+        # at(0)=symbol, at(1)=1, at(2)=0 for a single-variable identity function
+        M = analytic.WorstMatrix(2)
+        T = M.item((0, 1))
+        sym = sympy.Symbol('m_0_1')
+        self.assertEqual(T.at(0), sym)
+        self.assertEqual(T.at(1), sympy.Integer(1))
+        self.assertEqual(T.at(2), sympy.Integer(0))
+
+    def test_item_bias_and_variance(self):
+        # Under normalized ζ(0)=1, bias of a single entry is 0 and variance is δm²·ζ(2).
+        M = analytic.WorstMatrix(2)
+        T = M.item((0, 0))
+        inv = T.in_vars[0]
+        self.assertEqual(sympy.simplify(T.biasOrder(0) - inv.value), 0)
+        self.assertEqual(T.biasOrder(1), sympy.Integer(0))
+        self.assertEqual(T.biasOrder(2), sympy.Integer(0))
+        self.assertEqual(sympy.simplify(T.varOrder(2)
+                                        - inv.deviation**2 * inv.moment(2)), 0)
+
+    def test_item_invalid_position(self):
+        M = analytic.WorstMatrix(2)
+        with self.assertRaises(analytic.TaylorException):
+            M.item((0, 1, 2))
+        with self.assertRaises(analytic.TaylorException):
+            M.item([0, 0])
+        with self.assertRaises(analytic.TaylorException):
+            M.item((2, 0))
+
+    def test_invalid_N(self):
+        with self.assertRaises(analytic.TaylorException):
+            analytic.WorstMatrix(0)
+        with self.assertRaises(analytic.TaylorException):
+            analytic.WorstMatrix(-1)
+
+    def _laplace_along_row(self, M, row):
+        return sum(((-1) ** (row + c) * M.matrix[row, c]
+                    * M.subMatrix([(row, c)]).determ().function
+                    for c in range(M.N)),
+                   sympy.Integer(0))
+
+    def _laplace_along_col(self, M, col):
+        return sum(((-1) ** (r + col) * M.matrix[r, col]
+                    * M.subMatrix([(r, col)]).determ().function
+                    for r in range(M.N)),
+                   sympy.Integer(0))
+
+    def test_determ_matches_row_laplace_2x2(self):
+        M = analytic.WorstMatrix(2)
+        det = M.determ().function
+        self.assertEqual(sympy.simplify(det - self._laplace_along_row(M, 0)), 0)
+        self.assertEqual(sympy.simplify(det - self._laplace_along_row(M, 1)), 0)
+
+    def test_determ_matches_col_laplace_2x2(self):
+        M = analytic.WorstMatrix(2)
+        det = M.determ().function
+        self.assertEqual(sympy.simplify(det - self._laplace_along_col(M, 0)), 0)
+        self.assertEqual(sympy.simplify(det - self._laplace_along_col(M, 1)), 0)
+
+    def test_determ_matches_row_laplace_3x3(self):
+        M = analytic.WorstMatrix(3)
+        det = M.determ().function
+        for r in range(M.N):
+            self.assertEqual(sympy.simplify(det - self._laplace_along_row(M, r)), 0)
+
+    def test_determ_matches_col_laplace_3x3(self):
+        M = analytic.WorstMatrix(3)
+        det = M.determ().function
+        for c in range(M.N):
+            self.assertEqual(sympy.simplify(det - self._laplace_along_col(M, c)), 0)
+
+    def test_determ_matches_row_laplace_4x4(self):
+        M = analytic.WorstMatrix(4)
+        det = M.determ().function
+        for r in range(M.N):
+            self.assertEqual(sympy.simplify(det - self._laplace_along_row(M, r)), 0)
+
+    def test_determ_matches_col_laplace_4x4(self):
+        M = analytic.WorstMatrix(4)
+        det = M.determ().function
+        for c in range(M.N):
+            self.assertEqual(sympy.simplify(det - self._laplace_along_col(M, c)), 0)
 
 
 if __name__ == '__main__':

@@ -156,7 +156,7 @@ class TaylorException(Exception):
     pass
 
 
-class Taylor:
+class StatTaylor:
     __slots__ = ('_function', '_in_vars', '_max_order', '_coeffs')
 
     def __init__(self, function: sympy.Expr, in_vars: tuple, max_order: int = 200):
@@ -311,4 +311,178 @@ class Taylor:
             raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
         return sum((self.biasAt(*p) for p in _multi_indices(N, n)), sympy.Integer(0))
+
+
+class StatMatrix(StatTaylor):
+    """N×N matrix whose entries are a mix of InVar (uncertain) and value
+    (certain) cells. Inherits StatTaylor with a placeholder zero function
+    (max_order=0); the symbolic determinant and per-entry StatTaylor are
+    exposed via determ() and item(). Indices are row-major: index(row, col)
+    = row*N + col."""
+
+    __slots__ = ('_N', '_matrix', '_invar_pos')
+
+    def __init__(self, N: int, items: dict):
+        """`N`: positive int, side length.
+        `items`: dict {(row, col): InVar | numeric/sympy.Expr}. Any (row, col)
+        not present in `items` defaults to symbolic zero — `sympy.Integer(0)`,
+        which is the `sympy.S.Zero` singleton — so the resulting `matrix` cell
+        is always a sympy expression. At least one entry must be an InVar
+        (otherwise no variance arithmetic is possible)."""
+        if not isinstance(N, int) or isinstance(N, bool) or N <= 0:
+            raise TaylorException(f'N must be a positive int, got {N}')
+        if not isinstance(items, dict):
+            raise TaylorException(f'items must be a dict, got {type(items)}')
+        for key in items:
+            if not (isinstance(key, tuple) and len(key) == 2):
+                raise TaylorException(
+                    f'items key must be a (row, col) tuple, got {key}')
+            r, c = key
+            if (not isinstance(r, int) or isinstance(r, bool)
+                    or not isinstance(c, int) or isinstance(c, bool)):
+                raise TaylorException(f'items key {key} must contain ints')
+            if not (0 <= r < N and 0 <= c < N):
+                raise TaylorException(f'items key {key} out of range for N={N}')
+        in_vars = []
+        invar_pos = {}  # (r, c) -> position in in_vars
+        rows = []
+        for r in range(N):
+            row = []
+            for c in range(N):
+                entry = items.get((r, c), sympy.Integer(0))
+                if isinstance(entry, InVar):
+                    invar_pos[(r, c)] = len(in_vars)
+                    in_vars.append(entry)
+                    row.append(entry.value)
+                else:
+                    row.append(sympy.sympify(entry))
+            rows.append(row)
+        if not in_vars:
+            raise TaylorException('StatMatrix must contain at least one InVar entry')
+        self._N = N
+        self._matrix = sympy.Matrix(rows)
+        self._invar_pos = invar_pos
+        super().__init__(sympy.Integer(0), tuple(in_vars), max_order=0)
+
+    @property
+    def N(self) -> int:
+        """Side length of the square matrix."""
+        return self._N
+
+    @property
+    def matrix(self) -> sympy.Matrix:
+        """sympy.Matrix with value-symbols at InVar positions and sympy
+        expressions / numerics at all other positions."""
+        return self._matrix
+
+    def index(self, row: int, col: int) -> int:
+        """Row-major flat index row*N + col for the entry at (row, col).
+        For all-InVar matrices (e.g. WorstMatrix) this is also the index
+        into `in_vars`; for mixed matrices it is just the layout position."""
+        if (not isinstance(row, int) or isinstance(row, bool)
+                or not isinstance(col, int) or isinstance(col, bool)):
+            raise TaylorException(f'row and col must be ints, got ({row}, {col})')
+        if not (0 <= row < self._N and 0 <= col < self._N):
+            raise TaylorException(
+                f'(row, col)=({row}, {col}) out of range for N={self._N}')
+        return row * self._N + col
+
+    def pos(self, index: int) -> tuple:
+        """Inverse of index(): (row, col) for the given flat index."""
+        if not isinstance(index, int) or isinstance(index, bool):
+            raise TaylorException(f'index must be an int, got {index}')
+        if not (0 <= index < self._N * self._N):
+            raise TaylorException(
+                f'index={index} out of range for N={self._N}')
+        return (index // self._N, index % self._N)
+
+    def subMatrix(self, positions) -> 'StatMatrix':
+        """Return a new StatMatrix with every row and every col appearing in
+        `positions` removed. Each element of `positions` is a (row, col) tuple.
+        Unique rows and unique cols must be equinumerous so the result stays
+        square; surviving InVar instances are reused (same symbols), and
+        non-zero value entries are preserved."""
+        if not isinstance(positions, (list, tuple)):
+            raise TaylorException(
+                f'positions must be a list/tuple, got {type(positions)}')
+        rows_to_drop = set()
+        cols_to_drop = set()
+        for p in positions:
+            if not (isinstance(p, tuple) and len(p) == 2):
+                raise TaylorException(f'each position must be a 2-tuple, got {p}')
+            r, c = p
+            if (not isinstance(r, int) or isinstance(r, bool)
+                    or not isinstance(c, int) or isinstance(c, bool)):
+                raise TaylorException(f'position must be ints, got ({r}, {c})')
+            if not (0 <= r < self._N and 0 <= c < self._N):
+                raise TaylorException(
+                    f'position ({r}, {c}) out of range for N={self._N}')
+            rows_to_drop.add(r)
+            cols_to_drop.add(c)
+        if len(rows_to_drop) != len(cols_to_drop):
+            raise TaylorException(
+                f'subMatrix needs equal row/col deletions; got '
+                f'{len(rows_to_drop)} unique rows and {len(cols_to_drop)} unique cols')
+        new_N = self._N - len(rows_to_drop)
+        if new_N <= 0:
+            raise TaylorException('subMatrix would empty the matrix')
+        survivor_rows = [r for r in range(self._N) if r not in rows_to_drop]
+        survivor_cols = [c for c in range(self._N) if c not in cols_to_drop]
+        new_items = {}
+        for new_r, r in enumerate(survivor_rows):
+            for new_c, c in enumerate(survivor_cols):
+                if (r, c) in self._invar_pos:
+                    new_items[(new_r, new_c)] = self._in_vars[self._invar_pos[(r, c)]]
+                else:
+                    val = self._matrix[r, c]
+                    if val != 0:
+                        new_items[(new_r, new_c)] = val
+        return StatMatrix(new_N, new_items)
+
+    def determ(self, max_order: int = None) -> StatTaylor:
+        """Return a fresh StatTaylor for the symbolic determinant of this matrix.
+        The default max_order is 2*N — sufficient for variance analysis of the
+        polynomial determinant. Reuses the matrix's in_vars."""
+        if max_order is None:
+            max_order = 2 * self._N
+        det_expr = self._matrix.det()
+        return StatTaylor(det_expr, self._in_vars, max_order=max_order)
+
+    def item(self, position, max_order: int = 2) -> StatTaylor:
+        """Return a single-variable StatTaylor for the entry at `position`=(row, col).
+        Requires the entry to be an InVar (raises otherwise — value entries have
+        no uncertainty to expand). Default max_order=2 covers bias and variance."""
+        if not (isinstance(position, tuple) and len(position) == 2):
+            raise TaylorException(
+                f'position must be a (row, col) tuple, got {position}')
+        row, col = position
+        # Validate (row, col) range via index().
+        self.index(row, col)
+        if (row, col) not in self._invar_pos:
+            raise TaylorException(
+                f'item at ({row}, {col}) is a value, not an InVar')
+        inv = self._in_vars[self._invar_pos[(row, col)]]
+        return StatTaylor(inv.value, (inv,), max_order=max_order)
+
+
+class WorstMatrix(StatMatrix):
+    """All-InVar special case of StatMatrix: every entry is an InVar with value
+    symbol `m_{r}_{c}` and deviation symbol `dm_{r}_{c}`, drawn from
+    `distr_type` (default Uniform). Used for worst-case variance analysis."""
+
+    __slots__ = ()
+
+    def __init__(self, N: int,
+                 distr_type: EDistrType = EDistrType.Uniform,
+                 kappa: typing.Union[float, sympy.Symbol] = None,
+                 samples: int = 10000):
+        if not isinstance(N, int) or isinstance(N, bool) or N <= 0:
+            raise TaylorException(f'N must be a positive int, got {N}')
+        items = {}
+        for r in range(N):
+            for c in range(N):
+                v = sympy.Symbol(f'm_{r}_{c}')
+                d = sympy.Symbol(f'dm_{r}_{c}')
+                items[(r, c)] = InVar(v, d, distr_type, kappa=kappa, samples=samples)
+        super().__init__(N, items)
 
