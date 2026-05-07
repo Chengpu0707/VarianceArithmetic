@@ -1107,16 +1107,16 @@ Figure \ref{fig: Adjugate_Error_vs_Size_Noise} demonstrates a typical distributi
 \mathbf{M}^{-1} &\equiv\; \mathbf{M}^A / |\mathbf{M}|; \\
 \label{eqn: inverse matrix 2 variance}
 \delta^2 \left( \begin{matrix} w, x \\ y, z \end{matrix} \right)^{-1} \simeq&\; \frac{
-	 	\left( \begin{matrix} z^4, x^2 z^2 \\ y^2 z^2,  x^2 y^2 \end{matrix} \right) (\delta w)^2 +
-	 	\left( \begin{matrix} y^2 z^2, w^2 z^2 \\ y^4, w^2 y^2 \end{matrix} \right) (\delta x)^2}{(w z - x y)^4} + \\
-	&\; \frac{\left( \begin{matrix} x^2 z^2, x^4 \\ w^2 z^2, w^2 x^2 \end{matrix} \right) (\delta y)^2 +
-	 	\left( \begin{matrix} x^2 y^2, w^2 x^2 \\ w^2 y^2, w^4 \end{matrix} \right) (\delta z)^2
+	 	\left( \begin{matrix} z^4, x^2 z^2 \\ y^2 z^2,  x^2 y^2 \end{matrix} \right) \zeta(2) (\delta w)^2 +
+	 	\left( \begin{matrix} y^2 z^2, w^2 z^2 \\ y^4, w^2 y^2 \end{matrix} \right)\zeta(2)  (\delta x)^2}{(w z - x y)^4} + \\
+	&\; \frac{\left( \begin{matrix} x^2 z^2, x^4 \\ w^2 z^2, w^2 x^2 \end{matrix} \right) \zeta(2) (\delta y)^2 +
+	 	\left( \begin{matrix} x^2 y^2, w^2 x^2 \\ w^2 y^2, w^4 \end{matrix} \right) \zeta(2) (\delta z)^2
 	}{(w z - x y)^4}; \nonumber
 \end{align}
 Let $\mathbf{I}$ be the identity matrix for $\mathbf{M}$ \cite{Linear_Algebra}.
 Formula \eqref{eqn: adjugate matrix} shows the relationship between $\mathbf{M}^A$ and $\mathbf{M}$ which leads to the definition of inverse matrix $\mathbf{M}^{-1}$ in Formula \eqref{eqn: inverse matrix} \cite{Linear_Algebra}.
 $\tilde{\mathbf{M}} \times \tilde{\mathbf{M}}^A - |\tilde{\mathbf{M}}| \mathbf{I}$ tests each element value such that it is a value test.
-Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$, because the values should match unless at $\delta x \rightarrow 0$ when floating-point rounding errors dominate.
+Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ at a constant rate of $-1$, because the values should match unless at $\delta x \rightarrow 0$ when floating-point rounding errors dominate.
 The matrix size is the algorithm specific dimension in Figure \ref{fig: Forward_Error_vs_Size_Noise}.
 
 Because an element of the original matrix $\mathbf{M}$ appears multiple times in Formula \eqref{eqn: inverse matrix}, its variance, as obtained using Formula \eqref{eqn: Taylor 2d variance}, is very complicated. 

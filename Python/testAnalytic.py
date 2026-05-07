@@ -2023,6 +2023,92 @@ class TestWorstMatrix(unittest.TestCase):
     def test_dump_reverse_4x4_max_order_8(self):
         self._dump_reverse_matrix(4, max_order=8)
 
+    # ---- Formula (6.3) determinant variance verification ----------------
+    # δ²|M| = Σ_{m=1..n} Σ_{<i_1..i_m>} Σ_{[j_1..j_m]} |minor|² · ∏ ζ(2)·(δx_{i_k,j_k})²
+    # where |minor| is the determinant of the (n-m)×(n-m) sub-matrix obtained
+    # by removing the listed rows and columns.
+
+    def _formula_6_3_rhs(self, M):
+        import itertools
+        N = M.N
+        rows_list = list(range(N))
+        cols_list = list(range(N))
+        total = sympy.Integer(0)
+        for m in range(1, N + 1):
+            for row_combo in itertools.combinations(rows_list, m):
+                row_set = set(row_combo)
+                for col_perm in itertools.permutations(cols_list, m):
+                    col_set = set(col_perm)
+                    surviving_rows = [r for r in rows_list if r not in row_set]
+                    surviving_cols = [c for c in cols_list if c not in col_set]
+                    if surviving_rows and surviving_cols:
+                        sub = sympy.Matrix(
+                            len(surviving_rows), len(surviving_cols),
+                            lambda i, j: M.matrix[surviving_rows[i],
+                                                  surviving_cols[j]])
+                        minor_det = sub.det()
+                    else:
+                        minor_det = sympy.Integer(1)
+                    var_product = sympy.Integer(1)
+                    for k in range(m):
+                        inv = M.in_vars[M.index(row_combo[k], col_perm[k])]
+                        var_product *= inv.moment(2) * inv.deviation**2
+                    total += minor_det**2 * var_product
+        return total
+
+    def _check_formula_6_3(self, N):
+        M = analytic.WorstMatrix(N)
+        det_T = M.determ()
+        # Total variance up to 2N (degree of det as polynomial in N² variables).
+        lhs = sum((det_T.varOrder(n) for n in range(1, 2 * N + 1)),
+                  sympy.Integer(0))
+        rhs = self._formula_6_3_rhs(M)
+        self.assertEqual(sympy.simplify(lhs - rhs), 0)
+
+    def test_formula_6_3_determinant_variance_2x2(self):
+        self._check_formula_6_3(2)
+
+    def test_formula_6_3_determinant_variance_3x3(self):
+        self._check_formula_6_3(3)
+
+    # ---- Formula (6.6) 2×2 inverse variance verification ----------------
+    # δ²(M^{-1}) ≈ (matrices of (∂(M^{-1})_{i,j}/∂var)² · δvar²) / (wz - xy)⁴
+    # where M = [[w, x], [y, z]]. First-order approximation only — compare
+    # against varOrder(2) of each inverse-entry's StatTaylor.
+
+    def test_formula_6_6_inverse_2x2_variance(self):
+        M = analytic.WorstMatrix(2)
+        inv = M.reverse()
+        w, x, y, z = (M.matrix[0, 0], M.matrix[0, 1],
+                      M.matrix[1, 0], M.matrix[1, 1])
+        dw, dx, dy, dz = (M.in_vars[0].deviation, M.in_vars[1].deviation,
+                          M.in_vars[2].deviation, M.in_vars[3].deviation)
+        det4 = (w * z - x * y)**4
+        # The paper's (δw)² in (6.6) means *variance* (= ζ(2)·dw² in our
+        # framework); multiply each cell by ζ(2) so both sides carry the same
+        # numerical moment factor.
+        zeta2 = M.in_vars[0].moment(2)
+        # The four 2×2 (i,j)-coefficient matrices in (6.6), one per input var.
+        expected = {
+            (0, 0): zeta2 * (z**4 * dw**2 + y**2 * z**2 * dx**2
+                             + x**2 * z**2 * dy**2
+                             + x**2 * y**2 * dz**2) / det4,
+            (0, 1): zeta2 * (x**2 * z**2 * dw**2 + w**2 * z**2 * dx**2
+                             + x**4 * dy**2
+                             + w**2 * x**2 * dz**2) / det4,
+            (1, 0): zeta2 * (y**2 * z**2 * dw**2 + y**4 * dx**2
+                             + w**2 * z**2 * dy**2
+                             + w**2 * y**2 * dz**2) / det4,
+            (1, 1): zeta2 * (x**2 * y**2 * dw**2 + w**2 * y**2 * dx**2
+                             + w**2 * x**2 * dy**2
+                             + w**4 * dz**2) / det4,
+        }
+        for (r, c), exp in expected.items():
+            T = inv.item((r, c), max_order=2)
+            actual = T.varOrder(2)
+            self.assertEqual(sympy.simplify(actual - exp), 0,
+                             msg=f'Entry ({r}, {c}) mismatch')
+
 
 if __name__ == '__main__':
     unittest.main()

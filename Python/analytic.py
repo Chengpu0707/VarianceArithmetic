@@ -30,6 +30,9 @@ class zeta(sympy.Function):
 
     @classmethod
     def eval(cls, n, _):
+        # Normalized Formula (2.2): ζ(0, κ) = 1 by construction.
+        if n.is_zero:
+            return sympy.Integer(1)
         # Symmetric distribution assumption: odd-order moments vanish identically.
         if n.is_odd:
             return sympy.Integer(0)
@@ -517,14 +520,29 @@ class StatMatrix(StatTaylor):
         return StatMatrix(new_N, new_items, in_vars=self._in_vars,
                           max_order=self._max_order)
 
+    def _compute_det(self) -> sympy.Expr:
+        """Recursive Laplace expansion via subMatrix; the base case (N=1)
+        returns the single matrix entry directly. Yields a structurally
+        compact (unexpanded) sympy expression — sums of products of
+        sub-determinants — rather than the fully distributed polynomial
+        that `sympy.Matrix.det()` would emit."""
+        if self._N == 1:
+            return self._matrix[0, 0]
+        return sum(((-1)**c * self._matrix[0, c]
+                    * self.subMatrix([(0, c)])._compute_det()
+                    for c in range(self._N)),
+                   sympy.Integer(0))
+
     def determ(self, max_order: int = None) -> StatTaylor:
-        """Return a fresh StatTaylor for the symbolic determinant of this matrix.
-        The default max_order is 2*N — sufficient for variance analysis of the
-        polynomial determinant. Reuses the matrix's in_vars."""
+        """Return a fresh StatTaylor for the symbolic determinant of this
+        matrix. The default max_order is 2*N — sufficient for variance
+        analysis of the polynomial determinant. Reuses the matrix's in_vars.
+        Built by Laplace expansion via subMatrix (`_compute_det`), so the
+        function expression is kept structurally compact."""
         if max_order is None:
             max_order = 2 * self._N
-        det_expr = self._matrix.det()
-        return StatTaylor(det_expr, self._in_vars, max_order=max_order)
+        return StatTaylor(self._compute_det(), self._in_vars,
+                          max_order=max_order)
 
     def adjugate(self) -> 'StatMatrix':
         """Return the adjugate (classical adjoint) as a new StatMatrix. Each
@@ -532,32 +550,50 @@ class StatMatrix(StatTaylor):
         original in_vars):
             adj(M)[i, j] = (-1)^(i+j) · det(M with row j and col i removed)
         Equivalently, adj(M) is the transpose of the cofactor matrix. The
-        defining identity is `adj(M) · M == det(M) · I`. The returned matrix
-        has no InVar items of its own; it inherits this matrix's `in_vars`."""
-        adj_matrix = self._matrix.adjugate()
+        defining identity is `adj(M) · M == det(M) · I`. Built via
+        sub-matrix recursion: for each (i, j) we drop row j and col i to get
+        the (N-1)×(N-1) minor and take its determinant via subMatrix; when
+        the minor is 1×1 the lone entry is used directly (no further
+        recursion). For N=1 the adjugate is the 1×1 identity [[1]]. The
+        returned matrix has no InVar items of its own; it inherits this
+        matrix's `in_vars`."""
+        if self._N == 1:
+            return StatMatrix(1, {(0, 0): sympy.Integer(1)},
+                              in_vars=self._in_vars,
+                              max_order=self._max_order)
         items = {}
         for i in range(self._N):
             for j in range(self._N):
-                entry = adj_matrix[i, j]
-                if entry != 0:
-                    items[(i, j)] = entry
+                sign = sympy.Integer((-1)**(i + j))
+                # _compute_det() handles its own 1×1 base case (returns the
+                # entry directly) — no extra branch needed here.
+                cofactor = sign * self.subMatrix([(j, i)])._compute_det()
+                if cofactor != 0:
+                    items[(i, j)] = cofactor
         return StatMatrix(self._N, items, in_vars=self._in_vars,
                           max_order=self._max_order)
 
     def reverse(self) -> 'StatMatrix':
         """Return the matrix inverse as a new StatMatrix. Each entry is the
-        rational expression M^(-1)[i, j] = adj(M)[i, j] / det(M). The defining
-        identity is `reverse(M) · M == I == M · reverse(M)`. The returned
+        rational expression M^(-1)[i, j] = adj(M)[i, j] / det(M). The
+        defining identity is `reverse(M) · M == I == M · reverse(M)`. Built
+        via the same sub-matrix recursion as adjugate(): each cofactor uses
+        subMatrix → _compute_det() (which collapses to the lone entry for a
+        1×1 minor). For N=1 the inverse is [[1/M[0,0]]]. The returned
         matrix has no InVar items of its own; it inherits this matrix's
-        `in_vars`. Raises sympy's NonInvertibleMatrixError if the matrix is
-        singular (det = 0)."""
-        inv_matrix = self._matrix.inv()
+        `in_vars`. Raises ZeroDivisionError if det(M) is identically zero."""
+        if self._N == 1:
+            return StatMatrix(1, {(0, 0): 1 / self._matrix[0, 0]},
+                              in_vars=self._in_vars,
+                              max_order=self._max_order)
+        det_expr = self._compute_det()
         items = {}
         for i in range(self._N):
             for j in range(self._N):
-                entry = inv_matrix[i, j]
-                if entry != 0:
-                    items[(i, j)] = entry
+                sign = sympy.Integer((-1)**(i + j))
+                cofactor = sign * self.subMatrix([(j, i)])._compute_det()
+                if cofactor != 0:
+                    items[(i, j)] = cofactor / det_expr
         return StatMatrix(self._N, items, in_vars=self._in_vars,
                           max_order=self._max_order)
 

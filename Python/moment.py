@@ -218,7 +218,9 @@ class Uniform:
 
     @property
     def leakage(self):
-        return 1 - self.bounding
+        # Two-sided leakage for the Uniform on [-√3, √3] truncated to [-κ, κ]:
+        # 1 - (κ/√3). Default κ=√3 gives leakage 0.
+        return 1 - self.bounding / math.sqrt(3)
 
     @property
     def maxOrder(self):

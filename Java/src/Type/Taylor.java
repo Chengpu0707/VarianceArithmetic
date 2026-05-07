@@ -214,7 +214,8 @@ public class Taylor {
                     in, value, variance, n, newValue, newVariance, monotonics);
         }
         if (checkStability) {
-            if (newValue.value() > Math.sqrt(variance.value()) * moment.leakage) {
+            if (Math.abs(newValue.value()) >
+                    Math.sqrt(variance.value() + value.variance()) * moment.leakage) {
                 writeResult(fw, "NotStableException\tvariance", value, variance);
                 throw new NotStableException(String.format("Taylor1d: limit=%e", unc),
                         name, s1dTaylor, inPrec, outPrec,
