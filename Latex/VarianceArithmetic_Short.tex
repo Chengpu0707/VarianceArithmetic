@@ -63,8 +63,8 @@
 \begin{abstract}
 
 As a rigorous extension of conventional Taylor expansion, statistical Taylor expansion replaces precise input variables with random input variables of known distributions and sample counts, to compute the mean, deviation, and reliability of each result.
-This approach tracks the propagation of input uncertainties through intermediate steps, making the final result path independent.
-As a result, it differs fundamentally from conventional approaches, which are usually path dependent, and may serve as a unified standard for numerical computations of analytic expressions.
+This approach tracks the propagation of input uncertainties through intermediate steps, making the final result path-independent.
+As a result, it differs fundamentally from conventional approaches, which are usually path-dependent, and may serve as a unified standard for numerical computations of analytic expressions.
 This study further presents an implementation of statistical Taylor expansion called variance arithmetic, and demonstrates its performance across diverse mathematical applications.
 
 This study also reveals the potentially substantial impact of numerical errors in library functions. 
@@ -115,7 +115,7 @@ The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Ca
 Conversely, statistical Taylor expansion is precise statistically.
 
 Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}\cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, which can make conventional numerical computation more an art than a science.
-In contrast, statistical Taylor expansion is path independent.
+In contrast, statistical Taylor expansion is path-independent.
 
 To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance arithmetic nature of its processor \cite{Prev_Precision_Arithmetic}.
 
@@ -448,7 +448,7 @@ Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean 
   \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ n - j \end{pmatrix} \big( \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \big);
 \end{align}
 
-The input and output in statistical Taylor expansion reflects the inherent characteristics of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow \delta \log(x)$, $\delta x \rightarrow \delta \sin(x)$, and $P(x) \rightarrow P(x^c)$.
+The input and output in statistical Taylor expansion reflect the inherent characteristics of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow \delta \log(x)$, $\delta x \rightarrow \delta \sin(x)$, and $P(x) \rightarrow P(x^c)$.
 
 
 
@@ -707,7 +707,7 @@ For a reversible transformation such as matrix reversion or FFT (Fast Fourier Tr
 
 \end{itemize}
 Statistical Taylor expansion employs dependency tracing to ensure that the calculated mean and variance satisfy statistics rigorously.
-Dependency tracing also implies that the results of statistical Taylor expansion must remain path independent.
+Dependency tracing also implies that the results of statistical Taylor expansion must remain path-independent.
 However, dependency tracing comes at a cost: variance calculations are generally more complex than value calculations and exhibit a narrower convergence range for input variables.
 
 
@@ -1383,7 +1383,7 @@ However, DFT is not a faithful digital implementation of the continuous Fourier 
 For example, the FT spectrum of a sine function is a Delta function at the signal frequency $f$ with a phase $\pi/2$ \cite{Numerical_Recipes}.
 Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, where $f$ is its signal frequency. 
 The DFT spectra exhibit no modeling error only when the input signal frequency $f$ is an integer, and display varying degrees of modeling errors otherwise.
-Because of these modeling errors, the use of DFT as the digital implementation of FT is questionable, even though such usage is ubiquitous, and fundamental to many areas of applied mathematics \cite{Numerical_Recipes}.
+Because of these modeling errors, the use of DFT as the digital implementation of FT is questionable, even though such usage is ubiquitous and fundamental to many areas of applied mathematics \cite{Numerical_Recipes}.
 
 To avoid the modeling errors inherent in DFT, only Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are used in this study.
 
@@ -1879,7 +1879,7 @@ However, such approach is valid only if the statistical meaning of the ideal lea
 In variance arithmetic, $\delta^2 f$ in $f \pm \delta f$ is also calculated as an imprecise value.
 The implication of such uncertainty-of-uncertainty requires further clarification.
 
-Because conventional numerical approaches are based on floating-point arithmetic and path dependent in general, they must be reexamined or even reinvented within the framework of variance arithmetic.
+Because conventional numerical approaches are based on floating-point arithmetic and are path-dependent in general, they must be reexamined or even reinvented within the framework of variance arithmetic.
 For instance, most conventional numerical algorithms aim to identify optimal computational paths, whereas statistical Taylor expansion conceptually rejects all path-dependent calculations.
 Reconciling these two paradigms may present a significant and ongoing challenge.
 

@@ -322,13 +322,19 @@ class StatMatrix(StatTaylor):
 
     __slots__ = ('_N', '_matrix', '_invar_pos')
 
-    def __init__(self, N: int, items: dict):
+    def __init__(self, N: int, items: dict,
+                 in_vars: typing.Optional[tuple] = None):
         """`N`: positive int, side length.
         `items`: dict {(row, col): InVar | numeric/sympy.Expr}. Any (row, col)
         not present in `items` defaults to symbolic zero — `sympy.Integer(0)`,
         which is the `sympy.S.Zero` singleton — so the resulting `matrix` cell
-        is always a sympy expression. At least one entry must be an InVar
-        (otherwise no variance arithmetic is possible)."""
+        is always a sympy expression.
+        `in_vars`: optional explicit tuple of InVar to use as the underlying
+        StatTaylor inputs. If None (default), inferred from InVar entries in
+        `items` (and at least one such entry is required). If provided (as for
+        derived matrices like adjugate(), where every entry is a sympy
+        expression in the original in_vars rather than an InVar), used directly;
+        any InVar entries in `items` are then stored as their value symbol."""
         if not isinstance(N, int) or isinstance(N, bool) or N <= 0:
             raise TaylorException(f'N must be a positive int, got {N}')
         if not isinstance(items, dict):
@@ -343,26 +349,41 @@ class StatMatrix(StatTaylor):
                 raise TaylorException(f'items key {key} must contain ints')
             if not (0 <= r < N and 0 <= c < N):
                 raise TaylorException(f'items key {key} out of range for N={N}')
-        in_vars = []
-        invar_pos = {}  # (r, c) -> position in in_vars
+        if in_vars is not None:
+            if not isinstance(in_vars, tuple):
+                raise TaylorException(
+                    f'in_vars must be a tuple, got {type(in_vars)}')
+            if not in_vars:
+                raise TaylorException('in_vars must have at least one element')
+            for v in in_vars:
+                if not isinstance(v, InVar):
+                    raise TaylorException(
+                        f'each in_vars element must be InVar, got {type(v)}')
+        item_in_vars = []
+        invar_pos = {}  # (r, c) -> position in item_in_vars (only used when in_vars is None)
         rows = []
         for r in range(N):
             row = []
             for c in range(N):
                 entry = items.get((r, c), sympy.Integer(0))
                 if isinstance(entry, InVar):
-                    invar_pos[(r, c)] = len(in_vars)
-                    in_vars.append(entry)
+                    if in_vars is None:
+                        invar_pos[(r, c)] = len(item_in_vars)
+                        item_in_vars.append(entry)
                     row.append(entry.value)
                 else:
                     row.append(sympy.sympify(entry))
             rows.append(row)
-        if not in_vars:
-            raise TaylorException('StatMatrix must contain at least one InVar entry')
+        if in_vars is None:
+            if not item_in_vars:
+                raise TaylorException(
+                    'StatMatrix must contain at least one InVar entry '
+                    '(or pass in_vars explicitly for a derived matrix)')
+            in_vars = tuple(item_in_vars)
         self._N = N
         self._matrix = sympy.Matrix(rows)
         self._invar_pos = invar_pos
-        super().__init__(sympy.Integer(0), tuple(in_vars), max_order=0)
+        super().__init__(sympy.Integer(0), in_vars, max_order=0)
 
     @property
     def N(self) -> int:
@@ -437,7 +458,11 @@ class StatMatrix(StatTaylor):
                     val = self._matrix[r, c]
                     if val != 0:
                         new_items[(new_r, new_c)] = val
-        return StatMatrix(new_N, new_items)
+        # If no InVar items survive (e.g. subMatrix of an adjugate), inherit
+        # the original's in_vars so the derived StatMatrix stays valid.
+        if any(isinstance(v, InVar) for v in new_items.values()):
+            return StatMatrix(new_N, new_items)
+        return StatMatrix(new_N, new_items, in_vars=self._in_vars)
 
     def determ(self, max_order: int = None) -> StatTaylor:
         """Return a fresh StatTaylor for the symbolic determinant of this matrix.
@@ -447,6 +472,39 @@ class StatMatrix(StatTaylor):
             max_order = 2 * self._N
         det_expr = self._matrix.det()
         return StatTaylor(det_expr, self._in_vars, max_order=max_order)
+
+    def adjugate(self) -> 'StatMatrix':
+        """Return the adjugate (classical adjoint) as a new StatMatrix. Each
+        entry is the corresponding cofactor expression (sympy.Expr in the
+        original in_vars):
+            adj(M)[i, j] = (-1)^(i+j) · det(M with row j and col i removed)
+        Equivalently, adj(M) is the transpose of the cofactor matrix. The
+        defining identity is `adj(M) · M == det(M) · I`. The returned matrix
+        has no InVar items of its own; it inherits this matrix's `in_vars`."""
+        adj_matrix = self._matrix.adjugate()
+        items = {}
+        for i in range(self._N):
+            for j in range(self._N):
+                entry = adj_matrix[i, j]
+                if entry != 0:
+                    items[(i, j)] = entry
+        return StatMatrix(self._N, items, in_vars=self._in_vars)
+
+    def reverse(self) -> 'StatMatrix':
+        """Return the matrix inverse as a new StatMatrix. Each entry is the
+        rational expression M^(-1)[i, j] = adj(M)[i, j] / det(M). The defining
+        identity is `reverse(M) · M == I == M · reverse(M)`. The returned
+        matrix has no InVar items of its own; it inherits this matrix's
+        `in_vars`. Raises sympy's NonInvertibleMatrixError if the matrix is
+        singular (det = 0)."""
+        inv_matrix = self._matrix.inv()
+        items = {}
+        for i in range(self._N):
+            for j in range(self._N):
+                entry = inv_matrix[i, j]
+                if entry != 0:
+                    items[(i, j)] = entry
+        return StatMatrix(self._N, items, in_vars=self._in_vars)
 
     def item(self, position, max_order: int = 2) -> StatTaylor:
         """Return a single-variable StatTaylor for the entry at `position`=(row, col).

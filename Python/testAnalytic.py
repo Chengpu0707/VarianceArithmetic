@@ -1647,6 +1647,23 @@ class TestStatMatrix(unittest.TestCase):
         M = analytic.WorstMatrix(2)
         self.assertIsInstance(M, analytic.StatMatrix)
 
+    def test_explicit_in_vars_allows_no_invar_items(self):
+        # When in_vars is provided, items may consist entirely of values.
+        M = analytic.StatMatrix(2, {(0, 0): 5, (1, 1): 7},
+                                in_vars=(self.v00,))
+        self.assertEqual(M.in_vars, (self.v00,))
+        self.assertEqual(M.matrix.tolist(),
+                         [[sympy.Integer(5), sympy.Integer(0)],
+                          [sympy.Integer(0), sympy.Integer(7)]])
+
+    def test_explicit_in_vars_validation(self):
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, {}, in_vars=[self.v00])  # not a tuple
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, {}, in_vars=())  # empty
+        with self.assertRaises(analytic.TaylorException):
+            analytic.StatMatrix(2, {}, in_vars=('not an InVar',))
+
 
 class TestWorstMatrix(unittest.TestCase):
     """Validates analytic.WorstMatrix construction, index/pos round-trips,
@@ -1772,6 +1789,75 @@ class TestWorstMatrix(unittest.TestCase):
         det = M.determ().function
         for c in range(M.N):
             self.assertEqual(sympy.simplify(det - self._laplace_along_col(M, c)), 0)
+
+    def _check_adjugate_identity(self, N):
+        # adj(M) · M = det(M) · I  (and also M · adj(M) = det(M) · I).
+        M = analytic.WorstMatrix(N)
+        adj = M.adjugate()
+        self.assertIsInstance(adj, analytic.StatMatrix)
+        self.assertEqual(adj.N, N)
+        self.assertEqual(adj.in_vars, M.in_vars)
+        det = M.determ().function
+        identity = det * sympy.eye(N)
+        for product in (adj.matrix * M.matrix, M.matrix * adj.matrix):
+            for i in range(N):
+                for j in range(N):
+                    self.assertEqual(sympy.simplify(product[i, j] - identity[i, j]), 0)
+
+    def test_adjugate_identity_1x1(self):
+        self._check_adjugate_identity(1)
+
+    def test_adjugate_identity_2x2(self):
+        self._check_adjugate_identity(2)
+
+    def test_adjugate_identity_3x3(self):
+        self._check_adjugate_identity(3)
+
+    def test_adjugate_identity_4x4(self):
+        self._check_adjugate_identity(4)
+
+    def test_adjugate_2x2_explicit_form(self):
+        # For [[a, b], [c, d]], adj = [[d, -b], [-c, a]].
+        M = analytic.WorstMatrix(2)
+        adj = M.adjugate()
+        m00 = sympy.Symbol('m_0_0')
+        m01 = sympy.Symbol('m_0_1')
+        m10 = sympy.Symbol('m_1_0')
+        m11 = sympy.Symbol('m_1_1')
+        self.assertEqual(adj.matrix.tolist(), [[m11, -m01], [-m10, m00]])
+
+    def _check_reverse_identity(self, N):
+        # M · reverse(M) = I = reverse(M) · M.
+        M = analytic.WorstMatrix(N)
+        inv = M.reverse()
+        self.assertIsInstance(inv, analytic.StatMatrix)
+        self.assertEqual(inv.N, N)
+        self.assertEqual(inv.in_vars, M.in_vars)
+        eye = sympy.eye(N)
+        for product in (M.matrix * inv.matrix, inv.matrix * M.matrix):
+            for i in range(N):
+                for j in range(N):
+                    self.assertEqual(sympy.simplify(product[i, j] - eye[i, j]), 0)
+
+    def test_reverse_identity_1x1(self):
+        self._check_reverse_identity(1)
+
+    def test_reverse_identity_2x2(self):
+        self._check_reverse_identity(2)
+
+    def test_reverse_identity_3x3(self):
+        self._check_reverse_identity(3)
+
+    def test_reverse_equals_adjugate_over_det(self):
+        # reverse(M) entry-wise should equal adj(M) / det(M).
+        M = analytic.WorstMatrix(3)
+        inv = M.reverse()
+        adj = M.adjugate()
+        det = M.determ().function
+        for i in range(M.N):
+            for j in range(M.N):
+                self.assertEqual(
+                    sympy.simplify(inv.matrix[i, j] - adj.matrix[i, j] / det), 0)
 
 
 if __name__ == '__main__':
