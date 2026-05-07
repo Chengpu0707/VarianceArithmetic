@@ -28,11 +28,14 @@ Multi-variable tests (Uniform on every variable):
   TestXaddYaddZ          — f = x + y + z:       3D extension of TestXaddY.
 """
 
+import csv
 import math
+import os
 import sympy
 import unittest
 
 import analytic
+from indexSin import OUTDIR
 
 
 class TestInVar(unittest.TestCase):
@@ -478,6 +481,93 @@ class TestStatTaylorBiasOrder(_Base):
         t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(5)
+
+
+class TestStatTaylorDump(_Base):
+
+    def test_dump_1d_writes_function_header_and_rows(self):
+        import tempfile
+        t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=3)
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, 'dump.csv')
+            t.dump(path)
+            with open(path, newline='') as f:
+                rows = list(csv.reader(f))
+        # Function row: single-field line with InVar value as `x~dx`.
+        self.assertEqual(rows[0], ['function: sin(x~dx)'])
+        # Header: order + per-InVar columns (named `x~dx`) + varAt + biasAt.
+        self.assertEqual(rows[1], ['order', 'x~dx', 'varAt', 'biasAt'])
+        # 1D max_order=3 sin(x): orders 0 and 2 are nonzero (1, 3 skipped).
+        self.assertEqual(len(rows), 2 + 2)
+        # Row 0: order=0, x~dx=0, varAt=0, biasAt=sin(x)
+        self.assertEqual(rows[2][0], '0')
+        self.assertEqual(rows[2][1], '0')
+        self.assertEqual(rows[2][2], str(t.varAt(0)))
+        self.assertEqual(rows[2][3], str(t.biasAt(0)))
+        # Row 1: order=2, x~dx=2
+        self.assertEqual(rows[3][0], '2')
+        self.assertEqual(rows[3][1], '2')
+        self.assertEqual(rows[3][2], str(t.varAt(2)))
+        self.assertEqual(rows[3][3], str(t.biasAt(2)))
+
+    def test_dump_skips_all_zero_rows(self):
+        import tempfile
+        # 1D linear x: every order ≥ 2 has varAt=biasAt=0; order 1 has both 0
+        # (moment(1)=0), order 0 has biasAt=x (nonzero) and varAt=0.
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, 'dump.csv')
+            t.dump(path)
+            with open(path, newline='') as f:
+                rows = list(csv.reader(f))
+        # Expect: function + header + (order=0, biasAt=x) + (order=2, varAt=dx²·ζ(2))
+        self.assertEqual(len(rows), 2 + 2)
+        self.assertEqual(rows[2][0], '0')
+        self.assertEqual(rows[3][0], '2')
+
+    def test_dump_2d_per_invar_columns(self):
+        import tempfile
+        t = analytic.StatTaylor(self.x * self.y,
+                                (self.vx, self.vy), max_order=2)
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, 'dump.csv')
+            t.dump(path)
+            with open(path, newline='') as f:
+                rows = list(csv.reader(f))
+        # Header has 5 columns: order, x~dx, y~dy, varAt, biasAt.
+        self.assertEqual(rows[1], ['order', 'x~dx', 'y~dy', 'varAt', 'biasAt'])
+        # Nonzero rows for x*y at max_order=2:
+        # (0,0): biasAt=x*y; (0,2): varAt=dy²·x²; (2,0): varAt=dx²·y²
+        self.assertEqual(len(rows), 2 + 3)
+        # Each data row's order column should equal sum of per-InVar columns.
+        for row in rows[2:]:
+            self.assertEqual(int(row[0]), int(row[1]) + int(row[2]))
+
+    def test_dump_invalid_path(self):
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=2)
+        with self.assertRaises(analytic.TaylorException):
+            t.dump(123)
+
+    def test_dump_2d_function_uses_invar_notation(self):
+        import tempfile
+        # Function references both InVars; both must render as `x~dx` form.
+        t = analytic.StatTaylor(self.x * self.y + sympy.sin(self.x),
+                                (self.vx, self.vy), max_order=1)
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, 'dump.csv')
+            t.dump(path)
+            with open(path, newline='') as f:
+                first_row = next(csv.reader(f))
+        # Single-field function row.
+        self.assertEqual(len(first_row), 1)
+        first_line = first_row[0]
+        self.assertIn('x~dx', first_line)
+        self.assertIn('y~dy', first_line)
+        # Function line shouldn't carry bare `x` or `y` outside the `~` token.
+        # (Strip the `x~dx`/`y~dy` substrings, then check no leftover `x`/`y`.)
+        stripped = first_line.replace('x~dx', '').replace('y~dy', '')
+        self.assertNotIn('x', stripped)
+        self.assertNotIn('y', stripped)
 
 
 # f(x) = x: Taylor coefficients, varAt, and varOrder.
@@ -1622,11 +1712,14 @@ class TestStatMatrix(unittest.TestCase):
         self.assertIsInstance(T, analytic.StatTaylor)
         self.assertEqual(T.function, self.m11)
 
-    def test_item_value_position_raises(self):
-        # (1, 0) is the default 0 value, not an InVar.
+    def test_item_value_position_returns_constant_taylor(self):
+        # (1, 0) is the default 0 value, not an InVar; item() now returns a
+        # full-in_vars StatTaylor of the entry expression (here Integer(0)).
         M = analytic.StatMatrix(2, {(0, 0): self.v00, (1, 1): self.v11})
-        with self.assertRaises(analytic.TaylorException):
-            M.item((1, 0))
+        T = M.item((1, 0))
+        self.assertIsInstance(T, analytic.StatTaylor)
+        self.assertEqual(T.function, sympy.Integer(0))
+        self.assertEqual(T.in_vars, M.in_vars)
 
     def test_subMatrix_preserves_value_entries(self):
         # 3x3 with 1 InVar and 2 nonzero value entries; drop row 0 + col 0.
@@ -1858,6 +1951,77 @@ class TestWorstMatrix(unittest.TestCase):
             for j in range(M.N):
                 self.assertEqual(
                     sympy.simplify(inv.matrix[i, j] - adj.matrix[i, j] / det), 0)
+
+    def _dump_reverse_matrix(self, N: int, max_order: int = 2):
+        """Dump the entire reverse(WorstMatrix(N)) via StatMatrix.dump() to
+        Python/Output/dump_reverse_<N>.csv for inspection, then assert
+        structural invariants of the CSV file. `max_order` is passed
+        explicitly because the constructor default (16) is impractical for
+        the per-entry Taylor of an N×N matrix inverse over N² in_vars."""
+        M = analytic.WorstMatrix(N)
+        inv = M.reverse()
+        path = os.path.join(OUTDIR, 'Python', 'Output',
+                            f'dump_reverse_{N}.csv')
+        inv.dump(path, max_order=max_order)
+        self.assertTrue(os.path.isfile(path))
+        with open(path, newline='') as f:
+            rows = list(csv.reader(f))
+        # First N² rows are per-entry function rows (single-field, quoted by csv).
+        for k, (r, c) in enumerate((rr, cc) for rr in range(N) for cc in range(N)):
+            self.assertEqual(len(rows[k]), 1)
+            line = rows[k][0]
+            self.assertTrue(line.startswith(f'function ({r}, {c}): '))
+            for inv_var in M.in_vars:
+                self.assertIn(f'{inv_var.value}~{inv_var.deviation}', line)
+        # Header row: order, row, col, N² InVar labels, varAt, biasAt.
+        header = rows[N * N]
+        self.assertEqual(header[0], 'order')
+        self.assertEqual(header[1], 'row')
+        self.assertEqual(header[2], 'col')
+        self.assertEqual(header[-2], 'varAt')
+        self.assertEqual(header[-1], 'biasAt')
+        self.assertEqual(len(header), 3 + N * N + 2)
+        for k, inv_var in enumerate(M.in_vars):
+            self.assertEqual(header[3 + k],
+                             f'{inv_var.value}~{inv_var.deviation}')
+        # Every data row: order = sum of per-InVar columns; row,col in range.
+        for row in rows[N * N + 1:]:
+            self.assertEqual(int(row[0]),
+                             sum(int(row[3 + k]) for k in range(N * N)))
+            self.assertTrue(0 <= int(row[1]) < N)
+            self.assertTrue(0 <= int(row[2]) < N)
+        # Each (row, col) entry should produce at least one row (order-0 biasAt
+        # is the entry expression, which is nonzero for every reverse entry of
+        # an invertible WorstMatrix).
+        positions = {(int(row[1]), int(row[2])) for row in rows[N * N + 1:]}
+        self.assertEqual(positions,
+                         {(r, c) for r in range(N) for c in range(N)})
+
+    def test_dump_reverse_2x2(self):
+        self._dump_reverse_matrix(2)
+
+    def test_dump_reverse_3x3(self):
+        self._dump_reverse_matrix(3)
+
+    # The next two run a per-entry Taylor expansion of the inverse with
+    # max_order=8 — for an N×N matrix that is C(N²+8, 8) multi-indices per
+    # entry × N² entries × sympy.diff/varAt/biasAt of a rational function.
+    # N=3 is ~24310 multi-indices × 9 entries; N=4 is ~735471 × 16. They
+    # write substantial dump files into Python/Output/ for inspection.
+    # Marked slow; remove the decorator (or set RUN_SLOW_DUMP_TESTS=1) to run.
+    _RUN_SLOW = bool(os.environ.get('RUN_SLOW_DUMP_TESTS'))
+
+    @unittest.skipUnless(_RUN_SLOW,
+                         'slow: reverse-3x3 dump with max_order=8 (set '
+                         'RUN_SLOW_DUMP_TESTS=1 to enable)')
+    def test_dump_reverse_3x3_max_order_8(self):
+        self._dump_reverse_matrix(3, max_order=8)
+
+    @unittest.skipUnless(_RUN_SLOW,
+                         'slow: reverse-4x4 dump with max_order=8 (set '
+                         'RUN_SLOW_DUMP_TESTS=1 to enable)')
+    def test_dump_reverse_4x4_max_order_8(self):
+        self._dump_reverse_matrix(4, max_order=8)
 
 
 if __name__ == '__main__':

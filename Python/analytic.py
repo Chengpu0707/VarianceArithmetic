@@ -7,6 +7,7 @@ Expression conventions:
 - All distributions are assumed symmetric, so ζ(odd, κ) = 0.
 """
 
+import csv
 import enum
 import functools
 import itertools
@@ -159,7 +160,7 @@ class TaylorException(Exception):
 class StatTaylor:
     __slots__ = ('_function', '_in_vars', '_max_order', '_coeffs')
 
-    def __init__(self, function: sympy.Expr, in_vars: tuple, max_order: int = 200):
+    def __init__(self, function: sympy.Expr, in_vars: tuple, max_order: int = 16):
         """Build the Taylor coefficient table for `function` around the InVars in
         `in_vars`, up to total order `max_order`. Raises TaylorException if the
         function references any deviation symbol from `in_vars`."""
@@ -185,6 +186,14 @@ class StatTaylor:
         n_vars = len(symbols)
         zero = (0,) * n_vars
         self._coeffs = {zero: function}
+        # Optimization: if the function is identically zero, every higher-order
+        # derivative is also zero — skip the (potentially huge) recurrence
+        # loop. This lets StatMatrix use any max_order for its placeholder
+        # Integer(0) function without building a multi-million-entry coeff
+        # table; lookups in at()/varAt()/biasAt() use .get(..., 0) so missing
+        # entries report as zero.
+        if function == 0:
+            return
         # Recurrence c[α] = diff(c[α - e_i], x_i) / α_i for any i with α_i > 0.
         # Equivalent to (1/α!) · ∂^|α| f / ∏ ∂x_k^{α_k} but reuses lower-order results.
         for k in range(1, max_order + 1):
@@ -229,7 +238,7 @@ class StatTaylor:
         total = sum(orders)
         if total > self._max_order:
             raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
-        return self._coeffs[orders]
+        return self._coeffs.get(orders, sympy.Integer(0))
 
     def varAt(self, *orders: int) -> sympy.Expr:
         """Variance contribution at multi-index p=orders: one term of δ²f as a
@@ -263,7 +272,9 @@ class StatTaylor:
                                             (self._in_vars[k].moment(nn[k]) *
                                              self._in_vars[k].moment(pn[k]) for k in range(N)),
                                             sympy.Integer(1))
-            result = result + self._coeffs[nn] * self._coeffs[pn] * (full_moment - split_moment)
+            result = result + (self._coeffs.get(nn, sympy.Integer(0))
+                               * self._coeffs.get(pn, sympy.Integer(0))
+                               * (full_moment - split_moment))
         return dev_prod * result
 
     def varOrder(self, n: int) -> sympy.Expr:
@@ -299,7 +310,7 @@ class StatTaylor:
         moment_prod = functools.reduce(operator.mul,
                                        (self._in_vars[k].moment(p[k]) for k in range(N)),
                                        sympy.Integer(1))
-        return dev_prod * self._coeffs[p] * moment_prod
+        return dev_prod * self._coeffs.get(p, sympy.Integer(0)) * moment_prod
 
     def biasOrder(self, n: int) -> sympy.Expr:
         """Sum of biasAt(*p) over all multi-indices p with |p| = n. The total
@@ -312,6 +323,41 @@ class StatTaylor:
         N = len(self._in_vars)
         return sum((self.biasAt(*p) for p in _multi_indices(N, n)), sympy.Integer(0))
 
+    def dump(self, path: str) -> None:
+        """Write varAt(*p) and biasAt(*p) for every multi-index p with
+        sum(p) ≤ max_order to `path` in CSV format. Rows where both varAt
+        and biasAt are 0 are skipped.
+
+        The first row is a single-field `function: <expr>` line with each
+        InVar's value symbol `x` rendered as `x~dx` (where `dx` is its
+        deviation symbol). The second row is the column header:
+        `order` + one column per InVar (named `x~dx`) + `varAt` + `biasAt`.
+        Each subsequent row holds one multi-index (the per-InVar columns
+        give the derivative order per input variable), in lexicographic
+        order within each total-order block. Field quoting is handled by
+        the standard csv writer (commas in the function expression are
+        quoted automatically)."""
+        if not isinstance(path, str):
+            raise TaylorException(f'path must be a str, got {type(path)}')
+        N = len(self._in_vars)
+        # Display each InVar value symbol `x` as `x~dx` in the function and
+        # use the same `x~dx` strings as per-InVar column headers.
+        invar_labels = [f'{inv.value}~{inv.deviation}' for inv in self._in_vars]
+        fn_subs = {inv.value: sympy.Symbol(label)
+                   for inv, label in zip(self._in_vars, invar_labels)}
+        fn_display = self._function.subs(fn_subs)
+        with open(path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([f'function: {fn_display}'])
+            writer.writerow(['order'] + invar_labels + ['varAt', 'biasAt'])
+            for n in range(self._max_order + 1):
+                for p in _multi_indices(N, n):
+                    v = self.varAt(*p)
+                    b = self.biasAt(*p)
+                    if v == 0 and b == 0:
+                        continue
+                    writer.writerow([n] + list(p) + [str(v), str(b)])
+
 
 class StatMatrix(StatTaylor):
     """N×N matrix whose entries are a mix of InVar (uncertain) and value
@@ -323,7 +369,8 @@ class StatMatrix(StatTaylor):
     __slots__ = ('_N', '_matrix', '_invar_pos')
 
     def __init__(self, N: int, items: dict,
-                 in_vars: typing.Optional[tuple] = None):
+                 in_vars: typing.Optional[tuple] = None,
+                 max_order: int = 16):
         """`N`: positive int, side length.
         `items`: dict {(row, col): InVar | numeric/sympy.Expr}. Any (row, col)
         not present in `items` defaults to symbolic zero — `sympy.Integer(0)`,
@@ -334,7 +381,12 @@ class StatMatrix(StatTaylor):
         `items` (and at least one such entry is required). If provided (as for
         derived matrices like adjugate(), where every entry is a sympy
         expression in the original in_vars rather than an InVar), used directly;
-        any InVar entries in `items` are then stored as their value symbol."""
+        any InVar entries in `items` are then stored as their value symbol.
+        `max_order`: forwarded to the underlying StatTaylor (default 16) and
+        used as the default for derived analyses (item, dump). The parent
+        StatTaylor's coefficient table is never materialised because the
+        StatMatrix's function is the placeholder Integer(0); see the
+        zero-function shortcut in StatTaylor.__init__."""
         if not isinstance(N, int) or isinstance(N, bool) or N <= 0:
             raise TaylorException(f'N must be a positive int, got {N}')
         if not isinstance(items, dict):
@@ -383,7 +435,7 @@ class StatMatrix(StatTaylor):
         self._N = N
         self._matrix = sympy.Matrix(rows)
         self._invar_pos = invar_pos
-        super().__init__(sympy.Integer(0), in_vars, max_order=0)
+        super().__init__(sympy.Integer(0), in_vars, max_order=max_order)
 
     @property
     def N(self) -> int:
@@ -461,8 +513,9 @@ class StatMatrix(StatTaylor):
         # If no InVar items survive (e.g. subMatrix of an adjugate), inherit
         # the original's in_vars so the derived StatMatrix stays valid.
         if any(isinstance(v, InVar) for v in new_items.values()):
-            return StatMatrix(new_N, new_items)
-        return StatMatrix(new_N, new_items, in_vars=self._in_vars)
+            return StatMatrix(new_N, new_items, max_order=self._max_order)
+        return StatMatrix(new_N, new_items, in_vars=self._in_vars,
+                          max_order=self._max_order)
 
     def determ(self, max_order: int = None) -> StatTaylor:
         """Return a fresh StatTaylor for the symbolic determinant of this matrix.
@@ -488,7 +541,8 @@ class StatMatrix(StatTaylor):
                 entry = adj_matrix[i, j]
                 if entry != 0:
                     items[(i, j)] = entry
-        return StatMatrix(self._N, items, in_vars=self._in_vars)
+        return StatMatrix(self._N, items, in_vars=self._in_vars,
+                          max_order=self._max_order)
 
     def reverse(self) -> 'StatMatrix':
         """Return the matrix inverse as a new StatMatrix. Each entry is the
@@ -504,23 +558,83 @@ class StatMatrix(StatTaylor):
                 entry = inv_matrix[i, j]
                 if entry != 0:
                     items[(i, j)] = entry
-        return StatMatrix(self._N, items, in_vars=self._in_vars)
+        return StatMatrix(self._N, items, in_vars=self._in_vars,
+                          max_order=self._max_order)
 
-    def item(self, position, max_order: int = 2) -> StatTaylor:
-        """Return a single-variable StatTaylor for the entry at `position`=(row, col).
-        Requires the entry to be an InVar (raises otherwise — value entries have
-        no uncertainty to expand). Default max_order=2 covers bias and variance."""
+    def dump(self, path: str, max_order: int = None) -> None:
+        """Write per-entry varAt and biasAt to `path` in CSV format
+        (overrides StatTaylor.dump for matrices). For each (row, col) of
+        the matrix, builds a StatTaylor of the entry over all in_vars and
+        emits one row per nonzero (multi-index, varAt, biasAt) triple,
+        tagged with (row, col) so all entries share one file. Defaults to
+        this StatMatrix's own max_order (16 unless overridden at construction).
+
+        File structure (CSV):
+          - One single-field `function (row, col): <expr>` row per entry,
+            with each InVar's value symbol rendered as `x~dx` (deviation
+            appended). The csv writer quotes the field automatically since
+            it contains commas.
+          - Header row: `order, row, col` + one column per InVar (named
+            `x~dx`) + `varAt`, `biasAt`.
+          - Data rows: `order` is the multi-index sum; `row` and `col`
+            identify the matrix entry; the per-InVar columns hold the
+            multi-index components; the last two columns are varAt and biasAt.
+        Rows where both varAt and biasAt are 0 are skipped."""
+        if not isinstance(path, str):
+            raise TaylorException(f'path must be a str, got {type(path)}')
+        if max_order is None:
+            max_order = self._max_order
+        if (not isinstance(max_order, int) or isinstance(max_order, bool)
+                or max_order < 0):
+            raise TaylorException(
+                f'max_order must be a non-negative int, got {max_order}')
+        N = self._N
+        n_in_vars = len(self._in_vars)
+        invar_labels = [f'{inv.value}~{inv.deviation}' for inv in self._in_vars]
+        fn_subs = {inv.value: sympy.Symbol(label)
+                   for inv, label in zip(self._in_vars, invar_labels)}
+        with open(path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            for r in range(N):
+                for c in range(N):
+                    display = self._matrix[r, c].subs(fn_subs)
+                    writer.writerow([f'function ({r}, {c}): {display}'])
+            writer.writerow(['order', 'row', 'col'] + invar_labels +
+                            ['varAt', 'biasAt'])
+            for r in range(N):
+                for c in range(N):
+                    T = StatTaylor(self._matrix[r, c], self._in_vars,
+                                   max_order=max_order)
+                    for n in range(max_order + 1):
+                        for p in _multi_indices(n_in_vars, n):
+                            v = T.varAt(*p)
+                            b = T.biasAt(*p)
+                            if v == 0 and b == 0:
+                                continue
+                            writer.writerow([n, r, c] + list(p)
+                                            + [str(v), str(b)])
+
+    def item(self, position, max_order: int = None) -> StatTaylor:
+        """Return a StatTaylor for the entry at `position`=(row, col).
+        If the entry is an InVar, returns a single-variable StatTaylor over
+        that InVar (function = its value symbol). Otherwise the entry is a
+        sympy expression in the original in_vars (e.g. for derived matrices
+        produced by adjugate() or reverse()), and the returned StatTaylor
+        uses all of this StatMatrix's in_vars. Defaults to this StatMatrix's
+        own max_order (16 unless overridden at construction)."""
+        if max_order is None:
+            max_order = self._max_order
         if not (isinstance(position, tuple) and len(position) == 2):
             raise TaylorException(
                 f'position must be a (row, col) tuple, got {position}')
         row, col = position
         # Validate (row, col) range via index().
         self.index(row, col)
-        if (row, col) not in self._invar_pos:
-            raise TaylorException(
-                f'item at ({row}, {col}) is a value, not an InVar')
-        inv = self._in_vars[self._invar_pos[(row, col)]]
-        return StatTaylor(inv.value, (inv,), max_order=max_order)
+        if (row, col) in self._invar_pos:
+            inv = self._in_vars[self._invar_pos[(row, col)]]
+            return StatTaylor(inv.value, (inv,), max_order=max_order)
+        return StatTaylor(self._matrix[row, col], self._in_vars,
+                          max_order=max_order)
 
 
 class WorstMatrix(StatMatrix):
@@ -533,7 +647,8 @@ class WorstMatrix(StatMatrix):
     def __init__(self, N: int,
                  distr_type: EDistrType = EDistrType.Uniform,
                  kappa: typing.Union[float, sympy.Symbol] = None,
-                 samples: int = 10000):
+                 samples: int = 10000,
+                 max_order: int = 16):
         if not isinstance(N, int) or isinstance(N, bool) or N <= 0:
             raise TaylorException(f'N must be a positive int, got {N}')
         items = {}
@@ -542,5 +657,5 @@ class WorstMatrix(StatMatrix):
                 v = sympy.Symbol(f'm_{r}_{c}')
                 d = sympy.Symbol(f'dm_{r}_{c}')
                 items[(r, c)] = InVar(v, d, distr_type, kappa=kappa, samples=samples)
-        super().__init__(N, items)
+        super().__init__(N, items, max_order=max_order)
 
