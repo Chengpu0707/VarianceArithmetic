@@ -603,7 +603,7 @@ Under a mean preserving bounding, Formula \eqref{eqn: addition mean} and \eqref{
 \label{eqn: multiplication variance}
 \delta^2 (x y) &= \zeta(2, \kappa_x) (\sigma_x)^2 y^2 + x^2 \zeta(2, \kappa_y) (\sigma_y)^2 + \zeta(2, \kappa_x) (\sigma_x)^2 \; \zeta(2, \kappa_y) (\sigma_y)^2;
 \end{align}
-When $N \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kappa) \rightarrow 1$, making Formula \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formula \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
+When $\kappa \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kappa) \rightarrow 1$, making Formula \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formula \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
 
 For any input distribution $\rho(\tilde{x}, \mu, \sigma)$ that is symmetric about its mean $\mu$, any bounding range $[\mu - \kappa \sigma, \mu + \kappa \sigma]$ satisfies $\zeta(2n+1) = 0$, which further simplifies the statistical Taylor expansion.
 
@@ -3288,14 +3288,6 @@ The uncertainties (y-axis) of $\sin(\pi j/2^{18})$ versus $j$ (x-axis) and $L$ u
 \label{fig: Regression_Sin}
 \end{figure}
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=2.5in]{Regression_Error.pdf}
-\captionof{figure}{
-Uncertainties, value errors (left y-axis), and error deviation (right y-axis) for $\sin(x)^2 + \cos(x)^2 - 1, x \in [0, \pi/4]$ versus regression order (x-axis) when compared with the Quart sine function (legend)
-}
-\label{fig: Regression_Error}
-\end{figure}
 
 
 
@@ -3316,10 +3308,6 @@ Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \ri
 In Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits uncertainties proportional to $\sin(\frac{\pi}{2^L})$, whereas the regression sine function shows increasing uncertainties as $x \rightarrow 0$.
 Unlike catastrophic cancellation in floating-point arithmetic, variance arithmetic uses very coarse precision to signal that the regression algorithm is unfit to compute $\sin(x \rightarrow 0)$.
 
-Figure \ref{fig: Regression_Error} evaluates the  Quart and Regression sine functions using $\sin(x)^2 + \cos(x)^2 - 1 = 0$.
-The figure shows that the resulting uncertainties remain nearly constant and independent of the regression order $L$ when $L \geq 4$ for both the Regression sine and the Quart sine functions.
-It also demonstrates that the value errors for both are comparable.
-The Regression sine function has error deviations closer to $1$.
 
 
 

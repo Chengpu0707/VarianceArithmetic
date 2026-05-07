@@ -47,12 +47,15 @@ class InVar:
     __slots__ = ('_value', '_deviation', '_distr_type', '_kappa', '_samples')
 
     def __init__(self, value: sympy.Symbol, deviation: sympy.Symbol,
-                 distr_type: EDistrType, kappa: float = None, samples: int = 10000):
+                 distr_type: EDistrType,
+                 kappa: typing.Union[float, sympy.Symbol] = None,
+                 samples: int = 10000):
         """An input random variable with `value` ± `deviation`, drawn from
         `distr_type` and bounded by ±`kappa`·deviation. Defaults: kappa=5.0
         for Gaussian (leakage ~5e-7), kappa=√3 for Uniform (the maximum
-        bounding range of the Uniform distribution). Raises InVarException
-        if any argument has the wrong type or is out of range."""
+        bounding range of the Uniform distribution). For Uniform, kappa may
+        also be a sympy.Symbol — the moment formulas then evaluate symbolically.
+        Raises InVarException if any argument has the wrong type or is out of range."""
         if not isinstance(value, sympy.Symbol):
             raise InVarException(f'value must be a sympy.Symbol, got {type(value)}')
         if not isinstance(deviation, sympy.Symbol):
@@ -63,12 +66,26 @@ class InVar:
             # Gaussian default κ=5 keeps bounding leakage ~5e-7.
             # Uniform default κ=√3 makes ζ(0)=ζ(2)=1 exactly (the standard normalization).
             kappa = 5.0 if distr_type == EDistrType.Gaussian else math.sqrt(3)
-        if not isinstance(kappa, float):
-            raise InVarException(f'kappa must be a float, got {type(kappa)}')
-        if kappa <= 0:
-            raise InVarException(f'kappa must be positive, got {kappa}')
-        if distr_type == EDistrType.Uniform and kappa > math.sqrt(3):
-            raise InVarException(f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
+        if isinstance(kappa, sympy.Symbol):
+            # Symbolic κ: only Uniform supports it. Gaussian needs a numeric κ
+            # because zeta(n, κ) is evaluated against the precomputed moment table.
+            if distr_type != EDistrType.Uniform:
+                raise InVarException(
+                    f'symbolic kappa is only supported for Uniform, got {distr_type}')
+            # Reject if sympy assumptions imply kappa is outside (0, √3].
+            if kappa.is_positive is False:
+                raise InVarException(f'kappa must be positive, got {kappa}')
+            if (kappa - sympy.sqrt(3)).is_positive:
+                raise InVarException(
+                    f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
+        elif isinstance(kappa, float):
+            if kappa <= 0:
+                raise InVarException(f'kappa must be positive, got {kappa}')
+            if distr_type == EDistrType.Uniform and kappa > math.sqrt(3):
+                raise InVarException(f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
+        else:
+            raise InVarException(
+                f'kappa must be a float or (for Uniform) sympy.Symbol, got {type(kappa)}')
         if not isinstance(samples, int) or samples <= 0:
             raise InVarException(f'samples must be a positive int, got {samples}')
         self._value = value
@@ -93,8 +110,9 @@ class InVar:
         return self._distr_type
 
     @property
-    def kappa(self) -> float:
-        """The bounding factor: the variable is restricted to mean ± κ·deviation."""
+    def kappa(self) -> typing.Union[float, sympy.Symbol]:
+        """The bounding factor: the variable is restricted to mean ± κ·deviation.
+        A float for Gaussian; either a float or a sympy.Symbol for Uniform."""
         return self._kappa
 
     @property
@@ -111,7 +129,9 @@ class InVar:
         if order % 2 == 1:
             return 0.0
         # Formula (2.22): ζ(n) = 2ρ(κ) · κ^(n+1) / (n+1), 2ρ(κ) = 1/√3
-        return self._kappa ** (order + 1) / (math.sqrt(3) * (order + 1))
+        # Use sympy.sqrt(3) (not math.sqrt(3)) so the result stays exact symbolic
+        # for symbolic kappa, and Float-coefficient FP residuals don't appear.
+        return self._kappa ** (order + 1) / (sympy.sqrt(3) * (order + 1))
 
 
 def _multi_indices(n: int, k: int):
@@ -237,13 +257,15 @@ class Taylor:
                                     (self._in_vars[k].deviation ** p[k] for k in range(N)),
                                     sympy.Integer(1))
         full_moment = functools.reduce(operator.mul,
-                                       (self._in_vars[k].moment(p[k]) for k in range(N)), 1.0)
+                                       (self._in_vars[k].moment(p[k]) for k in range(N)),
+                                       sympy.Integer(1))
         result = sympy.Integer(0)
         for nn in itertools.product(*[range(pk + 1) for pk in p]):
             pn = tuple(p[k] - nn[k] for k in range(N))
             split_moment = functools.reduce(operator.mul,
                                             (self._in_vars[k].moment(nn[k]) *
-                                             self._in_vars[k].moment(pn[k]) for k in range(N)), 1.0)
+                                             self._in_vars[k].moment(pn[k]) for k in range(N)),
+                                            sympy.Integer(1))
             result = result + self._coeffs[nn] * self._coeffs[pn] * (full_moment - split_moment)
         return dev_prod * result
 
@@ -281,7 +303,8 @@ class Taylor:
                                     (self._in_vars[k].deviation ** p[k] for k in range(N)),
                                     sympy.Integer(1))
         moment_prod = functools.reduce(operator.mul,
-                                       (self._in_vars[k].moment(p[k]) for k in range(N)), 1.0)
+                                       (self._in_vars[k].moment(p[k]) for k in range(N)),
+                                       sympy.Integer(1))
         return dev_prod * self._coeffs[p] * moment_prod
 
     def biasOrder(self, n: int) -> sympy.Expr:

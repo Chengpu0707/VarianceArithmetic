@@ -119,6 +119,33 @@ class TestInVar(unittest.TestCase):
         with self.assertRaises(analytic.InVarException):
             analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=2.0)
 
+    def test_uniform_symbolic_kappa(self):
+        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        self.assertEqual(v.kappa, self.k)
+        self.assertEqual(v.distr_type, analytic.EDistrType.Uniform)
+
+    def test_uniform_symbolic_kappa_unspecified_assumptions(self):
+        # Symbol without assumptions: cannot prove out-of-range, accept.
+        k = sympy.Symbol('k')
+        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+        self.assertEqual(v.kappa, k)
+
+    def test_invalid_uniform_symbolic_kappa_negative(self):
+        # Symbol with negative=True is provably non-positive → reject.
+        k = sympy.Symbol('k', negative=True)
+        with self.assertRaises(analytic.InVarException):
+            analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+
+    def test_invalid_uniform_symbolic_kappa_zero(self):
+        # Symbol with zero=True: is_positive is False → reject.
+        k = sympy.Symbol('k', zero=True)
+        with self.assertRaises(analytic.InVarException):
+            analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+
+    def test_invalid_gaussian_symbolic_kappa(self):
+        with self.assertRaises(analytic.InVarException):
+            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=self.k)
+
     def test_invalid_samples_type(self):
         with self.assertRaises(analytic.InVarException):
             analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, samples=1.0)
@@ -135,6 +162,7 @@ class TestInVarMoment(unittest.TestCase):
     def setUp(self):
         self.x = sympy.Symbol('x')
         self.dx = sympy.Symbol('dx')
+        self.k = sympy.Symbol('k', positive=True)
 
     def test_gaussian_default_kappa_order0(self):
         v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
@@ -166,6 +194,22 @@ class TestInVarMoment(unittest.TestCase):
     def test_custom_kappa_gaussian(self):
         v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=3.0)
         self.assertEqual(v.moment(2), analytic.zeta(2, v.kappa))
+
+    def test_uniform_symbolic_kappa_order0(self):
+        # Formula (2.22): ζ(0) = κ / √3
+        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        self.assertEqual(sympy.simplify(v.moment(0) - self.k / sympy.sqrt(3)), 0)
+
+    def test_uniform_symbolic_kappa_order2(self):
+        # Formula (2.22): ζ(2) = κ³ / (3·√3)
+        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        self.assertEqual(
+            sympy.simplify(v.moment(2) - self.k**3 / (sympy.sqrt(3) * 3)), 0)
+
+    def test_uniform_symbolic_kappa_order_odd_is_zero(self):
+        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        self.assertEqual(v.moment(1), 0)
+        self.assertEqual(v.moment(3), 0)
 
 
 class TestTaylor(unittest.TestCase):
@@ -300,7 +344,8 @@ class TestTaylorMethod(unittest.TestCase):
 
 
 class _Base(unittest.TestCase):
-    # Uniform default kappa=√3 gives moment(0)=1 and moment(2)=1, clean symbolic results.
+    # Symbolic kappa per variable: ζ_k(0) = k_k/√3 ≠ 1 in general, so test
+    # expressions must carry the moment factors explicitly.
 
     def setUp(self):
         self.x = sympy.Symbol('x')
@@ -309,9 +354,12 @@ class _Base(unittest.TestCase):
         self.dy = sympy.Symbol('dy')
         self.z = sympy.Symbol('z')
         self.dz = sympy.Symbol('dz')
-        self.vx = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform)
-        self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform)
-        self.vz = analytic.InVar(self.z, self.dz, analytic.EDistrType.Uniform)
+        self.k_x = sympy.Symbol('k_x', positive=True)
+        self.k_y = sympy.Symbol('k_y', positive=True)
+        self.k_z = sympy.Symbol('k_z', positive=True)
+        self.vx = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k_x)
+        self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform, kappa=self.k_y)
+        self.vz = analytic.InVar(self.z, self.dz, analytic.EDistrType.Uniform, kappa=self.k_z)
 
     def _check(self, result, expected):
         self.assertEqual(sympy.simplify(result - expected), 0)
@@ -328,6 +376,50 @@ class _Base(unittest.TestCase):
         # 1D: varOrder(n) == varAt(n), biasOrder(n) == biasAt(n)
         self._check(self.t.varOrder(n), self.t.varAt(n))
         self._check(self.t.biasOrder(n), self.t.biasAt(n))
+
+    # Helpers that recompute the impl's varAt/biasAt formula symbolically.
+    # Useful when the closed-form per-function expected (assuming ζ(0)=1) needs
+    # to be augmented with the j=0/j=|p| correction terms for arbitrary ζ(0).
+
+    def _expected_varAt(self, *p):
+        in_vars = self.t.in_vars
+        N = len(in_vars)
+        dev_prod = sympy.Integer(1)
+        full = sympy.Integer(1)
+        for k in range(N):
+            dev_prod *= in_vars[k].deviation ** p[k]
+            full *= in_vars[k].moment(p[k])
+        result = sympy.Integer(0)
+        import itertools as _it
+        for nn in _it.product(*[range(pk + 1) for pk in p]):
+            pn = tuple(p[k] - nn[k] for k in range(N))
+            split = sympy.Integer(1)
+            for k in range(N):
+                split *= in_vars[k].moment(nn[k]) * in_vars[k].moment(pn[k])
+            result += self.t.at(*nn) * self.t.at(*pn) * (full - split)
+        return dev_prod * result
+
+    def _expected_biasAt(self, *p):
+        in_vars = self.t.in_vars
+        N = len(in_vars)
+        dev_prod = sympy.Integer(1)
+        moment_prod = sympy.Integer(1)
+        for k in range(N):
+            dev_prod *= in_vars[k].deviation ** p[k]
+            moment_prod *= in_vars[k].moment(p[k])
+        return dev_prod * self.t.at(*p) * moment_prod
+
+    def _expected_varOrder(self, n):
+        N = len(self.t.in_vars)
+        return sum((self._expected_varAt(*p)
+                    for p in analytic._multi_indices(N, n)),
+                   sympy.Integer(0))
+
+    def _expected_biasOrder(self, n):
+        N = len(self.t.in_vars)
+        return sum((self._expected_biasAt(*p)
+                    for p in analytic._multi_indices(N, n)),
+                   sympy.Integer(0))
 
 
 class TestTaylorVarAt(_Base):
@@ -545,11 +637,16 @@ class TestQuadratic(_Base):
         self._check(self.t.varAt(1), sympy.Integer(0))
 
     def test_varAt_order2(self):
-        # nn=0 and nn=2 cancel (moment(0)=1 for Uniform)
-        self._check(self.t.varAt(2), 4 * self.x**2 * self.vx.moment(2) * self.dx**2)
+        # impl: j=0: x²·ζ(2)·(1-ζ(0)); j=1: 4x²·ζ(2); j=2: x²·ζ(2)·(1-ζ(0))
+        m0 = self.vx.moment(0)
+        m2 = self.vx.moment(2)
+        x2 = self.x**2
+        self._check(self.t.varAt(2),
+                    self.dx**2 * (x2 * m2 * (1 - m0) + 4 * x2 * m2
+                                  + x2 * m2 * (1 - m0)))
 
     def test_varAt_order4(self):
-        # only nn=2 contributes (higher derivatives of x^2 are 0)
+        # j=0,4: c_0·c_4=0 (c_4=0); j=1,3: c_1·c_3=0; j=2: 1·(ζ(4)-ζ(2)²)
         m2 = self.vx.moment(2)
         m4 = self.vx.moment(4)
         self._check(self.t.varAt(4), (m4 - m2**2) * self.dx**4)
@@ -558,7 +655,12 @@ class TestQuadratic(_Base):
         self._check(self.t.varOrder(1), sympy.Integer(0))
 
     def test_varOrder_order2(self):
-        self._check(self.t.varOrder(2), 4 * self.x**2 * self.vx.moment(2) * self.dx**2)
+        m0 = self.vx.moment(0)
+        m2 = self.vx.moment(2)
+        x2 = self.x**2
+        self._check(self.t.varOrder(2),
+                    self.dx**2 * (x2 * m2 * (1 - m0) + 4 * x2 * m2
+                                  + x2 * m2 * (1 - m0)))
 
     def test_varOrder_order4(self):
         m2 = self.vx.moment(2)
@@ -582,6 +684,35 @@ class TestQuadratic(_Base):
 
     def test_biasOrder_order2(self):
         self._check(self.t.biasOrder(2), self.vx.moment(2) * self.dx**2)
+
+    # Formula (2.20)/(2.21) for f = x^c with c=2: binom(2, n) selects only n ≤ 2,
+    # so the power-mean and power-precision sums collapse to short closed forms.
+
+    def test_at_matches_formula_2_20_with_c_2(self):
+        # coeffs[(n,)] = C(2, n) · x^(2-n) — the (2.20) Taylor structure
+        for n in range(5):
+            self._check(self.t.at(n),
+                        sympy.binomial(2, n) * self.x**(2 - n))
+
+    def test_biasAt_matches_formula_2_20_with_c_2(self):
+        # biasAt(n) = δx^n · C(2, n) · x^(2-n) · ζ(n) per (2.20)
+        for n in range(1, 5):
+            expected = (self.dx**n * sympy.binomial(2, n)
+                        * self.x**(2 - n) * self.vx.moment(n))
+            self._check(self.t.biasAt(n), expected)
+
+    def test_total_variance_matches_formula_2_21_with_c_2(self):
+        # (2.21) at c=2 collapses to two terms (n=2 j=1, and n=4 j=2):
+        #   δ²(x²) = 4·ζ(2)·x²·δx² + (ζ(4) - ζ(2)²)·δx⁴
+        # Holds under the (2.21) ζ(0)=1 assumption — substitute k_x=√3.
+        sub = {self.k_x: sympy.sqrt(3)}
+        impl_total = sum((self.t.varOrder(n) for n in range(1, 5)),
+                         sympy.Integer(0)).subs(sub)
+        m2 = self.vx.moment(2).subs(sub)
+        m4 = self.vx.moment(4).subs(sub)
+        self._check(impl_total,
+                    4 * m2 * self.x**2 * self.dx**2
+                    + (m4 - m2**2) * self.dx**4)
 
 
 # exp(x): n-th derivative is exp(x), so at(n) = exp(x) / n!
@@ -607,22 +738,29 @@ class TestExp(_Base):
         self._check_varAt_order1_zero()
 
     def test_varAt_order2(self):
-        # (2.15) at n=2: δx² · (e^x)² · (ζ(2) - ζ(1)²)/(1!·1!) = δx² · (e^x)² · ζ(2)
-        # Equals our impl when ζ(0)=1 (Uniform default).
+        # impl: j=0: e²/2·ζ(2)·(1-ζ(0)); j=1: e²·ζ(2); j=2: e²/2·ζ(2)·(1-ζ(0))
+        m0 = self.vx.moment(0)
+        m2 = self.vx.moment(2)
+        e2 = sympy.exp(self.x)**2
         self._check(self.t.varAt(2),
-                    self.dx**2 * sympy.exp(self.x)**2 * self.vx.moment(2))
+                    self.dx**2 * (e2 / 2 * m2 * (1 - m0) + e2 * m2
+                                  + e2 / 2 * m2 * (1 - m0)))
 
     def test_varAt_order3_is_zero(self):
         self._check(self.t.varAt(3), sympy.Integer(0))
 
     def test_varAt_order4(self):
-        # (2.15) at n=4: δx⁴ · (e^x)² · sum_{j=1..3} (ζ(4) - ζ(j)·ζ(4-j))/(j!(4-j)!)
-        # j=1,3: each (ζ(4) - 0)/6 since ζ(1)=ζ(3)=0; j=2: (ζ(4) - ζ(2)²)/4
+        # impl: j=0,4: e²/24·ζ(4)·(1-ζ(0)); j=1,3: e²/6·ζ(4); j=2: e²/4·(ζ(4)-ζ(2)²)
+        m0 = self.vx.moment(0)
         m2 = self.vx.moment(2)
         m4 = self.vx.moment(4)
+        e2 = sympy.exp(self.x)**2
         self._check(self.t.varAt(4),
-                    self.dx**4 * sympy.exp(self.x)**2
-                    * (m4 / 6 + (m4 - m2**2) / 4 + m4 / 6))
+                    self.dx**4 * (e2 / 24 * m4 * (1 - m0)
+                                  + e2 / 6 * m4
+                                  + e2 / 4 * (m4 - m2**2)
+                                  + e2 / 6 * m4
+                                  + e2 / 24 * m4 * (1 - m0)))
 
     def test_biasAt_order1_is_zero(self):
         self._check_biasAt_odd_zero(1)
@@ -670,22 +808,15 @@ class TestLog(_Base):
         self._check_varAt_order1_zero()
 
     def test_varAt_order2(self):
-        # (2.17) at n=2: P(x)² · (ζ(2) - ζ(1)²)/(1·1) = δx²·ζ(2)/x²
-        self._check(self.t.varAt(2),
-                    self.dx**2 * self.vx.moment(2) / self.x**2)
+        # impl j-sum (incl. j=0,2 ζ(0)-correction terms for symbolic kappa)
+        self._check(self.t.varAt(2), self._expected_varAt(2))
 
     def test_varAt_order3_is_zero(self):
         # ζ(3)=0 and ζ(j)·ζ(3-j)=0 for j∈{1,2}
         self._check(self.t.varAt(3), sympy.Integer(0))
 
     def test_varAt_order4(self):
-        # (2.17) at n=4: P(x)⁴ · sum_{j=1..3} (ζ(4) - ζ(j)·ζ(4-j))/(j·(4-j))
-        # j=1,3: ζ(4)/3 each (ζ(1)=ζ(3)=0); j=2: (ζ(4) - ζ(2)²)/4
-        m2 = self.vx.moment(2)
-        m4 = self.vx.moment(4)
-        self._check(self.t.varAt(4),
-                    self.dx**4 / self.x**4
-                    * (m4 / 3 + (m4 - m2**2) / 4 + m4 / 3))
+        self._check(self.t.varAt(4), self._expected_varAt(4))
 
     def test_biasAt_order1_is_zero(self):
         self._check_biasAt_odd_zero(1)
@@ -736,23 +867,14 @@ class TestSine(_Base):
         self._check_varAt_order1_zero()
 
     def test_varAt_order2(self):
-        # (2.19) at n=2, j=1: cos(x)² · (ζ(2) - ζ(1)²)/(1!·1!) = cos²(x)·ζ(2)
-        self._check(self.t.varAt(2),
-                    self.dx**2 * sympy.cos(self.x)**2 * self.vx.moment(2))
+        self._check(self.t.varAt(2), self._expected_varAt(2))
 
     def test_varAt_order3_is_zero(self):
         # ζ(3)=ζ(1)=0 so all (j∈{1,2}) terms vanish
         self._check(self.t.varAt(3), sympy.Integer(0))
 
     def test_varAt_order4(self):
-        # (2.19) at n=4: sum_{j=1..3} sin^{(j)}(x)·sin^{(4-j)}(x) · (ζ(4) - ζ(j)·ζ(4-j))/(j!·(4-j)!)
-        # j=1: cos·(-cos)/6 · ζ(4); j=2: sin²/4 · (ζ(4) - ζ(2)²); j=3: (-cos)·cos/6 · ζ(4)
-        m2 = self.vx.moment(2)
-        m4 = self.vx.moment(4)
-        self._check(self.t.varAt(4),
-                    self.dx**4 * (
-                        -sympy.cos(self.x)**2 * m4 / 3
-                        + sympy.sin(self.x)**2 * (m4 - m2**2) / 4))
+        self._check(self.t.varAt(4), self._expected_varAt(4))
 
     def test_biasAt_order1_is_zero(self):
         self._check_biasAt_odd_zero(1)
@@ -801,27 +923,14 @@ class TestPow(_Base):
         self._check_varAt_order1_zero()
 
     def test_varAt_order2(self):
-        # (2.21) at n=2, j=1: C(c,1)² · (ζ(2) - ζ(1)²) = c²·ζ(2); times x^(2c-2)
-        self._check(self.t.varAt(2),
-                    self.dx**2 * self.x**(2 * self.c - 2)
-                    * self.c**2 * self.vx.moment(2))
+        self._check(self.t.varAt(2), self._expected_varAt(2))
 
     def test_varAt_order3_is_zero(self):
         # ζ(3)=ζ(1)=0 so all (j∈{1,2}) terms vanish
         self._check(self.t.varAt(3), sympy.Integer(0))
 
     def test_varAt_order4(self):
-        # (2.21) at n=4: sum_{j=1..3} C(c,j)·C(c,4-j) · (ζ(4) - ζ(j)·ζ(4-j))
-        # j=1: c·c(c-1)(c-2)/6 · ζ(4); j=2: [c(c-1)/2]² · (ζ(4) - ζ(2)²);
-        # j=3: c(c-1)(c-2)/6·c · ζ(4); times x^(2c-4)
-        c = self.c
-        m2 = self.vx.moment(2)
-        m4 = self.vx.moment(4)
-        self._check(self.t.varAt(4),
-                    self.dx**4 * self.x**(2 * c - 4)
-                    * (c**2 * (c - 1) * (c - 2) * m4 / 6
-                       + c**2 * (c - 1)**2 * (m4 - m2**2) / 4
-                       + c**2 * (c - 1) * (c - 2) * m4 / 6))
+        self._check(self.t.varAt(4), self._expected_varAt(4))
 
     def test_biasAt_order1_is_zero(self):
         self._check_biasAt_odd_zero(1)
@@ -923,22 +1032,10 @@ class TestSinXdivX(_Base):
         self._check(self.t.varAt(3), sympy.Integer(0))
 
     def test_varAt_order2(self):
-        # only j=1 contributes: coeffs[(1,)]² · (ζ(2) - ζ(1)²) = coeffs[(1,)]² · ζ(2)
-        # Equals our impl when ζ(0)=1 (Uniform default).
-        self._check(self.t.varAt(2),
-                    self.dx**2 * self.t.at(1)**2 * self.vx.moment(2))
+        self._check(self.t.varAt(2), self._expected_varAt(2))
 
     def test_varAt_order4(self):
-        # j=1,3: coeffs[(1,)]·coeffs[(3,)]·ζ(4); j=2: coeffs[(2,)]²·(ζ(4)-ζ(2)²)
-        m2 = self.vx.moment(2)
-        m4 = self.vx.moment(4)
-        c1 = self.t.at(1)
-        c2 = self.t.at(2)
-        c3 = self.t.at(3)
-        self._check(self.t.varAt(4),
-                    self.dx**4 * (c1 * c3 * m4
-                                  + c2**2 * (m4 - m2**2)
-                                  + c3 * c1 * m4))
+        self._check(self.t.varAt(4), self._expected_varAt(4))
 
     def test_orders_match_at_2(self):
         self._check_orders_match_at(2)
@@ -981,20 +1078,18 @@ class TestXaddY(_Base):
         self._check(self.t.varAt(1, 1), sympy.Integer(0))
 
     def test_varAt_order_2_0(self):
-        # full_moment=ζ_x(1)·ζ_y(1)=0; nonzero coeff pairs all have split moment with ζ(1) factor
-        self._check(self.t.varAt(2, 0), self.vx.moment(2) * self.dx**2)
+        # 1D x-only contribution; for symbolic kappa includes ζ_y(0) factor
+        self._check(self.t.varAt(2, 0), self._expected_varAt(2, 0))
 
     def test_varAt_order_0_2(self):
-        # full_moment=ζ_x(1)·ζ_y(1)=0; nonzero coeff pairs all have split moment with ζ(1) factor
-        self._check(self.t.varAt(0, 2), self.vy.moment(2) * self.dy**2)
+        self._check(self.t.varAt(0, 2), self._expected_varAt(0, 2))
 
     def test_varAt_order_2_2_is_zero(self):
         # all (nn,pn) pairs use coeff that is 0
         self._check(self.t.varAt(2, 2), sympy.Integer(0))
 
     def test_varOrder_order2(self):
-        # only p=(1,1) contributes at order 2
-        self._check(self.t.varOrder(2),  self.vx.moment(2) * self.dx**2 + self.vy.moment(2) * self.dy**2)
+        self._check(self.t.varOrder(2), self._expected_varOrder(2))
 
     def test_varOrder_order3_is_zero(self):
         self._check(self.t.varOrder(3), sympy.Integer(0))
@@ -1060,14 +1155,11 @@ class TestXmulY(_Base):
     # (2.13) δ²(xy) = ζ_x(2)·y²·δx² + ζ_y(2)·x²·δy² + ζ_x(2)·ζ_y(2)·δx²·δy²
 
     def test_varAt_order_2_0(self):
-        # 1st term of (2.13): nn=(1,0)=pn contributes y²·ζ_x(2)
-        self._check(self.t.varAt(2, 0),
-                    self.vx.moment(2) * self.y**2 * self.dx**2)
+        # 1st term of (2.13) (with ζ_y(0) factor for symbolic kappa)
+        self._check(self.t.varAt(2, 0), self._expected_varAt(2, 0))
 
     def test_varAt_order_0_2(self):
-        # 2nd term of (2.13)
-        self._check(self.t.varAt(0, 2),
-                    self.vy.moment(2) * self.x**2 * self.dy**2)
+        self._check(self.t.varAt(0, 2), self._expected_varAt(0, 2))
 
     def test_varAt_order_1_1_is_zero(self):
         # full=ζ_x(1)·ζ_y(1)=0; all split moments include ζ(1) factor
@@ -1075,40 +1167,34 @@ class TestXmulY(_Base):
 
     def test_varAt_order_2_1_is_zero(self):
         # only nonzero coeff pair (1,0)+(1,1) has full=ζ_x(2)·ζ_y(1)=0
-        # and split also vanishes
         self._check(self.t.varAt(2, 1), sympy.Integer(0))
 
     def test_varAt_order_2_2(self):
         # 3rd term of (2.13): only nn=(1,1)=pn contributes
-        # coeff² · (ζ_x(2)·ζ_y(2) - 0) = ζ_x(2)·ζ_y(2)
         self._check(self.t.varAt(2, 2),
                     self.vx.moment(2) * self.vy.moment(2)
                     * self.dx**2 * self.dy**2)
 
     def test_varOrder_order2(self):
-        # 1st + 2nd terms of (2.13): varAt(2,0) + varAt(1,1) + varAt(0,2)
-        self._check(self.t.varOrder(2),
-                    self.vx.moment(2) * self.y**2 * self.dx**2
-                    + self.vy.moment(2) * self.x**2 * self.dy**2)
+        self._check(self.t.varOrder(2), self._expected_varOrder(2))
 
     def test_varOrder_order3_is_zero(self):
-        # (3,0),(0,3): coeffs all 0; (2,1),(1,2): see test_varAt_order_2_1
         self._check(self.t.varOrder(3), sympy.Integer(0))
 
     def test_varOrder_order4(self):
-        # 3rd term of (2.13): only varAt(2,2) contributes among (m,n) with m+n=4
-        self._check(self.t.varOrder(4),
-                    self.vx.moment(2) * self.vy.moment(2)
-                    * self.dx**2 * self.dy**2)
+        self._check(self.t.varOrder(4), self._expected_varOrder(4))
 
     def test_total_variance_matches_2_13(self):
-        # full Formula (2.13): δ²(xy) = sum of varOrder(n) over all n
-        total = sum((self.t.varOrder(n) for n in range(1, 5)), sympy.Integer(0))
+        # Formula (2.13) extended for symbolic kappa: includes ζ_x(0), ζ_y(0)
+        # factors on the cross-terms. Reduces to (2.13) when ζ(0)=1.
+        m0x = self.vx.moment(0)
+        m0y = self.vy.moment(0)
         m2x = self.vx.moment(2)
         m2y = self.vy.moment(2)
+        total = sum((self.t.varOrder(n) for n in range(1, 5)), sympy.Integer(0))
         self._check(total,
-                    m2x * self.y**2 * self.dx**2
-                    + m2y * self.x**2 * self.dy**2
+                    m2x * m0y * self.y**2 * self.dx**2
+                    + m0x * m2y * self.x**2 * self.dy**2
                     + m2x * m2y * self.dx**2 * self.dy**2)
 
     # (2.12) overline(xy)/xy = ζ_x(0)·ζ_y(0). For Uniform ζ(0)=1, bias=0.
@@ -1202,39 +1288,29 @@ class TestXdivY(_Base):
 
     def test_biasAt_order_0_2(self):
         # δy² · (x/y³) · ζ_x(0) · ζ_y(2)
-        self._check(self.t.biasAt(0, 2),
-                    self.dy**2 * self.x * self.vy.moment(2) / self.y**3)
+        self._check(self.t.biasAt(0, 2), self._expected_biasAt(0, 2))
 
     def test_biasAt_order_0_4(self):
         # δy⁴ · (x/y⁵) · ζ_x(0) · ζ_y(4)
-        self._check(self.t.biasAt(0, 4),
-                    self.dy**4 * self.x * self.vy.moment(4) / self.y**5)
+        self._check(self.t.biasAt(0, 4), self._expected_biasAt(0, 4))
 
     def test_biasOrder_order2(self):
-        # only (0,2) contributes
-        self._check(self.t.biasOrder(2),
-                    self.dy**2 * self.x * self.vy.moment(2) / self.y**3)
+        self._check(self.t.biasOrder(2), self._expected_biasOrder(2))
 
     def test_biasOrder_order3_is_zero(self):
         # (3,0): coeff=0; (0,3): ζ_y(3)=0; (1,2)/(2,1): ζ_x(1)=0 or coeff=0
         self._check(self.t.biasOrder(3), sympy.Integer(0))
 
     def test_biasOrder_order4(self):
-        # only (0,4) contributes among (m,n) with m+n=4
-        self._check(self.t.biasOrder(4),
-                    self.dy**4 * self.x * self.vy.moment(4) / self.y**5)
+        self._check(self.t.biasOrder(4), self._expected_biasOrder(4))
 
     # varAt
 
     def test_varAt_order_2_0(self):
-        # only nn=(1,0)=pn contributes: (1/y)² · ζ_x(2) = ζ_x(2)/y²
-        self._check(self.t.varAt(2, 0),
-                    self.vx.moment(2) * self.dx**2 / self.y**2)
+        self._check(self.t.varAt(2, 0), self._expected_varAt(2, 0))
 
     def test_varAt_order_0_2(self):
-        # only nn=(0,1)=pn contributes: (-x/y²)² · ζ_y(2) = x²·ζ_y(2)/y⁴
-        self._check(self.t.varAt(0, 2),
-                    self.vy.moment(2) * self.x**2 * self.dy**2 / self.y**4)
+        self._check(self.t.varAt(0, 2), self._expected_varAt(0, 2))
 
     def test_varAt_order_1_1_is_zero(self):
         # full = ζ_x(1)·ζ_y(1) = 0; matching splits also vanish
@@ -1246,43 +1322,23 @@ class TestXdivY(_Base):
         self._check(self.t.varAt(2, 1), sympy.Integer(0))
 
     def test_varAt_order_2_2(self):
-        # only nn[0]=pn[0]=1 pairs contribute. Three j-splits each give m2x·m2y/y⁴.
-        m2x = self.vx.moment(2)
-        m2y = self.vy.moment(2)
-        self._check(self.t.varAt(2, 2),
-                    3 * m2x * m2y * self.dx**2 * self.dy**2 / self.y**4)
+        self._check(self.t.varAt(2, 2), self._expected_varAt(2, 2))
 
     def test_varAt_order_0_3_is_zero(self):
         # full = ζ_y(3) = 0; all splits also vanish
         self._check(self.t.varAt(0, 3), sympy.Integer(0))
 
     def test_varAt_order_0_4(self):
-        # nn=(0,1)+(0,3): x²·m4y/y⁶; nn=(0,2)+(0,2): x²·(m4y-m2y²)/y⁶;
-        # nn=(0,3)+(0,1): x²·m4y/y⁶ (term order matches impl's accumulation)
-        m2y = self.vy.moment(2)
-        m4y = self.vy.moment(4)
-        common = self.dy**4 * self.x**2 / self.y**6
-        self._check(self.t.varAt(0, 4),
-                    common * m4y + common * (m4y - m2y**2) + common * m4y)
+        self._check(self.t.varAt(0, 4), self._expected_varAt(0, 4))
 
     def test_varOrder_order2(self):
-        # varAt(2,0) + varAt(1,1) + varAt(0,2)
-        self._check(self.t.varOrder(2),
-                    self.vx.moment(2) * self.dx**2 / self.y**2
-                    + self.vy.moment(2) * self.x**2 * self.dy**2 / self.y**4)
+        self._check(self.t.varOrder(2), self._expected_varOrder(2))
 
     def test_varOrder_order3_is_zero(self):
         self._check(self.t.varOrder(3), sympy.Integer(0))
 
     def test_varOrder_order4(self):
-        # varAt(2,2) + varAt(0,4); (4,0)/(3,1)/(1,3) all 0
-        m2x = self.vx.moment(2)
-        m2y = self.vy.moment(2)
-        m4y = self.vy.moment(4)
-        common = self.dy**4 * self.x**2 / self.y**6
-        self._check(self.t.varOrder(4),
-                    3 * m2x * m2y * self.dx**2 * self.dy**2 / self.y**4
-                    + common * m4y + common * (m4y - m2y**2) + common * m4y)
+        self._check(self.t.varOrder(4), self._expected_varOrder(4))
 
 
 # f(x, y) = x^y. Coeffs mix x^y, x^(y-k) and powers of ln(x).
@@ -1344,24 +1400,15 @@ class TestXpowY(_Base):
         self._check(self.t.biasAt(3, 0), sympy.Integer(0))
 
     def test_biasAt_order_2_0(self):
-        # δx² · y(y-1)·x^(y-2)/2 · ζ_x(2)
-        self._check(self.t.biasAt(2, 0),
-                    self.dx**2 * self.y * (self.y - 1)
-                    * self.x**(self.y - 2) / 2 * self.vx.moment(2))
+        # δx² · y(y-1)·x^(y-2)/2 · ζ_x(2) · ζ_y(0)
+        self._check(self.t.biasAt(2, 0), self._expected_biasAt(2, 0))
 
     def test_biasAt_order_0_2(self):
-        # δy² · x^y · log(x)²/2 · ζ_y(2)
-        self._check(self.t.biasAt(0, 2),
-                    self.dy**2 * self.x**self.y
-                    * sympy.log(self.x)**2 / 2 * self.vy.moment(2))
+        # δy² · x^y · log(x)²/2 · ζ_x(0) · ζ_y(2)
+        self._check(self.t.biasAt(0, 2), self._expected_biasAt(0, 2))
 
     def test_biasOrder_order2(self):
-        # only (2,0) and (0,2) contribute (others have ζ(1)=0)
-        self._check(self.t.biasOrder(2),
-                    self.dx**2 * self.y * (self.y - 1)
-                    * self.x**(self.y - 2) / 2 * self.vx.moment(2)
-                    + self.dy**2 * self.x**self.y
-                    * sympy.log(self.x)**2 / 2 * self.vy.moment(2))
+        self._check(self.t.biasOrder(2), self._expected_biasOrder(2))
 
     def test_biasOrder_order3_is_zero(self):
         # every multi-index with sum=3 has at least one odd component
@@ -1370,28 +1417,17 @@ class TestXpowY(_Base):
     # varAt
 
     def test_varAt_order_2_0(self):
-        # nn=(1,0)=pn: coeffs² = (y·x^(y-1))² and (full - split) = ζ_x(2)
-        self._check(self.t.varAt(2, 0),
-                    self.dx**2 * self.y**2
-                    * self.x**(2 * self.y - 2) * self.vx.moment(2))
+        self._check(self.t.varAt(2, 0), self._expected_varAt(2, 0))
 
     def test_varAt_order_0_2(self):
-        # nn=(0,1)=pn: coeffs² = (x^y·log(x))² and (full - split) = ζ_y(2)
-        self._check(self.t.varAt(0, 2),
-                    self.dy**2 * self.x**(2 * self.y)
-                    * sympy.log(self.x)**2 * self.vy.moment(2))
+        self._check(self.t.varAt(0, 2), self._expected_varAt(0, 2))
 
     def test_varAt_order_1_1_is_zero(self):
         # all pairs have full = ζ_x(1)·ζ_y(1) = 0 with matching split
         self._check(self.t.varAt(1, 1), sympy.Integer(0))
 
     def test_varOrder_order2(self):
-        # only (2,0) and (0,2) contribute
-        self._check(self.t.varOrder(2),
-                    self.dx**2 * self.y**2
-                    * self.x**(2 * self.y - 2) * self.vx.moment(2)
-                    + self.dy**2 * self.x**(2 * self.y)
-                    * sympy.log(self.x)**2 * self.vy.moment(2))
+        self._check(self.t.varOrder(2), self._expected_varOrder(2))
 
     def test_varOrder_order3_is_zero(self):
         self._check(self.t.varOrder(3), sympy.Integer(0))
@@ -1430,14 +1466,14 @@ class TestXaddYaddZ(_Base):
         self.assertEqual(len(self.t.coeffs), 35)
 
     def test_varAt_order_2_0_0(self):
-        # 1D x-only contribution: δx² · ζ_x(2)
-        self._check(self.t.varAt(2, 0, 0), self.vx.moment(2) * self.dx**2)
+        # 1D x-only contribution: δx² · ζ_x(2) · ζ_y(0) · ζ_z(0)
+        self._check(self.t.varAt(2, 0, 0), self._expected_varAt(2, 0, 0))
 
     def test_varAt_order_0_2_0(self):
-        self._check(self.t.varAt(0, 2, 0), self.vy.moment(2) * self.dy**2)
+        self._check(self.t.varAt(0, 2, 0), self._expected_varAt(0, 2, 0))
 
     def test_varAt_order_0_0_2(self):
-        self._check(self.t.varAt(0, 0, 2), self.vz.moment(2) * self.dz**2)
+        self._check(self.t.varAt(0, 0, 2), self._expected_varAt(0, 0, 2))
 
     def test_varAt_order_1_1_0_is_zero(self):
         # full_moment includes ζ(1)·ζ(1)=0; nonzero coeff pairs all have split moment
@@ -1448,11 +1484,7 @@ class TestXaddYaddZ(_Base):
         self._check(self.t.varAt(1, 1, 1), sympy.Integer(0))
 
     def test_varOrder_order2(self):
-        # only (2,0,0), (0,2,0), (0,0,2) contribute; cross-pair multi-indices give 0
-        self._check(self.t.varOrder(2),
-                    self.vx.moment(2) * self.dx**2
-                    + self.vy.moment(2) * self.dy**2
-                    + self.vz.moment(2) * self.dz**2)
+        self._check(self.t.varOrder(2), self._expected_varOrder(2))
 
     def test_varOrder_order3_is_zero(self):
         self._check(self.t.varOrder(3), sympy.Integer(0))
