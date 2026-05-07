@@ -1,4 +1,7 @@
-
+"""Unit tests for Taylor.poly1d — verifies polynomial expansion of VarDbl
+inputs against analytic value/uncertainty for low- and high-degree integer
+polynomials and exception cases.
+"""
 import math
 import logging
 import os

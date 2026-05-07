@@ -1,3 +1,7 @@
+"""Unit tests for matrix.py — verifies permutation sign, integer/Hilbert
+matrix construction, noise injection, linear solve, multiply, adjugate, and
+adjugate_mul on Fraction, float, and VarDbl element types.
+"""
 import datetime
 from fractions import Fraction
 import itertools
@@ -189,8 +193,12 @@ class Adjugate (unittest.TestCase):
     '''
     A class to hold precise matrix for adjugate matrix.
     A precise matrix has all int elements.
-    ELEMENT_RANGE decides MAX_SIZE so that the calculated variance does not overflow
+    ELEMENT_RANGE decides MAX_SIZE so that the calculated variance does not overflow.
+
+    Note: this is a helper data class, not a pytest test class — its __init__
+    takes an int `size` rather than a method name, so pytest must not collect it.
     '''
+    __test__ = False
     ELEMENT_RANGE = 1 << 8
     MIN_SIZE = 2
     MAX_SIZE = 9    # overflow at matrix size 9 for ELEMENT_RANGE = 1 << 8

@@ -1,5 +1,9 @@
 package Func;
 
+/**
+ * JUnit tests for {@link IndexSin} — verifies lookup-table sin/cos values at
+ * quadrant boundaries and across the circle for each {@link SinSource}.
+ */
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

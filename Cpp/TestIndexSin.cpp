@@ -1,3 +1,8 @@
+/*
+Unit tests for IndexSin: verifies precomputed sin/cos lookup tables produce
+exact values at quadrant boundaries and reduced ULP error compared with
+std::sin/std::cos across the full circle.
+*/
 #include "IndexSin.h"
 #include "Stat.h"
 #include "Test.h"

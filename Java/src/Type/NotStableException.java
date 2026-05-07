@@ -1,7 +1,8 @@
 package Type;
 
-/*
- * The Taylor expansion result has large uncetainty for either value or variance
+/**
+ * Thrown when a Taylor expansion result has too-large uncertainty in either
+ * value or variance to be considered stable.
  */
 public class NotStableException extends Taylor1dException {
     public NotStableException(String msg, 

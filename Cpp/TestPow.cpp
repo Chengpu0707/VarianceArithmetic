@@ -1,3 +1,8 @@
+/*
+Unit tests for Taylor::pow: verifies statistical Taylor expansion of pow(x, e)
+across integer and fractional exponents, including the edge cases at x = 1
+where the expansion bias and variance must remain bounded.
+*/
 #include "TestTaylor.h"
 
 using namespace var_dbl;

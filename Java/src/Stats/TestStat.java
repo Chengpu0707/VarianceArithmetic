@@ -1,5 +1,9 @@
 package Stats;
 
+/**
+ * JUnit tests for {@link Stat} — verifies count/avg/min/max/dev behaviour on
+ * empty, single-sample and multi-sample sequences.
+ */
 import org.junit.Assert;
 import org.junit.Test;
 

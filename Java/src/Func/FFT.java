@@ -1,6 +1,10 @@
 package Func;
 
-
+/**
+ * Variance-arithmetic FFT: forward/inverse Fast Fourier Transform on VarDbl
+ * sequences using {@link IndexSin} for trig accuracy. Caches bit-reversed
+ * indices by order. Mirrors Python fft.py and C++ FFT.h.
+ */
 import Type.InitException;
 import Type.VarDbl;
 

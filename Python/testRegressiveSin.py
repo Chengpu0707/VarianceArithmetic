@@ -1,5 +1,7 @@
-'''
-'''
+"""Unit tests for regressiveSin.py — exercises RegressiveSin's recursive
+generation of sin/cos values from sin(0)=0 and sin(pi/2)=1 and validates
+self-consistency of summation identities.
+"""
 import unittest
 
 from regressiveSin import RegressiveSin

@@ -15,7 +15,7 @@ import operator
 import sympy
 import typing
 
-import momentum
+import moment
 
 
 class EDistrType(enum.Enum):
@@ -36,7 +36,7 @@ class zeta(sympy.Function):
     def _eval_evalf(self, _):
         n, kappa = self.args
         if n.is_integer and kappa.is_number:
-            return sympy.Float(momentum.Normal(bounding=float(kappa))[int(n)])
+            return sympy.Float(moment.Normal(bounding=float(kappa))[int(n)])
 
 
 class InVarException(Exception):
@@ -127,11 +127,11 @@ class InVar:
         if self._distr_type == EDistrType.Gaussian:
             return zeta(order, self._kappa)
         if order % 2 == 1:
-            return 0.0
-        # Formula (2.22): ζ(n) = 2ρ(κ) · κ^(n+1) / (n+1), 2ρ(κ) = 1/√3
-        # Use sympy.sqrt(3) (not math.sqrt(3)) so the result stays exact symbolic
-        # for symbolic kappa, and Float-coefficient FP residuals don't appear.
-        return self._kappa ** (order + 1) / (sympy.sqrt(3) * (order + 1))
+            return 0
+        # Formula (2.2) normalized: ζ(n, κ) = ∫z^n ρ dz / ∫ρ dz.
+        # For Uniform on [-√3, √3] truncated to [-κ, κ]: ζ(n, κ) = κ^n / (n+1).
+        # ζ(0, κ) = 1 by construction (normalized).
+        return self._kappa ** order / (order + 1)
 
 
 def _multi_indices(n: int, k: int):
@@ -233,11 +233,10 @@ class Taylor:
 
     def varAt(self, *orders: int) -> sympy.Expr:
         """Variance contribution at multi-index p=orders: one term of δ²f as a
-        sympy expression. Each p_k must be a non-negative int, sum(p) ≥ 1, and
-        sum(p) ≤ max_order. Implements one term of the variance per Formula
-        (2.7) (1D) / (2.10) (2D) / extension to N-D. Allows any p_k = 0 as long
-        as |p| ≥ 1, which captures 1D contributions (e.g. δ²(x+y) gets nonzero
-        terms at p=(2,0) and (0,2))."""
+        sympy expression per Formula (2.7) (1D) / (2.10) (2D) / extension to N-D.
+        Each p_k must be a non-negative int with sum(p) ≤ max_order. The all-zero
+        p=(0,…,0) is now valid: it returns f(x)²·∏ζ_k(0)·(1−∏ζ_k(0)), the n=0
+        contribution that vanishes only when ζ(0)=1."""
         if len(orders) != len(self._in_vars):
             raise TaylorException(
                 f'expected {len(self._in_vars)} orders, got {len(orders)}')
@@ -245,8 +244,6 @@ class Taylor:
             if not isinstance(o, int) or isinstance(o, bool) or o < 0:
                 raise TaylorException(f'each order must be a non-negative int, got {o}')
         total = sum(orders)
-        if total < 1:
-            raise TaylorException(f'at least one order must be positive, got {orders}')
         if total > self._max_order:
             raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
@@ -271,21 +268,20 @@ class Taylor:
 
     def varOrder(self, n: int) -> sympy.Expr:
         """Sum of varAt(*p) over all multi-indices p with |p| = n. The total
-        variance δ²f equals sum(varOrder(n) for n in 1..max_order)."""
-        if not isinstance(n, int) or isinstance(n, bool) or n < 1:
-            raise TaylorException(f'n must be a positive int, got {n}')
+        variance δ²f equals sum(varOrder(n) for n in 0..max_order)."""
+        if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+            raise TaylorException(f'n must be a non-negative int, got {n}')
         if n > self._max_order:
             raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
         return sum((self.varAt(*p) for p in _multi_indices(N, n)), sympy.Integer(0))
 
     def biasAt(self, *orders: int) -> sympy.Expr:
-        """Bias (mean − f) contribution at multi-index p=orders: one term of the
-        Taylor expansion of the mean as a sympy expression. Each p_k must be a
-        non-negative int, sum(p) ≥ 1, and sum(p) ≤ max_order. Implements one
-        term of the mean per Formula (2.6) (1D) / (2.9) (2D) / extension to N-D.
-        The all-zero p is excluded because that term equals f itself (modulo
-        ζ(0)) rather than a bias contribution."""
+        """One term of the mean's Taylor expansion at multi-index p=orders, per
+        Formula (2.6) (1D) / (2.9) (2D) / extension to N-D. Each p_k must be a
+        non-negative int with sum(p) ≤ max_order. The all-zero p=(0,…,0) returns
+        f(x)·∏ζ_k(0); the bias `mean − f` therefore equals (sum of biasAt over
+        all p) − f, with the (0,…,0) term contributing f·(∏ζ_k(0) − 1)."""
         if len(orders) != len(self._in_vars):
             raise TaylorException(
                 f'expected {len(self._in_vars)} orders, got {len(orders)}')
@@ -293,8 +289,6 @@ class Taylor:
             if not isinstance(o, int) or isinstance(o, bool) or o < 0:
                 raise TaylorException(f'each order must be a non-negative int, got {o}')
         total = sum(orders)
-        if total < 1:
-            raise TaylorException(f'at least one order must be positive, got {orders}')
         if total > self._max_order:
             raise TaylorException(f'total order {total} exceeds max_order {self._max_order}')
         N = len(self._in_vars)
@@ -309,9 +303,10 @@ class Taylor:
 
     def biasOrder(self, n: int) -> sympy.Expr:
         """Sum of biasAt(*p) over all multi-indices p with |p| = n. The total
-        bias (mean − f) equals sum(biasOrder(n) for n in 1..max_order)."""
-        if not isinstance(n, int) or isinstance(n, bool) or n < 1:
-            raise TaylorException(f'n must be a positive int, got {n}')
+        mean equals sum(biasOrder(n) for n in 0..max_order); the bias is the
+        total mean minus f."""
+        if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+            raise TaylorException(f'n must be a non-negative int, got {n}')
         if n > self._max_order:
             raise TaylorException(f'n {n} exceeds max_order {self._max_order}')
         N = len(self._in_vars)

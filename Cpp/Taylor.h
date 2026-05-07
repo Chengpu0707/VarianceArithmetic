@@ -1,3 +1,9 @@
+/*
+Statistical Taylor expansion for VarDbl: implements sin, exp, log, pow and poly1d
+using bounded normal moments. Defines the Taylor1dException hierarchy
+(NotFinite/NotMonotonic/NotPositive/NotReliable/NotStable) signalling failures of
+expansion convergence, monotonicity, finiteness, positivity and stability.
+*/
 #include <exception>
 #if __cplusplus >= 201103L
 #include <functional>
@@ -12,7 +18,7 @@
 #endif
 #include <vector>
 
-#include "Momentum.h"
+#include "Moment.h"
 #include "VarDbl.h"
 
 #ifndef __Taylor_h__
@@ -146,7 +152,7 @@ struct NotPositiveException : public TaylorIdException
 };
 
 
-const NormalMomentum IDEAL_MOMENTUM(5);
+const NormalMoment IDEAL_MOMENT(5);
 
 
 /*
@@ -174,7 +180,7 @@ public:
     constexpr static const char* INPUT_HEADER =
             "result\tvalue\tuncertainty\tinPrec\toutPrec\tbounding\tmaxOrder\tMinMonotonic\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tName";
     constexpr static const char* EXPANSION_HEADER =
-            "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMomentum\tMonotonics\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty";
+            "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMoment\tMonotonics\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty";
     constexpr static const char* OUTPUT_HEADER =
             "Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tException";
 #else
@@ -185,27 +191,27 @@ public:
 #endif
 
     static VarDbl taylor1d(const VarDbl& in, std::string name, const UnionVector s1dTaylor, bool inPrec, bool outPrec,
-            const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM,
+            const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT,
             bool checkMonotonic=true, bool checkStability=true, bool checkReliablity=true, bool checkPositive=true);
 
     static VarDbl poly1d(const VarDbl& in, UnionVector sCoeff,
-            const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+            const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
 
 public:
     static VarDbl exp(const VarDbl& in,
-            const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+            const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
     static VarDbl log(const VarDbl& in,
-            const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+            const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
     static VarDbl sin(const VarDbl& in,
-            const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+            const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
     static VarDbl pow(const VarDbl& in, double exp,
-        const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+        const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
     /*
         1d Taylor expansion for differential series {s1dTaylor} at {input}, with {name} for logging.
         When {inPrec} is true, calculate Taylor expnasion against the precision of {input}.
         When {outPrec} is true, the result of the Taylor expnasion is the precision.
         s1dTaylor[n] should already normalized by /n!. 
-        The max order of expansion is {maxOrder}, which should not exceed momentum.Normal.MAX_ORDER
+        The max order of expansion is {maxOrder}, which should not exceed moment.Normal.MAX_ORDER
 
         When {checkMonotonic} is true, raise {NotMonotonicException} if 
             after full expansion, the monotonic count is still less than {MIN_MONOTONIC_COUNT}.
@@ -213,7 +219,7 @@ public:
 
         When {checkStability} is true, raise {NotStableException} if 
             after full expansion, the value for the last expansion term is more than 
-            momentum.leakage-fold of the expansion uncertainty.
+            moment.leakage-fold of the expansion uncertainty.
         It should always be True.
 
         When {checkReliablity} is true, raise {NotReliableException} if
@@ -232,16 +238,16 @@ public:
      */
     static VarDbl taylor1d(const VarDbl& in, std::string name, const std::vector<double>& s1dTaylor, bool inPrec, bool outPrec,
 #if __cplusplus >= 201103L
-                    const char* const dumpPath=nullptr, const Momentum& momentum=IDEAL_MOMENTUM,
+                    const char* const dumpPath=nullptr, const Moment& moment=IDEAL_MOMENT,
 #else
-                    const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM,
+                    const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT,
 #endif
                     bool checkMonotonic=true, bool checkStability=true, bool checkReliablity=true, bool checkPositive=true);
     static VarDbl taylor1d(const VarDbl& in, std::string name, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
 #if __cplusplus >= 201103L
-                    const char* const dumpPath=nullptr, const Momentum& momentum=IDEAL_MOMENTUM,
+                    const char* const dumpPath=nullptr, const Moment& moment=IDEAL_MOMENT,
 #else
-                    const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM,
+                    const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT,
 #endif
                     bool checkMonotonic=true, bool checkStability=true, bool checkReliablity=true, bool checkPositive=true);
 
@@ -249,16 +255,16 @@ public:
      1d polynomial with coeeficient {sCoeff}
     */
                     static VarDbl poly1d(const VarDbl& in, const std::vector<double>& sCoeff,
-                       const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+                       const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
     static VarDbl poly1d(const VarDbl& in, const std::vector<VarDbl>& sCoeff,
-                       const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+                       const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
 #if __cplusplus >= 202002L
     template <typename T> requires std::integral<T>
 #else
     template <typename T>
 #endif
     static VarDbl poly1d(const VarDbl& in, const std::vector<T>& sCoeff,
-                       const char* const dumpPath=0, const Momentum& momentum=IDEAL_MOMENTUM);
+                       const char* const dumpPath=0, const Moment& moment=IDEAL_MOMENT);
 };
 
 
@@ -267,7 +273,7 @@ const int Taylor::MIN_MONOTONIC_COUNT = 20;
 const char* Taylor::INPUT_HEADER =
         "result\tvalue\tuncertainty\tinPrec\toutPrec\tbounding\tmaxOrder\tMinMonotonic\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tName";
 const char* Taylor::EXPANSION_HEADER =
-        "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMomentum\tMonotonics\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty";
+        "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMoment\tMonotonics\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty";
 const char* Taylor::OUTPUT_HEADER =
         "Value Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty\tException";
 #endif
@@ -275,17 +281,17 @@ const char* Taylor::OUTPUT_HEADER =
 
 inline VarDbl Taylor::taylor1d(
     const VarDbl& in, std::string name, const std::vector<double>& s1dTaylor, bool inPrec, bool outPrec,
-    const char* const dumpPath, const Momentum& momentum,
+    const char* const dumpPath, const Moment& moment,
     bool checkMonotonic, bool checkStability, bool checkReliablity, bool checkPositive
     )
 {
 #if __cplusplus >= 201103L
     return taylor1d(in, name, UnionVector(std::move(s1dTaylor)), inPrec, outPrec,
-                    dumpPath, momentum,
+                    dumpPath, moment,
                     checkMonotonic, checkStability, checkReliablity, checkPositive);
 #else
     return taylor1d(in, name, UnionVector(s1dTaylor), inPrec, outPrec,
-                    dumpPath, momentum,
+                    dumpPath, moment,
                     checkMonotonic, checkStability, checkReliablity, checkPositive);
 #endif
 }
@@ -293,17 +299,17 @@ inline VarDbl Taylor::taylor1d(
 
 inline VarDbl Taylor::taylor1d(
     const VarDbl& in, std::string name, const std::vector<VarDbl>& s1dTaylor, bool inPrec, bool outPrec,
-    const char* const dumpPath, const Momentum& momentum,
+    const char* const dumpPath, const Moment& moment,
     bool checkMonotonic, bool checkStability, bool checkReliablity, bool checkPositive
     )
 {
 #if __cplusplus >= 201103L
     return taylor1d(in, name, UnionVector(std::move(s1dTaylor)), inPrec, outPrec,
-                    dumpPath, momentum,
+                    dumpPath, moment,
                     checkMonotonic, checkStability, checkReliablity, checkPositive);
 #else
     return taylor1d(in, name, UnionVector(s1dTaylor), inPrec, outPrec,
-                    dumpPath, momentum,
+                    dumpPath, moment,
                     checkMonotonic, checkStability, checkReliablity, checkPositive);
 #endif
 }
@@ -311,7 +317,7 @@ inline VarDbl Taylor::taylor1d(
 
 inline VarDbl Taylor::taylor1d(
     const VarDbl& in, std::string name, const UnionVector s1dTaylor, bool inPrec, bool outPrec,
-    const char* const dumpPath, const Momentum& momentum,
+    const char* const dumpPath, const Moment& moment,
     bool checkMonotonic, bool checkStability, bool checkReliablity, bool checkPositive
     )
 {
@@ -356,7 +362,7 @@ inline VarDbl Taylor::taylor1d(
         ofs << INPUT_HEADER <<"\n";
         ofs << (isDbl? pDbl[0] : pVar[0].value()) << '\t' << in.value() << '\t' << in.uncertainty() << '\t'
             << inPrec << '\t' << outPrec << '\t'
-            << momentum.bounding << '\t' << momentum.maxOrder() << '\t' <<Taylor::MIN_MONOTONIC_COUNT << '\t'
+            << moment.bounding << '\t' << moment.maxOrder() << '\t' <<Taylor::MIN_MONOTONIC_COUNT << '\t'
             << checkMonotonic << '\t' << checkStability << '\t' << checkReliablity << '\t' << checkPositive << '\t'
             << name << '\n';
         ofs << EXPANSION_HEADER << "\n";
@@ -393,21 +399,21 @@ inline VarDbl Taylor::taylor1d(
     size_t monotonics = 0;
     bool monotonicPrev = true, finite=true;
     size_t n = 1;
-    for (; (n < momentum.maxOrder()) && (n < size) && std::isfinite(uncN) && (uncN > 0); ++n, uncN *= unc) {
+    for (; (n < moment.maxOrder()) && (n < size) && std::isfinite(uncN) && (uncN > 0); ++n, uncN *= unc) {
         std::string except;
         size_t j = 1;
         try {
             if (isDbl) {
                 if (abs(uncN) < 1)
-                    newValue = pDbl[n] * (uncN * momentum[n]);
+                    newValue = pDbl[n] * (uncN * moment[n]);
                 else
-                    newValue = pDbl[n] * uncN * momentum[n];
+                    newValue = pDbl[n] * uncN * moment[n];
             }
             else {
                 if (abs(uncN) < 1)
-                    newValue = pVar[n] * (uncN * momentum[n]);
+                    newValue = pVar[n] * (uncN * moment[n]);
                 else
-                    newValue = pVar[n] * uncN * momentum[n];
+                    newValue = pVar[n] * uncN * moment[n];
             }
             try {
                 newVariance = VarDbl();
@@ -415,17 +421,17 @@ inline VarDbl Taylor::taylor1d(
                     double newVar = 0;
                     for (; j < n; ++j) {
                         if ((uncN < 1))
-                            newVar += pDbl[j] * pDbl[n - j] * (uncN * (momentum[n] - momentum[j] * momentum[n - j]));
+                            newVar += pDbl[j] * pDbl[n - j] * (uncN * (moment[n] - moment[j] * moment[n - j]));
                         else
-                            newVar += pDbl[j] * pDbl[n - j] * uncN * (momentum[n] - momentum[j] * momentum[n - j]);
+                            newVar += pDbl[j] * pDbl[n - j] * uncN * (moment[n] - moment[j] * moment[n - j]);
                     }
                     newVariance += newVar;
                 } else {
                     for (; j < n; ++j) {
                         if ((uncN < 1))
-                            newVariance += pVar[j] * pVar[n - j] * (uncN * (momentum[n] - momentum[j] * momentum[n - j]));
+                            newVariance += pVar[j] * pVar[n - j] * (uncN * (moment[n] - moment[j] * moment[n - j]));
                         else
-                            newVariance += pVar[j] * pVar[n - j] * uncN * (momentum[n] - momentum[j] * momentum[n - j]);
+                            newVariance += pVar[j] * pVar[n - j] * uncN * (moment[n] - moment[j] * moment[n - j]);
                     }
                 }
                 try {
@@ -475,7 +481,7 @@ inline VarDbl Taylor::taylor1d(
         if (ofs) {
             ofs << n
                 << "\t" << (isDbl? pDbl[n] : pVar[n].value()) << "\t" << (isDbl? 0 : pVar[n].uncertainty())
-                << "\t" << uncN << "\t" << momentum[n] << "\t" << monotonics
+                << "\t" << uncN << "\t" << moment[n] << "\t" << monotonics
                 << "\t" << value.value() << "\t" << value.uncertainty()
                 << "\t" << variance.value() << "\t" << variance.uncertainty()
                 << "\t" << newValue.value() << "\t" << newValue.variance()
@@ -500,7 +506,7 @@ inline VarDbl Taylor::taylor1d(
             throw NotStableException(name, in, s1dTaylor, inPrec, outPrec,
                         value, variance, n, monotonics, newValue, newVariance);
         }
-        if (std::abs(newValue.value()) > std::sqrt(variance.value() + value.variance()) *momentum.leakage) {
+        if (std::abs(newValue.value()) > std::sqrt(variance.value() + value.variance()) *moment.leakage) {
             dumpOutput(value, variance, "NotStableException\tVariance");
             throw NotStableException(name, in, s1dTaylor, inPrec, outPrec,
                         value, variance, n, monotonics, newValue, newVariance);
@@ -532,15 +538,15 @@ inline VarDbl Taylor::taylor1d(
 }
 
 inline VarDbl Taylor::poly1d(const VarDbl& in, const std::vector<VarDbl>& sCoeff,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
-    return poly1d(in, UnionVector(sCoeff), dumpPath, momentum);
+    return poly1d(in, UnionVector(sCoeff), dumpPath, moment);
 }
 
 inline VarDbl Taylor::poly1d(const VarDbl& in, const std::vector<double>& sCoeff,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
-    return poly1d(in, UnionVector(sCoeff), dumpPath, momentum);
+    return poly1d(in, UnionVector(sCoeff), dumpPath, moment);
 }
 
 #if __cplusplus >= 202002L
@@ -549,18 +555,18 @@ template <typename T> requires std::integral<T>
 template <typename T>
 #endif
 inline VarDbl Taylor::poly1d(const VarDbl& in, const std::vector<T>& sCoeff,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
     std::vector<double> inCoeff(sCoeff.size());
     for (size_t i = 0; i < sCoeff.size(); ++i) {
         inCoeff[i] = static_cast<double>(sCoeff[i]);
     }
-    return poly1d(in, UnionVector(inCoeff), dumpPath, momentum);
+    return poly1d(in, UnionVector(inCoeff), dumpPath, moment);
 }
 
 
 inline VarDbl Taylor::poly1d(const VarDbl& in, UnionVector sCoeff,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
 #if __cplusplus >= 201703L
     const bool isDbl = std::holds_alternative<std::vector<double>>(sCoeff);
@@ -574,7 +580,7 @@ inline VarDbl Taylor::poly1d(const VarDbl& in, UnionVector sCoeff,
     const VarDbl* const sVar = isDbl? NULL : sCoeff.var.data();
 #endif
 
-    if (size >= momentum.maxOrder()*2) {
+    if (size >= moment.maxOrder()*2) {
         std::ostringstream oss;
         oss << "coefficient length " << size << " is too large!";
         throw std::invalid_argument(oss.str());
@@ -643,48 +649,48 @@ inline VarDbl Taylor::poly1d(const VarDbl& in, UnionVector sCoeff,
     }
     std::ostringstream oss;
     oss << "Poly(" << exp << ")";
-    return taylor1d(in, oss.str(), s1dTaylor, false, false, dumpPath, momentum,
+    return taylor1d(in, oss.str(), s1dTaylor, false, false, dumpPath, moment,
                 false, false, true, true);
 }
 
 inline VarDbl Taylor::exp(const VarDbl& in,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(momentum.maxOrder());
+    sTaylor.reserve(moment.maxOrder());
     sTaylor.push_back(std::exp(in.value()));
     double n = 1;
-    for (size_t i = 1; i < momentum.maxOrder(); ++i) {
+    for (size_t i = 1; i < moment.maxOrder(); ++i) {
         n *= 1.0 / i;
         sTaylor.push_back(n);
     }
     std::ostringstream os;
     os << "exp(" << in << ")";
-    return taylor1d(in, os.str(), UnionVector(sTaylor), false, true, dumpPath, momentum);
+    return taylor1d(in, os.str(), UnionVector(sTaylor), false, true, dumpPath, moment);
 }
 
 inline VarDbl Taylor::log(const VarDbl& in,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(momentum.maxOrder());
+    sTaylor.reserve(moment.maxOrder());
     sTaylor.push_back(std::log(in.value()));
-    for (size_t i = 1; i < momentum.maxOrder(); ++i) {
+    for (size_t i = 1; i < moment.maxOrder(); ++i) {
         sTaylor.push_back((((i%2) == 1)? 1.0 : -1.0) / i);
     }
     std::ostringstream os;
     os << "log(" << in << ")";
-    return taylor1d(in, os.str(), UnionVector(sTaylor), true, false, dumpPath, momentum);
+    return taylor1d(in, os.str(), UnionVector(sTaylor), true, false, dumpPath, moment);
 }
 
 inline VarDbl Taylor::sin(const VarDbl& in,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
     std::vector<double> sTaylor;
-    sTaylor.reserve(momentum.maxOrder());
+    sTaylor.reserve(moment.maxOrder());
     sTaylor.push_back(std::sin(in.value()));
     double n = 1;
-    for (size_t i = 1; i < momentum.maxOrder(); ++i) {
+    for (size_t i = 1; i < moment.maxOrder(); ++i) {
         n *= 1.0 / i;
         switch (i % 4) {
             case 0:
@@ -703,11 +709,11 @@ inline VarDbl Taylor::sin(const VarDbl& in,
     }
     std::ostringstream os;
     os << "sin(" << in << ")";
-    return taylor1d(in, os.str(), UnionVector(sTaylor), false, false, dumpPath, momentum);
+    return taylor1d(in, os.str(), UnionVector(sTaylor), false, false, dumpPath, moment);
 }
 
 inline VarDbl Taylor::pow(const VarDbl& in, double exp,
-        const char* const dumpPath, const Momentum& momentum)
+        const char* const dumpPath, const Moment& moment)
 {
     if (exp == 0)
         return VarDbl(1);
@@ -718,7 +724,7 @@ inline VarDbl Taylor::pow(const VarDbl& in, double exp,
         if (exp > 0) {
             std::vector<double> sCoeff((size_t)(exp + 1));
             sCoeff[(size_t) exp] = 1;
-            return poly1d(in, UnionVector(sCoeff), dumpPath, momentum);
+            return poly1d(in, UnionVector(sCoeff), dumpPath, moment);
         }
         if ((((int) exp) & 1) == 0)
             neg = false;
@@ -726,16 +732,16 @@ inline VarDbl Taylor::pow(const VarDbl& in, double exp,
         throw std::invalid_argument("Negative base with non-integer exponent");
     }
     std::vector<VarDbl> sTaylor;
-    sTaylor.reserve(momentum.maxOrder());
+    sTaylor.reserve(moment.maxOrder());
     sTaylor.push_back(VarDbl(std::pow(std::abs(in.value()), exp)));
     sTaylor.push_back(VarDbl(exp));
-    for (size_t i = 2; i < momentum.maxOrder(); ++i) {
+    for (size_t i = 2; i < moment.maxOrder(); ++i) {
         sTaylor.push_back(sTaylor[i - 1] * ((exp + 1)/i - 1));
     }
     std::ostringstream os;
     os << "pow(" << in << ", " << exp << ")";
     VarDbl res = taylor1d((in.value() >= 0)? in : -in,
-                          os.str(), UnionVector(sTaylor), true, true, dumpPath, momentum);
+                          os.str(), UnionVector(sTaylor), true, true, dumpPath, moment);
     return neg? -res : res;
 }
 

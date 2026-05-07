@@ -1,5 +1,9 @@
 package Stats;
 
+/**
+ * Streaming statistics counter: tracks count, sum, sum-of-squares, min/max
+ * and the indices at which min/max occurred for a sequence of double samples.
+ */
 public class Stat {
 	private int _count;
 	private double _sum;

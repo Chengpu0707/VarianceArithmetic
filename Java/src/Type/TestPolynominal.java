@@ -1,5 +1,10 @@
 package Type;
 
+/**
+ * JUnit tests for {@link Taylor} polynomial expansion (poly1d) — checks
+ * value/uncertainty propagation through low- and higher-degree integer
+ * polynomials evaluated on VarDbl inputs.
+ */
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

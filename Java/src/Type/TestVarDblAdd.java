@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * JUnit tests for {@link VarDbl} addition: verifies value/uncertainty
+ * propagation through + and += operators across edge cases.
+ */
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

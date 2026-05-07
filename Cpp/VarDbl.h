@@ -2,7 +2,7 @@
 VarDbl is a class to implement variance arithmetic in C++
 
 VarDbl.h is intended to be fully inline and deplored along without any making system.
-It relies only on Momentum.h, which is also in the var_dbl namespace.
+It relies only on Moment.h, which is also in the var_dbl namespace.
 */
 #include <cmath>
 

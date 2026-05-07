@@ -141,18 +141,18 @@ IpyNb/DistributionZeroAndPole.ipynb
 
 ### _Sub Section: Bounding Asymptote_
 
-Calculation of bounded momentum for Normal and Uniform distributions in _Sub Section Bounding Asymptote_ of _Section Statistical Taylor Expansion_:
- * Cpp/momentum.h
- * Java/Types/Momentum.java: calculate uncertainty as well.
- * Python/Momentum.py
+Calculation of bounded moment for Normal and Uniform distributions in _Sub Section Bounding Asymptote_ of _Section Statistical Taylor Expansion_:
+ * Cpp/Moment.h
+ * Java/Types/Moment.java: calculate uncertainty as well.
+ * Python/moment.py
 
 Analysis:
- * IPyNb/Momentum.ipynb: with linear fit.
+ * IPyNb/Moment.ipynb: with linear fit.
 
 The unit tests:
- * Cpp/TestMomentum.cpp
- * Java/Types/TestMomentum.java
- * Python/testMomentum.py
+ * Cpp/TestMoment.cpp
+ * Java/Types/TestMoment.java
+ * Python/testMoment.py
 
 
 ### _Sub Section: Statistical Bounding_ and  _Sub Section: Ideal Statistics_
@@ -324,7 +324,7 @@ $ pip install coverage
 
 Run all the test*.py files together, which will take much longer (~3930 secons) than the normal unit test (~820 seconds).
 '''
-VarianceArithmetic\Python> coverage run -m unittest testCompare.py testFFT.py testHisto.py testIndexSin.py testMatrix.py testMomentum.py testMovingLineFit.py testPolynominal.py testRegressiveSin.py testSinCos.py testStatBounding.py testTaylor.py testValDbl.py
+VarianceArithmetic\Python> coverage run -m unittest testCompare.py testFFT.py testHisto.py testIndexSin.py testMatrix.py testMoment.py testMovingLineFit.py testPolynominal.py testRegressiveSin.py testSinCos.py testStatBounding.py testTaylor.py testValDbl.py
 Ran 256 tests in 3930.139s
 OK (skipped=8)
 ```
@@ -338,7 +338,7 @@ fft.py                   692    100    86%   163-165, 215, 217, 255-256, 259-262
 histo.py                  86      6    93%   20, 33, 37, 53, 56, 102
 indexSin.py              198     17    91%   42, 80-81, 125, 133-134, 158-161, 166, 170, 173, 177, 180, 183, 212, 232
 matrix.py                125     11    91%   70, 80, 82, 90, 95, 106, 109, 159-161, 182
-momentum.py              184     84    54%   17, 22, 27, 31, 43-57, 61-77, 88, 97, 100, 102, 104, 111, 115-157, 173, 178
+moment.py                184     84    54%   17, 22, 27, 31, 43-57, 61-77, 88, 97, 100, 102, 104, 111, 115-157, 173, 178
 movingLineFit.py          45      2    96%   68-69
 regressiveSin.py          75      9    88%   38, 40, 42, 46, 58, 77, 84, 92, 98
 taylor.py                306     50    84%   21, 66, 82-102, 156, 159, 163, 243-247, 263-265, 270-271, 277-279, 288-289, 293-295, 331-333, 350-351, 357, 377
@@ -370,9 +370,9 @@ File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Taylor.h'
 Lines executed:36.14% of 249
 Creating 'Taylor.h.gcov'
 
-File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Momentum.h'
+File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/Moment.h'
 Lines executed:100.00% of 31
-Creating 'Momentum.h.gcov'
+Creating 'Moment.h.gcov'
 
 File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/VarDbl.h'
 Lines executed:84.87% of 119

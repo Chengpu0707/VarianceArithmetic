@@ -1,5 +1,9 @@
 package Stats;
 
+/**
+ * JUnit tests for {@link Noise} — verifies that gaussian() and white()
+ * produce samples consistent with their target distributions.
+ */
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import static org.junit.Assert.assertEquals;

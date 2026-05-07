@@ -1,7 +1,8 @@
 package Type;
 
-/*
- * The Taylor expansion is not strictly monotonic
+/**
+ * Thrown when a Taylor expansion fails to be strictly monotonic across the
+ * required minimum number of terms.
  */
 public class NotMonotonicException extends Taylor1dException {
     public NotMonotonicException(String msg, 

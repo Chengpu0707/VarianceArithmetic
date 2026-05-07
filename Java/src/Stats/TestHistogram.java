@@ -1,5 +1,9 @@
 package Stats;
 
+/**
+ * JUnit tests for {@link Histogram} — verifies default construction,
+ * binning, range/divids handling and summary statistics on synthetic input.
+ */
 import org.junit.Assert;
 import org.junit.Test;
 

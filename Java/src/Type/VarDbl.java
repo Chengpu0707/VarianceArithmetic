@@ -1,5 +1,10 @@
 package Type;
 
+/**
+ * Core VarDbl type implementing variance arithmetic: a (value, variance) pair
+ * with arithmetic operator equivalents, ULP-aware initialization, and Taylor
+ * expansion entry points. Mirrors Python varDbl.py and C++ VarDbl.h.
+ */
 import java.math.BigInteger;
 
 import Type.VarDbl;

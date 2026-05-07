@@ -1,5 +1,10 @@
 package Func;
 
+/**
+ * Index-frequency sin/cos lookup with resolution pi/size (size = 1<<order):
+ * supports Prec, Quart and Lib SinSource variants for minimum float error in
+ * FFT and regression-based sin generation.
+ */
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;

@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * JUnit tests for {@link VarDbl} — covers construction, value/uncertainty
+ * accessors, equality/hashing and basic arithmetic identity behaviour.
+ */
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -1,3 +1,7 @@
+"""Unit tests for indexSin.py — checks IndexSin lookup tables (Quart/Full/Fixed
+sources) for correctness at quadrant boundaries and across the full circle,
+and writes histogram statistics for analysis.
+"""
 import math
 import os
 import typing

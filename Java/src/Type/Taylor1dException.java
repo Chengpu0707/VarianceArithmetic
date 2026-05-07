@@ -1,5 +1,10 @@
 package Type;
 
+/**
+ * Base checked exception for 1-D Taylor expansion failures: carries the input,
+ * partial value/variance, expansion order and current Taylor coefficient
+ * vector for diagnostics. Subclassed for specific failure modes.
+ */
 public class Taylor1dException extends Exception {
     public final String name;
     public final UnionArray s1dTaylor;

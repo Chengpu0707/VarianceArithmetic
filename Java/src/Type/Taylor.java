@@ -1,11 +1,17 @@
 package Type;
 
+/**
+ * Statistical Taylor expansion for VarDbl: implements sin, exp, log, pow and
+ * polynomial expansion using a bounded {@link NormalMoment}. Mirrors Python
+ * taylor.py and C++ Taylor.h. Throws {@link Taylor1dException} subclasses on
+ * convergence/monotonicity/finiteness/positivity/stability failures.
+ */
 import java.io.FileWriter;
 import java.io.IOException;
 
 
 public class Taylor {
-    static final NormalMomentum IDEAL_MOMENTUM = new NormalMomentum(5.0);
+    static final NormalMoment IDEAL_MOMENT = new NormalMoment(5.0);
 
     static final int MIN_MONOTONIC_COUNT = 20;
 
@@ -13,7 +19,7 @@ public class Taylor {
             "result\tvalue\tuncertainty\tinPrec\toutPrec\tbounding\tmaxOrder\tMinMonotonic" +
             "\tcheckMonotonic\tcheckStability\tcheckReliablity\tcheckPositive\tName";
     static String EXTENSION_HEADER = 
-            "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMomentum\tMonotonics" +
+            "Order\tTaylor Value\tTaylor Uncertainty\tExponent\tMoment\tMonotonics" +
             "\tValue Value\tValue Uncertainty\tVariance Value\tVariance Uncertainty" +
             "\tNew Value Value\tNew Value Uncertainty\tNew Variance Value\tNew Variance Uncertainty";
     static String OUTPUT_HEADER =
@@ -35,7 +41,7 @@ public class Taylor {
     When {inPrec} is true, calculate Taylor expnasion against the precision of {input}.
     When {outPrec} is true, the result of the Taylor expnasion is the precision.
     s1dTaylor[n] should already normalized by /n!. 
-    The max order of expansion is {maxOrder}, which should not exceed momentum.Normal.MAX_ORDER
+    The max order of expansion is {maxOrder}, which should not exceed moment.Normal.MAX_ORDER
 
     When {checkMonotonic} is true, raise {NotMonotonicException} if 
         after full expansion, the monotonic count is still less than {MIN_MONOTONIC_COUNT}.
@@ -62,7 +68,7 @@ public class Taylor {
      */
     static private VarDbl taylor1d(
             final VarDbl in, final String name, final UnionArray s1dTaylor, boolean inPrec, boolean outPrec,
-            final String dumpPath, final Momentum momentum,
+            final String dumpPath, final Moment moment,
             boolean checkMonotonic, boolean checkStability, boolean checkPositive, boolean checkReliablity) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                 InitException, IOException {
@@ -105,7 +111,7 @@ public class Taylor {
             fw.write(String.format("%.15e\t%.15e\t%.15e\t%b\t%b\t%.3f\t%d\t%d\t%b\t%b\t%b\t%b\t%s\n", 
                      (s1dTaylor.sDbl != null)? s1dTaylor.sDbl[0] : s1dTaylor.sVar[0].value(), 
                      in.value(), in.uncertainty(), inPrec, outPrec, 
-                     momentum.bounding, momentum.maxOrder, MIN_MONOTONIC_COUNT,
+                     moment.bounding, moment.maxOrder, MIN_MONOTONIC_COUNT,
                      checkMonotonic, checkStability, checkReliablity, checkPositive, name));
             fw.write(EXTENSION_HEADER + "\n");
         }
@@ -120,7 +126,7 @@ public class Taylor {
         VarDbl prevVariance = new VarDbl();
         VarDbl newValue = null, newVariance = null;
         int n = 1;
-        for (; (n < momentum.maxOrder) && (n < length) && Double.isFinite(uncN) && (uncN > 0); ++n, uncN *= unc) {
+        for (; (n < moment.maxOrder) && (n < length) && Double.isFinite(uncN) && (uncN > 0); ++n, uncN *= unc) {
             newValue = new VarDbl();
             newVariance = new VarDbl();
             String infinite = null;
@@ -128,31 +134,31 @@ public class Taylor {
             try {
                 if (s1dTaylor.sDbl != null) {
                     if (uncN < 1)
-                        newValue.addInPlace(s1dTaylor.sDbl[n] * (uncN * momentum.get(n)));
+                        newValue.addInPlace(s1dTaylor.sDbl[n] * (uncN * moment.get(n)));
                     else
-                        newValue.addInPlace(s1dTaylor.sDbl[n] * uncN * momentum.get(n));
+                        newValue.addInPlace(s1dTaylor.sDbl[n] * uncN * moment.get(n));
                     double newVar = 0;
                     for (j = 1; j < n; ++j) {
                         if (uncN < 1)
                             newVar += s1dTaylor.sDbl[j] * s1dTaylor.sDbl[n - j] * (uncN *
-                                (momentum.get(n) - momentum.get(j) * momentum.get(n - j)));
+                                (moment.get(n) - moment.get(j) * moment.get(n - j)));
                         else
                             newVar += s1dTaylor.sDbl[j] * s1dTaylor.sDbl[n - j] * uncN *
-                                (momentum.get(n) - momentum.get(j) * momentum.get(n - j));
+                                (moment.get(n) - moment.get(j) * moment.get(n - j));
                     }
                     newVariance.addInPlace(newVar);
                 } else {
                     if (uncN < 1)
-                        newValue.addInPlace(s1dTaylor.sVar[n].multiply(uncN * momentum.get(n)));
+                        newValue.addInPlace(s1dTaylor.sVar[n].multiply(uncN * moment.get(n)));
                     else
-                        newValue.addInPlace(s1dTaylor.sVar[n].multiply(uncN).multiply(momentum.get(n)));
+                        newValue.addInPlace(s1dTaylor.sVar[n].multiply(uncN).multiply(moment.get(n)));
                     for (j = 1; j < n; ++j) {
                         if (uncN < 1)
                             newVariance.addInPlace(s1dTaylor.sVar[j].multiply(s1dTaylor.sVar[n - j]).multiply(uncN *
-                                (momentum.get(n) - momentum.get(j) * momentum.get(n - j))));
+                                (moment.get(n) - moment.get(j) * moment.get(n - j))));
                         else
                             newVariance.addInPlace(s1dTaylor.sVar[j].multiply(s1dTaylor.sVar[n - j]).multiply(uncN)
-                                .multiply(momentum.get(n) - momentum.get(j) * momentum.get(n - j)));
+                                .multiply(moment.get(n) - moment.get(j) * moment.get(n - j)));
                     }
                 }
                 value.addInPlace(newValue);
@@ -182,7 +188,7 @@ public class Taylor {
                         n, 
                         (s1dTaylor.sDbl != null)? s1dTaylor.sDbl[n] : s1dTaylor.sVar[n].value(),
                         (s1dTaylor.sDbl != null)? 0 : s1dTaylor.sVar[n].uncertainty(),
-                        uncN, momentum.get(n), monotonics, 
+                        uncN, moment.get(n), monotonics, 
                         value.value(), value.uncertainty(), variance.value(), variance.uncertainty(),
                         newValue.value(), newValue.variance(), newVariance.value(), newVariance.uncertainty()));
                 fw.flush();
@@ -208,7 +214,7 @@ public class Taylor {
                     in, value, variance, n, newValue, newVariance, monotonics);
         }
         if (checkStability) {
-            if (newValue.value() > Math.sqrt(variance.value()) * (1 - momentum.get(0))) {
+            if (newValue.value() > Math.sqrt(variance.value()) * moment.leakage) {
                 writeResult(fw, "NotStableException\tvariance", value, variance);
                 throw new NotStableException(String.format("Taylor1d: limit=%e", unc),
                         name, s1dTaylor, inPrec, outPrec,
@@ -243,19 +249,19 @@ public class Taylor {
     } 
 
     static public VarDbl taylor1d(final VarDbl in, final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec, 
-                                  final String dumpPath, final Momentum momment) 
+                                  final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                 InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            dumpPath, momment, 
+            dumpPath, moment, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec, 
-                                  final Momentum momment) 
+                                  final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                 InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            null, momment, 
+            null, moment, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec, 
@@ -263,14 +269,14 @@ public class Taylor {
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                 InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            dumpPath, IDEAL_MOMENTUM, 
+            dumpPath, IDEAL_MOMENT, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, VarDbl[] s1dTaylor, boolean inPrec, boolean outPrec) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException {
         try {
-            return taylor1d(in, name, s1dTaylor, inPrec, outPrec, IDEAL_MOMENTUM);
+            return taylor1d(in, name, s1dTaylor, inPrec, outPrec, IDEAL_MOMENT);
         } catch (IOException ex) {
             assert false;
             return null;
@@ -278,11 +284,11 @@ public class Taylor {
     }
 
     static public VarDbl taylor1d(final VarDbl in, final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec, 
-                                  final String dumpPath, final Momentum momentum) 
+                                  final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            dumpPath, momentum, 
+            dumpPath, moment, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec, 
@@ -290,21 +296,21 @@ public class Taylor {
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            dumpPath, IDEAL_MOMENTUM, 
+            dumpPath, IDEAL_MOMENT, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec, 
-                                  final Momentum momment) 
+                                  final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
         return taylor1d(in, name, new UnionArray(s1dTaylor), inPrec, outPrec, 
-            null, momment, 
+            null, moment, 
             true, true, true, true);
     }
     static public VarDbl taylor1d(final VarDbl in, final String name, double[] s1dTaylor, boolean inPrec, boolean outPrec) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException  {
-        return taylor1d(in, name, s1dTaylor, inPrec, outPrec, IDEAL_MOMENTUM);
+        return taylor1d(in, name, s1dTaylor, inPrec, outPrec, IDEAL_MOMENT);
     }
 
     /*
@@ -312,7 +318,7 @@ public class Taylor {
     Allow input.value() +- input.uncertainty() to include 0
     */
     static private VarDbl poly1d(final VarDbl in, final UnionArray s1dCoeff, 
-                                 final String dumpPath, final Momentum momentum) 
+                                 final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
         final int length;
@@ -327,9 +333,9 @@ public class Taylor {
         }
         else
             throw new IllegalArgumentException("Invalid Taylor coefficient");
-        if (length * 2 >= momentum.maxOrder) {
+        if (length * 2 >= moment.maxOrder) {
             throw new IllegalArgumentException(String.format("coefficient length %d >= %d", 
-                    length, momentum.maxOrder / 2));
+                    length, moment.maxOrder / 2));
         }
         final int exp = length - 1;
         if (s1dCoeff.sVar != null) {
@@ -374,56 +380,56 @@ public class Taylor {
             }
         }
         return taylor1d(in, String.format("Poly[%d]", exp), 
-                    s1dTaylor, false, false, dumpPath, momentum,
+                    s1dTaylor, false, false, dumpPath, moment,
                     false, false, true, true);
     }
 
     static public VarDbl poly1d(final VarDbl in, final VarDbl[] sCoeff, 
-                                final String dumpPath, final Momentum momentum) 
+                                final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), dumpPath, momentum);
+        return poly1d(in, new UnionArray(sCoeff), dumpPath, moment);
     }
     static public VarDbl poly1d(final VarDbl in, final VarDbl[] sCoeff, 
                                 final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), dumpPath, IDEAL_MOMENTUM);
+        return poly1d(in, new UnionArray(sCoeff), dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl poly1d(final VarDbl in, final VarDbl[] sCoeff, 
-                                final Momentum momentum) 
+                                final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), null, momentum);
+        return poly1d(in, new UnionArray(sCoeff), null, moment);
     }
     static public VarDbl poly1d(final VarDbl in, final VarDbl[] sCoeff) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, sCoeff, IDEAL_MOMENTUM);
+        return poly1d(in, sCoeff, IDEAL_MOMENT);
     }
 
     static public VarDbl poly1d(final VarDbl in, final double[] sCoeff, 
-                                final String dumpPath, final Momentum momentum) 
+                                final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), dumpPath, momentum);
+        return poly1d(in, new UnionArray(sCoeff), dumpPath, moment);
     }
     static public VarDbl poly1d(final VarDbl in, final double[] sCoeff, 
                                 final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), dumpPath, IDEAL_MOMENTUM);
+        return poly1d(in, new UnionArray(sCoeff), dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl poly1d(final VarDbl in, final double[] sCoeff, 
-                                final Momentum momentum) 
+                                final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, new UnionArray(sCoeff), null, momentum);
+        return poly1d(in, new UnionArray(sCoeff), null, moment);
     }
     static public VarDbl poly1d(final VarDbl in, final double[] sCoeff) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return poly1d(in, sCoeff, IDEAL_MOMENTUM);
+        return poly1d(in, sCoeff, IDEAL_MOMENT);
     }
 
 
@@ -431,7 +437,7 @@ public class Taylor {
      * @return in^exponenet
      */
     static public VarDbl pow(final VarDbl in, final double exponent, 
-                             final String dumpPath, final Momentum momentum) 
+                             final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
         if (exponent == 0) {
@@ -447,51 +453,51 @@ public class Taylor {
                 sCoeff[i] = 0;
             }
             sCoeff[exp] = 1;
-            return poly1d(in, sCoeff, dumpPath, momentum);
+            return poly1d(in, sCoeff, dumpPath, moment);
         }
         if (in.value() < 0) {
             throw new IllegalArgumentException(String.format("pow(%s, %s): negative base", in, exponent));
         }
-        final VarDbl[] sTaylor = new VarDbl[momentum.maxOrder];
+        final VarDbl[] sTaylor = new VarDbl[moment.maxOrder];
         sTaylor[0] = new VarDbl(Math.pow(in.value(), exponent));
         sTaylor[1] = new VarDbl(exponent);
         double exp = exponent - 1;
-        for (int i = 2; i < momentum.maxOrder; ++i, --exp) {
+        for (int i = 2; i < moment.maxOrder; ++i, --exp) {
             sTaylor[i] = sTaylor[i - 1].multiply(exp / i);
         }
         return taylor1d(in, String.format("(%s)^%s", in, exponent), 
-                        sTaylor, true, true, dumpPath, momentum);
+                        sTaylor, true, true, dumpPath, moment);
     }
     static public VarDbl pow(final VarDbl in, double exponent, 
                              final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return pow(in, exponent, dumpPath, IDEAL_MOMENTUM);
+        return pow(in, exponent, dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl pow(final VarDbl in, double exponent, 
-                             final Momentum momentum) 
+                             final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return pow(in, exponent, null, momentum);
+        return pow(in, exponent, null, moment);
     }
     static public VarDbl pow(final VarDbl in, double exponent) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return pow(in, exponent, IDEAL_MOMENTUM);
+        return pow(in, exponent, IDEAL_MOMENT);
     }
 
     /*
      * @return sin(x)
      */
     static public VarDbl sin(final VarDbl in, 
-                             final String dumpPath, final Momentum momentum) 
+                             final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        final double[] sTaylor = new double[momentum.maxOrder];
+        final double[] sTaylor = new double[moment.maxOrder];
         final double x = in.value();
         sTaylor[0] = Math.sin(x);
         double fac = 1;
-        for (int i = 1; i < momentum.maxOrder; ++i, fac /= i) {
+        for (int i = 1; i < moment.maxOrder; ++i, fac /= i) {
             switch (i%4) {
             case 0:
                 sTaylor[i] = Math.sin(x) * fac; 
@@ -507,90 +513,90 @@ public class Taylor {
                 break;
             }
         }
-        return taylor1d(in, String.format("sin(%s)", in), sTaylor, false, false, dumpPath, momentum);
+        return taylor1d(in, String.format("sin(%s)", in), sTaylor, false, false, dumpPath, moment);
     }
     static public VarDbl sin(final VarDbl in, 
                              final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return sin(in, dumpPath, IDEAL_MOMENTUM);
+        return sin(in, dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl sin(final VarDbl in, 
-                             final Momentum momentum) 
+                             final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return sin(in, null, momentum);
+        return sin(in, null, moment);
     }
     static public VarDbl sin(final VarDbl in) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return sin(in, null, IDEAL_MOMENTUM);
+        return sin(in, null, IDEAL_MOMENT);
     }
 
     /*
      * @return exp(x)
      */
     static public VarDbl exp(final VarDbl in, 
-                             final String dumpPath, final Momentum momentum) 
+                             final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        final double[] sTaylor = new double[momentum.maxOrder];
+        final double[] sTaylor = new double[moment.maxOrder];
         sTaylor[0] = Math.exp(in.value());
         double fac = 1;
-        for (int i = 1; i < momentum.maxOrder; ++i, fac /= i) {
+        for (int i = 1; i < moment.maxOrder; ++i, fac /= i) {
             sTaylor[i] = 1.0 *fac;
         }
         return taylor1d(in, String.format("exp(%s)", in), sTaylor, false, true, 
-                        dumpPath, momentum);
+                        dumpPath, moment);
     }
     static public VarDbl exp(final VarDbl in, 
                              final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return exp(in, dumpPath, IDEAL_MOMENTUM);
+        return exp(in, dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl exp(final VarDbl in, 
-                             final Momentum momentum) 
+                             final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return exp(in, null, momentum);
+        return exp(in, null, moment);
     }
     static public VarDbl exp(final VarDbl in) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return exp(in, null, IDEAL_MOMENTUM);
+        return exp(in, null, IDEAL_MOMENT);
     }
 
     /*
      * @return log(x)
      */
     static public VarDbl log(final VarDbl in,
-                             final String dumpPath, final Momentum momentum) 
+                             final String dumpPath, final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        final double[] sTaylor = new double[momentum.maxOrder];
+        final double[] sTaylor = new double[moment.maxOrder];
         sTaylor[0] = Math.log(in.value());
-        for (int i = 1; i < momentum.maxOrder; ++i) {
+        for (int i = 1; i < moment.maxOrder; ++i) {
             sTaylor[i] =((i%2) == 1)? +1.0/i : -1.0/i;
         }
-        return taylor1d(in, String.format("log(%s)", in), sTaylor, true, false, dumpPath, momentum);
+        return taylor1d(in, String.format("log(%s)", in), sTaylor, true, false, dumpPath, moment);
     }
     static public VarDbl log(final VarDbl in,
                              final String dumpPath) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-            return log(in, dumpPath, IDEAL_MOMENTUM);
+            return log(in, dumpPath, IDEAL_MOMENT);
     }
     static public VarDbl log(final VarDbl in,
-                             final Momentum momentum) 
+                             final Moment moment) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-            return log(in, null, momentum);
+            return log(in, null, moment);
     }
     static public VarDbl log(final VarDbl in) 
             throws NotFiniteException, NotReliableException, NotMonotonicException, NotStableException, NotPositiveException, 
                     InitException, IOException {
-        return log(in, null, IDEAL_MOMENTUM);
+        return log(in, null, IDEAL_MOMENT);
     }
 
 

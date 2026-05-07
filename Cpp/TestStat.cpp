@@ -1,3 +1,8 @@
+/*
+Unit tests for Stat<T> and Histogram<T>: verifies count/min/max/mean/dev plus
+binning behaviour, including testWhite/testGaussian which use live RNG seeds
+and may flake; rerun on intermittent failure.
+*/
 #include "Stat.h"
 #include "Test.h"
 

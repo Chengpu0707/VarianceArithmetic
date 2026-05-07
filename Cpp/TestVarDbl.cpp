@@ -1,3 +1,8 @@
+/*
+Unit tests for the core VarDbl class: construction, value/uncertainty/variance
+accessors, arithmetic operator overloads (+, -, *, /), comparison, and
+overflow/initialization exception handling.
+*/
 #include "VarDbl.h"
 #include "Taylor.h"
 #include "Test.h"

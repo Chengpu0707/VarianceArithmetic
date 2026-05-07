@@ -314,12 +314,28 @@ In both Figures \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distrib
 
 \subsection{Statistical Taylor Expansion}
 
+\iffalse
+
+\begin{align*}
+\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 =
+		\sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{m+n} \frac{f^{(m)}_x f^{(n)}_x}{m! n!} \left(\zeta(m+n, \kappa) - \zeta(m, \kappa) \zeta(n, \kappa) \right) \\
+ 	&= \sum_{n=0}^{\infty} (\delta x)^{n} \sum_{j=0}^{n} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) \\
+ 	&= \sum_{n=2}^{\infty} (\delta x)^{n} \sum_{j=0}^{n} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) 
+ 	 	+ f(x)^2 \zeta(0, \kappa) (1 - \zeta(0, \kappa)) \\
+ 	&= \sum_{n=2}^{\infty} (\delta x)^{n} \sum_{j=1}^{n-1} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) \\
+ 	&\;\; + (1 - \zeta(0, \kappa)) \left(f(x) + 2 \sum_{n=2}^{\infty} (\delta x)^{n} f(x) \frac{f^{(n)}_x}{n!} \zeta(n, \kappa) \right);
+\end{align*}
+
+Thus, $\zeta(n, \kappa)$ needs to be 1.
+
+\fi
+
 Define $\tilde{z} \equiv (\tilde{x} - x)/\delta x$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, x, \delta x)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$.
 For example, Normal distribution is the normalized form of Gaussian distributions.
 
 \begin{align}
 \label{eqn: bound moment}
-\zeta(n, \kappa) &\equiv \int_{\varrho}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z};\\
+\zeta(n, \kappa) &\equiv \frac{\int_{\varrho}^{\kappa} \tilde{z}^n \rho(\tilde{z}) d \tilde{z}}{\int_{\varrho}^{\kappa} \rho(\tilde{z}) d \tilde{z}};\\
 \label{eqn: mean-reverting bounding}
 \zeta(1, \kappa) &= 0;
 \end{align}
@@ -328,7 +344,7 @@ Formula \eqref{eqn: bound moment} defines the corresponding \emph{bound moment} 
 For any symmetric probability distribution: $\rho(-\tilde{z}) = \rho(\tilde{z})$, $\varrho = -\kappa$, and $\zeta(2n+1, \kappa) = 0$.
 
 \begin{align}
-\label{eqn: Taylor 1d} 
+\label{eqn: Taylor 1d}
 f(x + \tilde{x}) &= f(x + \tilde{z} \delta x) = f(x) + \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!} \tilde{z}^n (\delta x)^n; \\
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= f(x) + \sum_{n=2}^{\infty}(\delta x)^n \frac{f^{(n)}_x}{n!} \zeta(n, \kappa); \\
@@ -341,11 +357,11 @@ The difference $\overline{f(x)} - f(x)$ is defined as the \emph{uncertainty bias
 
 \begin{align}
 \label{eqn: Taylor 2d}
-f(x + \tilde{x}, y + \tilde{y}) &= \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+f(x + \tilde{x}, y + \tilde{y}) &= f(x, y) + \sum_{m=0, n=0}^{m+n \geq 1} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
 \label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &=  \sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y);  \\
+\overline{f(x,y)} &= f(x, y) + \sum_{m=0, n=0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y);  \\
 \label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \sum_{m=1}^{\infty} \sum_{n=1}^{\infty} (\delta x)^m (\delta y)^n \sum_{i=0}^{m} \sum_{j=0}^{n} 
+\delta^2 f(x, y) &= \sum_{m=0, n=0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \sum_{i=0}^{m} \sum_{j=0}^{n}
 		\frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \nonumber \\
 	&\big( \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y) - \zeta_x(i, \kappa_x)\zeta_x(m-i, \kappa_x)\; \zeta_y(j, \kappa_y)\zeta_y(n-j, \kappa_y) \big);
 \end{align}
@@ -355,15 +371,15 @@ Although Formula \eqref{eqn: Taylor 2d variance} is only 2-dimensional, it can b
 With the mean reverting condition of Formula \eqref{eqn: mean-reverting bounding}:
 \begin{align}
 \label{eqn: addition mean}
-\overline{x \pm y} &= \zeta_x(0, \kappa_x) x \pm \zeta_y(0, \kappa_x) y; \\
+\overline{x \pm y} &= x \pm y; \\
 \label{eqn: addition variance}
 \delta^2 (x \pm y) &= \zeta_x(2, \kappa_x) (\delta x)^2 + \zeta_y(2, \kappa_y) (\delta y)^2; \\
 \label{eqn: multiplication mean}
-\frac{\overline{x y}}{xy} &= \zeta_x(0, \kappa_x)\zeta_y(0, \kappa_y); \\
+\overline{x y} &= xy; \\
 \label{eqn: multiplication variance}
-P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(2, \kappa_x) P(x)^2 \zeta_y(2, \kappa_y) P(y)^2;
+P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(2, \kappa_x) \zeta_y(2, \kappa_y) P(x)^2 P(y)^2;
 \end{align}
-When $\kappa \rightarrow \infty$, $\zeta(0, \kappa) \rightarrow 1$ and $\zeta(2, \kappa) \rightarrow 1$, making Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
+When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$, making Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
 
 
 
@@ -420,7 +436,7 @@ Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and 
 \label{eqn: sin mean}
 \overline{\sin(x)} &= \sin(x) + \sum_{n=2}^{\infty} (\delta x)^n \sin(x)_x^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)_x^{(j)}\sin(x)_x^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!}; 
+\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)_x^{(j)}\sin(x)_x^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
 \end{align}
 
 Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and variance for $x^c$, respectively:
@@ -1830,6 +1846,7 @@ Accordingly, several important questions remain.
 
 Mathematical library functions should be recalculated using variance arithmetic to ensure that each output value is accompanied by its corresponding uncertainty.
 Without this refinement, the value errors in the library functions can produce unpredictable and potentially significant result errors.
+The attempt to cast a 80-bit sine library into a 64-bit sine library and use the difference as the uncertainty deviation results in slightly worse error deviations.
 
 The bound moment $\zeta(n, \kappa)$ should be extended to all probability distributions.
 The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions.

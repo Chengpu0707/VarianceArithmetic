@@ -1,3 +1,7 @@
+"""Unit tests for histo.py — verifies Stat (count/min/max/mean/dev) and Histo
+(symmetric histogram with division boundaries) on empty, sparse and dense
+input sequences.
+"""
 import math
 import unittest
 

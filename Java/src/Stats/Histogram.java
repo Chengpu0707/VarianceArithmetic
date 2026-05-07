@@ -1,9 +1,9 @@
 package Stats;
 
-/*
- * To construct a distogram:
- * 	*) symetric distributed between -_maxRange and +_maxRange
- *  *) with divids for each 1
+/**
+ * Symmetric histogram between -maxRange and +maxRange with the given number of
+ * divisions per unit. Wraps a {@link Stat} for summary statistics on the same
+ * input stream.
  */
 public class Histogram {
 

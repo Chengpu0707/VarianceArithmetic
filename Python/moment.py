@@ -1,3 +1,7 @@
+"""Bounded moments for symmetric distributions used by Taylor expansion:
+abstract Moment base class with NormalMoment and Uniform implementations
+returning the moment table truncated by the bounding factor.
+"""
 import abc
 import datetime
 import math
@@ -9,7 +13,7 @@ import sympy
 from indexSin import OUTDIR
 import varDbl
 
-class Momentum (abc.ABC):
+class Moment (abc.ABC):
 
     @property
     @abc.abstractmethod
@@ -20,7 +24,7 @@ class Momentum (abc.ABC):
     @abc.abstractmethod
     def leakage(self):
         pass
-   
+
     @property
     @abc.abstractmethod
     def maxOrder(self):
@@ -31,20 +35,20 @@ class Momentum (abc.ABC):
         pass
 
 
-class Normal (Momentum):
+class Normal (Moment):
     '''
-    Calculate variance momentum for the given {bounding}.
-    Detect the {_maxOrder} for the bounding, which is 448 when {bounding}=5.   
+    Calculate variance moment for the given {bounding}.
+    Detect the {_maxOrder} for the bounding, which is 448 when {bounding}=5.
     '''
-    __slots__ = ('_sMomentum', '_maxOrder', '_bounding')
+    __slots__ = ('_sMoment', '_maxOrder', '_bounding')
 
     @staticmethod
     def readPreciseNorm(filePath:str):
-        sMomentum = []
+        sMoment = []
         with open(filePath) as f:
             hdr = next(f)
             sHdr = hdr.split('\t')
-            if (len(sHdr) != 4) or (sHdr[0] != 'n') or (sHdr[1] != 'Momentum') or (sHdr[2] != 'Bounding:'):
+            if (len(sHdr) != 4) or (sHdr[0] != 'n') or (sHdr[1] != 'Moment') or (sHdr[2] != 'Bounding:'):
                 raise ValueError(f'Invalid header "{hdr}" in {filePath}')
             bounding = float(sHdr[3])
             if not (0 < bounding <= 8):
@@ -53,33 +57,37 @@ class Normal (Momentum):
                 n, mmt = map(float, line.split('\t'))
                 if n != i * 2:
                     raise ValueError(f'Invalid index {n} at line {i+2} in {filePath}, expected {i*2}: {line}')
-                sMomentum.append(mmt)
-        return bounding, sMomentum
+                sMoment.append(mmt)
+        return bounding, sMoment
 
     @staticmethod
     def calcPreciseNorm(bounding:float=5.0, maxOrder:int=1000000):
-        filePath = f'{OUTDIR}/Python/NormalMomentum_{bounding}.txt'
-        HEADER = f'n\tMomentum\tBounding={bounding}'
-        b, sMomentum = Normal.readPreciseNorm(filePath)
+        filePath = f'{OUTDIR}/Python/NormalMoment_{bounding}.txt'
+        HEADER = f'n\tMoment\tBounding={bounding}'
+        b, sMoment = Normal.readPreciseNorm(filePath)
         if b != bounding:
-            sMomentum = []
+            sMoment = []
         x = sympy.symbols("x", is_real=True)
-        while ((n := len(sMomentum)*2) < maxOrder):
-            print(f'At {datetime.datetime.now()}, Calculate {n}/{maxOrder} momentum')
-            density = 1/sympy.sqrt(2*sympy.pi) * sympy.exp(-x**2/2) * x**n
-            mmt = sympy.integrate(density, (x, - bounding, bounding))
+        # Normalized per Formula (2.2): ζ(n, κ) = ∫z^n ρ dz / ∫ρ dz.
+        density_const = 1/sympy.sqrt(2*sympy.pi) * sympy.exp(-x**2/2)
+        norm = sympy.integrate(density_const, (x, -bounding, bounding)).evalf()
+        while ((n := len(sMoment)*2) < maxOrder):
+            print(f'At {datetime.datetime.now()}, Calculate {n}/{maxOrder} moment')
+            mmt = sympy.integrate(density_const * x**n, (x, - bounding, bounding))
             if not math.isfinite(mmt):
                 break
-            sMomentum.append(mmt.evalf())
+            sMoment.append((mmt / norm).evalf())
             with open(filePath, 'w') as f:
                 f.write(HEADER)
-                for i, mmt in enumerate(sMomentum):
-                    f.write(f'{i*2}\t{mmt}\n')    
+                for i, mmt in enumerate(sMoment):
+                    f.write(f'{i*2}\t{mmt}\n')
 
     def __init__(self, bounding:float=5, maxOrder:int=1000000, withVariance:bool=False):
         self._bounding = bounding
-        filePath = f'{OUTDIR}/Python/Output/NormalMomentum_{bounding}_{"var" if withVariance else "float"}.txt'
-        HEADER = 'Order\tValue\tUncertainty\n'
+        filePath = f'{OUTDIR}/Python/Output/NormalMoment_{bounding}_{"var" if withVariance else "float"}.txt'
+        # Header bumped from 'Value' to 'NormalizedValue' to invalidate caches
+        # written before Formula (2.2) was normalized.
+        HEADER = 'Order\tNormalizedValue\tUncertainty\n'
         if os.path.isfile(filePath):
             try:
                 with open(filePath) as f:
@@ -89,7 +97,7 @@ class Normal (Momentum):
                     n = -1
                     prevVal = 0
                     prevUnc = 0
-                    sMomentum = []
+                    sMoment = []
                     for line in f.readlines():
                         n += 1
                         nn, val, unc = map(float, line.strip().split('\t'))
@@ -103,14 +111,14 @@ class Normal (Momentum):
                             if (val <= prevVal) or (unc <= prevUnc):
                                 raise NotImplementedError(f'Invalid {val}+/-{unc} vs {prevVal}+/-{prevUnc} for index={n}')
                             if withVariance:
-                                sMomentum.append(varDbl.VarDbl(val, unc))
+                                sMoment.append(varDbl.VarDbl(val, unc))
                             else:
-                                sMomentum.append(val)
+                                sMoment.append(val)
                         else:
                             if val != 0:
                                 raise NotImplementedError(f'Invalid value {val} for index={n}')
-                    self._maxOrder = len(sMomentum) * 2
-                    self._sMomentum = sMomentum
+                    self._maxOrder = len(sMoment) * 2
+                    self._sMoment = sMoment
                     return
             except BaseException as ex:
                 os.remove(filePath)
@@ -136,17 +144,21 @@ class Normal (Momentum):
             except:
                 break
         self._maxOrder = n * 2
-        self._sMomentum = sTerm[:]
+        self._sMoment = sTerm[:]
         for j in range(2, maxOrder):
             for i in range(n):
                 sTerm[i] *= 1/(2*i - 1 + 2*j) * bounding2
-                prev = self._sMomentum[i]
-                self._sMomentum[i] += sTerm[i]
-                if (prev.value() == self._sMomentum[i].value()) if withVariance else (prev == self._sMomentum[i]):
+                prev = self._sMoment[i]
+                self._sMoment[i] += sTerm[i]
+                if (prev.value() == self._sMoment[i].value()) if withVariance else (prev == self._sMoment[i]):
                     n = i
                     break
             if n == 0:
                 break
+        # Normalize per Formula (2.2): divide unnormalized moments by ∫ρ dz = 1 - leakage.
+        norm_factor = 1 - self.leakage
+        for i in range(len(self._sMoment)):
+            self._sMoment[i] = self._sMoment[i] * (1 / norm_factor)
         with open(filePath, 'w') as f:
             f.write(HEADER)
             for n in range(self.maxOrder):
@@ -159,11 +171,11 @@ class Normal (Momentum):
     @property
     def bounding(self):
         return self._bounding
-    
+
     @property
     def leakage(self):
-        return 1 - scipy.special.erf(self.bounding/math.sqrt(2))   
-    
+        return 1 - scipy.special.erf(self.bounding/math.sqrt(2))
+
     @property
     def maxOrder(self):
         return self._maxOrder
@@ -174,20 +186,20 @@ class Normal (Momentum):
         if (n % 2) == 1:
             return 0
         n //= 2
-        if n >= len(self._sMomentum):
+        if n >= len(self._sMoment):
             return IndexError()
-        return self._sMomentum[n]
+        return self._sMoment[n]
 
 
 class Uniform:
     '''
-    Pre-calculated variance momentum for uniform distribution [-1, 1].
+    Pre-calculated variance moment for uniform distribution [-1, 1].
     '''
-    __slots__ = ('_bounding', '_sMomentum', '_maxOrder')
+    __slots__ = ('_bounding', '_sMoment', '_maxOrder')
 
     def __init__(self, bounding=math.sqrt(3)):
         self._bounding = bounding
-        self._sMomentum = []
+        self._sMoment = []
         fac = 1
         for n in range(10000):
             try:
@@ -196,18 +208,18 @@ class Uniform:
                 break
             if not math.isfinite(mmt):
                 break
-            self._sMomentum.append(mmt)
+            self._sMoment.append(mmt)
             fac *= bounding**2
-        self._maxOrder = len(self._sMomentum)
+        self._maxOrder = len(self._sMoment)
 
     @property
     def bounding(self):
         return self._bounding
-    
+
     @property
     def leakage(self):
         return 1 - self.bounding
-    
+
     @property
     def maxOrder(self):
         return self._maxOrder
@@ -215,10 +227,9 @@ class Uniform:
     def __getitem__(self, n:int) -> float:
         if n < 0 or n >= self._maxOrder or (n % 2) == 1:
             return 0
-        return self._sMomentum[n >> 1]
-    
+        return self._sMoment[n >> 1]
+
 
 NORMAL = Normal(bounding=5.0)
 
 UNIFORM = Uniform()
-

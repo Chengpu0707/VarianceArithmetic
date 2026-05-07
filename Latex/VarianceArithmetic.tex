@@ -1356,7 +1356,7 @@ These limits follow directly from the relationship $P(x) \rightarrow \delta \log
 \end{itemize}
 For $(x \pm \delta x)^c$, except when $c$ is a natural number, the upper bound $P(x)$ is close to $\hat{\kappa}$ but increasing with $c$. 
 This trend is confirmed in Figure \ref{fig: Pow_Conv_Edge} for Gaussian input distribution and Figure \ref{fig: Pow_Conv_Edge_Uniform} for uniform input distribution.
-The bounded momentum $\zeta(2n, \hat{\kappa})$ for Uniform distribution is much less than that for Normal distribution, such that the expansion contains $652$ terms instead of $448$ terms.
+The bounded moment $\zeta(2n, \hat{\kappa})$ for Uniform distribution is much less than that for Normal distribution, such that the expansion contains $652$ terms instead of $448$ terms.
 When normalized by the respective $\kappa$, the upper bounds of input uncertainty in Figure \ref{fig: Pow_Conv_Edge} and \ref{fig: Pow_Conv_Edge_Uniform} looks identical, however, the resulting uncertainty biases and uncertainties in Figure \ref{fig: Pow_Conv_Edge} are $3$ order-of-magnitude smaller than those in Figure \ref{fig: Pow_Conv_Edge_Uniform} when the exponent $c$ is less than $0$, showing the effect of input uncertainty distribution.
 
 Even a result converges, it can still be abandoned due to too large uncertainty bias or uncertainty.
@@ -3391,7 +3391,7 @@ Without this refinement, the value errors in the library functions can produce u
 How to compute and validate these new uncertainty-bearing library functions will need innovation.
 For example, the uncertainty of a 64-bit value can not directly determined by its difference with the corresponding 128-bit value,
 
-Bound momentum $\zeta(2n)$ needs to be extended to all probability distributions.
+Bound moment $\zeta(2n)$ needs to be extended to all probability distributions.
 The statistical bounding to find the bounding range $\kappa$ for the bounded moment needs to be extended to discrete distributions.
 The choice of ideal bounding range $\hat{\kappa}$ needs further study to extend to other distributions.
 The condition for Formula \eqref{eqn: variance asymptotic} seems to be as generic as the definition in Formula \eqref{eqn: bound moment} which needs further proof.

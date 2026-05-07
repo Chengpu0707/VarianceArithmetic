@@ -118,10 +118,10 @@ class TestDumpPath (unittest.TestCase):
             self.assertEqual(l.exp, 0)
         else:
             self.assertAlmostEqual(l.exp / r.exp, 1)
-        if r.momentum == 0:
-            self.assertEqual(l.momentum, 0) 
+        if r.moment == 0:
+            self.assertEqual(l.moment, 0) 
         else:
-            self.assertAlmostEqual(l.momentum /r.momentum, 1)
+            self.assertAlmostEqual(l.moment /r.moment, 1)
         assertVarDblEqual(self, l.taylor, r.taylor, valPrec, uncPrec)
         assertVarDblEqual(self, l.val, r.val, valPrec, uncPrec)
         assertVarDblEqual(self, l.var, r.var, valPrec, uncPrec)

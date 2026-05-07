@@ -1,7 +1,8 @@
 package Type;
 
-/*
- * Either the value or the varance is invalid when initialize VarDbl
+/**
+ * Thrown when VarDbl construction is given invalid value or variance
+ * (NaN, infinite, or negative variance).
  */
 public class InitException extends Exception {
     final double value;

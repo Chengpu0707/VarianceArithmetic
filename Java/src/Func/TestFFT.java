@@ -1,5 +1,10 @@
 package Func;
 
+/**
+ * JUnit tests for {@link FFT} — verifies bit-reversal indexing, forward/
+ * inverse round-trip on synthetic spectra across orders, and writes
+ * comparison files for cross-implementation validation.
+ */
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

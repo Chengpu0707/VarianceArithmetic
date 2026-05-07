@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * Thrown when a Taylor expansion produces a non-finite value or variance
+ * (NaN or infinite).
+ */
 public class NotFiniteException extends Taylor1dException {
     public NotFiniteException(String msg, 
             String name, final UnionArray s1dTaylor, boolean inPrec, boolean outPrec,

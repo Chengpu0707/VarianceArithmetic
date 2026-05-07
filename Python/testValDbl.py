@@ -1,3 +1,7 @@
+"""Unit tests for varDbl.py — covers VarDbl construction, frexp handling,
+arithmetic operator overloads, pickling, and InitException/Taylor exception
+propagation.
+"""
 import math
 import pickle
 import unittest

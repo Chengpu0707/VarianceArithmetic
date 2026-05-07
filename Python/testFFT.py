@@ -1,3 +1,7 @@
+"""Unit tests for fft.py — verifies bit-reversed indexing, forward/inverse
+FFT correctness across orders and signal types, and exercises noise injection
+and uncertainty propagation through the variance-arithmetic FFT.
+"""
 import math
 import os
 import unittest

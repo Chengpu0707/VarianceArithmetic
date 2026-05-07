@@ -1,3 +1,7 @@
+"""Unit tests for movingLineFit.py — verifies LOCAL/MOVING/MOVING_NO_VAR_ADJ
+fits on flat, linear and noisy inputs and checks variance propagation across
+window sizes.
+"""
 import math
 import os
 import random

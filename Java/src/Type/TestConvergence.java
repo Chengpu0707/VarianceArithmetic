@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * JUnit tests that sweep input ranges to locate Taylor-expansion convergence
+ * edges for sin/exp/log/pow and write the boundary data for analysis.
+ */
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;

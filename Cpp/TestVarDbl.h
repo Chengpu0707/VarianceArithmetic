@@ -1,3 +1,8 @@
+/*
+Shared helpers for VarDbl/Taylor unit tests: TestResult/TestStat structures,
+search_edge convergence sweeps, and validate_func / stat_func harnesses used by
+TestExp.cpp, TestLog.cpp, TestSin.cpp and TestPow.cpp.
+*/
 #include "VarDbl.h"
 #include "Test.h"
 #include "Stat.h"

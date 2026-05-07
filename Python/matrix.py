@@ -1,3 +1,7 @@
+"""Matrix utilities for VarDbl/Fraction/float/int element types: permutation
+sign, square-matrix checks, integer/Hilbert matrix generation, noise injection,
+linear solve, multiply, adjugate, and adjugate_mul used by matrix tests.
+"""
 import fractions
 import functools
 import itertools

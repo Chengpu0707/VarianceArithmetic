@@ -34,12 +34,12 @@ The g++ path is configured in `.vscode/tasks.json` (`C:\msys64\mingw64\bin\g++.e
 
 **Core dependency chain:**
 ```
-ulp.h → VarDbl.h → Momentum.h → Taylor.h → IndexSin.h / FFT.h
+ulp.h → VarDbl.h → Moment.h → Taylor.h → IndexSin.h / FFT.h
 ```
 
 - `ulp.h`: ULP (units in the last place) computation with C++03-compatible type traits (`_is_floating_point_c03`, `_is_integral_c03`, `_C03FloatTag`/`_C03IntTag` tag structs for SFINAE disambiguation)
 - `VarDbl.h`: Core `VarDbl` type — a `(value, variance)` pair with operator overloads. Uses `VDBL_TMPL` macro to collapse C++20 `requires` clauses vs plain `template<typename T>`
-- `Momentum.h`: Bounded moments for Normal/Uniform distributions used in Taylor expansion
+- `Moment.h`: Bounded moments for Normal/Uniform distributions used in Taylor expansion
 - `Taylor.h`: Statistical Taylor expansion for `sin`, `exp`, `log`, `pow`, and polynomial functions. Exception hierarchy (`TaylorIdException` and 5 derived) must use `virtual ~XxxException() throw() {}` in C++03 due to `std::runtime_error`'s `throw()` dtor
 - `Stat.h`: `Stat<T>` and `Histogram<T>` counters. Uses `STAT_TMPL`/`HISTO_TMPL` macros; `_Optional<T>` polyfill for C++17 `std::optional`
 - `IndexSin.h`: Precomputed sine/cosine tables for FFT precision

@@ -1,3 +1,7 @@
+"""Moving-window least-squares line fit over VarDbl timeseries: returns
+(value, slope) per window center for LOCAL, MOVING and MOVING_NO_VAR_ADJ
+fitting strategies used to estimate uncertainty propagation in noisy data.
+"""
 import enum
 import math
 

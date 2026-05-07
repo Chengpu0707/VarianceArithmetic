@@ -1,3 +1,9 @@
+/*
+Stat<T> and Histogram<T> counters used by tests and analysis: track count, mean,
+deviation, min/max plus optional binned histogram. Provides _Optional<T> polyfill
+for pre-C++17 builds and STAT_TMPL/HISTO_TMPL macros to abstract C++20 requires
+clauses for arithmetic types.
+*/
 #include <algorithm>
 #include <cmath>
 #include <limits>

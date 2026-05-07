@@ -1,5 +1,10 @@
 package Stats;
 
+/**
+ * Random noise generators used by tests and analysis: gaussian (Normal) and
+ * white (Uniform-equivalent variance) noise scaled to a given standard
+ * deviation.
+ */
 import java.util.Random;
 
 public class Noise {

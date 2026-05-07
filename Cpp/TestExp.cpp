@@ -1,3 +1,8 @@
+/*
+Unit tests for Taylor::exp: verifies statistical Taylor expansion of exp() over
+a range of input values and uncertainties, comparing to std::exp and tracking
+convergence/edge behaviour.
+*/
 #include "TestTaylor.h"
 
 using namespace var_dbl;

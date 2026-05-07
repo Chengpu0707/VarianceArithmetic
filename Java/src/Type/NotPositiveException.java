@@ -1,7 +1,8 @@
 package Type;
 
-/*
- * The Taylor expansion variance is negative
+/**
+ * Thrown when a Taylor expansion produces a negative variance, indicating loss
+ * of positive-definiteness.
  */
 public class NotPositiveException extends Taylor1dException {
     public NotPositiveException(String msg, 

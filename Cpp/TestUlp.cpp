@@ -1,9 +1,14 @@
+/*
+Unit tests for ulp.h: verifies units-in-the-last-place computation for integer
+and floating-point inputs and confirms boundary behaviour at the precision
+limits of double.
+*/
 #include <cassert>
 #include <iostream>
 
 #include "ulp.h"
 
-int main() 
+int main()
 {
     assert(0 == var_dbl::ulp(0));
     assert(0 == var_dbl::ulp(1));

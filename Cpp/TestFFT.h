@@ -1,3 +1,8 @@
+/*
+Signal generators and harness for FFT unit tests: builds reference waves
+(sWave/sFreq) at varying orders, frequencies and sin sources, and compares
+forward/inverse FFT output against the analytic spectrum.
+*/
 #include <map>
 #if __cplusplus >= 201103L
 #include <array>

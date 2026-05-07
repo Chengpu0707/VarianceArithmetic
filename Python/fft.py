@@ -1,3 +1,7 @@
+"""Variance-arithmetic FFT: forward/inverse Fast Fourier Transform on VarDbl
+sequences using IndexSin for trig accuracy. Defines FFT_Signal/FFT_Order/
+FFT_Step harness and SignalType/NoiseType/TestType enums for analysis runs.
+"""
 
 import datetime
 import enum

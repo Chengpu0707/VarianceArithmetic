@@ -1,3 +1,8 @@
+/*
+Smoke test that simply includes every public header in the library to verify
+they compile cleanly together and that there are no missing transitive includes
+across all supported C++ standards.
+*/
 #include <cstdlib>
 #include <iostream>
 

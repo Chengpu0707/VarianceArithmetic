@@ -1,4 +1,9 @@
-
+/*
+Variance-arithmetic FFT: forward/inverse Fast Fourier Transform on VarDbl
+sequences using IndexSin for trig accuracy. Tracks bit-reversed indices and
+operates with statistical Taylor expansion to propagate uncertainty through
+each butterfly stage.
+*/
 #if __cplusplus >= 201103L
 #include <unordered_map>
 #else

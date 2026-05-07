@@ -1,3 +1,7 @@
+"""Streaming statistics and histogram counters: Stat tracks
+count/min/max/mean/deviation; Histo bins values into symmetric divisions for
+distribution analysis. Used by tests and notebook-driven analysis pipelines.
+"""
 
 import math
 import typing

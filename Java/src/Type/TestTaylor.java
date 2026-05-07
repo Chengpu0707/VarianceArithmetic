@@ -1,5 +1,10 @@
 package Type;
 
+/**
+ * JUnit tests for {@link Taylor} — verifies statistical Taylor expansion of
+ * exp/log/sin/pow against direct evaluation plus Monte-Carlo histograms, and
+ * checks {@link Taylor1dException} behaviour at convergence edges.
+ */
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -158,7 +163,7 @@ public class TestTaylor {
             assertTrue(0 <= exp);
             assertTrue(Math.floor(exp) == Math.ceil(exp));
             int n = (int) exp;
-            double value = Math.pow(dx, n) * Taylor.IDEAL_MOMENTUM.get(2);
+            double value = Math.pow(dx, n) * Taylor.IDEAL_MOMENT.get(2);
             if ((value == 0))
                 assertEquals(var.value(), value, valPrec);
             else

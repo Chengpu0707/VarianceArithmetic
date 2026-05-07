@@ -1,3 +1,8 @@
+/*
+Unit tests for Taylor::sin: verifies statistical Taylor expansion of sin()
+across the full circle including special values (0, pi/2, pi) and tracks
+convergence and edge behaviour for varying uncertainties.
+*/
 #include "TestTaylor.h"
 
 #if __cplusplus >= 202002L

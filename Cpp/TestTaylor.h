@@ -1,3 +1,8 @@
+/*
+Test scaffolding for Taylor expansion functions (exp/log/sin/pow): defines
+common functor wrappers, edge-search loops and statistical comparison harnesses
+shared by TestExp.cpp, TestLog.cpp, TestSin.cpp and TestPow.cpp.
+*/
 #include "Stat.h"
 #include "Taylor.h"
 #include "Test.h"

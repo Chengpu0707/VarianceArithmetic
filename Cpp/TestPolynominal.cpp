@@ -1,3 +1,8 @@
+/*
+Unit tests for Taylor::poly1d: verifies value/uncertainty propagation through
+constant, linear, quadratic and higher-degree integer polynomials evaluated on
+VarDbl inputs.
+*/
 #include "Taylor.h"
 #include "Test.h"
 

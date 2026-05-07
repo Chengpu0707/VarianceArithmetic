@@ -23,7 +23,8 @@
       "Bash(python3 -c ' *)",
       "Bash(awk -F. '{print $1\".\"$2}')",
       "Bash(sort -k2)",
-      "WebSearch"
+      "WebSearch",
+      "PowerShell(& \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testAnalytic.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testValDbl.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testHisto.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testMomentum.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testIndexSin.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testPolynominal.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testSinCos.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testMovingLineFit.py\" \"c:\\\\Users\\\\Cheng\\\\OneDrive\\\\Documents\\\\Github\\\\VarianceArithmetic\\\\Python\\\\testRegressiveSin.py\" 2>&1)"
     ]
   }
 }

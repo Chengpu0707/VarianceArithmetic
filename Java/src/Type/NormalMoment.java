@@ -1,11 +1,16 @@
 package Type;
 
+/**
+ * Normal-distribution implementation of {@link Moment}: computes the truncated
+ * Gaussian moment table up to the given bounding factor for use in
+ * statistical Taylor expansion.
+ */
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-public class NormalMomentum extends Momentum {
+public class NormalMoment extends Moment {
     private static final NormalDistribution distr = new NormalDistribution();
- 
-    public NormalMomentum(double bounding) {
+
+    public NormalMoment(double bounding) {
         super(bounding);
     }
 
@@ -23,28 +28,34 @@ public class NormalMomentum extends Momentum {
             }
             term *= bounding2;
         }
-        double[] sMomentum = new double[n << 1];
+        double[] sMoment = new double[n << 1];
         for (int i = 0; i < n; ++i) {
-            sMomentum[i << 1] = sTerm[i];
+            sMoment[i << 1] = sTerm[i];
         }
-        for (int j = 2; j < sMomentum.length; ++j) {
+        for (int j = 2; j < sMoment.length; ++j) {
             for (int i = 0; i < n; ++i) {
                 sTerm[i] = sTerm[i] / (2*i - 1 + 2*j) * bounding2;
-                final double prev = sMomentum[i << 1];
-                sMomentum[i << 1] += sTerm[i];
-                if (prev == sMomentum[i << 1]) {
+                final double prev = sMoment[i << 1];
+                sMoment[i << 1] += sTerm[i];
+                if (prev == sMoment[i << 1]) {
                     n = i;
                     break;
                 }
             }
-            if (n <= 0) 
+            if (n <= 0)
                 break;
         }
-        return sMomentum;
+        // Normalize per Formula (2.2): divide by ∫ρ dz = 1 - leakage so ζ(0,κ)=1.
+        final double normFactor = 1 - leakage(bounding);
+        for (int i = 0; i < sMoment.length; ++i) {
+            sMoment[i] /= normFactor;
+        }
+        return sMoment;
     }
     @Override
     protected double leakage(double bounding) {
-        return 1 - distr.cumulativeProbability(bounding);
+        // Two-sided leakage = 1 - ∫_{-κ}^{κ} ρ(z) dz = 2 · P(Z > κ).
+        return 2 * (1 - distr.cumulativeProbability(bounding));
     }
-    
+
 }

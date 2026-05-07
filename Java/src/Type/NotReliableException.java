@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * Thrown when a Taylor expansion is judged unreliable (e.g. uncertainty too
+ * large relative to the value to be statistically meaningful).
+ */
 public class NotReliableException extends Taylor1dException {
     public NotReliableException(String msg, 
             String name, final UnionArray s1dTaylor, boolean inPrec, boolean outPrec,

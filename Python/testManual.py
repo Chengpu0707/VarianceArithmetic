@@ -21,7 +21,7 @@ from fft import NoiseType, FFT_Order
 from indexSin import OUTDIR
 from matrix import createHilbertMatrix, addNoise
 from matrix import adjugate
-import momentum
+import moment
 from regressiveSin import RegressiveSin
 from taylor import Taylor, NotMonotonicException, NotStableException
 import taylor
@@ -263,7 +263,7 @@ class TestUniform (unittest.TestCase):
 class TestBoundingRange (unittest.TestCase):
 
     def assert_func(self, fileName:str, sKappa=(2,2.5, 3,3.5, 4,4.5, 5,5.5, 6)):
-        sMomentum = {}
+        sMoment = {}
         ssBounding = {}
         filePath = f'{OUTDIR}/Python/Output/{fileName}Samples.txt'
         match fileName:
@@ -277,10 +277,10 @@ class TestBoundingRange (unittest.TestCase):
                             continue
                         sBounding = ssBounding.setdefault(k, {})
                         sBounding[int(n)] = bounding
-                        if bounding not in sMomentum:
-                            sMomentum[bounding] = momentum.Normal(bounding=bounding)
+                        if bounding not in sMoment:
+                            sMoment[bounding] = moment.Normal(bounding=bounding)
             case 'Uniform':
-                sMomentum[1] = momentum.UNIFORM
+                sMoment[1] = moment.UNIFORM
                 sBounding = ssBounding.setdefault(1, {})
                 with open(filePath) as f:
                     hdr = next(f)
@@ -289,22 +289,22 @@ class TestBoundingRange (unittest.TestCase):
                         n, cnt, leak, std, bounding = map(float, line.split('\t'))
                         bounding /= TestUniform.SQRT3
                         sBounding[int(n)] = bounding
-                        if bounding not in sMomentum:
-                            sMomentum[bounding] = momentum.Uniform(bounding=bounding)
+                        if bounding not in sMoment:
+                            sMoment[bounding] = moment.Uniform(bounding=bounding)
             case _:
                 raise ValueError(f'Invalid fileName {fileName}')
 
         sFunc = {
-            'x': lambda mmt, var: taylor.Taylor.polynominal1d(var, (0,1), momentum=mmt),
-            'sin(x)': lambda mmt, var: taylor.Taylor.sin(var, momentum=mmt),
-            'exp(x)': lambda mmt, var: taylor.Taylor.exp(var, momentum=mmt), 
-            'log(x)': lambda mmt, var: taylor.Taylor.log(var, momentum=mmt), 
+            'x': lambda mmt, var: taylor.Taylor.polynominal1d(var, (0,1), moment=mmt),
+            'sin(x)': lambda mmt, var: taylor.Taylor.sin(var, moment=mmt),
+            'exp(x)': lambda mmt, var: taylor.Taylor.exp(var, moment=mmt), 
+            'log(x)': lambda mmt, var: taylor.Taylor.log(var, moment=mmt), 
         }
         var = varDbl.VarDbl(1, 0.1)
         zero = varDbl.VarDbl(1, 0)
 
         def powFunc(exp, mmt, var):
-            return taylor.Taylor.pow(var, exp, momentum=mmt)
+            return taylor.Taylor.pow(var, exp, moment=mmt)
 
         for exp in (2, 0.5, -1, -2):
             sFunc[f'x^{exp}'] = functools.partial(powFunc, exp)
@@ -313,10 +313,10 @@ class TestBoundingRange (unittest.TestCase):
         with open(filePath, 'w') as f:
             f.write('Kappa\tSamples\tBounding\tLeakage\tFunction\tStable Variance\tOutput Variance\tVariance Ratio\tVariance Leak\n')
             for calc, func in sFunc.items():
-                stable = func(sMomentum[6] if fileName == 'Normal' else sMomentum[1], var)
+                stable = func(sMoment[6] if fileName == 'Normal' else sMoment[1], var)
                 for kappa_s, sBounding in ssBounding.items():
                     for samples, bounding in sBounding.items():
-                        mmt = sMomentum[bounding]
+                        mmt = sMoment[bounding]
                         res = func(mmt, var)
                         f.write(f'{kappa_s}\t{samples}\t{bounding}\t{mmt.leakage}\t{calc}')
                         f.write(f'\t{stable.variance()}\t{res.variance()}')
@@ -379,7 +379,7 @@ class TestFFTDumpFile (unittest.TestCase):
 
     @unittest.skipIf(SKIP_TEST, "After 39 seconds, Found none betwwen [0.1990569896377899, 0.19905698963778992]")
     def test_NotStableException(self):
-        sTayler = [-i - 1 if (i & 1) else i + 1 for i in range(Taylor.momentum.maxOrder)]
+        sTayler = [-i - 1 if (i & 1) else i + 1 for i in range(Taylor.moment.maxOrder)]
         lower = 0.199
         upper = 0.200
         Taylor.taylor1d(VarDbl(1, lower), 'lower', sTayler, True, True)
@@ -457,15 +457,15 @@ class TestConvergence (unittest.TestCase):
 
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 4187s')
     def test_pow_uniform(self):
-        Taylor.pow(VarDbl(1, 0.57), -3, momentum=momentum.UNIFORM,
+        Taylor.pow(VarDbl(1, 0.57), -3, moment=moment.UNIFORM,
                    dumpPath=f'{OUTDIR}/Python/Output/Pow_1_0.57_-3.Uniform.txt')
-        Taylor.pow(VarDbl(1, 0.58), 2.9, momentum=momentum.UNIFORM,
+        Taylor.pow(VarDbl(1, 0.58), 2.9, moment=moment.UNIFORM,
                    dumpPath=f'{OUTDIR}/Python/Output/Pow_1_0.58_2.9.Uniform.txt')
 
         DIVIDS = 20
         TestConvergence._search(0.57, 0.59, 100000,
                 [i/20 for i in range(-3*DIVIDS, 4*DIVIDS + 1) if (i < 0) or ((i % DIVIDS) != 0)],
-                lambda x, dx: Taylor.pow(VarDbl(1, dx), x, momentum=momentum.UNIFORM), lambda x: 1,
+                lambda x, dx: Taylor.pow(VarDbl(1, dx), x, moment=moment.UNIFORM), lambda x: 1,
                 f'{OUTDIR}/Python/Output/PowEdge.Uniform.txt')
 
     def test_sin(self):
@@ -480,7 +480,7 @@ class TestConvergence (unittest.TestCase):
         DIVIDS = 64
         TestConvergence._search(0.3, 5.0, 1000,
                 [math.pi*i/DIVIDS for i in range(-1*DIVIDS, 1*DIVIDS + 1)],
-                lambda x, dx: Taylor.sin(VarDbl(x, dx), momentum=momentum.UNIFORM), 
+                lambda x, dx: Taylor.sin(VarDbl(x, dx), moment=moment.UNIFORM), 
                 lambda x: math.sin(x),
                 f'{OUTDIR}/Python/Output/SinEdge.Uniform.txt')
         
@@ -531,7 +531,7 @@ class TestConvergence (unittest.TestCase):
         dumpPath = f'{OUTDIR}/Python/Output/LogEdge.uniform.txt'
         TestConvergence._search(0.57, 0.59, 100000,
                 (1, 2, 0.5, 5, 0.2, 10, 0.1, 20, 0.05, 50, 0.02, 100, 0.01, 200, 0.005, 500, 0.002, 1000, 0.001),
-                lambda x, dx: Taylor.log(VarDbl(x, x*dx), momentum=momentum.UNIFORM), 
+                lambda x, dx: Taylor.log(VarDbl(x, x*dx), moment=moment.UNIFORM), 
                 lambda x: math.log(x),
                 dumpPath)
         with open(dumpPath) as f:

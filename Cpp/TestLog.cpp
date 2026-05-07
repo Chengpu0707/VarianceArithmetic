@@ -1,3 +1,8 @@
+/*
+Unit tests for Taylor::log: verifies statistical Taylor expansion of log() over
+a range of input values and uncertainties, comparing to std::log and tracking
+convergence/edge behaviour as input approaches zero.
+*/
 #include "TestTaylor.h"
 
 using namespace var_dbl;

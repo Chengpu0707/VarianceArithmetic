@@ -1,11 +1,16 @@
+"""IndexSin lookup table for sin/cos with index-frequency input (resolution
+pi/size, size = 1<<order). Provides Quart/Full/Fixed SinSource variants used
+by FFT and regression-based sin generation to minimise float error.
+"""
 import enum
 import math
 import os
 
 import varDbl
 
-OUTDIR = '.' if os.getcwd().endswith('VarianceArithmetic') else \
-        '..' if os.getcwd().endswith('Python') else '\InvalidOutPath'
+# Resolve OUTDIR (project root) from this file's location, independent of CWD.
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTDIR = os.path.dirname(_THIS_DIR)
 
 
 class SinSource (enum.StrEnum):
@@ -158,12 +163,7 @@ class IndexSin:
         '''
         IndexSin.validateOrder(order)
         size = 1 << order
-        if os.getcwd().endswith('\\Python'):
-            dumpPath = f'../Cpp/Output/IndexSin_{sinSource}_{order}.txt'
-        elif os.getcwd().endswith('\\VarianceArithmetic'):
-            dumpPath = f'./Cpp/Output/IndexSin_{sinSource}_{order}.txt'
-        else:
-            raise RuntimeError(f'Invalid current working directory {os.getcwd()}')
+        dumpPath = os.path.join(OUTDIR, 'Cpp', 'Output', f'IndexSin_{sinSource}_{order}.txt')
         sSin = []
         with open(dumpPath) as f:
             hdr = next(f)

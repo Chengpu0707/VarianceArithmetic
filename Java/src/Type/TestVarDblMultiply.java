@@ -1,5 +1,9 @@
 package Type;
 
+/**
+ * JUnit tests for {@link VarDbl} multiplication: verifies value/uncertainty
+ * propagation through *, including zero-value and zero-deviation edge cases.
+ */
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

@@ -1,3 +1,8 @@
+/*
+Unit tests / driver for the variance-arithmetic FFT: validates forward/inverse
+transforms against analytic spectra at multiple orders and sin sources. Note:
+extremely slow unoptimized — build with -O3 -march=native (~3 hours full).
+*/
 #include "Test.h"
 #include "TestFFT.h"
 #include "ulp.h"

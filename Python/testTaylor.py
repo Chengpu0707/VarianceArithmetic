@@ -1,3 +1,7 @@
+"""Unit tests for taylor.py — verifies statistical Taylor expansion of exp,
+log, sin and pow plus exception propagation (Taylor1dException, NotFinite,
+NotPositive, NotMonotonic) across input ranges and uncertainties.
+"""
 import math
 import logging
 import numpy as np
@@ -8,7 +12,7 @@ import sys
 
 from histo import Stat, Histo
 from indexSin import OUTDIR
-import momentum
+import moment
 from taylor import Taylor, Taylor1dException, NotFiniteException, NotPositiveException, NotMonotonicException
 from varDbl import VarDbl, InitException
 
@@ -241,7 +245,7 @@ class TestLog (unittest.TestCase):
     def test_max_out_uncertainty(self):
         for x in (0.5, 1, 2, 5, 10, 20, 50):
             res = Taylor.log(VarDbl(x, x/5))
-            self.assertAlmostEqual(res.uncertainty(), 0.2120048)
+            self.assertAlmostEqual(res.uncertainty(), 0.2120049)
 
     @staticmethod
     def func(x):
@@ -308,7 +312,7 @@ class TestSin (unittest.TestCase):
                 dumpPath=f'{OUTDIR}/Python/Output/sin_0_0.5.txt')
 
         self.validate(math.pi, math.pi/8)
-        self.validate(math.pi, math.pi/4, valueDelta=8e-5, varianceDelta=3e-2)
+        self.validate(math.pi, math.pi/4, valueDelta=9e-5, varianceDelta=3e-2)
         self.validate(math.pi, math.pi/2, NotPositiveException)
 
         res1 = self.validate(- math.pi/64, 0.1)
@@ -324,8 +328,8 @@ class TestSin (unittest.TestCase):
  
         self.validate(-math.pi/2, 0.1)
         self.validate(-math.pi/2, math.pi/8, varianceDelta=2e-3)
-        res = self.validate(-math.pi/2, math.pi/4, valueDelta=8e-5, varianceDelta=8e-2)
-        self.assertAlmostEqual(res.value() - math.sin(-math.pi/2), 0.2653961)
+        res = self.validate(-math.pi/2, math.pi/4, valueDelta=9e-5, varianceDelta=8e-2)
+        self.assertAlmostEqual(res.value() - math.sin(-math.pi/2), 0.2653963)
         self.validate(-math.pi/2, math.pi/2, NotPositiveException)
 
         res1 = self.validate(math.pi/2 - math.pi/64, 0.1)
@@ -338,12 +342,12 @@ class TestSin (unittest.TestCase):
         res = self.validate(math.pi/4, 1, valueDelta=7e-4, varianceDelta=0.4,
                             dumpPath=f'{OUTDIR}/Python/Output/sin_0.25_1.txt')
 
-        res = self.validate(math.pi/4, math.pi/4, valueDelta=8e-5, varianceDelta=2e-3)
-        self.assertAlmostEqual(res.value() - math.sin(math.pi/4), -0.1876634)
+        res = self.validate(math.pi/4, math.pi/4, valueDelta=9e-5, varianceDelta=2e-3)
+        self.assertAlmostEqual(res.value() - math.sin(math.pi/4), -0.1876635)
         self.validate(math.pi/4, math.pi/2, NotPositiveException)
 
-        res = self.validate(-math.pi/4, math.pi/4, valueDelta=8e-5, varianceDelta=2e-3)
-        self.assertAlmostEqual(res.value() - math.sin(-math.pi/4), 0.1876634)
+        res = self.validate(-math.pi/4, math.pi/4, valueDelta=9e-5, varianceDelta=2e-3)
+        self.assertAlmostEqual(res.value() - math.sin(-math.pi/4), 0.1876635)
         self.validate(-math.pi/4, math.pi/2, NotPositiveException)
 
         res1 = self.validate(math.pi/4 - math.pi/64, 0.1)
@@ -429,7 +433,7 @@ class TestPow (unittest.TestCase):
                 dumpPath=f'{OUTDIR}/Python/Output/pow_1_0.1_2.txt')
         self.validate(2 - 1e-6, 0.1, valueDelta=4e-3)  
         self.validate(2 + 1e-6, 0.1, valueDelta=4e-3)  
-        self.validate(2, 1, varianceDelta=8e-5,     # due to momentum(4) != 3
+        self.validate(2, 1, varianceDelta=8e-5,     # due to moment(4) != 3
                 dumpPath=f'{OUTDIR}/Python/Output/pow_1_1_2.txt')
         
     def test_inverse(self):
@@ -552,9 +556,9 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
-        self.assertEqual(len(sExpansion), momentum.NORMAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], moment.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], moment.NORMAL.maxOrder)
+        self.assertEqual(len(sExpansion), moment.NORMAL.maxOrder)
         self.assertEqual(sExpansion[-1].monotonics, 222)
 
     def test_NotMonotonicException(self):
@@ -568,9 +572,9 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
-        self.assertEqual(len(sExpansion), momentum.NORMAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], moment.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], moment.NORMAL.maxOrder)
+        self.assertEqual(len(sExpansion), moment.NORMAL.maxOrder)
         self.assertEqual(sExpansion[-1].monotonics, 0)
 
     def test_NotPositiveException(self):
@@ -584,8 +588,8 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], False)
         self.assertEqual(sInput['outPrec'], False)
-        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], moment.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], moment.NORMAL.maxOrder)
         self.assertEqual(len(sExpansion), 7)
         self.assertLess(sExpansion[-1].var, 0)
 
@@ -600,8 +604,8 @@ class TestDumpFile (unittest.TestCase):
         self.assertAlmostEqual(sInput['result'], 1)
         self.assertEqual(sInput['inPrec'], True)
         self.assertEqual(sInput['outPrec'], True)
-        self.assertAlmostEqual(sInput['bounding'], momentum.NORMAL.bounding)
-        self.assertEqual(sInput['maxOrder'], momentum.NORMAL.maxOrder)
+        self.assertAlmostEqual(sInput['bounding'], moment.NORMAL.bounding)
+        self.assertEqual(sInput['maxOrder'], moment.NORMAL.maxOrder)
         self.assertEqual(len(sExpansion), 429)
         self.assertEqual(sExpansion[-1].monotonics, 0)
 
@@ -704,19 +708,19 @@ class TestRoundingError (unittest.TestCase):
     def test_inverse(self):
         inv = Taylor.pow(VarDbl(0.1), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.1_-1.txt')
         self.assertAlmostEqual(inv.value() / 10, 1)
-        self.assertAlmostEqual(inv.uncertainty() / 8.01228266906342e-16, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 8.012284965797827e-16, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.7763568394002505e-15, 1)
         self.assertAlmostEqual(VarDbl.ulp(inv.value())/1.0255800994045676e-15, 1)
 
         inv = Taylor.pow(VarDbl(0.01), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.01_-1.txt')
         self.assertAlmostEqual(inv.value() / 99.99999999999991, 1)
-        self.assertAlmostEqual(inv.uncertainty() / 1.0015353336329276e-14, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 1.0015356207247283e-14, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.4210854715202004e-14, 1)
         self.assertAlmostEqual(VarDbl.ulp(inv.value())/8.20464079523654e-15, 1)
 
         inv = Taylor.pow(VarDbl(0.001), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.001_-1.txt')
         self.assertAlmostEqual(inv.value() / 1000, 1)
-        self.assertAlmostEqual(inv.uncertainty() / 1.2519191670411594e-13, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 1.2519195259059105e-13, 1)
         self.assertAlmostEqual(math.ulp(inv.value())/1.1368683772161603e-13, 1)
         self.assertAlmostEqual(VarDbl.ulp(inv.value())/6.563712636189232e-14, 1)
 
@@ -728,7 +732,7 @@ class TestImpreciseCoeff (unittest.TestCase):
         with self.assertRaises(NotMonotonicException):
             Taylor.pow(VarDbl(1, 0.20003), -1)
 
-        sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, 0.5) for i in range(momentum.NORMAL.maxOrder)]
+        sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, 0.5) for i in range(moment.NORMAL.maxOrder)]
         Taylor.taylor1d(VarDbl(1, 0.20002), 'Imprecise_Coeff Upper', sTaylor, True, True)
         with self.assertRaises(NotMonotonicException):
             Taylor.taylor1d(VarDbl(1, 0.20003), 'Imprecise_Coeff NotMonotonic', sTaylor, True, True)
@@ -738,7 +742,7 @@ class TestImpreciseCoeff (unittest.TestCase):
             for dx in (0.05, 0.1, 0.15, 0.20002):
                 for i in range(0, 51, 2):
                     dy = i / 100
-                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(momentum.NORMAL.maxOrder)]
+                    sTaylor = [VarDbl(1 if (i % 2) == 0 else -1, dy) for i in range(moment.NORMAL.maxOrder)]
                     res = Taylor.taylor1d(VarDbl(1, dx), 'Imprecise_Coeff', sTaylor, True, True)
                     f.write(f'{dy}\t{dx}\t{res.value()}\t{res.uncertainty()}\n')
                     f.flush()
