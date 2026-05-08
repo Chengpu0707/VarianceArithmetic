@@ -972,6 +972,7 @@ When an input contains unspecified errors, such as numerical errors in library f
 The minimal noise deviation required for the ideal coverage provides a good estimate of the magnitude of the unspecified input uncertainty deviations.
 Achieving ideal coverage serves as a necessary verification step to ensure that statistical Taylor expansion has been applied correctly within the given context.
 The input noise range that yields ideal coverage defines the ideal application range for the analytic function.
+For the value test, the \emph{error noise ratio} which is the slope between the error deviation and the input noise of a linear regression, should be exactly $-1$,
 
 
 
@@ -1116,7 +1117,7 @@ Figure \ref{fig: Adjugate_Error_vs_Size_Noise} demonstrates a typical distributi
 Let $\mathbf{I}$ be the identity matrix for $\mathbf{M}$ \cite{Linear_Algebra}.
 Formula \eqref{eqn: adjugate matrix} shows the relationship between $\mathbf{M}^A$ and $\mathbf{M}$ which leads to the definition of inverse matrix $\mathbf{M}^{-1}$ in Formula \eqref{eqn: inverse matrix} \cite{Linear_Algebra}.
 $\tilde{\mathbf{M}} \times \tilde{\mathbf{M}}^A - |\tilde{\mathbf{M}}| \mathbf{I}$ tests each element value such that it is a value test.
-Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ at a constant rate of $-1$, because the values should match unless at $\delta x \rightarrow 0$ when floating-point rounding errors dominate.
+Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ with a error noise ratio of $-0.985 \pm 0.003$.
 The matrix size is the algorithm specific dimension in Figure \ref{fig: Forward_Error_vs_Size_Noise}.
 
 Because an element of the original matrix $\mathbf{M}$ appears multiple times in Formula \eqref{eqn: inverse matrix}, its variance, as obtained using Formula \eqref{eqn: Taylor 2d variance}, is very complicated. 
@@ -1829,6 +1830,10 @@ Although statistical Taylor expansion eliminates the dependency problem, it also
 
 The presence of ideal coverage is a necessary condition for a numerical algorithm based on statistical Taylor expansion to be considered correct. 
 Ideal coverage defines the optimal range of applicability for an algorithm. 
+\begin{itemize}
+\item For a distribution test, the error distribution should be Normal, with error deviation being $1$.
+\item For a value test, the error distribution should be Delta, with error deviation noise ration being $-1$.
+\end{itemize}
 
 Variance arithmetic simplifies statistical Taylor expansion by introducing numerical rules that eliminate invalid results, such as divergent, negative variance, unstable, infinite, or unreliable.
 It also provides proper coverage for floating-point rounding errors.
