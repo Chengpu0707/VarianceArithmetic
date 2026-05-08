@@ -10,6 +10,9 @@ import random
 import unittest
 import sys
 
+import sympy
+
+import analytic
 from histo import Stat, Histo
 from indexSin import OUTDIR
 import moment
@@ -748,6 +751,85 @@ class TestImpreciseCoeff (unittest.TestCase):
                     f.flush()
 
 
+class TestAnalyticVsNumeric(unittest.TestCase):
+    """Cross-verify Python's numeric `taylor.Taylor` against the symbolic
+    `analytic.StatTaylor` for the same (function, x, dx) inputs.
+
+    For each function we build a symbolic StatTaylor with Gaussian κ=5 (the
+    default the numeric Taylor uses), evaluate the total bias (Σ biasOrder)
+    and total variance (Σ varOrder) at the numeric (x, dx), and compare
+    against the numeric Taylor result. The symbolic side serves as the
+    ground-truth specification."""
+
+    MAX_ORDER = 16
+
+    def _verify(self, sympy_fn, numeric_fn, x_val, dx_val,
+                value_tol=1e-8, var_tol=1e-3):
+        """sympy_fn: callable taking a sympy.Symbol → sympy.Expr.
+        numeric_fn: callable taking VarDbl → VarDbl."""
+        x_sym = sympy.Symbol('x')
+        dx_sym = sympy.Symbol('dx')
+        v = analytic.InVar(x_sym, dx_sym,
+                           analytic.EDistrType.Gaussian, kappa=5.0)
+        T = analytic.StatTaylor(sympy_fn(x_sym), (v,), max_order=self.MAX_ORDER)
+        sym_mean = sum((T.biasOrder(n) for n in range(self.MAX_ORDER + 1)),
+                       sympy.Integer(0))
+        sym_var = sum((T.varOrder(n) for n in range(self.MAX_ORDER + 1)),
+                      sympy.Integer(0))
+        subs = {x_sym: x_val, dx_sym: dx_val}
+        sym_mean_f = float(sym_mean.subs(subs).evalf())
+        sym_var_f = float(sym_var.subs(subs).evalf())
+        res = numeric_fn(VarDbl(x_val, dx_val))
+        num_mean = res.value()
+        num_var = res.uncertainty() ** 2
+        # Mean: scale-relative tolerance.
+        mean_scale = max(abs(sym_mean_f), 1e-10)
+        self.assertLess(
+            abs(num_mean - sym_mean_f), mean_scale * value_tol,
+            msg=f'mean ({x_val}±{dx_val}): numeric={num_mean!r} '
+                f'vs symbolic={sym_mean_f!r}')
+        if sym_var_f > 1e-20:
+            self.assertLess(
+                abs(num_var / sym_var_f - 1), var_tol,
+                msg=f'variance ({x_val}±{dx_val}): numeric={num_var!r} '
+                    f'vs symbolic={sym_var_f!r}')
+        else:
+            self.assertLess(num_var, 1e-20,
+                            msg='variance should be near 0')
+
+    def test_exp(self):
+        for x, dx in [(1.0, 0.1), (2.0, 0.05), (-1.0, 0.1), (0.0, 0.2)]:
+            self._verify(sympy.exp, Taylor.exp, x, dx)
+
+    def test_log(self):
+        for x, dx in [(1.0, 0.1), (2.0, 0.2), (5.0, 0.5)]:
+            self._verify(sympy.log, Taylor.log, x, dx)
+
+    def test_sin(self):
+        for x, dx in [(0.0, 0.1), (math.pi / 4, 0.1),
+                      (math.pi / 2, 0.1), (math.pi, 0.1)]:
+            self._verify(sympy.sin, Taylor.sin, x, dx)
+
+    def test_pow_minus_1(self):
+        # Inverse: f(x) = 1/x, numeric via Taylor.pow(.., -1).
+        self._verify(lambda x: 1 / x, lambda v: Taylor.pow(v, -1),
+                     2.0, 0.1)
+        self._verify(lambda x: 1 / x, lambda v: Taylor.pow(v, -1),
+                     1.0, 0.05)
+
+    def test_pow_half(self):
+        # Square root: f(x) = sqrt(x), numeric via Taylor.pow(.., 0.5).
+        self._verify(lambda x: x ** sympy.Rational(1, 2),
+                     lambda v: Taylor.pow(v, 0.5), 4.0, 0.1)
+        self._verify(lambda x: x ** sympy.Rational(1, 2),
+                     lambda v: Taylor.pow(v, 0.5), 1.0, 0.05)
+
+    def test_pow_2(self):
+        # Square: f(x) = x², numeric via Taylor.pow(.., 2) → polynomial1d.
+        self._verify(lambda x: x ** 2, lambda v: Taylor.pow(v, 2),
+                     1.0, 0.1)
+        self._verify(lambda x: x ** 2, lambda v: Taylor.pow(v, 2),
+                     3.0, 0.05)
 
 
 if __name__ == '__main__':

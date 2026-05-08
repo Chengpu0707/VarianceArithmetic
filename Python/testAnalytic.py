@@ -379,31 +379,57 @@ class _Base(unittest.TestCase):
         self._check(self.t.varOrder(n), self.t.varAt(n))
         self._check(self.t.biasOrder(n), self.t.biasAt(n))
 
+    def _dump_function(self, name: str):
+        """Write self.t.dump() to Python/Output/dump_<name>.csv for inspection
+        and assert structural invariants of the CSV file."""
+        path = os.path.join(OUTDIR, 'Python', 'Output', f'dump_{name}.csv')
+        self.t.dump(path)
+        self.assertTrue(os.path.isfile(path))
+        with open(path, newline='') as f:
+            rows = list(csv.reader(f))
+        # Row 0: single-field `function: <expr>` line.
+        self.assertEqual(len(rows[0]), 1)
+        self.assertTrue(rows[0][0].startswith('function: '))
+        # Row 1: header `order, <invar labels...>, varAt, biasAt`.
+        n_invars = len(self.t.in_vars)
+        header = rows[1]
+        self.assertEqual(header[0], 'order')
+        self.assertEqual(header[-2], 'varAt')
+        self.assertEqual(header[-1], 'biasAt')
+        self.assertEqual(len(header), 1 + n_invars + 2)
+        for k, inv in enumerate(self.t.in_vars):
+            self.assertEqual(header[1 + k], f'{inv.value}~{inv.deviation}')
+        # Data rows: order = sum of per-InVar columns; at least one non-zero row.
+        self.assertGreater(len(rows), 2)
+        for row in rows[2:]:
+            self.assertEqual(int(row[0]),
+                             sum(int(row[1 + k]) for k in range(n_invars)))
+
 class TestStatTaylorVarAt(_Base):
 
     def test_invalid_wrong_num_orders(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(1, 1)
 
     def test_invalid_order_float(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(2.0)
 
     def test_invalid_order_bool(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.varAt(True)
 
     def test_invalid_order_exceeds_max_order(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
-            t.varAt(5)
+            t.varAt(7)
 
     def test_2d_product_order2_2(self):
         # f(x,y)=x*y: p=(2,2), nn=(1,1) contributes (mixed partials beyond order 1 are 0)
-        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=6)
         self._check(t.varAt(2, 2),
                     self.vx.moment(2) * self.vy.moment(2) * self.dx**2 * self.dy**2)
 
@@ -411,23 +437,23 @@ class TestStatTaylorVarAt(_Base):
 class TestStatTaylorVarOrder(_Base):
 
     def test_invalid_n_float(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.varOrder(2.0)
 
     def test_invalid_n_bool(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.varOrder(True)
 
     def test_invalid_n_exceeds_max_order(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
-            t.varOrder(5)
+            t.varOrder(7)
 
     def test_2d_product_order4(self):
         # f(x,y)=x*y: only varAt(2,2) contributes among (1,3),(2,2),(3,1)
-        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=6)
         self._check(t.varOrder(4),
                     self.vx.moment(2) * self.vy.moment(2) * self.dx**2 * self.dy**2)
 
@@ -435,52 +461,52 @@ class TestStatTaylorVarOrder(_Base):
 class TestStatTaylorBiasAt(_Base):
 
     def test_invalid_wrong_num_orders(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(1, 1)
 
     def test_invalid_order_float(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(2.0)
 
     def test_invalid_order_bool(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(True)
 
     def test_invalid_order_negative(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasAt(-1)
 
     def test_invalid_order_exceeds_max_order(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
-            t.biasAt(5)
+            t.biasAt(7)
 
     def test_2d_partial_zero_allowed(self):
         # biasAt(1,0)=δx · ∂f/∂x · ζ_x(1) · ζ_y(0); for f=x and symmetric x, ζ_x(1)=0
-        t = analytic.StatTaylor(self.x, (self.vx, self.vy), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx, self.vy), max_order=6)
         self._check(t.biasAt(1, 0), sympy.Integer(0))
 
 
 class TestStatTaylorBiasOrder(_Base):
 
     def test_invalid_n_float(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(2.0)
 
     def test_invalid_n_bool(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
             t.biasOrder(True)
 
     def test_invalid_n_exceeds_max_order(self):
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with self.assertRaises(analytic.TaylorException):
-            t.biasOrder(5)
+            t.biasOrder(7)
 
 
 class TestStatTaylorDump(_Base):
@@ -514,7 +540,7 @@ class TestStatTaylorDump(_Base):
         import tempfile
         # 1D linear x: every order ≥ 2 has varAt=biasAt=0; order 1 has both 0
         # (moment(1)=0), order 0 has biasAt=x (nonzero) and varAt=0.
-        t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, 'dump.csv')
             t.dump(path)
@@ -575,7 +601,7 @@ class TestLinear(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x, (self.vx,), max_order=6)
 
     def test_at_order0(self):
         self._check(self.t.at(0), self.x)
@@ -589,10 +615,10 @@ class TestLinear(_Base):
         self._check(self.t.at(2), sympy.Integer(0))
 
     def test_coeffs_length(self):
-        self.assertEqual(len(self.t.coeffs), 5)
+        self.assertEqual(len(self.t.coeffs), 7)
 
     def test_coeffs_indexed_by_order(self):
-        for order in range(5):
+        for order in range(7):
             self._check(self.t.coeffs[(order,)], self.t.at(order))
 
     def test_varAt_order1_is_zero(self):
@@ -631,7 +657,7 @@ class TestQuadratic(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x**2, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x**2, (self.vx,), max_order=6)
 
     def test_at_order0(self):
         self._check(self.t.at(0), self.x**2)
@@ -645,10 +671,10 @@ class TestQuadratic(_Base):
         self._check(self.t.at(2), sympy.Integer(1))
 
     def test_coeffs_length(self):
-        self.assertEqual(len(self.t.coeffs), 5)
+        self.assertEqual(len(self.t.coeffs), 7)
 
     def test_coeffs_indexed_by_order(self):
-        for order in range(5):
+        for order in range(7):
             self._check(self.t.coeffs[(order,)], self.t.at(order))
 
     def test_varAt_order1_is_zero(self):
@@ -709,13 +735,13 @@ class TestQuadratic(_Base):
 
     def test_at_matches_formula_2_20_with_c_2(self):
         # coeffs[(n,)] = C(2, n) · x^(2-n) — the (2.20) Taylor structure
-        for n in range(5):
+        for n in range(7):
             self._check(self.t.at(n),
                         sympy.binomial(2, n) * self.x**(2 - n))
 
     def test_biasAt_matches_formula_2_20_with_c_2(self):
         # biasAt(n) = δx^n · C(2, n) · x^(2-n) · ζ(n) per (2.20)
-        for n in range(1, 5):
+        for n in range(1, 7):
             expected = (self.dx**n * sympy.binomial(2, n)
                         * self.x**(2 - n) * self.vx.moment(n))
             self._check(self.t.biasAt(n), expected)
@@ -725,7 +751,7 @@ class TestQuadratic(_Base):
         #   δ²(x²) = 4·ζ(2)·x²·δx² + (ζ(4) - ζ(2)²)·δx⁴
         m2 = self.vx.moment(2)
         m4 = self.vx.moment(4)
-        impl_total = sum((self.t.varOrder(n) for n in range(1, 5)),
+        impl_total = sum((self.t.varOrder(n) for n in range(1, 7)),
                          sympy.Integer(0))
         self._check(impl_total,
                     4 * m2 * self.x**2 * self.dx**2
@@ -737,7 +763,7 @@ class TestExp(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(sympy.exp(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.exp(self.x), (self.vx,), max_order=6)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.exp(self.x))
@@ -792,13 +818,16 @@ class TestExp(_Base):
     def test_orders_match_at_4(self):
         self._check_orders_match_at(4)
 
+    def test_dump(self):
+        self._dump_function('exp')
+
 
 # log(x): at(0)=log(x), at(n)=(-1)^(n-1)/(n*x^n) for n>=1
 class TestLog(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(sympy.log(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.log(self.x), (self.vx,), max_order=6)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.log(self.x))
@@ -854,13 +883,16 @@ class TestLog(_Base):
     def test_orders_match_at_4(self):
         self._check_orders_match_at(4)
 
+    def test_dump(self):
+        self._dump_function('log')
+
 
 # sin(x): derivatives cycle sin->cos->-sin->-cos->sin, divided by n!
 class TestSine(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=6)
 
     def test_order0(self):
         self._check(self.t.at(0), sympy.sin(self.x))
@@ -919,6 +951,9 @@ class TestSine(_Base):
     def test_orders_match_at_4(self):
         self._check_orders_match_at(4)
 
+    def test_dump(self):
+        self._dump_function('sin')
+
 
 # x**c (c=1.5): at(n) = c*(c-1)*...*(c-n+1)/n! * x**(c-n)
 class TestPow(_Base):
@@ -926,7 +961,7 @@ class TestPow(_Base):
     def setUp(self):
         super().setUp()
         self.c = 1.5
-        self.t = analytic.StatTaylor(self.x**self.c, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.x**self.c, (self.vx,), max_order=6)
 
     def test_order0(self):
         self._check(self.t.at(0), self.x**self.c)
@@ -991,6 +1026,9 @@ class TestPow(_Base):
     def test_orders_match_at_4(self):
         self._check_orders_match_at(4)
 
+    def test_dump(self):
+        self._dump_function('pow')
+
 
 # f(x) = sin(x)/x: 1D rational mixture of sin(x), cos(x), and powers of x.
 class TestSinXdivX(_Base):
@@ -998,7 +1036,7 @@ class TestSinXdivX(_Base):
     def setUp(self):
         super().setUp()
         self.f = sympy.sin(self.x) / self.x
-        self.t = analytic.StatTaylor(self.f, (self.vx,), max_order=4)
+        self.t = analytic.StatTaylor(self.f, (self.vx,), max_order=6)
 
     # at: derivatives of sin(x)/x divided by n!
 
@@ -1036,7 +1074,7 @@ class TestSinXdivX(_Base):
                      + 24 * sympy.sin(self.x) / self.x**5) / 24)
 
     def test_coeffs_length(self):
-        self.assertEqual(len(self.t.coeffs), 5)
+        self.assertEqual(len(self.t.coeffs), 7)
 
     # biasAt: ζ(odd) = 0 for symmetric distributions
 
@@ -1090,7 +1128,7 @@ class TestXaddY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x + self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x + self.y, (self.vx, self.vy), max_order=6)
 
     def test_at_order_0_0(self):
         self._check(self.t.at(0, 0), self.x + self.y)
@@ -1111,8 +1149,8 @@ class TestXaddY(_Base):
         self._check(self.t.at(2, 0), sympy.Integer(0))
 
     def test_coeffs_length(self):
-        # 2 vars, max_order=4: sum_{k=0..4}(k+1) = 15
-        self.assertEqual(len(self.t.coeffs), 15)
+        # 2 vars, max_order=6: sum_{k=0..6}(k+1) = 28
+        self.assertEqual(len(self.t.coeffs), 28)
 
     def test_varAt_order_1_1_is_zero(self):
         # full_moment=ζ_x(1)·ζ_y(1)=0; nonzero coeff pairs all have split moment with ζ(1) factor
@@ -1167,17 +1205,20 @@ class TestXaddY(_Base):
 
     def test_total_bias_matches_formula_2_11(self):
         # (2.11) addition mean: x ± y is exact under ζ_k(0)=1, so total bias = 0.
-        total_bias = sum((self.t.biasOrder(n) for n in range(1, 5)),
+        total_bias = sum((self.t.biasOrder(n) for n in range(1, 7)),
                          sympy.Integer(0))
         self._check(total_bias, sympy.Integer(0))
 
     def test_total_variance_matches_formula_2_12(self):
         # (2.12) δ²(x+y) = ζ_x(2)·δx² + ζ_y(2)·δy²
-        total_var = sum((self.t.varOrder(n) for n in range(1, 5)),
+        total_var = sum((self.t.varOrder(n) for n in range(1, 7)),
                         sympy.Integer(0))
         self._check(total_var,
                     self.vx.moment(2) * self.dx**2
                     + self.vy.moment(2) * self.dy**2)
+
+    def test_dump(self):
+        self._dump_function('x_plus_y')
 
 
 # f(x, y) = x * y: tests Formula (2.12) bias and (2.13) variance.
@@ -1186,7 +1227,7 @@ class TestXmulY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x * self.y, (self.vx, self.vy), max_order=6)
 
     def test_at_order_0_0(self):
         self._check(self.t.at(0, 0), self.x * self.y)
@@ -1210,8 +1251,8 @@ class TestXmulY(_Base):
         self._check(self.t.at(0, 2), sympy.Integer(0))
 
     def test_coeffs_length(self):
-        # 2 vars, max_order=4: sum_{k=0..4}(k+1) = 15
-        self.assertEqual(len(self.t.coeffs), 15)
+        # 2 vars, max_order=6: sum_{k=0..6}(k+1) = 28
+        self.assertEqual(len(self.t.coeffs), 28)
 
     # (2.13) δ²(xy) = ζ_x(2)·y²·δx² + ζ_y(2)·x²·δy² + ζ_x(2)·ζ_y(2)·δx²·δy²
 
@@ -1258,7 +1299,7 @@ class TestXmulY(_Base):
         # (2.13) δ²(xy) = ζ_x(2)·y²·δx² + ζ_y(2)·x²·δy² + ζ_x(2)·ζ_y(2)·δx²·δy²
         m2x = self.vx.moment(2)
         m2y = self.vy.moment(2)
-        total = sum((self.t.varOrder(n) for n in range(1, 5)), sympy.Integer(0))
+        total = sum((self.t.varOrder(n) for n in range(1, 7)), sympy.Integer(0))
         self._check(total,
                     m2x * self.y**2 * self.dx**2
                     + m2y * self.x**2 * self.dy**2
@@ -1282,6 +1323,9 @@ class TestXmulY(_Base):
         # (2,0)/(0,2): coeff=0; (1,1): full_moment=0
         self._check(self.t.biasOrder(2), sympy.Integer(0))
 
+    def test_dump(self):
+        self._dump_function('x_mul_y')
+
 
 # f(x, y) = x / y. Linear in x → coeffs[(i, j)] = 0 for i ≥ 2.
 # Nonzero: coeffs[(0, j)] = (-1)^j · x / y^{j+1}, coeffs[(1, j)] = (-1)^j / y^{j+1}.
@@ -1289,7 +1333,7 @@ class TestXdivY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x / self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x / self.y, (self.vx, self.vy), max_order=6)
 
     # at / coeffs
 
@@ -1328,8 +1372,8 @@ class TestXdivY(_Base):
         self._check(self.t.at(1, 3), -1 / self.y**4)
 
     def test_coeffs_length(self):
-        # 2 vars, max_order=4: 15 entries
-        self.assertEqual(len(self.t.coeffs), 15)
+        # 2 vars, max_order=6: 28 entries
+        self.assertEqual(len(self.t.coeffs), 28)
 
     # biasAt: nonzero iff coeffs[p] ≠ 0 AND every p_k is even (since ζ(odd)=0)
     # → only (0, 2) and (0, 4) contribute for f=x/y under symmetric distributions.
@@ -1437,13 +1481,16 @@ class TestXdivY(_Base):
                     + self.dy**4 * self.x**2 / self.y**6
                     * (2 * m4 + (m4 - m2**2)))
 
+    def test_dump(self):
+        self._dump_function('x_div_y')
+
 
 # f(x, y) = x^y. Coeffs mix x^y, x^(y-k) and powers of ln(x).
 class TestXpowY(_Base):
 
     def setUp(self):
         super().setUp()
-        self.t = analytic.StatTaylor(self.x**self.y, (self.vx, self.vy), max_order=4)
+        self.t = analytic.StatTaylor(self.x**self.y, (self.vx, self.vy), max_order=6)
 
     # at / coeffs
 
@@ -1479,8 +1526,8 @@ class TestXpowY(_Base):
                     self.x**self.y * sympy.log(self.x)**4 / 24)
 
     def test_coeffs_length(self):
-        # 2 vars, max_order=4: 15 entries
-        self.assertEqual(len(self.t.coeffs), 15)
+        # 2 vars, max_order=6: 28 entries
+        self.assertEqual(len(self.t.coeffs), 28)
 
     # biasAt: ζ(odd) = 0 zeros out any p with an odd component.
 
@@ -1549,6 +1596,9 @@ class TestXpowY(_Base):
     def test_varOrder_order3_is_zero(self):
         self._check(self.t.varOrder(3), sympy.Integer(0))
 
+    def test_dump(self):
+        self._dump_function('x_pow_y')
+
 
 # f(x, y, z) = x + y + z: separable 3D function; nonzero coeffs only at
 # (0,0,0), (1,0,0), (0,1,0), (0,0,1).
@@ -1557,7 +1607,7 @@ class TestXaddYaddZ(_Base):
     def setUp(self):
         super().setUp()
         self.t = analytic.StatTaylor(
-            self.x + self.y + self.z, (self.vx, self.vy, self.vz), max_order=4)
+            self.x + self.y + self.z, (self.vx, self.vy, self.vz), max_order=6)
 
     def test_at_order_0_0_0(self):
         self._check(self.t.at(0, 0, 0), self.x + self.y + self.z)
@@ -1579,8 +1629,8 @@ class TestXaddYaddZ(_Base):
         self._check(self.t.at(2, 0, 0), sympy.Integer(0))
 
     def test_coeffs_length(self):
-        # 3 vars, max_order=4: sum_{k=0..4} C(k+2, 2) = 1+3+6+10+15 = 35
-        self.assertEqual(len(self.t.coeffs), 35)
+        # 3 vars, max_order=6: sum_{k=0..6} C(k+2, 2) = 1+3+6+10+15+21+28 = 84
+        self.assertEqual(len(self.t.coeffs), 84)
 
     def test_varAt_order_2_0_0(self):
         # 1D x-only contribution: δx² · ζ_x(2) (only nn=(1,0,0) contributes)
@@ -1630,13 +1680,13 @@ class TestXaddYaddZ(_Base):
 
     def test_total_bias_matches_formula_2_11(self):
         # 3D extension of (2.11): exact mean for x+y+z, so total bias = 0.
-        total_bias = sum((self.t.biasOrder(n) for n in range(1, 5)),
+        total_bias = sum((self.t.biasOrder(n) for n in range(1, 7)),
                          sympy.Integer(0))
         self._check(total_bias, sympy.Integer(0))
 
     def test_total_variance_matches_formula_2_12(self):
         # 3D extension of (2.12): δ²(x+y+z) = ζ_x(2)·δx² + ζ_y(2)·δy² + ζ_z(2)·δz²
-        total_var = sum((self.t.varOrder(n) for n in range(1, 5)),
+        total_var = sum((self.t.varOrder(n) for n in range(1, 7)),
                         sympy.Integer(0))
         self._check(total_var,
                     self.vx.moment(2) * self.dx**2
