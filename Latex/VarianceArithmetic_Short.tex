@@ -141,7 +141,9 @@ The remainder of this paper is organized as follows:
 
 \item Section \ref{sec: FFT} examines the impact of numerical library errors and shows that these errors can be significant.
 
-\item Section \ref{sec: recursion} showcases variance arithmetic in catching catastrophic cancellation in a regression algorithm.
+\item Section \ref{sec: recursion} showcases variance arithmetic in catching catastrophic cancellation in a recursion algorithm.
+
+\item Section \ref{sec: regression} demonstrates imprecise analysis as a new concept in linear regression.
 
 \item Section \ref{sec: conclusion and discussion} concludes with a summary and a discussion of the findings.
 
@@ -1850,48 +1852,82 @@ Unlike the hidden catastrophic cancellation in floating-point arithmetic, varian
 
 
 
-\section{Linear Regression}
-\label{sec: linear regression}
+\section{Regression}
+\label{sec: regression}
+
+Statistical Taylor expansion brings not only numerical enhancement, but also conceptual extension to the conventional mathematical concepts.
+For example, sample count should be ubiquitous in analysis, and this study suggests that the conventional least-squares regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective without using sample counts.
 
 \subsection{Zeroth Order Regression}
 
-Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - f_0)^2 /N$ is minimized. 
-$f_0 = \overline{x}$ and $R_0 = \delta^2 x$ where $\overline{x}$ and $\delta^2 x$ are the mean and variance of the data set.
+Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f[0]$ such that the residual $R_0 \equiv \sum_{j} (X_j - f[0])^2 /N$ is minimized. 
+$f[0] = \overline{x}$ and $R_0 = (\delta x)^2$ where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
 
-Suppose a data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$ and variance $\delta^2 x_j$, Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance respectively, in which $N_j/N$ is the weight of $j$-th sub set. 
+Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th sub set.
+$(\delta x)^2$ contains both the sub set variance $(\delta x_j)^2$ and the inter sub set variance $(\overline{x_j} - \overline{x})^2$.
 \begin{align}
 \label{eqn: set mean}
 \overline{x} &= \sum_{j} \frac{N_j}{N} \overline{x_j}; \\
 \label{eqn: set variance}
-\delta^2 x &= \sum_{j} \frac{N_j}{N} \left( \delta^2 x_j +  (\overline{x_j} - \overline{x})^2 \right);
+(\delta x)^2 &= \sum_{j} \frac{N_j}{N} \left( (\delta x_j)^2 +  (\overline{x_j} - \overline{x})^2 \right);
 \end{align}
-From the perspective of fitting the data set $\overline{x_j} \pm \delta x_j$ to $f_0$ with weight $N_j/N$,  $f_0 = \overline{x}$ and $R_0 = \delta^2 x$.
-Contrary to conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, $R_0$ also contains $\sum_j (N_j/N) \delta^2 x_j$, in addition to $\sum_j (N_j/N)(\overline{x_j}-\overline{x})^2$.
 
 
 \subsection{Regression Weight}
 
-If $N_j$ is unknown, $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight because after bootstrapping the underlying distribution mean as $\overline{x}$, $(\overline{x_j} - \overline{x})^2$ is proportional to $1/N_j$ according to central limit theorem \cite{Probability_Statistics}.
-The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ yields approximate result for $\delta^2 x$ in Formula \eqref{eqn: set variance approx}.
-For example, when $\overline{x_j} \in \{2, 3, 5\}$, the non-trivial solution is $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$.
-For the special case when all $\overline{x_j}$ are equal, $\overline{x} = \overline{x_j}$ and $\delta^2 x = \sum_{j} \delta^2 x_j /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information.
+If $N_j$ is unknown, and if further \emph{the data set is assumed to be independent and identically distributed}, $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight because after bootstrapping the underlying distribution mean as $\overline{x}$, $(\overline{x_j} - \overline{x})^2$ is proportional to $1/N_j$ according to central limit theorem \cite{Probability_Statistics}.
+The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 \sim 1/N_j$ holds only in expectation, and the solution with the least $|\varpi|$ is the most likely.
+The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
+Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, which are non-unique due to lack of information.
+When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is singular; in this case $\overline{x} = \overline{x_j}$ and $(\delta x)^2 = \sum_{j} (\delta x_j)^2 /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information on $N_j$.
 \begin{align}
 \label{eqn: set mean approx}
-\overline{x} &\simeq \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
-		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}}; \\
+\overline{x} &= \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
+		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \varpi; \\
 \label{eqn: set variance approx}
-\delta^2 x &\simeq \frac{J + \sum_{j} \frac{\delta^2 x_j}{(\overline{x_j} - \overline{x})^2}}
+(\delta x)^2 &\simeq \frac{J + \sum_{j} \frac{(\delta x_j)^2}{(\overline{x_j} - \overline{x})^2}}
 		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}};
 \end{align}
-
-In contrast, $\delta^2 x_j$ approaches the underlying distribution variance so that $1/\delta^2 x_j$ cannot replace $N_j/N$.
-The common practice to use $1/\delta^2 x_j$ as the sub set weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression seems to have no statistical ground.
-In addition, using $1/\delta^2 x_j$ as weight prevents the mixing of precise and imprecise values in the data set, while Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx} and \eqref{eqn: set variance approx} all permit such mixture.
+In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
+The common practice to use $1/(\delta x_j)^2$ as the sub set weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression seems to have no statistical ground.
+In addition, using $1/(\delta x_j)^2$ as weight prevents the mixing of precise and imprecise values in the data set, while Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx} and \eqref{eqn: set variance approx} all permit such mixture.
 
 
 \subsection{First Order Regression}
 
-Suppose a data set contains $N$ samples $(X_j, Y_j) j = 1 \dots N$, to fit with two parameters $Y_j = f_0 + f_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f_1 X_j - f_0)^2 /N$ is minimized. 
+Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, in which $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is defined as the co-variance between x and y.
+Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
+$(\delta f[1])^2$ decreases with larger $(\delta x)^2$, while $(\delta f[0])^2$ decreases with larger $(\delta x)^2$ relative to $\overline{x}^2$ and reaches its lower bound $R_1/N$ as $\overline{x} \to 0$.
+\begin{align}
+\label{eqn: set residual}
+R_1 &= (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
+\label{eqn: set slope}
+f[1] &= \frac{\nu(x,y)}{(\delta x)^2}; \\
+\label{eqn: set intercept}
+f[0] & = \overline{y} - \overline{x} f[1]; \\
+\label{eqn: set slope variance}
+(\delta f[1])^2 &= \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
+\label{eqn: set intercept variance}
+(\delta f[0])^2 &= \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
+\end{align}
+Formula \eqref{eqn: set slope precision} shows that $P(f[1])$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
+Whether $P(f[1])$ or $R^2$ is the better measure of goodness-of-fit is debatable.
+\begin{align}
+\label{eqn: set slope precision}
+P(f[1])^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
+\label{eqn: set R2}
+\frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
+\end{align}
+
+Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, $\overline{y_j}$, variance $(\delta x_j)^2$,  $(\delta y_j)^2$, and co-variance $\nu(x,y)_j$. 
+Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, while Formula \eqref{eqn: set cov} gives the set co-variance in which the first term is sub set co-variance and the second term is inter sub set co-variance.
+\begin{align}
+\label{eqn: set cov}
+\nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
+\end{align}
+Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} contains two defects: ignoring vital information in regression formulas such as $N_j$, $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$, and ad hoc usage of either $1/(\delta x_j)^2$ or $1/(\delta y_j)^2$ or $1/(\delta x_j)^2 \; 1/(\delta y_j)^2$ as weights.
+Both defects stem from patching $\delta x_j$ and $\delta y_j$ into the original least-squares analysis that used precise values only.
+
 
 
 
