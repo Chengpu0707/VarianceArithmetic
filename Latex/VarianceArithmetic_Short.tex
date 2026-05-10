@@ -1849,6 +1849,52 @@ Unlike the hidden catastrophic cancellation in floating-point arithmetic, varian
 
 
 
+
+\section{Linear Regression}
+\label{sec: linear regression}
+
+\subsection{Zeroth Order Regression}
+
+Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - f_0)^2 /N$ is minimized. 
+$f_0 = \overline{x}$ and $R_0 = \delta^2 x$ where $\overline{x}$ and $\delta^2 x$ are the mean and variance of the data set.
+
+Suppose a data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$ and variance $\delta^2 x_j$, Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance respectively, in which $N_j/N$ is the weight of $j$-th sub set. 
+\begin{align}
+\label{eqn: set mean}
+\overline{x} &= \sum_{j} \frac{N_j}{N} \overline{x_j}; \\
+\label{eqn: set variance}
+\delta^2 x &= \sum_{j} \frac{N_j}{N} \left( \delta^2 x_j +  (\overline{x_j} - \overline{x})^2 \right);
+\end{align}
+From the perspective of fitting the data set $\overline{x_j} \pm \delta x_j$ to $f_0$ with weight $N_j/N$,  $f_0 = \overline{x}$ and $R_0 = \delta^2 x$.
+Contrary to conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, $R_0$ also contains $\sum_j (N_j/N) \delta^2 x_j$, in addition to $\sum_j (N_j/N)(\overline{x_j}-\overline{x})^2$.
+
+
+\subsection{Regression Weight}
+
+If $N_j$ is unknown, $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight because after bootstrapping the underlying distribution mean as $\overline{x}$, $(\overline{x_j} - \overline{x})^2$ is proportional to $1/N_j$ according to central limit theorem \cite{Probability_Statistics}.
+The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ yields approximate result for $\delta^2 x$ in Formula \eqref{eqn: set variance approx}.
+For example, when $\overline{x_j} \in \{2, 3, 5\}$, the non-trivial solution is $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$.
+For the special case when all $\overline{x_j}$ are equal, $\overline{x} = \overline{x_j}$ and $\delta^2 x = \sum_{j} \delta^2 x_j /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information.
+\begin{align}
+\label{eqn: set mean approx}
+\overline{x} &\simeq \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
+		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}}; \\
+\label{eqn: set variance approx}
+\delta^2 x &\simeq \frac{J + \sum_{j} \frac{\delta^2 x_j}{(\overline{x_j} - \overline{x})^2}}
+		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}};
+\end{align}
+
+In contrast, $\delta^2 x_j$ approaches the underlying distribution variance so that $1/\delta^2 x_j$ cannot replace $N_j/N$.
+The common practice to use $1/\delta^2 x_j$ as the sub set weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression seems to have no statistical ground.
+In addition, using $1/\delta^2 x_j$ as weight prevents the mixing of precise and imprecise values in the data set, while Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx} and \eqref{eqn: set variance approx} all permit such mixture.
+
+
+\subsection{First Order Regression}
+
+Suppose a data set contains $N$ samples $(X_j, Y_j) j = 1 \dots N$, to fit with two parameters $Y_j = f_0 + f_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f_1 X_j - f_0)^2 /N$ is minimized. 
+
+
+
 \section{Conclusion and Discussion}
 \label{sec: conclusion and discussion}
 
