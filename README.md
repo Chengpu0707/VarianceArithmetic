@@ -8,9 +8,9 @@ The code and analysis associated with the paper will be pointed out here.
 
 ## Target
 
-The code is targeted for Vs Code IDE.
-For the ease of sharing the source code, no project file is provided.
-Instead .vscode/settings.json and .vscode/tasks.json needs to be modified for each client's enviornment, such as the location of g++:
+The code is targeted for the VS Code IDE.
+For ease of sharing the source code, no project file is provided.
+Instead, `.vscode/settings.json` and `.vscode/tasks.json` need to be modified for each client's environment, such as the location of g++:
 ```
 {
     "tasks": [
@@ -23,32 +23,33 @@ Instead .vscode/settings.json and .vscode/tasks.json needs to be modified for ea
 
 ## Implementing Languages and Folders
 
-The C++ implementation is under ./Cpp, as *.h files, for easier souce code sharing.
-The cpp files contains tests using a self-made simple unit test framework provided by test.h.
-There is no project file so each cpp file should be complied to be executed by itself.
-Run all unit test will generate txt files under ./Cpp/Output
-All files are built and tested against C++23, C++20, C++17, C++11 and C++03 standards. 
+The C++ implementation is under `./Cpp` as header (`*.h`) files for easier source-code sharing.
+The `*.cpp` files contain tests using a self-made simple unit-test framework provided by `Test.h`.
+There is no project file, so each `*.cpp` file should be compiled to be executed by itself.
+Running all unit tests will generate `*.txt` files under `./Cpp/Output`.
+All files are built and tested against C++23, C++20, C++17, C++11, and C++03 standards.
 
-The Java implementation is under ./Java, containing both source code and test code.
-The needed 3 jar libraries is under ./Java/lib.
-Run all unit test will generate txt files under ./Java/Output
+The Java implementation is under `./Java`, containing both source code and test code.
+The 3 required jar libraries are under `./Java/lib`.
+Running all unit tests will generate `*.txt` files under `./Java/Output`.
 
-The Python implementation is under ./Python, containing both source code and test code.
-Run all unit test will generate txt files under ./Python/Output
-Specifically, analytic.py allows the solution to any analytic functions.
-Not included is the python interpreter and libraries (numpy, scipy, sympy) which needs to be downloaded and set up, such as by the python pip tool. 
+The Python implementation is under `./Python`, containing both source code and test code.
+Running all unit tests will generate `*.txt` files under `./Python/Output`.
+Specifically, `analytic.py` provides solutions for arbitrary analytic functions.
+Not included are the Python interpreter and libraries (`numpy`, `scipy`, `sympy`), which need to be downloaded and set up (e.g., via `pip`).
 
-The txt files under ./{Cpp, Java, Python}/Output are analyzed by Jupyter Notebook code ipynb under ./IPyNb/as *.ipynb files.
-Different implementation should give the same result.
+The `*.txt` files under `./{Cpp, Java, Python}/Output` are analyzed by Jupyter notebooks under `./IPyNb/` as `*.ipynb` files.
+Different implementations should produce the same result.
 
-The figures in *.ipynb files are saved as *.png files under ./Latex, and converted to *.pdf files under ./Latex before they are used in the ./Latex/VarianceArithmetic.tex file.
-The Latex style file is ./Latex/intmacros.sty
+The figures in `*.ipynb` files are saved as `*.png` files under `./Latex`, and converted to `*.pdf` files under `./Latex` before being used in the `./Latex/VarianceArithmetic.tex` file.
+The LaTeX style file is `./Latex/intmacros.sty`.
 
+All codes are checked against the tex document using Claude.
 
 # Unit Tests
 
 All unit tests should pass.
-Before running unit tests, please make sub folder ./{Cpp, Java, Python}/Output.
+Before running unit tests, please create the subfolder `./{Cpp, Java, Python}/Output`.
 
 ## Manual test
 
@@ -62,19 +63,19 @@ To enable manual test in Python:
 
 ### FFT Test
 
-The output file is ./{Java, Cpp, Python}/Output/FFT_2_19.txt.
-If it exist, the test can be continue.
+The output file is `./{Java, Cpp, Python}/Output/FFT_2_19.txt`.
+If it exists, the test will resume from where it left off.
 For a clean test, delete the file.
 
-Java unit test TestFFT.dump_Order_2_19() takes about 2.1 hours
+The Java unit test `TestFFT.dump_Order_2_19()` takes about 2.1 hours.
 
-For debugging, C++ code is not compiled with any optimization, so it is much slower than java.
+For debugging, the C++ code is compiled without any optimization, so it is much slower than Java.
 The full FFT test took 17.9 hours:
 ```
     ...\VarianceArithmetic\Cpp> .\TestFFT.exe Test
 ```
-For other compilation options, please change .vscode/tasks.json and rerun the C++ FFT test.
-The full FFT test took about 3 hours with the following compilation flag: -O3 march=native
+For other compilation options, change `.vscode/tasks.json` and rerun the C++ FFT test.
+With `-O3 -march=native`, the full FFT test took about 3 hours.
 
 For Python, run the manual command:
 ``` 
@@ -86,9 +87,9 @@ The full FFT test took about a week.
 
 ## Last Unit tests to run
 
-testCompare.py compares the results of C++, Java, and Python for the selected tests, and it should be run last.
+`testCompare.py` compares the results of C++, Java, and Python for the selected tests, and should be run last.
 
-IPyNb/ExeTime.ipynb comoares the executioin speed of C++, Java, and Python.
+`IPyNb/ExeTime.ipynb` compares the execution speed of C++, Java, and Python.
 
 
 ## Outlier
@@ -108,20 +109,20 @@ For signal=Sin freq=1 noiseType=Gaussian noise=0 test=Reverse index=98305, norma
 
 # Failure of unit test
 
-Because of using random variable in the test, occassionally, some test can fail due to sampling.
-Usually rerun the test will pass.
+Because the tests use random variables, occasionally a test can fail due to sampling.
+Rerunning the test usually passes.
 
 
-# Fuction Description and Related files
+# Function Description and Related Files
 
-The Jupiter files in ./IpyNb folder shows that difference implmentation of variance arithmetic has identical results.
+The Jupyter notebooks in `./IPyNb/` show that the different implementations of variance arithmetic produce identical results.
 
-./Python/testCompare.py also compares selected files from the Output folders from difference implmentation directly to show no difference in the results.
+`./Python/testCompare.py` also compares selected files from the `Output` folders of different implementations directly to show no difference in the results.
 
 
 ## Statistical Tools
 
-A statistical counter, and a hostogram counter only for Deviation == 1:
+A statistical counter, and a histogram counter only for Deviation == 1:
  * Cpp/Stats.h
  * Java/Stats/Stat.java, Java/Stats/Histogram.java
  * Python/histo.py
@@ -181,7 +182,7 @@ The basic data type for variance arithmetic in _Sub Section Numerical Representa
 
 The unit tests:
  * Cpp/TestVarDbl.cpp
- * Java/Types/TestVarDbl.java, Java/Types/TestVarDblAdd.java, Java/Types/TestVarDblMutiply.java
+ * Java/Types/TestVarDbl.java, Java/Types/TestVarDblAdd.java, Java/Types/TestVarDblMultiply.java
  * Python/testVarDbl.py
 
 
@@ -223,7 +224,7 @@ Code:
 Unit tests:
  * Cpp/TestPolynominal.cpp
  * Java/TestPolynominal.Java
- * Python/testPolynominal.cpp
+ * Python/testPolynominal.py
 
 Analysis:
  * IPyNb/TaylorExpansion.ipynb: expansion of 1/(1 - x)
@@ -277,7 +278,7 @@ Unit tests:
  * Java/TestFFT.java
  * Python/testFFT.py
 
-Anaylysis:
+Analysis:
  * IPyNb/FFT.{Cpp, Java, Python}.ipynb
  * IPyNb/FFT_Step_{Prec, Quart}.{Cpp, Java, Python}.ipynb
  * IPyNb/FFT_Step_Lib.SciPy.{Cpp, Java, Python}.ipynb
@@ -301,49 +302,23 @@ Analysis:
  * IPyNb/SinDiff.ipynb
 
 
-## _Section: Regressive Generation of Sin and Cos_
+## _Section: Recursive Generation of Sin and Cos_
 
 Code:
- * Python/regressiveSin.py
+ * Python/recursiveSin.py
 
 Unit tests:
- * Python/testRegressiveSin.py
+ * Python/testRecursiveSin.py
 
 Analysis:
- * IPyNb/RegressiveSin.ipynb
+ * IPyNb/RecursiveSin.ipynb
 
 
 # Unit Test Coverage
 
-## Python
+## Python and Java
 
-Please download: 
-```
-$ pip install coverage
-'''
-
-Run all the test*.py files together, which will take much longer (~3930 secons) than the normal unit test (~820 seconds).
-'''
-VarianceArithmetic\Python> coverage run -m unittest testCompare.py testFFT.py testHisto.py testIndexSin.py testMatrix.py testMoment.py testMovingLineFit.py testPolynominal.py testRegressiveSin.py testSinCos.py testStatBounding.py testTaylor.py testValDbl.py
-Ran 256 tests in 3930.139s
-OK (skipped=8)
-```
-
-Display the result:
-```
-VarianceArithmetic\Python> coverage report -m                                          
-Name                   Stmts   Miss  Cover   Missing                                                                               
-----------------------------------------------------
-fft.py                   692    100    86%   163-165, 215, 217, 255-256, 259-262, 269-272, 315-316, 328-329, 355-356, 358-359, 368, 392-394, 399, 403, 412, 416, 420, 423, 444, 450-452, 457, 461, 464, 472, 501, 523-564, 587, 597, 605, 613, 617, 621, 632, 682, 686, 695, 699, 761-762, 776-777, 799, 818-819, 826-827, 864-866
-histo.py                  86      6    93%   20, 33, 37, 53, 56, 102
-indexSin.py              198     17    91%   42, 80-81, 125, 133-134, 158-161, 166, 170, 173, 177, 180, 183, 212, 232
-matrix.py                125     11    91%   70, 80, 82, 90, 95, 106, 109, 159-161, 182
-moment.py                184     84    54%   17, 22, 27, 31, 43-57, 61-77, 88, 97, 100, 102, 104, 111, 115-157, 173, 178
-movingLineFit.py          45      2    96%   68-69
-regressiveSin.py          75      9    88%   38, 40, 42, 46, 58, 77, 84, 92, 98
-taylor.py                306     50    84%   21, 66, 82-102, 156, 159, 163, 243-247, 263-265, 270-271, 277-279, 288-289, 293-295, 331-333, 350-351, 357, 377
-varDbl.py                192     10    95%   59, 75-76, 167-168, 200, 248, 260-261, 275
-'''
+Coverage for Python and Java is measured using the built-in coverage support in VS Code (via the Python and Java test extensions). Run the test suites from the VS Code Testing view with the "Run Tests with Coverage" action.
 
 ## C++
 
@@ -354,7 +329,7 @@ In .vscode/tasks.json, each file should be compiled with the following options:
 ```
 These options will slow down the execution.
 
-'''
+```
 ...\VarianceArithmetic\Cpp> .\TestFFT.exe
 ...\VarianceArithmetic\Cpp> gcov .\TestFFT.cpp
 PS C:\Users\Cheng\OneDrive\Documents\Github\VarianceArithmetic\Cpp> gcov .\TestFFT.cpp
@@ -393,4 +368,4 @@ Creating 'Test.h.gcov'
 File 'C:/Users/Cheng/OneDrive/Documents/Github/VarianceArithmetic/Cpp/FFT.h'
 Lines executed:100.00% of 74
 Creating 'FFT.h.gcov'
-'''
+```
