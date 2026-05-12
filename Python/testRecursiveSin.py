@@ -1,16 +1,16 @@
-"""Unit tests for regressiveSin.py — exercises RegressiveSin's recursive
+"""Unit tests for recursiveSin.py — exercises RecursiveSin's recursive
 generation of sin/cos values from sin(0)=0 and sin(pi/2)=1 and validates
 self-consistency of summation identities.
 """
 import unittest
 
-from regressiveSin import RegressiveSin
+from recursiveSin import RecursiveSin
 from varDbl import VarDbl
 
-class TestRegressiveSin (unittest.TestCase):
+class TestRecursiveSin (unittest.TestCase):
 
     def test_2(self):
-        regr = RegressiveSin(2)
+        regr = RecursiveSin(2)
         regr.calc()
 
     def test_sum2(self):
@@ -31,9 +31,9 @@ class TestRegressiveSin (unittest.TestCase):
         self.assertAlmostEqual(rErr.uncertainty(), qErr.uncertainty())
 
     def test_consistency(self):
-        regr4 = RegressiveSin(4)
+        regr4 = RecursiveSin(4)
         regr4.calc()
-        regr5 = RegressiveSin(5)
+        regr5 = RecursiveSin(5)
         regr5.calc()
         for i in range(0, 5):
             self.assertAlmostEqual(regr4._sSin[i].value(), regr5._sSin[i << 1].value())

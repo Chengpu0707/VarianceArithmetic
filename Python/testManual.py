@@ -22,7 +22,7 @@ from indexSin import OUTDIR
 from matrix import createHilbertMatrix, addNoise
 from matrix import adjugate
 import moment
-from regressiveSin import RegressiveSin
+from recursiveSin import RecursiveSin
 from taylor import Taylor, NotMonotonicException, NotStableException
 import taylor
 from varDbl import VarDbl
@@ -406,11 +406,11 @@ class TestFFTDumpFile (unittest.TestCase):
             self.fail(f"Found none betwwen [{lower}, {upper}]")
 
 
-class TestRegressiveSin (unittest.TestCase):
+class TestRecursiveSin (unittest.TestCase):
 
     @unittest.skipIf(SKIP_TEST, "Ran 1 test in 702s")
     def test_18(self):
-        sin = RegressiveSin(18)
+        sin = RecursiveSin(18)
         sin.calc()
 
 

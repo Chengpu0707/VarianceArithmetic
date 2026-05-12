@@ -1,5 +1,5 @@
 '''
-Regressive calculation of sine and cosine from sin(0) = 0 and sin(PI/2) = 1
+Recursive calculation of sine and cosine from sin(0) = 0 and sin(PI/2) = 1
 '''
 import os
 
@@ -7,9 +7,9 @@ from indexSin import IndexSin, SinSource
 import varDbl
 
 
-class RegressiveSin:
+class RecursiveSin:
     '''
-    Use regression to generate sin(j /(1<<order) *math.pi)
+    Use recursion to generate sin(j /(1<<order) *math.pi)
     '''
     ZERO = varDbl.VarDbl(0,0)
     ONE = varDbl.VarDbl(1,0)
@@ -32,8 +32,8 @@ class RegressiveSin:
         Return None for successfully calculating the fsin which contain sin with uncertainty.
         Otherwise return error string
         '''
-        self._sSin[0] = RegressiveSin.ZERO
-        self._sSin[self._half] = RegressiveSin.ONE
+        self._sSin[0] = RecursiveSin.ZERO
+        self._sSin[self._half] = RecursiveSin.ONE
         if os.getcwd().endswith('/VarianceArithmetic'):
             dirPath = './Python/Output'
         elif os.getcwd().endswith('/VarianceArithmetic/Python'):
@@ -66,9 +66,9 @@ class RegressiveSin:
         if (self._sSin[smid] is None) or (self._sSin[cmid] is None):
             x = self._sSin[self._half - begin] * self._sSin[self._half - end] - self._sSin[begin] * self._sSin[end]
             if self._sSin[smid] is None:
-                self._sSin[smid] = ((RegressiveSin.ONE - x) *RegressiveSin.HALF) ** 0.5
+                self._sSin[smid] = ((RecursiveSin.ONE - x) *RecursiveSin.HALF) ** 0.5
             if self._sSin[cmid] is None:
-                self._sSin[cmid] = ((RegressiveSin.ONE + x) *RegressiveSin.HALF) ** 0.5
+                self._sSin[cmid] = ((RecursiveSin.ONE + x) *RecursiveSin.HALF) ** 0.5
             err = self._sSin[smid].value() - self.sin(smid).value()
             fsin.write(f'{order}\t{smid}\t{self.sin(smid).value()}\t{self.sin(smid).uncertainty()}\t{self._sSin[smid].value()}\t{self._sSin[smid].uncertainty()}\t{err}')
             if self._sSin[smid].uncertainty():
