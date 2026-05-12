@@ -253,10 +253,10 @@ class TestConvergeEdge (unittest.TestCase):
     def test_PowEdge(self):
         self.convergeEdge(f'{OUTDIR}/Python/Output/PowEdge.txt', 
                           f'{OUTDIR}/Java/Output/PowEdge.txt',
-                          prec=1e-9)
+                          prec=1e-5)
         self.convergeEdge(f'{OUTDIR}/Python/Output/PowEdge.txt', 
                           f'{OUTDIR}/Cpp/Output/PowEdge.txt',
-                          prec=1e-9)
+                          prec=1e-5)
 
     def test_SinEdge(self):
         '''

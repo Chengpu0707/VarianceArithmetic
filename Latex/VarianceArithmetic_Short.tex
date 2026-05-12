@@ -1050,6 +1050,7 @@ Figure \ref{fig: Poly_Continuity} illustrates the error distributions of $(x \pm
 
 \iffalse
 
+
 \fi
 
 \begin{figure}[p]
@@ -1820,14 +1821,14 @@ Table \ref{tbl: fft error stats} shows the measured average error deviation for 
 The Linear/Library rows stand out with large reverse error deviations, consistent with the corresponding noise thresholds of $10^{-3}$ in Table \ref{tbl: ideal coverage}.
 In other cases, the average error deviations are close to $1$ while the error slopes are close to $-1$.
 
-\section{Regressive Generation of Sine}
+\section{Recursive Generation of Sine}
 \label{sec: recursion}
 
 \begin{figure}[p]
 \centering
 \includegraphics[height=2.5in]{Regression_Sin.pdf}
 \captionof{figure}{
-The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(\pi j/2^{18})$ versus index $j$ (x-axis) using either Quart or regressive sine function (legend).
+The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(\pi j/2^{18})$ versus index $j$ (x-axis) using either Quart or recursive sine function (legend).
 }
 \label{fig: Regression_Sin}
 \end{figure}
@@ -1843,7 +1844,7 @@ The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(
 & \sin(\alpha + \beta) = 2 \sin(\frac{\alpha + \beta}{2}) \cos(\frac{\alpha + \beta}{2}) = \sqrt{1 - \cos(\frac{\alpha + \beta}{2})^2};
 \end{align}
 Formulas \eqref{eqn: phase sin} and \eqref{eqn: phase cos} compute $\sin(j \pi/2^L), \cos(j \pi/2^L), j = 0 \dots 2^{L - 2}$ recursively for regression order $L = 0 \dots 17$ starting from Formula \eqref{eqn: phase boundary}.
-Formula \eqref{eqn: regr error} shows that such regression guarantees both $\sin(x)^2 + \cos(x)^2 = 1$ and $\sin(2x) = 2\sin(x) \cos(x)$, such that value errors will not accumulate when the regression order $L$ increases.
+Formula \eqref{eqn: regr error} shows that such regression guarantees both $\sin(x)^2 + \cos(x)^2 = 1$ and $\sin(2x) = 2\sin(x) \cos(x)$, such that value errors will not accumulate when the recursion order $L$ increases.
 
 Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation \cite{Rounding_Error}\cite{Precise_Numerical_Methods}.
 As shown in Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits a constant precision around $10^{-16}$, whereas the regression sine function shows increasing precision up to $10^{-7}$ as $x \rightarrow 0$.
@@ -1855,16 +1856,17 @@ Unlike the hidden catastrophic cancellation in floating-point arithmetic, varian
 \section{Regression}
 \label{sec: regression}
 
-Statistical Taylor expansion brings not only numerical enhancement, but also conceptual extension to the conventional mathematical concepts.
-For example, sample count should be ubiquitous in analysis, and this study suggests that the conventional least-squares regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective without using sample counts.
+Statistical Taylor expansion brings not only numerical enhancement, but also conceptual extension of conventional mathematical concepts.
+In particular, the value, deviation, and sample count of each variable should be treated jointly in analysis.
+Conventional least-squares regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} violates this principle and is therefore defective.
 
 \subsection{Zeroth Order Regression}
 
-Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f[0]$ such that the residual $R_0 \equiv \sum_{j} (X_j - f[0])^2 /N$ is minimized. 
-$f[0] = \overline{x}$ and $R_0 = (\delta x)^2$ where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
+Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f[0]$ such that the residual $R_0 \equiv \sum_{j} (X_j - f[0])^2 /N$ is minimized.
+The solution is $f[0] = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
 
 Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th sub set.
-$(\delta x)^2$ contains both the sub set variance $(\delta x_j)^2$ and the inter sub set variance $(\overline{x_j} - \overline{x})^2$.
+$(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the between-subset variance $(\overline{x_j} - \overline{x})^2$.
 \begin{align}
 \label{eqn: set mean}
 \overline{x} &= \sum_{j} \frac{N_j}{N} \overline{x_j}; \\
@@ -1875,10 +1877,10 @@ $(\delta x)^2$ contains both the sub set variance $(\delta x_j)^2$ and the inter
 
 \subsection{Regression Weight}
 
-If $N_j$ is unknown, and if further \emph{the data set is assumed to be independent and identically distributed}, $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight because after bootstrapping the underlying distribution mean as $\overline{x}$, $(\overline{x_j} - \overline{x})^2$ is proportional to $1/N_j$ according to central limit theorem \cite{Probability_Statistics}.
-The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 \sim 1/N_j$ holds only in expectation, and the solution with the least $|\varpi|$ is the most likely.
+If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because bootstrapping the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
+The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 = 1/N_j$ holds only in expectation, and the solution with the smallest $|\varpi|$ is the most likely.
 The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
-Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, which are non-unique due to lack of information.
+Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, leaving the solution indeterminate due to insufficient information.
 When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is singular; in this case $\overline{x} = \overline{x_j}$ and $(\delta x)^2 = \sum_{j} (\delta x_j)^2 /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information on $N_j$.
 \begin{align}
 \label{eqn: set mean approx}
@@ -1889,13 +1891,13 @@ When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is si
 		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}};
 \end{align}
 In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
-The common practice to use $1/(\delta x_j)^2$ as the sub set weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression seems to have no statistical ground.
-In addition, using $1/(\delta x_j)^2$ as weight prevents the mixing of precise and imprecise values in the data set, while Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx} and \eqref{eqn: set variance approx} all permit such mixture.
+The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression lacks statistical justification.
+Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx}, and \eqref{eqn: set variance approx} all permit such mixing.
 
 
 \subsection{First Order Regression}
 
-Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, in which $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is defined as the co-variance between x and y.
+Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
 Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
 $(\delta f[1])^2$ decreases with larger $(\delta x)^2$, while $(\delta f[0])^2$ decreases with larger $(\delta x)^2$ relative to $\overline{x}^2$ and reaches its lower bound $R_1/N$ as $\overline{x} \to 0$.
 \begin{align}
@@ -1919,14 +1921,16 @@ P(f[1])^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
 \frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
 \end{align}
 
-Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, $\overline{y_j}$, variance $(\delta x_j)^2$,  $(\delta y_j)^2$, and co-variance $\nu(x,y)_j$. 
-Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, while Formula \eqref{eqn: set cov} gives the set co-variance in which the first term is sub set co-variance and the second term is inter sub set co-variance.
+Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, means $\overline{x_j}$ and $\overline{y_j}$, variances $(\delta x_j)^2$ and $(\delta y_j)^2$, and covariance $\nu(x,y)_j$.
+Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
+For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be zero, but all $N_j/N$ are required.
 \begin{align}
 \label{eqn: set cov}
 \nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
 \end{align}
-Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} contains two defects: ignoring vital information in regression formulas such as $N_j$, $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$, and ad hoc usage of either $1/(\delta x_j)^2$ or $1/(\delta y_j)^2$ or $1/(\delta x_j)^2 \; 1/(\delta y_j)^2$ as weights.
-Both defects stem from patching $\delta x_j$ and $\delta y_j$ into the original least-squares analysis that used precise values only.
+Because of its statistical rigor, one usage of Formula \eqref{eqn: set cov} is to exclude data from a data set to improve the fitting result according to Formula \eqref{eqn: set slope precision} in cluster analysis.
+
+Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
 
 

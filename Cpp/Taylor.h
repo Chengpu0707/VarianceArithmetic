@@ -745,6 +745,7 @@ inline VarDbl Taylor::pow(const VarDbl& in, double exp,
     return neg? -res : res;
 }
 
+template <>
 inline VarDbl VarDbl::operator/=(const VarDbl& other)
 {
     return *this *=  Taylor::pow(other, -1);

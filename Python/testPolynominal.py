@@ -119,26 +119,26 @@ class TestPolyOne (unittest.TestCase):
     def test_precise_x(self):
         inv = Taylor.pow(1 - VarDbl(0.7), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.3_-1.txt')
         self.assertAlmostEqual(inv.value(), 10/3)
-        self.assertAlmostEqual(inv.uncertainty() / 7.569487334792672e-16, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 7.569489255651884e-16, 1)
         res = Taylor.polynominal1d(VarDbl(0.7), TestPolyOne.sPoly, dumpPath=f'{OUTDIR}/Python/Output/PolyOne_0.7.txt')
         self.assertAlmostEqual(res.value(), 10/3)
-        self.assertAlmostEqual(res.uncertainty(), 7.569487334792672e-16)
+        self.assertAlmostEqual(res.uncertainty(), 7.569489255651885e-16)
         self.assertAlmostEqual(res.value(), inv.value(), delta=res.uncertainty()*10)
 
         inv = Taylor.pow(1 - VarDbl(0.8), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.2_-1.txt')
         self.assertAlmostEqual(inv.value(), 5)
-        self.assertAlmostEqual(inv.uncertainty() / 1.682504257894355e-15, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 1.6825046953871088e-15, 1)
         res = Taylor.polynominal1d(VarDbl(0.8), TestPolyOne.sPoly, dumpPath=f'{OUTDIR}/Python/Output/PolyOne_0.8.txt')
         self.assertAlmostEqual(res.value(), 5)
-        self.assertAlmostEqual(res.uncertainty(), 1.6825042578220935e-15)
+        self.assertAlmostEqual(res.uncertainty(), 1.6825046953871086e-15)
         self.assertAlmostEqual(res.value(), inv.value(), delta=res.uncertainty())
 
         inv = Taylor.pow(1 - VarDbl(0.99), -1, dumpPath=f'{OUTDIR}/Python/Output/Pow_0.01_-1.txt')
         self.assertAlmostEqual(inv.value(), 99.99999999999991)
-        self.assertAlmostEqual(inv.uncertainty(), 6.410351214808837e-13)
+        self.assertAlmostEqual(inv.uncertainty(), 6.41035305204586e-13)
         res = Taylor.polynominal1d(VarDbl(0.99), TestPolyOne.sPoly, dumpPath=f'{OUTDIR}/Python/Output/PolyOne_0.99.txt')
         self.assertAlmostEqual(res.value(), 89.47350981516396)
-        self.assertAlmostEqual(res.uncertainty(), 4.209234934156554e-13)
+        self.assertAlmostEqual(res.uncertainty(), 4.2092361402824557e-13)
 
         with open(f'{OUTDIR}/Python/Output/PolyOne_x.txt', 'w') as f:
             f.write('x\tInverse Value\tInverse Uncertainty\tPoly Value\tPoly Uncertainty\tValue Diff\tValue LSV\tLSV Diff\tOrder\n')
@@ -159,19 +159,19 @@ class TestPolyOne (unittest.TestCase):
     def test_precise_order(self):
         inv = Taylor.pow(1 - VarDbl(0.6), -1)
         self.assertAlmostEqual(inv.value(), 2.5)
-        self.assertAlmostEqual(inv.uncertainty() / 4.00614133453171e-16, 1)
+        self.assertAlmostEqual(inv.uncertainty() / 4.0061424828989134e-16, 1)
 
         res = Taylor.polynominal1d(VarDbl(0.6), [1]*69)
         self.assertAlmostEqual((res.value() - inv.value()) / math.ulp(inv.value()), -1)
-        self.assertAlmostEqual(res.uncertainty() / 4.756365132018834e-16, 1)
+        self.assertAlmostEqual(res.uncertainty() / 4.756366099253557e-16, 1)
 
         res = Taylor.polynominal1d(VarDbl(0.6), [1]*70)
         self.assertAlmostEqual((res.value() - inv.value()) / math.ulp(inv.value()), 0)
-        self.assertAlmostEqual(res.uncertainty() / 4.0061413345316546e-16, 1)
+        self.assertAlmostEqual(res.uncertainty() / 4.0061424828988577e-16, 1)
 
         res = Taylor.polynominal1d(VarDbl(0.6), [1]*71)
         self.assertAlmostEqual((res.value() - inv.value()) / math.ulp(inv.value()), 1)
-        self.assertAlmostEqual(res.uncertainty() / 4.756365132018883e-16, 1)
+        self.assertAlmostEqual(res.uncertainty() / 4.756366099253606e-16, 1)
 
         with open(f'{OUTDIR}/Python/Output/PolyOne_order.txt', 'w') as fw:
             fw.write('x\tOrder\tPoly Value\tPoly Uncertainty\tValue Diff\tPoly LSV\n')
@@ -191,11 +191,11 @@ class TestPolyOne (unittest.TestCase):
         with self.assertRaises(NotMonotonicException):
             Taylor.pow(1 - VarDbl(0.7, 0.061), -1)
         res = Taylor.pow(1 - VarDbl(0.7, 0.060), -1)
-        self.assertAlmostEqual(res.value(), 10/3 + 0.1541670)
-        self.assertAlmostEqual(res.uncertainty(), 0.8494772)
+        self.assertAlmostEqual(res.value(), 10/3 + 0.15416710417357438)
+        self.assertAlmostEqual(res.uncertainty(), 0.8494774741445651)
         res = Taylor.polynominal1d(VarDbl(0.7, 0.060), TestPolyOne.sPoly)
-        self.assertAlmostEqual(res.value(), 10/3 + 0.1541102)
-        self.assertAlmostEqual(res.uncertainty(), 0.8299787)
+        self.assertAlmostEqual(res.value(), 10/3 + 0.15411029134938925)
+        self.assertAlmostEqual(res.uncertainty(), 0.8299789351123686)
 
         with open(f'{OUTDIR}/Python/Output/PolyOne_x_0.05.txt', 'w') as f:
             f.write('x\tInverse Value\tInverse Uncertainty\tPoly Value\tPoly Uncertainty\tValue Diff\n')

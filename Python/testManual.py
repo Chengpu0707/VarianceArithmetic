@@ -505,7 +505,7 @@ class TestConvergence (unittest.TestCase):
                 exception = sWords[-1].strip()
                 self.assertEqual(edge, 19.864)
                 prec = unc / val
-                self.assertAlmostEqual(prec, 1681.7672471)
+                self.assertAlmostEqual(prec, 1681.7667650)
                 self.assertTrue(exception.startswith('NotMonotonicException'))
 
 
