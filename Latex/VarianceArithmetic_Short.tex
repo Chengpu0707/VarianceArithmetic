@@ -1936,7 +1936,7 @@ Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\
 \subsection{Multi-Dimensional Linear Regression}
 
 Suppose a data set contains $N$ samples $(X_{1j}, \dots, X_{Kj}, Y_j)$, $j = 1 \dots N$, to fit with $K+1$ parameters $Y_j = f[0] + \sum_{k=1}^{K} f[k]\, X_{kj}$ such that the residual $R_K$ in Formula \eqref{eqn: multi residual def} is minimized.
-Stacking the $K$ $\nu(x_k, y)$ into a covariance vector $\boldsymbol{\nu}$ and the $K \times K$ covariances $\nu(x_k, x_l)$ into a covariance matrix $\mathbf{C}$, Formulas \eqref{eqn: multi slope} to \eqref{eqn: multi intercept variance} generalize Formulas \eqref{eqn: set slope} to \eqref{eqn: set intercept variance} to $K$ predictors.
+Stacking the $K$ $\nu(x_k, y)$ into a covariance vector $\boldsymbol{\nu}$ and the $K \times K$ covariances $\nu(x_k, x_l)$ into a covariance matrix $\mathbf{C}$, Formulas \eqref{eqn: multi slope} to \eqref{eqn: multi intercept variance} generalize Formulas \eqref{eqn: set slope} to \eqref{eqn: set intercept variance}.
 \begin{align}
 \label{eqn: multi residual def}
 R_K &\equiv \frac{1}{N} \sum_j \left(Y_j - f[0] - \sum_{k=1}^{K} f[k]\, X_{kj}\right)^2; \\
@@ -1953,8 +1953,6 @@ R_K &= (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
 \label{eqn: multi intercept variance}
 (\delta f[0])^2 &= \frac{R_K}{N} \left(1 + \overline{\mathbf{x}}^{\,T} \mathbf{C}^{-1} \overline{\mathbf{x}} \right);
 \end{align}
-where $\overline{\mathbf{x}} = (\overline{x_1}, \dots, \overline{x_K})^T$.
-$R_K$ is non-negative because $\mathbf{C}$ is positive semi-definite, and decreases monotonically with $K$.
 The off-diagonal entries $\nu(f[k], f[l])$ quantify collinearity: large $(\mathbf{C}^{-1})_{kl}$ makes individual slope estimates unreliable even when $R_K$ is small.
 
 Formulas \eqref{eqn: multi cov partition} and \eqref{eqn: multi cross cov partition} extend Formula \eqref{eqn: set cov} component-wise to assemble $\mathbf{C}$ and $\boldsymbol{\nu}$ from subset statistics, with the same conditions as in the previous subsection: within-subset covariances may be zero, but all $N_j$ are required.
@@ -1970,7 +1968,8 @@ Conventional multi-dimensional regression is defective for the same reason as th
 
 \subsection{Polynomial Regression}
 
-Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def}.
+\iffalse
+
 Differentiating $R_P$ with respect to each $f[n]$ and setting $\partial R_P / \partial f[n] = 0$ for $n = 0, 1, \dots, P$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
 \label{eqn: poly residual def}
@@ -1979,19 +1978,27 @@ R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2;
 &\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
 \end{align}
 
-Equivalently, polynomial regression can be applied as a multi-dimensional linear regression with $x^p$ for each dimension, and the result residual is also Formula \eqref{eqn: poly residual def}.
-Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} gives the corresponding covariance matrix and covariance vector, respectively.
+
+\fi
+
+Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
+
+Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
+It can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension, and its residual is also Formula \eqref{eqn: poly residual def}.
+Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix and covariance vector, respectively.
 \begin{align}
+\label{eqn: poly residual def}
+R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
 \label{eqn: poly C}
 C_{kl} &= \nu(x^k, x^l) = \overline{x^{k+l}} - \overline{x^k}\,\overline{x^l}, \quad k,\, l = 1, \dots, P; \\
 \label{eqn: poly nu}
 \nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P;
 \end{align}
 
-Because $x^m$ and $x_n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ are generally significant.
-For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^m)$ making $\mathbf{C}$ near-singular and $|(\mathbf{C}^{-1})_{mn}|$ large and unstable.
-Even when $\overline{x} \rightarrow 0$, $f[m]$ for large $m$ inherently depends on others.
-Thus only power regression for $y = f[0] + f[P] x^P$ is absolutely reliable.
+Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
+For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$.
+Even when $\overline{x} \rightarrow 0$, $f[m]$ inherently depends on others, except between odd and even parities when $x$ is symmetrically distributed.
+These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
 
 
 
@@ -2229,6 +2236,11 @@ C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
+
+\bibitem{Polynomial Regression}
+G. E. Forsythe.
+\newblock Generation and use of orthogonal polynomials for data-fitting with a digital computer.
+\newblock {\em Journal of the Society for Industrial and Applied Mathematics},  5(2), 74–88, 1957.
 
 \bibitem{Quantum Field}
 Michel Le Bellac, G Barton.
