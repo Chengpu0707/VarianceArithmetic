@@ -1968,9 +1968,10 @@ Conventional multi-dimensional regression is defective for the same reason as th
 
 \subsection{Polynomial Regression}
 
-\iffalse
+Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
 
-Differentiating $R_P$ with respect to each $f[n]$ and setting $\partial R_P / \partial f[n] = 0$ for $n = 0, 1, \dots, P$ yields Equation \eqref{eqn: poly normal}.
+Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
+Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
 \label{eqn: poly residual def}
 R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
@@ -1978,26 +1979,31 @@ R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2;
 &\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
 \end{align}
 
-
-\fi
-
-Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
-
-Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
-It can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension, and its residual is also Formula \eqref{eqn: poly residual def}.
+The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
 Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix and covariance vector, respectively.
 \begin{align}
-\label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
 \label{eqn: poly C}
 C_{kl} &= \nu(x^k, x^l) = \overline{x^{k+l}} - \overline{x^k}\,\overline{x^l}, \quad k,\, l = 1, \dots, P; \\
 \label{eqn: poly nu}
 \nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P;
 \end{align}
+Conversely, the multi-dimensional regression of Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} also yields Formula \eqref{eqn: poly normal}, confirming that the two methods are equivalent.
+\iffalse
+For $n = 0$, Formula \eqref{eqn: multi intercept} rearranges to $\sum_{p=0}^{P} f[p]\, \overline{x^p} = \overline{y}$, which is Formula \eqref{eqn: poly normal} at $n = 0$.
+For $n = 1, \dots, P$, substituting Formula \eqref{eqn: multi intercept} for $f[0]$ in the left-hand side of Formula \eqref{eqn: poly normal} and applying Formulas \eqref{eqn: multi slope} and \eqref{eqn: poly nu} gives Formula \eqref{eqn: poly normal from multi}.
+\begin{align}
+\label{eqn: poly normal from multi}
+\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}}
+&= \overline{x^n}\,\overline{y} + \sum_{p=1}^{P} f[p]\, C_{np}
+= \overline{x^n}\,\overline{y} + \nu_n
+= \overline{x^n y}, \quad n = 1, \dots, P;
+\end{align}
+\fi
+This equivalence allows applying Formulas \eqref{eqn: multi cov partition} and \eqref{eqn: multi cross cov partition} for polynomial regression also.
 
 Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$.
-Even when $\overline{x} \rightarrow 0$, $f[m]$ inherently depends on others, except between odd and even parities when $x$ is symmetrically distributed.
+Even when $\overline{x} \rightarrow 0$, $f[m]$ inherently depends on others, unless between odd and even parities when $x$ is symmetrically distributed.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
 
 
