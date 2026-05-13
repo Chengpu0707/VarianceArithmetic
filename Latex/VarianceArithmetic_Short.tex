@@ -23,8 +23,6 @@
 \newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
 \newcommand\whenaccepted{}
 
-\newcommand{\eqspace}{\;\;\;}
-\newcommand{\largespace}{\;\;\;\;\;\;\;\;\;\;\;\;}
 \newcommand{\Verbose}{}
 \newcommand{\ManualReference}{}
 %\newcommand{\NoAuthor}{}
@@ -178,65 +176,65 @@ It also distinguishes statistical Taylor expansion from conventional theory of p
 To solve for mode:
 \begin{align*}
 & \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z});
-\eqspace \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}; \\
+\quad \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}; \\
 & 0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}} = \frac{d^2 \tilde{z}}{d \tilde{y}^2} N(\tilde{z}) - \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}) \tilde{z}; \\
-& \frac{d^2 \tilde{z}}{d \tilde{y}^2} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z}; \eqspace \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x};
+& \frac{d^2 \tilde{z}}{d \tilde{y}^2} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z}; \quad \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x};
 \end{align*}
 
 The exponential function:
 \begin{align*}
-f(x) = e^x:& \eqspace 
-\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \eqspace 
-\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \eqspace \\
+f(x) = e^x:& \quad 
+\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \quad 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \quad \\
 \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
 &= e^{-\log(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2}{2 \delta^2 x}}
  = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2 + 2 \log(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
 & = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
  = N(\frac{\log(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
-& 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \eqspace
+& 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \quad
  \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
 \end{align*}
 
 The log function $f(x) = \log(x)$:
 \begin{align*}
-& \tilde{z} = \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+& \tilde{z} = \frac{e^{\tilde{y}} - x}{\delta x}; \quad 
 \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} e^{\tilde{y}} = \frac{1}{\delta x} (x + \tilde{z} \delta x)
  = \frac{1}{\frac{d}{d \tilde{z}} \log(x + \tilde{z} \delta x)}; \\
-& \frac{1}{\delta x} e^{\tilde{y}} = (\frac{1}{\delta x} e^{\tilde{y}})^2 \frac{e^{\tilde{y}} - x}{\delta x}; \eqspace 
+& \frac{1}{\delta x} e^{\tilde{y}} = (\frac{1}{\delta x} e^{\tilde{y}})^2 \frac{e^{\tilde{y}} - x}{\delta x}; \quad 
 (e^{\tilde{y}})^2 - x e^{\tilde{y}} - \delta^2 x = 0; \\
 e^{\tilde{y}_m} &= \frac{x + \sqrt{x^2 + 4 \delta^2 x}}{2}; \\
-& \eqspace 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \eqspace
+& \quad 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \quad
 0 = (\delta x) \tilde{z}^2 + x \tilde{z} - (\delta x); \\
 & \tilde{z} = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 + 4 (\delta x)^2}}{2} - x);
 \end{align*}
 
 The power mode $f(x) = x^{\frac{1}{p}}$:
 \begin{align*}
-& \tilde{z} = \frac{\tilde{y}^p - x}{\delta x}; \eqspace 
+& \tilde{z} = \frac{\tilde{y}^p - x}{\delta x}; \quad 
 \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} p \tilde{y}^{p-1}; \\
 & \frac{1}{\delta x} p (p - 1) \tilde{y}^{p-2} = (\frac{1}{\delta x} p \tilde{y}^{p-1})^2 \frac{\tilde{y}^p - x}{\delta x}; \\
 & \tilde{y}^{2p} - x \tilde{y}^{p} - \frac{p - 1}{p} \delta^2 x = 0; \\
 \tilde{y}_m^p &= \frac{1}{2} (x + \sqrt{x^2 + 4 \frac{p - 1}{p} \delta^2 x}); \\
-& 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \eqspace
+& 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \quad
 0 = (\delta x) \tilde{z}^2 + x \tilde{z} + (c - 1) (\delta x); \\
-& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \eqspace 
+& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \quad 
 f^{-1}(\tilde{y}_m) = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2}; \\
-p = 2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 2 \tilde{y}; \eqspace 
+p = 2:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 2 \tilde{y}; \quad 
   \tilde{y}_m^{\frac{1}{2}} = \frac{1}{2} \left( x + \sqrt{x^2 + 2 \delta^2 x} \right); \\
-p = 3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 3 \tilde{y}^2; \eqspace  
+p = 3:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 3 \tilde{y}^2; \quad  
   \tilde{y}_m^{\frac{1}{3}} = \frac{1}{2} \left( x \pm \sqrt{x^2 + \frac{8}{3} \delta^2 x} \right); \\
-p = 1/2:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{2} \tilde{y}^{-\frac{1}{2}}; \eqspace 
+p = 1/2:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{2} \tilde{y}^{-\frac{1}{2}}; \quad 
   \tilde{y}_m^2 = \frac{1}{2} \left( x + \sqrt{x^2 - 4 \delta^2 x} \right); \\
-p = 1/3:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{3} \tilde{y}^{-\frac{2}{3}}; \eqspace
+p = 1/3:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{3} \tilde{y}^{-\frac{2}{3}}; \quad
   \tilde{y}_m^2 = \frac{1}{2} \left( x \pm \sqrt{x^2 - 8 \delta^2 x} \right); \\
-p = -1:& \eqspace \frac{d \tilde{z}}{d \tilde{y}} = - \frac{1}{\delta x} \tilde{y}^{-2}; \eqspace 
+p = -1:& \quad \frac{d \tilde{z}}{d \tilde{y}} = - \frac{1}{\delta x} \tilde{y}^{-2}; \quad 
   \tilde{y}_m^{-1} = \frac{1}{2} \left( x + \sqrt{x^2 + 8 \delta^2 x} \right); 
 \end{align*}
 
 
 The distribution difference:
 \begin{align*}
-&\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}: \eqspace 
+&\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}: \quad 
  N(\frac{f^{-1}(\tilde{y}) - f^{-1}(\tilde{y}_m)}{\delta x} )
  = N(\tilde{z} + \nu) = N(\tilde{z}) e^{-\tilde{z} \nu} e^{-\frac{1}{2} \nu^2}; \\
 \eta &\equiv \int |\varrho(\tilde{y}, y, \delta y) - \rho(\tilde{y}, y, \delta y)| d \tilde{y}
@@ -261,7 +259,7 @@ When $f(x)=x^c$:
 
 \begin{align}
 \label{eqn: power distribution}
-&y = x^c: \eqspace \rho(\tilde{y}, \mu_y, \sigma_y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\sigma} N(\frac{\tilde{y}^\frac{1}{c} - \mu}{\sigma}); 
+&y = x^c: \quad \rho(\tilde{y}, \mu_y, \sigma_y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\sigma} N(\frac{\tilde{y}^\frac{1}{c} - \mu}{\sigma}); 
 \end{align}
 
 \fi
@@ -398,12 +396,12 @@ When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$, making Formu
 & \log(x + \tilde{x}) - \log(x) = \log(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
 \label{eqn: sin Taylor}
 \sin(x + \tilde{x}) &= \sum_{n=0}^{\infty} \eta(n, x) \frac{\tilde{x}^{n}}{n!};
-	\eqspace \eta(n, x) \equiv \begin{cases} 
-		n = 4j: \eqspace  sin(x); \\ n = 4j + 1: \eqspace  cos(x); \\ n = 4j + 2: \eqspace  -sin(x); \\ n = 4j +3: \eqspace  -cos(x); 
+	\quad \eta(n, x) \equiv \begin{cases} 
+		n = 4j: \quad  sin(x); \\ n = 4j + 1: \quad  cos(x); \\ n = 4j + 2: \quad  -sin(x); \\ n = 4j +3: \quad  -cos(x); 
 	\end{cases} \\
 \label{eqn: power Taylor}
 &(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c + x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix};
-	\eqspace \begin{pmatrix} c \\ n \end{pmatrix} \equiv \frac{\prod_{j=0}^{n-1} (c -j)}{n!};
+	\quad \begin{pmatrix} c \\ n \end{pmatrix} \equiv \frac{\prod_{j=0}^{n-1} (c -j)}{n!};
 \end{align}
 
 \begin{align*}
@@ -514,7 +512,7 @@ Thus:
 &\sum_{j=1}^{2n+2-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j + 2 \end{pmatrix} = 
 		\sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix}  \begin{pmatrix} c \\ 2 n - j \end{pmatrix}
 		\frac{c - (2 n - j)}{2 n - j + 1} \frac{c - (2 n - j + 1)}{2 n - j + 2} \\
-		&\largespace + \left(\frac{c^2}{2} + \frac{c - 2n}{2n + 1} c \right) \begin{pmatrix} c \\ 2n \end{pmatrix}; \\
+		&\qquad + \left(\frac{c^2}{2} + \frac{c - 2n}{2n + 1} c \right) \begin{pmatrix} c \\ 2n \end{pmatrix}; \\
 &\lim_{2n \rightarrow +\infty} \sum_{j=1}^{2n+2-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n + 2 - j \end{pmatrix}  =
 	\sum_{j=1}^{2n-1} \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ 2n - j \end{pmatrix} 
 		+ \prod_{j=0}^{2 n - 1} \frac{c - j}{j + 1} \frac{1}{2} ((c - 1)^2 - 1)
@@ -543,7 +541,7 @@ Thus:
 	\simeq&\; 2\nu(\kappa) \log(2) \sum_{n = 1}^{+\infty} \frac{(P(x) \kappa)^{2n}}{(2n)^2},
 		\begin{cases}		
  			\text{Gaussian}:	\nu(\kappa) = N(\kappa) \kappa\\
- 			\text{Uniform}:	\nu(\kappa) = 1,\eqspace \kappa = \sqrt{3}
+ 			\text{Uniform}:	\nu(\kappa) = 1,\quad \kappa = \sqrt{3}
 		\end{cases}; \\
 \label{eqn: pow convergence}
 \frac{\delta^2 (x \pm \delta x)^c}{(x^c)^2} \simeq& \sum_{n=1}^{\infty} P(x)^{2n} \zeta(2n, \kappa) 
@@ -875,7 +873,7 @@ Unless the least 20 bits of the significand of $x$ are all zero, $\delta x$ is a
 
 Statistically the less relation between two imprecise values $x \pm \delta x$ and $y \pm (\delta y)^2$ is calculated by Formula \ref{eqn: x < y}:
 \begin{align}
-& z \equiv \frac{\tilde{y} - y}{\delta y}; \eqspace \tilde{y} = \delta y z + y; \\
+& z \equiv \frac{\tilde{y} - y}{\delta y}; \quad \tilde{y} = \delta y z + y; \\
 & x - \Delta x < z \delta y + y < x + \Delta x; \\ & x - \Delta x - y < z \delta y < x + \Delta x - y \\
 & - \Delta y < z \delta y < \Delta y; \\
 p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) & = 
@@ -986,7 +984,7 @@ For the value test, the \emph{error slope}---defined as the slope of error devia
 Formula \eqref{eqn: polynomial Taylor} presents polynomial Taylor expansion:
 \begin{align}
 \label{eqn: polynomial Taylor}
-\sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \eqspace
+\sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \quad
 	P_j \equiv \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{align}
 Because the maximal expansion term using Formula \eqref{eqn: polynomial Taylor} is $\tilde{x}^{2N}$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
@@ -1458,12 +1456,12 @@ The Fourier transformation of a linear signal $h[n] = n$.
 Let $y \equiv i 2\pi n /N$:
 \begin{align*}
 & G(y) = \sum_{k=0}^{N-1}  e^{y k} = \sum_{k=0}^{N-1}  (e^y)^k = \frac{e^{N y} - 1}{e^y - 1}
- = \begin{cases} y = 0: \eqspace N \\ y \neq 0: \eqspace 0 \end{cases}; \\
+ = \begin{cases} y = 0: \quad N \\ y \neq 0: \quad 0 \end{cases}; \\
 H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k} 
  = \frac{d G}{y} = \frac{N e^{N y}}{e^y - 1} - \frac{e^{N y} - 1}{(e^y - 1)^2} e^y = \frac{N}{e^y - 1} \\
  &= \frac{N}{\cos(y) - 1 + i \sin(y)} = \frac{N}{2} \frac{\cos(y) - 1 -  i \sin(y)}{1 - \cos(y)} 
   = - \frac{N}{2}(1 + i \frac{2 \sin(\frac{y}{2}) \cos(\frac{y}{2})}{2 \sin^2(\frac{y}{2})}) \\
- &= \begin{cases} y = 0: \eqspace \frac{N^2}{2} \\ y \neq 0: \eqspace - \frac{N}{2}(1 + i \frac{1}{\tan(\frac{n}{N} \pi)}) \end{cases};
+ &= \begin{cases} y = 0: \quad \frac{N^2}{2} \\ y \neq 0: \quad - \frac{N}{2}(1 + i \frac{1}{\tan(\frac{n}{N} \pi)}) \end{cases};
 \end{align*}
 
 \fi
@@ -1477,9 +1475,9 @@ The following signals are used for testing:
 
 \item \emph{Linear}: $h[k] = k$, whose DFT is given by Formula \eqref{eqn: Fourier spec for linear}.
 \begin{align}
-& y \equiv i 2\pi \frac{n}{N}: \eqspace G(y) = \sum_{k=0}^{N-1}  e^{y k} = \frac{e^{N y} - 1}{e^y - 1}; \nonumber \\
+& y \equiv i 2\pi \frac{n}{N}: \quad G(y) = \sum_{k=0}^{N-1}  e^{y k} = \frac{e^{N y} - 1}{e^y - 1}; \nonumber \\
 \label{eqn: Fourier spec for linear}
-H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \eqspace \frac{N (N-1)}{2} \\ n \neq 0: \eqspace
+H[n] &= \frac{d G}{d y} = \begin{cases} n = 0: \quad \frac{N (N-1)}{2} \\ n \neq 0: \quad
  - \frac{N}{2}(1 + i \frac{\cos(n \frac{\pi}{N})}{\sin(n \frac{\pi}{N})}) \end{cases};
 \end{align}
 
@@ -1835,7 +1833,7 @@ The resulting precision (left y-axis) and uncertainties (right y-axis) of $\sin(
 
 \begin{align}
 \label{eqn: phase boundary}
-& \sin(0) = \cos(\frac{\pi}{2}) = 0;\eqspace \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
+& \sin(0) = \cos(\frac{\pi}{2}) = 0;\quad \sin(\frac{\pi}{2}) = \cos(0) = 1; \\
 \label{eqn: phase sin}
 & \sin(\frac{\alpha + \beta}{2}) = \sqrt{\frac{1 - \cos(\alpha + \beta)}{2}} = \sqrt{\frac{1 - \cos(\alpha) \cos(\beta) + \sin(\alpha) \sin(\beta)}{2}}; \\
 \label{eqn: phase cos}
@@ -1877,7 +1875,7 @@ $(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the
 
 \subsection{Regression Weight}
 
-If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because bootstrapping the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
+If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
 The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 = 1/N_j$ holds only in expectation, and the solution with the smallest $|\varpi|$ is the most likely.
 The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
 Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, leaving the solution indeterminate due to insufficient information.
@@ -1887,19 +1885,20 @@ When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is si
 \overline{x} &= \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
 		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \varpi; \\
 \label{eqn: set variance approx}
-(\delta x)^2 &\simeq \frac{J + \sum_{j} \frac{(\delta x_j)^2}{(\overline{x_j} - \overline{x})^2}}
-		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}};
+(\delta x)^2 &\simeq \frac{\sum_{j} \frac{(\delta x_j)^2}{(\overline{x_j} - \overline{x})^2}}
+		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \frac{1}{\frac{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}}{J}};
 \end{align}
 In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
 The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression lacks statistical justification.
-Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean}, \eqref{eqn: set variance}, \eqref{eqn: set mean approx}, and \eqref{eqn: set variance approx} all permit such mixing.
+Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean} to \eqref{eqn: set variance approx} all permit such mixing.
 
 
-\subsection{First Order Regression}
+\subsection{Linear Regression}
 
 Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
 Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
-$(\delta f[1])^2$ decreases with larger $(\delta x)^2$, while $(\delta f[0])^2$ decreases with larger $(\delta x)^2$ relative to $\overline{x}^2$ and reaches its lower bound $R_1/N$ as $\overline{x} \to 0$.
+$(\delta f[1])^2$ decreases with larger $(\delta x)^2$, while $(\delta f[0])^2$ decreases with larger $(\delta x)^2 /\overline{x}^2$ and reaches its lower bound $R_1/N$ as $\overline{x} \to 0$.
+Because $(\delta f[0])^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
 \begin{align}
 \label{eqn: set residual}
 R_1 &= (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
@@ -1928,9 +1927,71 @@ For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be z
 \label{eqn: set cov}
 \nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
 \end{align}
-Because of its statistical rigor, one usage of Formula \eqref{eqn: set cov} is to exclude data from a data set to improve the fitting result according to Formula \eqref{eqn: set slope precision} in cluster analysis.
+Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data set into sub sets in cluster analysis using Formula \eqref{eqn: set slope precision} as the standard.
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
+
+
+
+\subsection{Multi-Dimensional Linear Regression}
+
+Suppose a data set contains $N$ samples $(X_{1j}, \dots, X_{Kj}, Y_j)$, $j = 1 \dots N$, to fit with $K+1$ parameters $Y_j = f[0] + \sum_{k=1}^{K} f[k]\, X_{kj}$ such that the residual $R_K$ in Formula \eqref{eqn: multi residual def} is minimized.
+Stacking the $K$ $\nu(x_k, y)$ into a covariance vector $\boldsymbol{\nu}$ and the $K \times K$ covariances $\nu(x_k, x_l)$ into a covariance matrix $\mathbf{C}$, Formulas \eqref{eqn: multi slope} to \eqref{eqn: multi intercept variance} generalize Formulas \eqref{eqn: set slope} to \eqref{eqn: set intercept variance} to $K$ predictors.
+\begin{align}
+\label{eqn: multi residual def}
+R_K &\equiv \frac{1}{N} \sum_j \left(Y_j - f[0] - \sum_{k=1}^{K} f[k]\, X_{kj}\right)^2; \\
+\label{eqn: multi slope}
+\bigl(f[1], \dots, f[K]\bigr)^T &= \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi intercept}
+f[0] &= \overline{y} - \sum_{k=1}^{K} f[k]\, \overline{x_k}; \\
+\label{eqn: multi residual}
+R_K &= (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi slope cov}
+\nu\bigl(f[k],\, f[l]\bigr) &= \frac{R_K}{N}\, \bigl(\mathbf{C}^{-1}\bigr)_{kl}; \\
+\label{eqn: multi slope var}
+(\delta f[k])^2 &= \frac{R_K}{N}\, \bigl(\mathbf{C}^{-1}\bigr)_{kk}; \\
+\label{eqn: multi intercept variance}
+(\delta f[0])^2 &= \frac{R_K}{N} \left(1 + \overline{\mathbf{x}}^{\,T} \mathbf{C}^{-1} \overline{\mathbf{x}} \right);
+\end{align}
+where $\overline{\mathbf{x}} = (\overline{x_1}, \dots, \overline{x_K})^T$.
+$R_K$ is non-negative because $\mathbf{C}$ is positive semi-definite, and decreases monotonically with $K$.
+The off-diagonal entries $\nu(f[k], f[l])$ quantify collinearity: large $(\mathbf{C}^{-1})_{kl}$ makes individual slope estimates unreliable even when $R_K$ is small.
+
+Formulas \eqref{eqn: multi cov partition} and \eqref{eqn: multi cross cov partition} extend Formula \eqref{eqn: set cov} component-wise to assemble $\mathbf{C}$ and $\boldsymbol{\nu}$ from subset statistics, with the same conditions as in the previous subsection: within-subset covariances may be zero, but all $N_j$ are required.
+\begin{align}
+\label{eqn: multi cov partition}
+\nu(x_k, x_l) &= \sum_j \frac{N_j}{N} \Bigl( \nu(x_k, x_l)_j + \bigl(\overline{x_{k,j}} - \overline{x_k}\bigr)\bigl(\overline{x_{l,j}} - \overline{x_l}\bigr) \Bigr), \\
+\label{eqn: multi cross cov partition}
+\nu(x_k, y) &= \sum_j \frac{N_j}{N} \Bigl( \nu(x_k, y)_j + \bigl(\overline{x_{k,j}} - \overline{x_k}\bigr)\bigl(\overline{y_j} - \overline{y}\bigr) \Bigr);
+\end{align}
+Conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
+
+
+
+\subsection{Polynomial Regression}
+
+Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def}.
+Differentiating $R_P$ with respect to each $f[n]$ and setting $\partial R_P / \partial f[n] = 0$ for $n = 0, 1, \dots, P$ yields Equation \eqref{eqn: poly normal}.
+\begin{align}
+\label{eqn: poly residual def}
+R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
+\label{eqn: poly normal}
+&\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
+\end{align}
+
+Equivalently, polynomial regression can be applied as a multi-dimensional linear regression with $x^p$ for each dimension, and the result residual is also Formula \eqref{eqn: poly residual def}.
+Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} gives the corresponding covariance matrix and covariance vector, respectively.
+\begin{align}
+\label{eqn: poly C}
+C_{kl} &= \nu(x^k, x^l) = \overline{x^{k+l}} - \overline{x^k}\,\overline{x^l}, \quad k,\, l = 1, \dots, P; \\
+\label{eqn: poly nu}
+\nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P;
+\end{align}
+
+Because $x^m$ and $x_n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ are generally significant.
+For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^m)$ making $\mathbf{C}$ near-singular and $|(\mathbf{C}^{-1})_{mn}|$ large and unstable.
+Even when $\overline{x} \rightarrow 0$, $f[m]$ for large $m$ inherently depends on others.
+Thus only power regression for $y = f[0] + f[P] x^P$ is absolutely reliable.
 
 
 
