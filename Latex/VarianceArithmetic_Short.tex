@@ -1964,14 +1964,15 @@ Conventional multi-dimensional regression is defective for the same reason as th
 \fi
 
 The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
-Formula \eqref{eqn: multi slope cov} shows that slopes from different dimensions may be inter dependent, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $R_M$ is the residual.
-Such colinearity makes slopes sensitive to small changes in input data.
+Formula \eqref{eqn: multi slope cov} shows that slopes from different dimensions may be mutually dependent, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $R_M$ is the residual.
+Such dependency makes slopes sensitive to small changes in input data.
+This dependency can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
 \begin{align}
 \label{eqn: multi slope cov}
 \nu(f[m],\, f[n]) &= \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
 \end{align}
 
-When assemble $\mathbf{C}$ from subset, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
+When $\mathbf{C}$ is assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
 
 
 
@@ -2004,7 +2005,7 @@ R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2;
 \end{align}
 The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
 Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix $\mathbf{C}$ and covariance vector $\boldsymbol{\nu}$, respectively.
-Conversely, the multi-dimensional regression of Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
+Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
 \begin{align}
 \label{eqn: poly C}
 C_{m,n} & = \overline{x^{m+n}} - \overline{x^m}\,\overline{x^n}, \quad m,n = 1, \dots, P; \\
@@ -2014,8 +2015,8 @@ C_{m,n} & = \overline{x^{m+n}} - \overline{x^m}\,\overline{x^n}, \quad m,n = 1, 
 \big(f[1], \dots, f[P]\big)^T &= \mathbf{C}^{-1} \boldsymbol{\nu};
 \end{align}
 
-Because $x^m$ and $x^n$ are not independent of each other, a collinearity $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
-For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$.
+Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
+For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that polynomial regression should be carried out in a coordinate with $\overline{x} = 0$.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
 
 
