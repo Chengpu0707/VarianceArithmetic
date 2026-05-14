@@ -1931,10 +1931,16 @@ Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data 
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
+\iffalse
+Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} is not invariant under swapping x and y. 
+A swap-consistent regression (total least squares, geometric-mean regression, or Deming) \cite{Linear_Regression} is more appropriate when both variables carry uncertainty, which indicates a future development of regression using imprecise values.
+\fi
+
 
 
 \subsection{Multi-Dimensional Linear Regression}
 
+\iffalse
 Suppose a data set contains $N$ samples $(X_{1j}, \dots, X_{Kj}, Y_j)$, $j = 1 \dots N$, to fit with $K+1$ parameters $Y_j = f[0] + \sum_{k=1}^{K} f[k]\, X_{kj}$ such that the residual $R_K$ in Formula \eqref{eqn: multi residual def} is minimized.
 Stacking the $K$ $\nu(x_k, y)$ into a covariance vector $\boldsymbol{\nu}$ and the $K \times K$ covariances $\nu(x_k, x_l)$ into a covariance matrix $\mathbf{C}$, Formulas \eqref{eqn: multi slope} to \eqref{eqn: multi intercept variance} generalize Formulas \eqref{eqn: set slope} to \eqref{eqn: set intercept variance}.
 \begin{align}
@@ -1946,49 +1952,33 @@ R_K &\equiv \frac{1}{N} \sum_j \left(Y_j - f[0] - \sum_{k=1}^{K} f[k]\, X_{kj}\r
 f[0] &= \overline{y} - \sum_{k=1}^{K} f[k]\, \overline{x_k}; \\
 \label{eqn: multi residual}
 R_K &= (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi slope cov}
-\nu\bigl(f[k],\, f[l]\bigr) &= \frac{R_K}{N}\, \bigl(\mathbf{C}^{-1}\bigr)_{kl}; \\
 \label{eqn: multi slope var}
 (\delta f[k])^2 &= \frac{R_K}{N}\, \bigl(\mathbf{C}^{-1}\bigr)_{kk}; \\
 \label{eqn: multi intercept variance}
-(\delta f[0])^2 &= \frac{R_K}{N} \left(1 + \overline{\mathbf{x}}^{\,T} \mathbf{C}^{-1} \overline{\mathbf{x}} \right);
-\end{align}
-The off-diagonal entries $\nu(f[k], f[l])$ quantify collinearity: large $(\mathbf{C}^{-1})_{kl}$ makes individual slope estimates unreliable even when $R_K$ is small.
-
-Formulas \eqref{eqn: multi cov partition} and \eqref{eqn: multi cross cov partition} extend Formula \eqref{eqn: set cov} component-wise to assemble $\mathbf{C}$ and $\boldsymbol{\nu}$ from subset statistics, with the same conditions as in the previous subsection: within-subset covariances may be zero, but all $N_j$ are required.
-\begin{align}
-\label{eqn: multi cov partition}
-\nu(x_k, x_l) &= \sum_j \frac{N_j}{N} \Bigl( \nu(x_k, x_l)_j + \bigl(\overline{x_{k,j}} - \overline{x_k}\bigr)\bigl(\overline{x_{l,j}} - \overline{x_l}\bigr) \Bigr), \\
+(\delta f[0])^2 &= \frac{R_K}{N} \left(1 + \overline{\mathbf{x}}^{\,T} \mathbf{C}^{-1} \overline{\mathbf{x}} \right); \\
 \label{eqn: multi cross cov partition}
 \nu(x_k, y) &= \sum_j \frac{N_j}{N} \Bigl( \nu(x_k, y)_j + \bigl(\overline{x_{k,j}} - \overline{x_k}\bigr)\bigl(\overline{y_j} - \overline{y}\bigr) \Bigr);
 \end{align}
+The off-diagonal entries $\nu(f[k], f[l])$ quantify collinearity: large $(\mathbf{C}^{-1})_{kl}$ makes individual slope estimates unreliable even when $R_K$ is small.
 Conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
+\fi
+
+The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
+Formula \eqref{eqn: multi slope cov} shows that slopes from different dimensions may be inter dependent, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $R_M$ is the residual.
+Such colinearity makes slopes sensitive to small changes in input data.
+\begin{align}
+\label{eqn: multi slope cov}
+\nu(f[m],\, f[n]) &= \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
+\end{align}
+
+When assemble $\mathbf{C}$ from subset, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
 
 
 
 \subsection{Polynomial Regression}
 
-Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
-
-Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
-Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
-\begin{align}
-\label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
-\label{eqn: poly normal}
-&\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
-\end{align}
-
-The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
-Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix and covariance vector, respectively.
-\begin{align}
-\label{eqn: poly C}
-C_{kl} &= \nu(x^k, x^l) = \overline{x^{k+l}} - \overline{x^k}\,\overline{x^l}, \quad k,\, l = 1, \dots, P; \\
-\label{eqn: poly nu}
-\nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P;
-\end{align}
-Conversely, the multi-dimensional regression of Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} also yields Formula \eqref{eqn: poly normal}, confirming that the two methods are equivalent.
 \iffalse
+
 For $n = 0$, Formula \eqref{eqn: multi intercept} rearranges to $\sum_{p=0}^{P} f[p]\, \overline{x^p} = \overline{y}$, which is Formula \eqref{eqn: poly normal} at $n = 0$.
 For $n = 1, \dots, P$, substituting Formula \eqref{eqn: multi intercept} for $f[0]$ in the left-hand side of Formula \eqref{eqn: poly normal} and applying Formulas \eqref{eqn: multi slope} and \eqref{eqn: poly nu} gives Formula \eqref{eqn: poly normal from multi}.
 \begin{align}
@@ -1998,14 +1988,69 @@ For $n = 1, \dots, P$, substituting Formula \eqref{eqn: multi intercept} for $f[
 = \overline{x^n}\,\overline{y} + \nu_n
 = \overline{x^n y}, \quad n = 1, \dots, P;
 \end{align}
-\fi
-This equivalence allows applying Formulas \eqref{eqn: multi cov partition} and \eqref{eqn: multi cross cov partition} for polynomial regression also.
 
-Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
+\fi
+
+
+Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
+
+Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
+Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
+\begin{align}
+\label{eqn: poly residual def}
+R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
+\label{eqn: poly normal}
+&\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; 
+\end{align}
+The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
+Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix $\mathbf{C}$ and covariance vector $\boldsymbol{\nu}$, respectively.
+Conversely, the multi-dimensional regression of Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
+\begin{align}
+\label{eqn: poly C}
+C_{m,n} & = \overline{x^{m+n}} - \overline{x^m}\,\overline{x^n}, \quad m,n = 1, \dots, P; \\
+\label{eqn: poly nu}
+\nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P; \\
+\label{eqn: multi slope}
+\big(f[1], \dots, f[P]\big)^T &= \mathbf{C}^{-1} \boldsymbol{\nu};
+\end{align}
+
+Because $x^m$ and $x^n$ are not independent of each other, a collinearity $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$.
-Even when $\overline{x} \rightarrow 0$, $f[m]$ inherently depends on others, unless between odd and even parities when $x$ is symmetrically distributed.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
 
+
+
+\iffalse
+
+\subsection{Symmetric Linear Regression}
+
+The total-least-squares fit minimizes the squared perpendicular distance from each sample $(X_j, Y_j)$ to the line $Y_j = f[0] + f[1] X_j$, yielding the residual in Formula \eqref{eqn: tls residual def}.
+\begin{align}
+\label{eqn: tls residual def}
+R_1^{\perp} &\equiv \frac{1}{N(1 + f[1]^2)} \sum_j (Y_j - f[1] X_j - f[0])^2;
+\end{align}
+Setting $\partial R_1^{\perp}/\partial f[0] = 0$ recovers the OLS intercept Formula \eqref{eqn: set intercept}; setting $\partial R_1^{\perp}/\partial f[1] = 0$ yields the quadratic Formula \eqref{eqn: tls slope quadratic}, whose root with $\mathrm{sign}(f[1]) = \mathrm{sign}(\nu(x,y))$ is the slope Formula \eqref{eqn: tls slope}.
+The minimum residual Formula \eqref{eqn: tls residual} retains the OLS form $R_1^{\perp} = (\delta y)^2 - f[1]\, \nu(x,y)$ but with $f[1]$ from Formula \eqref{eqn: tls slope} rather than Formula \eqref{eqn: set slope}.
+The slope variance Formula \eqref{eqn: tls slope variance} follows from principal-axis perturbation theory, $(\delta f[1])^2 = (1 + f[1]^2)^2\, \lambda_+ \lambda_-/(N\,(\lambda_+ - \lambda_-)^2)$, with the Jacobian factor $(1 + f[1]^2)^2$ converting the principal-angle variance into slope variance.
+\begin{align}
+\label{eqn: tls slope quadratic}
+0 &= \nu(x,y)\, f[1]^2 + ((\delta x)^2 - (\delta y)^2)\, f[1] - \nu(x,y); \\
+\label{eqn: tls slope}
+f[1] &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2}}{2\,\nu(x,y)}; \\
+\label{eqn: tls residual}
+R_1^{\perp} &= (\delta y)^2 - f[1]\, \nu(x,y)
+= \frac{(\delta x)^2 + (\delta y)^2 - \sqrt{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}}{2}; \\
+\label{eqn: tls slope variance}
+(\delta f[1])^2 &= \frac{(1 + f[1]^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{N\, \bigl(((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2\bigr)};
+\end{align}
+$R_1^{\perp}$ is the smaller eigenvalue $\lambda_-$ of the covariance matrix $\bigl(\begin{smallmatrix}(\delta x)^2 & \nu(x,y) \\ \nu(x,y) & (\delta y)^2\end{smallmatrix}\bigr)$, while $\lambda_+ = (\delta x)^2 + (\delta y)^2 - R_1^{\perp}$ is the variance along the fitted line; the slope direction $(1, f[1])$ is the eigenvector of $\lambda_+$.
+The numerator $(\delta x)^2 (\delta y)^2 - \nu(x,y)^2 = \lambda_+ \lambda_-$ vanishes at perfect correlation, where $f[1]$ is determined exactly and $(\delta f[1])^2 \to 0$.
+When $(\delta x)^2 = (\delta y)^2$, Formula \eqref{eqn: tls slope} reduces to $f[1] = \mathrm{sign}(\nu(x,y))$, the $45^{\circ}$ line through the centroid.
+
+Under the $x \leftrightarrow y$ swap, $\nu(x,y)$ is unchanged while $(\delta x)^2$ and $(\delta y)^2$ exchange, so Formula \eqref{eqn: tls slope quadratic} becomes $\nu(x,y)\, b'^2 - ((\delta x)^2 - (\delta y)^2)\, b' - \nu(x,y) = 0$.
+Substituting $b' = 1/f[1]$ and multiplying by $f[1]^2$ recovers Formula \eqref{eqn: tls slope quadratic}, so the swapped TLS slope is $1/f[1]$ --- the fitted line is the same in $(x, y)$ space regardless of which variable is treated as the predictor.
+
+\fi
 
 
 
@@ -2242,6 +2287,11 @@ C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
+
+\bibitem{Linear_Regression}
+W. A. Fuller.
+\newblock Measurement Error Models, Wiley Series in Probability and Mathematical Statistics.
+\newblock Wiley, New York. ISBN 978-0-471-86187-4, 1987.
 
 \bibitem{Polynomial Regression}
 G. E. Forsythe.
