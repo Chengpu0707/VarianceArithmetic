@@ -1901,7 +1901,7 @@ $(\delta f[1])^2$ decreases with larger $(\delta x)^2$ as expected.
 Because $(\delta f[0])^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
 \begin{align}
 \label{eqn: set residual}
-R_1 &\equiv \frac{1}{N} \sum_i^N \big( y_i - f[0] - f[1] x_i \big); \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
+R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - f[0] - f[1] X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
 \label{eqn: set slope}
 &f[1] = \frac{\nu(x,y)}{(\delta x)^2}; \\
 \label{eqn: set intercept}
@@ -1931,7 +1931,7 @@ Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data 
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
-Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} is not invariant under swapping x and y. 
+Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} are not invariant under swapping x and y. 
 A swap-consistent regression (total least squares, geometric-mean regression, or Deming) \cite{Linear_Regression} is more appropriate when both variables carry uncertainty, which indicates a future development of regression using imprecise values.
 
 
@@ -1941,12 +1941,12 @@ A swap-consistent regression (total least squares, geometric-mean regression, or
 The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
 Formula \eqref{eqn: multi residual} shows the residual definition and minimization.
 Formula \eqref{eqn: multi slope} provides the solution for $f[m]$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
-Formula \eqref{eqn: multi slope cov} is the slope variance, which shows that slopes from different dimensions may be mutually dependent. 
+Formula \eqref{eqn: multi slope cov} is the slope covariance, which shows that slopes from different dimensions may be mutually dependent. 
 Such dependency makes slopes sensitive to small changes in input data.
 It can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
 \begin{align}
 \label{eqn: multi residual}
-R_M &\equiv \frac{1}{N} \sum_i^N \left(Y_i - f[0] - \sum_{m=1}^{M} f[m]\, X_{m,i}\right)^2 
+R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - f[0] - \sum_{m=1}^{M} f[m]\, X_{m,i}\right)^2 
 		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
 \label{eqn: multi slope}
 &\big(f[1], \dots, f[M]\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
@@ -1983,7 +1983,7 @@ Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{
 Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
 \label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_i^N \left(Y_ij - \sum_{p=0}^{P} f[p]\, X_i^p\right)^2; \\
+R_P &\equiv \frac{1}{N} \sum_i^N (Y_i - \sum_{p=0}^{P} f[p]\, X_i^p)^2; \\
 \label{eqn: poly normal}
 &\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; 
 \end{align}
