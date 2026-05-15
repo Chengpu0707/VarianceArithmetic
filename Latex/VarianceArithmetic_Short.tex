@@ -1897,19 +1897,19 @@ Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise a
 
 Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
 Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
-$(\delta f[1])^2$ decreases with larger $(\delta x)^2$, while $(\delta f[0])^2$ decreases with larger $(\delta x)^2 /\overline{x}^2$ and reaches its lower bound $R_1/N$ as $\overline{x} \to 0$.
+$(\delta f[1])^2$ decreases with larger $(\delta x)^2$ as expected.
 Because $(\delta f[0])^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
 \begin{align}
 \label{eqn: set residual}
-R_1 &= (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
+R_1 &\equiv \frac{1}{N} \sum_i^N \big( y_i - f[0] - f[1] x_i \big); \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
 \label{eqn: set slope}
-f[1] &= \frac{\nu(x,y)}{(\delta x)^2}; \\
+&f[1] = \frac{\nu(x,y)}{(\delta x)^2}; \\
 \label{eqn: set intercept}
-f[0] & = \overline{y} - \overline{x} f[1]; \\
+&f[0]  = \overline{y} - \overline{x} f[1]; \\
 \label{eqn: set slope variance}
-(\delta f[1])^2 &= \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
+&(\delta f[1])^2 = \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
 \label{eqn: set intercept variance}
-(\delta f[0])^2 &= \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
+&(\delta f[0])^2 = \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
 \end{align}
 Formula \eqref{eqn: set slope precision} shows that $P(f[1])$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
 Whether $P(f[1])$ or $R^2$ is the better measure of goodness-of-fit is debatable.
@@ -1931,48 +1931,32 @@ Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data 
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
-\iffalse
 Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} is not invariant under swapping x and y. 
 A swap-consistent regression (total least squares, geometric-mean regression, or Deming) \cite{Linear_Regression} is more appropriate when both variables carry uncertainty, which indicates a future development of regression using imprecise values.
-\fi
 
 
 
 \subsection{Multi-Dimensional Linear Regression}
 
-\iffalse
-Suppose a data set contains $N$ samples $(X_{1j}, \dots, X_{Kj}, Y_j)$, $j = 1 \dots N$, to fit with $K+1$ parameters $Y_j = f[0] + \sum_{k=1}^{K} f[k]\, X_{kj}$ such that the residual $R_K$ in Formula \eqref{eqn: multi residual def} is minimized.
-Stacking the $K$ $\nu(x_k, y)$ into a covariance vector $\boldsymbol{\nu}$ and the $K \times K$ covariances $\nu(x_k, x_l)$ into a covariance matrix $\mathbf{C}$, Formulas \eqref{eqn: multi slope} to \eqref{eqn: multi intercept variance} generalize Formulas \eqref{eqn: set slope} to \eqref{eqn: set intercept variance}.
-\begin{align}
-\label{eqn: multi residual def}
-R_K &\equiv \frac{1}{N} \sum_j \left(Y_j - f[0] - \sum_{k=1}^{K} f[k]\, X_{kj}\right)^2; \\
-\label{eqn: multi slope}
-\bigl(f[1], \dots, f[K]\bigr)^T &= \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi intercept}
-f[0] &= \overline{y} - \sum_{k=1}^{K} f[k]\, \overline{x_k}; \\
-\label{eqn: multi residual}
-R_K &= (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi slope var}
-(\delta f[k])^2 &= \frac{R_K}{N}\, \bigl(\mathbf{C}^{-1}\bigr)_{kk}; \\
-\label{eqn: multi intercept variance}
-(\delta f[0])^2 &= \frac{R_K}{N} \left(1 + \overline{\mathbf{x}}^{\,T} \mathbf{C}^{-1} \overline{\mathbf{x}} \right); \\
-\label{eqn: multi cross cov partition}
-\nu(x_k, y) &= \sum_j \frac{N_j}{N} \Bigl( \nu(x_k, y)_j + \bigl(\overline{x_{k,j}} - \overline{x_k}\bigr)\bigl(\overline{y_j} - \overline{y}\bigr) \Bigr);
-\end{align}
-The off-diagonal entries $\nu(f[k], f[l])$ quantify collinearity: large $(\mathbf{C}^{-1})_{kl}$ makes individual slope estimates unreliable even when $R_K$ is small.
-Conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
-\fi
-
 The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
-Formula \eqref{eqn: multi slope cov} shows that slopes from different dimensions may be mutually dependent, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $R_M$ is the residual.
+Formula \eqref{eqn: multi residual} shows the residual definition and minimization.
+Formula \eqref{eqn: multi slope} provides the solution for $f[m]$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
+Formula \eqref{eqn: multi slope cov} is the slope variance, which shows that slopes from different dimensions may be mutually dependent. 
 Such dependency makes slopes sensitive to small changes in input data.
-This dependency can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
+It can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
 \begin{align}
+\label{eqn: multi residual}
+R_M &\equiv \frac{1}{N} \sum_i^N \left(Y_i - f[0] - \sum_{m=1}^{M} f[m]\, X_{m,i}\right)^2 
+		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi slope}
+&\big(f[1], \dots, f[M]\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
 \label{eqn: multi slope cov}
-\nu(f[m],\, f[n]) &= \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
+&\nu(f[m],\, f[n]) = \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
 \end{align}
 
-When $\mathbf{C}$ is assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
+When $\mathbf{C}$ and $\boldsymbol{\nu}$ are assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
+If $x$ is replaced with $x_m$,  Formula \eqref{eqn: set cov} gives correct assembly for $\boldsymbol{\nu}$.
+If $y$ is further replaced with $x_n$,  Formula \eqref{eqn: set cov} yields correct assembly for $\mathbf{C}$.
 
 
 
@@ -1999,21 +1983,12 @@ Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{
 Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
 \label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_j \left(Y_j - \sum_{p=0}^{P} f[p]\, X_j^p\right)^2; \\
+R_P &\equiv \frac{1}{N} \sum_i^N \left(Y_ij - \sum_{p=0}^{P} f[p]\, X_i^p\right)^2; \\
 \label{eqn: poly normal}
 &\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; 
 \end{align}
 The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
-Formulas \eqref{eqn: poly C} and \eqref{eqn: poly nu} give the corresponding covariance matrix $\mathbf{C}$ and covariance vector $\boldsymbol{\nu}$, respectively.
 Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
-\begin{align}
-\label{eqn: poly C}
-C_{m,n} & = \overline{x^{m+n}} - \overline{x^m}\,\overline{x^n}, \quad m,n = 1, \dots, P; \\
-\label{eqn: poly nu}
-\nu_k &= \nu(x^k, y) = \overline{x^k y} - \overline{x^k}\,\overline{y}, \quad k = 1, \dots, P; \\
-\label{eqn: multi slope}
-\big(f[1], \dots, f[P]\big)^T &= \mathbf{C}^{-1} \boldsymbol{\nu};
-\end{align}
 
 Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that polynomial regression should be carried out in a coordinate with $\overline{x} = 0$.
@@ -2093,6 +2068,9 @@ The attempt to cast a 80-bit sine library into a 64-bit sine library and use the
 The bound moment $\zeta(n, \kappa)$ should be extended to all probability distributions.
 The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions.
 The procedure for determining the bound range $\kappa$ from sample count $N$ should be developed for discrete distributions.
+
+The measured error slope rates so far are slightly but significantly more than $-1$.
+This needs further investigation.
 
 The performance of variance arithmetic must be improved for broader practical adoption.
 The fundamental formulas of statistical Taylor expansion, Formulas \eqref{eqn: Taylor 1d mean}, \eqref{eqn: Taylor 1d variance}, \eqref{eqn: Taylor 2d mean}, and \eqref{eqn: Taylor 2d variance}, contain many independent summations, making them excellent candidates for parallel processing.
