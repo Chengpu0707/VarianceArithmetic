@@ -1,5 +1,5 @@
 """Symbolic statistical Taylor expansion: bounded moments ζ(n, κ), input random
-variables (InVar), and the Taylor coefficient / mean (bias) / variance machinery.
+variables (ImPrecise), and the Taylor coefficient / mean (bias) / variance machinery.
 
 Expression conventions:
 - coeffs[(α₁,…,α_N)] = (1/α!) · ∂^|α| f / ∏ ∂x_k^{α_k}  (i.e. includes the 1/n! factor).
@@ -43,11 +43,11 @@ class zeta(sympy.Function):
             return sympy.Float(moment.Normal(bounding=float(kappa))[int(n)])
 
 
-class InVarException(Exception):
+class ImPreciseException(Exception):
     pass
 
 
-class InVar:
+class ImPrecise:
     __slots__ = ('_value', '_deviation', '_distr_type', '_kappa', '_samples')
 
     def __init__(self, value: sympy.Symbol, deviation: sympy.Symbol,
@@ -59,13 +59,13 @@ class InVar:
         for Gaussian (leakage ~5e-7), kappa=√3 for Uniform (the maximum
         bounding range of the Uniform distribution). For Uniform, kappa may
         also be a sympy.Symbol — the moment formulas then evaluate symbolically.
-        Raises InVarException if any argument has the wrong type or is out of range."""
+        Raises ImPreciseException if any argument has the wrong type or is out of range."""
         if not isinstance(value, sympy.Symbol):
-            raise InVarException(f'value must be a sympy.Symbol, got {type(value)}')
+            raise ImPreciseException(f'value must be a sympy.Symbol, got {type(value)}')
         if not isinstance(deviation, sympy.Symbol):
-            raise InVarException(f'deviation must be a sympy.Symbol, got {type(deviation)}')
+            raise ImPreciseException(f'deviation must be a sympy.Symbol, got {type(deviation)}')
         if not isinstance(distr_type, EDistrType):
-            raise InVarException(f'distr_type must be an EDistrType, got {type(distr_type)}')
+            raise ImPreciseException(f'distr_type must be an EDistrType, got {type(distr_type)}')
         if kappa is None:
             # Gaussian default κ=5 keeps bounding leakage ~5e-7.
             # Uniform default κ=√3 makes ζ(0)=ζ(2)=1 exactly (the standard normalization).
@@ -74,24 +74,24 @@ class InVar:
             # Symbolic κ: only Uniform supports it. Gaussian needs a numeric κ
             # because zeta(n, κ) is evaluated against the precomputed moment table.
             if distr_type != EDistrType.Uniform:
-                raise InVarException(
+                raise ImPreciseException(
                     f'symbolic kappa is only supported for Uniform, got {distr_type}')
             # Reject if sympy assumptions imply kappa is outside (0, √3].
             if kappa.is_positive is False:
-                raise InVarException(f'kappa must be positive, got {kappa}')
+                raise ImPreciseException(f'kappa must be positive, got {kappa}')
             if (kappa - sympy.sqrt(3)).is_positive:
-                raise InVarException(
+                raise ImPreciseException(
                     f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
         elif isinstance(kappa, float):
             if kappa <= 0:
-                raise InVarException(f'kappa must be positive, got {kappa}')
+                raise ImPreciseException(f'kappa must be positive, got {kappa}')
             if distr_type == EDistrType.Uniform and kappa > math.sqrt(3):
-                raise InVarException(f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
+                raise ImPreciseException(f'kappa must be <= sqrt(3) for Uniform distribution, got {kappa}')
         else:
-            raise InVarException(
+            raise ImPreciseException(
                 f'kappa must be a float or (for Uniform) sympy.Symbol, got {type(kappa)}')
         if not isinstance(samples, int) or samples <= 0:
-            raise InVarException(f'samples must be a positive int, got {samples}')
+            raise ImPreciseException(f'samples must be a positive int, got {samples}')
         self._value = value
         self._deviation = deviation
         self._distr_type = distr_type
@@ -164,7 +164,7 @@ class StatTaylor:
     __slots__ = ('_function', '_in_vars', '_max_order', '_coeffs')
 
     def __init__(self, function: sympy.Expr, in_vars: tuple, max_order: int = 16):
-        """Build the Taylor coefficient table for `function` around the InVars in
+        """Build the Taylor coefficient table for `function` around the ImPrecises in
         `in_vars`, up to total order `max_order`. Raises TaylorException if the
         function references any deviation symbol from `in_vars`."""
         if not isinstance(function, sympy.Expr):
@@ -174,8 +174,8 @@ class StatTaylor:
         if len(in_vars) == 0:
             raise TaylorException('in_vars must have at least one element')
         for i, v in enumerate(in_vars):
-            if not isinstance(v, InVar):
-                raise TaylorException(f'in_vars[{i}] must be an InVar, got {type(v)}')
+            if not isinstance(v, ImPrecise):
+                raise TaylorException(f'in_vars[{i}] must be an ImPrecise, got {type(v)}')
         deviation_symbols = {v.deviation for v in in_vars}
         if function.free_symbols & deviation_symbols:
             raise TaylorException(
@@ -214,7 +214,7 @@ class StatTaylor:
 
     @property
     def in_vars(self) -> tuple:
-        """Tuple of InVar inputs, one per independent variable."""
+        """Tuple of ImPrecise inputs, one per independent variable."""
         return self._in_vars
 
     @property
@@ -332,10 +332,10 @@ class StatTaylor:
         and biasAt are 0 are skipped.
 
         The first row is a single-field `function: <expr>` line with each
-        InVar's value symbol `x` rendered as `x~dx` (where `dx` is its
+        ImPrecise's value symbol `x` rendered as `x~dx` (where `dx` is its
         deviation symbol). The second row is the column header:
-        `order` + one column per InVar (named `x~dx`) + `varAt` + `biasAt`.
-        Each subsequent row holds one multi-index (the per-InVar columns
+        `order` + one column per ImPrecise (named `x~dx`) + `varAt` + `biasAt`.
+        Each subsequent row holds one multi-index (the per-ImPrecise columns
         give the derivative order per input variable), in lexicographic
         order within each total-order block. Field quoting is handled by
         the standard csv writer (commas in the function expression are
@@ -343,8 +343,8 @@ class StatTaylor:
         if not isinstance(path, str):
             raise TaylorException(f'path must be a str, got {type(path)}')
         N = len(self._in_vars)
-        # Display each InVar value symbol `x` as `x~dx` in the function and
-        # use the same `x~dx` strings as per-InVar column headers.
+        # Display each ImPrecise value symbol `x` as `x~dx` in the function and
+        # use the same `x~dx` strings as per-ImPrecise column headers.
         invar_labels = [f'{inv.value}~{inv.deviation}' for inv in self._in_vars]
         fn_subs = {inv.value: sympy.Symbol(label)
                    for inv, label in zip(self._in_vars, invar_labels)}
@@ -363,7 +363,7 @@ class StatTaylor:
 
 
 class StatMatrix(StatTaylor):
-    """N×N matrix whose entries are a mix of InVar (uncertain) and value
+    """N×N matrix whose entries are a mix of ImPrecise (uncertain) and value
     (certain) cells. Inherits StatTaylor with a placeholder zero function
     (max_order=0); the symbolic determinant and per-entry StatTaylor are
     exposed via determ() and item(). Indices are row-major: index(row, col)
@@ -375,16 +375,16 @@ class StatMatrix(StatTaylor):
                  in_vars: typing.Optional[tuple] = None,
                  max_order: int = 16):
         """`N`: positive int, side length.
-        `items`: dict {(row, col): InVar | numeric/sympy.Expr}. Any (row, col)
+        `items`: dict {(row, col): ImPrecise | numeric/sympy.Expr}. Any (row, col)
         not present in `items` defaults to symbolic zero — `sympy.Integer(0)`,
         which is the `sympy.S.Zero` singleton — so the resulting `matrix` cell
         is always a sympy expression.
-        `in_vars`: optional explicit tuple of InVar to use as the underlying
-        StatTaylor inputs. If None (default), inferred from InVar entries in
+        `in_vars`: optional explicit tuple of ImPrecise to use as the underlying
+        StatTaylor inputs. If None (default), inferred from ImPrecise entries in
         `items` (and at least one such entry is required). If provided (as for
         derived matrices like adjugate(), where every entry is a sympy
-        expression in the original in_vars rather than an InVar), used directly;
-        any InVar entries in `items` are then stored as their value symbol.
+        expression in the original in_vars rather than an ImPrecise), used directly;
+        any ImPrecise entries in `items` are then stored as their value symbol.
         `max_order`: forwarded to the underlying StatTaylor (default 16) and
         used as the default for derived analyses (item, dump). The parent
         StatTaylor's coefficient table is never materialised because the
@@ -411,9 +411,9 @@ class StatMatrix(StatTaylor):
             if not in_vars:
                 raise TaylorException('in_vars must have at least one element')
             for v in in_vars:
-                if not isinstance(v, InVar):
+                if not isinstance(v, ImPrecise):
                     raise TaylorException(
-                        f'each in_vars element must be InVar, got {type(v)}')
+                        f'each in_vars element must be ImPrecise, got {type(v)}')
         item_in_vars = []
         invar_pos = {}  # (r, c) -> position in item_in_vars (only used when in_vars is None)
         rows = []
@@ -421,7 +421,7 @@ class StatMatrix(StatTaylor):
             row = []
             for c in range(N):
                 entry = items.get((r, c), sympy.Integer(0))
-                if isinstance(entry, InVar):
+                if isinstance(entry, ImPrecise):
                     if in_vars is None:
                         invar_pos[(r, c)] = len(item_in_vars)
                         item_in_vars.append(entry)
@@ -432,7 +432,7 @@ class StatMatrix(StatTaylor):
         if in_vars is None:
             if not item_in_vars:
                 raise TaylorException(
-                    'StatMatrix must contain at least one InVar entry '
+                    'StatMatrix must contain at least one ImPrecise entry '
                     '(or pass in_vars explicitly for a derived matrix)')
             in_vars = tuple(item_in_vars)
         self._N = N
@@ -447,13 +447,13 @@ class StatMatrix(StatTaylor):
 
     @property
     def matrix(self) -> sympy.Matrix:
-        """sympy.Matrix with value-symbols at InVar positions and sympy
+        """sympy.Matrix with value-symbols at ImPrecise positions and sympy
         expressions / numerics at all other positions."""
         return self._matrix
 
     def index(self, row: int, col: int) -> int:
         """Row-major flat index row*N + col for the entry at (row, col).
-        For all-InVar matrices (e.g. WorstMatrix) this is also the index
+        For all-ImPrecise matrices (e.g. WorstMatrix) this is also the index
         into `in_vars`; for mixed matrices it is just the layout position."""
         if (not isinstance(row, int) or isinstance(row, bool)
                 or not isinstance(col, int) or isinstance(col, bool)):
@@ -476,7 +476,7 @@ class StatMatrix(StatTaylor):
         """Return a new StatMatrix with every row and every col appearing in
         `positions` removed. Each element of `positions` is a (row, col) tuple.
         Unique rows and unique cols must be equinumerous so the result stays
-        square; surviving InVar instances are reused (same symbols), and
+        square; surviving ImPrecise instances are reused (same symbols), and
         non-zero value entries are preserved."""
         if not isinstance(positions, (list, tuple)):
             raise TaylorException(
@@ -513,9 +513,9 @@ class StatMatrix(StatTaylor):
                     val = self._matrix[r, c]
                     if val != 0:
                         new_items[(new_r, new_c)] = val
-        # If no InVar items survive (e.g. subMatrix of an adjugate), inherit
+        # If no ImPrecise items survive (e.g. subMatrix of an adjugate), inherit
         # the original's in_vars so the derived StatMatrix stays valid.
-        if any(isinstance(v, InVar) for v in new_items.values()):
+        if any(isinstance(v, ImPrecise) for v in new_items.values()):
             return StatMatrix(new_N, new_items, max_order=self._max_order)
         return StatMatrix(new_N, new_items, in_vars=self._in_vars,
                           max_order=self._max_order)
@@ -555,7 +555,7 @@ class StatMatrix(StatTaylor):
         the (N-1)×(N-1) minor and take its determinant via subMatrix; when
         the minor is 1×1 the lone entry is used directly (no further
         recursion). For N=1 the adjugate is the 1×1 identity [[1]]. The
-        returned matrix has no InVar items of its own; it inherits this
+        returned matrix has no ImPrecise items of its own; it inherits this
         matrix's `in_vars`."""
         if self._N == 1:
             return StatMatrix(1, {(0, 0): sympy.Integer(1)},
@@ -580,7 +580,7 @@ class StatMatrix(StatTaylor):
         via the same sub-matrix recursion as adjugate(): each cofactor uses
         subMatrix → _compute_det() (which collapses to the lone entry for a
         1×1 minor). For N=1 the inverse is [[1/M[0,0]]]. The returned
-        matrix has no InVar items of its own; it inherits this matrix's
+        matrix has no ImPrecise items of its own; it inherits this matrix's
         `in_vars`. Raises ZeroDivisionError if det(M) is identically zero."""
         if self._N == 1:
             return StatMatrix(1, {(0, 0): 1 / self._matrix[0, 0]},
@@ -607,13 +607,13 @@ class StatMatrix(StatTaylor):
 
         File structure (CSV):
           - One single-field `function (row, col): <expr>` row per entry,
-            with each InVar's value symbol rendered as `x~dx` (deviation
+            with each ImPrecise's value symbol rendered as `x~dx` (deviation
             appended). The csv writer quotes the field automatically since
             it contains commas.
-          - Header row: `order, row, col` + one column per InVar (named
+          - Header row: `order, row, col` + one column per ImPrecise (named
             `x~dx`) + `varAt`, `biasAt`.
           - Data rows: `order` is the multi-index sum; `row` and `col`
-            identify the matrix entry; the per-InVar columns hold the
+            identify the matrix entry; the per-ImPrecise columns hold the
             multi-index components; the last two columns are varAt and biasAt.
         Rows where both varAt and biasAt are 0 are skipped."""
         if not isinstance(path, str):
@@ -652,8 +652,8 @@ class StatMatrix(StatTaylor):
 
     def item(self, position, max_order: int = None) -> StatTaylor:
         """Return a StatTaylor for the entry at `position`=(row, col).
-        If the entry is an InVar, returns a single-variable StatTaylor over
-        that InVar (function = its value symbol). Otherwise the entry is a
+        If the entry is an ImPrecise, returns a single-variable StatTaylor over
+        that ImPrecise (function = its value symbol). Otherwise the entry is a
         sympy expression in the original in_vars (e.g. for derived matrices
         produced by adjugate() or reverse()), and the returned StatTaylor
         uses all of this StatMatrix's in_vars. Defaults to this StatMatrix's
@@ -674,7 +674,7 @@ class StatMatrix(StatTaylor):
 
 
 class WorstMatrix(StatMatrix):
-    """All-InVar special case of StatMatrix: every entry is an InVar with value
+    """All-ImPrecise special case of StatMatrix: every entry is an ImPrecise with value
     symbol `m_{r}_{c}` and deviation symbol `dm_{r}_{c}`, drawn from
     `distr_type` (default Uniform). Used for worst-case variance analysis."""
 
@@ -692,6 +692,6 @@ class WorstMatrix(StatMatrix):
             for c in range(N):
                 v = sympy.Symbol(f'm_{r}_{c}')
                 d = sympy.Symbol(f'dm_{r}_{c}')
-                items[(r, c)] = InVar(v, d, distr_type, kappa=kappa, samples=samples)
+                items[(r, c)] = ImPrecise(v, d, distr_type, kappa=kappa, samples=samples)
         super().__init__(N, items, max_order=max_order)
 

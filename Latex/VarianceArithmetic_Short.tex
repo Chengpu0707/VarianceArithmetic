@@ -329,7 +329,19 @@ In such cases, the output $f(x)$ can be fully characterized by its mean $\overli
 
 Thus, $\zeta(n, \kappa)$ needs to be 1.
 
+\begin{align*}
+f(a+\Delta x,, b+\Delta y) =;&
+f \\
++& f_x,\Delta x + f_y,\Delta y \\
++& \tfrac{1}{2!}\bigl(f_{xx},\Delta x^{2} + 2 f_{xy},\Delta x,\Delta y + f_{yy},\Delta y^{2}\bigr) \\
++& \tfrac{1}{3!}\bigl(f_{xxx},\Delta x^{3} + 3 f_{xxy},\Delta x^{2},\Delta y + 3 f_{xyy},\Delta x,\Delta y^{2} + f_{yyy},\Delta y^{3}\bigr) \\
++& \tfrac{1}{4!}\bigl(f_{xxxx},\Delta x^{4} + 4 f_{xxxy},\Delta x^{3},\Delta y + 6 f_{xxyy},\Delta x^{2},\Delta y^{2} + 4 f_{xyyy},\Delta x,\Delta y^{3} + f_{yyyy},\Delta y^{4}\bigr) \\
++& O(|\Delta|^{5}) \\
+&= \sum_{n=0}^{\infty} \frac{1}{n!} \sum_{j=0}^{n} \frac{n!}{j! (n-j)!} f_x^{(j)} f_y^{(n - j)};
+\end{align*}
+
 \fi
+
 
 Define $\tilde{z} \equiv (\tilde{x} - x)/\delta x$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, x, \delta x)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$.
 The Normal distribution is the normalized form of the Gaussian distribution.
@@ -985,9 +997,9 @@ Formula \eqref{eqn: polynomial Taylor} presents polynomial Taylor expansion:
 \begin{align}
 \label{eqn: polynomial Taylor}
 \sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \quad
-	P_j \equiv \sum_{k=0}^{N-j} x^{k - j} c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
+	P_j \equiv \sum_{k=0}^{N-j} x^k c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{align}
-Because the maximal expansion term using Formula \eqref{eqn: polynomial Taylor} is $\tilde{x}^{2N}$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
+Because the variance computation via Formula (2.6) on Formula (5.1) requires moments up to order $2N$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
 
 \subsection{Residual Error}
 
@@ -1099,11 +1111,7 @@ The square matrix whose element is $(-1)^{i+j}|M_{j,i}|$ is defined as the \emph
 Each element of $\mathbf{M}$ is assigned a random integer from $[-2^8, +2^8]$ such that $\mathbf{M}^A$ can be computed exactly in floating-point arithmetic when $n \leq 7$.
 By adding Gaussian noise $\tilde{x}_{i,j}$ of deviation $\delta x$ to each element of $\mathbf{M}$, $\widetilde{\mathbf{M}}$ is created as shown in Formula \eqref{eqn: random determinant}.
 The value error of $\mathbf{M}^A$ is the difference between $\widetilde{\mathbf{M}^A}$ and $\mathbf{M}^A$, whereas the result deviation is calculated using Formula \eqref{eqn: determinant variance}, such that $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ is a distribution test.
-Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the error deviations of $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ are very close to $1$, as $0.986 \pm 0.051$ on average.
-
-Figure \ref{fig: Adjugate_Error_vs_Size_Noise} contains an abnormal error deviation of $3.2$ when the matrix size is $8$ and the input uncertainty is $\delta x = 10^{-17}$.
-Without added noise, when the matrix size is $8$, error distribution transforms from Delta distribution to Gaussian distribution due to the emergence of rounding errors.
-With added noise less than $10^{-15}$, when the matrix size is less than $8$, error distribution is Gaussian with a Delta-like spike.
+Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the error deviations of $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ are very close to $1$ when $\delta x > 10^{-17}$, as $1.000 \pm 0.019$ on average.
 
 \begin{align}
 \label{eqn: adjugate matrix}
@@ -1121,7 +1129,7 @@ With added noise less than $10^{-15}$, when the matrix size is less than $8$, er
 Let $\mathbf{I}$ be the identity matrix for $\mathbf{M}$ \cite{Linear_Algebra}.
 Formula \eqref{eqn: adjugate matrix} shows the relationship between $\mathbf{M}^A$ and $\mathbf{M}$ which leads to the definition of inverse matrix $\mathbf{M}^{-1}$ in Formula \eqref{eqn: inverse matrix} \cite{Linear_Algebra}.
 $\tilde{\mathbf{M}} \times \tilde{\mathbf{M}}^A - |\tilde{\mathbf{M}}| \mathbf{I}$ is a value test applied to each matrix element.
-Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ with error slopes very close to $-1$, as $-0.985 \pm 0.003$ on average.
+Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ with error slopes very close to $-1$, as $-0.998 \pm 0.008$ on average.
 The matrix size is the algorithm specific dimension in Figure \ref{fig: Forward_Error_vs_Size_Noise}.
 
 Because an element of the original matrix $\mathbf{M}$ appears multiple times in Formula \eqref{eqn: inverse matrix}, the variance of that element, as obtained using Formula \eqref{eqn: Taylor 2d variance}, is very complicated. 
@@ -1895,25 +1903,31 @@ Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise a
 
 \subsection{Linear Regression}
 
-Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
+\iffalse 
 Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
 $(\delta f[1])^2$ decreases with larger $(\delta x)^2$ as expected.
 Because $(\delta f[0])^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
+
 \begin{align}
-\label{eqn: set residual}
-R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - f[0] - f[1] X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
-\label{eqn: set slope}
-&f[1] = \frac{\nu(x,y)}{(\delta x)^2}; \\
-\label{eqn: set intercept}
-&f[0]  = \overline{y} - \overline{x} f[1]; \\
 \label{eqn: set slope variance}
 &(\delta f[1])^2 = \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
 \label{eqn: set intercept variance}
 &(\delta f[0])^2 = \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
 \end{align}
-Formula \eqref{eqn: set slope precision} shows that $P(f[1])$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
+
+\fi
+
+Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
+Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, which shows that $f[0]$ is derived from $f[1]$ and thus is worth no further discussion.
+Formula \eqref{eqn: set slope precision} shows that the precision of the slope $P(f[1])$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
 Whether $P(f[1])$ or $R^2$ is the better measure of goodness-of-fit is debatable.
 \begin{align}
+\label{eqn: set residual}
+R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - f[0] - f[1] X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
+\label{eqn: set slope}
+f[1] &= \frac{\nu(x,y)}{(\delta x)^2}; \\
+\label{eqn: set intercept}
+f[0]  &= \overline{y} - \overline{x} f[1]; \\
 \label{eqn: set slope precision}
 P(f[1])^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
 \label{eqn: set R2}
@@ -1931,7 +1945,7 @@ Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data 
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
-Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} are not invariant under swapping x and y. 
+Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} are not invariant under swapping $x$ and $y$. 
 A swap-consistent regression (total least squares, geometric-mean regression, or Deming) \cite{Linear_Regression} is more appropriate when both variables carry uncertainty, which indicates a future development of regression using imprecise values.
 
 
@@ -1983,7 +1997,7 @@ Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{
 Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
 \label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_i^N (Y_i - \sum_{p=0}^{P} f[p]\, X_i^p)^2; \\
+R_P &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - \sum_{p=0}^{P} f[p]\, X_i^p)^2; \\
 \label{eqn: poly normal}
 &\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; 
 \end{align}

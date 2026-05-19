@@ -769,7 +769,7 @@ class TestAnalyticVsNumeric(unittest.TestCase):
         numeric_fn: callable taking VarDbl → VarDbl."""
         x_sym = sympy.Symbol('x')
         dx_sym = sympy.Symbol('dx')
-        v = analytic.InVar(x_sym, dx_sym,
+        v = analytic.ImPrecise(x_sym, dx_sym,
                            analytic.EDistrType.Gaussian, kappa=5.0)
         T = analytic.StatTaylor(sympy_fn(x_sym), (v,), max_order=self.MAX_ORDER)
         sym_mean = sum((T.biasOrder(n) for n in range(self.MAX_ORDER + 1)),

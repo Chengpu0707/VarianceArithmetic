@@ -1,8 +1,8 @@
 """Unit tests for analytic.py (statistical Taylor expansion).
 
 Validation tests:
-  TestInVar              — InVar construction, defaults, immutability, type checks.
-  TestInVarMoment        — InVar.moment() for Gaussian (symbolic ζ) and Uniform (numeric).
+  TestImPrecise              — ImPrecise construction, defaults, immutability, type checks.
+  TestImPreciseMoment        — ImPrecise.moment() for Gaussian (symbolic ζ) and Uniform (numeric).
   TestStatTaylor         — StatTaylor construction, properties, immutability, type checks.
   TestStatTaylorMethod   — StatTaylor.at() argument validation and small structural cases.
   TestStatTaylorVarAt    — varAt(*orders) argument validation and 1D/2D structural cases.
@@ -38,7 +38,7 @@ import analytic
 from indexSin import OUTDIR
 
 
-class TestInVar(unittest.TestCase):
+class TestImPrecise(unittest.TestCase):
 
     def setUp(self):
         self.x = sympy.Symbol('x')
@@ -46,7 +46,7 @@ class TestInVar(unittest.TestCase):
         self.k = sympy.Symbol('k')
 
     def test_gaussian_defaults(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         self.assertEqual(v.value, self.x)
         self.assertEqual(v.deviation, self.dx)
         self.assertEqual(v.distr_type, analytic.EDistrType.Gaussian)
@@ -54,113 +54,113 @@ class TestInVar(unittest.TestCase):
         self.assertEqual(v.samples, 10000)
 
     def test_uniform_defaults(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform)
         self.assertEqual(v.kappa, math.sqrt(3))
         self.assertEqual(v.samples, 10000)
 
     def test_explicit_kappa(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=3.0)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=3.0)
         self.assertEqual(v.kappa, 3.0)
 
     def test_explicit_samples(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, samples=500)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, samples=500)
         self.assertEqual(v.samples, 500)
 
     def test_readonly_value(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.value = sympy.Symbol('y')
 
     def test_readonly_deviation(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.deviation = sympy.Symbol('dy')
 
     def test_readonly_distr_type(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.distr_type = analytic.EDistrType.Uniform
 
     def test_readonly_kappa(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.kappa = 3.0
 
     def test_readonly_samples(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.samples = 1
 
     def test_no_extra_attributes(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         with self.assertRaises(AttributeError):
             v.extra = 42
 
     def test_invalid_value(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(1.0, self.dx, analytic.EDistrType.Gaussian)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(1.0, self.dx, analytic.EDistrType.Gaussian)
 
     def test_invalid_deviation(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, 1.0, analytic.EDistrType.Gaussian)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, 1.0, analytic.EDistrType.Gaussian)
 
     def test_invalid_distr_type(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, 'Gaussian')
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, 'Gaussian')
 
     def test_invalid_kappa_type(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=5)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=5)
 
     def test_invalid_kappa_nonpositive(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=0.0)
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=-1.0)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=0.0)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=-1.0)
 
     def test_invalid_kappa_uniform_exceeds_sqrt3(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=2.0)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=2.0)
 
     def test_uniform_symbolic_kappa(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
         self.assertEqual(v.kappa, self.k)
         self.assertEqual(v.distr_type, analytic.EDistrType.Uniform)
 
     def test_uniform_symbolic_kappa_unspecified_assumptions(self):
         # Symbol without assumptions: cannot prove out-of-range, accept.
         k = sympy.Symbol('k')
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
         self.assertEqual(v.kappa, k)
 
     def test_invalid_uniform_symbolic_kappa_negative(self):
         # Symbol with negative=True is provably non-positive → reject.
         k = sympy.Symbol('k', negative=True)
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
 
     def test_invalid_uniform_symbolic_kappa_zero(self):
         # Symbol with zero=True: is_positive is False → reject.
         k = sympy.Symbol('k', zero=True)
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=k)
 
     def test_invalid_gaussian_symbolic_kappa(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=self.k)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=self.k)
 
     def test_invalid_samples_type(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, samples=1.0)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, samples=1.0)
 
     def test_invalid_samples_nonpositive(self):
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, samples=0)
-        with self.assertRaises(analytic.InVarException):
-            analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, samples=-1)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, samples=0)
+        with self.assertRaises(analytic.ImPreciseException):
+            analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, samples=-1)
 
 
-class TestInVarMoment(unittest.TestCase):
+class TestImPreciseMoment(unittest.TestCase):
 
     def setUp(self):
         self.x = sympy.Symbol('x')
@@ -168,48 +168,48 @@ class TestInVarMoment(unittest.TestCase):
         self.k = sympy.Symbol('k', positive=True)
 
     def test_gaussian_default_kappa_order0(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         self.assertEqual(v.moment(0), analytic.zeta(0, v.kappa))
 
     def test_gaussian_default_kappa_order2(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         self.assertEqual(v.moment(2), analytic.zeta(2, v.kappa))
 
     def test_gaussian_odd_order_is_zero(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
         self.assertEqual(v.moment(1), 0)
         self.assertEqual(v.moment(3), 0)
 
     def test_uniform_default_kappa_order0(self):
         import moment as _mmt
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform)
         self.assertAlmostEqual(v.moment(0), _mmt.Uniform(bounding=math.sqrt(3))[0])
 
     def test_uniform_default_kappa_order2(self):
         import moment as _mmt
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform)
         self.assertAlmostEqual(v.moment(2), _mmt.Uniform(bounding=math.sqrt(3))[2])
 
     def test_uniform_odd_order_is_zero(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform)
         self.assertEqual(v.moment(1), 0)
 
     def test_custom_kappa_gaussian(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=3.0)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian, kappa=3.0)
         self.assertEqual(v.moment(2), analytic.zeta(2, v.kappa))
 
     def test_uniform_symbolic_kappa_order0(self):
         # Normalized (2.2): ζ(0, κ) = 1 by construction.
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
         self.assertEqual(sympy.simplify(v.moment(0) - 1), 0)
 
     def test_uniform_symbolic_kappa_order2(self):
         # Normalized: ζ(2, κ) = κ² / 3.
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
         self.assertEqual(sympy.simplify(v.moment(2) - self.k**2 / 3), 0)
 
     def test_uniform_symbolic_kappa_order_odd_is_zero(self):
-        v = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
+        v = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k)
         self.assertEqual(v.moment(1), 0)
         self.assertEqual(v.moment(3), 0)
 
@@ -221,8 +221,8 @@ class TestStatTaylor(unittest.TestCase):
         self.dx = sympy.Symbol('dx')
         self.y = sympy.Symbol('y')
         self.dy = sympy.Symbol('dy')
-        self.vx = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
-        self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform)
+        self.vx = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
+        self.vy = analytic.ImPrecise(self.y, self.dy, analytic.EDistrType.Uniform)
 
     def test_single_var(self):
         t = analytic.StatTaylor(sympy.sin(self.x), (self.vx,), max_order=2)
@@ -302,8 +302,8 @@ class TestStatTaylorMethod(unittest.TestCase):
         self.dx = sympy.Symbol('dx')
         self.y = sympy.Symbol('y')
         self.dy = sympy.Symbol('dy')
-        self.vx = analytic.InVar(self.x, self.dx, analytic.EDistrType.Gaussian)
-        self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform)
+        self.vx = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Gaussian)
+        self.vy = analytic.ImPrecise(self.y, self.dy, analytic.EDistrType.Uniform)
 
     def _check(self, result, expected):
         self.assertEqual(sympy.expand(result - expected), 0)
@@ -359,9 +359,9 @@ class _Base(unittest.TestCase):
         self.k_x = sympy.Symbol('k_x', positive=True)
         self.k_y = sympy.Symbol('k_y', positive=True)
         self.k_z = sympy.Symbol('k_z', positive=True)
-        self.vx = analytic.InVar(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k_x)
-        self.vy = analytic.InVar(self.y, self.dy, analytic.EDistrType.Uniform, kappa=self.k_y)
-        self.vz = analytic.InVar(self.z, self.dz, analytic.EDistrType.Uniform, kappa=self.k_z)
+        self.vx = analytic.ImPrecise(self.x, self.dx, analytic.EDistrType.Uniform, kappa=self.k_x)
+        self.vy = analytic.ImPrecise(self.y, self.dy, analytic.EDistrType.Uniform, kappa=self.k_y)
+        self.vz = analytic.ImPrecise(self.z, self.dz, analytic.EDistrType.Uniform, kappa=self.k_z)
 
     def _check(self, result, expected):
         self.assertEqual(sympy.simplify(result - expected), 0)
@@ -399,7 +399,7 @@ class _Base(unittest.TestCase):
         self.assertEqual(len(header), 1 + n_invars + 2)
         for k, inv in enumerate(self.t.in_vars):
             self.assertEqual(header[1 + k], f'{inv.value}~{inv.deviation}')
-        # Data rows: order = sum of per-InVar columns; at least one non-zero row.
+        # Data rows: order = sum of per-ImPrecise columns; at least one non-zero row.
         self.assertGreater(len(rows), 2)
         for row in rows[2:]:
             self.assertEqual(int(row[0]),
@@ -519,9 +519,9 @@ class TestStatTaylorDump(_Base):
             t.dump(path)
             with open(path, newline='') as f:
                 rows = list(csv.reader(f))
-        # Function row: single-field line with InVar value as `x~dx`.
+        # Function row: single-field line with ImPrecise value as `x~dx`.
         self.assertEqual(rows[0], ['function: sin(x~dx)'])
-        # Header: order + per-InVar columns (named `x~dx`) + varAt + biasAt.
+        # Header: order + per-ImPrecise columns (named `x~dx`) + varAt + biasAt.
         self.assertEqual(rows[1], ['order', 'x~dx', 'varAt', 'biasAt'])
         # 1D max_order=3 sin(x): orders 0 and 2 are nonzero (1, 3 skipped).
         self.assertEqual(len(rows), 2 + 2)
@@ -565,7 +565,7 @@ class TestStatTaylorDump(_Base):
         # Nonzero rows for x*y at max_order=2:
         # (0,0): biasAt=x*y; (0,2): varAt=dy²·x²; (2,0): varAt=dx²·y²
         self.assertEqual(len(rows), 2 + 3)
-        # Each data row's order column should equal sum of per-InVar columns.
+        # Each data row's order column should equal sum of per-ImPrecise columns.
         for row in rows[2:]:
             self.assertEqual(int(row[0]), int(row[1]) + int(row[2]))
 
@@ -576,7 +576,7 @@ class TestStatTaylorDump(_Base):
 
     def test_dump_2d_function_uses_invar_notation(self):
         import tempfile
-        # Function references both InVars; both must render as `x~dx` form.
+        # Function references both ImPrecises; both must render as `x~dx` form.
         t = analytic.StatTaylor(self.x * self.y + sympy.sin(self.x),
                                 (self.vx, self.vy), max_order=1)
         with tempfile.TemporaryDirectory() as d:
@@ -1695,7 +1695,7 @@ class TestXaddYaddZ(_Base):
 
 
 class TestStatMatrix(unittest.TestCase):
-    """Validates analytic.StatMatrix construction with mixed InVar/value entries
+    """Validates analytic.StatMatrix construction with mixed ImPrecise/value entries
     and inheritance of index/pos/subMatrix/determ/item from the base."""
 
     def setUp(self):
@@ -1703,8 +1703,8 @@ class TestStatMatrix(unittest.TestCase):
         self.dm00 = sympy.Symbol('dm00')
         self.m11 = sympy.Symbol('m11')
         self.dm11 = sympy.Symbol('dm11')
-        self.v00 = analytic.InVar(self.m00, self.dm00, analytic.EDistrType.Uniform)
-        self.v11 = analytic.InVar(self.m11, self.dm11, analytic.EDistrType.Uniform)
+        self.v00 = analytic.ImPrecise(self.m00, self.dm00, analytic.EDistrType.Uniform)
+        self.v11 = analytic.ImPrecise(self.m11, self.dm11, analytic.EDistrType.Uniform)
 
     def test_unassigned_defaults_to_symbolic_zero(self):
         # Every (row, col) not in items resolves to sympy.S.Zero (the symbolic
@@ -1719,7 +1719,7 @@ class TestStatMatrix(unittest.TestCase):
                 self.assertIsInstance(cell, sympy.Expr)
 
     def test_mixed_entries(self):
-        # 2x2 matrix: diagonal InVars, off-diagonal values 7 and 0 (default).
+        # 2x2 matrix: diagonal ImPrecises, off-diagonal values 7 and 0 (default).
         M = analytic.StatMatrix(2, {(0, 0): self.v00,
                                 (0, 1): 7,
                                 (1, 1): self.v11})
@@ -1763,7 +1763,7 @@ class TestStatMatrix(unittest.TestCase):
         self.assertEqual(T.function, self.m11)
 
     def test_item_value_position_returns_constant_taylor(self):
-        # (1, 0) is the default 0 value, not an InVar; item() now returns a
+        # (1, 0) is the default 0 value, not an ImPrecise; item() now returns a
         # full-in_vars StatTaylor of the entry expression (here Integer(0)).
         M = analytic.StatMatrix(2, {(0, 0): self.v00, (1, 1): self.v11})
         T = M.item((1, 0))
@@ -1772,8 +1772,8 @@ class TestStatMatrix(unittest.TestCase):
         self.assertEqual(T.in_vars, M.in_vars)
 
     def test_subMatrix_preserves_value_entries(self):
-        # 3x3 with 1 InVar and 2 nonzero value entries; drop row 0 + col 0.
-        v = analytic.InVar(sympy.Symbol('a'), sympy.Symbol('da'),
+        # 3x3 with 1 ImPrecise and 2 nonzero value entries; drop row 0 + col 0.
+        v = analytic.ImPrecise(sympy.Symbol('a'), sympy.Symbol('da'),
                            analytic.EDistrType.Uniform)
         M = analytic.StatMatrix(3, {(1, 1): v,
                                 (1, 2): 5,
@@ -1805,7 +1805,7 @@ class TestStatMatrix(unittest.TestCase):
         with self.assertRaises(analytic.TaylorException):
             analytic.StatMatrix(2, {}, in_vars=())  # empty
         with self.assertRaises(analytic.TaylorException):
-            analytic.StatMatrix(2, {}, in_vars=('not an InVar',))
+            analytic.StatMatrix(2, {}, in_vars=('not an ImPrecise',))
 
 
 class TestWorstMatrix(unittest.TestCase):
@@ -2023,7 +2023,7 @@ class TestWorstMatrix(unittest.TestCase):
             self.assertTrue(line.startswith(f'function ({r}, {c}): '))
             for inv_var in M.in_vars:
                 self.assertIn(f'{inv_var.value}~{inv_var.deviation}', line)
-        # Header row: order, row, col, N² InVar labels, varAt, biasAt.
+        # Header row: order, row, col, N² ImPrecise labels, varAt, biasAt.
         header = rows[N * N]
         self.assertEqual(header[0], 'order')
         self.assertEqual(header[1], 'row')
@@ -2034,7 +2034,7 @@ class TestWorstMatrix(unittest.TestCase):
         for k, inv_var in enumerate(M.in_vars):
             self.assertEqual(header[3 + k],
                              f'{inv_var.value}~{inv_var.deviation}')
-        # Every data row: order = sum of per-InVar columns; row,col in range.
+        # Every data row: order = sum of per-ImPrecise columns; row,col in range.
         for row in rows[N * N + 1:]:
             self.assertEqual(int(row[0]),
                              sum(int(row[3 + k]) for k in range(N * N)))

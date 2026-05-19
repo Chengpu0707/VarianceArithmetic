@@ -235,16 +235,37 @@ Analysis:
 ## _Section: Matrix Calculations_
 
 Code:
+ * Cpp/Matrix.h: bottom-up Laplace expansion (Formula 6.1/6.3) for `determ()` and `adjugate()`; `multiply()` for matrix product; static `runMatrixAnalysis()` that parallelizes the Hilbert + random-integer sweep via `std::async`.
+ * Java/src/Func/Matrix.java: mirrors the C++ design (same bottom-up Laplace, same `multiply()` with inline-doubles fast path, same `runMatrixAnalysis(int minSize, int maxSize, int targetCells, double[] noises, String outDir, int threads)` static driver); `RandomMatrix` subclass populates noisy cells via `set()`.
  * Python/matrix.py
 
 Unit test:
+ * Cpp/TestMatrix.cpp: 15 standalone tests (construction, `get`/`set`, Laplace determinant, adjugate, the M·adj(M) = |M|·I identity, variance propagation, `RandomMatrix`).
+ * Java/src/Func/TestMatrix.java: 16 JUnit tests — the same 15 plus `testAdjugateUncertaintyVsMonteCarlo` (a Monte-Carlo diagnostic that prints the Adj/Fwd/Rnd over- or under-prediction ratio at five noise levels, see explanation of the `Adj Norm Deviation ≈ 1 → drop` pattern below).
  * Python/testMatrix.py
  * Python/testManual.py: class TestAdjugateManually
 
+Drivers and benchmarks:
+ * Cpp/RunMatrixAnalysis.cpp: standalone executable wrapping `Matrix::runMatrixAnalysis`. CLI: `<minSize> <maxSize> <targetCells> <outDir>` (all positional, defaults `4 10 1000 Output`). Build: `g++ -std=c++23 -O2 -pthread -o RunMatrixAnalysis.exe RunMatrixAnalysis.cpp -lstdc++exp`.
+ * Cpp/BenchMatrix.cpp: micro-benchmark for `calc()` at sizes 6/8/10; useful when regressing the inner-loop optimization (`std::map` → flat `vector<vector<VarDbl>>`, bit-trick set-bit iteration, in-place `+=`/`-=`, `__builtin_ctzll`/`popcountll`).
+ * Java `Func.Matrix.main(String[] args)`: same CLI as the C++ driver, with optional 5th arg `threads` (default = `availableProcessors()`). Lower the thread count and pass `-Xmx...` to JVM if larger sizes OOM (sizes 14–15 need ≥ 8 GB / few threads on a 16 GB box).
+ * Python/runMatrixAnalysis.py: original Python driver; the C++/Java versions are ports of it.
+
+Output schema:
+ * `MatrixCondition_{minSize}_{maxSize}.txt` — one row per matrix (Hilbert + Random samples). Columns: `Size, Type, Noise, Condition Number, Determinant Value, Determinant Uncertainty, Determinant Precision, Run Time`.
+ * `AdjMatrix_{minSize}_{maxSize}.txt` — one row per `(size, noise)` cell, 58 columns: `Type, Noise, Size, Count` followed by 9 stat blocks for `{Adj, Fwd, Rnd} × {Unc, Val, Norm} × {Deviation, Mean, Minimum, Maximum, Count, Loss}`. `Adj` = noisy adjugate vs precise integer adjugate; `Fwd` = `M·adj − det·I`; `Rnd` = `M·adj − adj·M`.
+ * The Java and C++ runners both **skip cells already present** in an existing `AdjMatrix_*.txt` (parsed at startup), so a previous run can be extended (e.g., rename `_4_10.txt` to `_4_16.txt` and rerun with the larger maxSize to fill in only sizes 10..15).
+
 Analysis:
- * IPyNb/AdjugateMatrix.ipynb
+ * IPyNb/AdjugateMatrix.Python.ipynb: reads `Python/Output/AdjMatrix_4_9.txt`, plots 3D surfaces of the five error metrics (Adjugate Uncertainty/Error, Forward, Roundtrip, Multiple Error) plus normalized-error histograms and a log-noise power-law regression of Forward Error.
+ * IPyNb/AdjugateMatrix.Cpp.ipynb: reads `Cpp/Output/AdjMatrix_4_16.txt`. Same surface plots adapted to the C++ schema (`Adj/Fwd/Rnd Unc/Val/Norm`), no histogram section since the C++/Java schema doesn't carry per-bucket counts. Includes the log-Forward power-law fit.
+ * IPyNb/AdjMatrix.Java.ipynb: identical to `AdjugateMatrix.Cpp.ipynb` but reads `Java/Output/AdjMatrix_4_16.txt`.
  * IPyNb/MatrixCondition.ipynb
  * Maxima/Matrix_2.wxmx, Maxima/Matrix_2.wxmx
+
+Notes on observed behaviors:
+ * `Adj Norm Deviation` stays near 1 for noise ≲ 0.1 and drops rapidly (to ~0.5–0.6) at noise ≳ 1. The drop is the variance arithmetic over-predicting at large noise: Laplace's alternating-sign summation creates negative covariance between terms that `VarDbl.add` cannot see (it sums variances as if independent). `testAdjugateUncertaintyVsMonteCarlo` in `Java/src/Func/TestMatrix.java` confirms this with a Monte-Carlo comparison.
+ * `Fwd Val Dev` at noise = 0, size ≥ 8 has heavy-tailed sampling variance — a few near-singular random matrices dominate the std. C++ and Java compute identical adj/M·adj values for any **single fixed** matrix; the orders-of-magnitude difference visible in the two AdjMatrix files reflects different random samples (each language has its own RNG, sample count is ~12 per cell at size 8). Fix: pass a deterministic seed or bump the sample count.
 
 
 ## _Section: Moving-Window Linear Regression_
