@@ -578,30 +578,37 @@ The value of moment  $\zeta(2n)$ for Uniform distribution is also provided as an
 
 \begin{align}
 \label{eqn: uniform moment}
-\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{z} = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n + 1}, \;\; 0 \leq \kappa \leq \sqrt{3}; \\
+\rho(\tilde{z}) = \frac{1}{2\sqrt{3}}, |\tilde{z}| \leq \sqrt{3}&:
+		\zeta(2n, \kappa) = \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{z}
+			= 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n + 1}; \\
 \label{eqn: symetric asymptotic moment}
-\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1}; \\ 
+\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1}; \\
+\label{eqn: exponential asymptotic moment}
+\rho(\tilde{z}) = e^{-(1+\tilde{z})}, \tilde{z} \geq -1&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) = \rho(\kappa) \frac{\kappa^{n+1}}{n+1}; \\
 \label{eqn: variance asymptotic}
-\forall j&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n};
+0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n + 1}}{n + 1};
 \end{align}
 \else
 \begin{align}
 \label{eqn: variance asymptotic}
-\forall j&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) = \frac{\kappa^n}{n};
+0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n + 1}}{n + 1};
 \end{align}
 \fi
 
 \ifdefined\Verbose
-Formula \eqref{eqn: uniform moment} gives $\zeta(2n, \kappa)$ for Uniform distributions, Formula \eqref{eqn: symetric asymptotic moment} shows the asymptoticity for any symmetric distribution $\rho(\tilde{z})$.
-Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for Uniform distribution, $\zeta(2n, 5)$ for Normal distribution. and the asymptote for Normal distribution.
+Formula \eqref{eqn: uniform moment} gives the closed form of $\zeta(2n, \kappa)$ for the Uniform distribution.
+Formula \eqref{eqn: symetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$, with the prefactor $2 \rho(\kappa)$ given by the parent density at the boundary.
+Formula \eqref{eqn: exponential asymptotic moment} states the corresponding asymptote for the standardized Exponential distribution under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding}; the one-sided support yields a single prefactor $\rho(\kappa)$ rather than the symmetric $2 \rho(\kappa)$.
+For the Exponential, Formula \eqref{eqn: mean-reverting bounding} reduces to $(1+\varrho)\,e^{-(1+\varrho)} = (1+\kappa)\,e^{-(1+\kappa)}$, whose non-trivial root $\varrho \in (-1, 0)$ is paired with the user-chosen upper bound $\kappa > 0$.
+Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for the Uniform distribution, $\zeta(2n, 5)$ for the Normal distribution, and the corresponding asymptote for the Normal distribution.
 \fi
-Formula \eqref{eqn: variance asymptotic} shows that the asymptotic behavior of $\zeta(n, \kappa)$ as $n \rightarrow \infty$ determines whether Formula \eqref{eqn: Taylor 1d variance} will converge.
+Formula \eqref{eqn: variance asymptotic} shows that the general asymptotic behavior of $\zeta(n, \kappa)$ determines whether Formula \eqref{eqn: Taylor 1d variance} converges:
 \begin{itemize}
-\item Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally.
+\item Formula \eqref{eqn: exp precision} for $e^{x \pm \delta x}$ and Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$ both converge unconditionally because the derivative coefficients decay factorially, dominating the $\kappa^{n+1}/(n+1)$ growth.
 
 \item Formula \eqref{eqn: log precision} for $\log(x \pm \delta x)$ can be approximated by Formula \eqref{eqn: log convergence}, which converges when $P(x) \leq 1/\kappa$.
 
-\item Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence}, which converges when $P(x) \lesssim 1/\kappa$ although the precise upper bound for $P(x)$ varies with $c$.
+\item Formula \eqref{eqn: power precision} for $(x \pm \delta x)^c$ can be approximated by Formula \eqref{eqn: pow convergence}, which converges when $P(x) \lesssim 1/\kappa$; the precise upper bound for $P(x)$ varies with $c$.
 \end{itemize}
 \begin{align}
 \label{eqn: log convergence}
@@ -1086,7 +1093,8 @@ Error deviations (z-axis) as a function of input noise precision (x-axis) and ma
 \includegraphics[height=2.5in]{Matrix_Determinant_Prec_vs_Condition.pdf} 
 \captionof{figure}{
 Linear correlation between the precision of a matrix determinant (y-axis) to its condition number (x-axis).
-The legend shows the size of the matrix, as well as the type of the matrix as \textit{Random} for randomly generated matrix, and \textit{Hilbert} as the Hilbert matrix.
+The legend shows the size of the matrix, the deviation of added noise, as well as the type of the matrix as \textit{Random} for randomly generated matrix, and \textit{Hilbert} as the Hilbert matrix.
+The noise of a Hilbert matrix matrix is the ULP of each of its element, which is slightly less than $10^{-16}$ as expected.
 }
 \label{fig: Matrix_Determinant_Prec_vs_Condition}
 \end{figure}
@@ -1139,7 +1147,8 @@ Contrary to the conventional approach, statistical Taylor expansion uses Formula
 In Formula \eqref{eqn: inverse matrix}, $\mathbf{M}^{-1}$ is dominated by $1/|\mathbf{M}|$, suggesting that the precision of $\mathbf{M}^{-1}$ is largely determined by the precision of $|\mathbf{M}|$.
 Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that a strong linear correlation exists between condition numbers \cite{Linear_Algebra} and the corresponding determinant precision of the matrices.
 As a reference, Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} presents the Hilbert matrix \cite{Linear_Algebra} (which is the most unstable matrix in theory) for each matrix size and shows that the Hilbert matrices also follow the linear relation between determinant precision and condition number.
-Thus, determinant precision can replace matrix condition number to quantify overall matrix stability \cite{Linear_Algebra}, and Formula \eqref{eqn: inverse matrix 2 variance} further shows the stability of each matrix element.
+In Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition}, adding small noise to a matrix does not change its conditional number, but increases result precision, so that determinant precision cannot replace matrix condition number.  
+In fact, Formula \eqref{eqn: inverse matrix 2 variance} shows the stability of each matrix element, which may be a better characterization of matrix stability than the conditional number.
 
 
 \section{Mathematical Library Functions}

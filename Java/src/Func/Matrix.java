@@ -61,7 +61,7 @@ public class Matrix {
              sValue[i] = zero;
     }
 
-    public int    size() { return size; }
+    public int size() { return size; }
 
     private int index(int row, int col) {
         return row * size + col;
@@ -334,8 +334,9 @@ public class Matrix {
         for (int r = 0; r < size; ++r) {
             for (int c = 0; c < size; ++c) {
                 double v = 1.0 / (r + c + 1);
+                final double unc = VarDbl.ulp(v);
                 if (dev > 0) v += dev * rng.nextGaussian();
-                sv[r * size + c] = new VarDbl(v, dev);
+                sv[r * size + c] = new VarDbl(v, Math.sqrt(unc*unc + dev*dev));
             }
         }
         return new Matrix(size, sv);

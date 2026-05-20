@@ -295,8 +295,9 @@ inline Matrix Matrix::hilbertMatrix(size_t size, double dev, std::mt19937& rng) 
     for (size_t r = 0; r < size; ++r) {
         for (size_t c = 0; c < size; ++c) {
             double v = 1.0 / static_cast<double>(r + c + 1);
+            const double unc = VarDbl::ulp(v);
             if (dev > 0) v += gauss(rng);
-            sv[r * size + c] = VarDbl(v, dev);
+            sv[r * size + c] = VarDbl(v, std::sqrt(unc * unc + dev * dev));
         }
     }
     return Matrix(size, sv);

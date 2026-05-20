@@ -1,10 +1,12 @@
-"""Symbolic statistical Taylor expansion: bounded moments ζ(n, κ), input random
-variables (ImPrecise), and the Taylor coefficient / mean (bias) / variance machinery.
+"""Symbolic statistical Taylor expansion: bounded moments ζ(n, κ) / ξ(n, κ),
+input random variables (ImPrecise), and the Taylor coefficient / mean (bias) /
+variance machinery.
 
 Expression conventions:
 - coeffs[(α₁,…,α_N)] = (1/α!) · ∂^|α| f / ∏ ∂x_k^{α_k}  (i.e. includes the 1/n! factor).
-- moment(n) returns the bound moment ζ(n, κ): symbolic for Gaussian, numeric for Uniform.
-- All distributions are assumed symmetric, so ζ(odd, κ) = 0.
+- moment(n) returns the bound moment:
+    - ζ(n, κ): symbolic for Gaussian, numeric for Uniform — symmetric, so ζ(odd, κ)=0.
+    - ξ(n, κ): symbolic for Exponential — asymmetric, ξ(odd, κ) ≠ 0.
 """
 
 import csv
@@ -22,6 +24,7 @@ import moment
 class EDistrType(enum.Enum):
     Uniform = enum.auto()
     Gaussian = enum.auto()
+    Exponential = enum.auto()
 
 
 class zeta(sympy.Function):
@@ -41,6 +44,41 @@ class zeta(sympy.Function):
         n, kappa = self.args
         if n.is_integer and kappa.is_number:
             return sympy.Float(moment.Normal(bounding=float(kappa))[int(n)])
+
+
+class xi(sympy.Function):
+    """Symbolic bounded moment ξ(n, κ) of the truncated standardized Exponential
+    distribution with mean-reverting bounding ζ(1, κ) = 0.
+
+    Closed form for non-negative integer n (returned on construction):
+        a = -LambertW(-(1+κ)·exp(-(1+κ))),  ρ = a - 1
+        J_n = n! · [exp(-a)·Σ_{j=0}^{n} ρ^j/j!  -  exp(-(1+κ))·Σ_{j=0}^{n} κ^j/j!]
+        ξ(n, κ) = J_n / J_0   where J_0 = exp(-a) - exp(-(1+κ))
+
+    Special values: ξ(0, κ) = 1, ξ(1, κ) = 0 (mean-reverting). For symbolic n,
+    the call is left unevaluated. Unlike ζ for the symmetric Normal/Uniform,
+    ξ(odd, κ) ≠ 0 for n ≥ 3 in general."""
+    nargs = 2
+
+    @classmethod
+    def eval(cls, n, kappa):
+        if n.is_zero:
+            return sympy.Integer(1)
+        # Only expand for concrete non-negative integer n; leave symbolic n
+        # unevaluated so StatTaylor doesn't accidentally inflate its expression tree.
+        if not isinstance(n, sympy.Integer) or n < 0:
+            return None
+        n_int = int(n)
+        if n_int == 1:
+            return sympy.Integer(0)
+        b = 1 + kappa
+        a = -sympy.LambertW(-b * sympy.exp(-b))
+        rho = a - 1
+        rho_sum = sympy.Add(*(rho**j / sympy.factorial(j) for j in range(n_int + 1)))
+        kap_sum = sympy.Add(*(kappa**j / sympy.factorial(j) for j in range(n_int + 1)))
+        J_n = sympy.factorial(n_int) * (sympy.exp(-a) * rho_sum - sympy.exp(-b) * kap_sum)
+        J_0 = sympy.exp(-a) - sympy.exp(-b)
+        return J_n / J_0
 
 
 class ImPreciseException(Exception):
@@ -67,12 +105,18 @@ class ImPrecise:
         if not isinstance(distr_type, EDistrType):
             raise ImPreciseException(f'distr_type must be an EDistrType, got {type(distr_type)}')
         if kappa is None:
-            # Gaussian default κ=5 keeps bounding leakage ~5e-7.
-            # Uniform default κ=√3 makes ζ(0)=ζ(2)=1 exactly (the standard normalization).
-            kappa = 5.0 if distr_type == EDistrType.Gaussian else math.sqrt(3)
+            # Default κ chosen for similar one-sided leakage across distributions:
+            # Gaussian κ=5 → leakage ~5e-7; Uniform κ=√3 → leakage 0 (ζ(0)=ζ(2)=1);
+            # Exponential κ=15 → leakage exp(-16) ~1e-7.
+            if distr_type == EDistrType.Gaussian:
+                kappa = 5.0
+            elif distr_type == EDistrType.Uniform:
+                kappa = math.sqrt(3)
+            else:
+                kappa = 15.0
         if isinstance(kappa, sympy.Symbol):
-            # Symbolic κ: only Uniform supports it. Gaussian needs a numeric κ
-            # because zeta(n, κ) is evaluated against the precomputed moment table.
+            # Symbolic κ: only Uniform supports it. Gaussian/Exponential need
+            # numeric κ because zeta/xi evaluate against precomputed moment tables.
             if distr_type != EDistrType.Uniform:
                 raise ImPreciseException(
                     f'symbolic kappa is only supported for Uniform, got {distr_type}')
@@ -125,11 +169,15 @@ class ImPrecise:
         return self._samples
 
     def moment(self, order: int) -> typing.Union[float, typing.Callable[[int, float], float]]:
-        """Return the bound moment ζ(n, κ) of the normalized distribution.
+        """Return the bound moment of the normalized distribution.
         For Gaussian: a symbolic `zeta(order, kappa)` (numeric via `.evalf()`).
-        For Uniform: a Python float per Formula (2.22), or 0 for odd order."""
+        For Uniform: a Python float per Formula (2.22), or 0 for odd order.
+        For Exponential: a symbolic `xi(order, kappa)` — odd orders do *not*
+        vanish since the standardized Exponential is asymmetric."""
         if self._distr_type == EDistrType.Gaussian:
             return zeta(order, self._kappa)
+        if self._distr_type == EDistrType.Exponential:
+            return xi(order, self._kappa)
         if order % 2 == 1:
             return 0
         # Formula (2.2) normalized: ζ(n, κ) = ∫z^n ρ dz / ∫ρ dz.

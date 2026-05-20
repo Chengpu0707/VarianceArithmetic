@@ -1,6 +1,8 @@
-"""Bounded moments for symmetric distributions used by Taylor expansion:
-abstract Moment base class with NormalMoment and Uniform implementations
-returning the moment table truncated by the bounding factor.
+"""Bounded moments for distributions used by Taylor expansion:
+abstract Moment base class with Normal, Uniform, and Exponential
+implementations returning the moment table truncated by the bounding factor.
+Normal and Uniform are symmetric (odd central moments vanish); Exponential
+is asymmetric (all odd central moments are nonzero).
 """
 import abc
 import datetime
@@ -232,6 +234,107 @@ class Uniform:
         return self._sMoment[n >> 1]
 
 
+class Exponential(Moment):
+    '''
+    Central moments of the standardized Exponential distribution truncated to
+    [ρ, κ] with the mean-reverting bounding condition ζ(1, κ) = 0.
+
+    Density on the standardized variable z = λx - 1 (where x ~ Exp(λ)):
+        ρ(z) = exp(-(1 + z))   for z ∈ [-1, ∞), 0 otherwise.
+    Mean-reverting bounding has the closed-form solution
+        a ≡ ρ + 1 = -W_0(-b · e^(-b))     where b = κ + 1
+    (W_0 is the principal Lambert W branch). For κ > 0, -b·e^(-b) ∈ (-1/e, 0),
+    where W_0 is real-valued in (-1, 0); the trivial root W_{-1}(...) = -b is
+    rejected.
+
+    With J_n(ρ, κ) = ∫_ρ^κ z^n exp(-(1+z)) dz, integration by parts unrolls into
+    a closed sum:
+        J_n = n! · [ e^(-a) · Σ_{j=0}^{n} ρ^j / j!  -  e^(-b) · Σ_{j=0}^{n} κ^j / j! ]
+        J_0 = e^(-a) - e^(-b)
+        μ_n(κ) = J_n / J_0
+    By construction μ_1(κ) = 0 (mean-reverting).
+
+    Unlike Normal/Uniform, the Exponential is *asymmetric*: ζ(odd, κ) ≠ 0 for
+    n ≥ 3. Callers that assume symmetric moments must be revised accordingly.
+    '''
+    __slots__ = ('_bounding', '_lower', '_sMoment', '_maxOrder')
+
+    @staticmethod
+    def _solveLower(b):
+        """Mean-reverting lower bound a = -W_0(-b·e^(-b)) ∈ (0, 1). Requires b > 1."""
+        if b <= 1.0:
+            raise ValueError(f'Exponential bounding must give b=κ+1 > 1; got b={b}')
+        w = scipy.special.lambertw(-b * math.exp(-b), k=0)
+        # For arg ∈ (-1/e, 0), W_0 is real; the imaginary part is numerical noise.
+        if abs(w.imag) > 1e-12 * max(abs(w.real), 1.0):
+            raise ValueError(f'Lambert W returned non-real value for b={b}: {w}')
+        return float(-w.real)
+
+    def __init__(self, bounding=15.0, maxOrder=256):
+        if bounding <= 0:
+            raise ValueError(f'bounding must be positive, got {bounding}')
+        self._bounding = bounding
+        b = bounding + 1.0
+        a = Exponential._solveLower(b)
+        self._lower = a - 1.0
+        rho = a - 1.0
+        kappa = bounding
+        e_neg_a = math.exp(-a)
+        e_neg_b = math.exp(-b)
+        norm = e_neg_a - e_neg_b
+        # Build μ_n from the closed-form J_n = n! · (e^(-a)·rho_sum - e^(-b)·kap_sum),
+        # where rho_sum and kap_sum are partial exponential series accumulated in-place.
+        sMoment = []
+        rho_sum = 0.0
+        kap_sum = 0.0
+        rho_j = 1.0     # ρ^j
+        kap_j = 1.0     # κ^j
+        fact_j = 1.0    # j!
+        n_fact = 1.0    # n!
+        for n in range(maxOrder + 1):
+            rho_sum += rho_j / fact_j
+            kap_sum += kap_j / fact_j
+            J_n = n_fact * (e_neg_a * rho_sum - e_neg_b * kap_sum)
+            mu_n = J_n / norm
+            if not math.isfinite(mu_n):
+                break
+            sMoment.append(mu_n)
+            rho_j *= rho
+            kap_j *= kappa
+            fact_j *= (n + 1)
+            n_fact *= (n + 1)
+        self._sMoment = sMoment
+        self._maxOrder = len(sMoment)
+
+    @property
+    def bounding(self):
+        return self._bounding
+
+    @property
+    def lower(self):
+        """Derived lower bound ρ in the standardized z-space, chosen by the
+        mean-reverting condition ζ(1, κ) = 0. Always in (-1, 0)."""
+        return self._lower
+
+    @property
+    def leakage(self):
+        # Two-sided: lower tail (1 - e^(-a)) plus upper tail e^(-b).
+        a = self._lower + 1.0
+        b = self._bounding + 1.0
+        return (1.0 - math.exp(-a)) + math.exp(-b)
+
+    @property
+    def maxOrder(self):
+        return self._maxOrder
+
+    def __getitem__(self, n:int) -> float:
+        if n < 0 or n >= self._maxOrder:
+            return IndexError()
+        return self._sMoment[n]
+
+
 NORMAL = Normal(bounding=5.0)
 
 UNIFORM = Uniform()
+
+EXPONENTIAL = Exponential()
