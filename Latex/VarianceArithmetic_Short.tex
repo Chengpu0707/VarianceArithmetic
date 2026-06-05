@@ -60,10 +60,10 @@
 \maketitle
 \begin{abstract}
 
-As a rigorous extension of conventional Taylor expansion, statistical Taylor expansion replaces precise input variables with random input variables of known distributions and sample counts, to compute the mean, deviation, and reliability of each result.
-This approach tracks the propagation of input uncertainties through intermediate steps, making the final result path-independent.
-As a result, it differs fundamentally from conventional approaches, which are usually path-dependent, and may serve as a unified standard for numerical computations of analytic expressions.
-This study further presents an implementation of statistical Taylor expansion called variance arithmetic, and demonstrates its performance across diverse mathematical applications.
+Statistical Taylor expansion is a rigorous extension of conventional Taylor expansion that replaces each precise input variable with a random variable of known distribution and sample count, then computes the mean, deviation, and reliability of every result.
+By tracking the propagation of input uncertainties through all intermediate steps, it renders the final result path-independent, and it validates that result either as a $+1$ error deviation or a $-1$ error slope.
+This path-independence sets it fundamentally apart from conventional numerical approaches, which are path-dependent, and may make statistical Taylor expansion a unified standard for the numerical computation of analytic expressions.
+To this end, this study presents an implementation called variance arithmetic and demonstrates its performance across diverse mathematical applications.
 
 This study also reveals the potentially substantial impact of numerical errors in library functions. 
 \ifdefined\Verbose
@@ -109,11 +109,16 @@ Conventional floating-point arithmetic \cite{Computer_Architecture}\cite{Floatin
 Because $f$ contains an unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be sufficient for inputs with $10^{-2}$ to $10^{-6}$ precision.
 However, statistical Taylor expansion can account for rounding errors as part of the result deviation $\delta f$.
 
-The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair and it tends to over-estimate the result uncertainty because of its worst-case assumption \cite{Prev_Precision_Arithmetic}.
-Conversely, statistical Taylor expansion is precise statistically.
+The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair and it tends to grossly over-estimate the result uncertainty because of its worst-case assumption \cite{Prev_Precision_Arithmetic}.
+Even the interval Taylor methods that bound the Taylor remainder with interval arithmetic, such as the Taylor model \cite{Taylor_Models} and the Taylor form \cite{Taylor_Forms_Limits}, inherit this over-estimation.
+Partitioning each input interval into $n$ pieces and taking the union of the per-piece results reduces the over-estimation of the natural interval extension at a linear rate of $O(1/n)$ \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}.
+However, for an expression in $d$ variables this requires $O(n^d)$ evaluations \cite{Interval_Global_Optimization}.
+The subdivision can also cause branched results, such as calculating square root for an input interval containing zero.
+In contrast, statistical Taylor expansion is precise statistically, and it diverges when the input precision is not fine enough, such as requiring the input precision to be finer than $1/\sqrt{3}$ for square root when the input is Uniform distributed.
 
 Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}\cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, which can make conventional numerical computation more an art than a science.
 In contrast, statistical Taylor expansion is path-independent.
+
 
 To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance arithmetic nature of its processor \cite{Prev_Precision_Arithmetic}.
 
@@ -564,6 +569,50 @@ Thus:
 \fi
 
 
+\iffalse
+Validate Formula \eqref{eqn: exponential asymptotic moment} of the tex using Formula \eqref{eqn: mean-reverting bounding}:
+
+Validation result
+
+Formula eqn: exponential asymptotic moment is valid as a leading-order asymptote, and the mean-reverting condition is exactly what licenses its clean form. Here is the derivation, and the precise sub-leading caveat the numerics expose.
+
+What must be shown
+
+For the standardized Exponential, $\rho(\tilde z)=e^{-(1+\tilde z)}$ on $\tilde z\ge -1$ (I verified mean $0$, variance $1$ — correctly standardized). The bound moment is the conditional moment
+$$\zeta(n,\kappa)=\frac{I_n}{D},\qquad I_n=\int_\varrho^\kappa \tilde z^n\rho(\tilde z),d\tilde z,\qquad D=\int_\varrho^\kappa\rho(\tilde z),d\tilde z=e^{-(1+\varrho)}-e^{-(1+\kappa)}.$$
+
+The derivation (the paper's route)
+
+For large $n$, $\tilde z^n$ concentrates the mass at the upper endpoint $\kappa$ (the integrand $e^{n\ln\tilde z-(1+\tilde z)}$ is increasing for $\tilde z<n$, so on $[\varrho,\kappa]$ its max is at $\kappa$). Approximating $\rho(\tilde z)\approx\rho(\kappa)$ there and integrating the monomial exactly:
+$$I_n\approx \rho(\kappa)\int_\varrho^\kappa \tilde z^n,d\tilde z=\rho(\kappa),\frac{\kappa^{n+1}-\varrho^{,n+1}}{n+1}.$$
+
+Now invoke eqn: mean-reverting bounding. The condition $\zeta(1,\kappa)=0$ reduces (as the text states) to
+$$(1+\varrho),e^{-(1+\varrho)}=(1+\kappa),e^{-(1+\kappa)}.$$
+As $\kappa$ grows, the right side $\to 0$, forcing $1+\varrho\to 0^+$, i.e. $\varrho\to -1^+$ (the support edge). This does two things at once:
+
+1. Kills the lower endpoint: $|\varrho|\le 1<\kappa$, so $\varrho^{,n+1}$ is negligible against $\kappa^{n+1}$ — drop it.
+2. Normalizes the denominator: $D=e^{-(1+\varrho)}-e^{-(1+\kappa)}\to e^{0}-0 = 1$.
+
+Together these give exactly
+$$\zeta(n,\kappa)=\frac{I_n}{D}\ \longrightarrow\ \rho(\kappa),\frac{\kappa^{n+1}}{n+1}. \qquad\checkmark$$
+
+This is also structurally consistent with eqn: symetric asymptotic moment: the symmetric case integrates $\tilde z^{2n}$ over both endpoints $\pm\kappa$ (factor 2), whereas the one-sided Exponential is dominated by the single endpoint $\kappa$ (factor 1) — which is exactly the difference between the two formulas.
+
+The numbers (and the honest caveat)
+
+A rigorous endpoint (Watson/Laplace) analysis sharpens the numerator to $I_n\sim\rho(\kappa),\kappa^{n+1}/n$, so the exact asymptote is
+$$\zeta(n,\kappa)\ \sim\ \frac{\rho(\kappa)}{D}\cdot\frac{\kappa^{n+1}}{n}.$$
+This differs from the stated RHS only in two sub-leading ways: the denominator is $n$ rather than $n{+}1$ (ratio $\to1$), and there is a normalization factor $1/D$ (which $\to1$ under mean-reverting). The high-precision check confirms both readings: the stated form converges to $1/D$, the sharpened form converges cleanly to $1$, each as $O(\kappa/n)$:
+
+
+Verdict
+
+Valid. Formula eqn: exponential asymptotic moment correctly captures the dominant behavior $\zeta(n,\kappa)\sim\rho(\kappa),\kappa^{n+1}/n$, and the mean-reverting condition eqn: mean-reverting bounding is precisely what makes the clean stated form hold: by pinning $\varrho\to-1$ it both removes the lower-endpoint term and sends the truncation factor $D\to1$. The only imprecisions are sub-leading — the $n{+}1$ vs $n$ denominator and the residual $1/D\to1$ — and neither affects the formula's purpose: the exponential growth rate $\kappa^{n}$ is what drives the convergence test in eqn: variance asymptotic, and that rate is exactly right.
+
+One small suggestion: since eqn: symetric asymptotic moment and this one are leading-order asymptotic equivalences (the RHS depends on $n$), the "$\lim_{n\to\infty}\zeta = \ldots$" notation is slightly loose — "$\zeta(n,\kappa)\sim\ldots$ as $n\to\infty$" would be more precise. Want me to adjust that notation in both formulas?
+
+\fi
+
 
 \ifdefined\Verbose
 \begin{figure}
@@ -575,6 +624,7 @@ The value of moment  $\zeta(2n)$ for Uniform distribution is also provided as an
 }
 \label{fig: Gaussian_5_Moment}
 \end{figure}
+\fi
 
 \begin{align}
 \label{eqn: uniform moment}
@@ -588,18 +638,10 @@ The value of moment  $\zeta(2n)$ for Uniform distribution is also provided as an
 \label{eqn: variance asymptotic}
 0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n + 1}}{n + 1};
 \end{align}
-\else
-\begin{align}
-\label{eqn: variance asymptotic}
-0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n + 1}}{n + 1};
-\end{align}
-\fi
-
-\ifdefined\Verbose
 Formula \eqref{eqn: uniform moment} gives the closed form of $\zeta(2n, \kappa)$ for the Uniform distribution.
-Formula \eqref{eqn: symetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$, with the prefactor $2 \rho(\kappa)$ given by the parent density at the boundary.
-Formula \eqref{eqn: exponential asymptotic moment} states the corresponding asymptote for the standardized Exponential distribution under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding}; the one-sided support yields a single prefactor $\rho(\kappa)$ rather than the symmetric $2 \rho(\kappa)$.
-For the Exponential, Formula \eqref{eqn: mean-reverting bounding} reduces to $(1+\varrho)\,e^{-(1+\varrho)} = (1+\kappa)\,e^{-(1+\kappa)}$, whose non-trivial root $\varrho \in (-1, 0)$ is paired with the user-chosen upper bound $\kappa > 0$.
+Formula \eqref{eqn: symetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$.
+Formula \eqref{eqn: exponential asymptotic moment} states the corresponding asymptote for the standardized Exponential distribution under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding} which reduces to $(1+\varrho)\,e^{-(1+\varrho)} = (1+\kappa)\,e^{-(1+\kappa)}, \varrho < 0, \kappa > 0$.
+\ifdefined\Verbose
 Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for the Uniform distribution, $\zeta(2n, 5)$ for the Normal distribution, and the corresponding asymptote for the Normal distribution.
 \fi
 Formula \eqref{eqn: variance asymptotic} shows that the general asymptotic behavior of $\zeta(n, \kappa)$ determines whether Formula \eqref{eqn: Taylor 1d variance} converges:
@@ -715,8 +757,89 @@ The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_
 
 \subsection{Dependency Tracing}
 
+\iffalse
+
+In your paper's notation, Formula eqn: sum variance gives the two-item case:
+$$\delta^2(f+g) = \delta^2 f + \delta^2 g + 2(\overline{fg} - \overline{f},\overline{g}).$$
+
+Three items
+
+$$\boxed{;\delta^2(f+g+h) = \delta^2 f + \delta^2 g + \delta^2 h + 2(\overline{fg}-\overline{f},\overline{g}) + 2(\overline{fh}-\overline{f},\overline{h}) + 2(\overline{gh}-\overline{g},\overline{h});}$$
+
+One self-variance per item, plus a covariance term for each of the three pairs.
+
+Derivation
+
+Let $S=f+g+h$ and use $\delta^2 S = \overline{S^2}-\overline{S}^2$.
+
+$$\overline{S^2} = \overline{f^2}+\overline{g^2}+\overline{h^2} + 2\overline{fg}+2\overline{fh}+2\overline{gh},$$
+$$\overline{S}^2 = \overline{f}^2+\overline{g}^2+\overline{h}^2 + 2\overline{f},\overline{g}+2\overline{f},\overline{h}+2\overline{g},\overline{h}.$$
+
+Subtracting and grouping each $\overline{\cdot^2}-\overline{\cdot}^2$ as a variance and each $\overline{\cdot\cdot}-\overline{\cdot},\overline{\cdot}$ as a covariance:
+$$\delta^2 S = \underbrace{(\overline{f^2}-\overline{f}^2)}{\delta^2 f}+\underbrace{(\overline{g^2}-\overline{g}^2)}{\delta^2 g}+\underbrace{(\overline{h^2}-\overline{h}^2)}_{\delta^2 h} + 2(\overline{fg}-\overline{f},\overline{g})+2(\overline{fh}-\overline{f},\overline{h})+2(\overline{gh}-\overline{g},\overline{h}).$$
+
+General pattern
+
+This is just bilinearity of variance applied to a sum:
+$$\delta^2!\Big(\sum_{i=1}^{n} f_i\Big) = \sum_{i=1}^{n}\delta^2 f_i ;+; 2!!\sum_{1\le i<j\le n}!!\big(\overline{f_i f_j} - \overline{f_i},\overline{f_j}\big).$$
+
+
+Can Formula {eqn: Taylor inner dependency} lead to Formula {eqn: Taylor 1d variance}?
+
+Yes — and it's an exact derivation, not just an analogy. Let me show it.
+
+The two formulas
+
+Target — eqn: Taylor 1d variance:
+$$\delta^2 f(x) = \sum_{N=2}^{\infty} (\delta x)^N \sum_{j=1}^{N-1} \frac{f^{(j)}_x}{j!}\frac{f^{(N-j)}_x}{(N-j)!}\Big(\zeta(N) - \zeta(j),\zeta(N-j)\Big)$$
+(I rename the outer index to $N$ to free up $n$.)
+
+Building block — eqn: Taylor inner dependency (the cross term of eqn: sum variance applied to two Taylor monomials):
+$$+,2,(\delta x)^{m+n}\frac{f^{(m)}_x f^{(n)}_x}{m!,n!}\big(\zeta(m+n) - \zeta(m)\zeta(n)\big)$$
+
+The bridge
+
+From eqn: Taylor 1d, $f$ is a sum of monomial terms in the normalized variable $\tilde z$ (mean 0, deviation 1), with $\overline{\tilde z^k} = \zeta(k)$:
+$$T_m \equiv \frac{f^{(m)}x}{m!}(\delta x)^m,\tilde z^m, \qquad f(x+\tilde z,\delta x) = f(x) + \sum{m\ge 1} T_m .$$
+
+Variance is a bilinear form, so the variance of the whole series is the double sum of covariances of its terms:
+$$\delta^2 f = \delta^2!\Big(\sum_{m\ge1} T_m\Big) = \sum_{m\ge1}\sum_{n\ge1}\operatorname{Cov}(T_m,T_n).$$
+
+Now read off the covariance kernel directly:
+$$\operatorname{Cov}(T_m,T_n) = \frac{f^{(m)}_x}{m!}\frac{f^{(n)}_x}{n!}(\delta x)^{m+n}\big(\overline{\tilde z^{m+n}} - \overline{\tilde z^m},\overline{\tilde z^n}\big) = (\delta x)^{m+n}\frac{f^{(m)}_x f^{(n)}_x}{m!,n!}\big(\zeta(m+n) - \zeta(m)\zeta(n)\big).$$
+
+That is exactly what eqn: Taylor inner dependency provides:
+- the off-diagonal $m\neq n$ piece is the cross term shown in eqn: Taylor inner dependency (the factor 2 there is just the symmetric pair $(m,n)+(n,m)$);
+- the diagonal $m=n$ piece is the self-variance $\delta^2 T_m = (\delta x)^{2m}(f^{(m)}_x/m!)^2(\zeta(2m)-\zeta(m)^2)$ — the two leading terms of eqn: sum variance.
+
+Regrouping reproduces the target
+
+Group the ordered double sum by total order $N = m+n$. For each $N\ge 2$ the admissible ordered pairs are $m = 1,\dots,N-1$ with $n = N-m$:
+$$\delta^2 f = \sum_{N=2}^{\infty}(\delta x)^N \sum_{m=1}^{N-1}\frac{f^{(m)}_x}{m!}\frac{f^{(N-m)}_x}{(N-m)!}\big(\zeta(N) - \zeta(m)\zeta(N-m)\big).$$
+
+With $j \equiv m$ this is character-for-character eqn: Taylor 1d variance. The bookkeeping checks out: the off-diagonal covariances appear twice in $\sum_{m=1}^{N-1}$ (once as $j=m$, once as $j=N-m$), recovering the factor 2; the diagonal $j=N/2$ (even $N$) appears once, as it should for a self-variance.
+
+Conclusion
+
+So eqn: Taylor inner dependency doesn't merely resemble a fragment of eqn: Taylor 1d variance — it is the generic pairwise covariance term, and summing it over all term pairs and regrouping by total order reconstructs eqn: Taylor 1d variance exactly.
+h
+\fi
+
+\begin{align}
+\delta^2 (f + g + h) &= \delta^2 f + \delta^2 g + \delta^2 h  \nonumber  \\ 
+\label{eqn: sum variance}
+	&+ 2 (\overline{fg} - \overline{f}\overline{g}) + 2 (\overline{fh} - \overline{f}\overline{h}) + 2 (\overline{gh} - \overline{g}\overline{h}); \\
+\delta^2 \left( \frac{f^{(m)}_x}{m!} \tilde{x}^m + \frac{f^{(n)}_x}{n!} \tilde{x}^n \right) &=
+    (\delta x)^{2m} (\frac{f^{(m)}_x }{m!})^2 \left(\zeta(2m) - \zeta(m)^2\right) 
+    	+ (\delta x)^{2n} (\frac{f^{(n)}_x }{n!})^2 \left(\zeta(2n) - \zeta(n)^2 \right)  \nonumber  \\
+\label{eqn: Taylor inner dependency}
+	&+ 2 (\delta x)^{m+n} \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \left(\zeta(m+n) - \zeta(m) \zeta(n) \right);
+\end{align}
+From the sum variance Formula \eqref{eqn: sum variance} \cite{Probability_Statistics}, Formula \eqref{eqn: Taylor inner dependency} decomposes and leads to Formula \eqref{eqn: Taylor 1d variance}.
+Because Formula \eqref{eqn: sum variance} comes from variance definition, Formula \eqref{eqn: Taylor 1d variance} does not contain dependence problem, in contrast to Taylor expansion using interval arithmetic \cite{Interval_Analysis}\cite{Taylor_Forms_Limits}.
+
 When all inputs satisfy the uncorrelated uncertainty condition, statistical Taylor expansion traces dependencies through the intermediate steps.
-For example, when the sample count $N$ is sufficiently large:
+Some typical examples of dependency tracing:
 \begin{itemize}
 \item The dependency tracing of $\delta^2 (f + g)$ is illustrated by $\delta^2 (f - f) = 0$, and $\delta^2 (f(x) + g(y)) = \delta^2 f + \delta^2 g$, with the latter corresponding to Formula \eqref{eqn: addition variance}.   
 
@@ -1000,13 +1123,15 @@ For the value test, the \emph{error slope}---defined as the slope of error devia
 \section{Polynomial}
 \label{sec: polynomial}
 
+\iffalse
 Formula \eqref{eqn: polynomial Taylor} presents polynomial Taylor expansion:
 \begin{align}
 \label{eqn: polynomial Taylor}
 \sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \quad
 	P_j \equiv \sum_{k=0}^{N-j} x^k c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{align}
-Because the variance computation via Formula (2.6) on Formula (5.1) requires moments up to order $2N$, $N$ in Formula \eqref{eqn: polynomial Taylor} can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
+\fi
+Because the variance computation for $N$-order polynomial requires moments up to order $2N$, $N$ can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
 
 \subsection{Residual Error}
 
@@ -1147,7 +1272,7 @@ Contrary to the conventional approach, statistical Taylor expansion uses Formula
 In Formula \eqref{eqn: inverse matrix}, $\mathbf{M}^{-1}$ is dominated by $1/|\mathbf{M}|$, suggesting that the precision of $\mathbf{M}^{-1}$ is largely determined by the precision of $|\mathbf{M}|$.
 Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that a strong linear correlation exists between condition numbers \cite{Linear_Algebra} and the corresponding determinant precision of the matrices.
 As a reference, Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} presents the Hilbert matrix \cite{Linear_Algebra} (which is the most unstable matrix in theory) for each matrix size and shows that the Hilbert matrices also follow the linear relation between determinant precision and condition number.
-In Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition}, adding small noise to a matrix does not change its conditional number, but increases result precision, so that determinant precision cannot replace matrix condition number.  
+In Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition}, adding noise to a matrix does not change its conditional number, while increases result precision because conceptually a matrix with larger uncertainty is less stable.  
 In fact, Formula \eqref{eqn: inverse matrix 2 variance} shows the stability of each matrix element, which may be a better characterization of matrix stability than the conditional number.
 
 
@@ -1390,6 +1515,7 @@ This result agrees with both theoretical formula \cite{Prev_Precision_Arithmetic
 }
 \label{fig: FFT_Unfaithful}
 \end{figure}
+\fi
 
 \begin{align}
 \label{eqn: Fourier forward}
@@ -1400,6 +1526,8 @@ h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{-\frac{i 2\pi}{N} n k};
 
 For each signal sequence $h[k]$, where $k = 0, 1 \dots  N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1 \dots  N-1$, along with its inverse transformation, is defined by Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse}, respectively \cite{Numerical_Recipes}.
 As a convention, $k$ denotes the \emph{time index} for $h[k]$ as a waveform, whereas $n$ represents the \emph{frequency index} for $H[n]$ as a spectrum.
+
+\ifdefined\Verbose
 
 However, DFT is not a faithful digital implementation of the continuous Fourier transform (FT) \cite{Numerical_Recipes}.
 For example, the FT spectrum of a sine function is a Delta function at the signal frequency $f$ with a phase $\pi/2$ \cite{Numerical_Recipes}.
@@ -1839,7 +1967,7 @@ In other cases, the average error deviations are close to $1$ while the error sl
 \section{Recursive Generation of Sine}
 \label{sec: recursion}
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[height=2.5in]{Regression_Sin.pdf}
 \captionof{figure}{
@@ -1877,26 +2005,21 @@ Conventional least-squares regression \cite{Statistical_Methods}\cite{Probabilit
 
 \subsection{Zeroth Order Regression}
 
-Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $f[0]$ such that the residual $R_0 \equiv \sum_{j} (X_j - f[0])^2 /N$ is minimized.
-The solution is $f[0] = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
+Suppose a data set contains $N$ samples $X_j, j = 1 \dots N$, to fit with a parameter $c_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - c_0)^2 /N$ is minimized.
+The solution is $c_0 = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
 
-Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th sub set.
-$(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the between-subset variance $(\overline{x_j} - \overline{x})^2$.
 \begin{align}
 \label{eqn: set mean}
 \overline{x} &= \sum_{j} \frac{N_j}{N} \overline{x_j}; \\
 \label{eqn: set variance}
 (\delta x)^2 &= \sum_{j} \frac{N_j}{N} \left( (\delta x_j)^2 +  (\overline{x_j} - \overline{x})^2 \right);
 \end{align}
+Suppose the data set of $N$ samples is partitioned into $J$ sub sets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th sub set.
+$(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the between-subset variance $(\overline{x_j} - \overline{x})^2$.
 
 
 \subsection{Regression Weight}
 
-If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
-The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 = 1/N_j$ holds only in expectation, and the solution with the smallest $|\varpi|$ is the most likely.
-The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
-Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, leaving the solution indeterminate due to insufficient information.
-When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is singular; in this case $\overline{x} = \overline{x_j}$ and $(\delta x)^2 = \sum_{j} (\delta x_j)^2 /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information on $N_j$.
 \begin{align}
 \label{eqn: set mean approx}
 \overline{x} &= \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
@@ -1905,6 +2028,12 @@ When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is si
 (\delta x)^2 &\simeq \frac{\sum_{j} \frac{(\delta x_j)^2}{(\overline{x_j} - \overline{x})^2}}
 		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \frac{1}{\frac{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}}{J}};
 \end{align}
+If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
+The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 = 1/N_j$ holds only in expectation, and the solution with the smallest $|\varpi|$ is the most likely.
+The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
+%Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, leaving the solution indeterminate due to insufficient information.
+When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is singular; in this case $\overline{x} = \overline{x_j}$ and $(\delta x)^2 = \sum_{j} (\delta x_j)^2 /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information on $N_j$.
+
 In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
 The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression lacks statistical justification.
 Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean} to \eqref{eqn: set variance approx} all permit such mixing.
@@ -1913,69 +2042,70 @@ Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise a
 \subsection{Linear Regression}
 
 \iffalse 
-Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
-$(\delta f[1])^2$ decreases with larger $(\delta x)^2$ as expected.
-Because $(\delta f[0])^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
+Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $c_1$ and $c_0$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
+$(\delta c_1)^2$ decreases with larger $(\delta x)^2$ as expected.
+Because $(\delta c_0)^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
 
 \begin{align}
 \label{eqn: set slope variance}
-&(\delta f[1])^2 = \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
+&(\delta c_1)^2 = \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
 \label{eqn: set intercept variance}
-&(\delta f[0])^2 = \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
+&(\delta c_0)^2 = \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
 \end{align}
 
 \fi
 
-Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = f[0] + f[1] X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - f[1] X_j - f[0])^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
-Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $f[1]$ and $f[0]$, respectively, which shows that $f[0]$ is derived from $f[1]$ and thus is worth no further discussion.
-Formula \eqref{eqn: set slope precision} shows that the precision of the slope $P(f[1])$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
-Whether $P(f[1])$ or $R^2$ is the better measure of goodness-of-fit is debatable.
 \begin{align}
 \label{eqn: set residual}
-R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - f[0] - f[1] X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
+R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - c_0 - c_1 X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
 \label{eqn: set slope}
-f[1] &= \frac{\nu(x,y)}{(\delta x)^2}; \\
+c_1 &= \frac{\nu(x,y)}{(\delta x)^2}; \\
 \label{eqn: set intercept}
-f[0]  &= \overline{y} - \overline{x} f[1]; \\
+c_0  &= \overline{y} - \overline{x} c_1; \\
 \label{eqn: set slope precision}
-P(f[1])^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
+P(c_1)^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
 \label{eqn: set R2}
 \frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
 \end{align}
+Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots N$, to fit with two parameters $Y_j = c_0 + c_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - c_1 X_j - c_0)^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
+Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $c_1$ and $c_0$, respectively, which shows that $c_0$ is derived from $c_1$ and thus is worth no further discussion.
+Formula \eqref{eqn: set slope precision} shows that the precision of the slope $P(c_1)$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
+Whether $P(c_1)$ or $R^2$ is the better measure of goodness-of-fit is debatable.
 
-Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, means $\overline{x_j}$ and $\overline{y_j}$, variances $(\delta x_j)^2$ and $(\delta y_j)^2$, and covariance $\nu(x,y)_j$.
-Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
-For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be zero, but all $N_j/N$ are required.
 \begin{align}
 \label{eqn: set cov}
 \nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
 \end{align}
+Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, means $\overline{x_j}$ and $\overline{y_j}$, variances $(\delta x_j)^2$ and $(\delta y_j)^2$, and covariance $\nu(x,y)_j$.
+Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
+For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be zero, but all $N_j/N$ are required.
+
 Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data set into sub sets in cluster analysis using Formula \eqref{eqn: set slope precision} as the standard.
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
-
-Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} are not invariant under swapping $x$ and $y$. 
-A swap-consistent regression (total least squares, geometric-mean regression, or Deming) \cite{Linear_Regression} is more appropriate when both variables carry uncertainty, which indicates a future development of regression using imprecise values.
 
 
 
 \subsection{Multi-Dimensional Linear Regression}
 
+\begin{align}
+\label{eqn: multi residual}
+R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - c_0 - \sum_{m=1}^{M} c_m\, X_{m,i}\right)^2 
+		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi slope}
+&\big(c_1, \dots, c_M\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi intercept}
+&c_0 = \overline{y} - \sum_{m=1}^{M} \overline{x_m}\, c_m; \\
+\label{eqn: multi slope cov}
+&\nu(c_m,\, c_n) = \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
+\end{align}
 The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
 Formula \eqref{eqn: multi residual} shows the residual definition and minimization.
-Formula \eqref{eqn: multi slope} provides the solution for $f[m]$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
+Formula \eqref{eqn: multi slope} provides the solution for $c_m$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
+Formula \eqref{eqn: multi intercept} gives the intercept $c_0$, generalizing Formula \eqref{eqn: set intercept}.
 Formula \eqref{eqn: multi slope cov} is the slope covariance, which shows that slopes from different dimensions may be mutually dependent. 
 Such dependency makes slopes sensitive to small changes in input data.
 It can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
-\begin{align}
-\label{eqn: multi residual}
-R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - f[0] - \sum_{m=1}^{M} f[m]\, X_{m,i}\right)^2 
-		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi slope}
-&\big(f[1], \dots, f[M]\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi slope cov}
-&\nu(f[m],\, f[n]) = \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
-\end{align}
 
 When $\mathbf{C}$ and $\boldsymbol{\nu}$ are assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
 If $x$ is replaced with $x_m$,  Formula \eqref{eqn: set cov} gives correct assembly for $\boldsymbol{\nu}$.
@@ -1986,70 +2116,58 @@ If $y$ is further replaced with $x_n$,  Formula \eqref{eqn: set cov} yields corr
 \subsection{Polynomial Regression}
 
 \iffalse
+\begin{align*}
+\hat{y}(x) &= \sum_{p=0}^{P} c_p\, x^p; \\
+0 &= (x_i - X_i) + \left( \hat{y}(x_i) - Y_i \right) \frac{d \hat{y}(x_i)}{d x_i}; \\
+C &= (x_i - X_i)^2 + \left( \hat{y}(x_i) - Y_i \right)^2;
+\end{align*}
+\fi
 
-For $n = 0$, Formula \eqref{eqn: multi intercept} rearranges to $\sum_{p=0}^{P} f[p]\, \overline{x^p} = \overline{y}$, which is Formula \eqref{eqn: poly normal} at $n = 0$.
-For $n = 1, \dots, P$, substituting Formula \eqref{eqn: multi intercept} for $f[0]$ in the left-hand side of Formula \eqref{eqn: poly normal} and applying Formulas \eqref{eqn: multi slope} and \eqref{eqn: poly nu} gives Formula \eqref{eqn: poly normal from multi}.
 \begin{align}
+\label{eqn: poly residual def}
+R_P &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - \sum_{p=0}^{P} c_p\, X_i^p)^2; \\
+\label{eqn: poly normal}
+&\sum_{p=0}^{P} c_p\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
+\end{align}
+Conventionally, polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} c_p\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $c_p$ \cite{Numerical_Recipes}.
+Differentiating $R_P$ with respect to each $c_n$ yields Equation \eqref{eqn: poly normal}.
+
+The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
+Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
+\iffalse
+For $n = 0$, the intercept Formula \eqref{eqn: multi intercept} with $x_m = x^m$ rearranges to $\sum_{p=0}^{P} c_p\, \overline{x^p} = \overline{y}$, which is Formula \eqref{eqn: poly normal} at $n = 0$ (using $\overline{x^0} = 1$).
+For $n = 1, \dots, P$, splitting the $p = 0$ term from the left side of Formula \eqref{eqn: poly normal}, substituting that intercept, and applying the slope solution \eqref{eqn: multi slope} with the polynomial covariances of Formula \eqref{eqn: poly nu} recovers Formula \eqref{eqn: poly normal}, as Formula \eqref{eqn: poly normal from multi} shows:
+\begin{align}
+\label{eqn: poly nu}
+C_{np} &\equiv \nu(x^n, x^p) = \overline{x^{n+p}} - \overline{x^n}\,\overline{x^p}, \qquad
+\nu_n \equiv \nu(x^n, y) = \overline{x^n y} - \overline{x^n}\,\overline{y}; \\
 \label{eqn: poly normal from multi}
-\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}}
-&= \overline{x^n}\,\overline{y} + \sum_{p=1}^{P} f[p]\, C_{np}
+\sum_{p=0}^{P} c_p\, \overline{x^{p+n}}
+&= \overline{x^n}\,\overline{y} + \sum_{p=1}^{P} c_p\, C_{np}
 = \overline{x^n}\,\overline{y} + \nu_n
 = \overline{x^n y}, \quad n = 1, \dots, P;
 \end{align}
-
 \fi
+This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ are independent, which is not valid conceptually.
 
-
-Because of the inter-dependency between $x^m$ and $x^n$, it seems that polynomial regression should not exist in general.
-
-Polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} f[p]\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $f[p]$.
-Differentiating $R_P$ with respect to each $f[n]$ yields Equation \eqref{eqn: poly normal}.
 \begin{align}
-\label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - \sum_{p=0}^{P} f[p]\, X_i^p)^2; \\
-\label{eqn: poly normal}
-&\sum_{p=0}^{P} f[p]\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; 
+\label{eqn: poly perp foot}
+0 &= (x_i - X_i) + \left( \sum_{p=0}^{P} c_p\, x_i^p -  Y_i \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}; \\
+\label{eqn: tls slope}
+c_1 &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2}}{2\,\nu(x,y)}; \\
+\label{eqn: tls slope variance}
+\delta c_1 &= \frac{1}{\sqrt{N}} \sqrt{ \frac{(1 + c_1^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}};
 \end{align}
-The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
-Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
+The correct approach is to minimize the square distance between $(X_i, Y_i)$ and a point $(x_i, y_i)$ on the polynomial, to result in Equation \eqref{eqn: poly perp foot}. 
+When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} shows that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller absolute slope values \cite{Linear_Regression}.
 
-Because $x^m$ and $x^n$ are not independent of each other, $|(\mathbf{C}^{-1})_{mn}|$ is generally significant.
-For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that polynomial regression should be carried out in a coordinate with $\overline{x} = 0$.
+However, because Equation \eqref{eqn: poly perp foot} has no general solution when the polynomial power $P$ is larger than $2$, Equation \eqref{eqn: poly normal} is used for general polynomial regression.
+This compromise of false independence introduces dependence problem into the regression.
+For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
 
 
 
-\iffalse
-
-\subsection{Symmetric Linear Regression}
-
-The total-least-squares fit minimizes the squared perpendicular distance from each sample $(X_j, Y_j)$ to the line $Y_j = f[0] + f[1] X_j$, yielding the residual in Formula \eqref{eqn: tls residual def}.
-\begin{align}
-\label{eqn: tls residual def}
-R_1^{\perp} &\equiv \frac{1}{N(1 + f[1]^2)} \sum_j (Y_j - f[1] X_j - f[0])^2;
-\end{align}
-Setting $\partial R_1^{\perp}/\partial f[0] = 0$ recovers the OLS intercept Formula \eqref{eqn: set intercept}; setting $\partial R_1^{\perp}/\partial f[1] = 0$ yields the quadratic Formula \eqref{eqn: tls slope quadratic}, whose root with $\mathrm{sign}(f[1]) = \mathrm{sign}(\nu(x,y))$ is the slope Formula \eqref{eqn: tls slope}.
-The minimum residual Formula \eqref{eqn: tls residual} retains the OLS form $R_1^{\perp} = (\delta y)^2 - f[1]\, \nu(x,y)$ but with $f[1]$ from Formula \eqref{eqn: tls slope} rather than Formula \eqref{eqn: set slope}.
-The slope variance Formula \eqref{eqn: tls slope variance} follows from principal-axis perturbation theory, $(\delta f[1])^2 = (1 + f[1]^2)^2\, \lambda_+ \lambda_-/(N\,(\lambda_+ - \lambda_-)^2)$, with the Jacobian factor $(1 + f[1]^2)^2$ converting the principal-angle variance into slope variance.
-\begin{align}
-\label{eqn: tls slope quadratic}
-0 &= \nu(x,y)\, f[1]^2 + ((\delta x)^2 - (\delta y)^2)\, f[1] - \nu(x,y); \\
-\label{eqn: tls slope}
-f[1] &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2}}{2\,\nu(x,y)}; \\
-\label{eqn: tls residual}
-R_1^{\perp} &= (\delta y)^2 - f[1]\, \nu(x,y)
-= \frac{(\delta x)^2 + (\delta y)^2 - \sqrt{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}}{2}; \\
-\label{eqn: tls slope variance}
-(\delta f[1])^2 &= \frac{(1 + f[1]^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{N\, \bigl(((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2\bigr)};
-\end{align}
-$R_1^{\perp}$ is the smaller eigenvalue $\lambda_-$ of the covariance matrix $\bigl(\begin{smallmatrix}(\delta x)^2 & \nu(x,y) \\ \nu(x,y) & (\delta y)^2\end{smallmatrix}\bigr)$, while $\lambda_+ = (\delta x)^2 + (\delta y)^2 - R_1^{\perp}$ is the variance along the fitted line; the slope direction $(1, f[1])$ is the eigenvector of $\lambda_+$.
-The numerator $(\delta x)^2 (\delta y)^2 - \nu(x,y)^2 = \lambda_+ \lambda_-$ vanishes at perfect correlation, where $f[1]$ is determined exactly and $(\delta f[1])^2 \to 0$.
-When $(\delta x)^2 = (\delta y)^2$, Formula \eqref{eqn: tls slope} reduces to $f[1] = \mathrm{sign}(\nu(x,y))$, the $45^{\circ}$ line through the centroid.
-
-Under the $x \leftrightarrow y$ swap, $\nu(x,y)$ is unchanged while $(\delta x)^2$ and $(\delta y)^2$ exchange, so Formula \eqref{eqn: tls slope quadratic} becomes $\nu(x,y)\, b'^2 - ((\delta x)^2 - (\delta y)^2)\, b' - \nu(x,y) = 0$.
-Substituting $b' = 1/f[1]$ and multiplying by $f[1]^2$ recovers Formula \eqref{eqn: tls slope quadratic}, so the swapped TLS slope is $1/f[1]$ --- the fitted line is the same in $(x, y)$ space regardless of which variable is treated as the predictor.
-
-\fi
 
 
 
@@ -2262,6 +2380,21 @@ A.~Neumaier S.M. Rump S.P.~Shary B.~Kearfott, M. T.~Nakao and P.~Van
 C.~P. Wang.
 \newblock A new uncertainty-bearing floating-point arithmetic.
 \newblock {\em Reliable Computing}, 16:308--361, 2012.
+
+\bibitem{Taylor_Models}
+K.~Makino and M.~Berz.
+\newblock Taylor models and other validated functional inclusion methods.
+\newblock {\em International Journal of Pure and Applied Mathematics}, 4:379--456, 2003.
+
+\bibitem{Taylor_Forms_Limits}
+A.~Neumaier.
+\newblock Taylor forms---use and limits.
+\newblock {\em Reliable Computing}, 9:43--79, 2003.
+
+\bibitem{Interval_Global_Optimization}
+E.~Hansen and G.W. Walster.
+\newblock {\em Global Optimization Using Interval Analysis}.
+\newblock Marcel Dekker, 2nd edition, 2004.
 
 \bibitem{Stochastic_Arithmetic}
 J.~Vignes.
