@@ -1884,7 +1884,7 @@ The FFT order is $18$.
 \label{fig: FFT_Linear_1e-3_Histo_Lib}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}
 \centering
 \includegraphics[height=2.5in]{FFT_Linear_1e-3_vs_Order_Lib.pdf} 
 \captionof{figure}{
@@ -2115,11 +2115,19 @@ If $y$ is further replaced with $x_n$,  Formula \eqref{eqn: set cov} yields corr
 
 \subsection{Polynomial Regression}
 
+
 \iffalse
 \begin{align*}
 \hat{y}(x) &= \sum_{p=0}^{P} c_p\, x^p; \\
-0 &= (x_i - X_i) + \left( \hat{y}(x_i) - Y_i \right) \frac{d \hat{y}(x_i)}{d x_i}; \\
-C &= (x_i - X_i)^2 + \left( \hat{y}(x_i) - Y_i \right)^2;
+D_i^2 &= (x_i - X_i)^2 + \left( \hat{y}(x_i) - Y_i \right)^2 = (x_i - X_i)^2 \big(1 + \frac{1}{\left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \right)^2} \big); \\
+0 &= \frac{d D_i^2}{d x_i} = (x_i - X_i) + \left( \hat{y}(x_i) - Y_i \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}; \\
+0 &= \frac{\partial \frac{d D_i^2}{d x_i}}{\partial c_j} 
+		=  \frac{\partial x_i}{\partial c_j} + \left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \frac{\partial x_i}{\partial c_j} + x_i^j \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}
+		+ \left( \sum_{p=0}^{P} c_p\, x_i^p - Y_i \right) \left( \sum_{p=2}^{P} c_p p(p - 1)\, x_i^{p - 2} \frac{\partial x_i}{\partial c_j} + c_j j x_i^{j-1} \right); \\
+0 &= \frac{\partial \frac{d D_i^2}{d x_i}}{\partial c_0} 
+		= \frac{\partial x_i}{\partial c_0} + \left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \frac{\partial x_i}{\partial c_j} + 1 \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}
+		+ \left( \sum_{p=0}^{P} c_p\, x_i^p - Y_i \right) \left( \sum_{p=2}^{P} c_p p(p - 1)\, x_i^{p - 2} \frac{\partial x_i}{\partial c_j} \right); \\
+0 &= \sum_{i=1}^{N} \frac{\partial D_i^2}{\partial c_j} =
 \end{align*}
 \fi
 
@@ -2148,7 +2156,8 @@ C_{np} &\equiv \nu(x^n, x^p) = \overline{x^{n+p}} - \overline{x^n}\,\overline{x^
 = \overline{x^n y}, \quad n = 1, \dots, P;
 \end{align}
 \fi
-This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ are independent, which is not valid conceptually.
+This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ obey the uncorrelated uncertainty condition, which is incorrect conceptually.
+This example shows that statistical Taylor expansion may impose stronger mathematical constraints.
 
 \begin{align}
 \label{eqn: poly perp foot}
@@ -2159,12 +2168,12 @@ c_1 &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2
 \delta c_1 &= \frac{1}{\sqrt{N}} \sqrt{ \frac{(1 + c_1^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}};
 \end{align}
 The correct approach is to minimize the square distance between $(X_i, Y_i)$ and a point $(x_i, y_i)$ on the polynomial, to result in Equation \eqref{eqn: poly perp foot}. 
-When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} shows that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller absolute slope values \cite{Linear_Regression}.
+When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} shows that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller $|c_1|$ by ignoring errors of $X_i$ \cite{Linear_Regression}.
 
 However, because Equation \eqref{eqn: poly perp foot} has no general solution when the polynomial power $P$ is larger than $2$, Equation \eqref{eqn: poly normal} is used for general polynomial regression.
-This compromise of false independence introduces dependence problem into the regression.
+This compromise introduces dependence problem in the regression.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
-These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be resolved by orthogonal transformations under restricted conditions}.
+These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
 
 
 
