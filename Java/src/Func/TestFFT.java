@@ -27,6 +27,7 @@ import Stats.Histogram;
 import Stats.Noise;
 import Stats.Stat;
 import Type.InitException;
+import Type.Interval;
 import Type.NotFiniteException;
 import Type.NotMonotonicException;
 import Type.NotPositiveException;
@@ -150,12 +151,18 @@ class Measure {
 
     final Map<TestType, Stat> sUncertainty = new HashMap<>();
     final Map<TestType, Stat> sValue = new HashMap<>();
+    final Map<TestType, Stat> sRange = new HashMap<>();
+    final Map<TestType, Stat> sUncRatio = new HashMap<>();
+    final Map<TestType, Stat> sRangeRatio = new HashMap<>();
     final Map<TestType, Histogram> sHisto = new HashMap<>();
 
     Measure() {
         for (TestType test: TestType.values()) {
             sUncertainty.put(test, new Stat());
             sValue.put(test, new Stat());
+            sRange.put(test, new Stat());
+            sUncRatio.put(test, new Stat());
+            sRangeRatio.put(test, new Stat());
             sHisto.put(test, new Histogram(BINDING, DIVIDS));
         }
     }
@@ -164,6 +171,7 @@ class Measure {
 
 class FFT_Order extends FFT_Signal {
     static final double NORMALIZED_ERROR_OUTLIER = 1e14;
+    static final double SQRT3 = Math.sqrt(3.0);
     static final Map<Integer, Map<NoiseType, Map<Double, Map<SinSource, Measure>>>> ssssAggr = new HashMap<>();
 
     final Measure measure = new Measure();
@@ -176,6 +184,19 @@ class FFT_Order extends FFT_Signal {
     final VarDbl[] sFwrd, sBack;
     final VarDbl[] sSpec, sRound, sRev;
     final VarDbl[][] ssSpecStep, ssRoundStep, ssRevStep;
+    final Interval[] sSpec_intv, sRound_intv, sRev_intv;
+
+    // Half-width of input interval centered on clean value.
+    //   Gaussian, dev>0:  5*dev (5-sigma rule)
+    //   White,    dev>0:  sqrt(3)*dev (full Uniform support)
+    //   dev==0:           Math.ulp(value)
+    static double intervalBound(NoiseType nt, double noise, double cleanValue) {
+        if (noise <= 0) {
+            final double u = Math.ulp(cleanValue);
+            return (u > 0.0) ? u : Double.MIN_NORMAL;
+        }
+        return (nt == NoiseType.Gaussian) ? 5.0 * noise : SQRT3 * noise;
+    }
 
     FFT_Order(FFT_Signal signal, NoiseType noiseType, double noise, boolean traceSteps) 
             throws InitException, IOException, 
@@ -186,7 +207,7 @@ class FFT_Order extends FFT_Signal {
 
         sFwrd = new VarDbl[size << 1];
         sBack = new VarDbl[size << 1];
-        for (int i = 0; i < (size << 1); ++i) { 
+        for (int i = 0; i < (size << 1); ++i) {
             if (noise == 0) {
                 sFwrd[i] = new VarDbl(sWave[i]);
                 sBack[i] = new VarDbl(sFreq[i]);
@@ -195,6 +216,21 @@ class FFT_Order extends FFT_Signal {
                 sBack[i] = new VarDbl(sFreq[i]).addInPlace(new VarDbl(getNoise(), noise));
             }
         }
+
+        // Deterministic interval-arithmetic FFT (clean-wave centered).
+        final Interval[] sFwrd_intv = new Interval[size << 1];
+        final Interval[] sBack_intv = new Interval[size << 1];
+        for (int i = 0; i < (size << 1); ++i) {
+            final double w = sWave[i].value();
+            final double s = sFreq[i].value();
+            sFwrd_intv[i] = new Interval(w - intervalBound(noiseType, noise, w),
+                                          w + intervalBound(noiseType, noise, w));
+            sBack_intv[i] = new Interval(s - intervalBound(noiseType, noise, s),
+                                          s + intervalBound(noiseType, noise, s));
+        }
+        sSpec_intv  = fft.transform(sFwrd_intv, true);
+        sRev_intv   = fft.transform(sBack_intv, false);
+        sRound_intv = fft.transform(sSpec_intv, false);
 
         sSpec = fft.transform(sFwrd, true, traceSteps);
         if (traceSteps) {
@@ -247,9 +283,12 @@ class FFT_Order extends FFT_Signal {
         this.aggr = aggr;
 
         for (int i = 0; i < (size << 1); ++i) {
-            accum(TestType.Forward, sSpec[i], sFreq[i], traceSteps? ssSpecStep[order + FFT.EXTRA_STEPS - 1] : null, i);
-            accum(TestType.Roundtrip, sRound[i], sFwrd[i], traceSteps? ssRoundStep[order + FFT.EXTRA_STEPS - 1] : null, i);
-            accum(TestType.Reverse, sRev[i], sWave[i], traceSteps? ssRevStep[order + FFT.EXTRA_STEPS - 1] : null, i);
+            accum(TestType.Forward, sSpec[i], sFreq[i], sSpec_intv[i].rad(),
+                  traceSteps? ssSpecStep[order + FFT.EXTRA_STEPS - 1] : null, i);
+            accum(TestType.Roundtrip, sRound[i], sFwrd[i], sRound_intv[i].rad(),
+                  traceSteps? ssRoundStep[order + FFT.EXTRA_STEPS - 1] : null, i);
+            accum(TestType.Reverse, sRev[i], sWave[i], sRev_intv[i].rad(),
+                  traceSteps? ssRevStep[order + FFT.EXTRA_STEPS - 1] : null, i);
         }
     }
 
@@ -270,21 +309,26 @@ class FFT_Order extends FFT_Signal {
         }
     }
 
-    private void accum(final TestType test, final VarDbl actual, final VarDbl exptected,  
-                       final VarDbl sStep[], int index) 
+    private void accum(final TestType test, final VarDbl actual, final VarDbl exptected,
+                       double range, final VarDbl sStep[], int index)
             throws InitException {
         final VarDbl err = actual.minus(exptected);
-        accum(test, actual, err, index, measure);
+        accum(test, actual, err, range, index, measure);
         if (aggr != null)
-            accum(test, actual, err, index, aggr);
+            accum(test, actual, err, range, index, aggr);
         if (sStep != null)
             sStep[index] = err;
     }
 
-    private void accum(final TestType test, final VarDbl actual, final VarDbl error, int index,
-            final Measure measure) {
+    private void accum(final TestType test, final VarDbl actual, final VarDbl error,
+                       double range, int index, final Measure measure) {
         measure.sUncertainty.get(test).accum(actual.uncertainty(), index);
         measure.sValue.get(test).accum(error.value(), index);
+        measure.sRange.get(test).accum(range, index);
+        if (actual.uncertainty() > 0)
+            measure.sUncRatio.get(test).accum(range / actual.uncertainty(), index);
+        if (range > 0)
+            measure.sRangeRatio.get(test).accum(Math.abs(error.value()) / range, index);
         if (error.uncertainty() > 0) {
             final double norm = error.value()/error.uncertainty();
             if (Math.abs(norm) < NORMALIZED_ERROR_OUTLIER) 
@@ -295,24 +339,30 @@ class FFT_Order extends FFT_Signal {
         }
     }
 
+    static private void writeStat(FileWriter fw, Stat s) throws IOException {
+        fw.write(String.format("\t%d\t%.15e\t%.15e\t%.15e\t%d\t%.15e\t%d",
+                s.count(), s.avg(), s.dev(), s.min(), s.minAt(), s.max(), s.maxAt()));
+    }
+
     static private void dump(final FileWriter fw, SinSource sinSource, NoiseType noiseType, double noise,
               SignalType signal, int order, int freq, final Measure measure) throws IOException {
         for (TestType test: TestType.values()) {
-            fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s", 
+            fw.write(String.format("%s\t%s\t%.1e\t%s\t%d\t%d\t%s",
                      sinSource, noiseType, noise, signal, order, freq, test));
-            Stat stat = measure.sUncertainty.get(test);
-            fw.write(String.format("\t%d\t%.15e\t%.15e\t%.15e\t%d\t%.15e\t%d", 
-                    stat.count(), stat.avg(), stat.dev(), stat.min(), stat.minAt(), stat.max(), stat.maxAt()));
-            stat = measure.sValue.get(test);
-            fw.write(String.format("\t%d\t%.15e\t%.15e\t%.15e\t%d\t%.15e\t%d", 
-                    stat.count(), stat.avg(), stat.dev(), stat.min(), stat.minAt(), stat.max(), stat.maxAt()));
+            writeStat(fw, measure.sUncertainty.get(test));   // header "Uncertainty"
+            writeStat(fw, measure.sValue.get(test));         // header "Value"
+            // header "Error" — keep emitting histo stats here (pre-existing layout)
             final Histogram histo = measure.sHisto.get(test);
-            fw.write(String.format("\t%d\t%.15e\t%.15e\t%.15e\t%d\t%.15e\t%d", 
-                    histo.stat().count(), histo.stat().avg(), histo.stat().dev(), histo.stat().min(), histo.stat().minAt(), histo.stat().max(), histo.stat().maxAt()));
+            fw.write(String.format("\t%d\t%.15e\t%.15e\t%.15e\t%d\t%.15e\t%d",
+                    histo.stat().count(), histo.stat().avg(), histo.stat().dev(),
+                    histo.stat().min(), histo.stat().minAt(), histo.stat().max(), histo.stat().maxAt()));
+            writeStat(fw, measure.sRange.get(test));         // header "Range"
+            writeStat(fw, measure.sUncRatio.get(test));      // header "Uncertainty Ratio"
+            writeStat(fw, measure.sRangeRatio.get(test));    // header "Range Ratio"
             fw.write(String.format("\t%d\t%d", histo.lower(), histo.upper()));
             final double[] sHisto = histo.histo();
             if (sHisto != null) {
-                for (int i = 0; i < sHisto.length; ++i) 
+                for (int i = 0; i < sHisto.length; ++i)
                     fw.write(String.format("\t%.6g", sHisto[i]));
             }
             fw.write("\n");
@@ -334,9 +384,12 @@ class FFT_Order extends FFT_Signal {
                 "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Minimum At\tUncertainty Maximum\tUncertainty Maximum At" +
                 "\tValue Count\tValue Mean\tValue Deviation\tValue Minimum\tValue Minimum At\tValue Maximum\tValue Maximum At" +
                 "\tError Count\tError Mean\tError Deviation\tError Minimum\tError Minimum At\tError Maximum\tError Maximum At" +
+                "\tRange Count\tRange Mean\tRange Deviation\tRange Minimum\tRange Minimum At\tRange Maximum\tRange Maximum At" +
+                "\tUncertainty Ratio Count\tUncertainty Ratio Mean\tUncertainty Ratio Deviation\tUncertainty Ratio Minimum\tUncertainty Ratio Minimum At\tUncertainty Ratio Maximum\tUncertainty Ratio Maximum At" +
+                "\tRange Ratio Count\tRange Ratio Mean\tRange Ratio Deviation\tRange Ratio Minimum\tRange Ratio Minimum At\tRange Ratio Maximum\tRange Ratio Maximum At" +
                 "\tLower Count\tUpper Count");
         for (int i = - Measure.BINDING * Measure.DIVIDS; i <= Measure.BINDING * Measure.DIVIDS; ++i) {
-            hdrBuilder.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));  
+            hdrBuilder.append(String.format("\t%.1f", ((double) i) / Measure.DIVIDS));
         }
         return hdrBuilder.toString();
     }

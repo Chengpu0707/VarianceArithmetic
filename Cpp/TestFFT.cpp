@@ -5,6 +5,7 @@ extremely slow unoptimized — build with -O3 -march=native (~3 hours full).
 */
 #include "Test.h"
 #include "TestFFT.h"
+#include "Interval.h"
 #include "ulp.h"
 
 #if __cplusplus >= 201103L
@@ -25,6 +26,25 @@ extremely slow unoptimized — build with -O3 -march=native (~3 hours full).
 #include <vector>
 
 using namespace var_dbl;
+
+namespace {
+constexpr double SQRT3 = 1.7320508075688772;
+
+// Half-width of the input interval centered on the clean value.
+//   Gaussian: 5*dev (5-sigma rule)
+//   White (Uniform): sqrt(3)*dev (full support of unit-variance uniform)
+//   dev=0: ulp(value), floored at MIN_NORMAL.
+inline double intervalBound(int noiseType, double noise, double cleanValue)
+{
+    if (noise <= 0) {
+        const double u = ulp(cleanValue);
+        return (u > 0.0) ? u : std::numeric_limits<double>::min();
+    }
+    // FFT_Order::Gaussian == 0, White == 1
+    return (noiseType == 0) ? 5.0 * noise : SQRT3 * noise;
+}
+
+}  // anonymous namespace
 
 void validate(const std::vector<VarDbl>& sExpected, const std::vector<VarDbl>& sRes, double delta = 0) {
     test::assertEqual( sExpected.size(), sRes.size());
@@ -273,13 +293,24 @@ double FFT_Order::getNoise(Random& rand) const
     }
 }
 
-void FFT_Order::accum(TestType testType, size_t index, const VarDbl& res, const VarDbl& err, bool hasAggr)
+void FFT_Order::accum(TestType testType, size_t index, const VarDbl& res, const VarDbl& err,
+                       double range, bool hasAggr)
 {
     measure.sUncStat[testType].addAt(res.uncertainty(), index);
     measure.sErrStat[testType].addAt(err.value(), index);
+    measure.sRangeStat[testType].addAt(range, index);
+    if (res.uncertainty() > 0)
+        measure.sUncRatioStat[testType].addAt(range / res.uncertainty(), index);
+    if (range > 0)
+        measure.sRangeRatioStat[testType].addAt(std::abs(err.value()) / range, index);
     if (hasAggr) {
         aggr().sUncStat[testType].addAt(res.uncertainty(), index);
         aggr().sErrStat[testType].addAt(err.value(), index);
+        aggr().sRangeStat[testType].addAt(range, index);
+        if (res.uncertainty() > 0)
+            aggr().sUncRatioStat[testType].addAt(range / res.uncertainty(), index);
+        if (range > 0)
+            aggr().sRangeRatioStat[testType].addAt(std::abs(err.value()) / range, index);
     }
     if (err.uncertainty() > 0) {
         const double norm = err.value() / err.uncertainty();
@@ -311,10 +342,27 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
 		oss << "Unknown noise type " << noiseType;
 		throw std::invalid_argument(oss.str());
 	}
-	Random rand(0, noise);      
+	Random rand(0, noise);
 
 	sFrwd.reserve(size << 1);
 	sBack.reserve(size << 1);
+
+	// Deterministic interval-arithmetic FFT: clean-wave-centered intervals
+	// with half-width = intervalBound(noiseType, noise, value).  Computed
+	// once per cell (does not depend on the Monte-Carlo noise sample).
+	std::vector<Interval> sFrwd_intv(size << 1), sBack_intv(size << 1);
+	for (size_t i = 0; i < (size_t)(size << 1); ++i) {
+		const double w = sWave[i].value();
+		const double s = sFreq[i].value();
+		sFrwd_intv[i] = Interval(w - intervalBound((int)noiseType, noise, w),
+								  w + intervalBound((int)noiseType, noise, w));
+		sBack_intv[i] = Interval(s - intervalBound((int)noiseType, noise, s),
+								  s + intervalBound((int)noiseType, noise, s));
+	}
+	const std::vector<Interval> sSpec_intv  = transform<Interval>(sFrwd_intv, true);
+	const std::vector<Interval> sRev_intv   = transform<Interval>(sBack_intv, false);
+	const std::vector<Interval> sRound_intv = transform<Interval>(sSpec_intv, false);
+
     do {
         sFrwd.clear();
         sBack.clear();
@@ -339,17 +387,17 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
             ssRevStep.push_back(std::vector<VarDbl>());
         }
         const bool hasAggr = (signalType == Sin) || (signalType == Cos);
-        for (size_t i = 0; i < (size << 1); ++i) { 
+        for (size_t i = 0; i < (size << 1); ++i) {
             const VarDbl errSpec = sSpec[i] - sFreq[i];
-            accum(Forward, i, sSpec[i], errSpec, hasAggr);
+            accum(Forward, i, sSpec[i], errSpec, sSpec_intv[i].rad(), hasAggr);
             if (traceSteps)
                 ssSpecStep.back().push_back(errSpec);
             const VarDbl errRound = sRound[i] - sFrwd[i];
-            accum(Roundtrip, i, sRound[i], errRound, hasAggr);
+            accum(Roundtrip, i, sRound[i], errRound, sRound_intv[i].rad(), hasAggr);
             if (traceSteps)
                 ssRoundStep.back().push_back(errRound);
             const VarDbl errRev = sRev[i] - sWave[i];
-            accum(Reverse, i, sRev[i], errRev, hasAggr);
+            accum(Reverse, i, sRev[i], errRev, sRev_intv[i].rad(), hasAggr);
             if (traceSteps)
                 ssRevStep.back().push_back(errRev);
         }
@@ -359,23 +407,31 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
 
 void FFT_Order::dump(std::ofstream& ofs, SignalType signalType, const Measure& measure) const
 {
+    auto dumpStat = [&ofs](const Stat<double, size_t>& s) {
+        ofs << '\t' << s.count() << '\t' << s.mean() << '\t' << s.std()
+            << '\t' << s.min() << '\t' << (s.minAt().has_value()? std::to_string(s.minAt().value()) : "")
+            << '\t' << s.max() << '\t' << (s.maxAt().has_value()? std::to_string(s.maxAt().value()) : "");
+    };
     for (unsigned testType = 0; testType < (sizeof(FFT_Order::sTestType)/sizeof(FFT_Order::sTestType[0])); ++testType) {
         const Stat<double, size_t>& uncStat( measure.sUncStat[testType] );
         const Stat<double, size_t>& errStat( measure.sUncStat[testType] );
+        const Stat<double, size_t>& rangeStat( measure.sRangeStat[testType] );
+        const Stat<double, size_t>& uncRatioStat( measure.sUncRatioStat[testType] );
+        const Stat<double, size_t>& rangeRatioStat( measure.sRangeRatioStat[testType] );
         const Histogram<double, size_t>& histo( measure.sHisto[testType] );
 #if __cplusplus >= 201103L
         ofs << IndexSin::sinSourceName(sinSource) << '\t' << FFT_Order::noiseTypeName(noiseType) << '\t' << noise
-            << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType]
-            << '\t' << uncStat.count()<< '\t' << uncStat.mean() << '\t' << uncStat.std()
-                << '\t' << uncStat.min() << '\t' << (uncStat.minAt().has_value()? std::to_string(uncStat.minAt().value()) : "")
-                << '\t' << uncStat.max() << '\t' << (uncStat.maxAt().has_value()? std::to_string(uncStat.maxAt().value()) : "")
-            << '\t' << errStat.count()<< '\t' << errStat.mean() << '\t' << errStat.std()
-                << '\t' << errStat.min() << '\t' << (errStat.minAt().has_value()? std::to_string(errStat.minAt().value()) : "")
-                << '\t' << errStat.max() << '\t' << (errStat.maxAt().has_value()? std::to_string(errStat.maxAt().value()) : "")
-            << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
-                << '\t' << histo.min() << '\t' << (histo.minAt().has_value()? std::to_string(histo.minAt().value()) : "")
-                << '\t' << histo.max() << '\t' << (histo.maxAt().has_value()? std::to_string(histo.maxAt().value()) : "")
-            << '\t' << histo.lowers() << '\t' << histo.uppers()
+            << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType];
+        dumpStat(uncStat);          // header "Uncertainty"
+        dumpStat(errStat);          // header "Value" (aliased to uncStat — pre-existing)
+        // header "Error" — original code emitted histo stats here
+        ofs << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
+            << '\t' << histo.min() << '\t' << (histo.minAt().has_value()? std::to_string(histo.minAt().value()) : "")
+            << '\t' << histo.max() << '\t' << (histo.maxAt().has_value()? std::to_string(histo.maxAt().value()) : "");
+        dumpStat(rangeStat);        // header "Range"
+        dumpStat(uncRatioStat);     // header "Uncertainty Ratio"
+        dumpStat(rangeRatioStat);   // header "Range Ratio"
+        ofs << '\t' << histo.lowers() << '\t' << histo.uppers()
             << histo.formatted() << "\n";
 #else
         std::ostringstream _o;
@@ -431,6 +487,9 @@ bool FFT_Order::dump(
         << "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Minimum At\tUncertainty Maximum\tUncertainty Maximum At"
         << "\tValue Count\tValue Mean\tValue Deviation\tValue Minimum\tValue Minimum At\tValue Maximum\tValue Maximum At"
         << "\tError Count\tError Mean\tError Deviation\tError Minimum\tError Minimum At\tError Maximum\tError Maximum At"
+        << "\tRange Count\tRange Mean\tRange Deviation\tRange Minimum\tRange Minimum At\tRange Maximum\tRange Maximum At"
+        << "\tUncertainty Ratio Count\tUncertainty Ratio Mean\tUncertainty Ratio Deviation\tUncertainty Ratio Minimum\tUncertainty Ratio Minimum At\tUncertainty Ratio Maximum\tUncertainty Ratio Maximum At"
+        << "\tRange Ratio Count\tRange Ratio Mean\tRange Ratio Deviation\tRange Ratio Minimum\tRange Ratio Minimum At\tRange Ratio Maximum\tRange Ratio Maximum At"
         << "\tLower Count\tUpper Count" << histo.header();
     const std::string HEADER = oss.str();
     if (dumpPath.empty())

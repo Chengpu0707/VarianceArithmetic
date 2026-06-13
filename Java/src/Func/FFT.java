@@ -6,6 +6,7 @@ package Func;
  * indices by order. Mirrors Python fft.py and C++ FFT.h.
  */
 import Type.InitException;
+import Type.Interval;
 import Type.VarDbl;
 
 
@@ -144,9 +145,65 @@ public class FFT {
         return sRes;
     }
 
-    public VarDbl[] transform(final VarDbl[] sInput, boolean forward) 
+    public VarDbl[] transform(final VarDbl[] sInput, boolean forward)
                 throws InitException {
         return transform(sInput, forward, false);
+    }
+
+    /*
+     * Interval-arithmetic FFT overload — same butterfly body as the VarDbl
+     * version, but on Interval[].  Twiddles are read from IndexSin (VarDbl-valued)
+     * and widened to ULP-level intervals via new Interval(VarDbl).  No
+     * traceSteps support (which is VarDbl-typed).
+     */
+    public Interval[] transform(final Interval[] sInput, boolean forward) {
+        int order = IndexSin.MIN_ORDER;
+        for (; order <= IndexSin.MAX_ORDER; ++order) {
+            if ((2 << order) == sInput.length) break;
+        }
+        if (order > IndexSin.MAX_ORDER) {
+            throw new IllegalArgumentException(
+                String.format("Invalid input array size=%d for fft.transform()", sInput.length));
+        }
+        final int size = 1 << order;
+        final Interval[] sRes = new Interval[sInput.length];
+        final int[] sIndex = bitReversedIndices(order);
+        for (int i = 0; i < sIndex.length; ++i) {
+            final int j = sIndex[i];
+            sRes[i << 1]       = sInput[j << 1];
+            sRes[(i << 1) + 1] = sInput[(j << 1) + 1];
+        }
+        for (int i = 0; i + 1 < sIndex.length; i += 2) {
+            final Interval rt = sRes[i << 1];
+            final Interval it = sRes[(i << 1) + 1];
+            sRes[i << 1]       = rt.add(sRes[(i << 1) + 2]);
+            sRes[(i << 1) + 1] = it.add(sRes[(i << 1) + 3]);
+            sRes[(i << 1) + 2] = rt.sub(sRes[(i << 1) + 2]);
+            sRes[(i << 1) + 3] = it.sub(sRes[(i << 1) + 3]);
+        }
+        for (int o = 1, k = 4; o < order; ++o, k <<= 1) {
+            for (int j = 0; j < (k >> 1); ++j) {
+                final Interval vcos = new Interval(isin.cos(j, o));
+                final Interval vsin = new Interval(isin.sin(forward ? j : -j, o));
+                for (int i = 0; i < sIndex.length; i += k) {
+                    final int idx0 = (i + j) << 1;
+                    final int idx1 = idx0 + k;
+                    final Interval r1 = sRes[idx1];
+                    final Interval i1 = sRes[idx1 + 1];
+                    final Interval rd = r1.mul(vcos).sub(i1.mul(vsin));
+                    final Interval id = i1.mul(vcos).add(r1.mul(vsin));
+                    sRes[idx1]     = sRes[idx0].sub(rd);
+                    sRes[idx1 + 1] = sRes[idx0 + 1].sub(id);
+                    sRes[idx0]     = sRes[idx0].add(rd);
+                    sRes[idx0 + 1] = sRes[idx0 + 1].add(id);
+                }
+            }
+        }
+        if (!forward) {
+            final double invN = 1.0 / size;
+            for (int i = 0; i < sRes.length; ++i) sRes[i] = sRes[i].mul(invN);
+        }
+        return sRes;
     }
 
 }

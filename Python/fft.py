@@ -13,8 +13,20 @@ import typing
 import unittest
 
 from indexSin import SinSource, IndexSin
+from interval import Interval
 import histo
 import varDbl
+
+
+def _interval_bound(noise_type, noise: float, clean_value: float) -> float:
+    """Half-width of an input interval centered on the clean value.
+       Gaussian: 5*dev; White: sqrt(3)*dev; dev=0: ulp(value)."""
+    if noise <= 0:
+        u = math.ulp(clean_value)
+        return u if u > 0.0 else 2.2250738585072014e-308  # sys.float_info.min
+    # Compare by string to avoid importing NoiseType at module top.
+    name = noise_type.value if hasattr(noise_type, 'value') else str(noise_type).rsplit('.', 1)[-1]
+    return 5.0 * noise if name == 'Gaussian' else math.sqrt(3.0) * noise
 
 
 class SignalType (enum.StrEnum):
@@ -74,21 +86,30 @@ class FFT:
         FFT._bitReversedIndex[order] = sRes
         return sRes
     
-    def transform(self, sInput:tuple[varDbl.VarDbl], forward:bool, 
-                  traceSteps=False):
+    def transform(self, sInput, forward:bool, traceSteps=False):
         '''
-        {sInput}: a VarDbl array of size (2<<order), with each datum contains (real, image)
-        {forward}: true for forware transformation, false for backward transformation.
-
-        When {sSin} and {sCos} are not None, output the result.
-        '''        
-        order = IndexSin.validateSize(len(sInput) >> 1) 
+        FFT over T in {VarDbl, Interval}.  Same butterfly body for both;
+        traceSteps is honored only when sInput[0] is a VarDbl.
+        sInput: array of size (2<<order), interleaved (real, imag) pairs.
+        '''
+        order = IndexSin.validateSize(len(sInput) >> 1)
         size = 1 << order
-        sRes = [0] * (size << 1)
+
+        # Type-aware twiddle wrap and traceSteps gating.
+        is_interval = (len(sInput) > 0 and isinstance(sInput[0], Interval))
+        if is_interval:
+            zero = Interval(0.0)
+            wrap = Interval.from_varDbl
+            traceSteps = False     # Interval has no traceSteps
+        else:
+            zero = 0
+            wrap = lambda v: v
+
+        sRes = [zero] * (size << 1)
         self.ssStep = []
         if traceSteps:
             self.ssStep.append(tuple([varDbl.VarDbl(var) for var in sInput]))
-        
+
         sIndex = FFT.bitReversedIndices(order)
         for i in range(len(sIndex)):
             j = sIndex[i]
@@ -106,8 +127,8 @@ class FFT:
         for o in range(1, order):
             k = 2 << o
             for j in range(k >> 1):
-                cos = self.idxSin.cos(j, o) 
-                sin = self.idxSin.sin(j if forward else -j, o)
+                cos = wrap(self.idxSin.cos(j, o))
+                sin = wrap(self.idxSin.sin(j if forward else -j, o))
                 for i in range(0, size, k):
                     i0 = (i + j) << 1
                     i1 = i0 + k
@@ -121,7 +142,7 @@ class FFT:
         if not forward:
             sz = 1/len(sIndex)
             for i in range(len(sRes)):
-                sRes[i] *= sz
+                sRes[i] = sRes[i] * sz
         if traceSteps:
             self.ssStep.append(tuple([varDbl.VarDbl(var) for var in sRes]))
         return sRes
@@ -129,22 +150,12 @@ class FFT:
 
 class Measure:
     def __init__(self, divids=5, devs=3) -> None:
-        self.sUncStat = {
-            TestType.Forward: histo.Stat(), 
-            TestType.Reverse: histo.Stat(), 
-            TestType.Roundtrip: histo.Stat()}
-        self.sValStat = {
-            TestType.Forward: histo.Stat(), 
-            TestType.Reverse: histo.Stat(), 
-            TestType.Roundtrip: histo.Stat()}
-        self.sValStat = {
-            TestType.Forward: histo.Stat(), 
-            TestType.Reverse: histo.Stat(), 
-            TestType.Roundtrip: histo.Stat()}
-        self.sHisto = {
-            TestType.Forward: histo.Histo(divids, devs), 
-            TestType.Reverse: histo.Histo(divids, devs), 
-            TestType.Roundtrip: histo.Histo(divids, devs)}
+        self.sUncStat = {t: histo.Stat() for t in TestType}
+        self.sValStat = {t: histo.Stat() for t in TestType}
+        self.sRangeStat = {t: histo.Stat() for t in TestType}
+        self.sUncRatioStat = {t: histo.Stat() for t in TestType}
+        self.sRangeRatioStat = {t: histo.Stat() for t in TestType}
+        self.sHisto = {t: histo.Histo(divids, devs) for t in TestType}
 
 
 class FFT_Signal (FFT): 
@@ -300,15 +311,29 @@ class FFT_Order (FFT_Signal):
         self.sRev = self.transform(self.sBack, False, traceSteps=traceSteps)
         self.ssRevStep = self.ssStep
 
+        # Deterministic interval-arithmetic FFT: clean-wave centered with bound by noise model.
+        sFrwd_intv = [None] * (self.size << 1)
+        sBack_intv = [None] * (self.size << 1)
+        for i in range(self.size << 1):
+            w = self.sWave[i].value()
+            s = self.sFreq[i].value()
+            bw = _interval_bound(self.noiseType, self.noise, w)
+            bs = _interval_bound(self.noiseType, self.noise, s)
+            sFrwd_intv[i] = Interval(w - bw, w + bw)
+            sBack_intv[i] = Interval(s - bs, s + bs)
+        self.sSpec_intv  = self.transform(sFrwd_intv, True)
+        self.sRev_intv   = self.transform(sBack_intv, False)
+        self.sRound_intv = self.transform(self.sSpec_intv, False)
+
         if self.signalType == SignalType.Linear:
             self.aggr = None
         else:
             self.aggr = FFT_Order.ssssAggr.setdefault(self.order, {}).setdefault(self.sinSource, {})\
-                            .setdefault(self.noiseType, {}).setdefault(self.noise, Measure(FFT_Order.DIVIDS, FFT_Order.DEVS))     
+                            .setdefault(self.noiseType, {}).setdefault(self.noise, Measure(FFT_Order.DIVIDS, FFT_Order.DEVS))
         for i in range(self.size << 1):
-            self.accum(TestType.Forward, i, self.sSpec[i], self.sFreq[i])
-            self.accum(TestType.Roundtrip, i, self.sRound[i], self.sFrwd[i])
-            self.accum(TestType.Reverse, i, self.sRev[i], self.sWave[i])
+            self.accum(TestType.Forward, i, self.sSpec[i], self.sFreq[i], self.sSpec_intv[i].rad())
+            self.accum(TestType.Roundtrip, i, self.sRound[i], self.sFrwd[i], self.sRound_intv[i].rad())
+            self.accum(TestType.Reverse, i, self.sRev[i], self.sWave[i], self.sRev_intv[i].rad())
 
     def getNoise(self) -> float:
         match self.noiseType:
@@ -319,13 +344,23 @@ class FFT_Order (FFT_Signal):
             case _:
                 raise ValueError(f'Invalid noiseType={self.noiseType}')
 
-    def accum(self, test:TestType, index:int, actual:varDbl.VarDbl, expected:varDbl.VarDbl):
+    def accum(self, test:TestType, index:int, actual:varDbl.VarDbl, expected:varDbl.VarDbl, range_: float = 0.0):
         err = actual - expected
         self.measure.sUncStat[test].accum(actual.uncertainty(), index)
         self.measure.sValStat[test].accum(err.value(), index)
+        self.measure.sRangeStat[test].accum(range_, index)
+        if actual.uncertainty() > 0:
+            self.measure.sUncRatioStat[test].accum(range_ / actual.uncertainty(), index)
+        if range_ > 0:
+            self.measure.sRangeRatioStat[test].accum(abs(err.value()) / range_, index)
         if self.aggr:
             self.aggr.sUncStat[test].accum(actual.uncertainty(), index)
             self.aggr.sValStat[test].accum(err.value(), index)
+            self.aggr.sRangeStat[test].accum(range_, index)
+            if actual.uncertainty() > 0:
+                self.aggr.sUncRatioStat[test].accum(range_ / actual.uncertainty(), index)
+            if range_ > 0:
+                self.aggr.sRangeRatioStat[test].accum(abs(err.value()) / range_, index)
         if err.uncertainty() > 0:
             try:
                 norm = err.value() / err.uncertainty()
@@ -344,9 +379,12 @@ class FFT_Order (FFT_Signal):
                "\tUncertainty Count\tUncertainty Mean\tUncertainty Deviation\tUncertainty Minimum\tUncertainty Minimum At\tUncertainty Maximum\tUncertainty Maximum At"\
                "\tValue Count\tValue Mean\tValue Deviation\tValue Minimum\tValue Minimum At\tValue Maximum\tValue Maximum At"\
                "\tError Count\tError Mean\tError Deviation\tError Minimum\tError Minimum At\tError Maximum\tError Maximum At"\
+               "\tRange Count\tRange Mean\tRange Deviation\tRange Minimum\tRange Minimum At\tRange Maximum\tRange Maximum At"\
+               "\tUncertainty Ratio Count\tUncertainty Ratio Mean\tUncertainty Ratio Deviation\tUncertainty Ratio Minimum\tUncertainty Ratio Minimum At\tUncertainty Ratio Maximum\tUncertainty Ratio Maximum At"\
+               "\tRange Ratio Count\tRange Ratio Mean\tRange Ratio Deviation\tRange Ratio Minimum\tRange Ratio Minimum At\tRange Ratio Maximum\tRange Ratio Maximum At"\
                "\tLower Count\tUpper Count\t"\
                + '\t'.join([f'{i/divids}' for i in range(-devs * divids, devs * divids + 1)])\
-               + '\n' 
+               + '\n'
     
     @staticmethod
     def is_title(header:str, dumpPath:str) -> str:
@@ -377,13 +415,21 @@ class FFT_Order (FFT_Signal):
     
     @staticmethod
     def histo_offset():
-        return 30
+        # 7 metadata + 6 Stat sections * 7 + 2 (lowers/uppers) = 51
+        return 51
 
     def dumpMeasure(self, fw, signalType:SignalType, measure:Measure):
         for test in TestType:
             try:
                 fw.write(f'{self.sinSource}\t{self.noiseType}\t{self.noise}\t{signalType}\t{self.order}\t{self.freq}\t{test}')
-                for stat in (measure.sUncStat[test], measure.sValStat[test], measure.sHisto[test].stat()):
+                # Order matches title(): Uncertainty, Value, [Error=histo stats], Range, UncRatio, RangeRatio.
+                for stat in (
+                        measure.sUncStat[test],
+                        measure.sValStat[test],
+                        measure.sHisto[test].stat(),
+                        measure.sRangeStat[test],
+                        measure.sUncRatioStat[test],
+                        measure.sRangeRatioStat[test]):
                     fw.write(f'\t{stat.count()}\t{stat.mean()}\t{stat.dev()}\t{stat.min()}\t{stat.minAt()}\t{stat.max()}\t{stat.maxAt()}')
                 fw.write(f'\t{measure.sHisto[test].less()}\t{measure.sHisto[test].more()}')
                 count = sum([c for c in measure.sHisto[test].histogram()])

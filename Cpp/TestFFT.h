@@ -157,6 +157,9 @@ struct FFT_Order : public FFT_Signal
     struct Measure {
         Stat<double, size_t> sUncStat[3];
         Stat<double, size_t> sErrStat[3];
+        Stat<double, size_t> sRangeStat[3];        // interval half-width
+        Stat<double, size_t> sUncRatioStat[3];     // range / uncertainty
+        Stat<double, size_t> sRangeRatioStat[3];   // |err.value| / range
         Histogram<double, size_t> sHisto[3];
     };
 
@@ -195,7 +198,8 @@ protected:
 
 private:
     double getNoise(Random& rand) const;
-    void accum(FFT_Order::TestType testType, size_t index, const VarDbl& res, const VarDbl& err, bool hasAggr);
+    void accum(FFT_Order::TestType testType, size_t index, const VarDbl& res, const VarDbl& err,
+               double range, bool hasAggr);
 
     static std::map<unsigned, std::map<NoiseType, std::map<double, std::map<IndexSin::SinSource, Measure> > > > ssssAggr;
     static Measure& aggr(unsigned order, NoiseType noiseType, double noise, IndexSin::SinSource sinSource);

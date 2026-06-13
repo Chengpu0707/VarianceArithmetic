@@ -9,10 +9,14 @@ each butterfly stage.
 #else
 #include <map>
 #endif
+#if __cplusplus >= 201703L
+#include <type_traits>
+#endif
 #include <sstream>
 #include <vector>
 
 #include "IndexSin.h"
+#include "Interval.h"
 #include "Taylor.h"
 #include "Stat.h"
 
@@ -28,19 +32,35 @@ class FFT {
 public:
     static std::vector<size_t> bitReversedIndices(unsigned char order);
 
-    std::vector<VarDbl> transform(const std::vector<VarDbl>& sData, bool forward,
-                                  bool traceSteps=false) const;
-        // FFT of input {sData} of (real + imag) of size (2 << order)
-        // When {traceSteps} is true, {ssStep} contains the data for intermediate steps,
-        //  with [order + 1] for the result, and [order + 2] for the value error which could be non-exist
+    // Templated FFT over T in {VarDbl, Interval}.  Same butterfly body for both;
+    // traceSteps is honored only when T == VarDbl (ssStep is typed to VarDbl).
+    // Input/output are size (2<<order) arrays of interleaved (real, imag) pairs.
+#if __cplusplus >= 202002L
+    template<typename T>
+        requires (std::is_same_v<T, VarDbl> || std::is_same_v<T, Interval>)
+    std::vector<T> transform(const std::vector<T>& sData, bool forward,
+                              bool traceSteps=false) const;
+#elif __cplusplus >= 201103L
+    template<typename T,
+             typename = typename std::enable_if<
+                std::is_same<T, VarDbl>::value || std::is_same<T, Interval>::value>::type>
+    std::vector<T> transform(const std::vector<T>& sData, bool forward,
+                              bool traceSteps=false) const;
+#endif
+
+    // Promote arithmetic-typed inputs (int, double, ...) to VarDbl first.
 #if __cplusplus >= 202002L
     template<typename T> requires std::floating_point<T> || std::integral<T>
-#else
-    template<typename T>
-#endif
     std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward,
                                   bool traceSteps=false) const;
-    // intermediate steps for the transform() when {traceSteps} is true
+#elif __cplusplus >= 201103L
+    template<typename T,
+             typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+    std::vector<VarDbl> transform(const std::vector<T>& sData, bool forward,
+                                  bool traceSteps=false) const;
+#endif
+
+    // intermediate steps for the transform() when {traceSteps} is true (VarDbl only)
     mutable std::vector<std::vector<VarDbl> > ssStep;
 
     FFT(IndexSin::SinSource sinSource = IndexSin::Quart, const std::string& dumpDir = "")
@@ -89,83 +109,113 @@ inline std::vector<size_t> FFT::bitReversedIndices(unsigned char order)
 }
 
 /*
-    * 1-dimentional Fast Fourier Transformation (FFT)
-    *
-    * @param sData     an array of size (2<<order), with each datum contains (real, image)
-    *
-    * @return      an array of size (2<<order), with each datum contains (real, image)
-    */
-inline std::vector<VarDbl> FFT::transform(const std::vector<VarDbl>& sData, bool forward, bool traceSteps) const
+ * 1-dimensional Fast Fourier Transformation (FFT) over T in {VarDbl, Interval}.
+ *
+ * @param sData     size (2<<order) array of interleaved (real, imag) pairs.
+ * @param forward   true: forward DFT; false: inverse DFT (with 1/N normalization).
+ * @param traceSteps  honored only when T == VarDbl; populates ssStep with the
+ *                  intermediate state after each butterfly stage.
+ *
+ * Twiddles come from IndexSin::cos/sin (VarDbl-valued) and are converted via the
+ * one-argument constructor T(VarDbl) — copy for VarDbl, [v.value-w, v.value+w]
+ * (with w = max(unc, ulp(value))) for Interval.
+ */
+#if __cplusplus >= 202002L
+template<typename T>
+    requires (std::is_same_v<T, VarDbl> || std::is_same_v<T, Interval>)
+inline std::vector<T> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
+#elif __cplusplus >= 201103L
+template<typename T, typename>
+inline std::vector<T> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
+#endif
 {
     const unsigned char order = IndexSin::getOrder(sData.size() >> 1);
     const unsigned size = 1 << order;
 
-    std::vector<VarDbl> sRes(2 << order);
-    ssStep.clear();
-    if (traceSteps)
-        ssStep.push_back(sData);
+    std::vector<T> sRes(2 << order);
+#if __cplusplus >= 201703L
+    if constexpr (std::is_same_v<T, VarDbl>) {
+        ssStep.clear();
+        if (traceSteps) ssStep.push_back(sData);
+    }
+#endif
 
     const std::vector<size_t> sIndex = bitReversedIndices(order);
-    for (int i = 0; i < (int)sIndex.size(); i++) {
-        const int j = sIndex[i];
-        sRes[(i << 1)] = sData[j << 1];
+    for (size_t i = 0; i < sIndex.size(); ++i) {
+        const size_t j = sIndex[i];
+        sRes[(i << 1)]     = sData[j << 1];
         sRes[(i << 1) + 1] = sData[(j << 1) + 1];
     }
-    if (traceSteps)
-        ssStep.push_back(sRes);
+#if __cplusplus >= 201703L
+    if constexpr (std::is_same_v<T, VarDbl>) {
+        if (traceSteps) ssStep.push_back(sRes);
+    }
+#endif
 
-    for (int i = 0; i < (int)(sIndex.size() - 1); i += 2 ) {
-        const VarDbl rt = sRes[(i << 1)], it = sRes[(i << 1) + 1];
-        sRes[(i << 1)] += sRes[(i << 1) + 2];
+    for (size_t i = 0; i + 1 < sIndex.size(); i += 2) {
+        const T rt = sRes[(i << 1)];
+        const T it = sRes[(i << 1) + 1];
+        sRes[(i << 1)]     += sRes[(i << 1) + 2];
         sRes[(i << 1) + 1] += sRes[(i << 1) + 3];
         sRes[(i << 1) + 2] = rt - sRes[(i << 1) + 2];
         sRes[(i << 1) + 3] = it - sRes[(i << 1) + 3];
     }
-    if (traceSteps)
-        ssStep.push_back(sRes);
+#if __cplusplus >= 201703L
+    if constexpr (std::is_same_v<T, VarDbl>) {
+        if (traceSteps) ssStep.push_back(sRes);
+    }
+#endif
 
     for (unsigned o = 1, k = 4; o < order; ++o, k <<= 1) {
-        for (long j = 0; j < (long)(k >> 1); j++) {
-            const VarDbl vcos = _sin.cos(j, o);
-            const VarDbl vsin = _sin.sin(forward? j : -j, o);
-            for (int i = 0; i < (int)sIndex.size(); i += k ) {
-                const int idx0 = (i + j) << 1;
-                const int idx1 = idx0 + k;
-                const VarDbl& r1 = sRes[idx1];
-                const VarDbl& i1 = sRes[idx1 + 1];
-
-                const VarDbl rd = r1 * vcos - i1 * vsin;
-                const VarDbl id = i1 * vcos + r1 * vsin;
-
-                sRes[idx1] = sRes[idx0] - rd;
+        for (long j = 0; j < (long)(k >> 1); ++j) {
+            const T vcos(_sin.cos(j, o));
+            const T vsin(_sin.sin(forward ? j : -j, o));
+            for (size_t i = 0; i < sIndex.size(); i += k) {
+                const size_t idx0 = (i + j) << 1;
+                const size_t idx1 = idx0 + k;
+                const T r1 = sRes[idx1];
+                const T i1 = sRes[idx1 + 1];
+                const T rd = r1 * vcos - i1 * vsin;
+                const T id = i1 * vcos + r1 * vsin;
+                sRes[idx1]     = sRes[idx0]     - rd;
                 sRes[idx1 + 1] = sRes[idx0 + 1] - id;
-                sRes[idx0] += rd;
+                sRes[idx0]     += rd;
                 sRes[idx0 + 1] += id;
-            }   // for( i
+            }
         }
-        if (traceSteps)
-            ssStep.push_back(sRes);
+#if __cplusplus >= 201703L
+        if constexpr (std::is_same_v<T, VarDbl>) {
+            if (traceSteps) ssStep.push_back(sRes);
+        }
+#endif
     }
 
     if (!forward) {
-        for (int i = 0; i < (int)(sIndex.size() << 1); i ++ ) {
-            sRes[i] *= 1.0/size;
-        }
+        const double invN = 1.0 / size;
+        for (size_t i = 0; i < (sIndex.size() << 1); ++i)
+            sRes[i] *= invN;
     }
-    if (traceSteps)
-        ssStep.push_back(sRes);
+#if __cplusplus >= 201703L
+    if constexpr (std::is_same_v<T, VarDbl>) {
+        if (traceSteps) ssStep.push_back(sRes);
+    }
+#endif
     return sRes;
 }
 
 #if __cplusplus >= 202002L
 template<typename T> requires std::floating_point<T> || std::integral<T>
-#else
-template<typename T>
-#endif
 inline std::vector<VarDbl> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
 {
-    return transform(std::vector<VarDbl>(sData.begin(), sData.end()), forward, traceSteps);
+    return transform<VarDbl>(std::vector<VarDbl>(sData.begin(), sData.end()), forward, traceSteps);
 }
+#elif __cplusplus >= 201103L
+template<typename T, typename>
+inline std::vector<VarDbl> FFT::transform(const std::vector<T>& sData, bool forward, bool traceSteps) const
+{
+    return transform<VarDbl>(std::vector<VarDbl>(sData.begin(), sData.end()), forward, traceSteps);
+}
+#endif
 
 
 } // namespace var_dbl

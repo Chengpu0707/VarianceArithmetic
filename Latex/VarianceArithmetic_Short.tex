@@ -23,7 +23,7 @@
 \newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
 \newcommand\whenaccepted{}
 
-\newcommand{\Verbose}{}
+%\newcommand{\Verbose}{}
 \newcommand{\ManualReference}{}
 %\newcommand{\NoAuthor}{}
 
@@ -84,43 +84,42 @@ Copyright \copyright{2024}
 \section{Introduction}
 \label{sec: introduction}
 
-Let $x$ and  $\delta x$ denote a value and its uncertainty deviation, respectively.
+Let a signal value contain a value $x$ and an uncertainty deviation $\delta x$.
 As input, $x$ and $\delta x$ are usually the mean and standard deviation of a measurement, respectively \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
 If $\delta x = 0$, then $x$ is a \emph{precise value}; otherwise, the pair specifies an \emph{imprecise value} $x \pm \delta x$.
 Let $P(x) \equiv \delta x / |x|$ be the \emph{statistical precision} (hereafter referred to as precision) of $x \pm \delta x$.
 A smaller $P(x)$ indicates a higher measurement quality of $x \pm \delta x$.
 
-Statistical Taylor expansion determines the result $f \pm \delta f$ and reliability of a general analytic expression $f(x, \dots)$ on the basis of inputs $x \pm \delta x, \dots$ and their corresponding distributions and sample counts. 
+Statistical Taylor expansion determines the result $f \pm \delta f$ of a general analytic expression $f(x, \dots)$ on the basis of inputs $x \pm \delta x, \dots$ and their corresponding distributions and sample counts. 
 \begin{itemize}
 \item 
 Previous studies have examined the effect of input uncertainties on output values for specific cases \cite{Lower_Order_Variance_Expansion}.
 Statistical Taylor expansion generalizes these effects as uncertainty bias, as shown in Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 2d mean} of this study.
 
 \item
-The traditional variance-covariance framework accounts only for linear interactions between random variables through an analytic function \cite{Lower_Order_Variance_Expansion}\cite{Probability_Statistics}\cite{Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance}.
-A full expansion illuminates the convergence of the result.
+The traditional variance-covariance framework accounts only for first-order interactions between random variables through an analytic function \cite{Lower_Order_Variance_Expansion}\cite{Probability_Statistics}\cite{Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance}.
+Carrying out the expansion in full also reveals when the variance series converges, which is the focus of Section \ref{sec: convergence}.
 
-\item Calculating the reliability $[0, 1]$ of $f \pm \delta f$ from input uncertainty distributions and sample counts seems completely new.
+\item Calculating the reliability of $f \pm \delta f$ as a value between $0$ and $1$ from input uncertainty distributions and sample counts appears to be without precedent, as shown in section \ref{sec: statistical bounding}.
 \end{itemize}
 
 Statistical Taylor expansion improves upon existing numerical arithmetic in several key respects.
 
 Conventional floating-point arithmetic \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} computes only the result value $f$.
-Because $f$ contains an unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be sufficient for inputs with $10^{-2}$ to $10^{-6}$ precision.
+Because $f$ contains an unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be sufficient for non-trivial computations on inputs with $10^{-6}$ or coarser precision.
 However, statistical Taylor expansion can account for rounding errors as part of the result deviation $\delta f$.
 
-The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair and it tends to grossly over-estimate the result uncertainty because of its worst-case assumption \cite{Prev_Precision_Arithmetic}.
-Even the interval Taylor methods that bound the Taylor remainder with interval arithmetic, such as the Taylor model \cite{Taylor_Models} and the Taylor form \cite{Taylor_Forms_Limits}, inherit this over-estimation.
-Partitioning each input interval into $n$ pieces and taking the union of the per-piece results reduces the over-estimation of the natural interval extension at a linear rate of $O(1/n)$ \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}.
-However, for an expression in $d$ variables this requires $O(n^d)$ evaluations \cite{Interval_Global_Optimization}.
-The subdivision can also cause branched results, such as calculating square root for an input interval containing zero.
-In contrast, statistical Taylor expansion is precise statistically, and it diverges when the input precision is not fine enough, such as requiring the input precision to be finer than $1/\sqrt{3}$ for square root when the input is Uniform distributed.
+The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair, and it answers a different question from statistical Taylor expansion.
+The direct application of Taylor expansion in interval arithmetic over-estimates result intervals, so that it has to be treated as a polynomial \cite{Taylor_Models}\cite{Taylor_Forms_Limits}, and needs interval partition and other techniques to reduce such over-estimation \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Global_Optimization}.
+The subdivision can cause branched results \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, such as calculating square root for an input interval containing zero.
+The over-estimation of bounding range is a well-known difficulty of interval arithmetic \cite{Interval_Global_Optimization}.
+In contrast, statistical Taylor expansion is precise statistically, and it diverges when the input precision is not fine enough.
 
-Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}\cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, which can make conventional numerical computation more an art than a science.
-In contrast, statistical Taylor expansion is path-independent.
+Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}\cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, which can make conventional numerical computation less systematic and more practitioner-dependent.
+\emph{Path dependency} extends the dependency problem to numerical algorithms that lack a corresponding analytic expression: the result depends on how the algorithm is carried out, for example because of catastrophic cancellation \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}.
+In contrast, statistical Taylor expansion is path-independent in theory; in practice, accumulated rounding errors may still depend on operation order, but variance arithmetic catches them as additional $\delta f$.
 
-
-To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance arithmetic nature of its processor \cite{Prev_Precision_Arithmetic}.
+To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance-arithmetic representation used in its predecessor \cite{Prev_Precision_Arithmetic}, in which precision was tracked implicitly through the number of significant digits.
 
 As a statistical sampling process, stochastic arithmetic \cite{Stochastic_Arithmetic}\cite{CADNA_library} is computationally expensive, whereas statistical Taylor expansion provides a direct characterization without sampling.
 
@@ -143,6 +142,7 @@ The remainder of this paper is organized as follows:
 \fi
 
 \item Section \ref{sec: FFT} examines the impact of numerical library errors and shows that these errors can be significant.
+It also compares interval arithmetic and statistical Taylor expansion for their different goals.
 
 \item Section \ref{sec: recursion} showcases variance arithmetic in catching catastrophic cancellation in a recursion algorithm.
 
@@ -160,18 +160,85 @@ The remainder of this paper is organized as follows:
 
 \subsection{Uncorrelated Uncertainty Condition}
 
-\iffalse
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Signal_and_Noise.pdf}
+\captionof{figure}{
+Effect of noise on bit values of a measured value.  The triangular wave signal and the added white noise are shown at top using the thin black line and the grey area, respectively.  The values are measured by a theoretical 4-bit Analog-to-Digital Converter in ideal condition, assuming LSB is the 0th bit.  The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
+This figure is a reproduction of Figure 1 in \cite{Prev_Precision_Arithmetic}.
+}
+\label{fig: Signal_and_Noise}
+\end{figure}
 
-\begin{align*}
-& \frac{1}{\gamma_{P}} - 1 = \left(\frac{1}{\gamma} -1\right) \frac{1}{P^2}; \\
-& P^2 \left( \frac{1}{\gamma_{P}} - 1 \right) + 1 = \frac{1}{\gamma};
-\end{align*}
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.25in]{Independent_Uncertainty_Assumption.pdf} 
+\captionof{figure}{
+$\gamma$ vs $P$ for different $\gamma_P$ in Formula \eqref{eqn: uncertainty correlation}.
+If $\gamma_P$ is the maximal allowed correlation at the uncertainty level for the uncorrelated uncertainty assumption to hold, then $\gamma$ is the maximal allowed correlation for the two signals to hold.
+For a given $\gamma_P$, $\gamma$ increases with finer $P$.
+This figure is a reproduction of Figure 2 in \cite{Prev_Precision_Arithmetic}.
+}
+\label{fig: Independent_Uncertainty_Assumption}
+\end{figure}
 
-\fi
+A signal consists of many signal values, each carrying uncertainty.
+The uncorrelated uncertainty condition \cite{Prev_Precision_Arithmetic} keeps the uncertainty-level correlation less than the signal-level correlation when the precision is less than $1$.
+It is the statistical foundation for statistical Taylor expansion \footnote{In the following quotation from \cite{Prev_Precision_Arithmetic}, minor spelling and grammar mistakes have been corrected, and axis labels and title for Figure \ref{fig: Independent_Uncertainty_Assumption} have been changed.}:
+\begin{quotation}
 
-When inputs contain no systematic error \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}, their uncertainties are uncorrelated even though their values may be significantly correlated.
-This condition can be characterized quantitatively in statistics as the \emph{uncorrelated uncertainty condition} \cite{Prev_Precision_Arithmetic}.
-It also distinguishes statistical Taylor expansion from conventional theory of propagation of uncertainty \cite{Uncertainty Propagation}\cite{Uncertainties Library}.
+Let $X$, $Y$, and $Z$ denote three mutually independent random variables \cite{Probability_Statistics} with variances $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
+Let $\alpha$ denote a constant.  
+Let $Cov()$ denote the covariance function.  
+Let $\gamma$ denote the correlation between $(X + Y)$ and $(\alpha X + Z)$. 
+\begin{align}
+\label{eqn: uncertainty ratio}
+& \eta _{1} ^{2} \equiv \frac{V(Y)}{V(X)}; \quad
+ \eta _{2} ^{2} \equiv \frac{V(Z)}{V(\alpha X)} =\frac{V(Z)}{\alpha ^{2} V(X)};  \\
+\label{eqn: uncertainty correlation}
+& \gamma =\frac{Cov(X+Y,\alpha X+Z)}{\sqrt{V(X+Y)} \sqrt{V(\alpha X+Z)}}  =\frac{\alpha /|\alpha |}{\sqrt{1+\eta _{1} ^{2} } \sqrt{1+\eta _{2} ^{2}}} \equiv \frac{\alpha /|\alpha |}{1+\eta ^{2}};
+\end{align}
+Formula \eqref{eqn: uncertainty correlation} gives the correlation $\gamma$ between two random variables, each of which contains a completely uncorrelated part and a completely correlated part $X$, with $\eta$ being defined as the average ratio between these two parts.  
+Formula \eqref{eqn: uncertainty correlation} can also be interpreted conversely: if two random variables are correlated by $\gamma$, each of them can be viewed hypothetically as containing a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.
+The correlated parts common to different measurements are regarded as signals, which can either be desired or unwanted.
+
+One special application of Formula \eqref{eqn: uncertainty correlation} is the correlation between a measured signal and its true signal, in which noise is the uncorrelated part between the two.  
+Figure \ref{fig: Signal_and_Noise} shows the effect of noise on the most significant two bits of a 4-bit measured signal when $\eta=1/4$.  
+Its top chart shows a triangular waveform between 0 and 16 as a black line, and white noise between $-2$ and $+2$, using the grey area.  
+The measured signal is the sum of the triangle waveform and the noise.  
+The middle chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 3rd bit of the true signal as a black line, and the mean values of the 3rd bit of the measurement as a grey line.  
+The 3rd bit is affected by the noise during its transition between 0 and 1.  
+For example, when the signal is slightly below 8, only a small positive noise can turn the 3rd bit from 0 to 1.  
+The bottom chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 2nd bit of the signal and the measurement as a black line and a grey line, respectively.  
+Figure \ref{fig: Signal_and_Noise} clearly shows that the correlation between the measurement and the true signal is less at the 2nd bit than at the 3rd bit.  
+Quantitatively:
+\begin{itemize}
+\item  The overall measurement is 98.0\% correlated to the signal with $\eta=1/7$;
+\item  The 3rd bit of the measurement is 94.1\% correlated to the signal with $\eta=1/4$;
+\item  The 2nd bit of the measurement is 80.0\% correlated to the signal with $\eta=1/2$;
+\item  The 1st bit of the measurement is 50.0\% correlated to the signal with $\eta=1$;
+\item  The 0th bit of the measurement is 20.0\% correlated to the signal with $\eta=2$.
+\end{itemize}
+The above conclusion agrees with the common experiences that, below the noise level of measured signals, noise rather than true signals dominates each bit.  
+
+Similarly, while the correlated portion between two values has the same magnitude at every bit position, the ratio of uncorrelated portion to correlated portion doubles for each bit position below the MSB. 
+Quantitatively, let $P$ denote the precision of an imprecise value, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at the level of uncertainty; then $\eta_{P}$ increases as $P$ decreases according to Formula \eqref{eqn: uncertainty level}. 
+According to Formula \eqref{eqn: uncertainty correlation}, if two signals are overall correlated with $\gamma$, at the level of uncertainty the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: precision correlation}.
+\begin{align}
+\label{eqn: uncertainty level}
+& \eta_{P} = \frac{\eta}{P}, \quad P < 1; \\
+\label{eqn: precision correlation}
+& \frac{1}{\gamma_{P}} - 1 = \left(\frac{1}{\gamma} -1\right) \frac{1}{P^2}, \quad P < 1;
+\end{align}
+
+Figure \ref{fig: Independent_Uncertainty_Assumption} plots the relation of $\gamma$ vs. $P$ for each given $\gamma_{P}$ in Formula \eqref{eqn: precision correlation}.  
+When $\gamma_{P}$ is less than a predefined threshold (e.g., 2\%, 5\% or 10\%), the two values can be deemed uncorrelated at the level of uncertainty.  
+For each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of statistical Taylor expansion holds.  
+The maximal allowed correlation is a function of the coarser precision of the two values according to Formula \eqref{eqn: precision correlation}.  
+Figure \ref{fig: Independent_Uncertainty_Assumption} shows that for two precisely measured values, their correlation $\gamma$ is allowed to approach 1.  
+
+\end{quotation}
+
 
 
 \subsection{Distributional Zero and Distributional Pole}
@@ -274,7 +341,7 @@ When $f(x)=x^c$:
 \includegraphics[height=2.5in]{Square_Distribution.pdf} 
 \captionof{figure}{
 Probability density function of $\tilde{y} = \tilde{x}^2$, for various values of $\mu$ as indicated in the legend. 
-The variable $\tilde{x}$ follows a Gaussian distribution with mean $\mu$ and deviation $1$.
+The variable $\tilde{x}$ follows a Gaussian distribution with distribution mean $\mu$ and distribution deviation $1$.
 The horizontal axis is scaled as $\sqrt{\tilde{y}}$.
 }
 \label{fig: Square_Distribution}
@@ -285,36 +352,34 @@ The horizontal axis is scaled as $\sqrt{\tilde{y}}$.
 \includegraphics[height=2.5in]{Square_Root_Distribution.pdf} 
 \captionof{figure}{
 Probability density function for $\tilde{y} = \sqrt{\tilde{x}}$, for various values of $\mu$ as indicated in the legend. 
-The variable $\tilde{x}$ follows a Gaussian distribution with the distributional mean $\mu$ and deviation $1$.
+The variable $\tilde{x}$ follows a Gaussian distribution with distribution mean $\mu$ and distribution deviation $1$.
 The horizontal axis is scaled as $\tilde{y}^2$.
 }
 \label{fig: Square_Root_Distribution}
 \end{figure}
 
 Let $\rho(\tilde{x}, \mu, \sigma)$ denote the probability density function of a random variable $\tilde{x}$ with distribution mean $\mu$ and distribution deviation $\sigma$.
-Let $\tilde{y} = f(\tilde{x})$ be a strictly monotonic function, such that its inverse function $\tilde{x} = f^{-1}(\tilde{y})$ exists.
-Formula \eqref{eqn: function distribution} shows the probability density function of $\tilde{y}$ \cite{Statistical_Methods}\cite{Probability_Statistics}.
-In Formula \eqref{eqn: function distribution}, the same distribution can be expressed in terms of either $\tilde{x}$ or $\tilde{y}$, which are simply different representations of the same underlying random variable.
+Let $f(x)$ be a strictly monotonic function of $x$ so that the inverse $f^{-1}$ exists, and let $\tilde{y} = f(\tilde{x})$.
+Formula \eqref{eqn: function distribution} states that after the change of variables $\tilde{y} = f(\tilde{x})$, the probability density function $\rho(\tilde{y}, \mu_y, \sigma_y)$ with distribution mean $\mu_y$ and distribution deviation $\sigma_y$ describes the same underlying probability as $\rho(\tilde{x}, \mu, \sigma)$, viewed in a different coordinate.
 \begin{align}
 \label{eqn: function distribution}
-\rho(\tilde{x}, \mu, \sigma) d\tilde{x} &= \rho(f^{-1}(\tilde{y}), \mu, \sigma) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} 
-= \rho(\tilde{y}, \mu_y, \sigma_y) d\tilde{y};
+\rho(\tilde{y}, \mu_y, \sigma_y) d\tilde{y} &\equiv \rho(f^{-1}(\tilde{y}), \mu, \sigma) \frac{d\tilde{x}}{d\tilde{y}} d\tilde{y} = \rho(\tilde{x}, \mu, \sigma) d\tilde{x};
 \end{align}
 
-Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, \mu_y, \sigma_y)$ is $\rho(\tilde{x}, \mu, \sigma)$ multiplied by $1/f^{(1)}_x$, in which $f^{(1)}_x$ is the first derivative of $f(x)$ with respect to $x$.
+Viewed in the $f^{-1}(\tilde{y})$ coordinate, $\rho(\tilde{y}, \mu_y, \sigma_y)$ is $\rho(\tilde{x}, \mu, \sigma)$ multiplied by $1/f^{(1)}_x$, where $f^{(1)}_x$ is the first derivative of $f(x)$ with respect to $x$.
 \begin{itemize}
 \item 
-A \emph{distributional pole} occurs when $y^{(1)}_x=0 \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = \infty$.
-For example, $(\mu \pm 1)^2$ has a distributional pole at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Distribution}.
+A \emph{distributional pole} occurs when $f^{(1)}_x=0 \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = \infty$.
+For example, $(\mu \pm 1)^2$ (which means $\tilde{x}^2$ for $\tilde{x} \sim N(\mu, 1)$) has a distributional pole at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Distribution}.
 
 \item 
-A \emph{distributional zero} occurs when $y^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = 0$.
-For example, $\sqrt{\mu \pm 1}$ has a distributional zero at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Root_Distribution}.
+A \emph{distributional zero} occurs when $f^{(1)}_x=\infty \rightarrow \rho(\tilde{y}, \mu_y, \sigma_y) = 0$.
+For example, $\sqrt{\mu \pm 1}$ (which means $\sqrt{\tilde{x}}$ for $\tilde{x} \sim N(\mu, 1)$) has a distributional zero at $\tilde{x} = 0$, as shown in Figure \ref{fig: Square_Root_Distribution}.
 
 \end{itemize}
 
-In both Figures \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distribution}, $\rho(\tilde{y}, \mu_y, \sigma_y)$ closely resembles $\rho(\tilde{x}, \mu, \sigma)$ when the mode lies sufficiently far from either a distributional pole or zero, as in $(5 \pm 1)^2$ and $\sqrt{5 \pm 1}$.
-In such cases, the output $f(x)$ can be fully characterized by its mean $\overline{f(x)}$ and deviation $\delta f(x)$. 
+In both Figures \ref{fig: Square_Distribution} and \ref{fig: Square_Root_Distribution}, $\rho(\tilde{y}, \mu_y, \sigma_y)$ closely resembles $\rho(\tilde{x}, \mu, \sigma)$ when the mode lies sufficiently far from any distributional pole or zero, as in $(5 \pm 1)^2$ and $\sqrt{5 \pm 1}$.
+In such cases, the output $f(x)$ can be well characterized by its distribution mean $\overline{f(x)}$ and distribution deviation $\delta f(x)$. 
 
 
 
@@ -348,7 +413,7 @@ f \\
 \fi
 
 
-Define $\tilde{z} \equiv (\tilde{x} - x)/\delta x$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, x, \delta x)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$.
+Define $\tilde{z} \equiv (\tilde{x} - x)/\delta x$ and let $\rho(\tilde{z})$ be the normalized form of $\rho(\tilde{x}, x, \delta x)$ such that $\tilde{z}$ has distribution mean $0$ and distribution deviation $1$  \footnote{The requirement of the normalized form excludes the distributions without finite distribution deviation, such as the Student's $t$-distributions whose degrees of freedom is 2 or less.}.
 The Normal distribution is the normalized form of the Gaussian distribution.
 
 \begin{align}
@@ -357,7 +422,7 @@ The Normal distribution is the normalized form of the Gaussian distribution.
 \label{eqn: mean-reverting bounding}
 \zeta(1, \kappa) &= 0;
 \end{align}
-Let $\tilde{z} \in [\varrho, \kappa]$ where $\varrho, \kappa$ specify the \emph{bounding ranges}. 
+Let $\tilde{z} \in [\varrho, \kappa]$ where $\varrho, \kappa$ specify the \emph{bounding range}. 
 Formula \eqref{eqn: bound moment} defines the corresponding \emph{bound moment} $\zeta(n, \kappa)$, which further satisfies the \emph{mean-reverting condition} of Formula \eqref{eqn: mean-reverting bounding} such that $\kappa$ determines $\varrho$.
 For any symmetric probability distribution: $\rho(-\tilde{z}) = \rho(\tilde{z})$, $\varrho = -\kappa$, and $\zeta(2n+1, \kappa) = 0$.
 
@@ -369,24 +434,24 @@ f(x + \tilde{x}) &= f(x + \tilde{z} \delta x) = f(x) + \sum_{n=1}^{\infty} \frac
 \label{eqn: Taylor 1d variance}
 \delta^2 f(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \big);
 \end{align}
-An analytic function $f(x)$ can be accurately evaluated in a range using the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
+An analytic function $f(x)$ can be accurately evaluated near $x$ using the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
 Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} yield the mean $\overline{f(x)}$ and variance $\delta^2 f(x)$ of $f(x)$, respectively.
 The difference $\overline{f(x)} - f(x)$ is defined as the \emph{uncertainty bias}, representing the effect of input uncertainty on the resulting value.
 
 \begin{align}
 \label{eqn: Taylor 2d}
-f(x + \tilde{x}, y + \tilde{y}) &= f(x, y) + \sum_{m=0, n=0}^{m+n \geq 1} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+f(x + \tilde{x}, y + \tilde{y}) &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m+n \geq 1}} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
 \label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= f(x, y) + \sum_{m=0, n=0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y);  \\
+\overline{f(x,y)} &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m+n \geq 2}} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y);  \\
 \label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \sum_{m=0, n=0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \sum_{i=0}^{m} \sum_{j=0}^{n}
+\delta^2 f(x, y) &= \sum_{\substack{m, n \geq 0 \\ m+n \geq 2}} (\delta x)^m (\delta y)^n \sum_{i=0}^{m} \sum_{j=0}^{n}
 		\frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \nonumber \\
 	&\big( \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y) - \zeta_x(i, \kappa_x)\zeta_x(m-i, \kappa_x)\; \zeta_y(j, \kappa_y)\zeta_y(n-j, \kappa_y) \big);
 \end{align}
 Under the uncorrelated uncertainty condition, Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} compute the mean and variance of the Taylor expansion given in Formula \eqref{eqn: Taylor 2d}, where $\zeta_x(m, \kappa_x)$ and $\zeta_y(n, \kappa_y)$ denote the bound moments for $x$ and $y$, respectively.
 Although Formula \eqref{eqn: Taylor 2d variance} covers only the 2-dimensional case, it extends readily to any number of dimensions.
 
-With the mean reverting condition of Formula \eqref{eqn: mean-reverting bounding}:
+With the mean-reverting condition of Formula \eqref{eqn: mean-reverting bounding}:
 \begin{align}
 \label{eqn: addition mean}
 \overline{x \pm y} &= x \pm y; \\
@@ -397,7 +462,12 @@ With the mean reverting condition of Formula \eqref{eqn: mean-reverting bounding
 \label{eqn: multiplication variance}
 P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(2, \kappa_x) \zeta_y(2, \kappa_y) P(x)^2 P(y)^2;
 \end{align}
-When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$, making Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} the convolution results for $x \pm y$ \cite{Probability_Statistics}, and Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
+When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$:
+\begin{itemize}
+\item Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} become the convolution results for $x \pm y$ \cite{Probability_Statistics}.
+
+\item Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} become the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
+\end{itemize}
 
 
 
@@ -433,7 +503,7 @@ When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$, making Formu
 
 \fi
 
-Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and variance for $e^x$, respectively:
+Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and precision for $e^x$, respectively:
 \begin{align}
 \label{eqn: exp mean}
 \frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=2}^{\infty} (\delta x)^n \frac{\zeta(n, \kappa)}{n!}; \\
@@ -446,18 +516,18 @@ Formulas \eqref{eqn: log mean} and \eqref{eqn: log precision} give the mean and 
 \label{eqn: log mean}
 \overline{\log(x)}  &= \log(x) + \sum_{n=2}^{+\infty} P(x)^{n} \frac{(-1)^{n+1} \zeta(n, \kappa)}{n}; \\
 \label{eqn: log precision}
-\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j (n-j)};
+\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} (-1)^n \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j (n-j)};
 \end{align}
 
 Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and variance for $\sin(x)$, respectively:
 \begin{align}
 \label{eqn: sin mean}
-\overline{\sin(x)} &= \sin(x) + \sum_{n=2}^{\infty} (\delta x)^n \sin(x)_x^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
+\overline{\sin(x)} &= \sin(x) + \sum_{n=2}^{\infty} (\delta x)^n \sin(x)^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)_x^{(j)}\sin(x)_x^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
+\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)^{(j)}\sin(x)^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
 \end{align}
 
-Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and variance for $x^c$, respectively:
+Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and precision for $x^c$, respectively:
 \begin{align}
 \label{eqn: power mean}
 \frac{\overline{x^c}}{x^c}  &= 1 + \sum_{n=2}^{\infty} P(x)^{n} \zeta(n, \kappa) \begin{pmatrix} c \\ n \end{pmatrix}; \\
@@ -471,6 +541,7 @@ The input and output in statistical Taylor expansion reflect the inherent charac
 
 
 \subsection{Convergence of Variance}
+\label{sec: convergence}
 
 \iffalse
 
@@ -596,7 +667,7 @@ As $\kappa$ grows, the right side $\to 0$, forcing $1+\varrho\to 0^+$, i.e. $\va
 Together these give exactly
 $$\zeta(n,\kappa)=\frac{I_n}{D}\ \longrightarrow\ \rho(\kappa),\frac{\kappa^{n+1}}{n+1}. \qquad\checkmark$$
 
-This is also structurally consistent with eqn: symetric asymptotic moment: the symmetric case integrates $\tilde z^{2n}$ over both endpoints $\pm\kappa$ (factor 2), whereas the one-sided Exponential is dominated by the single endpoint $\kappa$ (factor 1) — which is exactly the difference between the two formulas.
+This is also structurally consistent with eqn: symmetric asymptotic moment: the symmetric case integrates $\tilde z^{2n}$ over both endpoints $\pm\kappa$ (factor 2), whereas the one-sided Exponential is dominated by the single endpoint $\kappa$ (factor 1) — which is exactly the difference between the two formulas.
 
 The numbers (and the honest caveat)
 
@@ -609,7 +680,7 @@ Verdict
 
 Valid. Formula eqn: exponential asymptotic moment correctly captures the dominant behavior $\zeta(n,\kappa)\sim\rho(\kappa),\kappa^{n+1}/n$, and the mean-reverting condition eqn: mean-reverting bounding is precisely what makes the clean stated form hold: by pinning $\varrho\to-1$ it both removes the lower-endpoint term and sends the truncation factor $D\to1$. The only imprecisions are sub-leading — the $n{+}1$ vs $n$ denominator and the residual $1/D\to1$ — and neither affects the formula's purpose: the exponential growth rate $\kappa^{n}$ is what drives the convergence test in eqn: variance asymptotic, and that rate is exactly right.
 
-One small suggestion: since eqn: symetric asymptotic moment and this one are leading-order asymptotic equivalences (the RHS depends on $n$), the "$\lim_{n\to\infty}\zeta = \ldots$" notation is slightly loose — "$\zeta(n,\kappa)\sim\ldots$ as $n\to\infty$" would be more precise. Want me to adjust that notation in both formulas?
+One small suggestion: since eqn: symmetric asymptotic moment and this one are leading-order asymptotic equivalences (the RHS depends on $n$), the "$\lim_{n\to\infty}\zeta = \ldots$" notation is slightly loose — "$\zeta(n,\kappa)\sim\ldots$ as $n\to\infty$" would be more precise. Want me to adjust that notation in both formulas?
 
 \fi
 
@@ -628,19 +699,17 @@ The value of moment  $\zeta(2n)$ for Uniform distribution is also provided as an
 
 \begin{align}
 \label{eqn: uniform moment}
-\rho(\tilde{z}) = \frac{1}{2\sqrt{3}}, |\tilde{z}| \leq \sqrt{3}&:
-		\zeta(2n, \kappa) = \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{2 \sqrt{3}} d \tilde{z}
-			= 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n + 1}; \\
-\label{eqn: symetric asymptotic moment}
-\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1}; \\
+\rho(\tilde{z}) = \frac{1}{2\sqrt{3}}, |\tilde{z}| \leq \sqrt{3}&: \zeta(2n, \kappa) = \frac{\kappa^{2n}}{2n + 1}; \\
+\label{eqn: symmetric asymptotic moment}
+\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) \simeq \frac{\kappa^{2n}}{2n}; \\
 \label{eqn: exponential asymptotic moment}
-\rho(\tilde{z}) = e^{-(1+\tilde{z})}, \tilde{z} \geq -1&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) = \rho(\kappa) \frac{\kappa^{n+1}}{n+1}; \\
+|\varrho| < \infty&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) \simeq \frac{\kappa^{n}}{n}; \\
 \label{eqn: variance asymptotic}
-0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n + 1}}{n + 1};
+0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n}}{n};
 \end{align}
 Formula \eqref{eqn: uniform moment} gives the closed form of $\zeta(2n, \kappa)$ for the Uniform distribution.
-Formula \eqref{eqn: symetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$.
-Formula \eqref{eqn: exponential asymptotic moment} states the corresponding asymptote for the standardized Exponential distribution under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding} which reduces to $(1+\varrho)\,e^{-(1+\varrho)} = (1+\kappa)\,e^{-(1+\kappa)}, \varrho < 0, \kappa > 0$.
+Formula \eqref{eqn: symmetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$.
+Formula \eqref{eqn: exponential asymptotic moment} states the corresponding asymptote for any asymmetric $\rho(\tilde{z})$ under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding} when both $\varrho$ and $\zeta(2, \kappa)$ are bounded.
 \ifdefined\Verbose
 Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n)$ for the Uniform distribution, $\zeta(2n, 5)$ for the Normal distribution, and the corresponding asymptote for the Normal distribution.
 \fi
@@ -665,6 +734,7 @@ Statistical Taylor expansion rejects the distributional zero of $\log(x)$ or $(x
 
 
 \subsection{Statistical Bounding}
+\label{sec: statistical bounding}
 
 \iffalse
 \begin{align}
@@ -715,12 +785,14 @@ When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 \label{fig: Uniform_Function}
 \end{figure}
 
-The first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
-As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$ so that $\delta^2 f(x)$ stabilizes, but the convergence range of $\delta^2 f(x)$ shrinks toward zero for Formulas \eqref{eqn: log precision} and \eqref{eqn: power precision}.
-The value of $\kappa$ that yields stable $f(x) - \overline{f(x)}$ and $\delta^2 f(x)$ is defined as the \emph{ideal bound range} $\hat{\kappa}$, and the corresponding result is the \emph{ideal variance} $\hat{\delta^2} f(x)$.
+Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$ which is the probability for the distribution to be outside the bounding range.
+Ideally, a bounding leakage should be as small as possible, and the corresponding bound range $\hat{\kappa}$ and variance $\hat{\delta^2} f(x)$ are the \emph{ideal bounding range} and \emph{ideal variance}, respectively.
 For a Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$.
-For a Gaussian distribution, according to the 5-$\sigma$ rule for determining the statistical significance of an experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
+For a Gaussian distribution, when $\kappa \rightarrow \infty$, the convergence range of Formulas \eqref{eqn: log convergence} and \eqref{eqn: pow convergence} approaches zero, such that the choice of $\hat{\kappa}$ is a compromise.  
+According to the 5-$\sigma$ rule for determining the statistical significance of an experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics},  $\hat{\kappa} = 5$ by default.
 
+The first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
+As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$.
 Define \emph{linear leakage} $\omega(\kappa) \equiv 1 - \zeta(2, \kappa)$.
 In $\delta^2 x = \zeta(2, \kappa) (\delta x)^2$, the result variance $\delta^2 x$ is less than input variance $(\delta x)^2$ due to linear leakage.
 When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
@@ -735,7 +807,6 @@ Let $\omega(\kappa) = \omega(\kappa_s, N)$, where $\kappa_s$ is the \emph{measur
 \label{eqn: Gaussian experimental bounding leakage}
 \epsilon(\kappa_s, N) &= 1 - \frac{1}{2} \xi(\frac{|\kappa_s \delta x - \overline{x}|}{\sqrt{2}}) - \frac{1}{2} \xi(\frac{|\kappa_s \delta x + \overline{x}|}{\sqrt{2}});
 \end{align}
-Define \emph{bounding leakage} $\epsilon(\kappa) \equiv 1 - \zeta(0, \kappa)$.
 When the underlying distribution is Normal, Formula \eqref{eqn: Gaussian result bounding leakage} presents the difference between the linear leakage $\omega(\kappa)$ and the bounding leakage $\epsilon(\kappa)$, whereas Formulas \eqref{eqn: Gaussian theoretical bounding leakage} and \eqref{eqn: Gaussian experimental bounding leakage} give the distributional bounding leakage $\epsilon(\kappa)$ and the sample bounding leakage $\epsilon(\kappa_s, N)$ respectively, where $\xi()$ is the Normal error function \cite{Probability_Statistics}.
 Figure \ref{fig: Normal_Bounding_Leakage} shows that as $N$ increases, $\omega(\kappa_s, N)$ decreases toward $\omega(\kappa_s)$ (y-axis), while $\kappa(\kappa_s, N)$ increases toward $\kappa_s$ (x-axis). 
 Figure \ref{fig: Bounding_Factor_Leakage} slices Figure \ref{fig: Normal_Bounding_Leakage} along the y-axis for $\kappa_s=4,5,6$, and shows that to reach the stable variance for a given $\kappa_s$, the required sample count is $N \gtrsim 10^3$, whereas the stable resulting linear leakage $\omega$ is smaller for larger measuring bounding range $\kappa_s$.
@@ -836,7 +907,8 @@ h
 	&+ 2 (\delta x)^{m+n} \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \left(\zeta(m+n) - \zeta(m) \zeta(n) \right);
 \end{align}
 From the sum variance Formula \eqref{eqn: sum variance} \cite{Probability_Statistics}, Formula \eqref{eqn: Taylor inner dependency} decomposes and leads to Formula \eqref{eqn: Taylor 1d variance}.
-Because Formula \eqref{eqn: sum variance} comes from variance definition, Formula \eqref{eqn: Taylor 1d variance} does not contain dependence problem, in contrast to Taylor expansion using interval arithmetic \cite{Interval_Analysis}\cite{Taylor_Forms_Limits}.
+Because Formula \eqref{eqn: sum variance} comes from variance definition, Formula \eqref{eqn: Taylor 1d variance} does not contain dependence problem, in contrast to Taylor expansion using interval arithmetic \cite{Interval_Analysis}\cite{Taylor_Models}\cite{Taylor_Forms_Limits}.
+If $\delta x$ is replaced by $\tilde{x} - x$, the major difference between Formula \eqref{eqn: Taylor 1d variance} and the equation for interval Taylor expansion \cite{Taylor_Models}\cite{Taylor_Forms_Limits} is the distribution-specific factor $\zeta(m+n) - \zeta(m) \zeta(n)$.
 
 When all inputs satisfy the uncorrelated uncertainty condition, statistical Taylor expansion traces dependencies through the intermediate steps.
 Some typical examples of dependency tracing:
@@ -1081,7 +1153,7 @@ Because the result of comparison depends on threshold probability which is appli
 \fi
 
 
-\section{Verification}
+\section{Validation}
 \label{sec: validation}
 
 Analytic functions or algorithms with precisely known results are used to evaluate the outputs of variance arithmetic based on the following statistical properties: 
@@ -1123,14 +1195,13 @@ For the value test, the \emph{error slope}---defined as the slope of error devia
 \section{Polynomial}
 \label{sec: polynomial}
 
-\iffalse
 Formula \eqref{eqn: polynomial Taylor} presents polynomial Taylor expansion:
 \begin{align}
 \label{eqn: polynomial Taylor}
 \sum_{j=0}^{N} c_j (x + \tilde{x})^j &= \sum_{j=0}^{N} \tilde{x}^{j} P_j, \quad
 	P_j \equiv \sum_{k=0}^{N-j} x^k c_{j + k} \begin{pmatrix} j + k \\ j \end{pmatrix};
 \end{align}
-\fi
+
 Because the variance computation for $N$-order polynomial requires moments up to order $2N$, $N$ can reach only half of the maximal expansion order of Formula \eqref{eqn: Taylor 1d variance}, for example, $N = 224 = 448/2$ for $\zeta(2n,5)$ of Gaussian input uncertainty.
 
 \subsection{Residual Error}
@@ -1964,6 +2035,41 @@ Table \ref{tbl: fft error stats} shows the measured average error deviation for 
 The Linear/Library rows stand out with large reverse error deviations, consistent with the corresponding noise thresholds of $10^{-3}$ in Table \ref{tbl: ideal coverage}.
 In other cases, the average error deviations are close to $1$ while the error slopes are close to $-1$.
 
+
+\subsection{Comparison to Interval Arithmetic}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Reverse_Uncertainty_Ratio.pdf}
+\captionof{figure}{
+The ratio of the interval range to the uncertainty deviation (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis) for the reverse transformations of Sin/Cos signals computed using the Quart sine function.
+}
+\label{fig: FFT_Reverse_Uncertainty_Ratio}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{FFT_Reverse_Range_Ratio.pdf}
+\captionof{figure}{
+The ratio of the maximal value error to the interval range (z-axis) versus input uncertainty (x-axis) and FFT order (y-axis) for the reverse transformations of Sin/Cos signals computed using the Quart sine function.
+}
+\label{fig: FFT_Reverse_Uncertainty_Ratio}
+\end{figure}
+
+
+
+It is worthwhile to compare statistical Taylor expansion with interval arithmetic which is the current de facto standard for uncertainty tracking.
+For this comparison, the input range is either $2\sqrt{3}$-fold of the deviation for Uniform input noise, or $10$-fold of the deviation for Gaussian input noise.
+The above interval ranges do not account for rounding errors when the input noise deviation is less than $10^{-15}$.
+Figure \ref{fig: FFT_Reverse_Uncertainty_Ratio} shows that the ratio of interval range to the uncertainty deviation increases linearly with FFT order.
+As a consequence, Figure \ref{fig: FFT_Reverse_Uncertainty_Ratio} shows that the ratio of of the maximal value error to the interval range decreases linearly with FFT order.
+Such trend of uncertainty over-estimation is independent of input noise type (Gaussian vs Uniform), the choice of interval range (use prefixed fold of deviation or use actual input range), the transformation (forward, reverse, or round-trip), the signal under test (Sin, Cos, or Linear), and the sine function (Quart, or Library).
+While statistical Taylor expansion tracks the output value errors precisely with error deviation of $1$ as shown in Table \ref{tbl: ideal coverage}, exactly the same calculation using interval arithmetic results in over-estimation of uncertainty which is linearly proportional to the amount of calculation.
+Interval arithmetic tracks the worse-case of output range, thus it is unsuitable to track random uncertainty with order-of-magnitude over-estimation which is difficult to quantify in general. 
+Thus, statistical Taylor expansion has much wider applicable range because the uncertainties in most applications are statistical in nature \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
+
+
+
 \section{Recursive Generation of Sine}
 \label{sec: recursion}
 
@@ -2156,7 +2262,8 @@ C_{np} &\equiv \nu(x^n, x^p) = \overline{x^{n+p}} - \overline{x^n}\,\overline{x^
 = \overline{x^n y}, \quad n = 1, \dots, P;
 \end{align}
 \fi
-This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ obey the uncorrelated uncertainty condition, which is incorrect conceptually.
+This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ belongs to different degrees of freedom, which is conceptually incorrect.
+When the data set is partitioned into subsets, the uncorrelated uncertainty condition cannot hold between $x^m$ and $x^n$.
 This example shows that statistical Taylor expansion may impose stronger mathematical constraints.
 
 \begin{align}
@@ -2256,7 +2363,7 @@ Reconciling these two paradigms may present a significant and ongoing challenge.
 Establishing a theoretical foundation for applying statistical Taylor expansion in the absence of a closed-form analytic solution, or when only limited low-order numerical derivatives are available, as in solving differential equations, remains an important direction for future research.
 
 
-\ifdefined\Verbose
+\iffalse
 \subsection{Possible Connections to Quantum Physics}
 
 For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge at all, for example, when the input uncertainty is Laplace \cite{Probability_Statistics}, $\zeta(2n, \infty) = (2n)!$.
