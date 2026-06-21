@@ -7,7 +7,6 @@ import unittest
 
 from indexSin import OUTDIR
 import moment
-import varDbl
 
 
 class TestNormal (unittest.TestCase):
@@ -41,38 +40,14 @@ class TestNormal (unittest.TestCase):
         self.assertAlmostEqual(sMoment[4], 105*(1 - 2.9706089e-03))
         self.assertAlmostEqual(sMoment[5], 945*(1 - 9.1161130e-03))
 
-    def testNormal_withoutVariance(self):
-        mmt = moment.Normal(withVariance=False)
+    def testNormal(self):
+        mmt = moment.Normal()
         self.assertAlmostEqual(mmt.leakage, 5.7330314e-07)
         self.assertEqual(mmt.maxOrder, 448)
         sMoment = TestNormal.preciseNormalMoment5()
         for i, m in enumerate(sMoment):
             self.assertAlmostEqual(mmt[i*2] / m, 1)
             self.assertEqual(mmt[i*2 + 1], 0)
-
-    def testNormal_withVariance(self):
-        mmt = moment.Normal(withVariance=True)
-        self.assertEqual(mmt.maxOrder, 250)
-        sMoment = TestNormal.preciseNormalMoment5()
-        for i, m in enumerate(sMoment):
-            self.assertAlmostEqual(mmt[i*2].value() / m, 1)
-            self.assertEqual(mmt[i*2 + 1], 0)
-
-    def testCompare(self):
-        mmtV = moment.Normal(withVariance=True)
-        self.assertEqual(mmtV.maxOrder, 250)
-        self.assertEqual(mmtV.bounding, 5)
-        mmtF = moment.Normal(withVariance=False)
-        self.assertGreater(mmtF.maxOrder, 250)
-        self.assertEqual(mmtF.bounding, 5)
-        sMoment = TestNormal.preciseNormalMoment5()
-        with open(f'{OUTDIR}/Python/Output/NormalMoment_compare.txt', 'w') as f:
-            f.write('Order\tVar Value\tVar Uncertainty\tVar Precison\tVar Diff\tFloat Diff\tFloat Uncertainty\tFloat Precison\n')
-            for n in range(0, mmtV.maxOrder, 2):
-                unc = varDbl.VarDbl(mmtF[n]).uncertainty()
-                f.write(f'{n}\t{mmtV[n].value()}\t{mmtV[n].uncertainty()}\t{mmtV[n].precision()}'
-                        f'\t{mmtV[n].value() - sMoment[n >> 1] if n < len(sMoment) * 2 else ""}'
-                        f'\t{mmtF[n] - mmtV[n].value()}\t{unc}\t{unc/mmtF[n]}\n')
 
 
 class TestUniform (unittest.TestCase):

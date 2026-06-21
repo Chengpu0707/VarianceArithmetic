@@ -15,12 +15,8 @@ OUTDIR = os.path.dirname(_THIS_DIR)
 
 class SinSource (enum.StrEnum):
     Quart = 'Quart',
-    Full = 'Full',
-    Fixed = 'Fixed',
-    Limit = 'Limit',
     Lib = 'Lib',
     Prec = 'Prec'
-    PrecAdj = 'PrecAdj'
 
 
 class IndexSin:
@@ -34,10 +30,7 @@ class IndexSin:
     _half = 1 << (MAX_ORDER - 1)
 
     _sSinQuart = None
-    _sSinFull = None
-    _sSinFixed = None
     _sSinPrec = None
-    _sSinPrecAdj = None
 
     __slots__ = ['_order', '_sinSource', '_sSin', '_sCos', '_order']
 
@@ -65,48 +58,6 @@ class IndexSin:
                 self._order = IndexSin.MAX_ORDER
                 self._sSin = IndexSin._sSinPrec
                 self._sCos =  None
-            case SinSource.PrecAdj:   
-                '''
-                To avoid extra rounding error due to casting from long double to double in C++,
-                '''
-                if not IndexSin._sSinPrecAdj:
-                    replaces = 0
-                    improves = 0
-                    ignores = 0
-                    corrects = 0
-                    IndexSin._sSinPrecAdj = IndexSin.read(SinSource.Prec)
-                    for i in range(len(IndexSin._sSinPrecAdj)):
-                        if i > (IndexSin._half >> 1):
-                            break
-                        j = len(IndexSin._sSinPrecAdj) - 1 - i
-                        if IndexSin._sSinQuart:
-                            sin = IndexSin._sSinQuart[i]
-                            cos = IndexSin._sSinQuart[j]
-                        else:
-                            sin = varDbl.VarDbl(math.sin(math.pi * i /IndexSin._size))
-                            cos = varDbl.VarDbl(math.cos(math.pi * i /IndexSin._size))
-                        errPrec = IndexSin._sSinPrecAdj[i] ** 2 + IndexSin._sSinPrecAdj[j] ** 2 - 1.0
-                        errQuart = sin ** 2 + cos ** 2 - 1.0
-                        if errPrec.value() and (not errQuart.value()):
-                            IndexSin._sSinPrecAdj[i] = varDbl.VarDbl(sin)
-                            IndexSin._sSinPrecAdj[j] = varDbl.VarDbl(cos)
-                            replaces += 2
-                        elif abs(errPrec.value()) > errPrec.uncertainty():
-                            IndexSin._sSinPrecAdj[i] = varDbl.VarDbl(sin)
-                            IndexSin._sSinPrecAdj[j] = varDbl.VarDbl(cos)
-                            improves += 2
-                        elif (abs(IndexSin._sSinPrecAdj[i].value() - sin) > math.ulp(sin.value())) or \
-                             (abs(IndexSin._sSinPrecAdj[j].value() - cos) > math.ulp(cos.value())):
-                            if (not errPrec) and errQuart.value():
-                                ignores += 2
-                            else:
-                                IndexSin._sSinPrecAdj[i] = varDbl.VarDbl(sin)
-                                IndexSin._sSinPrecAdj[j] = varDbl.VarDbl(cos)
-                                corrects += 2
-                    print(f'for {len(IndexSin._sSinPrecAdj)} sin/cos values in PrecAdj: replaces={replaces}, improves={improves}, corrects={corrects}, ignores={ignores}')
-                self._order = IndexSin.MAX_ORDER
-                self._sSin = IndexSin._sSinPrecAdj
-                self._sCos =  None
             case SinSource.Quart:
                 if not IndexSin._sSinQuart:
                     quart = IndexSin._half >> 1
@@ -116,26 +67,6 @@ class IndexSin:
                 self._order = IndexSin.MAX_ORDER
                 self._sSin = IndexSin._sSinQuart
                 self._sCos =  None
-            case SinSource.Full:
-                if not IndexSin._sSinFull:
-                    sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(IndexSin._size)]
-                    IndexSin._sSinFull = tuple([varDbl.VarDbl(v) for v in sSin])
-                self._order = IndexSin.MAX_ORDER
-                self._sSin = IndexSin._sSinFull
-                self._sCos =  None
-            case SinSource.Fixed:
-                if not IndexSin._sSinFixed:
-                    sSin = [math.sin(math.pi * i /IndexSin._size) for i in range(IndexSin._size)]
-                    IndexSin._sSinFixed = tuple([varDbl.VarDbl(v, math.ulp(1.)) for v in sSin])
-                self._order = IndexSin.MAX_ORDER
-                self._sSin = IndexSin._sSinFixed
-                self._sCos =  None
-            case SinSource.Limit:
-                if not sCosSin:
-                    raise RuntimeError('No sCosSin for SinSource.Limit')
-                self._order = IndexSin.validateSize(len(sCosSin) >> 1)
-                self._sCos = sCosSin[::2] + [-sCosSin[0]]
-                self._sSin = sCosSin[1::2]
             case SinSource.Lib:
                 self._order = None
                 self._sSin = None
@@ -199,7 +130,7 @@ class IndexSin:
         size = 1 << order
         div = freq // size
         rem = freq % size
-        if ((self.sinSource == SinSource.Prec) or (self.sinSource == SinSource.PrecAdj) or (self.sinSource == SinSource.Quart)) \
+        if ((self.sinSource == SinSource.Prec) or (self.sinSource == SinSource.Quart)) \
             and (rem > (size >> 1)):
             rem = size - rem
         if div & 1:
@@ -212,14 +143,6 @@ class IndexSin:
         if self.sinSource == SinSource.Lib:
             v = math.sin(math.pi * freq / (1 << order))
             return varDbl.VarDbl(v)
-        elif self.sinSource == SinSource.Limit:
-            if self._order < order:
-                raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
-            idx = self.get_index(freq, order)
-            if idx >= 0:
-                return self._sSin[idx << (self._order - order)]
-            else:
-                return -self._sSin[(-idx) << (self._order - order)]
         else:
             IndexSin.validateOrder(order)
             idx = self.get_index(freq << (IndexSin.MAX_ORDER - order), IndexSin.MAX_ORDER)
@@ -232,21 +155,6 @@ class IndexSin:
         if self.sinSource == SinSource.Lib:
             v = math.cos(math.pi * freq / (1 << order))
             return varDbl.VarDbl(v)
-        elif self.sinSource == SinSource.Limit:
-            if self._order < order:
-                raise RuntimeError(f'For SinSource.Limit, {self._order} < {order}')
-            '''
-            0->7:0->7, 8:8, 9->15:7->1, 16->23:0->7, 24:8    
-            -1->-7:1-7, -8:8, -9->-15:7->1, -16->23:0->7, -24:8
-            '''
-            freq = abs(freq)
-            freq <<= self._order - order
-            size = 1 << self._order
-            div = freq // size
-            rem = freq % size
-            if div & 1:
-                rem = size - rem
-            return self._sCos[rem]
         else:
             IndexSin.validateOrder(order)
             return self.sin(freq + (1 << (order - 1)), order)

@@ -10,11 +10,8 @@ import functools
 import logging
 import math
 import numpy
-import os
 import random
-import os
 import scipy
-import time
 import unittest
 
 from fft import NoiseType, FFT_Order
@@ -28,7 +25,7 @@ import taylor
 from varDbl import VarDbl
 import varDbl
 
-from testMatrix import Adjugate, TestAdjugate
+from testMatrix import Adjugate
 
 
 SKIP_TEST = True
@@ -46,8 +43,8 @@ class TestNormal (unittest.TestCase):
     MIN_COUNT = 10000
 
     header = 'Samples\tKappa\tCount\tMean\tDeviation\tRange\n'
-    leakPath = f"{OUTDIR}/Python/Output/NormalLeakage.txt"
-    resultPath = f"{OUTDIR}/Python/Output/NormalSamples.txt"
+    boundingPath = f"{OUTDIR}/Python/Output/BoundingLeakage.txt"
+    linearPath = f"{OUTDIR}/Python/Output/NormalSamples.txt"
 
     sSample = None
 
@@ -67,7 +64,7 @@ class TestNormal (unittest.TestCase):
 
 
     @staticmethod
-    def inputLeak(mu:float, sigma:float, kapp:float):
+    def boundingLeakage(mu:float, sigma:float, kapp:float):
         '''
         The sample bounding leakage of normal distribution for the bounding factor {kappa}.
         {mu} is the sample mean, {sigma} is the sample standard deviation.
@@ -75,19 +72,19 @@ class TestNormal (unittest.TestCase):
         return 1 - scipy.special.erf(abs(kapp*sigma - mu) * TestNormal.INV_SQRT2)*0.5 \
                  - scipy.special.erf(abs(kapp*sigma + mu) * TestNormal.INV_SQRT2)*0.5
 
-    def test_inputLeak(self):
+    def test_boundingLeakage(self):
         for k in range(1, 7):
-            self.assertAlmostEqual(k, scipy.special.erfinv(1 - TestNormal.inputLeak(0, 1, k)) * math.sqrt(2))
+            self.assertAlmostEqual(k, scipy.special.erfinv(1 - TestNormal.boundingLeakage(0, 1, k)) * math.sqrt(2))
             
     @unittest.skipIf(SKIP_TEST, 'Ran 1 tests in 83s')
-    def test_input(self):
+    def test_boundingOutput(self):
         TestNormal.initSamples()
         sPrev = {}
-        with open(TestNormal.leakPath, 'w') as f:
+        with open(TestNormal.boundingPath, 'w') as f:
             f.write(TestNormal.header)
             prev = 1
             for k in TestNormal.KAPPAS:
-                sPrev[k] = TestNormal.inputLeak(0, 1, k)
+                sPrev[k] = TestNormal.boundingLeakage(0, 1, k)
                 self.assertLess(sPrev[k], prev)
                 prev = sPrev[k]
                 f.write(f'0\t{k}\t0\t{prev}\t0\t{k}\n')
@@ -97,7 +94,7 @@ class TestNormal (unittest.TestCase):
                 sStat = TestNormal.calcStat(TestNormal.sSample, samples)
                 prev = 1
                 for k in TestNormal.KAPPAS:
-                    sLeak = [TestNormal.inputLeak(mu, sigma, k) for mu, sigma in sStat]
+                    sLeak = [TestNormal.boundingLeakage(mu, sigma, k) for mu, sigma in sStat]
                     mean = numpy.mean(sLeak)
                     self.assertGreater(mean, sPrev[k])
                     self.assertLess(mean, prev)
@@ -106,24 +103,24 @@ class TestNormal (unittest.TestCase):
                     self.assertLess(kapp, k)
                     f.write(f'{samples}\t{k}\t{len(sLeak)}\t{mean}\t{numpy.std(sLeak)}\t{kapp}\n')
                     f.flush()
-        print(f'Finsh writing to {TestNormal.leakPath}')
+        print(f'Finsh writing to {TestNormal.boundingPath}')
 
     @staticmethod
-    def outputLeak(mu:float, sigma:float, kapp:float):
+    def linearLeakage(mu:float, sigma:float, kapp:float):
         '''
         The result leakage of normal distribution for the bounding factor {kappa}.
         {mu} is the sample mean, {sigma} is the sample standard deviation.
         '''
         k1 = abs(mu + kapp*sigma)
         k2 = abs(mu - kapp*sigma)
-        return 1 - scipy.special.erf(k1 * TestNormal.INV_SQRT2)*0.5 + k1*scipy.stats.norm.pdf(k1) \
-                 - scipy.special.erf(k2 * TestNormal.INV_SQRT2)*0.5 + k2*scipy.stats.norm.pdf(k2)
+        return k1*scipy.stats.norm.pdf(k1) / scipy.special.erf(k1 * TestNormal.INV_SQRT2) + \
+               k2*scipy.stats.norm.pdf(k2) / scipy.special.erf(k2 * TestNormal.INV_SQRT2)
     
-    def test_outputLeak(self):
-        self.assertAlmostEqual(TestNormal.outputLeak(0, 1, 5), 1.544050e-05)
+    def test_linearLeakage(self):
+        self.assertAlmostEqual(TestNormal.linearLeakage(0, 1, 5), 1.4867204e-5)
         for k in TestNormal.KAPPAS:
             try:
-                self.assertLess(TestNormal.outputLeak(0, 1, k), TestNormal.outputLeak(0.1, 1, k))
+                self.assertLess(TestNormal.linearLeakage(0, 1, k), TestNormal.linearLeakage(0.1, 1, k))
                 if k < 1.5:
                     self.fail(f'kappa={k} should not pass the test')
             except AssertionError:
@@ -131,8 +128,8 @@ class TestNormal (unittest.TestCase):
                     continue
                 raise
      
-    @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 3171s')
-    def test_output(self):
+    @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 2329s')
+    def test_linearOutput(self):
         '''
         extract the sample count from 1/kappa.
         '''
@@ -140,11 +137,11 @@ class TestNormal (unittest.TestCase):
         RESOLUTION = 1000
         MIN_KAPPA = 1.5
         sPrev = {}
-        with open(TestNormal.resultPath, 'w') as f:
+        with open(TestNormal.linearPath, 'w') as f:
             f.write(TestNormal.header)
             prev = 1
             for k in TestNormal.KAPPAS:
-                sPrev[k] = TestNormal.outputLeak(0, 1, k)
+                sPrev[k] = TestNormal.linearLeakage(0, 1, k)
                 self.assertGreater(sPrev[k], 0)
                 self.assertLess(sPrev[k], 1)
                 self.assertLess(sPrev[k], prev)
@@ -158,7 +155,7 @@ class TestNormal (unittest.TestCase):
                 for k in TestNormal.KAPPAS:
                     if k <= MIN_KAPPA:
                         continue
-                    sLeak = [TestNormal.outputLeak(mu, sigma, k) for mu, sigma in sStat]
+                    sLeak = [TestNormal.linearLeakage(mu, sigma, k) for mu, sigma in sStat]
                     mean = numpy.mean(sLeak)
                     self.assertGreater(mean, 0)
                     self.assertLess(mean, 1)
@@ -169,7 +166,7 @@ class TestNormal (unittest.TestCase):
                     right = rightest = int(k * RESOLUTION)
                     while (left + 1) < right:
                         mid = (left + right) // 2
-                        testLeak = TestNormal.outputLeak(0, 1, mid/RESOLUTION)
+                        testLeak = TestNormal.linearLeakage(0, 1, mid/RESOLUTION)
                         if testLeak > mean:
                             left = mid
                         else:
@@ -183,7 +180,7 @@ class TestNormal (unittest.TestCase):
                     self.assertGreater(k, kappa)
                     f.write(f'{samples}\t{k}\t{len(sLeak)}\t{mean}\t{numpy.std(sLeak)}\t{kappa}\n')
                     f.flush()
-        print(f'Finsh writing to {TestNormal.resultPath}')
+        print(f'Finsh writing to {TestNormal.linearPath}')
 
 
 class TestUniform (unittest.TestCase):
@@ -213,23 +210,23 @@ class TestUniform (unittest.TestCase):
                                                           size = TestUniform.MIN_COUNT * TestUniform.SAMPLES[-1])   
 
     @staticmethod
-    def inputLeak(minR:float, maxR:float):
+    def boundingLeakage(minR:float, maxR:float):
         '''
         The sample bounding leakage of uniform distribution between [-SQRT3, +SQRT3].
         '''
         return (max(maxR - TestUniform.SQRT3, 0) - min(minR + TestUniform.SQRT3, 0)) / (2*TestUniform.SQRT3)
 
     def test_uniformLeak(self):
-        self.assertAlmostEqual(TestUniform.inputLeak(-TestUniform.SQRT3, +TestUniform.SQRT3), 0)
-        self.assertAlmostEqual(TestUniform.inputLeak(-TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.1)
-        self.assertAlmostEqual(TestUniform.inputLeak(-1.2 * TestUniform.SQRT3, TestUniform.SQRT3), 0.1)
-        self.assertAlmostEqual(TestUniform.inputLeak(-1.2 * TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.2)
-        self.assertAlmostEqual(TestUniform.inputLeak(-0.9 * TestUniform.SQRT3, 0.9 * TestUniform.SQRT3), 0)
-        self.assertAlmostEqual(TestUniform.inputLeak(-0.9 * TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.1)
-        self.assertAlmostEqual(TestUniform.inputLeak(-1.2 * TestUniform.SQRT3, 0.9 * TestUniform.SQRT3), 0.1)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-TestUniform.SQRT3, +TestUniform.SQRT3), 0)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.1)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-1.2 * TestUniform.SQRT3, TestUniform.SQRT3), 0.1)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-1.2 * TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.2)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-0.9 * TestUniform.SQRT3, 0.9 * TestUniform.SQRT3), 0)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-0.9 * TestUniform.SQRT3, 1.2 * TestUniform.SQRT3), 0.1)
+        self.assertAlmostEqual(TestUniform.boundingLeakage(-1.2 * TestUniform.SQRT3, 0.9 * TestUniform.SQRT3), 0.1)
 
     @staticmethod
-    def outputLeak(minR:float, maxR:float):
+    def linearLeakage(minR:float, maxR:float):
         '''
         The sample bounding leakage of uniform distribution between [-SQRT3, +SQRT3].
         '''
@@ -244,8 +241,8 @@ class TestUniform (unittest.TestCase):
             for samples in reversed(TestUniform.SAMPLES):
                 print(f'Start calculate samples={samples} for uniform distribution at {datetime.datetime.now()}')
                 sStat = TestUniform.calcRange(TestUniform.sSample, samples)
-                ssLeak = [[TestUniform.inputLeak(minR, maxR) for minR, maxR in sStat],
-                          [TestUniform.outputLeak(minR, maxR) for minR, maxR in sStat]]
+                ssLeak = [[TestUniform.boundingLeakage(minR, maxR) for minR, maxR in sStat],
+                          [TestUniform.linearLeakage(minR, maxR) for minR, maxR in sStat]]
                 for i, sLeak in enumerate(ssLeak):
                     mean = numpy.mean(sLeak)
                     self.assertGreater(mean, 0)

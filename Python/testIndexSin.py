@@ -1,4 +1,4 @@
-"""Unit tests for indexSin.py — checks IndexSin lookup tables (Quart/Full/Fixed
+"""Unit tests for indexSin.py — checks IndexSin lookup tables (Quart/Prec
 sources) for correctness at quadrant boundaries and across the full circle,
 and writes histogram statistics for analysis.
 """
@@ -354,35 +354,6 @@ class TestPrec (TestIndexSin):
         self.assert_cos_3(TestPrec.indexSin)
 
 
-class TestPrecAdj (TestIndexSin):
-    indexSin = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.indexSin = IndexSin(SinSource.PrecAdj)
-
-    def test_index(self):
-        self.assert_get_half_index_1(TestPrecAdj.indexSin)
-        self.assert_get_half_index_2(TestPrecAdj.indexSin)
-        self.assert_get_half_index_3(TestPrecAdj.indexSin)
-
-    def test_sin(self):
-        self.assert_sin_1(TestPrecAdj.indexSin)
-        self.assert_sin_2(TestPrecAdj.indexSin)
-        self.assert_sin_3(TestPrecAdj.indexSin)
-
-    def test_cos(self):
-        self.assert_cos_1(TestPrecAdj.indexSin)
-        self.assert_cos_2(TestPrecAdj.indexSin)
-        self.assert_cos_3(TestPrecAdj.indexSin)
-
-    def test_writeToFile(self):
-        self.writeToFile(TestPrecAdj.indexSin, 10)
-
-    def test_writeToFile_large(self):
-        self.writeToFile(TestPrecAdj.indexSin, 18)
-
-
 class TestQuart (TestIndexSin):
     indexSin = None
 
@@ -411,79 +382,6 @@ class TestQuart (TestIndexSin):
     def test_writeToFile_large(self):
         self.writeToFile(TestQuart.indexSin, 18)
 
-
-
-class TestFull (TestIndexSin):
-    indexSin = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.indexSin = IndexSin(SinSource.Full)
-
-    def test_get_index(self):
-        self.assert_get_index_1(TestFull.indexSin)
-        self.assert_get_index_2(TestFull.indexSin)
-        self.assert_get_index_3(TestFull.indexSin)
-
-    def test_sin(self):
-        self.assert_sin_1(TestFull.indexSin)
-        self.assert_sin_2(TestFull.indexSin)
-        self.assert_sin_3(TestFull.indexSin)
-
-    def test_cos(self):
-        self.assert_cos_3(TestFull.indexSin)
-
-    def test_writeToFile(self):
-        self.writeToFile(TestFull.indexSin, 10)
-
-    def test_writeToFile_large(self):
-        self.writeToFile(TestFull.indexSin, 18)
-
-
-class TestFixed (TestIndexSin):
-    indexSin = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.indexSin = IndexSin(SinSource.Fixed)
-
-    def test_get_index(self):
-        self.assert_get_index_1(TestFixed.indexSin)
-        self.assert_get_index_2(TestFixed.indexSin)
-        self.assert_get_index_3(TestFixed.indexSin) 
-
-    def test_sin(self):
-        self.assert_sin_1(TestFixed.indexSin)
-        self.assert_sin_2(TestFixed.indexSin)
-        self.assert_sin_3(TestFixed.indexSin)
-
-    def test_cos(self):
-        self.assert_cos_3(TestFixed.indexSin)
-
-    def test_writeToFile_large(self):
-        self.writeToFile(TestFixed.indexSin, 18)
-
-
-class TestLimit (TestIndexSin):
-    indexSin = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.indexSin = IndexSin(SinSource.Limit,
-                                sCosSin=[VarDbl(v) for v in (1,0, q3,q1, q2,q2, q1,q3, 0,1, -q1,q3, -q2,q2, -q3,q1)])
-
-    def test_get_index(self):
-        self.assert_get_index_1(TestLimit.indexSin) 
-        self.assert_get_index_2(TestLimit.indexSin) 
-        self.assert_get_index_3(TestLimit.indexSin) 
-
-    def test_sin(self):
-        self.assert_sin_1(TestLimit.indexSin)
-        self.assert_sin_2(TestLimit.indexSin)
-        self.assert_sin_3(TestLimit.indexSin)
-
-    def test_cos(self):
-        TestIndexSin.assert_cos_3(self, TestLimit.indexSin)
 
 class TestLib (TestIndexSin):
     indexSin = None
@@ -536,16 +434,12 @@ class TestIndexSinDiff (unittest.TestCase):
     Compare between different SinSource of IndexSin
     '''
     quart = None
-    full = None
     prec = None
-    precAdj = None
-
+ 
     @classmethod
     def setUpClass(cls):
         cls.quart = IndexSin(SinSource.Quart)
-        cls.full = IndexSin(SinSource.Full)
         cls.prec = IndexSin(SinSource.Prec)
-        cls.precAdj = IndexSin(SinSource.PrecAdj)
 
     def profile(self, testName:str, 
                 funcIdx:typing.Callable[[int, int], VarDbl], funcLib:typing.Callable[[int, int], VarDbl],
@@ -603,12 +497,6 @@ class TestIndexSinDiff (unittest.TestCase):
                      lambda i, order: TestIndexSinDiff.quart.sin(i, order),
                      lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order))))
         
-    def test_SinDiff_Quart_vs_Full(self):
-        self.profile('SinDiff_Quart_vs_Full', 
-                     lambda i, order: TestIndexSinDiff.quart.sin(i, order),
-                     lambda i, order: TestIndexSinDiff.full.sin(i, order),
-                     maxRange=1)
-
 
     def test_SinError_Quart(self):
         self.profile('SinError_Quart', 
@@ -625,12 +513,6 @@ class TestIndexSinDiff (unittest.TestCase):
                      lambda i, order: TestIndexSinDiff.prec.sin(i, order)**2 + TestIndexSinDiff.prec.cos(i, order)**2,
                      lambda i, order: 1)
 
-    def test_SinError_PrecAdj(self):
-        self.profile('SinError_PrecAdj', 
-                     lambda i, order: TestIndexSinDiff.precAdj.sin(i, order)**2 + TestIndexSinDiff.precAdj.cos(i, order)**2,
-                     lambda i, order: 1)
-
-
     def test_CTanDiff_Quart_vs_Lib(self):
         self.profile('CTanDiff_Quart_vs_Lib', 
                      lambda i, order: TestIndexSinDiff.quart.cos(i, order) / TestIndexSinDiff.quart.sin(i, order),
@@ -641,12 +523,6 @@ class TestIndexSinDiff (unittest.TestCase):
                      lambda i, order: VarDbl(math.cos(math.pi *i/(1 << order)) / math.sin(math.pi *i/(1 << order))),
                      lambda i, order: VarDbl(1 /math.tan(math.pi *i/(1 << order))))
 
-    def test_CTanDiff_Quart_vs_Full(self):
-        self.profile('CTanDiff_Quart_vs_Full', 
-                     lambda i, order: TestIndexSinDiff.quart.cos(i, order) / TestIndexSinDiff.quart.sin(i, order),
-                     lambda i, order: TestIndexSinDiff.full.cos(i, order) / TestIndexSinDiff.full.sin(i, order),
-                     maxRange=1)
-        
 
     def test_TanDiff_Quart_vs_Lib(self):
         self.profile('TanDiff_Quart_vs_Lib', 
@@ -658,12 +534,6 @@ class TestIndexSinDiff (unittest.TestCase):
                      lambda i, order: VarDbl(math.sin(math.pi *i/(1 << order)) / math.cos(math.pi *i/(1 << order))),
                      lambda i, order: VarDbl(math.tan(math.pi *i/(1 << order))))
         
-    def test_TanDiff_Quart_vs_Full(self):
-        self.profile('TanDiff_Quart_vs_Full', 
-                     lambda i, order: TestIndexSinDiff.quart.sin(i, order) / TestIndexSinDiff.quart.cos(i, order),
-                     lambda i, order: TestIndexSinDiff.full.sin(i, order) / TestIndexSinDiff.full.cos(i, order),
-                     maxRange=1)
-
 
 
 

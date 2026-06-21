@@ -172,33 +172,6 @@ class Test_FFT_Quart (unittest.TestCase):
                 raise ex  
 
 
-@unittest.skip('No longer needed')
-class Test_FFT_Full (unittest.TestCase):
-    fft = FFT(SinSource.Full)
-
-    def testOrder3Sin(self):
-        q2 = math.sqrt(0.5)
-        sData = [0,0, q2,0, 1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0]
-        sSpec = [0,0, 0,4, 0,0, 0,0, 0,0, 0,0, 0,0, 0,-4] 
-        sRes = Test_FFT_Lib.fft.transform(sData, True)
-        for spec, res in zip(sSpec, sRes):
-            self.assertAlmostEqual(spec, res, delta=math.ulp(2))     
-        sRes = Test_FFT_Lib.fft.transform(sSpec, False)     
-        for datum, res in zip(sData, sRes):
-            self.assertAlmostEqual(datum, res, delta=math.ulp(2))
-
-    def testOrder3Cos(self):
-        q2 = math.sqrt(0.5)
-        sData = [1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0, 0,0, q2,0]
-        sSpec = [0,0, 4,0, 0,0, 0,0, 0,0, 0,0, 0,0, 4,0] 
-        sRes = Test_FFT_Lib.fft.transform(sData, True)
-        for spec, res in zip(sSpec, sRes):
-            self.assertAlmostEqual(spec, res, delta=math.ulp(2))     
-        sRes = Test_FFT_Lib.fft.transform(sSpec, False)     
-        for datum, res in zip(sData, sRes):
-            self.assertAlmostEqual(datum, res, delta=math.ulp(2))
-
-
 class Test_FFT_Lib (unittest.TestCase):
     fft = FFT(SinSource.Lib)
 
@@ -206,10 +179,10 @@ class Test_FFT_Lib (unittest.TestCase):
         q2 = math.sqrt(0.5)
         sData = [0,0, q2,0, 1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0]
         sSpec = [0,0, 0,4, 0,0, 0,0, 0,0, 0,0, 0,0, 0,-4] 
-        sRes = Test_FFT_Full.fft.transform(sData, True)
+        sRes = Test_FFT_Lib.fft.transform(sData, True)
         for spec, res in zip(sSpec, sRes):
             self.assertAlmostEqual(spec, res, delta=math.ulp(2))     
-        sRes = Test_FFT_Full.fft.transform(sSpec, False)     
+        sRes = Test_FFT_Lib.fft.transform(sSpec, False)     
         for datum, res in zip(sData, sRes):
             self.assertAlmostEqual(datum, res, delta=math.ulp(2))
 
@@ -217,10 +190,10 @@ class Test_FFT_Lib (unittest.TestCase):
         q2 = math.sqrt(0.5)
         sData = [1,0, q2,0, 0,0, -q2,0, -1,0, -q2,0, 0,0, q2,0]
         sSpec = [0,0, 4,0, 0,0, 0,0, 0,0, 0,0, 0,0, 4,0] 
-        sRes = Test_FFT_Full.fft.transform(sData, True)
+        sRes = Test_FFT_Lib.fft.transform(sData, True)
         for spec, res in zip(sSpec, sRes):
             self.assertAlmostEqual(spec, res, delta=math.ulp(2))     
-        sRes = Test_FFT_Full.fft.transform(sSpec, False)     
+        sRes = Test_FFT_Lib.fft.transform(sSpec, False)     
         for datum, res in zip(sData, sRes):
             self.assertAlmostEqual(datum, res, delta=math.ulp(2))
 
@@ -260,30 +233,6 @@ class Test_FFT_Step (unittest.TestCase):
         rd0 = fftOrder.ssSpecStep[3][10] * sin
         self.assertEqual(rd0.value(), 1.0000000000000002)
         self.assertEqual(rd0.uncertainty(), 8.366014421717556e-17)
-
-    def test_order3_sin1_PrecAdj(self):
-        '''
-        SinSource.PrecAdj does not mean more precision
-        '''
-        fftSignal = FFT_Signal(SinSource.PrecAdj, SignalType.Sin, 3, 1)
-        fftOrder = FFT_Order(fftSignal, NoiseType.Gaussian, 0, traceSteps=True)
-        self.assertEqual(fftOrder.ssSpecStep[4][10].value(), 0.0)
-        self.assertEqual(fftOrder.ssSpecStep[4][10].uncertainty(), 1.5700924586837754e-16)
-        self.assertEqual(fftOrder.ssSpecStep[4][11].value(), -4.44089209850062616169e-16)
-        self.assertEqual(fftOrder.ssSpecStep[4][11].uncertainty(), 1.5700924586837754e-16)
-
-        sin = fftOrder.idxSin.sin(1, 2)
-        self.assertEqual(sin.value(), 7.07106781186547572737e-01)
-        self.assertEqual(sin.uncertainty(), 6.409875621278547e-17)
-        self.assertEqual(fftOrder.ssSpecStep[3][10].value(), 1.41421356237309514547e+00)
-        self.assertEqual(fftOrder.ssSpecStep[3][10].uncertainty(), 9.06493303673679e-17)
-        self.assertEqual(fftOrder.ssSpecStep[3][11].value(), 1.41421356237309514547e+00)
-        self.assertEqual(fftOrder.ssSpecStep[3][11].uncertainty(), 9.06493303673679e-17)
-
-        # floating point multiplication difference
-        rd0 = fftOrder.ssSpecStep[3][10] * sin
-        self.assertEqual(rd0.value(), 1.0000000000000002)
-        self.assertEqual(rd0.uncertainty(), 1.1102230246251568e-16)
 
     def test_order3_sin1_Quart(self):
         '''
@@ -369,7 +318,7 @@ class Test_FFT_Order (unittest.TestCase):
         self.assertTupleEqual(tuple(sssssAggr.keys()), sOrder)
         for order in sOrder:
             ssssAggr = sssssAggr[order]
-            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Quart, SinSource.Lib))
+            self.assertTupleEqual(tuple(ssssAggr.keys()), (SinSource.Quart, SinSource.Lib, SinSource.Prec))
             for src in ssssAggr.keys():
                 sssAggr = ssssAggr[src]
                 self.assertTupleEqual(tuple(sssAggr.keys()), (NoiseType.Gaussian, NoiseType.White))

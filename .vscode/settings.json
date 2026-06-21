@@ -101,7 +101,7 @@
     "python.testing.pytestArgs": [],
     "python.testing.pytestEnabled": true,
     "files.watcherExclude": {
-        "**/target": true
+        "**/target/**": true
     },
     "claudeCodeChat.permissions.yoloMode": true
 }

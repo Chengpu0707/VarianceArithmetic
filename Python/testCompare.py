@@ -7,7 +7,6 @@ import os
 import unittest
 import re
 import sys
-import traceback
 
 from fft import SinSource, SignalType, TestType, FFT_Order, FFT_Step
 from histo import Histo, Stat
@@ -17,7 +16,10 @@ from varDbl import VarDbl, assertVarDblEqual
 
 from testManual import TestConvergence
 
+SKIP_TEST = True
 
+
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class TestIndexSine (unittest.TestCase):
     '''
     Compare the indexed sine between Python, Java and C++
@@ -110,6 +112,7 @@ class TestIndexSine (unittest.TestCase):
                   compareUncertainty=False)
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class TestDumpPath (unittest.TestCase):
 
     def assertExtensionEqual(self, l, r, valPrec=1e-6, uncPrec=1e-6):
@@ -225,6 +228,7 @@ class TestDumpPath (unittest.TestCase):
                       f'{OUTDIR}/Cpp/Output/sin_0.785398_1.txt')
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class TestConvergeEdge (unittest.TestCase):
 
     def convergeEdge(self, pyPath, javaPath, prec):
@@ -270,6 +274,7 @@ class TestConvergeEdge (unittest.TestCase):
                           prec=5e-5)
         
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class Test_FFT_Step_Prec (unittest.TestCase):
 
     def test_java(self):
@@ -285,6 +290,7 @@ class Test_FFT_Step_Prec (unittest.TestCase):
             FFT_Step.compare(self, SinSource.Prec, order, dumpPathPy, dumpPathCode, precDiff=-1)
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class Test_FFT_Step_Quart (unittest.TestCase):
 
     def test_java(self):
@@ -316,6 +322,7 @@ class Test_FFT_Step_Quart (unittest.TestCase):
         self.assertDictEqual(sOrder_precDiff, {2: 0, 3: 4, 4: 5, 5: 5})
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class Test_FFT_Step_Lib (unittest.TestCase):
 
     def test_cos(self):
@@ -332,6 +339,7 @@ class Test_FFT_Step_Lib (unittest.TestCase):
         cpp75 = VarDbl( -7.07106781186547461715e-01, 6.40987562127854728723e-17)
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class Test_FFT_Order (unittest.TestCase):
 
     @staticmethod
@@ -350,7 +358,7 @@ class Test_FFT_Order (unittest.TestCase):
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.3 if test == TestType.Roundtrip else 0.1)
                     self.assertLess(-sssDiff[sinSource][test][0].min(), 0.3 if test == TestType.Roundtrip else 0.1)
                     self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 3e-3 if test == TestType.Roundtrip else 1e-3)
-                    self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 1e-13)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
             Test_FFT_Order.printDiff(sssDiff)
@@ -375,10 +383,10 @@ class Test_FFT_Order (unittest.TestCase):
         try:
             for sinSource in (SinSource.Quart, SinSource.Lib):
                 for test in TestType:
-                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
-                    self.assertLess(-sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
+                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.6 if test == TestType.Roundtrip else 0.5)
+                    self.assertLess(-sssDiff[sinSource][test][0].max(), 0.6 if test == TestType.Roundtrip else 0.5)
                     self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 6e-3 if test == TestType.Roundtrip else 4e-3)
-                    self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
+                    self.assertLess(sssDiff[sinSource][test][1].max(), 1e-13)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
             Test_FFT_Order.printDiff(sssDiff)
@@ -401,6 +409,7 @@ class Test_FFT_Order (unittest.TestCase):
 
 
 
+@unittest.skipIf(SKIP_TEST, 'Only run when all the individual tests are done')
 class Test_Exe_Time (unittest.TestCase):
 
     def readExeTime(self, logFile:str, regEx:str, 

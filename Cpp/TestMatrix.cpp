@@ -150,22 +150,45 @@ void testRandomMatrix() {
     (void) d;
 }
 
+// Single-pass matrix analysis equivalent to Python/runMatrixAnalysis.py:
+// sweeps (size, noise) cells from size 4..9 across 20 noise levels
+// (0 plus 1e-17..1e1), generates ~1000/size^2 random matrices plus one Hilbert
+// per cell, and writes MatrixCondition_4_10.txt and AdjMatrix_4_10.txt under
+// Cpp/Output. The conversion lives in Matrix::runMatrixAnalysis (Matrix.h);
+// this entry point matches the Python driver's defaults.
+void dumpMatrix() {
+    const size_t minSize     = 4;
+    const size_t maxSize     = 10;   // exclusive
+    const size_t targetCells = 1000;
+    const std::string outDir = "Output";
 
-int main() {
-    testConstruction();
-    testGetSet();
-    testDetermOne();
-    testDetermIdentity();
-    testDetermZero();
-    testDetermDiagonal();
-    testDeterm2x2();
-    testDeterm3x3();
-    testDeterm4x4UpperTri();
-    testAdjugate2x2();
-    testAdjugateIdentity();
-    testAdjugateRoundtrip3x3();
-    testDetermPropagatesVariance();
-    testRandomMatrix();
-    std::cout << "All Matrix tests are successful";
+    std::cout << "Matrix analysis: sizes [" << minSize << ", " << maxSize
+              << "), targetCells=" << targetCells
+              << ", output=" << outDir << '\n';
+    Matrix::runMatrixAnalysis(minSize, maxSize, targetCells,
+                              Matrix::defaultNoises(), outDir);
+    std::cout << "Matrix analysis complete\n";
+}
+
+
+int main(int argc, char* argv[]) {
+    if (argc == 1) {
+        testConstruction();
+        testGetSet();
+        testDetermOne();
+        testDetermIdentity();
+        testDetermZero();
+        testDetermDiagonal();
+        testDeterm2x2();
+        testDeterm3x3();
+        testDeterm4x4UpperTri();
+        testAdjugate2x2();
+        testAdjugateIdentity();
+        testAdjugateRoundtrip3x3();
+        testDetermPropagatesVariance();
+        testRandomMatrix();
+        std::cout << "All Matrix tests are successful";
+    } else if ((argc == 2) && (std::string(argv[1]) == "Test"))
+        dumpMatrix();
     return 0;
 }

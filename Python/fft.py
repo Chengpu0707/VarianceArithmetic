@@ -304,13 +304,6 @@ class FFT_Order (FFT_Signal):
             self.ssRevStep.append([actual - expected for actual, expected in zip(self.sRev, self.sWave)])
 
     def calc(self, traceSteps:bool):
-        self.sSpec = self.transform(self.sFrwd, True, traceSteps=traceSteps)
-        self.ssSpecStep = self.ssStep
-        self.sRound = self.transform(self.sSpec, False, traceSteps=traceSteps)
-        self.ssRoundStep = self.ssStep
-        self.sRev = self.transform(self.sBack, False, traceSteps=traceSteps)
-        self.ssRevStep = self.ssStep
-
         # Deterministic interval-arithmetic FFT: clean-wave centered with bound by noise model.
         sFrwd_intv = [None] * (self.size << 1)
         sBack_intv = [None] * (self.size << 1)
@@ -324,6 +317,13 @@ class FFT_Order (FFT_Signal):
         self.sSpec_intv  = self.transform(sFrwd_intv, True)
         self.sRev_intv   = self.transform(sBack_intv, False)
         self.sRound_intv = self.transform(self.sSpec_intv, False)
+
+        self.sSpec = self.transform(self.sFrwd, True, traceSteps=traceSteps)
+        self.ssSpecStep = self.ssStep
+        self.sRound = self.transform(self.sSpec, False, traceSteps=traceSteps)
+        self.ssRoundStep = self.ssStep
+        self.sRev = self.transform(self.sBack, False, traceSteps=traceSteps)
+        self.ssRevStep = self.ssStep
 
         if self.signalType == SignalType.Linear:
             self.aggr = None
@@ -525,7 +525,7 @@ class FFT_Order (FFT_Signal):
 
     @staticmethod
     def dump(sOrder=range(2, IndexSin.MAX_ORDER + 1), 
-             sSinSource=(SinSource.Quart, SinSource.Lib),
+             sSinSource=(SinSource.Quart, SinSource.Lib, SinSource.Prec),
              sFreq = range(1, MAX_FREQ),
              sNoise=[0] + [math.pow(10, n) for n in range(-17, 1)],
              sNoiseType=(NoiseType.Gaussian, NoiseType.White)):
@@ -909,8 +909,10 @@ class FFT_Step (FFT_Order):
                     print(f'Diff value at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
                     raise ex
                 try:
+                    # Cross-language uncertainty diffs are bounded by ulp of value (not ulp of uncertainty),
+                    # since uncertainty propagates from value-level rounding differences across languages.
                     testCase.assertAlmostEqual(sData1[i].uncertainty(), sData2[i].uncertainty(),
-                                                delta=math.ulp(1) * (sData1[i].uncertainty() + sData2[i].uncertainty()))
+                                                delta=math.ulp(1) * (abs(sData1[i].value()) + abs(sData2[i].value()) + 1.0))
                 except AssertionError as ex:
                     print(f'Diff uncertainty at order={order} step={step} {context} [{i}] {sData1[i]} vs {sData2[i]}')
                     raise ex

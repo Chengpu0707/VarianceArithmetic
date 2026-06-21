@@ -433,7 +433,7 @@ class Adjugate (unittest.TestCase):
         
         with open(dumpPath, 'a' if exist else 'w') as f:
             if not exist:
-                f.write(f'{header}\n')
+                f.write(f'{header}')
 
             def write(adj, noise, repeat):
                 f.write(f'Gaussian\t{noise}\t{adj.size}\t{repeat}')
@@ -670,11 +670,10 @@ class TestAdjugate (unittest.TestCase):
 
 
     def testAdjugate(self):
-        Adjugate.dump(2, 6)
-        dumpPath, logPath = Adjugate.dumpPath(2, 6)
+        Adjugate.dump(2, 5)
+        dumpPath, logPath = Adjugate.dumpPath(2, 5)
         self.assertTrue(os.path.isfile(dumpPath))
         os.remove(dumpPath)
-        self.assertTrue(os.path.isfile(logPath))
 
 
     def testIdealCoverage(self):

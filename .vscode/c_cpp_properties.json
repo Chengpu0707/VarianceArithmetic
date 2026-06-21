@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+            "intelliSenseMode": "windows-gcc-x64",
+            "cppStandard": "c++23",
+            "cStandard": "c17",
+            "includePath": [
+                "${workspaceFolder}/Cpp/**",
+                "${workspaceFolder}/Fitnesse/cppslim/include/**"
+            ],
+            "defines": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/Cpp",
+                    "${workspaceFolder}/Fitnesse/cppslim/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}

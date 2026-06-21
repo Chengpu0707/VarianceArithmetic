@@ -53,12 +53,10 @@ public:
     enum SinSource {
         Prec,
         Quart,
-        Full,
-        Fixed,
         Lib,
     };
 #if __cplusplus >= 202002L
-    constexpr static const std::array<std::string, 5> sSinSource{"Prec", "Quart", "Full", "Fixed", "Lib"};
+    constexpr static const std::array<std::string, 3> sSinSource{"Prec", "Quart", "Lib"};
     constexpr static const std::string sinSourceName(SinSource sinSouce) { return sSinSource[static_cast<size_t>(sinSouce)]; }
 #if __cplusplus >= 202302L
     constexpr
@@ -116,8 +114,6 @@ private:
     const std::vector<VarDbl>& _sSin;
 
     static std::vector<VarDbl> _sSinQuart;
-    static std::vector<VarDbl> _sSinFull;
-    static std::vector<VarDbl> _sSinFixed;
     static std::vector<VarDbl> _sSinLib;
     static std::vector<VarDbl> _sSinPrec;
 
@@ -127,13 +123,11 @@ private:
 };
 
 std::vector<VarDbl> IndexSin::_sSinQuart;
-std::vector<VarDbl> IndexSin::_sSinFull;
-std::vector<VarDbl> IndexSin::_sSinFixed;
 std::vector<VarDbl> IndexSin::_sSinLib;
 std::vector<VarDbl> IndexSin::_sSinPrec;
 
 #if __cplusplus < 202002L
-const char* const IndexSin::sSinSource[5] = {"Prec", "Quart", "Full", "Fixed", "Lib"};
+const char* const IndexSin::sSinSource[5] = {"Prec", "Quart", "Lib"};
 #endif
 #if __cplusplus < 201103L
 const unsigned char IndexSin::MIN_ORDER = 1;
@@ -145,10 +139,6 @@ inline const std::vector<VarDbl>& IndexSin::validateSinSource(SinSource sinSourc
     switch (sinSource) {
     case Quart:
         return _sSinQuart;
-    case Full:
-        return _sSinFull;
-    case Fixed:
-        return _sSinFixed;
     case Lib:
         return _sSinLib;
     case Prec:
@@ -304,18 +294,9 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
                     if (ulpVal > 0)
                         histo.addAt((val - ((double) val)) /ulpVal, half - i);
                 }
-#if __cplusplus >= 201103L
-                _sSinFull.emplace_back(value);
-                _sSinFixed.emplace_back(value, VarDbl::ulp(1.));
-#else
-                _sSinFull.push_back(VarDbl(value));
-                _sSinFixed.push_back(VarDbl(value, VarDbl::ulp(1.)));
-#endif
             }
             assert(_sSinPrec.size() == (half + 1));
             assert(_sSinQuart.size() == (half + 1));
-            assert(_sSinFull.size() == size);
-            assert(_sSinFixed.size() == size);
             std::ofstream ofs("Output/Prec.histo.txt");
             ofs << "Count\tMean\tDev\tMin\tMinAt\tMax\tMaxAt\tLower Count\tUpper Count" << histo.header() << "\n";
             ofs << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
@@ -326,12 +307,8 @@ inline IndexSin::IndexSin(SinSource sinSource, const std::string& dumpDir) :
         } else {
             read(_sSinPrec, Prec, dumpDir);
             read(_sSinQuart, Quart, dumpDir);
-            read(_sSinFull, Full, dumpDir);
-            read(_sSinFixed, Fixed, dumpDir);
             _sSinPrec.erase(_sSinQuart.begin() + half + 1, _sSinQuart.end());
             _sSinQuart.erase(_sSinPrec.begin() + half + 1, _sSinPrec.end());
-            _sSinFull.erase(_sSinFull.begin() + size, _sSinFull.end());
-            _sSinFixed.erase(_sSinFixed.begin() + size, _sSinFixed.end());
         }
         assert(_sSinLib.empty());
     }

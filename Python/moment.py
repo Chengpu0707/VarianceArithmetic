@@ -13,7 +13,6 @@ import scipy.stats
 import sympy
 
 from indexSin import OUTDIR
-import varDbl
 
 class Moment (abc.ABC):
 
@@ -84,12 +83,10 @@ class Normal (Moment):
                 for i, mmt in enumerate(sMoment):
                     f.write(f'{i*2}\t{mmt}\n')
 
-    def __init__(self, bounding:float=5, maxOrder:int=1000000, withVariance:bool=False):
+    def __init__(self, bounding:float=5, maxOrder:int=1000000):
         self._bounding = bounding
-        filePath = f'{OUTDIR}/Python/Output/NormalMoment_{bounding}_{"var" if withVariance else "float"}.txt'
-        # Header bumped from 'Value' to 'NormalizedValue' to invalidate caches
-        # written before Formula (2.2) was normalized.
-        HEADER = 'Order\tNormalizedValue\tUncertainty\n'
+        filePath = f'{OUTDIR}/Python/Output/NormalMoment_{bounding}.txt'
+        HEADER = 'Order\tMoment\n'
         if os.path.isfile(filePath):
             try:
                 with open(filePath) as f:
@@ -98,24 +95,19 @@ class Normal (Moment):
                         raise NotImplementedError(f'Invalid header {hdr} vs {HEADER}')
                     n = -1
                     prevVal = 0
-                    prevUnc = 0
                     sMoment = []
                     for line in f.readlines():
                         n += 1
-                        nn, val, unc = map(float, line.strip().split('\t'))
+                        nn, val = map(float, line.strip().split('\t'))
                         if nn != n:
                             raise NotImplementedError(f'Invalid index {nn} vs {n}')
                         if (n & 1) == 0:
                             if val <= 0:
                                 raise NotImplementedError(f'Invalid value {val} for index={n}')
-                            if (unc <= 0) or (val/bounding < unc):
-                                raise NotImplementedError(f'Invalid {val}+/-{unc} for index={n}')
-                            if (val <= prevVal) or (unc <= prevUnc):
-                                raise NotImplementedError(f'Invalid {val}+/-{unc} vs {prevVal}+/-{prevUnc} for index={n}')
-                            if withVariance:
-                                sMoment.append(varDbl.VarDbl(val, unc))
-                            else:
-                                sMoment.append(val)
+                            if val <= prevVal:
+                                raise NotImplementedError(f'Invalid {val} vs {prevVal} for index={n}')
+                            sMoment.append(val)
+                            prevVal = val
                         else:
                             if val != 0:
                                 raise NotImplementedError(f'Invalid value {val} for index={n}')
@@ -127,21 +119,13 @@ class Normal (Moment):
 
         term = 2 * scipy.stats.norm.pdf(bounding) * self._bounding
         bounding2 = self._bounding**2
-        if withVariance:
-            term = varDbl.VarDbl(term)
-            bounding2 = varDbl.VarDbl(bounding2)
         sTerm = []
         for n in range(maxOrder):
             try:
                 sTerm.append(term * (1/(2*n + 1)))
-                if withVariance:
-                    if (not math.isfinite(sTerm[-1].value())) or (not math.isfinite(sTerm[-1].variance())):
-                        del sTerm[-1]
-                        break
-                else:
-                    if not math.isfinite(sTerm[-1]):
-                        del sTerm[-1]
-                        break
+                if not math.isfinite(sTerm[-1]):
+                    del sTerm[-1]
+                    break
                 term *= bounding2
             except:
                 break
@@ -152,23 +136,22 @@ class Normal (Moment):
                 sTerm[i] *= 1/(2*i - 1 + 2*j) * bounding2
                 prev = self._sMoment[i]
                 self._sMoment[i] += sTerm[i]
-                if (prev.value() == self._sMoment[i].value()) if withVariance else (prev == self._sMoment[i]):
+                if prev == self._sMoment[i]:
                     n = i
                     break
             if n == 0:
                 break
         # Normalize per Formula (2.2): divide unnormalized moments by ∫ρ dz = 1 - leakage.
-        norm_factor = 1 - self.leakage
+        # Snapshot the 0th moment first; otherwise the first loop iteration sets sMoment[0]
+        # to 1 and the remaining moments would be divided by 1 (no-op).
+        norm_factor = self._sMoment[0]
         for i in range(len(self._sMoment)):
-            self._sMoment[i] = self._sMoment[i] * (1 / norm_factor)
+            self._sMoment[i] = self._sMoment[i] / norm_factor
         with open(filePath, 'w') as f:
             f.write(HEADER)
             for n in range(self.maxOrder):
                 mmt = self[n]
-                if type(mmt) == varDbl.VarDbl:
-                    f.write(f'{n}\t{mmt.value()}\t{mmt.uncertainty()}\n')
-                else:
-                    f.write(f'{n}\t{mmt}\t{math.ulp(mmt)}\n')
+                f.write(f'{n}\t{mmt}\n')
 
     @property
     def bounding(self):

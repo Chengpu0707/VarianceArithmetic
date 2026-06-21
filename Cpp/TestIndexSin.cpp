@@ -120,28 +120,6 @@ void test_neg_rem()
 }
 
 
-void test_Full_Fixed_index()
-{
-    IndexSin idxSin(IndexSin::SinSource::Full);
-    
-    test::assertEqual(idxSin.getIndex(1, 3), 1);
-    test::assertEqual(idxSin.getIndex(4, 3), 4);
-    test::assertEqual(idxSin.getIndex(5, 3), 5);
-    test::assertEqual(idxSin.getIndex(9, 3), -1);
-    test::assertEqual(idxSin.getIndex(12, 3), -4);
-    test::assertEqual(idxSin.getIndex(13, 3), -5);
-    test::assertEqual(idxSin.getIndex(17, 3), 1);
-    
-    test::assertEqual(idxSin.getIndex(-1, 3), -1);
-    test::assertEqual(idxSin.getIndex(-4, 3), -4);
-    test::assertEqual(idxSin.getIndex(-5, 3), -5);
-    test::assertEqual(idxSin.getIndex(-9, 3), 1);
-    test::assertEqual(idxSin.getIndex(-12, 3), 4);
-    test::assertEqual(idxSin.getIndex(-13, 3), 5);
-    test::assertEqual(idxSin.getIndex(-17, 3), -1);
-}
-
-
 void test_Quart_index()
 {
     IndexSin idxSin(IndexSin::SinSource::Quart);
@@ -206,52 +184,6 @@ void test_Quart_cos()
     test::assertAlmostEqual(indexSin.cos(-3, 3).value(), q1);
 }
 
-void test_Full_sin()
-{
-    const IndexSin indexSin(IndexSin::SinSource::Full);
-
-    test::assertAlmostEqual(indexSin.sin(0, 3).value(), 0.);
-    test::assertAlmostEqual(indexSin.sin(1, 3).value(), q1);
-    test::assertAlmostEqual(indexSin.sin(2, 3).value(), q2);
-    test::assertAlmostEqual(indexSin.sin(3, 3).value(), q3);
-    test::assertAlmostEqual(indexSin.sin(4, 3).value(), 1.);
-    test::assertAlmostEqual(indexSin.sin(5, 3).value(), q3);
-    test::assertAlmostEqual(indexSin.sin(6, 3).value(), q2);
-    test::assertAlmostEqual(indexSin.sin(7, 3).value(), q1, ulp(q1)*2);
-    test::assertAlmostEqual(indexSin.sin(8, 3).value(), 0.);
-    test::assertAlmostEqual(indexSin.sin(9, 3).value(), -q1);
-
-    test::assertAlmostEqual(indexSin.sin(-1, 3).value(), -q1);
-    test::assertAlmostEqual(indexSin.sin(-2, 3).value(), -q2);
-    test::assertAlmostEqual(indexSin.sin(-3, 3).value(), -q3);
-    test::assertAlmostEqual(indexSin.sin(-4, 3).value(), -1.);
-    test::assertAlmostEqual(indexSin.sin(-5, 3).value(), -q3);
-    test::assertAlmostEqual(indexSin.sin(-6, 3).value(), -q2);
-    test::assertAlmostEqual(indexSin.sin(-7, 3).value(), -q1, ulp(q1)*2);
-    test::assertAlmostEqual(indexSin.sin(-8, 3).value(), 0.);
-    test::assertAlmostEqual(indexSin.sin(-9, 3).value(), q1);
-}
-
-void test_Full_cos()
-{
-    const IndexSin indexSin(IndexSin::SinSource::Full);
-
-    IndexSin idxSin(IndexSin::SinSource::Full);
-    test::assertAlmostEqual(indexSin.cos(0, 3).value(), 1.);
-    test::assertAlmostEqual(indexSin.cos(1, 3).value(), q3);
-    test::assertAlmostEqual(indexSin.cos(2, 3).value(), q2);
-    test::assertAlmostEqual(indexSin.cos(3, 3).value(), q1, ulp(q1)*2);
-    test::assertAlmostEqual(indexSin.cos(4, 3).value(), 0.);
-    test::assertAlmostEqual(indexSin.cos(5, 3).value(), -q1);
-    test::assertAlmostEqual(indexSin.cos(6, 3).value(), -q2);
-    test::assertAlmostEqual(indexSin.cos(7, 3).value(), -q3);
-    test::assertAlmostEqual(indexSin.cos(8, 3).value(), -1.);
-
-    test::assertAlmostEqual(indexSin.cos(-1, 3).value(), q3);
-    test::assertAlmostEqual(indexSin.cos(-2, 3).value(), q2);
-    test::assertAlmostEqual(indexSin.cos(-3, 3).value(), q1);
-}
-
 void dump_Quart_indexSin()
 {
     const IndexSin indexSin(IndexSin::SinSource::Quart);
@@ -269,23 +201,6 @@ void dump_Quart_indexSin()
         test::assertAlmostEqual(indexSin.sin(n, order).value(), python.sin(n, order).value());
         test::assertAlmostEqual(indexSin.sin(n, order).uncertainty(), python.sin(n, order).uncertainty());
         test::assertAlmostEqual(indexSin.cos(n, order).value(), python.cos(n, order).value());
-        test::assertAlmostEqual(indexSin.cos(n, order).uncertainty(), python.cos(n, order).uncertainty());
-    }
-}
-
-void dump_Full_indexSin()
-{
-    const IndexSin indexSin(IndexSin::SinSource::Full);
-    test::assertTrue(indexSin.dump(10, "./Output/IndexSin_Full_10.txt"));
-    const IndexSin readback(IndexSin::SinSource::Full, "./Output");
-    const unsigned order = 6;
-    for (size_t n = 0; n <= (1 << order); ++n) {
-        test::assertAlmostEqual(indexSin.sin(n, order).value(), readback.sin(n, order).value());
-        test::assertAlmostEqual(indexSin.cos(n, order).uncertainty(), readback.cos(n, order).uncertainty());
-    }
-    const IndexSin python(IndexSin::SinSource::Full, "../Python/Output");
-    for (size_t n = 0; n <= (1 << order); ++n) {
-        test::assertAlmostEqual(indexSin.sin(n, order).value(), python.sin(n, order).value());
         test::assertAlmostEqual(indexSin.cos(n, order).uncertainty(), python.cos(n, order).uncertainty());
     }
 }
@@ -449,11 +364,6 @@ int main()
     test_Quart_sin();
     test_Quart_cos();
     dump_Quart_indexSin();
-
-    test_Full_Fixed_index();
-    test_Full_sin();
-    test_Full_cos();
-    dump_Full_indexSin();
 
     test_Lib_sin();
     test_Lib_cos();

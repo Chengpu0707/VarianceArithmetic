@@ -65,8 +65,11 @@ class Stat:
     def dev(self):
         if not self._count:
             return float('nan')
-        var = self._sum2 / self._count - self.mean()**2
-        return math.sqrt(var) if var >= 0 else 0.0        
+        try:
+            var = self._sum2 / self._count - self.mean()**2
+            return math.sqrt(var) if var >= 0 else 0.0
+        except OverflowError:
+            return float('inf')
 
 class Histo:
     '''

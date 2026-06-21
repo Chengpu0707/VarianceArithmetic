@@ -1089,7 +1089,7 @@ Gaussian noise with a deviation of $0.2$ is added to the slopes, except for the 
 In Figure \ref{fig: Moving_Linear_Fit_Value}, the fitted values of $\alpha$ and $\beta$ follow the expected behavior, exhibiting a characteristic delay of $H$ in $j$.
 
 
-\subsection{Variance Adjustment} 
+\subsection{Variance Adjustment}
 
 \begin{align}
 \label{eqn: moving-window linear regression variance 0}
@@ -1098,6 +1098,7 @@ In Figure \ref{fig: Moving_Linear_Fit_Value}, the fitted values of $\alpha$ and 
 \delta^2 \beta_{j} &= \sum_{X=-H}^{H} X^2 (\delta Y_{j-H+X})^2;
 \end{align}
 In Figure \ref{fig: Moving_Linear_Fit_Value}, directly applying Formulas \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1} results in quadratic growth for both $\delta \alpha$ and $\delta \beta$, because the multiple usage of the same input introduces the dependency problem.
+Figure \ref{fig: Moving_Linear_Fit_Value} shows that the variance calculation has a much stronger dependency problem than the value calculation in this case.
 Therefore, $\delta \alpha$ and $\delta \beta$ need to be calculated using Formulas \eqref{eqn: moving-window linear regression variance 0} and \eqref{eqn: moving-window linear regression variance 1}, in which Formula \eqref{eqn: moving-window linear regression variance 1} is no longer windowed because the windowed formula is more computationally expensive.
 After this adjustment, $\delta \alpha$ and $\delta \beta$ both become nearly constant.
 
@@ -1603,7 +1604,7 @@ Conventional least-squares regression \cite{Statistical_Methods}\cite{Probabilit
 
 \subsection{Zeroth Order Regression}
 
-Suppose a data set contains $N$ samples $X_j, j = 1, 2, \dots, N$, to fit with a parameter $c_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - c_0)^2 /N$ is minimized.
+Suppose a data set contains $N$ samples $X_j, j = 1, 2, \dots, N$, to fit by a parameter $c_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - c_0)^2 /N$ is minimized.
 The solution is $c_0 = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
 
 \begin{align}
@@ -1612,7 +1613,7 @@ The solution is $c_0 = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{
 \label{eqn: set variance}
 (\delta x)^2 &= \sum_{j} \frac{N_j}{N} \left( (\delta x_j)^2 +  (\overline{x_j} - \overline{x})^2 \right);
 \end{align}
-Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th sub set has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th sub set.
+Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th subset.
 $(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the between-subset variance $(\overline{x_j} - \overline{x})^2$.
 
 
@@ -1637,7 +1638,7 @@ The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Stati
 Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean} to \eqref{eqn: set variance approx} all permit such mixing.
 
 
-\subsection{Linear Regression}
+\subsection{Ordinary Linear Regression}
 
 
 \begin{align}
@@ -1652,7 +1653,7 @@ P(c_1)^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
 \label{eqn: set R2}
 \frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
 \end{align}
-Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1 \dots, N$, to fit with two parameters $Y_j = c_0 + c_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - c_1 X_j - c_0)^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
+Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1, \dots, N$, to fit with two parameters $Y_j = c_0 + c_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - c_1 X_j - c_0)^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
 Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $c_1$ and $c_0$, respectively, which shows that $c_0$ is derived from $c_1$ and thus is worth no further discussion.
 Formula \eqref{eqn: set slope precision} shows that the precision of the slope $P(c_1)$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
 Whether $P(c_1)$ or $R^2$ is the better measure of goodness-of-fit is debatable.
@@ -1662,20 +1663,20 @@ Whether $P(c_1)$ or $R^2$ is the better measure of goodness-of-fit is debatable.
 \nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
 \end{align}
 Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, means $\overline{x_j}$ and $\overline{y_j}$, variances $(\delta x_j)^2$ and $(\delta y_j)^2$, and covariance $\nu(x,y)_j$.
-Formula \eqref{eqn: set mean} provides set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields set $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
+Formula \eqref{eqn: set mean} provides the data set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
 For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be zero, but all $N_j/N$ are required.
 
-Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data set into sub sets in cluster analysis using Formula \eqref{eqn: set slope precision} as the standard.
+Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data set into subsets in cluster analysis using Formula \eqref{eqn: set slope precision} as the standard.
 
 Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
 
 
 
-\subsection{Multi-Dimensional Linear Regression}
+\subsection{Ordinary Multi-Dimensional Linear Regression}
 
 \begin{align}
 \label{eqn: multi residual}
-R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - c_0 - \sum_{m=1}^{M} c_m\, X_{m,i}\right)^2 
+R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - c_0 - \sum_{m=1}^{M} c_m\, X_{m,i}\right)^2
 		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
 \label{eqn: multi slope}
 &\big(c_1, \dots, c_M\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
@@ -1688,9 +1689,8 @@ The one-dimensional linear regression for precise values can be generalized to $
 Formula \eqref{eqn: multi residual} shows the residual definition and minimization.
 Formula \eqref{eqn: multi slope} provides the solution for $c_m$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
 Formula \eqref{eqn: multi intercept} gives the intercept $c_0$, generalizing Formula \eqref{eqn: set intercept}.
-Formula \eqref{eqn: multi slope cov} is the slope covariance, which shows that slopes from different dimensions may be mutually dependent. 
+Formula \eqref{eqn: multi slope cov} is the slope covariance, which shows that slopes from different dimensions may be mutually dependent.
 Such dependency makes slopes sensitive to small changes in input data.
-It can be avoided by rotating the sample space onto its principal axes (perhaps with dimension reduced) \cite{Linear_Algebra}, so it is not an inherent dependency problem for multi-dimensional linear regression.
 
 When $\mathbf{C}$ and $\boldsymbol{\nu}$ are assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
 If $x$ is replaced with $x_m$,  Formula \eqref{eqn: set cov} gives correct assembly for $\boldsymbol{\nu}$.
@@ -1708,13 +1708,13 @@ R_P &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - \sum_{p=0}^{P} c_p\, X_i^p)^2; \\
 \label{eqn: poly normal}
 &\sum_{p=0}^{P} c_p\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
 \end{align}
-Conventionally, polynomial regression fits $N$ samples $(X_j, Y_j)$ to $\hat{Y}_j = \sum_{p=0}^{P} c_p\, X_j^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $c_p$ \cite{Numerical_Recipes}.
+Conventionally, ordinary polynomial regression fits $N$ samples $(X_j, Y_j)$ to $y = \sum_{p=0}^{P} c_p x^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $c_p$ \cite{Numerical_Recipes}.
 Differentiating $R_P$ with respect to each $c_n$ yields Equation \eqref{eqn: poly normal}.
 
-The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as a multi-dimensional linear regression with $x^p$ for each dimension.
+The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as an ordinary multi-dimensional linear regression with $x^p$ for each dimension.
 Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
-This equivalence suggests that Formula \eqref{eqn: poly normal} implies that $x^m$ and $x^n$ belongs to different degrees of freedom, which is conceptually incorrect.
-The uncorrelated uncertainty condition cannot hold between $x^m$ and $x^n$.
+This equivalence reveals a conceptual difficulty: Formula \eqref{eqn: poly normal} treats $x^m$ and $x^n$ as independent degrees of freedom, which they are not. 
+For example, the uncorrelated uncertainty condition cannot hold between $x^m$ and $x^n$.
 This example shows that statistical Taylor expansion may impose stronger mathematical constraints.
 
 \begin{align}
@@ -1725,11 +1725,14 @@ c_1 &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2
 \label{eqn: tls slope variance}
 \delta c_1 &= \frac{1}{\sqrt{N}} \sqrt{ \frac{(1 + c_1^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}};
 \end{align}
-The correct approach is to minimize the square distance between $(X_i, Y_i)$ and a point $(x_i, y_i)$ on the polynomial, to result in Equation \eqref{eqn: poly perp foot}. 
-When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} shows that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller $|c_1|$ by ignoring errors of $X_i$ \cite{Linear_Regression}.
+A total regression minimizes the square distance between $(X_i, Y_i)$ and a point $(x_i, y_i)$ on the polynomial, to result in the distance Equation \eqref{eqn: poly perp foot}. 
+When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} show that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller $|c_1|$ by ignoring errors of $X_i$ \cite{Linear_Regression}.
+For total multi-dimensional linear regression, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
+From the perspective of statistical Taylor expansion, total multi-dimensional linear regression is superior to ordinary multi-dimensional linear regression because the former discovers independent dimensions without the dependency problem of the latter.
+Moreover, as a principal component regression \cite{Linear_Algebra}, a total multi-dimensional linear regression can drop a dimension if the corresponding fitting coefficient has precision coarser than $1$.
 
-However, because Equation \eqref{eqn: poly perp foot} has no general solution when the polynomial power $P$ is larger than $2$, Equation \eqref{eqn: poly normal} has to be used for general polynomial regression.
-This compromise introduces dependence problem in the regression.
+However, because Equation \eqref{eqn: poly perp foot} for total polynomial regression has no general solution when the polynomial degree $P$ is larger than $2$, Equation \eqref{eqn: poly normal} for ordinary polynomial regression has to be used.
+This compromise introduces a dependency problem in the regression.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
 
@@ -1770,8 +1773,8 @@ This study presents statistical Taylor expansion and variance arithmetic, which 
 Accordingly, several important questions remain.
 
 Mathematical library functions should be recalculated using variance arithmetic to ensure that each output value is accompanied by its corresponding uncertainty.
-Without this refinement, thne value errors in the library functions can produce unpredictable and potentially significant result errors.
-The attempt to cast a 80-bit sine library into a 64-bit sine library and use the difference as the uncertainty deviation results in slightly worse error deviations.
+Without this refinement, the value errors in the library functions can produce unpredictable and potentially significant result errors.
+The attempt to cast an 80-bit sine library into a 64-bit sine library and use the difference as the uncertainty deviation results in slightly worse error deviations.
 
 The bound moment $\zeta(n, \kappa)$ should be extended to all probability distributions.
 The choice of ideal bounding range $\hat{\kappa}$ should be extended to other distributions.
@@ -1802,7 +1805,7 @@ For example, Formulas \eqref{eqn: sum leakage} and \eqref{eqn: product leakage} 
 
 Figure \ref{fig: Normal_Bounding_Leakage} shows that linear leakage converges toward $0$, with faster convergence at larger $\kappa_s$.
 It indicates that the ideal bound range $\hat{\kappa}$ should be as large as possible just to ensure convergence.
-However, such an approach is valid only after the statistical meaning of ideal leakage --- and how it should inform the choice of ideal bounding --- is clarified..
+However, such an approach is valid only after the statistical meaning of ideal leakage --- and how it should inform the choice of ideal bounding --- is clarified.
 For example, why do different choices of $\hat{\kappa}$ result in different $\delta^2 f$ in Figure \ref{fig: Normal_Bounding_Leakage}?
 
 In variance arithmetic, $\delta^2 f$ in $f \pm \delta f$ is also calculated as an imprecise value.
@@ -1813,6 +1816,12 @@ Conventional numerical algorithms aim to identify optimal computational paths, w
 Reconciling these two paradigms may present a significant and ongoing challenge.
 
 Establishing a theoretical foundation for applying statistical Taylor expansion in the absence of a closed-form analytic solution, or when only limited low-order numerical derivatives are available, as in solving differential equations, remains an important direction for future research.
+
+The modeling error of DFT suggests that a faithful digital implementation of an infinite integration is not possible.
+Likewise, for $\log(x)$ or $x^c$ to converge, $\kappa$ has to be limited, which means the sample count $N$ cannot be infinite.
+In other words, statistical Taylor expansion holds only for limited observations in many cases.
+When the sample count changes (such as the sample count in Young's interference experiment), or the bounding range changes (such as limitation to space or time parameter changes due to a measurement), the result may be different (The interference pattern in Young's interference experiment becomes stronger, or the convergence range for $\log(x)$ or $x^c$ changes with $\kappa$).
+This property may relate to the understanding of quantum physics.
 
 
 
