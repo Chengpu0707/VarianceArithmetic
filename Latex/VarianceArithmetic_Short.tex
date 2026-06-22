@@ -1619,23 +1619,12 @@ $(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the
 
 \subsection{Regression Weight}
 
-\begin{align}
-\label{eqn: set mean approx}
-\overline{x} &= \frac{\sum_{j} \frac{\overline{x_j}}{(\overline{x_j} - \overline{x})^2}}
-		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \varpi; \\
-\label{eqn: set variance approx}
-(\delta x)^2 &\simeq \frac{\sum_{j} \frac{(\delta x_j)^2}{(\overline{x_j} - \overline{x})^2}}
-		{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}} + \frac{1}{\frac{\sum_{j} \frac{1}{(\overline{x_j} - \overline{x})^2}}{J}};
-\end{align}
 If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
-The resulting Equation \eqref{eqn: set mean approx} for $\overline{x}$ includes a non-zero correction $\varpi$ because $(\overline{x_j} - \overline{x})^2 = 1/N_j$ holds only in expectation, and the solution with the smallest $|\varpi|$ is the most likely.
-The $\overline{x}$ solution yields $(\delta x)^2$ in Formula \eqref{eqn: set variance approx}.
-%Equation \eqref{eqn: set mean approx} requires $J > 3$ for sufficient information; for example, with $J = 3$ and $\overline{x_j} \in \{2, 3, 5\}$, setting $\varpi = 0$ yields two solutions $\overline{x} \in \{\frac{10 - \sqrt{7}}{3}, \frac{10 + \sqrt{7}}{3}\}$, leaving the solution indeterminate due to insufficient information.
-When all $\overline{x_j}$ are equal, Equation \eqref{eqn: set mean approx} is singular; in this case $\overline{x} = \overline{x_j}$ and $(\delta x)^2 = \sum_{j} (\delta x_j)^2 /J$, with the latter deviating from Formula \eqref{eqn: set variance} due to lack of information on $N_j$.
+The mean $\overline{x}$ can be solved by maximum likelihood estimation \cite{Probability_Statistics} (as a solution for the equation $\sum_j 1/(\overline{x_j} - \overline{x}) = 0$), after which $(\delta x)^2$ follows from Formula \eqref{eqn: set variance} with $1/(\overline{x_j} - \overline{x})^2$ replacing $N_j$ as the subset weight.
 
 In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
-The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression lacks statistical justification.
-Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values, whereas Formulas \eqref{eqn: set mean} to \eqref{eqn: set variance approx} all permit such mixing.
+The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance}, which are derived from the mean and variance definitions without any assumption on uncertainty distribution.
+Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values.
 
 
 \subsection{Ordinary Linear Regression}
