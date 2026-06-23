@@ -1602,128 +1602,85 @@ Statistical Taylor expansion brings not only numerical enhancement, but also con
 In particular, the value, deviation, and sample count of each variable should be treated jointly in analysis.
 Conventional least-squares regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} violates this principle and is therefore defective.
 
-\subsection{Zeroth Order Regression}
-
-Suppose a data set contains $N$ samples $X_j, j = 1, 2, \dots, N$, to fit by a parameter $c_0$ such that the residual $R_0 \equiv \sum_{j} (X_j - c_0)^2 /N$ is minimized.
-The solution is $c_0 = \overline{x}$ and $R_0 = (\delta x)^2$, where $\overline{x}$ and $(\delta x)^2$ are the mean and variance of the data set.
+\subsection{Ordinary Regression}
 
 \begin{align}
-\label{eqn: set mean}
-\overline{x} &= \sum_{j} \frac{N_j}{N} \overline{x_j}; \\
-\label{eqn: set variance}
-(\delta x)^2 &= \sum_{j} \frac{N_j}{N} \left( (\delta x_j)^2 +  (\overline{x_j} - \overline{x})^2 \right);
+\label{eqn: ordinary polynomial residual}
+R_P &\equiv \frac{1}{N} \sum_{n=1}^N (Y_n - c_0 - \sum_{p=1}^{P} c_p\, X_n^p)^2; \\
+\label{eqn: ordinary polynomial equation}
+&\sum_{p=0}^{P} c_p \overline{x^{p+i}} = \overline{x^i y}, \quad i = 0, 1, \dots, P;
 \end{align}
-Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, mean $\overline{x_j}$, and variance $(\delta x_j)^2$. Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance} give the set mean and variance, respectively, in which $N_j/N$ is the weight of the $j$-th subset.
-$(\delta x)^2$ contains both the within-subset variance $(\delta x_j)^2$ and the between-subset variance $(\overline{x_j} - \overline{x})^2$.
-
-
-\subsection{Regression Weight}
-
-If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
-The mean $\overline{x}$ can be solved by maximum likelihood estimation \cite{Probability_Statistics} (as a solution for the equation $\sum_j 1/(\overline{x_j} - \overline{x}) = 0$), after which $(\delta x)^2$ follows from Formula \eqref{eqn: set variance} with $1/(\overline{x_j} - \overline{x})^2$ replacing $N_j$ as the subset weight.
-
-In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j/N$ as the weight.
-The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set variance}, which are derived from the mean and variance definitions without any assumption on uncertainty distribution.
-Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values.
-
-
-\subsection{Ordinary Linear Regression}
-
+An \emph{ordinary polynomial regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} fits a data set containing $N$ samples $\{X_n, Y_n, n = 1, \dots, N\}$ to a polynomial by minimizing the residual $R_P$ defined in Formula \eqref{eqn: ordinary polynomial residual}, to result in the Equation \eqref{eqn: ordinary polynomial equation} for $c_p,  p = 0, 1, \dots, P$.
 
 \begin{align}
-\label{eqn: set residual}
-R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - c_0 - c_1 X_i)^2; \Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2} ; \\
-\label{eqn: set slope}
-c_1 &= \frac{\nu(x,y)}{(\delta x)^2}; \\
-\label{eqn: set intercept}
-c_0  &= \overline{y} - \overline{x} c_1; \\
-\label{eqn: set slope precision}
-P(c_1)^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
-\label{eqn: set R2}
-\frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
+\label{eqn: ordinary multi residual}
+R_D &\equiv \frac{1}{N} \sum_{n=1}^N \left(Y_n - c_0 - \sum_{d=1}^{D} c_d X_{n, d}\right)^2; \\
+\label{eqn: ordinary multi slope}
+&\boldsymbol{c} \equiv (c_1, \dots, c_D)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: ordinary multi intercept}
+&c_0 = \overline{y} - \sum_{d=1}^{D} c_d\, \overline{x_d}; \\
+\label{eqn: ordinary multi slope cov}
+&\nu(c_d, c_e) = (\mathbf{C}^{-1})_{d,e} \frac{(\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}}{N} \quad d, e = 1, \dots, D;
 \end{align}
-Suppose a data set contains $N$ samples $(X_j, Y_j), j = 1, \dots, N$, to fit with two parameters $Y_j = c_0 + c_1 X_j$ such that the residual $R_1 \equiv \sum_{j} (Y_j - c_1 X_j - c_0)^2 /N$ is minimized, as in Formula \eqref{eqn: set residual}, where $\nu(x,y) \equiv \overline{x y} - \overline{x}\;\overline{y}$ is the covariance between $x$ and $y$.
-Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $c_1$ and $c_0$, respectively, which shows that $c_0$ is derived from $c_1$ and thus is worth no further discussion.
-Formula \eqref{eqn: set slope precision} shows that the precision of the slope $P(c_1)$ is the product of the central limit theorem factor $1/\sqrt{N}$ and the residual-to-signal ratio, while Formula \eqref{eqn: set R2} shows that the conventional goodness-of-fit $R^2$ depends only on the residual-to-signal ratio and not on $N$.
-Whether $P(c_1)$ or $R^2$ is the better measure of goodness-of-fit is debatable.
+When $P=1$, the regression is an \emph{ordinary linear regression}.
+It can be extended to \emph{ordinary multi-dimensional linear regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, which fits a data set containing $N$ samples $\{X_{1, n}, \dots, X_{D, n}, Y_n\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
+\begin{itemize}
+\item $\nu(u, v) \equiv \overline{u v} - \overline{u} \overline{v}$ is the covariance between $u$ and $v$.
+In the special case, $(\delta u)^2 = \nu(u, u)$.
+
+\item $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{d,e}$ as the covariance between dimension $d$ and $e$ of X,
+
+\item  $\boldsymbol{\nu}$ is the covariance vector with $(\boldsymbol{\nu})_d$ as the covariance between the X dimension $d$ and Y.
+\end{itemize}
+Formula \eqref{eqn: ordinary multi slope cov} shows that slopes from different dimensions may be mutually dependent, which is a known weakness of ordinary multi-dimensional linear regression. 
+
+The similarity between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: ordinary multi residual} suggests that the polynomial regression can also be applied as an ordinary multi-dimensional linear regression with $x^p$ for each dimension.
+Conversely, Formula \eqref{eqn: ordinary multi slope} also yields Formula \eqref{eqn: ordinary polynomial equation}, confirming that these two methods are equivalent.
+
+The dependency between $x^d$ and $x^e$ in ordinary polynomial regression is conceptually troublesome for statistical Taylor expansion: the uncorrelated uncertainty condition cannot hold between $x^d$ and $x^e$, so that the result of the polynomial fit could be sensitive to input data.
+For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^d, x^e) \rightarrow (\delta x^d) (\delta x^e)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{d,e}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
+These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
+
+
+
+
+\subsection{Total Regression}
 
 \begin{align}
-\label{eqn: set cov}
-\nu(x,y) = \sum_j \frac{N_j}{N} \big( \nu(x,y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \big);
+\label{eqn: total regression distance}
+0 &= (x_n - X_n) + \left( \sum_{p=0}^{P} c_p x_n^p -  Y_n \right) \sum_{p=1}^{P} c_p p x_n^{p - 1}; 
 \end{align}
-Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, means $\overline{x_j}$ and $\overline{y_j}$, variances $(\delta x_j)^2$ and $(\delta y_j)^2$, and covariance $\nu(x,y)_j$.
-Formula \eqref{eqn: set mean} provides the data set $\overline{x}$ and $\overline{y}$, Formula \eqref{eqn: set variance} yields $(\delta x)^2$ and $(\delta y)^2$, and Formula \eqref{eqn: set cov} gives the set covariance, in which the first term is the within-subset covariance and the second term is the between-subset covariance.
-For the regression, any of $\delta x_j$, $\delta y_j$, and $\nu(x,y)_j$ may be zero, but all $N_j/N$ are required.
-
-Because of its statistical rigor, Formula \eqref{eqn: set cov} can break a data set into subsets in cluster analysis using Formula \eqref{eqn: set slope precision} as the standard.
-
-Conventional regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} is defective because without statistical justification, it ignores the required $N_j/N$ and patches subset uncertainties onto a least-squares framework (Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2}) originally designed for precise values only.
-
-
-
-\subsection{Ordinary Multi-Dimensional Linear Regression}
-
-\begin{align}
-\label{eqn: multi residual}
-R_M &\equiv \frac{1}{N} \sum_{i=1}^N \left(Y_i - c_0 - \sum_{m=1}^{M} c_m\, X_{m,i}\right)^2
-		\Rightarrow R_M = (\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi slope}
-&\big(c_1, \dots, c_M\big)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
-\label{eqn: multi intercept}
-&c_0 = \overline{y} - \sum_{m=1}^{M} \overline{x_m}\, c_m; \\
-\label{eqn: multi slope cov}
-&\nu(c_m,\, c_n) = \frac{1}{N} R_M (\mathbf{C}^{-1})_{m,n} \quad m, n = 1, \dots, M;
-\end{align}
-The one-dimensional linear regression for precise values can be generalized to $M$-dimension linear regression in which Formulas \eqref{eqn: set residual} to \eqref{eqn: set R2} turn into matrix form \cite{Linear_Algebra}.
-Formula \eqref{eqn: multi residual} shows the residual definition and minimization.
-Formula \eqref{eqn: multi slope} provides the solution for $c_m$, in which $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ is the covariance vector $(\boldsymbol{\nu})_m = \nu(x_m, y)$.
-Formula \eqref{eqn: multi intercept} gives the intercept $c_0$, generalizing Formula \eqref{eqn: set intercept}.
-Formula \eqref{eqn: multi slope cov} is the slope covariance, which shows that slopes from different dimensions may be mutually dependent.
-Such dependency makes slopes sensitive to small changes in input data.
-
-When $\mathbf{C}$ and $\boldsymbol{\nu}$ are assembled from subsets, conventional multi-dimensional regression is defective for the same reason as the one-dimensional case.
-If $x$ is replaced with $x_m$,  Formula \eqref{eqn: set cov} gives correct assembly for $\boldsymbol{\nu}$.
-If $y$ is further replaced with $x_n$,  Formula \eqref{eqn: set cov} yields correct assembly for $\mathbf{C}$.
-
-
-
-\subsection{Polynomial Regression}
-
-
-
-\begin{align}
-\label{eqn: poly residual def}
-R_P &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - \sum_{p=0}^{P} c_p\, X_i^p)^2; \\
-\label{eqn: poly normal}
-&\sum_{p=0}^{P} c_p\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P;
-\end{align}
-Conventionally, ordinary polynomial regression fits $N$ samples $(X_j, Y_j)$ to $y = \sum_{p=0}^{P} c_p x^p$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using the least-squares method directly on $c_p$ \cite{Numerical_Recipes}.
-Differentiating $R_P$ with respect to each $c_n$ yields Equation \eqref{eqn: poly normal}.
-
-The residual in Formula \eqref{eqn: poly residual def} suggests that the regression can also be applied as an ordinary multi-dimensional linear regression with $x^p$ for each dimension.
-Conversely, the multi-dimensional regression Formula \eqref{eqn: multi slope} also yields Formula \eqref{eqn: poly normal}, confirming that these two methods are equivalent.
-This equivalence reveals a conceptual difficulty: Formula \eqref{eqn: poly normal} treats $x^m$ and $x^n$ as independent degrees of freedom, which they are not. 
-For example, the uncorrelated uncertainty condition cannot hold between $x^m$ and $x^n$.
-This example shows that statistical Taylor expansion may impose stronger mathematical constraints.
-
-\begin{align}
-\label{eqn: poly perp foot}
-0 &= (x_i - X_i) + \left( \sum_{p=0}^{P} c_p\, x_i^p -  Y_i \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}; \\
-\label{eqn: tls slope}
-c_1 &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2}}{2\,\nu(x,y)}; \\
-\label{eqn: tls slope variance}
-\delta c_1 &= \frac{1}{\sqrt{N}} \sqrt{ \frac{(1 + c_1^2)^2 \bigl((\delta x)^2 (\delta y)^2 - \nu(x,y)^2\bigr)}{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}};
-\end{align}
-A total regression minimizes the square distance between $(X_i, Y_i)$ and a point $(x_i, y_i)$ on the polynomial, to result in the distance Equation \eqref{eqn: poly perp foot}. 
-When $P = 1$, Formulas \eqref{eqn: tls slope} and \eqref{eqn: tls slope variance} show that the least square solution is symmetric between $\delta x$ and $\delta y$, which is an improvement over Formulas \eqref{eqn: set slope} and \eqref{eqn: set slope precision} because the latter bias toward smaller $|c_1|$ by ignoring errors of $X_i$ \cite{Linear_Regression}.
-For total multi-dimensional linear regression, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
+A total regression \cite{Linear_Regression} minimizes the squared distance between $(X_n, Y_n)$ and a point $(x_n, y_n)$ on the polynomial, to result in the distance Equation \eqref{eqn: total regression distance}. 
+For total multi-dimensional linear regression \cite{Linear_Regression}, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
 From the perspective of statistical Taylor expansion, total multi-dimensional linear regression is superior to ordinary multi-dimensional linear regression because the former discovers independent dimensions without the dependency problem of the latter.
 Moreover, as a principal component regression \cite{Linear_Algebra}, a total multi-dimensional linear regression can drop a dimension if the corresponding fitting coefficient has precision coarser than $1$.
 
-However, because Equation \eqref{eqn: poly perp foot} for total polynomial regression has no general solution when the polynomial degree $P$ is larger than $2$, Equation \eqref{eqn: poly normal} for ordinary polynomial regression has to be used.
-This compromise introduces a dependency problem in the regression.
-For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^m, x^n) \rightarrow (\delta x^m) (\delta x^n)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{mn}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
-These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
+However, because Equation \eqref{eqn: total regression distance} for total polynomial regression has no closed-form general solution when the polynomial degree $P$ is larger than $2$, Equation \eqref{eqn: ordinary polynomial equation} for ordinary polynomial regression has to be used.
+This compromise brings back the dependency problem.
+
+
+
+\subsection{Partition and Weight}
+
+All regressions need the mean $\overline{u}$ and covariance $\nu(u, v)$ as inputs, in which $u$ and $v$ can be any of X or Y.
+
+\begin{align}
+\label{eqn: set mean}
+\overline{u} &= \sum_{j} \frac{N_j}{N} \overline{u_j}; \\
+\label{eqn: set covariance}
+\nu(u, v) &= \sum_j \frac{N_j}{N} \left( \nu(u, v)_j + (\overline{u_j} - \overline{u})(\overline{v_j} - \overline{v}) \right);
+\end{align}
+Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, mean $\overline{u_j}$, and covariance $\nu(u_j, v_j)$. 
+Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} give the set mean and covariance, respectively, in which $N_j$ is the weight of the $j$-th subset.
+$\nu(u, v)$ contains both the within-subset covariance $\nu(u, v)_j$ and the between-subset covariance $(\overline{u_j} - \overline{u})(\overline{v_j} - \overline{v})$.
+
+If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
+The mean $\overline{x}$ can be solved by maximum likelihood estimation \cite{Probability_Statistics} (as a solution for the equation $\sum_j 1/(\overline{x_j} - \overline{x}) = 0$), after which $\nu(u, v)$ follows from Formula \eqref{eqn: set covariance} with $1/(\overline{x_j} - \overline{x})^2$ replacing $N_j$ as the subset weight.
+
+In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j$ as the weight.
+The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance}, which are derived from the mean and variance definitions without any assumption on uncertainty distribution.
+Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values.
+
 
 
 
@@ -1980,15 +1937,15 @@ J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
 
-\bibitem{Linear_Regression}
-W. A. Fuller.
-\newblock Measurement Error Models, Wiley Series in Probability and Mathematical Statistics.
-\newblock Wiley, New York. ISBN 978-0-471-86187-4, 1987.
-
 \bibitem{Polynomial Regression}
 G. E. Forsythe.
 \newblock Generation and use of orthogonal polynomials for data-fitting with a digital computer.
 \newblock {\em Journal of the Society for Industrial and Applied Mathematics},  5(2), 74–88, 1957.
+
+\bibitem{Linear_Regression}
+W. A. Fuller.
+\newblock Measurement Error Models, Wiley Series in Probability and Mathematical Statistics.
+\newblock Wiley, New York. ISBN 978-0-471-86187-4, 1987.
 
 \bibitem{Quantum Field}
 Michel Le Bellac, G Barton.
