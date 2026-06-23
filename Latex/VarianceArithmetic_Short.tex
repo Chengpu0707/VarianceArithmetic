@@ -23,7 +23,7 @@
 \newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
 \newcommand\whenaccepted{}
 
-\newcommand{\Verbose}{}
+%\newcommand{\Verbose}{}
 \newcommand{\ManualReference}{}
 %\newcommand{\NoAuthor}{}
 
@@ -65,7 +65,7 @@ By tracking the propagation of input uncertainties through all intermediate step
 This path-independence sets it fundamentally apart from conventional numerical approaches, which are path-dependent.
 This study presents an implementation called variance arithmetic and demonstrates its performance across diverse mathematical applications.
 
-This study also reveals the potentially substantial impact of numerical errors in library functions, the defect of applying input uncertainties as weights in conventional regression, and the modeling error of the discrete Fourier transformation.
+This study also reveals the potentially substantial impact of numerical errors in library functions, the defect of applying input uncertainties as weights in conventional regression, and the implied assumption of discrete Fourier transformation.
 \end{abstract}
 
 % Put keywords appropriate to your paper here, as shown
@@ -899,7 +899,7 @@ The noise of a Hilbert matrix is the ULP of each of its elements, which is sligh
   	|\mathbf{M}_{<i_1 \dots i_m>_n, <[j_1 \dots j_m]>_n}|^2 \prod _{k=1 \dots m} \zeta_{i_k,j_k}(2, \kappa_{i_k,j_k})(\delta x_{i_k, j_k})^2; 
 \end{align}
 Let $<j_1, j_{2} \dots j_m>_n$ denote a selection of $m$ numbers from the sequence of natural numbers $1,2 \dots n$ in sequence, which is a combination.
-Let $[j_1, j_{2} \dots j_m]_n$ and $(-1)^{[j_1, j_{2} \dots j_m]_n}$ denote a permutation of $<[j_1, j_{2} \dots j_m]>_n$ and the corresponding sign \cite{Linear_Algebra}.
+Let $[j_1, j_{2} \dots j_m]_n$ and $(-1)^{[j_1, j_{2} \dots j_m]_n}$ denote a permutation of $<j_1, j_{2} \dots j_m>_n$ and the corresponding sign \cite{Linear_Algebra}.
 Let $\mathbf{M}$ be a square matrix of size $n$ with element $x_{i,j} \pm \delta x_{i,j}, i, j = 1,2\dots n$ at row index $i$ and column index $j$. 
 Formula \eqref{eqn: random determinant} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} give the statistical Taylor expansion of the determinant $|\mathbf{M}|$.
 In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is a sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indexes, $[j_1 \dots j_m]_n$ contains the column indexes \cite{Linear_Algebra}, and $<[j_1, j_{2} \dots j_m]>_n$ denotes the corresponding combination of $[j_1 \dots j_m]_n$. 
@@ -1113,10 +1113,10 @@ This observation suggests that an error deviation exceeding 1 may indicate the p
 
 
 
-\section{FFT (Fast Fourier Transformation)}
+\section{Fast Fourier Transformation (FFT)}
 \label{sec: FFT}
 
-\subsection{DFT (Discrete Fourier Transformation)}
+\subsection{Discrete Fourier Transformation (DFT)}
 
 
 \ifdefined\Verbose
@@ -1124,7 +1124,7 @@ This observation suggests that an error deviation exceeding 1 may indicate the p
 \includegraphics[height=2.5in]{FFT_Unfaithful.pdf} 
 \captionof{figure}{
 The DFT spectrum $H[n]$ of signal $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, as magnitude (y-axis) and phase (embedded y-axis) versus frequency index $n \in [0, 18]$ (x-axis and embedded x-axis) for different signal frequencies $f$ (legend).
-This result agrees with both theoretical formula \cite{Prev_Precision_Arithmetic} and numerical computation from standard mathematical libraries such as \textit{SciPy}.
+This result agrees with both the theoretical formula \cite{Prev_Precision_Arithmetic} and the numerical computation from standard mathematical libraries such as \textit{SciPy}.
 }
 \label{fig: FFT_Unfaithful}
 \end{figure}
@@ -1132,29 +1132,27 @@ This result agrees with both theoretical formula \cite{Prev_Precision_Arithmetic
 
 \begin{align}
 \label{eqn: Fourier forward}
-H[n] &=\sum_{k=0}^{N-1} h[k] \; e^{\frac{i 2\pi}{N} k n}; \\
+H[n] &=\sum_{k=0}^{N-1} h[k] \; e^{\frac{-i 2\pi}{N} k n}; \\
 \label{eqn: Fourier reverse}
-h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{\frac{-i 2\pi}{N} n k};
+h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{\frac{i 2\pi}{N} n k};
 \end{align}
 
 For each signal sequence $h[k]$, where $k = 0, 1, \dots, N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1, \dots, N-1$, along with its inverse transformation, is defined by Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse}, respectively \cite{Numerical_Recipes}.
 As a convention, $k$ denotes the \emph{time index} for the waveform $h[k]$, whereas $n$ represents the \emph{frequency index} for the spectrum $H[n]$.
 
+Although mathematically self-consistent, DFT is not a faithful digital implementation of the continuous Fourier transform (FT).
+When the sampling window is moved from $k = 0,1,\dots,N-1$ to $k = 1,2,\dots,N$ and the new window is re-indexed to internal positions $0,\dots,N-1$, $H[n]$ changes to $e^{+i 2\pi n / N}(H[n] + h[N] - h[0])$, which matches the time-shifting property of FT \cite{Numerical_Recipes} only if $h[0] = h[N]$, or more generally $h[k] = h[k + N\,j]$ \cite{Prev_Precision_Arithmetic}.
+This implied boundary condition causes the modeling errors of DFT besides aliasing when DFT is viewed as the digital implementation of FT \cite{DFT modeling errors}.
 \ifdefined\Verbose
-
-However, DFT is not a faithful digital implementation of the continuous Fourier transform (FT) \cite{Numerical_Recipes}.
-For example, the FT spectrum of a sine function is two Delta distributions at the signal frequencies $\pm f$ with a phases $\pm \pi/2$, respectively \cite{Numerical_Recipes}.
-Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, where $f$ is its signal frequency. 
-The DFT spectra exhibit no modeling error only when the input signal frequency $f$ is an integer, and display varying degrees of modeling errors otherwise.
-Because of these modeling errors, the use of DFT as the digital implementation of FT is questionable, even though such usage is ubiquitous and fundamental to many areas of applied mathematics \cite{Numerical_Recipes}.
-\else
-Although mathematically self-consistent, DFT implies periodic repetition in the time domain \cite{Prev_Precision_Arithmetic}.
+For example, Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function with $f$ as frequency, which has a Dirac intensity with phase $\pi/2$ only if $f$ is an integer, and violates FT in all other cases.
 \fi
+Similar modeling errors must exist for all digital implementations of infinite integrations when the signal is not zero outside the digital integration window.
+
 In this study, Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are taken as the canonical definitions of forward and reverse DFT, without claiming they faithfully implement the continuous FT.
 
 
 
-\subsection{FFT (Fast Fourier Transformation)}
+\subsection{Fast Fourier Transformation (FFT)}
 
 
 
@@ -1610,7 +1608,7 @@ R_P &\equiv \frac{1}{N} \sum_{n=1}^N (Y_n - c_0 - \sum_{p=1}^{P} c_p\, X_n^p)^2;
 \label{eqn: ordinary polynomial equation}
 &\sum_{p=0}^{P} c_p \overline{x^{p+i}} = \overline{x^i y}, \quad i = 0, 1, \dots, P;
 \end{align}
-An \emph{ordinary polynomial regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} fits a data set containing $N$ samples $\{X_n, Y_n, n = 1, \dots, N\}$ to a polynomial by minimizing the residual $R_P$ defined in Formula \eqref{eqn: ordinary polynomial residual}, to result in the Equation \eqref{eqn: ordinary polynomial equation} for $c_p,  p = 0, 1, \dots, P$.
+An \emph{ordinary polynomial regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} fits a data set containing $N$ samples $\{(X_n, Y_n), n = 1, \dots, N\}$ to a polynomial by minimizing the residual $R_P$ defined in Formula \eqref{eqn: ordinary polynomial residual}, to result in the Equation \eqref{eqn: ordinary polynomial equation} for $c_p,  p = 0, 1, \dots, P$.
 
 \begin{align}
 \label{eqn: ordinary multi residual}
@@ -1623,7 +1621,7 @@ R_D &\equiv \frac{1}{N} \sum_{n=1}^N \left(Y_n - c_0 - \sum_{d=1}^{D} c_d X_{n, 
 &\nu(c_d, c_e) = (\mathbf{C}^{-1})_{d,e} \frac{(\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}}{N} \quad d, e = 1, \dots, D;
 \end{align}
 When $P=1$, the regression is an \emph{ordinary linear regression}.
-It can be extended to \emph{ordinary multi-dimensional linear regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, which fits a data set containing $N$ samples $\{X_{1, n}, \dots, X_{D, n}, Y_n\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
+It can be extended to \emph{ordinary multi-dimensional linear regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, which fits a data set containing $N$ samples $\{(X_{1, n}, \dots, X_{D, n}, Y_n)\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
 \begin{itemize}
 \item $\nu(u, v) \equiv \overline{u v} - \overline{u} \overline{v}$ is the covariance between $u$ and $v$.
 In the special case, $(\delta u)^2 = \nu(u, u)$.
@@ -1637,7 +1635,7 @@ Formula \eqref{eqn: ordinary multi slope cov} shows that slopes from different d
 The similarity between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: ordinary multi residual} suggests that the polynomial regression can also be applied as an ordinary multi-dimensional linear regression with $x^p$ for each dimension.
 Conversely, Formula \eqref{eqn: ordinary multi slope} also yields Formula \eqref{eqn: ordinary polynomial equation}, confirming that these two methods are equivalent.
 
-The dependency between $x^d$ and $x^e$ in ordinary polynomial regression is conceptually troublesome for statistical Taylor expansion: the uncorrelated uncertainty condition cannot hold between $x^d$ and $x^e$, so that the result of the polynomial fit could be sensitive to input data.
+The dependency between $x^d$ and $x^e$ in ordinary polynomial regression is conceptually troublesome for statistical Taylor expansion: the uncorrelated uncertainty condition cannot hold between $x^d$ and $x^e$, so that the result of the polynomial fit has dependency problem.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^d, x^e) \rightarrow (\delta x^d) (\delta x^e)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{d,e}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
 These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
 
@@ -1651,6 +1649,8 @@ These conditioning problems are well known and motivate the use of orthogonal po
 0 &= (x_n - X_n) + \left( \sum_{p=0}^{P} c_p x_n^p -  Y_n \right) \sum_{p=1}^{P} c_p p x_n^{p - 1}; 
 \end{align}
 A total regression \cite{Linear_Regression} minimizes the squared distance between $(X_n, Y_n)$ and a point $(x_n, y_n)$ on the polynomial, to result in the distance Equation \eqref{eqn: total regression distance}. 
+Total linear regression is invariant under swapping the roles of $x$ and $y$.
+In contrast, ordinary linear regression minimizes the vertical squared-distance sum rather than the orthogonal distance to the line, and so always yields a lower $|c_1|$ and a larger residual than total linear regression when the fit is not perfect.
 For total multi-dimensional linear regression \cite{Linear_Regression}, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
 From the perspective of statistical Taylor expansion, total multi-dimensional linear regression is superior to ordinary multi-dimensional linear regression because the former discovers independent dimensions without the dependency problem of the latter.
 Moreover, as a principal component regression \cite{Linear_Algebra}, a total multi-dimensional linear regression can drop a dimension if the corresponding fitting coefficient has precision coarser than $1$.
@@ -1936,6 +1936,11 @@ C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
 J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
+
+\bibitem{DFT modeling errors}
+ G.~Heinzel, A.~Rüdiger, and R.~Schilling, 
+\newblock Spectrum and spectral density estimation by the Discrete Fourier transform (DFT), including a comprehensive list of window functions.
+\newblock {\em MPI Hannover Technical Report}, MPI-2002-1.
 
 \bibitem{Polynomial Regression}
 G. E. Forsythe.
