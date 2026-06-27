@@ -1142,13 +1142,13 @@ As a convention, $k$ denotes the \emph{time index} for the waveform $h[k]$, wher
 
 Although mathematically self-consistent, DFT is not a faithful digital implementation of the continuous Fourier transform (FT).
 When the sampling window is moved from $k = 0,1,\dots,N-1$ to $k = 1,2,\dots,N$ and the new window is re-indexed to internal positions $0,\dots,N-1$, $H[n]$ changes to $e^{+i 2\pi n / N}(H[n] + h[N] - h[0])$, which matches the time-shifting property of FT \cite{Numerical_Recipes} only if $h[0] = h[N]$, or more generally $h[k] = h[k + N\,j]$ \cite{Prev_Precision_Arithmetic}.
-This implied boundary condition causes the modeling errors of DFT besides aliasing when DFT is viewed as the digital implementation of FT \cite{DFT modeling errors}.
+This implied boundary condition causes the modeling errors of DFT except aliasing when DFT is viewed as the digital implementation of FT \cite{DFT modeling errors}.
 \ifdefined\Verbose
 For example, Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function with $f$ as frequency, which has a Dirac intensity with phase $\pi/2$ only if $f$ is an integer, and violates FT in all other cases.
 \fi
-Similar modeling errors must exist for all digital implementations of infinite integrations when the signal is not zero outside the digital integration window.
+Similar modeling errors must exist for all digital implementations of infinite integration when the signal does not approach zero outside the digital integration window.
 
-In this study, Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are taken as the canonical definitions of forward and reverse DFT, without claiming they faithfully implement the continuous FT.
+In this study, Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse} are taken as the canonical definitions of forward and reverse DFT, without claiming they faithfully implement FT.
 
 
 
@@ -1623,7 +1623,7 @@ R_D &\equiv \frac{1}{N} \sum_{n=1}^N \left(Y_n - c_0 - \sum_{d=1}^{D} c_d X_{n, 
 When $P=1$, the regression is an \emph{ordinary linear regression}.
 It can be extended to \emph{ordinary multi-dimensional linear regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, which fits a data set containing $N$ samples $\{(X_{1, n}, \dots, X_{D, n}, Y_n)\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
 \begin{itemize}
-\item $\nu(u, v) \equiv \overline{u v} - \overline{u} \overline{v}$ is the covariance between $u$ and $v$.
+\item $\nu(u, v) \equiv \overline{u v} - \overline{u}\, \overline{v}$ is the covariance between $u$ and $v$.
 In the special case, $(\delta u)^2 = \nu(u, u)$.
 
 \item $\mathbf{C}$ is the covariance matrix with $(\mathbf{C})_{d,e}$ as the covariance between dimension $d$ and $e$ of X,
@@ -1672,17 +1672,44 @@ All regressions need the mean $\overline{u}$ and covariance $\nu(u, v)$ as input
 \end{align}
 Suppose the data set of $N$ samples is partitioned into $J$ subsets, where each $j$-th subset has samples $N_j$, mean $\overline{u_j}$, and covariance $\nu(u_j, v_j)$. 
 Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} give the set mean and covariance, respectively, in which $N_j$ is the weight of the $j$-th subset.
-$\nu(u, v)$ contains both the within-subset covariance $\nu(u, v)_j$ and the between-subset covariance $(\overline{u_j} - \overline{u})(\overline{v_j} - \overline{v})$.
+$\nu(u, v)$ contains both the within-subset covariance/variance $\nu(u, v)_j$ and the between-subset covariance/variance $(\overline{u_j} - \overline{u})(\overline{v_j} - \overline{v})$.
 
-If $N_j$ is unknown, and if \emph{the data set is assumed to be independent and identically distributed (i.i.d.)}, then $1/(\overline{x_j} - \overline{x})^2$ can replace $N_j/N$ as the weight, because treating the underlying distribution mean as $\overline{x}$ gives $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ according to the central limit theorem \cite{Probability_Statistics}.
-The mean $\overline{x}$ can be solved by maximum likelihood estimation \cite{Probability_Statistics} (as a solution for the equation $\sum_j 1/(\overline{x_j} - \overline{x}) = 0$), after which $\nu(u, v)$ follows from Formula \eqref{eqn: set covariance} with $1/(\overline{x_j} - \overline{x})^2$ replacing $N_j$ as the subset weight.
+\begin{align}
+\label{eqn: ordinary c_1}
+c_1 &= \frac{\nu(x, y)}{(\delta x)^2} = \frac{\sum_j \frac{N_j}{N} \left( \nu(x, y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \right)}{\sum_j \frac{N_j}{N} \left( (\delta x_j)^2 + (\overline{x_j} - \overline{x})^2 \right)}; 
+\end{align}
+As the simplest case of Formula \eqref{eqn: ordinary multi slope}, Formula \eqref{eqn: ordinary c_1} shows an example of applying Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} to ordinary linear fit of $y = c_0 + c_1\, x$, in which $\delta x_j$ is the deviation for $j$-th subset (but not the deviation $(\delta x_j)/\sqrt{N_j}$ for $j$-th subset mean $x_j$).
+Formula \eqref{eqn: time-series linear regression 1} is a special case of the first part of Formula \eqref{eqn: ordinary c_1} with $X_j \in [-H,\dots,+H]$.
 
-In contrast, $(\delta x_j)^2$ approaches the underlying distribution variance so that $1/(\delta x_j)^2$ cannot replace $N_j$ as the weight.
-The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance}, which are derived from the mean and variance definitions without any assumption on uncertainty distribution.
-Furthermore, using $1/(\delta x_j)^2$ as the weight prevents mixing of precise and imprecise values.
-
-
-
+\begin{align}
+\label{eqn: convention residual}
+&\chi^2(c_0, c_1) = \sum_j N_j \left(\frac{\overline{y_j} - c_0 - c_1 \overline{x_j}}{\delta y_j} \right)^2; \\
+\label{eqn: convention c_1}
+c_1 &= \frac{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \overline{y_j}\right)
+					- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{y_j}\right)}
+			{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j}^2\right)
+				- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right)^2};
+\end{align}
+In contrast, common practice \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} assumes the input uncertainty to be Gaussian, constructs the residual $\chi^2$ as in Formula \eqref{eqn: convention residual}, and finds the extremum over $\{ c_0, c_1 \}$ to result in Formula \eqref{eqn: convention c_1}.
+Formulas \eqref{eqn: convention residual} and \eqref{eqn: convention c_1} reproduce Formulas (15.2.2) and (15.2.6) from the reference \cite{Numerical_Recipes}, respectively, in which $c_0, c_1, \overline{x_j}, \overline{y_j}, \delta y_j/\sqrt{N_j}$ replace $a, b, x_i, y_i, \sigma_i$, respectively.
+The residual difference between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: convention residual}, and the result incompatibility between Formulas \eqref{eqn: ordinary c_1} and \eqref{eqn: convention c_1}, suggest that this common practice differs from ordinary linear regression. 
+Formula \eqref{eqn: ordinary c_1} is derived rigorously and directly from definitions without assumption on underlying input uncertainty distribution.
+Conversely, Formula \eqref{eqn: convention c_1} can approximate Formula \eqref{eqn: ordinary c_1} under the following conditions:
+\begin{itemize}
+\item within-subset covariance/variance is ignored;
+\item $\delta y_j \simeq \delta y$ when $N_j$ is sufficiently large;
+\item $N_j$ is not known, but the subset-mean deviation $\delta y_j/\sqrt{N_j}$ is supplied, so that $N_j/(\delta y_j)^2$ replaces $N_j$ as the subset weight.
+\end{itemize}
+In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which means that Formula \eqref{eqn: convention c_1} applies in a broader context than that of Formula \eqref{eqn: convention residual}.
+Therefore, Formula \eqref{eqn: convention c_1} does not need Formula \eqref{eqn: convention residual} and its unnecessary statistical context.
+However, Formula \eqref{eqn: convention c_1} has several drawbacks:
+\begin{itemize}
+\item ignoring within-subset covariance/variance,
+\item introducing noise from approximating $\delta y_j$ as $\delta y$,
+\item preventing mixing of precise and imprecise values as regression inputs.
+\end{itemize}
+When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_1} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_1} to include within-subset covariance/variance.
+In contrast, statistical Taylor expansion makes no assumption about the underlying input distribution, is much simpler, and has Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} both well suited for mixing of precise and imprecise values as regression inputs.
 
 
 
