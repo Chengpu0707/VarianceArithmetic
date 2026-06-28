@@ -88,6 +88,7 @@ The full FFT test took about a week.
 ## Last Unit tests to run
 
 `testCompare.py` compares the results of C++, Java, and Python for the selected tests, and should be run last.
+After the unit tests for C++, Java, and Python have all completed (so their `Output/` files are populated), turn `SKIP_TEST` to `False` at the top of `Python/testCompare.py` to enable the comparison tests. As with `testManual.py`, the flag should be committed as `True`.
 
 `IPyNb/ExeTime.ipynb` compares the execution speed of C++, Java, and Python.
 

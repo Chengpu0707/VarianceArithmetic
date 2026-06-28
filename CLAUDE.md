@@ -4,25 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build and Test
 
-All C++ tests are compiled and run from the `Cpp/` directory. Each `.cpp` file is a standalone test executable — there is no project file.
+All C++ tests are compiled and run from the `Cpp/` directory. Each `.cpp` file is a standalone test executable — there is no project file. Built executables go to `Cpp/bin/`.
 
 **Build a single test (from `Cpp/`):**
 ```
-g++ -std=c++23 -o TestXxx.exe TestXxx.cpp && ./TestXxx.exe
+g++ -std=c++23 -o bin/TestXxx.exe TestXxx.cpp && ./bin/TestXxx.exe
 ```
 
 **Build across all supported standards:**
 ```
 for std in c++03 c++11 c++17 c++20 c++23; do
-  g++ -std=$std -o TestXxx.exe TestXxx.cpp && ./TestXxx.exe
+  g++ -std=$std -o bin/TestXxx.exe TestXxx.cpp && ./bin/TestXxx.exe
 done
 ```
 
-On Windows, use PowerShell and `& ".\TestXxx.exe"` to run executables (avoids bash segfault issues with MSYS2).
+On Windows, use PowerShell and `& ".\bin\TestXxx.exe"` to run executables (avoids bash segfault issues with MSYS2).
 
-**Required before first run:** create `Cpp/Output/` directory.
+**Required before first run:** create `Cpp/bin/` and `Cpp/Output/` directories.
 
-**FFT test** is extremely slow unoptimized (~18 hours). Use `-O3 -march=native` (~3 hours). Full test: `.\TestFFT.exe Test`.
+**FFT test** is extremely slow unoptimized (~18 hours). Use `-O3 -march=native` (~3 hours). Full test: `.\bin\TestFFT.exe Test`.
 
 **Flaky tests:** `TestStat` (testWhite/testGaussian) uses live random seeds and can occasionally fail due to sampling. Rerun to pass — this is expected and documented.
 
