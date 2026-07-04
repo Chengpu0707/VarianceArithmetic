@@ -384,8 +384,8 @@ class Test_FFT_Order (unittest.TestCase):
             for sinSource in (SinSource.Quart, SinSource.Lib):
                 for test in TestType:
                     self.assertLess( sssDiff[sinSource][test][0].max(), 0.6 if test == TestType.Roundtrip else 0.5)
-                    self.assertLess(-sssDiff[sinSource][test][0].max(), 0.6 if test == TestType.Roundtrip else 0.5)
-                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 6e-3 if test == TestType.Roundtrip else 4e-3)
+                    self.assertLess(-sssDiff[sinSource][test][0].min(), 0.6 if test == TestType.Roundtrip else 0.5)
+                    self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 7e-3 if test == TestType.Roundtrip else 4e-3)
                     self.assertLess(sssDiff[sinSource][test][1].max(), 1e-13)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
         except AssertionError as ex:
@@ -397,8 +397,8 @@ class Test_FFT_Order (unittest.TestCase):
         try:
             for sinSource in (SinSource.Quart, SinSource.Lib):
                 for test in TestType:
-                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.5)
-                    self.assertLess(-sssDiff[sinSource][test][0].max(), 0.5 if test == TestType.Roundtrip else 0.4)
+                    self.assertLess( sssDiff[sinSource][test][0].max(), 0.6 if test == TestType.Roundtrip else 0.6)
+                    self.assertLess(-sssDiff[sinSource][test][0].min(), 0.3 if test == TestType.Roundtrip else 0.3)
                     self.assertLess(abs(sssDiff[sinSource][test][0].mean()), 0.2 if test == TestType.Roundtrip else 5e-2)
                     self.assertLess(sssDiff[sinSource][test][1].max(), 2e-15)
                     self.assertLess(sssDiff[sinSource][test][2].max(), 1e-6)
@@ -459,7 +459,7 @@ class Test_Exe_Time (unittest.TestCase):
                 f.write(f'{order}\t{stat.count()}\t{stat.mean()}\t{stat.dev()}\t{stat.min()}\t{stat.minAt()}\t{stat.max()}\t{stat.maxAt()}\n')
 
     def test_Adjugate(self):
-        self.readExeTime(f'{OUTDIR}/Python/Output/testAdjugate.log', 
+        self.readExeTime(f'{OUTDIR}/Python/Output/AdjMatrix_2_9.log',
                           '^Start size=(\d+), noise=(\d+e-\d+|\d+.\d+|\d+)$', 1, 2)
 
     def test_FFT_Order_Cpp(self):

@@ -150,6 +150,8 @@ It also shows that statistical Taylor expansion is more suitable than interval a
 
 \item Section \ref{sec: regression} demonstrates imprecise analysis as a new concept in linear regression.
 
+\item Section \ref{sec: equations} comments on solving equations.
+
 \item Section \ref{sec: conclusion and discussion} concludes with a summary and a discussion of the findings.
 
 \end{itemize}
@@ -1690,7 +1692,7 @@ c_1 &= \frac{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{
 			{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j}^2\right)
 				- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right)^2};
 \end{align}
-In contrast, common practice \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} assumes the input uncertainty to be Gaussian, constructs the residual $\chi^2$ as in Formula \eqref{eqn: convention residual}, and finds the extremum over $\{ c_0, c_1 \}$ to result in Formula \eqref{eqn: convention c_1}.
+In contrast, common practice \cite{Statistical_Methods}\cite{Numerical_Recipes} assumes the input uncertainty to be Gaussian, constructs the residual $\chi^2$ as in Formula \eqref{eqn: convention residual}, and finds the extremum over $\{ c_0, c_1 \}$ to result in Formula \eqref{eqn: convention c_1}.
 Formulas \eqref{eqn: convention residual} and \eqref{eqn: convention c_1} reproduce Formulas (15.2.2) and (15.2.6) from the reference \cite{Numerical_Recipes}, respectively, in which $c_0, c_1, \overline{x_j}, \overline{y_j}, \delta y_j/\sqrt{N_j}$ replace $a, b, x_i, y_i, \sigma_i$, respectively.
 The residual difference between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: convention residual}, and the result incompatibility between Formulas \eqref{eqn: ordinary c_1} and \eqref{eqn: convention c_1}, suggest that this common practice differs from ordinary linear regression. 
 Formula \eqref{eqn: ordinary c_1} is derived rigorously and directly from definitions without assumption on underlying input uncertainty distribution.
@@ -1700,16 +1702,51 @@ Conversely, Formula \eqref{eqn: convention c_1} can approximate Formula \eqref{e
 \item $\delta y_j \simeq \delta y$ when $N_j$ is sufficiently large;
 \item $N_j$ is not known, but the subset-mean deviation $\delta y_j/\sqrt{N_j}$ is supplied, so that $N_j/(\delta y_j)^2$ replaces $N_j$ as the subset weight.
 \end{itemize}
-In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which means that Formula \eqref{eqn: convention c_1} applies in a broader context than that of Formula \eqref{eqn: convention residual}.
-Therefore, Formula \eqref{eqn: convention c_1} does not need Formula \eqref{eqn: convention residual} and its unnecessary statistical context.
-However, Formula \eqref{eqn: convention c_1} has several drawbacks:
+In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which means that Formula \eqref{eqn: convention c_1} applies in a broader context than that of Formula \eqref{eqn: convention residual}
+\iffalse \footnote{
+Reference \cite{Numerical_Recipes} gives two $\chi^2(a,b)$ statistics, as its Formulas (15.2.2) and (15.3.2), and attributes them as the ordinary and the total linear regression, which seems to disagree with this study.
+}\fi.
+When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_1} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_1} to include within-subset covariance/variance.
+Compared with \eqref{eqn: ordinary c_1}, Formula \eqref{eqn: convention c_1} has several drawbacks:
 \begin{itemize}
 \item ignoring within-subset covariance/variance,
 \item introducing noise from approximating $\delta y_j$ as $\delta y$,
 \item preventing mixing of precise and imprecise values as regression inputs.
 \end{itemize}
-When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_1} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_1} to include within-subset covariance/variance.
 In contrast, statistical Taylor expansion makes no assumption about the underlying input distribution, is much simpler, and has Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} both well suited for mixing of precise and imprecise values as regression inputs.
+
+
+
+\section{Comments on Solving Equations}
+\label{sec: equations}
+
+\subsection{Random vs Deterministic}
+
+In the context of statistical Taylor expansion, in an equation $x$ is deterministic, so the equation has the format $g(f(x)) = 0$.
+
+\begin{align}
+\label{eqn: first-order ODE}
+\frac{d}{d x} f(x) &= c_0 \pm \delta c_0; \\
+\label{eqn: first-order ODE solution}
+f(x) &= (x - x_0) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
+\label{eqn: first-order ODE mean}
+\overline{f(x)} &= (x - x_0) c_0 + \overline{f(x_0)}; \\
+\label{eqn: first-order ODE variance}
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + (\delta f(x_0))^2;
+\end{align}
+For an example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_0 \pm \delta c_0$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
+Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$.
+The result for $f(x \pm \delta x)$ has to be constructed from Formula \eqref{eqn: first-order ODE solution}.
+
+\subsection{Numerical Solution}
+
+Because of the randomness of the equation, analytic solution is preferred over numerical solution because the latter has to sample over the distributional range of coefficients, initial conditions, and boundary conditions.
+For example, a numerical solution has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
+
+
+
+
+
 
 
 
@@ -1979,10 +2016,10 @@ W. A. Fuller.
 \newblock Measurement Error Models, Wiley Series in Probability and Mathematical Statistics.
 \newblock Wiley, New York. ISBN 978-0-471-86187-4, 1987.
 
-\bibitem{Quantum Field}
-Michel Le Bellac, G Barton.
-\newblock Quantum and statistical Field Theory.
-\newblock Oxford University Press, 1992, ISBN 9781383026535.
+\bibitem{Mathematical Methods}
+George B. Arfken, Hans J. Weber, Frank E. Harris.
+\newblock Mathematical Methods for Physics.
+\newblock Academic Press, 2013, ISBN  978012384654-9.
 
 
 \end{thebibliography}
