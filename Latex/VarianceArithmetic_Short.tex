@@ -1722,7 +1722,8 @@ In contrast, statistical Taylor expansion makes no assumption about the underlyi
 
 \subsection{Random vs Deterministic}
 
-In the context of statistical Taylor expansion, in an equation $x$ is deterministic, so the equation has the format $g(f(x)) = 0$.
+In the context of statistical Taylor expansion, in an equation, $x$ is deterministic, so the equation has the format $g(f(x)) = 0$.
+The result for $f(x \pm \delta x)$ has to be constructed from $f(x)$.
 
 \begin{align}
 \label{eqn: first-order ODE}
@@ -1736,11 +1737,19 @@ f(x) &= (x - x_0) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
 \end{align}
 For an example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_0 \pm \delta c_0$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
 Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$.
-The result for $f(x \pm \delta x)$ has to be constructed from Formula \eqref{eqn: first-order ODE solution}.
+
+\begin{align}
+\label{eqn: first-order ODE solution intg}
+f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
+\label{eqn: first-order ODE variance intg}
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + \big(c_0^2+(\delta c_0)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
+\end{align}
+When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution intg} shows the integration of  Formula \eqref{eqn: first-order ODE solution} around $x_0 \pm \delta x_0$, with the same mean as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance intg}.
+
 
 \subsection{Numerical Solution}
 
-Because of the randomness of the equation, analytic solution is preferred over numerical solution because the latter has to sample over the distributional range of coefficients, initial conditions, and boundary conditions.
+Due to the randomness of the equation, analytic solution is preferred over numerical solution because the latter has to sample over the distributional range of coefficients, initial conditions, and boundary conditions.
 For example, a numerical solution has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
 
 
