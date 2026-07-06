@@ -1685,7 +1685,7 @@ Formula \eqref{eqn: time-series linear regression 1} is a special case of the fi
 
 \begin{align}
 \label{eqn: convention residual}
-&\chi^2(c_0, c_1) = \sum_j N_j \left(\frac{\overline{y_j} - c_0 - c_1 \overline{x_j}}{\delta y_j} \right)^2; \\
+\chi^2(c_0, c_1) &= \sum_j N_j \left(\frac{\overline{y_j} - c_0 - c_1 \overline{x_j}}{\delta y_j} \right)^2; \\
 \label{eqn: convention c_1}
 c_1 &= \frac{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \overline{y_j}\right)
 					- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{y_j}\right)}
@@ -1707,7 +1707,7 @@ In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which
 Reference \cite{Numerical_Recipes} gives two $\chi^2(a,b)$ statistics, as its Formulas (15.2.2) and (15.3.2), and attributes them as the ordinary and the total linear regression, which seems to disagree with this study.
 }\fi.
 When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_1} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_1} to include within-subset covariance/variance.
-Compared with \eqref{eqn: ordinary c_1}, Formula \eqref{eqn: convention c_1} has several drawbacks:
+Compared with Formula \eqref{eqn: ordinary c_1}, Formula \eqref{eqn: convention c_1} has several drawbacks:
 \begin{itemize}
 \item ignoring within-subset covariance/variance,
 \item introducing noise from approximating $\delta y_j$ as $\delta y$,
@@ -1720,36 +1720,52 @@ In contrast, statistical Taylor expansion makes no assumption about the underlyi
 \section{Comments on Solving Equations}
 \label{sec: equations}
 
-\subsection{Random vs Deterministic}
+In the context of solving an equation, $x$ has to be precise and deterministic, so the equation has the format $g(f(x)) = 0$, while the solution for $f(x)$ is random if any of the coefficients, initial conditions, and boundary conditions is random.
+The result for $f(x \pm \delta x)$ has to be constructed by integrating $f(x)$ over the distribution of $x \pm \delta x$.
 
-In the context of statistical Taylor expansion, in an equation, $x$ is deterministic, so the equation has the format $g(f(x)) = 0$.
-The result for $f(x \pm \delta x)$ has to be constructed from $f(x)$.
+
+
+\subsection{The Simplest Differential Equation}
 
 \begin{align}
 \label{eqn: first-order ODE}
-\frac{d}{d x} f(x) &= c_0 \pm \delta c_0; \\
+\frac{d}{d x} f(x) &= c_1 \pm \delta c_1; \\
 \label{eqn: first-order ODE solution}
-f(x) &= (x - x_0) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
+f(x) &= (x - x_0) (c_1 \pm \delta c_1) + (f(x_0) \pm \delta f(x_0)); \\
 \label{eqn: first-order ODE mean}
-\overline{f(x)} &= (x - x_0) c_0 + \overline{f(x_0)}; \\
+\overline{f(x)} &= (x - x_0) c_1 + \overline{f(x_0)}; \\
 \label{eqn: first-order ODE variance}
-\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + (\delta f(x_0))^2;
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_1)^2 + (\delta f(x_0))^2;
 \end{align}
-For an example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_0 \pm \delta c_0$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
-Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$.
+For example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_1 \pm \delta c_1$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
+Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$, respectively, using statistical Taylor expansion.
 
 \begin{align}
 \label{eqn: first-order ODE solution intg}
-f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
+f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_1 \pm \delta c_1) + \big(f(x_0) \pm \delta f(x_0)\big); \\
 \label{eqn: first-order ODE variance intg}
-\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + \big(c_0^2+(\delta c_0)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_1)^2 + \big(c_1^2+(\delta c_1)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
 \end{align}
-When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution intg} shows the integration of  Formula \eqref{eqn: first-order ODE solution} around $x_0 \pm \delta x_0$, with the same mean as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance intg}.
+When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution intg} shows the solution, with the same mean as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance intg}.
 
+\begin{align}
+\label{eqn: first-order ODE two anchors solution}
+f(x) &= \frac{x_1 - x}{x_1 - x_0} (f(x_0) \pm \delta f(x_0)) + \frac{x - x_0}{x_1 - x_0} (f(x_1) \pm \delta f(x_1)); \\
+\label{eqn: first-order ODE two anchors mean}
+\overline{f(x)} &= \frac{x_1 - x}{x_1 - x_0} \overline{f(x_0)} + \frac{x - x_0}{x_1 - x_0} \overline{f(x_1)}; \\
+\label{eqn: first-order ODE two anchors variance}
+\delta^2 f(x) &= \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \delta^2 f(x_0) + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \delta^2 f(x_1); \\
+\label{eqn: first-order ODE two anchors variance minimal}
+x &= \frac{x_1 \delta^2 f(x_0) + x_0 \delta^2 f(x_1)}{\delta^2 f(x_0) + \delta^2 f(x_1)}: \quad
+		\delta^2 f(x) =  \frac{\delta^2 f(x_0) \, \delta^2 f(x_1)}{\delta^2 f(x_0) + \delta^2 f(x_1)};
+\end{align}
+With two initial conditions $f(x_0) \pm \delta f(x_0)$ and $f(x_1) \pm \delta f(x_1)$, Formula \eqref{eqn: first-order ODE two anchors solution} is the solution, with mean and variance as Formulas \eqref{eqn: first-order ODE two anchors mean} and \eqref{eqn: first-order ODE two anchors variance}, respectively.
+When $x \in (x_0, x_1)$, $\delta^2 f(x)$ is smaller than either $\delta^2 f(x_0)$ or $\delta^2 f(x_1)$, with the minimum at Formula \eqref{eqn: first-order ODE two anchors variance minimal} which is smaller than both of them.
+Formulas \eqref{eqn: first-order ODE two anchors solution} is equivalent to the $N = 2$ specialization of Formula \eqref{eqn: ordinary c_1}.
 
-\subsection{Numerical Solution}
+\subsection{A Comment on Numerical Solution}
 
-Due to the randomness of the equation, analytic solution is preferred over numerical solution because the latter has to sample over the distributional range of coefficients, initial conditions, and boundary conditions.
+When available, an analytic solution is preferable to a numerical one because the latter must sample over the distributional range of coefficients, initial conditions, and boundary conditions.
 For example, a numerical solution has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
 
 
