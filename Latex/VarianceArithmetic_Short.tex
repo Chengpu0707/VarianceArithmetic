@@ -8,14 +8,17 @@
 
 \usepackage{url,intmacros,graphicx}
 \usepackage{amssymb,amsmath}
+\usepackage[round]{natbib}            % Human Biology: author-date citations
 \usepackage{capt-of}
 \usepackage{float}
+\usepackage{setspace}                 % Human Biology: double-spaced throughout
 
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \numberwithin{equation}{section}
+\setcitestyle{aysep={}}               % Human Biology: (Author Year), no comma
 
 \newcommand{\email}[1]{\\ \small{\url{#1}} \\}
 \newcommand{\institution}[1]{\\ \parbox{3.0in}{\small{#1}}}
@@ -23,8 +26,8 @@
 \newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
 \newcommand\whenaccepted{}
 
-%\newcommand{\Verbose}{}
-\newcommand{\ManualReference}{}
+\newcommand{\Verbose}{}
+%\newcommand{\ManualReference}{}   % disabled: use BibTeX (VarianceArithmetic.bib) for author-date
 %\newcommand{\NoAuthor}{}
 
 
@@ -57,6 +60,8 @@
 
 
 \begin{document}
+\onehalfspacing
+%\doublespacing                        % Human Biology: double-spaced throughout
 \maketitle
 \begin{abstract}
 
@@ -66,6 +71,7 @@ This path-independence sets it fundamentally apart from conventional numerical a
 This study presents an implementation called variance arithmetic and demonstrates its performance across diverse mathematical applications.
 
 This study also reveals the potentially substantial impact of numerical errors in library functions, the defect of applying input uncertainties as weights in conventional regression, and the implied assumption of discrete Fourier transformation.
+The concept of statistical algebra is also introduced.
 \end{abstract}
 
 % Put keywords appropriate to your paper here, as shown
@@ -82,7 +88,7 @@ Copyright \copyright{2024}
 \label{sec: introduction}
 
 Let a signal value contain a value $x$ and an uncertainty deviation $\delta x$.
-As input, $x$ and $\delta x$ are usually the mean and standard deviation of a measurement, respectively \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
+As input, $x$ and $\delta x$ are usually the mean and standard deviation of a measurement, respectively \citep{Statistical_Methods, Precisions_Physical_Measurements}.
 If $\delta x = 0$, then $x$ is a \emph{precise value}; otherwise, the pair specifies an \emph{imprecise value} $x \pm \delta x$.
 Let $P(x) \equiv \delta x / |x|$ be the \emph{statistical precision} (hereafter referred to as precision) of $x \pm \delta x$.
 A smaller $P(x)$ indicates a higher measurement quality of $x \pm \delta x$.
@@ -90,11 +96,11 @@ A smaller $P(x)$ indicates a higher measurement quality of $x \pm \delta x$.
 Statistical Taylor expansion determines the result $f \pm \delta f$ of a general analytic expression $f(x, \dots)$ on the basis of inputs $x \pm \delta x, \dots$ and their corresponding distributions and sample counts. 
 \begin{itemize}
 \item 
-Previous studies have examined the effect of input uncertainties on output values for specific cases \cite{Lower_Order_Variance_Expansion}.
+Previous studies have examined the effect of input uncertainties on output values for specific cases \citep{Lower_Order_Variance_Expansion}.
 Statistical Taylor expansion generalizes these effects as uncertainty bias, as shown in Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 2d mean} of this study.
 
 \item
-The traditional variance-covariance framework accounts only for first-order interactions between random variables through an analytic function \cite{Lower_Order_Variance_Expansion}\cite{Probability_Statistics}\cite{Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance}.
+The traditional variance-covariance framework accounts only for first-order interactions between random variables through an analytic function \citep{Lower_Order_Variance_Expansion, Probability_Statistics, Numerical_Recipes}, whereas statistical Taylor expansion extends this framework to include higher-order interactions as expressed in Formula \eqref{eqn: Taylor 2d variance}.
 Carrying out the expansion in full also reveals when the variance series converges, which is the focus of Section \ref{sec: convergence}.
 
 \item Calculating the reliability of $f \pm \delta f$ as a value between $0$ and $1$ from input uncertainty distributions and sample counts appears to be without precedent, as shown in Section \ref{sec: statistical bounding}.
@@ -102,28 +108,28 @@ Carrying out the expansion in full also reveals when the variance series converg
 
 Statistical Taylor expansion improves upon existing numerical arithmetic in several key respects.
 
-Conventional floating-point arithmetic \cite{Computer_Architecture}\cite{Floating_Point_Arithmetic}\cite{Floating_Point_Standard} computes only the result value $f$.
-Because $f$ contains an unknown amount of rounding error \cite{Rounding_Error}\cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be sufficient for non-trivial computations on inputs with $10^{-6}$ or coarser precision.
+Conventional floating-point arithmetic \citep{Computer_Architecture, Floating_Point_Arithmetic, Floating_Point_Standard} computes only the result value $f$.
+Because $f$ contains an unknown amount of rounding error \citep{Rounding_Error, Precise_Numerical_Methods, Algorithms_Accuracy}, a 32-bit floating-point representation with $10^{-7}$ resolution may not be sufficient for non-trivial computations on inputs with $10^{-6}$ or coarser precision.
 However, statistical Taylor expansion can account for rounding errors as part of the result deviation $\delta f$.
 
-The bounding range in interval arithmetic \cite{Interval_Analysis}\cite{Worst_Case_Error_Bounds}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Arithmetic}\cite{Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair, and it answers a different question from statistical Taylor expansion.
-The direct application of Taylor expansion in interval arithmetic over-estimates result intervals; consequently, it has to be treated as a polynomial \cite{Taylor_Models}\cite{Taylor_Forms_Limits}, and needs interval partition and other techniques to reduce but not eliminate such over-estimation \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}\cite{Interval_Global_Optimization}.
-The subdivision can cause branched results \cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, such as when computing the square root of an input interval containing zero.
-The over-estimation of bounding range is a well-known difficulty of interval arithmetic \cite{Interval_Global_Optimization}.
+The bounding range in interval arithmetic \citep{Interval_Analysis, Worst_Case_Error_Bounds, Interval_Analysis_Theory_Applications, Interval_Arithmetic, Interval_Analysis_Notations} is inconsistent with the statistical nature of an $x \pm \delta x$ pair, and it answers a different question from statistical Taylor expansion.
+The direct application of Taylor expansion in interval arithmetic over-estimates result intervals; consequently, it has to be treated as a polynomial \citep{Taylor_Models, Taylor_Forms_Limits}, and needs interval partition and other techniques to reduce but not eliminate such over-estimation \citep{Interval_Analysis, Interval_Analysis_Theory_Applications, Interval_Global_Optimization}.
+The subdivision can cause branched results \citep{Interval_Analysis, Interval_Analysis_Theory_Applications}, such as when computing the square root of an input interval containing zero.
+The over-estimation of bounding range is a well-known difficulty of interval arithmetic \citep{Interval_Global_Optimization}.
 In contrast, statistical Taylor expansion is statistically precise, and it diverges when the input precision is not fine enough.
 
-Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}\cite{Interval_Analysis}\cite{Interval_Analysis_Theory_Applications}, which can make conventional numerical computation less systematic and more practitioner-dependent.
-\emph{Path dependency} extends the dependency problem to numerical algorithms that lack a corresponding analytic expression: the result depends on how the algorithm is carried out, for example because of catastrophic cancellation \cite{Precise_Numerical_Methods}\cite{Algorithms_Accuracy}.
+Both conventional floating-point arithmetic and interval arithmetic depend strongly on the specific algebraic form of an analytic function, a phenomenon known as the \emph{dependency problem} \citep{Precise_Numerical_Methods, Algorithms_Accuracy, Interval_Analysis, Interval_Analysis_Theory_Applications}, which can make conventional numerical computation less systematic and more practitioner-dependent.
+\emph{Path dependency} extends the dependency problem to numerical algorithms that lack a corresponding analytic expression: the result depends on how the algorithm is carried out, for example because of catastrophic cancellation \citep{Precise_Numerical_Methods, Algorithms_Accuracy}.
 In contrast, statistical Taylor expansion is path-independent in theory; in practice, accumulated rounding errors may still depend on operation order, but variance arithmetic catches them as additional $\delta f$.
 
 Mathematically, statistical Taylor expansion yields compact closed-form expressions, as in Formula \eqref{eqn: multiplication variance} for $(x \pm \delta x)(y \pm \delta y)$, or Formula \eqref{eqn: sin precision} for $\sin(x \pm \delta x)$, whereas the interval-arithmetic analogue requires monotonic partitioning to result in piece-wise expressions (via $\min$ and $\max$ functions of data sets).
 
-The uncorrelated uncertainty condition distinguishes statistical Taylor expansion from uncertainty propagation \cite{Uncertainty Propagation}:
-The correlation of two signals does not apply to the uncertainties of their individual signal values, with the latter usually arising from noise \cite{Statistical_Methods}.
+The uncorrelated uncertainty condition distinguishes statistical Taylor expansion from uncertainty propagation \citep{Uncertainty_Propagation}:
+The correlation of two signals does not apply to the uncertainties of their individual signal values, with the latter usually arising from noise \citep{Statistical_Methods}.
 
-To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance-arithmetic representation used in its predecessor \cite{Prev_Precision_Arithmetic}, in which precision was tracked implicitly through the number of significant digits.
+To ensure mathematical and statistical rigor, statistical Taylor expansion abandons the significance-arithmetic representation used in its predecessor \citep{Prev_Precision_Arithmetic}, in which precision was tracked implicitly through the number of significant digits.
 
-As a statistical sampling process, stochastic arithmetic \cite{Stochastic_Arithmetic}\cite{CADNA_library} is computationally expensive, whereas statistical Taylor expansion provides a direct characterization without sampling.
+As a statistical sampling process, stochastic arithmetic \citep{Stochastic_Arithmetic, CADNA_library} is computationally expensive, whereas statistical Taylor expansion provides a direct characterization without sampling.
 
 To demonstrate the wide applicability of statistical Taylor expansion, the remainder of this paper is organized as follows:
 \begin{itemize}
@@ -169,7 +175,7 @@ It also shows that statistical Taylor expansion is more suitable than interval a
 \includegraphics[height=2.5in]{Signal_and_Noise.pdf}
 \captionof{figure}{
 Effect of noise on bit values of a measured value.  The triangular wave signal and the added white noise are shown at top using the thin black line and the grey area, respectively.  The values are measured by a theoretical 4-bit Analog-to-Digital Converter in ideal condition, assuming the LSB is the 0th bit.  The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
-This figure is a reproduction of Figure 1 in \cite{Prev_Precision_Arithmetic}.
+This figure is a reproduction of Figure 1 in \citep{Prev_Precision_Arithmetic}.
 }
 \label{fig: Signal_and_Noise}
 \end{figure}
@@ -181,17 +187,17 @@ This figure is a reproduction of Figure 1 in \cite{Prev_Precision_Arithmetic}.
 $\gamma$ versus $P$ for different $\gamma_P$ in Formula \eqref{eqn: uncertainty correlation}.
 If $\gamma_P$ is the maximal allowed correlation at the uncertainty level for the uncorrelated uncertainty assumption to hold, then $\gamma$ is the maximal allowed correlation for the two signals.
 For a given $\gamma_P$, $\gamma$ increases with finer $P$.
-This figure is a reproduction of Figure 2 in \cite{Prev_Precision_Arithmetic}.
+This figure is a reproduction of Figure 2 in \citep{Prev_Precision_Arithmetic}.
 }
 \label{fig: Independent_Uncertainty_Assumption}
 \end{figure}
 
 A signal consists of many signal values, each carrying uncertainty.
-The uncorrelated uncertainty condition \cite{Prev_Precision_Arithmetic} states that the uncertainty-level correlation is less than the signal-level correlation when the precision is less than $1$.
-It is the statistical foundation for statistical Taylor expansion \footnote{In the following quotation from \cite{Prev_Precision_Arithmetic}, minor spelling and grammar mistakes have been corrected, and axis labels and title for Figure \ref{fig: Independent_Uncertainty_Assumption} have been changed.}:
+The uncorrelated uncertainty condition \citep{Prev_Precision_Arithmetic} states that the uncertainty-level correlation is less than the signal-level correlation when the precision is less than $1$.
+It is the statistical foundation for statistical Taylor expansion \footnote{In the following quotation from \citep{Prev_Precision_Arithmetic}, minor spelling and grammar mistakes have been corrected, and axis labels and title for Figure \ref{fig: Independent_Uncertainty_Assumption} have been changed.}:
 \begin{quotation}
 
-Let $X$, $Y$, and $Z$ denote three mutually independent random variables \cite{Probability_Statistics} with variances $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
+Let $X$, $Y$, and $Z$ denote three mutually independent random variables \citep{Probability_Statistics} with variances $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
 Let $\alpha$ denote a constant.
 Let $C()$ denote the covariance function.  
 Let $\gamma$ denote the correlation between $(X + Y)$ and $(\alpha X + Z)$. 
@@ -348,9 +354,9 @@ P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(
 \end{align}
 When $\kappa \rightarrow \infty$, $\zeta(2, \kappa) \rightarrow 1$:
 \begin{itemize}
-\item Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} become the convolution results for $x \pm y$ \cite{Probability_Statistics}.
+\item Formulas \eqref{eqn: addition mean} and \eqref{eqn: addition variance} become the convolution results for $x \pm y$ \citep{Probability_Statistics}.
 
-\item Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} become the corresponding results of the product distribution for $x y$ \cite{Probability_Statistics}.
+\item Formulas \eqref{eqn: multiplication mean} and \eqref{eqn: multiplication variance} become the corresponding results of the product distribution for $x y$ \citep{Probability_Statistics}.
 \end{itemize}
 
 
@@ -381,7 +387,7 @@ Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and 
 \label{eqn: sin mean}
 \overline{\sin(x)} &= \sin(x) + \sum_{n=2}^{\infty} (\delta x)^n \sin(x)^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) =& \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)^{(j)}\sin(x)^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
+\delta^2 \sin(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)^{(j)}\sin(x)^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
 \end{align}
 
 Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and precision for $x^c$, respectively:
@@ -498,13 +504,13 @@ Define \emph{bounding leakage} $\epsilon$ as the probability for the distributio
 Ideally, a bounding leakage should be as small as possible so that the calculated variance is close to the distribution variance when the sample count is infinite.
 The corresponding bound range $\hat{\kappa}$ and variance $\hat{\delta^2} f(x)$ are the \emph{ideal bounding range} and \emph{ideal variance}, respectively.
 For a Uniform distribution, by definition $\hat{\kappa} = \sqrt{3}$ for a zero bounding leakage.
-For a Gaussian distribution, $\epsilon = 1 - \xi(\kappa/\sqrt{2})$ where $\xi(\tilde{z})$ is the Normal error function \cite{Probability_Statistics}. When $\kappa \rightarrow \infty$, the convergence range of Formulas \eqref{eqn: log convergence} and \eqref{eqn: pow convergence} approaches zero, such that the choice of $\hat{\kappa}$ is a compromise.  
-According to the 5-$\sigma$ rule for determining the statistical significance of an experimental result \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}\cite{Probability_Statistics}, $\hat{\kappa} = 5$ by default, which corresponds to $\epsilon = 5.733 \times 10^{-7}$.
+For a Gaussian distribution, $\epsilon = 1 - \xi(\kappa/\sqrt{2})$ where $\xi(\tilde{z})$ is the Normal error function \citep{Probability_Statistics}. When $\kappa \rightarrow \infty$, the convergence range of Formulas \eqref{eqn: log convergence} and \eqref{eqn: pow convergence} approaches zero, such that the choice of $\hat{\kappa}$ is a compromise.  
+According to the 5-$\sigma$ rule for determining the statistical significance of an experimental result \citep{Statistical_Methods, Precisions_Physical_Measurements, Probability_Statistics}, $\hat{\kappa} = 5$ by default, which corresponds to $\epsilon = 5.733 \times 10^{-7}$.
 
 The first-order approximation of Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} both contain the term $(\delta x)^2 \zeta(2, \kappa)$.
 As $\kappa \rightarrow +\infty$, $\zeta(2, \kappa) \rightarrow 1$.
 Define \emph{linear leakage} $\omega(\kappa) \equiv 1 - \zeta(2, \kappa)$.
-When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
+When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \citep{Probability_Statistics}.
 This yields the \emph{sample linear leakage} $\omega(\kappa, N)$ for the interval $[\overline{x} + \varrho \delta x, \overline{x} + \kappa \delta x]$, in contrast to the \emph{distributional linear leakage} $\omega(\kappa)$ for the interval $[\mu + \varrho \sigma, \mu + \kappa \sigma]$.
 Let $\omega(\kappa) = \omega(\kappa_s, N)$, where $\kappa_s$ is the \emph{measuring bound range}, and $\kappa(\kappa_s, N)$ is the \emph{measured bound range}, with the latter used in calculating $\zeta(n, \kappa)$.
 
@@ -533,7 +539,7 @@ $\varepsilon$ can be calculated from the linear leakages and the input deviation
 When the input uncertainty is Gaussian distributed, Figure \ref{fig: Normal_Function} shows that when $\hat{\kappa} = 5$, $\varepsilon$ follows $\omega$ with the sample count $N$ for a selection of functions.
 When $\hat{\kappa} = 4, 6$, $\varepsilon$ for the selected functions follows the corresponding $\omega$ in Figure \ref{fig: Bounding_Factor_Leakage}.
 
-The unbiased bounding range $[\varrho, \kappa]$ of Uniform distribution is estimated as $1 + \frac{1}{N}$ times the minimal and maximal values in the sample \cite{Uniform_Distrobution Estimator}.
+The unbiased bounding range $[\varrho, \kappa]$ of Uniform distribution is estimated as $1 + \frac{1}{N}$ times the minimal and maximal values in the sample \citep{Uniform_Distrobution_Estimator}.
 The bounding leakage $\epsilon$ is calculated as the ratio of $[\overline{x} - \sqrt{3} \delta x, \overline{x} + \sqrt{3} \delta x]$ outside the true bounding range $[\mu - \sqrt{3}\sigma, \mu + \sqrt{3}\sigma]$.
 Because $\zeta(2n)$ for Uniform distribution increases with $2n$ much slower than $\zeta(2n, 5)$ for Gaussian distribution, Figure \ref{fig: Uniform_Function} shows that for the selected functions, ideal leakage equals linear leakage for Uniform input uncertainty, and both decrease linearly with sample count $N$.
 The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_Function} shows the effect of the input uncertainty distribution on the output deviation $\delta f$.
@@ -552,9 +558,9 @@ The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_
 \label{eqn: Taylor inner dependency}
 	&+ 2 (\delta x)^{m+n} \frac{f^{(m)}_x f^{(n)}_x}{m! \;n!} \left(\zeta(m+n) - \zeta(m) \zeta(n) \right);
 \end{align}
-From the sum variance Formula \eqref{eqn: sum variance} \cite{Probability_Statistics}, Formula \eqref{eqn: Taylor inner dependency} decomposes and leads to Formula \eqref{eqn: Taylor 1d variance}.
-Because Formula \eqref{eqn: sum variance} comes from variance definition, Formula \eqref{eqn: Taylor 1d variance} does not contain the dependency problem, in contrast to Taylor expansion using interval arithmetic \cite{Interval_Analysis}\cite{Taylor_Models}\cite{Taylor_Forms_Limits}.
-If $\delta x$ is replaced by $\tilde{x} - x$, the major difference between Formula \eqref{eqn: Taylor 1d variance} and the equation for interval Taylor expansion \cite{Taylor_Models}\cite{Taylor_Forms_Limits} is the distribution-specific factor $\zeta(m+n) - \zeta(m) \zeta(n)$.
+From the sum variance Formula \eqref{eqn: sum variance} \citep{Probability_Statistics}, Formula \eqref{eqn: Taylor inner dependency} decomposes and leads to Formula \eqref{eqn: Taylor 1d variance}.
+Because Formula \eqref{eqn: sum variance} comes from variance definition, Formula \eqref{eqn: Taylor 1d variance} does not contain the dependency problem, in contrast to Taylor expansion using interval arithmetic \citep{Interval_Analysis, Taylor_Models, Taylor_Forms_Limits}.
+If $\delta x$ is replaced by $\tilde{x} - x$, the major difference between Formula \eqref{eqn: Taylor 1d variance} and the equation for interval Taylor expansion \citep{Taylor_Models, Taylor_Forms_Limits} is the distribution-specific factor $\zeta(m+n) - \zeta(m) \zeta(n)$.
 
 When all inputs satisfy the uncorrelated uncertainty condition, statistical Taylor expansion traces dependencies through the intermediate steps.
 Some typical examples of dependency tracing:
@@ -591,7 +597,7 @@ Large calculations are often divided into sequential steps, such as computing $f
 This approach also introduces the dependency problem by ignoring dependency tracing within $g(x)$ affecting $f(g(x))$, such as $\overline{(\sqrt{x})^2} > \overline{\sqrt{x^2}} > \overline{x}$ and $\delta^2 (\sqrt{x})^2 > \delta^2 \sqrt{x^2} > \delta^2 x$.
 
 \item
-Conditional executions are often employed to optimize performance and minimize rounding errors, for example, using Gaussian elimination to minimize floating-point rounding errors in matrix inversion \cite{Linear_Algebra}.  
+Conditional executions are often employed to optimize performance and minimize rounding errors, for example, using Gaussian elimination to minimize floating-point rounding errors in matrix inversion \citep{Linear_Algebra}.  
 For dependency tracing, such conditional executions should instead be replaced by direct matrix inversion as described in Section \ref{sec: matrix}.
 
 \item
@@ -621,7 +627,7 @@ Consequently, the following numerical rules are introduced:
 
 \item \emph{monotonic}: As a necessary condition for convergence, the last $20$ terms of the expansion must decrease monotonically in absolute value, ensuring that under a null model where each consecutive term is equally likely to increase or decrease, the probability of observing 20 spurious monotonic decreases by chance is at most $2^{-20} \simeq 9.53 \times 10^{-7}$.
 
-\item \emph{stable}: To avoid truncation error \cite{Numerical_Recipes}, the absolute value of the last expansion term must be less than $\epsilon$ times both the result deviation and the result absolute value, where $\epsilon \simeq 5.73 \times 10^{-7}$ is the bounding leakage for Gaussian distribution with $\hat{\kappa} = 5$.
+\item \emph{stable}: To avoid truncation error \citep{Numerical_Recipes}, the absolute value of the last expansion term must be less than $\epsilon$ times both the result deviation and the result absolute value, where $\epsilon \simeq 5.73 \times 10^{-7}$ is the bounding leakage for Gaussian distribution with $\hat{\kappa} = 5$.
 This rule ensures sufficiently fast convergence in the context of monotonic convergence.
 
 \item \emph{positive}: At every expansion order, the expansion variance must be positive.
@@ -723,7 +729,7 @@ A similar trend holds when the input uncertainty is Uniform but with larger uppe
 \subsection{Floating-Point Rounding Errors}
 
 Variance arithmetic incorporates floating-point rounding errors as $\delta x$ when converting a floating-point value $x$ into $x \pm \delta x$. 
-Unless the least 20 bits of the significand of $x$ are all zero, $\delta x$ is assumed to be $1/\sqrt{3}$ times the ULP (Unit in the Last Place \cite{Floating_Point_Standard}) of $x$, because rounding errors are shown to be uniformly distributed over the range $[-\text{LSB}, +\text{LSB}]$ (Least significant bit) \cite{Prev_Precision_Arithmetic}.
+Unless the least 20 bits of the significand of $x$ are all zero, $\delta x$ is assumed to be $1/\sqrt{3}$ times the ULP (Unit in the Last Place \citep{Floating_Point_Standard}) of $x$, because rounding errors are shown to be uniformly distributed over the range $[-\text{LSB}, +\text{LSB}]$ (Least significant bit) \citep{Prev_Precision_Arithmetic}.
 
 
 
@@ -736,13 +742,13 @@ Two imprecise values can be compared statistically based on their difference:
 \begin{itemize}
 \item 
 When the value difference is zero, the two imprecise values are considered equal.  
-In statistics, such two values have a $50\%$ possibility of being either less than or greater than each other but zero probability of being exactly equal \cite{Probability_Statistics}.
+In statistics, such two values have a $50\%$ possibility of being either less than or greater than each other but zero probability of being exactly equal \citep{Probability_Statistics}.
 In variance arithmetic, however, they are considered equal.
 
 \item 
-Otherwise, the standard z-statistic method \cite{Probability_Statistics} is applied to determine whether two imprecise values are statistically equal, less than, or greater than each other.
+Otherwise, the standard z-statistic method \citep{Probability_Statistics} is applied to determine whether two imprecise values are statistically equal, less than, or greater than each other.
 For example, the difference between $1.002 \pm 0.001$ and $1.000 \pm 0.002$ is $0.002 \pm 0.002236$, yielding $z = 0.002 / 0.002236$.
-The probability that they are not equal is $\xi(|z|/\sqrt{2}) = 62.8\%$, in which $\xi(z)$ is the Normal error function \cite{Probability_Statistics}.
+The probability that they are not equal is $\xi(|z|/\sqrt{2}) = 62.8\%$, in which $\xi(z)$ is the Normal error function \citep{Probability_Statistics}.
 If the threshold probability for inequality is set at $50\%$, then $1.000 \pm 0.002 < 1.002 \pm 0.001$.
 Because the result of comparison depends on threshold probability which is application specific, comparison is not part of variance arithmetic.
 
@@ -772,7 +778,7 @@ Once input errors from all sources are accounted for precisely, \emph{ideal cove
 \begin{itemize}
 \item \emph{Distribution Test}:
 When comparing the calculated mean and deviation with the result data set, the error deviation is exactly $1$ and the error distribution is Normal, regardless of input uncertainty distribution.
-Such convergence to Normal distribution occurs rapidly \cite{Prev_Precision_Arithmetic} because of the central limit theorem \cite{Probability_Statistics}.
+Such convergence to Normal distribution occurs rapidly \citep{Prev_Precision_Arithmetic} because of the central limit theorem \citep{Probability_Statistics}.
 
 \item \emph{Value Test}: 
 When comparing values one-by-one between a calculated data set and the corresponding result data set, the error deviation is much less than $1$ and the error distribution is Delta (Dirac-delta-like, concentrated at zero error).
@@ -901,12 +907,12 @@ The noise of a Hilbert matrix is the ULP of each of its elements, which is sligh
   	|\mathbf{M}_{<i_1 \dots i_m>_n, <[j_1 \dots j_m]>_n}|^2 \prod _{k=1 \dots m} \zeta_{i_k,j_k}(2, \kappa_{i_k,j_k})(\delta x_{i_k, j_k})^2; 
 \end{align}
 Let $<j_1, j_{2} \dots j_m>_n$ denote a selection of $m$ numbers from the sequence of natural numbers $1,2 \dots n$ in sequence, which is a combination.
-Let $[j_1, j_{2} \dots j_m]_n$ and $(-1)^{[j_1, j_{2} \dots j_m]_n}$ denote a permutation of $<j_1, j_{2} \dots j_m>_n$ and the corresponding sign \cite{Linear_Algebra}.
+Let $[j_1, j_{2} \dots j_m]_n$ and $(-1)^{[j_1, j_{2} \dots j_m]_n}$ denote a permutation of $<j_1, j_{2} \dots j_m>_n$ and the corresponding sign \citep{Linear_Algebra}.
 Let $\mathbf{M}$ be a square matrix of size $n$ with element $x_{i,j} \pm \delta x_{i,j}, i, j = 1,2\dots n$ at row index $i$ and column index $j$. 
 Formula \eqref{eqn: random determinant} presents the Taylor expansion of the determinant for matrix $\mathbf{M}$ when the uncertainties of matrix elements are all independent of each other, whereas Formulas \eqref{eqn: determinant mean} and \eqref{eqn: determinant variance} give the statistical Taylor expansion of the determinant $|\mathbf{M}|$.
-In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is a sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indexes, $[j_1 \dots j_m]_n$ contains the column indexes \cite{Linear_Algebra}, and $<[j_1, j_{2} \dots j_m]>_n$ denotes the corresponding combination of $[j_1 \dots j_m]_n$. 
+In Formula \eqref{eqn: determinant variance}, $\mathbf{M}_{<i_1 \dots i_m>_n, [j_1 \dots j_m]_n}$ is a sub-matrix for $\mathbf{M}$, in which $<i_1 \dots i_m>_n$ contains the row indexes, $[j_1 \dots j_m]_n$ contains the column indexes \citep{Linear_Algebra}, and $<[j_1, j_{2} \dots j_m]>_n$ denotes the corresponding combination of $[j_1 \dots j_m]_n$. 
 
-The square matrix whose element is $(-1)^{i+j}|M_{j,i}|$ is defined as the \emph{adjugate matrix} \cite{Linear_Algebra} $\mathbf{M}^A$ to the original square matrix $\mathbf{M}$. 
+The square matrix whose element is $(-1)^{i+j}|M_{j,i}|$ is defined as the \emph{adjugate matrix} \citep{Linear_Algebra} $\mathbf{M}^A$ to the original square matrix $\mathbf{M}$. 
 Each element of $\mathbf{M}$ is assigned a random integer from $[-2^8, +2^8]$ such that $\mathbf{M}^A$ can be computed exactly in floating-point arithmetic when $n \leq 7$.
 By adding Gaussian noise $\tilde{x}_{i,j}$ of deviation $\delta x$ to each element of $\mathbf{M}$, $\widetilde{\mathbf{M}}$ is created as shown in Formula \eqref{eqn: random determinant}.
 The value error of $\mathbf{M}^A$ is the difference between $\widetilde{\mathbf{M}^A}$ and $\mathbf{M}^A$, whereas the result deviation is calculated using Formula \eqref{eqn: determinant variance}, such that $\widetilde{\mathbf{M}^A} - \mathbf{M}^A$ is a distribution test.
@@ -925,19 +931,19 @@ Figure \ref{fig: Adjugate_Error_vs_Size_Noise} shows that the error deviations o
 	; 
 \label{eqn: inverse matrix 2 variance}
 \end{align}
-Let $\mathbf{I}$ be the identity matrix for $\mathbf{M}$ \cite{Linear_Algebra}.
-Formula \eqref{eqn: adjugate matrix} shows the relationship between $\mathbf{M}^A$ and $\mathbf{M}$ which leads to the definition of inverse matrix $\mathbf{M}^{-1}$ in Formula \eqref{eqn: inverse matrix} \cite{Linear_Algebra}.
+Let $\mathbf{I}$ be the identity matrix for $\mathbf{M}$ \citep{Linear_Algebra}.
+Formula \eqref{eqn: adjugate matrix} shows the relationship between $\mathbf{M}^A$ and $\mathbf{M}$ which leads to the definition of inverse matrix $\mathbf{M}^{-1}$ in Formula \eqref{eqn: inverse matrix} \citep{Linear_Algebra}.
 $\tilde{\mathbf{M}} \times \tilde{\mathbf{M}}^A - |\tilde{\mathbf{M}}| \mathbf{I}$ is a value test applied to each matrix element.
 Figure \ref{fig: Forward_Error_vs_Size_Noise} shows the error deviation of a typical value test: the error deviation decreases linearly with increasing input uncertainty deviation $\delta x$ with error slopes very close to $-1$, as $-0.998 \pm 0.008$ on average.
 The matrix size serves as the algorithm-specific dimension in Figure \ref{fig: Forward_Error_vs_Size_Noise}.
 
 Because an element of the original matrix $\mathbf{M}$ appears multiple times in Formula \eqref{eqn: inverse matrix}, the variance computed via Formula \eqref{eqn: Taylor 2d variance} is very complicated. 
 For example, Formula \eqref{eqn: inverse matrix 2 variance} shows the simplest case for Formula \eqref{eqn: inverse matrix}: the first-order approximation of a $2 \times 2$ matrix.
-Contrary to the conventional approach, statistical Taylor expansion uses Formula \eqref{eqn: inverse matrix} for matrix inversion because logically, the result should be symmetric for all matrix elements as demonstrated by Formula \eqref{eqn: inverse matrix 2 variance}, instead of the more conventional Gaussian elimination \cite{Numerical_Recipes}.
+Contrary to the conventional approach, statistical Taylor expansion uses Formula \eqref{eqn: inverse matrix} for matrix inversion because logically, the result should be symmetric for all matrix elements as demonstrated by Formula \eqref{eqn: inverse matrix 2 variance}, instead of the more conventional Gaussian elimination \citep{Numerical_Recipes}.
 
 In Formula \eqref{eqn: inverse matrix}, $\mathbf{M}^{-1}$ is dominated by $1/|\mathbf{M}|$, suggesting that the precision of $\mathbf{M}^{-1}$ is largely determined by the precision of $|\mathbf{M}|$.
-Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that a strong linear correlation exists between condition numbers \cite{Linear_Algebra} and the corresponding determinant precision of the matrices.
-As a reference, Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} presents the Hilbert matrix \cite{Linear_Algebra} (which is the most unstable matrix in theory) for each matrix size and shows that the Hilbert matrices also follow the linear relation between determinant precision and condition number.
+Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} shows that a strong linear correlation exists between condition numbers \citep{Linear_Algebra} and the corresponding determinant precision of the matrices.
+As a reference, Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition} presents the Hilbert matrix \citep{Linear_Algebra} (which is the most unstable matrix in theory) for each matrix size and shows that the Hilbert matrices also follow the linear relation between determinant precision and condition number.
 In Figure \ref{fig: Matrix_Determinant_Prec_vs_Condition}, adding noise to a matrix does not change its condition number, while increasing the result precision because conceptually a matrix with larger uncertainty is less stable.  
 In fact, Formula \eqref{eqn: inverse matrix 2 variance} shows the stability of each matrix element, which may be a better characterization of matrix stability than the condition number.
 
@@ -1064,8 +1070,8 @@ For reference, the input time-series signal $\{Y_j\}$ is also plotted, with its 
 \end{align}
 In many applications, data set $\{Y_j\}$ denotes an input data stream where $j$ represents the time index or sequence index.
 $\{Y_j\}$ is thus referred to as a time-series input.  
-A moving window algorithm \cite{Numerical_Recipes} is applied within a small window centered on each $j$.  
-For each calculation window, Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} present the least-squares line-fit of $Y = \alpha + \beta j$ for a window width $2H + 1$ of $\{Y_j\}$ \cite{Prev_Precision_Arithmetic}.
+A moving window algorithm \citep{Numerical_Recipes} is applied within a small window centered on each $j$.  
+For each calculation window, Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} present the least-squares line-fit of $Y = \alpha + \beta j$ for a window width $2H + 1$ of $\{Y_j\}$ \citep{Prev_Precision_Arithmetic}.
 
 \begin{align}
 \label{eqn: moving-window linear regression 0}
@@ -1073,7 +1079,7 @@ For each calculation window, Formulas \eqref{eqn: time-series linear regression 
 \label{eqn: moving-window linear regression 1}
 \alpha_{j} &= \alpha _{j-1} - Y_{j-2H-1} + Y_{j};
 \end{align}
-The values of $(\alpha _{j}, \beta _{j})$ can be derived from the previous values $(\alpha _{j-1}, \beta _{j-1})$, allowing Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} to be reformulated into the progressive moving-window calculation given by Formulas \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1}, respectively \cite{Prev_Precision_Arithmetic}.
+The values of $(\alpha _{j}, \beta _{j})$ can be derived from the previous values $(\alpha _{j-1}, \beta _{j-1})$, allowing Formulas \eqref{eqn: time-series linear regression 0} and \eqref{eqn: time-series linear regression 1} to be reformulated into the progressive moving-window calculation given by Formulas \eqref{eqn: moving-window linear regression 0} and \eqref{eqn: moving-window linear regression 1}, respectively \citep{Prev_Precision_Arithmetic}.
 
 Figure \ref{fig: Moving_Linear_Fit_Value} shows that the input signal $Y_j$ consists of the following components:
 \begin{enumerate}
@@ -1126,7 +1132,7 @@ This observation suggests that an error deviation exceeding 1 may indicate the p
 \includegraphics[height=2.5in]{FFT_Unfaithful.pdf} 
 \captionof{figure}{
 The DFT spectrum $H[n]$ of signal $h[k] = \sin(f \frac{2 \pi}{128} k), k \in [0, 127]$, as magnitude (y-axis) and phase (embedded y-axis) versus frequency index $n \in [0, 18]$ (x-axis and embedded x-axis) for different signal frequencies $f$ (legend).
-This result agrees with both the theoretical formula \cite{Prev_Precision_Arithmetic} and the numerical computation from standard mathematical libraries such as \textit{SciPy}.
+This result agrees with both the theoretical formula \citep{Prev_Precision_Arithmetic} and the numerical computation from standard mathematical libraries such as \textit{SciPy}.
 }
 \label{fig: FFT_Unfaithful}
 \end{figure}
@@ -1139,14 +1145,14 @@ H[n] &=\sum_{k=0}^{N-1} h[k] \; e^{\frac{-i 2\pi}{N} k n}; \\
 h[k] &=\frac{1}{N} \sum_{n=0}^{N-1} H[n] \; e^{\frac{i 2\pi}{N} n k};
 \end{align}
 
-For each signal sequence $h[k]$, where $k = 0, 1, \dots, N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1, \dots, N-1$, along with its inverse transformation, is defined by Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse}, respectively \cite{Numerical_Recipes}.
+For each signal sequence $h[k]$, where $k = 0, 1, \dots, N-1$, and $N$ is a natural number, the discrete Fourier transform (DFT) $H[n]$, for $n = 0, 1, \dots, N-1$, along with its inverse transformation, is defined by Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier reverse}, respectively \citep{Numerical_Recipes}.
 As a convention, $k$ denotes the \emph{time index} for the waveform $h[k]$, whereas $n$ represents the \emph{frequency index} for the spectrum $H[n]$.
 
 Although mathematically self-consistent, DFT is not a faithful digital implementation of the continuous Fourier transform (FT).
-When the sampling window is moved from $k = 0,1,\dots,N-1$ to $k = 1,2,\dots,N$ and the new window is re-indexed to internal positions $0,\dots,N-1$, $H[n]$ changes to $e^{+i 2\pi n / N}(H[n] + h[N] - h[0])$, which matches the time-shifting property of FT \cite{Numerical_Recipes} only if $h[0] = h[N]$, or more generally $h[k] = h[k + N\,j]$ \cite{Prev_Precision_Arithmetic}.
-This implied boundary condition causes the modeling errors of DFT except aliasing when DFT is viewed as the digital implementation of FT \cite{DFT modeling errors}.
+When the sampling window is moved from $k = 0,1,\dots,N-1$ to $k = 1,2,\dots,N$ and the new window is re-indexed to internal positions $0,\dots,N-1$, $H[n]$ changes to $e^{+i 2\pi n / N}(H[n] + h[N] - h[0])$, which matches the time-shifting property of FT \citep{Numerical_Recipes} only if $h[0] = h[N]$, or more generally $h[k] = h[k + N\,j]$ \citep{Prev_Precision_Arithmetic}.
+This implied boundary condition causes the modeling errors of DFT except aliasing when DFT is viewed as the digital implementation of FT \citep{DFT_modeling_errors}.
 \ifdefined\Verbose
-For example, Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function with $f$ as frequency, which has a Dirac intensity with phase $\pi/2$ only if $f$ is an integer, and violates FT in all other cases.
+For example, Figure \ref{fig: FFT_Unfaithful} shows the DFT spectra of the sine function with $f$ as frequency, which has a Dirac intensity of $N/2$ with phase $\pi/2$ only if $f$ is an integer, and violates FT in all other cases.
 \fi
 Similar modeling errors must exist for all digital implementations of infinite integration when the signal does not approach zero outside the digital integration window.
 
@@ -1158,7 +1164,7 @@ In this study, Formulas \eqref{eqn: Fourier forward} and \eqref{eqn: Fourier rev
 
 
 
-When $N = 2^{L}$, where $L$ is a natural number called the \emph{FFT order}, the generalized Danielson-Lanczos lemma can be applied to DFT to produce the FFT \cite{Numerical_Recipes}. 
+When $N = 2^{L}$, where $L$ is a natural number called the \emph{FFT order}, the generalized Danielson-Lanczos lemma can be applied to DFT to produce the FFT \citep{Numerical_Recipes}. 
 \begin{itemize}
 
 \item Within each output computation, each input contributes exactly once, so no dependency problem arises when decomposing the FFT into arithmetic operations such as Formulas \eqref{eqn: addition mean}, \eqref{eqn: addition variance}, \eqref{eqn: multiplication mean}, and \eqref{eqn: multiplication variance}.
@@ -1430,7 +1436,7 @@ Because uncertainty deviations grow more slowly in the reverse transformation th
 Outside of the ideal coverage region, proper coverage cannot be achieved for the reverse transformation.
 Furthermore, the range of input noise that produces ideal coverage decreases with increasing FFT order.
 At sufficiently high FFT orders (visually beyond FFT order $25$ for the reverse transformation), ideal coverage may no longer be achievable.
-Although FFT is widely regarded as one of the most robust numerical algorithms \cite{Numerical_Recipes}\cite{Precise_Numerical_Methods} and is generally insensitive to input errors, it can still fail because extensive computation can amplify numerical errors in the Library sine function to obscure true signals.
+Although FFT is widely regarded as one of the most robust numerical algorithms \citep{Numerical_Recipes, Precise_Numerical_Methods} and is generally insensitive to input errors, it can still fail because extensive computation can amplify numerical errors in the Library sine function to obscure true signals.
 Such deterioration of computed values is not easily detectable when using conventional floating-point arithmetic.
 
 Figure \ref{fig: FFT_Linear_Lib_Roundtrip_ErrorDev_vs_Noise_Order} shows that, even when variance arithmetic can no longer effectively track the value errors for either the forward or the reverse transformations, it can still effectively track the value errors for the round-trip transformation, as shown by the plateau region of error deviations at high $L$ and low $\delta x$.
@@ -1562,7 +1568,7 @@ As a consequence, Figure \ref{fig: FFT_Reverse_Range_Ratio} shows that the ratio
 This trend of uncertainty over-estimation is independent of input noise type (Gaussian versus Uniform), the choice of interval range (fixed multiples of the deviation or the actual input range), the transformation (forward, reverse, or round-trip), the signal under test (Sin, Cos, or Linear), and the sine function (Quart or Library).
 While statistical Taylor expansion tracks the output value errors precisely with an error deviation of $1$ as shown in Table \ref{tbl: ideal coverage}, exactly the same calculation using interval arithmetic results in over-estimation of uncertainty which is linearly proportional to the amount of calculation.
 Because interval arithmetic tracks the worst-case of output range, it is unsuitable to track random uncertainty. 
-Thus, statistical Taylor expansion has a much wider applicable range because the uncertainties in most applications are random in nature \cite{Statistical_Methods}\cite{Precisions_Physical_Measurements}.
+Thus, statistical Taylor expansion has a much wider applicable range because the uncertainties in most applications are random in nature \citep{Statistical_Methods, Precisions_Physical_Measurements}.
 
 
 
@@ -1588,7 +1594,7 @@ The resulting precision (left y-axis) and uncertainty (right y-axis) of $\sin(\p
 \end{align}
 Formulas \eqref{eqn: phase sin} and \eqref{eqn: phase cos} compute $\sin(j \pi/2^L), \cos(j \pi/2^L), j = 0, 1, \dots, 2^{L - 2}$ recursively for recursion order $L = 0, 1, \dots, 17$ starting from Formula \eqref{eqn: phase boundary}.
 
-Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation \cite{Rounding_Error}\cite{Precise_Numerical_Methods}.
+Formula \eqref{eqn: phase sin} is not suitable for computing $\sin(x)$ as $x \rightarrow 0$ because it suffers from behavior analogous to catastrophic cancellation \citep{Rounding_Error, Precise_Numerical_Methods}.
 As shown in Figure \ref{fig: Regression_Sin}, the Quart sine function exhibits a constant precision around $10^{-16}$, whereas the recursive sine function shows worsening precision up to $10^{-7}$ as $x \rightarrow 0$.
 Unlike the hidden catastrophic cancellation in floating-point arithmetic, variance arithmetic uses coarser precision to demonstrate where and by how much the recursive algorithm becomes unfit to compute $\sin(x)$.
 
@@ -1600,7 +1606,7 @@ Unlike the hidden catastrophic cancellation in floating-point arithmetic, varian
 
 Statistical Taylor expansion brings not only numerical enhancement, but also conceptual extension of conventional mathematical concepts.
 In particular, the value, deviation, and sample count of each variable should be treated jointly in analysis.
-Conventional least-squares regression \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} violates this principle and is therefore defective.
+Conventional least-squares regression \citep{Statistical_Methods, Probability_Statistics, Numerical_Recipes} violates this principle and is therefore defective.
 
 \subsection{Ordinary Regression}
 
@@ -1610,20 +1616,20 @@ R_P &\equiv \frac{1}{N} \sum_{n=1}^N (Y_n - c_0 - \sum_{p=1}^{P} c_p\, X_n^p)^2;
 \label{eqn: ordinary polynomial equation}
 &\sum_{p=0}^{P} c_p \overline{x^{p+i}} = \overline{x^i y}, \quad i = 0, 1, \dots, P;
 \end{align}
-An \emph{ordinary polynomial regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} fits a data set containing $N$ samples $\{(X_n, Y_n), n = 1, \dots, N\}$ to a polynomial by minimizing the residual $R_P$ defined in Formula \eqref{eqn: ordinary polynomial residual}, to result in the Equation \eqref{eqn: ordinary polynomial equation} for $c_p,  p = 0, 1, \dots, P$.
+An \emph{ordinary polynomial regression} \citep{Statistical_Methods, Probability_Statistics, Numerical_Recipes} fits a data set containing $N$ samples $\{(X_n, Y_n), n = 1, \dots, N\}$ to a polynomial by minimizing the residual $R_P$ defined in Formula \eqref{eqn: ordinary polynomial residual}, to result in the Equation \eqref{eqn: ordinary polynomial equation} for $c_p,  p = 0, 1, \dots, P$.
 
 \begin{align}
 \label{eqn: ordinary multi residual}
 R_D &\equiv \frac{1}{N} \sum_{n=1}^N \left(Y_n - c_0 - \sum_{d=1}^{D} c_d X_{n, d}\right)^2; \\
 \label{eqn: ordinary multi slope}
-&\boldsymbol{c} \equiv (c_1, \dots, c_D)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+&\boldsymbol{c} \equiv (c_0, \dots, c_D)^T = \mathbf{C}^{-1} \boldsymbol{\nu}; \\
 \label{eqn: ordinary multi intercept}
 &c_0 = \overline{y} - \sum_{d=1}^{D} c_d\, \overline{x_d}; \\
 \label{eqn: ordinary multi slope cov}
 &\nu(c_d, c_e) = (\mathbf{C}^{-1})_{d,e} \frac{(\delta y)^2 - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}}{N} \quad d, e = 1, \dots, D;
 \end{align}
 When $P=1$, the regression is an \emph{ordinary linear regression}.
-It can be extended to \emph{ordinary multi-dimensional linear regression} \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes}, which fits a data set containing $N$ samples $\{(X_{1, n}, \dots, X_{D, n}, Y_n)\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
+It can be extended to \emph{ordinary multi-dimensional linear regression} \citep{Statistical_Methods, Probability_Statistics, Numerical_Recipes}, which fits a data set containing $N$ samples $\{(X_{1, n}, \dots, X_{D, n}, Y_n)\}$ to a multi-dimensional linear formula by minimizing the residual $R_D$ defined in Formula \eqref{eqn: ordinary multi residual}, to result in the solution for the slope and intercept as Formulas \eqref{eqn: ordinary multi slope} and \eqref{eqn: ordinary multi intercept}, respectively, in which:
 \begin{itemize}
 \item $\nu(u, v) \equiv \overline{u v} - \overline{u}\, \overline{v}$ is the covariance between $u$ and $v$.
 In the special case, $(\delta u)^2 = \nu(u, u)$.
@@ -1639,7 +1645,7 @@ Conversely, Formula \eqref{eqn: ordinary multi slope} also yields Formula \eqref
 
 The dependency between $x^d$ and $x^e$ in ordinary polynomial regression is conceptually troublesome for statistical Taylor expansion: the uncorrelated uncertainty condition cannot hold between $x^d$ and $x^e$, so that the result of the polynomial fit has dependency problem.
 For example, when $(\delta x)/\overline{x} \rightarrow 0$, $\nu(x^d, x^e) \rightarrow (\delta x^d) (\delta x^e)$ making $\mathbf{C}$ near-singular with large $|(\mathbf{C}^{-1})_{d,e}|$ in an unstable $\mathbf{C}^{-1}$, so that this regression should be carried out in a coordinate with $\overline{x} = 0$.
-These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \cite{Polynomial Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
+These conditioning problems are well known and motivate the use of orthogonal polynomial bases (Chebyshev, Legendre, Hermite) \citep{Polynomial_Regression}, which shows that \emph{a dependency problem can be reduced by orthogonal transformations under restricted conditions}.
 
 
 
@@ -1650,12 +1656,12 @@ These conditioning problems are well known and motivate the use of orthogonal po
 \label{eqn: total regression distance}
 0 &= (x_n - X_n) + \left( \sum_{p=0}^{P} c_p x_n^p -  Y_n \right) \sum_{p=1}^{P} c_p p x_n^{p - 1}; 
 \end{align}
-A total regression \cite{Linear_Regression} minimizes the squared distance between $(X_n, Y_n)$ and a point $(x_n, y_n)$ on the polynomial, to result in the distance Equation \eqref{eqn: total regression distance}. 
+A total regression \citep{Linear_Regression} minimizes the squared distance between $(X_n, Y_n)$ and a point $(x_n, y_n)$ on the polynomial, to result in the distance Equation \eqref{eqn: total regression distance}. 
 Total linear regression is invariant under swapping the roles of $x$ and $y$.
-In contrast, ordinary linear regression minimizes the vertical squared-distance sum rather than the orthogonal distance to the line, and so always yields a lower $|c_1|$ and a larger residual than total linear regression when the fit is not perfect.
-For total multi-dimensional linear regression \cite{Linear_Regression}, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
+In contrast, ordinary linear regression minimizes the vertical squared-distance sum rather than the orthogonal distance to the line, and so always yields a lower $|c_0|$ and a larger residual than total linear regression when the fit is not perfect.
+For total multi-dimensional linear regression \citep{Linear_Regression}, the solution for the regression residual and the dimensional fitting coefficients are the smallest eigenvalue and its corresponding eigenvector  $(-\mathbf{c},\ 1)^T$ for $\begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix}$, respectively.
 From the perspective of statistical Taylor expansion, total multi-dimensional linear regression is superior to ordinary multi-dimensional linear regression because the former discovers independent dimensions without the dependency problem of the latter.
-Moreover, as a principal component regression \cite{Linear_Algebra}, a total multi-dimensional linear regression can drop a dimension if the corresponding fitting coefficient has precision coarser than $1$.
+Moreover, as a principal component regression \citep{Linear_Algebra}, a total multi-dimensional linear regression can drop a dimension if the corresponding fitting coefficient has precision coarser than $1$.
 
 However, because Equation \eqref{eqn: total regression distance} for total polynomial regression has no closed-form general solution when the polynomial degree $P$ is larger than $2$, Equation \eqref{eqn: ordinary polynomial equation} for ordinary polynomial regression has to be used.
 This compromise brings back the dependency problem.
@@ -1677,37 +1683,37 @@ Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} give the set mean
 $\nu(u, v)$ contains both the within-subset covariance/variance $\nu(u, v)_j$ and the between-subset covariance/variance $(\overline{u_j} - \overline{u})(\overline{v_j} - \overline{v})$.
 
 \begin{align}
-\label{eqn: ordinary c_1}
-c_1 &= \frac{\nu(x, y)}{(\delta x)^2} = \frac{\sum_j \frac{N_j}{N} \left( \nu(x, y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \right)}{\sum_j \frac{N_j}{N} \left( (\delta x_j)^2 + (\overline{x_j} - \overline{x})^2 \right)}; 
+\label{eqn: ordinary c_0}
+c_0 &= \frac{\nu(x, y)}{(\delta x)^2} = \frac{\sum_j \frac{N_j}{N} \left( \nu(x, y)_j + (\overline{x_j} - \overline{x})(\overline{y_j} - \overline{y}) \right)}{\sum_j \frac{N_j}{N} \left( (\delta x_j)^2 + (\overline{x_j} - \overline{x})^2 \right)}; 
 \end{align}
-As the simplest case of Formula \eqref{eqn: ordinary multi slope}, Formula \eqref{eqn: ordinary c_1} shows an example of applying Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} to ordinary linear fit of $y = c_0 + c_1\, x$, in which $\delta x_j$ is the deviation for $j$-th subset (but not the deviation $(\delta x_j)/\sqrt{N_j}$ for $j$-th subset mean $x_j$).
-Formula \eqref{eqn: time-series linear regression 1} is a special case of the first part of Formula \eqref{eqn: ordinary c_1} with $X_j \in [-H,\dots,+H]$.
+As the simplest case of Formula \eqref{eqn: ordinary multi slope}, Formula \eqref{eqn: ordinary c_0} shows an example of applying Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} to ordinary linear fit of $y = c_0 + c_0\, x$, in which $\delta x_j$ is the deviation for $j$-th subset (but not the deviation $(\delta x_j)/\sqrt{N_j}$ for $j$-th subset mean $x_j$).
+Formula \eqref{eqn: time-series linear regression 1} is a special case of the first part of Formula \eqref{eqn: ordinary c_0} with $X_j \in [-H,\dots,+H]$.
 
 \begin{align}
 \label{eqn: convention residual}
-\chi^2(c_0, c_1) &= \sum_j N_j \left(\frac{\overline{y_j} - c_0 - c_1 \overline{x_j}}{\delta y_j} \right)^2; \\
-\label{eqn: convention c_1}
-c_1 &= \frac{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \overline{y_j}\right)
+\chi^2(c_0, c_0) &= \sum_j N_j \left(\frac{\overline{y_j} - c_0 - c_0 \overline{x_j}}{\delta y_j} \right)^2; \\
+\label{eqn: convention c_0}
+c_0 &= \frac{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \overline{y_j}\right)
 					- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{y_j}\right)}
 			{\left(\sum_j \frac{N_j}{(\delta y_j)^2} \right) \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j}^2\right)
 				- \left(\sum_j \frac{N_j}{(\delta y_j)^2} \overline{x_j} \right)^2};
 \end{align}
-In contrast, common practice \cite{Statistical_Methods}\cite{Numerical_Recipes} assumes the input uncertainty to be Gaussian, constructs the residual $\chi^2$ as in Formula \eqref{eqn: convention residual}, and finds the extremum over $\{ c_0, c_1 \}$ to result in Formula \eqref{eqn: convention c_1}.
-Formulas \eqref{eqn: convention residual} and \eqref{eqn: convention c_1} reproduce Formulas (15.2.2) and (15.2.6) from the reference \cite{Numerical_Recipes}, respectively, in which $c_0, c_1, \overline{x_j}, \overline{y_j}, \delta y_j/\sqrt{N_j}$ replace $a, b, x_i, y_i, \sigma_i$, respectively.
-The residual difference between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: convention residual}, and the result incompatibility between Formulas \eqref{eqn: ordinary c_1} and \eqref{eqn: convention c_1}, suggest that this common practice differs from ordinary linear regression. 
-Formula \eqref{eqn: ordinary c_1} is derived rigorously and directly from definitions without assumption on underlying input uncertainty distribution.
-Conversely, Formula \eqref{eqn: convention c_1} can approximate Formula \eqref{eqn: ordinary c_1} under the following conditions:
+In contrast, common practice \citep{Statistical_Methods, Numerical_Recipes} assumes the input uncertainty to be Gaussian, constructs the residual $\chi^2$ as in Formula \eqref{eqn: convention residual}, and finds the extremum over $\{ c_0, c_0 \}$ to result in Formula \eqref{eqn: convention c_0}.
+Formulas \eqref{eqn: convention residual} and \eqref{eqn: convention c_0} reproduce Formulas (15.2.2) and (15.2.6) from the reference \citep{Numerical_Recipes}, respectively, in which $c_0, c_0, \overline{x_j}, \overline{y_j}, \delta y_j/\sqrt{N_j}$ replace $a, b, x_i, y_i, \sigma_i$, respectively.
+The residual difference between Formulas \eqref{eqn: ordinary polynomial residual} and \eqref{eqn: convention residual}, and the result incompatibility between Formulas \eqref{eqn: ordinary c_0} and \eqref{eqn: convention c_0}, suggest that this common practice differs from ordinary linear regression. 
+Formula \eqref{eqn: ordinary c_0} is derived rigorously and directly from definitions without assumption on underlying input uncertainty distribution.
+Conversely, Formula \eqref{eqn: convention c_0} can approximate Formula \eqref{eqn: ordinary c_0} under the following conditions:
 \begin{itemize}
 \item within-subset covariance/variance is ignored;
 \item $\delta y_j \simeq \delta y$ when $N_j$ is sufficiently large;
 \item $N_j$ is not known, but the subset-mean deviation $\delta y_j/\sqrt{N_j}$ is supplied, so that $N_j/(\delta y_j)^2$ replaces $N_j$ as the subset weight.
 \end{itemize}
-In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which means that Formula \eqref{eqn: convention c_1} applies in a broader context than that of Formula \eqref{eqn: convention residual}
+In a similar context, $N_j/(\delta x_j)^2$ can also be used as the weight, which means that Formula \eqref{eqn: convention c_0} applies in a broader context than that of Formula \eqref{eqn: convention residual}
 \iffalse \footnote{
-Reference \cite{Numerical_Recipes} gives two $\chi^2(a,b)$ statistics, as its Formulas (15.2.2) and (15.3.2), and attributes them as the ordinary and the total linear regression, which seems to disagree with this study.
+Reference \citep{Numerical_Recipes} gives two $\chi^2(a,b)$ statistics, as its Formulas (15.2.2) and (15.3.2), and attributes them as the ordinary and the total linear regression, which seems to disagree with this study.
 }\fi.
-When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_1} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_1} to include within-subset covariance/variance.
-Compared with Formula \eqref{eqn: ordinary c_1}, Formula \eqref{eqn: convention c_1} has several drawbacks:
+When $\delta y$ is also known, a better approximation than Formula \eqref{eqn: convention c_0} is to apply the estimated $N_j$ directly to Formula \eqref{eqn: ordinary c_0} to include within-subset covariance/variance.
+Compared with Formula \eqref{eqn: ordinary c_0}, Formula \eqref{eqn: convention c_0} has several drawbacks:
 \begin{itemize}
 \item ignoring within-subset covariance/variance,
 \item introducing noise from approximating $\delta y_j$ as $\delta y$,
@@ -1720,33 +1726,74 @@ In contrast, statistical Taylor expansion makes no assumption about the underlyi
 \section{Comments on Solving Equations}
 \label{sec: equations}
 
-In the context of solving an equation, $x$ has to be precise and deterministic, so the equation has the format $g(f(x)) = 0$, while the solution for $f(x)$ is random if any of the coefficients, initial conditions, and boundary conditions is random.
-The result for $f(x \pm \delta x)$ has to be constructed by integrating $f(x)$ over the distribution of $x \pm \delta x$.
+\subsection{Precise versus Imprecise Input}
+
+A $g(f(x), \dots) = 0$ equation provides the solution $f(x)$ at a precise point $x$.
+Its analytic solution $f(x)$ is random if any of the coefficients, initial conditions, and boundary conditions is random.
+
+A $g(f(x \pm \delta x), \dots) = 0$ equation provides the solution $f(x \pm \delta x)$ at an imprecise point $x \pm \delta x$.
+\begin{align}
+\label{eqn: random to deterministic}
+0 = g(f(x \pm \delta x)) = g(f(x + \tilde{z} \delta x))
+   = \sum_{n=0}^{\infty} \frac{\tilde{z}^n (\delta x)^n}{n!} \, \frac{d^n}{d x^n} g(f(x));
+\end{align}
+Applying Formula \eqref{eqn: Taylor 1d} to expand the composite function $g(f(x + \tilde{z} \delta x))$ around $x$ results in Equation \eqref{eqn: random to deterministic}.
+The lowest order $n = 0$ recovers the deterministic equation $g(f(x)) = 0$, whereas the higher orders $n \geq 1$ are its successive derivatives, which vanish identically once $g(f(x)) = 0$ holds over the range around $x$---when $g(f(x))$ is analytic.
+Therefore, solving $g(f(x \pm \delta x)) = 0$ is equivalent to solving $g(f(x)) = 0$, then replacing $x$ with $x \pm \delta x$.
+\begin{align}
+\label{eqn: exponential ODE}
+\frac{d}{d x} f(x) &= (c_0 \pm \delta c_0) f(x); \\
+\label{eqn: exponential ODE random}
+\frac{d}{d x} f(x \pm \delta x) &= \frac{d}{d x} f(x + \tilde{z} \delta x) = (c_0 \pm \delta c_0)\,  f(x + \tilde{z} \delta x); \\
+\label{eqn: exponential ODE series}
+f^{(n)}_x &= (c_0 \pm \delta c_0)\, f^{(n - 1)}_x = (c_0 \pm \delta c_0)^n f(x), \quad n = 1,2, \dots; \\
+\label{eqn: exponential ODE solution}
+f(x + \tilde{z} \delta x) &= f(x) e^{(c_0 \pm \delta c_0) \tilde{z} \delta x}; \\
+\label{eqn: exponential ODE result}
+f(x \pm \delta x) &= A\, e^{(c_0 \pm \delta c_0) (x \pm \delta x)};
+\end{align}
+As a special example of Equation \eqref{eqn: random to deterministic}, Equation \eqref{eqn: exponential ODE random} has its counterpart of 
+Equation \eqref{eqn: exponential ODE}.
+Equation \eqref{eqn: exponential ODE random} leads to Formula \eqref{eqn: exponential ODE series}, which further leads to Formula \eqref{eqn: exponential ODE solution}.
+Substituting Formula \eqref{eqn: exponential ODE solution} back to Equation \eqref{eqn: exponential ODE random} results in Equation \eqref{eqn: exponential ODE}.
+Formula \eqref{eqn: exponential ODE result} is the solution for both Equation \eqref{eqn: exponential ODE} (via $x \rightarrow x \pm \delta x$) and Equation \eqref{eqn: exponential ODE random}, in which $A$ is determined by the initial condition.
+
+Statistical Taylor expansion provides the interpretation of $f(x)$ or $f(x \pm \delta x)$. 
+The method to extend the conventional analytic solution \citep{Mathematical_Methods} directly to random equations can perhaps be the foundation for a new branch of mathematics called statistical algebra.
+However, some crucial fundamental questions remain for this extension.
 
 
 
-\subsection{The Simplest Differential Equation}
+\subsection{The Simplest Ordinary Differential Equation}
 
 \begin{align}
 \label{eqn: first-order ODE}
-\frac{d}{d x} f(x) &= c_1 \pm \delta c_1; \\
+\frac{d}{d x} f(x) &= c_0 \pm \delta c_0; \\
 \label{eqn: first-order ODE solution}
-f(x) &= (x - x_0) (c_1 \pm \delta c_1) + (f(x_0) \pm \delta f(x_0)); \\
+f(x) &= (x - x_0) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
 \label{eqn: first-order ODE mean}
-\overline{f(x)} &= (x - x_0) c_1 + \overline{f(x_0)}; \\
+\overline{f(x)} &= (x - x_0) \overline{c_0} + \overline{f(x_0)}; \\
 \label{eqn: first-order ODE variance}
-\delta^2 f(x) &= (x - x_0)^2 (\delta c_1)^2 + (\delta f(x_0))^2;
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + (\delta f(x_0))^2;
 \end{align}
-For example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_1 \pm \delta c_1$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
-Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$, respectively, using statistical Taylor expansion.
+Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_0 \pm \delta c_0$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
+Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$, respectively.
 
 \begin{align}
-\label{eqn: first-order ODE solution intg}
-f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_1 \pm \delta c_1) + \big(f(x_0) \pm \delta f(x_0)\big); \\
-\label{eqn: first-order ODE variance intg}
-\delta^2 f(x) &= (x - x_0)^2 (\delta c_1)^2 + \big(c_1^2+(\delta c_1)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
+\label{eqn: first-order ODE solution initial}
+f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
+\label{eqn: first-order ODE variance initial}
+\delta^2 f(x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + \big(\overline{c_0}^2+(\delta c_0)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
 \end{align}
-When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution intg} shows the solution, with the same mean as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance intg}.
+When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution initial} shows the solution after replacing $x_0$ with $x_0 \pm \delta x_0$, with the same mean (by replacing $x_0$ with $\overline{x_0}$) as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance initial}.
+
+\begin{align}
+\label{eqn: first-order ODE solution imprecise}
+f(x \pm \delta x) &= \big((x \pm \delta x) - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
+\label{eqn: first-order ODE variance imprecise}
+\delta^2 f(x \pm \delta x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + \big(\overline{c_0}^2+(\delta c_0)^2\big) \big((\delta x)^2+(\delta x_0)^2 \big) + (\delta f(x_0))^2;
+\end{align}
+Formula \eqref{eqn: first-order ODE solution imprecise} evaluates the solution at the random point $x \pm \delta x$, in contrast to the deterministic evaluation point $x$ in Formula \eqref{eqn: first-order ODE solution initial}, with the same mean but larger variance in Formula \eqref{eqn: first-order ODE variance imprecise} due to the input $\delta x$.
 
 \begin{align}
 \label{eqn: first-order ODE two anchors solution}
@@ -1759,14 +1806,33 @@ f(x) &= \frac{x_1 - x}{x_1 - x_0} (f(x_0) \pm \delta f(x_0)) + \frac{x - x_0}{x_
 x &= \frac{x_1 \delta^2 f(x_0) + x_0 \delta^2 f(x_1)}{\delta^2 f(x_0) + \delta^2 f(x_1)}: \quad
 		\delta^2 f(x) =  \frac{\delta^2 f(x_0) \, \delta^2 f(x_1)}{\delta^2 f(x_0) + \delta^2 f(x_1)};
 \end{align}
-With two initial conditions $f(x_0) \pm \delta f(x_0)$ and $f(x_1) \pm \delta f(x_1)$, Formula \eqref{eqn: first-order ODE two anchors solution} is the solution, with mean and variance as Formulas \eqref{eqn: first-order ODE two anchors mean} and \eqref{eqn: first-order ODE two anchors variance}, respectively.
+With two initial conditions $f(x_0) \pm \delta f(x_0)$ and $f(x_1) \pm \delta f(x_1)$, $c_0 \pm \delta c_0$ is derived from the two anchors.
+Formula \eqref{eqn: first-order ODE two anchors solution} is the solution, with mean and variance as Formulas \eqref{eqn: first-order ODE two anchors mean} and \eqref{eqn: first-order ODE two anchors variance}, respectively.
 When $x \in (x_0, x_1)$, $\delta^2 f(x)$ is smaller than either $\delta^2 f(x_0)$ or $\delta^2 f(x_1)$, with the minimum at Formula \eqref{eqn: first-order ODE two anchors variance minimal} which is smaller than both of them.
-Formulas \eqref{eqn: first-order ODE two anchors solution} is equivalent to the $N = 2$ specialization of Formula \eqref{eqn: ordinary c_1}.
+Formula \eqref{eqn: first-order ODE two anchors solution} is equivalent to the $N = 2$ specialization of the linear regression Formula \eqref{eqn: ordinary c_0}.
+
+\begin{align}
+\label{eqn: first-order ODE two imprecise anchors solution}
+f(x) &= \frac{(x_1 \pm \delta x_1) - x}{(x_1 \pm \delta x_1) - (x_0 \pm \delta x_0)} (f(x_0) \pm \delta f(x_0)) \\
+		&+ \frac{x - (x_0 \pm \delta x_0)}{(x_1 \pm \delta x_1) - (x_0 \pm \delta x_0)} (f(x_1) \pm \delta f(x_1)); \nonumber \\
+\label{eqn: first-order ODE two imprecise anchors mean}
+\overline{f(x)} &\simeq \frac{\overline{x_1} - x}{\overline{x_1} - \overline{x_0}} \overline{f(x_0)} + \frac{x - \overline{x_0}}{\overline{x_1} - \overline{x_0}} \overline{f(x_1)}; \\
+\label{eqn: first-order ODE two imprecise anchors variance}
+\delta^2 f(x) &\simeq \left(\frac{\overline{x_1} - x}{\overline{x_1} - \overline{x_0}}\right)^2 \left(\delta^2 f(x_0) + \frac{\big(\overline{f(x_1)} - \overline{f(x_0)}\big)^2}{(\overline{x_1} - \overline{x_0})^2} \, \delta^2 x_0\right) \\
+	&+ \left(\frac{x - \overline{x_0}}{\overline{x_1} - \overline{x_0}}\right)^2 \left(\delta^2 f(x_1) + \frac{\big(\overline{f(x_1)} - \overline{f(x_0)}\big)^2}{(\overline{x_1} - \overline{x_0})^2} \, \delta^2 x_1\right); \nonumber
+\end{align}
+With two initial conditions $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ and $f(x_1 \pm \delta x_1) \pm \delta f(x_1)$, Formula \eqref{eqn: first-order ODE two anchors solution} becomes Formula \eqref{eqn: first-order ODE two imprecise anchors solution} as the solution.
+Formulas \eqref{eqn: first-order ODE two imprecise anchors mean} and \eqref{eqn: first-order ODE two imprecise anchors variance} show the first-order approximation of mean and variance using statistical Taylor expansion, respectively.
+
+The above solutions for the simplest differential equation show that equations with random variables provide much richer structure than their precise counterparts.
+Although the solution for Equation \eqref{eqn: first-order ODE} can be obtained by another method \citep{Random_Differential_Equations}, the presentation of the equation, the method, the solution, the interpretation of the solution, and the extension to more complicated cases in this section are all much simpler.
+
+
 
 \subsection{A Comment on Numerical Solution}
 
 When available, an analytic solution is preferable to a numerical one because the latter must sample over the distributional range of coefficients, initial conditions, and boundary conditions.
-For example, a numerical solution has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
+For example, a numerical solution for Equation \eqref{eqn: first-order ODE} has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
 
 
 
@@ -2050,7 +2116,8 @@ George B. Arfken, Hans J. Weber, Frank E. Harris.
 \end{thebibliography}
 
 \else
-\bibliographystyle{unsrt}
+\bibliographystyle{plainnat}
+\nocite{*}
 \bibliography{VarianceArithmetic}
 \fi
 
