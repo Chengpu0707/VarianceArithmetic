@@ -1722,8 +1722,88 @@ Compared with Formula \eqref{eqn: ordinary c_0}, Formula \eqref{eqn: convention 
 In contrast, statistical Taylor expansion makes no assumption about the underlying input distribution, is much simpler, and has Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} both well suited for mixing of precise and imprecise values as regression inputs.
 
 
+\ifdefined\Verbose
+\subsection{A Practical Example: Hydrogen Atomic Spectra}
 
-\section{Comments on Solving Equations}
+The interpretation of hydrogen atomic spectra gave rise to the mathematical formalism for quantum physics.
+The Lamb shift, the $4.4\times10^{-6}\,\mathrm{eV}$ difference between $2S_{1/2}$ and $2P_{1/2}$, marks the start of quantum field theory \citep{Lamb_Shift}.
+
+\begin{align}
+\label{eqn: atomic hydrogen levels}
+\frac{1}{\mu_e} = \frac{1}{m_e} + \frac{1}{m_p}:&\quad  
+	E_n = -\frac{\alpha^2 \mu_e c^2}{2n^2}, \quad n=1,2,\dots; \\
+\label{eqn: vacuum permittivity}
+\varepsilon_0 \equiv \dfrac{e^2}{4 \pi \alpha \hbar c}:&\quad 
+E_n =-\dfrac{\mu_e e^4}{2(4\pi\varepsilon_0)^2\hbar^2 n^2}, \quad n=1,2,\dots;
+\end{align}
+Formulas \eqref{eqn: atomic hydrogen levels} and \eqref{eqn: vacuum permittivity} both display the atomic hydrogen energy levels using quantum physics \citep{Fundamentals_of_Physics}, in which:
+\begin{itemize}
+\item $e$ is the electron electric charge, with $\delta e = 0$ as a definition.
+\item $\hbar$ is the Planck's constant, with $\delta \hbar = 0$ as a definition.
+\item $c$ is the light speed in vacuum, with $\delta c = 0$ as a definition.
+\item $\mu_e$ is the effective electron mass, which is defined by Formula \eqref{eqn: atomic hydrogen levels}, with $P(\mu_e) = 3.0\times 10^{-10}$. In Formula \eqref{eqn: atomic hydrogen levels}, $m_e$ and $m_p$ are the mass of electron and proton, respectively.
+\item $\alpha$ is the fine-structure constant, with $P(\alpha) = 1.5\times 10^{-10}$ using other methods \citep{CODATA_2018, Fine_Structure_Constant}.
+\item $\varepsilon_0$ is the vacuum permittivity, which is defined by Formula \eqref{eqn: vacuum permittivity}.
+\end{itemize}
+Quantum field theory shifts the $S$ states $E_1$, $E_2$, and $E_3$ by the fractions $2.48 \times 10^{-6}$, $1.27 \times 10^{-6}$, and $8.5 \times 10^{-7}$ of $E_n$, respectively \citep{CODATA_2018}.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|r|r|r|r|}
+\hline
+$n \rightarrow m$ & intensity & $A_{n \rightarrow m}$ (s$^{-1}$) & $\lambda$ (nm) & $\delta \lambda$ (nm) \\
+\hline
+$2 \rightarrow 3$   & 500000 & $4.41\times10^{7}$ & 656.279   & 0.003   \\
+$2 \rightarrow 4$   & 180000 & $8.42\times10^{6}$ & 486.135   & 0.005   \\
+$2 \rightarrow 5$   &  90000 & $2.53\times10^{6}$ & 434.0472  & 0.0006  \\
+$2 \rightarrow 6$   &  70000 & $9.73\times10^{5}$ & 410.1734  & 0.0006  \\
+$2 \rightarrow 7$   &  30000 & $4.39\times10^{5}$ & 397.0075  & 0.0006  \\
+$2 \rightarrow 8$   &  70000 & $2.21\times10^{5}$ & 388.9064  & 0.0006  \\
+$2 \rightarrow 9$   &  30000 & $1.22\times10^{5}$ & 383.5397  & 0.0006  \\
+$2 \rightarrow 10$  &  17000 & $7.12\times10^{4}$ & 379.7909  & 0.0006  \\
+$2 \rightarrow 11$  &   9000 & $4.40\times10^{4}$ & 377.0633  & 0.0006  \\
+$2 \rightarrow 12$  &   8000 & $2.83\times10^{4}$ & 375.0151  & 0.0006  \\
+$2 \rightarrow 13$  &   6000 & $1.89\times10^{4}$ & 373.4369  & 0.0006  \\
+$2 \rightarrow 14$  &   5000 & $1.30\times10^{4}$ & 372.1946  & 0.0006  \\
+$2 \rightarrow 15$  &   3300 & $9.21\times10^{3}$ & 371.1978  & 0.0006  \\
+$2 \rightarrow 16$  &   2800 & $6.66\times10^{3}$ & 370.3859  & 0.0006  \\
+$2 \rightarrow 17$  &   2300 & $4.91\times10^{3}$ & 369.7157  & 0.0006  \\
+$2 \rightarrow 18$  &   2300 & $3.69\times10^{3}$ & 369.1551  & 0.0006  \\
+$2 \rightarrow 19$  &   2000 & $2.81\times10^{3}$ & 368.6831  & 0.0006  \\
+$2 \rightarrow 20$  &   1700 & $2.17\times10^{3}$ & 368.2823  & 0.0006  \\
+$2 \rightarrow 21$  &   1700 & $1.70\times10^{3}$ & 367.9370  & 0.0006  \\
+$2 \rightarrow 22$  &   1400 & $1.35\times10^{3}$ & 367.6376  & 0.0006  \\
+\hline
+\end{tabular}
+\captionof{table}{
+Measured atomic hydrogen Balmer series ($n=2$) spectral lines from the NIST Atomic Spectra Database \citep{NIST_ASD}, ordered by the Einstein spontaneous-emission coefficient $A_{n \rightarrow m}$ (equivalently, by upper level $m$): the transition $n \rightarrow m$, the (source-dependent) relative intensity, $A_{n \rightarrow m}$, the observed wavelength $\lambda$ (in air), and its uncertainty $\delta \lambda$.
+Compiled from different sources, the relative intensity of $n \rightarrow m = 2 \rightarrow 7$ seems an abnormality.
+}
+\label{tbl: hydrogen spectra}
+\end{table}
+
+Formula \eqref{eqn: atomic hydrogen levels} can also be used to measure $\alpha$. 
+To avoid the large ground-state Lamb shift, only the Balmer series ($n=2$) is used.
+Table \ref{tbl: hydrogen spectra} shows the experimental data.
+Each observed light wavelength $\lambda$ and its uncertainty $\delta \lambda$ are converted to the transition energy $E_m - E_n = hc/\lambda$ and its uncertainty $\delta (E_m - E_n)$, then normalized by $\left(\frac{1}{n^2} - \frac{1}{m^2}\right) \frac{\mu_e c^2}{2}$ to give $\alpha^2$, whose square root yields $\alpha$ and $\delta \alpha$.
+Applying Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance} to the resulting data set, with the intensity as weight, the resulting $\alpha$ is $7.29841 \times 10^{-3} \pm 2.1 \times 10^{-8}$, with a relative deviation of $2.9 \times 10^{-6}$.
+The experimental data are obtained at room temperature in air. 
+After correction for vacuum, the resulting $\alpha$ is $7.29739 \times 10^{-3} \pm 2.1 \times 10^{-8}$, with the mean value very consistent with the values obtained by other methods \citep{CODATA_2018, Fine_Structure_Constant}.
+The in-between variance in Formula \eqref{eqn: set covariance} accounts for only $14\%$, suggesting that another measurement at very low temperature to reduce the measured $\delta \lambda$ can effectively reduce the resulting $\delta \alpha$.
+The rapidly decreasing Einstein spontaneous-emission coefficient $A_{n \rightarrow m}$ \citep{Einstein_Coefficient} or the intensity suggests that including more data will not improve the result significantly.
+
+The calculated $E_1$ bias offset is about $1.1\times10^{-10}\,\mathrm{eV}$, well below the Lamb shift.
+However, the actual value of bias offset using Formula \eqref{eqn: vacuum permittivity} is about 3-fold of that using Formula \eqref{eqn: atomic hydrogen levels}.
+Therefore, it is unimportant to distinguish between the original input and the derived input when applying statistical Taylor expansion.
+
+The calculated $\delta E_1$ is $7.8\times10^{-5}\,\mathrm{eV}$, well above the measured value of $2.6\times10^{-11}\,\mathrm{eV}$ \citep{CODATA_2018}.
+Using the best measured $\alpha \pm \delta \alpha$, the calculated $\delta E_1$ is $5.8\times10^{-9}\,\mathrm{eV}$, suggesting there is still room to improve on the measurement of $m_e$ and $\alpha$.
+%On the other hand, the measured value of $\delta E_1$ gives lower bounds for the measurement of $\delta m_e$ and $\delta \alpha$ using hydrogen atomic spectra.
+
+\fi
+
+
+\section{Solving Equations}
 \label{sec: equations}
 
 \subsection{Precise versus Imprecise Input}
@@ -1748,7 +1828,7 @@ Therefore, solving $g(f(x \pm \delta x)) = 0$ is equivalent to solving $g(f(x)) 
 \label{eqn: exponential ODE series}
 f^{(n)}_x &= (c_0 \pm \delta c_0)\, f^{(n - 1)}_x = (c_0 \pm \delta c_0)^n f(x), \quad n = 1,2, \dots; \\
 \label{eqn: exponential ODE solution}
-f(x + \tilde{z} \delta x) &= f(x) e^{(c_0 \pm \delta c_0) \tilde{z} \delta x}; \\
+f(x + \tilde{z} \delta x) &= f(x)\, e^{(c_0 \pm \delta c_0) \tilde{z} \delta x}; \\
 \label{eqn: exponential ODE result}
 f(x \pm \delta x) &= A\, e^{(c_0 \pm \delta c_0) (x \pm \delta x)};
 \end{align}
@@ -1758,7 +1838,7 @@ Equation \eqref{eqn: exponential ODE random} leads to Formula \eqref{eqn: expone
 Substituting Formula \eqref{eqn: exponential ODE solution} back to Equation \eqref{eqn: exponential ODE random} results in Equation \eqref{eqn: exponential ODE}.
 Formula \eqref{eqn: exponential ODE result} is the solution for both Equation \eqref{eqn: exponential ODE} (via $x \rightarrow x \pm \delta x$) and Equation \eqref{eqn: exponential ODE random}, in which $A$ is determined by the initial condition.
 
-Statistical Taylor expansion provides the interpretation of $f(x)$ or $f(x \pm \delta x)$. 
+Statistical Taylor expansion provides the statistical interpretation of $f(x)$ or $f(x \pm \delta x)$. 
 The method to extend the conventional analytic solution \citep{Mathematical_Methods} directly to random equations can perhaps be the foundation for a new branch of mathematics called statistical algebra.
 However, some crucial fundamental questions remain for this extension.
 
@@ -1828,18 +1908,110 @@ The above solutions for the simplest differential equation show that equations w
 Although the solution for Equation \eqref{eqn: first-order ODE} can be obtained by another method \citep{Random_Differential_Equations}, the presentation of the equation, the method, the solution, the interpretation of the solution, and the extension to more complicated cases in this section are all much simpler.
 
 
+\subsection{Quadratic Equation}
+
+\begin{align}
+\label{eqn: quadratic}
+0 &= (c_0 \pm \delta c_0) + (c_1 \pm \delta c_1) x + (c_2 \pm \delta c_2) x^2; \\
+\label{eqn: quadratic solution}
+x &= \frac{-(c_1 \pm \delta c_1) \pm \sqrt{\Delta}}{2 (c_2 \pm \delta c_2)}, \quad 
+	\Delta \equiv (c_1 \pm \delta c_1)^2 - 4 (c_2 \pm \delta c_2) (c_0 \pm \delta c_0); \\
+\label{eqn: quadratic complex}
+&\Delta < 0:\quad x = \sqrt{\frac{c_0 \pm \delta c_0}{c_2 \pm \delta c_2}}\, e^{i\theta},
+	\quad \tan(\theta)^2 = 4\frac{(c_2 \pm \delta c_2)(c_0 \pm \delta c_0)}{(c_1 \pm \delta c_1)^2} - 1; \\
+\label{eqn: quadratic discriminant mean}
+\overline{\Delta} &\simeq \overline{c_1}^2 - 4 \overline{c_2}\, \overline{c_0}; \\
+\label{eqn: quadratic discriminant variance}
+\delta^2 \Delta &\simeq 4 \overline{c_1}^2\, \delta^2 c_1 + 16 \overline{c_2}^2\, \delta^2 c_0 + 16 \overline{c_0}^2\, \delta^2 c_2; \\
+\label{eqn: quadratic mean}
+\overline{x} &\simeq \frac{-\overline{c_1} \pm \sqrt{\overline{\Delta}}}{2 \overline{c_2}}
+		\mp \frac{\overline{c_2}\, \delta^2 c_0 + \overline{c_0}\, \delta^2 c_1}{\overline{\Delta}^{3/2}} 
+	+ \left( \frac{1}{\overline{c_2}^2} \left(\overline{x} \pm \frac{\overline{c_0}}{\sqrt{\overline{\Delta}}}\right) \mp \frac{\overline{c_0}^2}{\overline{c_2}\, \overline{\Delta}^{3/2}} \right) \delta^2 c_2; 
+\end{align}
+A quadratic Equation \eqref{eqn: quadratic} has solution in Formula \eqref{eqn: quadratic solution}, whose discriminant $\Delta$ has first-order mean and variance in Formulas \eqref{eqn: quadratic discriminant mean} and \eqref{eqn: quadratic discriminant variance}, and whose root $x$ has iterative second-order mean $\overline{x}$ in Formula \eqref{eqn: quadratic mean}.
+
+In the statistical context, the solution space is smaller.
+\begin{itemize}
+\item In Formula \eqref{eqn: quadratic solution}, for the variance of $1/(c_2 \pm \delta c_2)$ to be bounded, $\hat{\kappa}_2\, \delta c_2 < \overline{c_2}$, in which $\hat{\kappa}_2=5$ when $c_2$ is Gaussian distributed, or $\hat{\kappa}_2=\sqrt{3}$ when $c_2$ is Uniform distributed.
+
+\item To guarantee that the variance $\delta^2 \sqrt{\Delta}$ is bounded, $5\, \delta \Delta < |\overline{\Delta}|$ (when $\Delta$ is assumed to be Gaussian distributed).
+Unless $0 = \delta c_0 = \delta c_1 = \delta c_2$, $\Delta = 0$ is excluded.
+
+\item When $\Delta < 0$, Formula \eqref{eqn: quadratic complex} shows that $x$ becomes complex.
+For the variance of the imaginary angle to be bounded, $\hat{\kappa}_1\, \delta c_1 < \overline{c_1}$.
+The variances for the amplitude and imaginary angle have to be calculated separately, because the statistical Taylor expansion on Formula \eqref{eqn: quadratic solution} results in complex variance.
+
+\end{itemize}
+
+
+
+\subsection{2nd Order Constant-Coefficient Homogeneous Ordinary Differential Equation}
+
+\begin{align}
+\label{eqn: homogeneous ODE}
+0 &= (c_0 \pm \delta c_0) x + (c_1 \pm \delta c_1) \frac{d x}{d t} + (c_2 \pm \delta c_2) \frac{d^2 x}{d t^2}; \\
+\label{eqn: homogeneous quadratic}
+\gamma &\equiv \frac{c_1 \pm \delta c_1}{2 (c_2 \pm \delta c_2)}, \quad
+	\Delta \equiv (c_1 \pm \delta c_1)^2 - 4 (c_2 \pm \delta c_2)(c_0 \pm \delta c_0); \\
+\label{eqn: homogeneous ODE overdamped}
+5 \delta \Delta < \overline{\Delta}:&\quad 
+	x= e^{-\gamma t} \big(A \cosh(\mu\, t) + B \sinh(\mu\, t)\big), \quad
+		\mu \equiv \frac{\sqrt{\Delta}}{2 (c_2 \pm \delta c_2)}; \\
+\label{eqn: homogeneous ODE underdamped}
+5 \delta \Delta < - \overline{\Delta}:&\quad 
+	x = e^{-\gamma t} \big(A \cos(\omega_d\, t) + B \sin(\omega_d\, t)\big), \quad
+		\omega_d \equiv \frac{\sqrt{-\Delta}}{2 (c_2 \pm \delta c_2)};
+\end{align}
+Equation \eqref{eqn: homogeneous ODE} describes a natural damping of the displacement over time $x(t)$.
+Formulas \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped} provide the solutions for over-damping and under-damping \citep{Driven_Damped_Oscillator}, in which Formula \eqref{eqn: homogeneous quadratic} connects Equation \eqref{eqn: homogeneous ODE} with Equation \eqref{eqn: quadratic} and all its constraints on $\Delta \pm \delta \Delta$, $c_2 \pm \delta c_2$, and $c_1 \pm \delta c_1$ when $\Delta < 0$.
+When $\overline{\Delta} \in (-5 \delta \Delta, 5 \delta \Delta)$, the solution is not statistically stable as either case. 
+
+Besides explicitly from measurement, the uncertainty of $c_0$, $c_1$, and $c_2$ can have intrinsic sources:
+\begin{itemize}
+\item $(c_0 \pm \delta c_0)$ is the elastic constant, in which $\delta c_0$ describes the deviation from linear elastic force, e.g., for large displacement $x$.
+
+\item $(c_1 \pm \delta c_1)$ describes damping, in which $\delta c_1$ results from nonlinear damping, e.g., for large speed $\frac{d x}{d t}$.
+
+\item $(c_2 \pm \delta c_2)$ is the mass, in which $\delta c_2$ may be due to the relativistic adjustment, e.g., for very large speed $\frac{d x}{d t}$, or for a mechanical oscillator in a rain.
+\end{itemize}
+Using either explicit or intrinsic sources, the exclusion of $\Delta \in (-5 \delta \Delta, 5 \delta \Delta)$ may have different physical interpretation.
+This example shows a challenge of interpreting the result of statistical Taylor expansion: Will it differ if an uncertainty is caused by measurement, or whether it is intrinsic?
+
+
+
+\subsection{2nd Order Constant-Coefficient Ordinary Differential Equation with $\sin(\omega\,t)$ Forcing}
+
+\begin{align}
+\label{eqn: forced ODE}
+A \sin(\omega\,t) &= (c_0 \pm \delta c_0) x + (c_1 \pm \delta c_1) \frac{d x}{d t} + (c_2 \pm \delta c_2) \frac{d^2 x}{d t^2}; \\
+\label{eqn: forced ODE steady}
+x_\infty &= A_\infty \sin(\omega\,t - \psi); \\
+\label{eqn: forced ODE amplitude}
+A_\infty &= \frac{A}{\sqrt{\big((c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \omega^2\big)^2 + \big((c_1 \pm \delta c_1)\, \omega\big)^2}}; \\
+\label{eqn: forced ODE phase}
+\tan\psi &= \frac{(c_1 \pm \delta c_1)\, \omega}{(c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \omega^2}; \\
+\label{eqn: forced ODE resonance}
+\omega_r &= \sqrt{\frac{2(c_2 \pm \delta c_2)(c_0 \pm \delta c_0) -(c_1 \pm \delta c_1)^2}{2 (c_2 \pm \delta c_2)^2}};
+\end{align}
+Equation \eqref{eqn: forced ODE} describes a forced oscillation of the displacement over time $x(t)$ \citep{Driven_Damped_Oscillator}, with its steady solution provided in Formula \eqref{eqn: forced ODE steady}, \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase}.
+Formula \eqref{eqn: forced ODE resonance} provides the resonance frequency $\omega_r$ at which $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} is maximized.
+$\omega_r$ is also a distribution due to the uncertainty of $c_0$, $c_1$, and $c_2$.
+If they are precise, the resonance exists only when $c_1^2 < 2c_0 c_2$.
+Because they are imprecise, this clear transition disappears.
+
+\begin{equation}
+\label{eqn: wave packet}
+A\sin\big((\omega\pm\delta\omega)t\big) \equiv A\int \rho(\tilde{\omega}, \omega, \delta \omega) \sin(\tilde{\omega} t)\, d\tilde{\omega};
+\end{equation}
+In Equation \eqref{eqn: forced ODE}, if $A \sin(\omega\,t)$ is replaced by  $A \sin((\omega \pm \delta \omega)\,t)$ as defined in Formula \eqref{eqn: wave packet}, in which $\rho(\tilde{\omega}, \omega, \delta \omega)$ is the probability density function, then $\omega$ in Formulas \eqref{eqn: forced ODE steady} to \eqref{eqn: forced ODE phase} can also be replaced by $\omega \pm \delta \omega$ because Equation \eqref{eqn: forced ODE} is linear.
+This notation is more concise and powerful.
+It is important to find the boundary of the proposed statistical algebra: to freely replace precise variables or values in the conventional analytic formulas with random variables or values.
+
 
 \subsection{A Comment on Numerical Solution}
 
 When available, an analytic solution is preferable to a numerical one because the latter must sample over the distributional range of coefficients, initial conditions, and boundary conditions.
 For example, a numerical solution for Equation \eqref{eqn: first-order ODE} has to sample from the two distributions in Formula \eqref{eqn: first-order ODE solution}.
-
-
-
-
-
-
-
 
 
 \section{Conclusion and Discussion}
@@ -1957,161 +2129,193 @@ No funding was received from any organization or agency in support of this resea
 
 \ifdefined\ManualReference
 
-\begin{thebibliography}{10}
+\begin{thebibliography}{31}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem{Statistical_Methods}
+\bibitem[Aberth(1998)]{Precise_Numerical_Methods}
+Oliver Aberth.
+\newblock \emph{Precise Numerical Methods Using {C++}}.
+\newblock Academic Press, 1998.
+
+\bibitem[Alefeld and Mayer(2000)]{Interval_Analysis_Theory_Applications}
+G.~Alefeld and G.~Mayer.
+\newblock Interval analysis: Theory and applications.
+\newblock \emph{Journal of Computational and Applied Mathematics},
+  121:\penalty0 421--464, 2000.
+
+\bibitem[Arfken et~al.(2013)Arfken, Weber, and Harris]{Mathematical_Methods}
+George~B. Arfken, Hans~J. Weber, and Frank~E. Harris.
+\newblock \emph{Mathematical Methods for Physicists}.
+\newblock Academic Press, 2013.
+\newblock ISBN 978-0-12-384654-9.
+
+\bibitem[Ehrenfeld and Littauer(1965)]{Statistical_Methods}
 Sylvain Ehrenfeld and Sebastian~B. Littauer.
-\newblock {\em Introduction to Statistical Methods}.
+\newblock \emph{Introduction to Statistical Methods}.
 \newblock McGraw-Hill, 1965.
 
-\bibitem{Precisions_Physical_Measurements}
-John~R. Taylor.
-\newblock {\em Introduction to Error Analysis: The Study of Output Precisions
-  in Physical Measurements}.
-\newblock University Science Books, 1997.
-
-\bibitem{Lower_Order_Variance_Expansion}
-Fredrik Gustafsson and Gustaf Hendeby.
-\newblock Some relations between extended and unscented kalman filters.
-\newblock {\em IEEE Transactions on Signal Processing}, 60-2:545--555, 2012.
-
-\bibitem{Probability_Statistics}
+\bibitem[Evans and Rosenthal(2003)]{Probability_Statistics}
 Michael~J. Evans and Jeffrey~S. Rosenthal.
-\newblock {\em Probability and Statistics: The Science of Uncertainty}.
+\newblock \emph{Probability and Statistics: The Science of Uncertainty}.
 \newblock W. H. Freeman, 2003.
 
-\bibitem{Numerical_Recipes}
-William~H. Press, Saul~A Teukolsky, William~T. Vetterling, and Brian~P.
-  Flannery.
-\newblock {\em Numerical Recipes in C}.
-\newblock Cambridge University Press, 1992.
+\bibitem[Forsythe(1957)]{Polynomial_Regression}
+G.~E. Forsythe.
+\newblock Generation and use of orthogonal polynomials for data-fitting with a
+  digital computer.
+\newblock \emph{Journal of the Society for Industrial and Applied Mathematics},
+  5\penalty0 (2):\penalty0 74--88, 1957.
 
-\bibitem{Computer_Architecture}
-John~P Hayes.
-\newblock {\em Computer Architecture}.
-\newblock McGraw-Hill, 1988.
+\bibitem[Fuller(1987)]{Linear_Regression}
+W.~A. Fuller.
+\newblock \emph{Measurement Error Models}.
+\newblock Wiley Series in Probability and Mathematical Statistics. Wiley, New
+  York, 1987.
+\newblock ISBN 978-0-471-86187-4.
 
-\bibitem{Floating_Point_Arithmetic}
+\bibitem[Goldberg(1991)]{Floating_Point_Arithmetic}
 David Goldberg.
 \newblock What every computer scientist should know about floating-point
   arithmetic.
-\newblock {\em ACM Computing Surveys}, March 1991.
+\newblock \emph{ACM Computing Surveys}, March 1991.
 
-\bibitem{Floating_Point_Standard}
-Institute of Electrical and Electronics Engineers.
-\newblock {\em ANSI/IEEE 754-2008 Standard for Binary Floating-Point
-  Arithmetic}, 2008.
+\bibitem[Gustafsson and Hendeby(2012)]{Lower_Order_Variance_Expansion}
+Fredrik Gustafsson and Gustaf Hendeby.
+\newblock Some relations between extended and unscented {Kalman} filters.
+\newblock \emph{IEEE Transactions on Signal Processing}, 60\penalty0
+  (2):\penalty0 545--555, 2012.
 
-\bibitem{Rounding_Error}
-J.~H. Wilkinson.
-\newblock {\em Rounding Errors in Algebraic Processes}.
-\newblock SIAM, 1961.
-
-\bibitem{Precise_Numerical_Methods}
-Oliver Aberth.
-\newblock {\em Precise Numerical Methods Using C++}.
-\newblock Academic Press, 1998.
-
-\bibitem{Algorithms_Accuracy}
-Nicholas~J. Higham.
-\newblock {\em Accuracy and Stability of Numerical Algorithms}.
-\newblock SIAM, 2002.
-
-\bibitem{Interval_Analysis}
-R.E. Moore.
-\newblock {\em Interval Analysis}.
-\newblock Prentice Hall, 1966.
-
-\bibitem{Worst_Case_Error_Bounds}
-W.~Kramer.
-\newblock A prior worst case error bounds for floating-point computations.
-\newblock {\em IEEE Trans. Computers}, 47:750--756, 1998.
-
-\bibitem{Interval_Analysis_Theory_Applications}
-G.~Alefeld and G.~Mayer.
-\newblock Interval analysis: Theory and applications.
-\newblock {\em Journal of Computational and Applied Mathematics}, 121:421--464,
-  2000.
-
-\bibitem{Interval_Arithmetic}
-W.~Kramer.
-\newblock Generalized intervals and the dependency problem.
-\newblock {\em Proceedings in Applied Mathematics and Mechanics}, 6:685--686,
-  2006.
-
-\bibitem{Interval_Analysis_Notations}
-A.~Neumaier S.M. Rump S.P.~Shary B.~Kearfott, M. T.~Nakao and P.~Van
-  Hentenryck.
-\newblock Standardized notation in interval analysis.
-\newblock {\em Computational Technologies}, 15:7--13, 2010.
-
-\bibitem{Prev_Precision_Arithmetic}
-C.~P. Wang.
-\newblock A new uncertainty-bearing floating-point arithmetic.
-\newblock {\em Reliable Computing}, 16:308--361, 2012.
-
-\bibitem{Taylor_Models}
-K.~Makino and M.~Berz.
-\newblock Taylor models and other validated functional inclusion methods.
-\newblock {\em International Journal of Pure and Applied Mathematics}, 4:379--456, 2003.
-
-\bibitem{Taylor_Forms_Limits}
-A.~Neumaier.
-\newblock Taylor forms---use and limits.
-\newblock {\em Reliable Computing}, 9:43--79, 2003.
-
-\bibitem{Interval_Global_Optimization}
-E.~Hansen and G.W. Walster.
-\newblock {\em Global Optimization Using Interval Analysis}.
+\bibitem[Hansen and Walster(2004)]{Interval_Global_Optimization}
+E.~Hansen and G.~W. Walster.
+\newblock \emph{Global Optimization Using Interval Analysis}.
 \newblock Marcel Dekker, 2nd edition, 2004.
 
-\bibitem{Uncertainty Propagation}
-\newblock Propagation of uncertainty.
-\newblock \url{https://en.wikipedia.org/wiki/Propagation_of_uncertainty}.
+\bibitem[Hayes(1988)]{Computer_Architecture}
+John~P. Hayes.
+\newblock \emph{Computer Architecture}.
+\newblock McGraw-Hill, 1988.
 
-\bibitem{Stochastic_Arithmetic}
-J.~Vignes.
-\newblock A stochastic arithmetic for reliable scientific computation.
-\newblock {\em Mathematics and Computers in Simulation}, 35:233--261, 1993.
-
-\bibitem{CADNA_library}
-C.~Denis N.~S.~Scott, F.~Jezequel and J.~M. Chesneaux.
-\newblock Numerical 'health' check for scientific codes: the cadna approach.
-\newblock {\em Computer Physics Communications}, 176(8):501--527, 2007.
-
-\bibitem{Uncertainties Library}
-\newblock Python Uncertainties Library.
-\newblock \url{https://pythonhosted.org/uncertainties/}.
-
-\bibitem{Uniform_Distrobution Estimator}
-\newblock Unbiased estimator of a uniform distribution.
-\newblock \url{https://math.stackexchange.com/questions/2246222/unbiased-estimator-of-a-uniform-distribution}, 2018.
-
-\bibitem{Linear_Algebra}
+\bibitem[Hefferon(2011)]{Linear_Algebra}
 J.~Hefferon.
 \newblock Linear algebra.
 \newblock \url{http://joshua.smcvt.edu/linearalgebra/}, 2011.
 
-\bibitem{DFT modeling errors}
- G.~Heinzel, A.~Rüdiger, and R.~Schilling, 
-\newblock Spectrum and spectral density estimation by the Discrete Fourier transform (DFT), including a comprehensive list of window functions.
-\newblock {\em MPI Hannover Technical Report}, MPI-2002-1.
+\bibitem[Heinzel et~al.(2002)Heinzel, R{\"u}diger, and
+  Schilling]{DFT_modeling_errors}
+G.~Heinzel, A.~R{\"u}diger, and R.~Schilling.
+\newblock Spectrum and spectral density estimation by the discrete {Fourier}
+  transform ({DFT}), including a comprehensive list of window functions.
+\newblock Technical Report MPI-2002-1, Max Planck Institute Hannover, 2002.
 
-\bibitem{Polynomial Regression}
-G. E. Forsythe.
-\newblock Generation and use of orthogonal polynomials for data-fitting with a digital computer.
-\newblock {\em Journal of the Society for Industrial and Applied Mathematics},  5(2), 74–88, 1957.
+\bibitem[Higham(2002)]{Algorithms_Accuracy}
+Nicholas~J. Higham.
+\newblock \emph{Accuracy and Stability of Numerical Algorithms}.
+\newblock SIAM, 2002.
 
-\bibitem{Linear_Regression}
-W. A. Fuller.
-\newblock Measurement Error Models, Wiley Series in Probability and Mathematical Statistics.
-\newblock Wiley, New York. ISBN 978-0-471-86187-4, 1987.
+\bibitem[{Institute of Electrical and Electronics
+  Engineers}(2008)]{Floating_Point_Standard}
+{Institute of Electrical and Electronics Engineers}.
+\newblock \emph{ANSI/IEEE 754-2008 Standard for Binary Floating-Point
+  Arithmetic}, 2008.
 
-\bibitem{Mathematical Methods}
-George B. Arfken, Hans J. Weber, Frank E. Harris.
-\newblock Mathematical Methods for Physics.
-\newblock Academic Press, 2013, ISBN  978012384654-9.
+\bibitem[Kearfott et~al.(2010)Kearfott, Nakao, Neumaier, Rump, Shary, and
+  Hentenryck]{Interval_Analysis_Notations}
+B.~Kearfott, M.~T. Nakao, A.~Neumaier, S.~M. Rump, S.~P. Shary, and P.~Van
+  Hentenryck.
+\newblock Standardized notation in interval analysis.
+\newblock \emph{Computational Technologies}, 15:\penalty0 7--13, 2010.
 
+\bibitem[Kramer(1998)]{Worst_Case_Error_Bounds}
+W.~Kramer.
+\newblock A prior worst case error bounds for floating-point computations.
+\newblock \emph{IEEE Transactions on Computers}, 47:\penalty0 750--756, 1998.
+
+\bibitem[Kramer(2006)]{Interval_Arithmetic}
+W.~Kramer.
+\newblock Generalized intervals and the dependency problem.
+\newblock \emph{Proceedings in Applied Mathematics and Mechanics}, 6:\penalty0
+  685--686, 2006.
+
+\bibitem[Makino and Berz(2003)]{Taylor_Models}
+K.~Makino and M.~Berz.
+\newblock Taylor models and other validated functional inclusion methods.
+\newblock \emph{International Journal of Pure and Applied Mathematics},
+  4:\penalty0 379--456, 2003.
+
+\bibitem[{Mathematics Stack Exchange}(2018)]{Uniform_Distrobution_Estimator}
+{Mathematics Stack Exchange}.
+\newblock Unbiased estimator of a uniform distribution.
+\newblock
+  \url{https://math.stackexchange.com/questions/2246222/unbiased-estimator-of-a-uniform-distribution},
+  2018.
+
+\bibitem[Moore(1966)]{Interval_Analysis}
+R.~E. Moore.
+\newblock \emph{Interval Analysis}.
+\newblock Prentice Hall, 1966.
+
+\bibitem[Neumaier(2003)]{Taylor_Forms_Limits}
+A.~Neumaier.
+\newblock Taylor forms---use and limits.
+\newblock \emph{Reliable Computing}, 9:\penalty0 43--79, 2003.
+
+\bibitem[Press et~al.(1992)Press, Teukolsky, Vetterling, and
+  Flannery]{Numerical_Recipes}
+William~H. Press, Saul~A. Teukolsky, William~T. Vetterling, and Brian~P.
+  Flannery.
+\newblock \emph{Numerical Recipes in {C}}.
+\newblock Cambridge University Press, 1992.
+
+\bibitem[{Python Uncertainties}(2024)]{Uncertainties_Library}
+{Python Uncertainties}.
+\newblock Python uncertainties library.
+\newblock \url{https://pythonhosted.org/uncertainties/}, 2024.
+\newblock Accessed 2024.
+
+\bibitem[Scott et~al.(2007)Scott, Jezequel, Denis, and
+  Chesneaux]{CADNA_library}
+N.~S. Scott, F.~Jezequel, C.~Denis, and J.~M. Chesneaux.
+\newblock Numerical `health' check for scientific codes: the {CADNA} approach.
+\newblock \emph{Computer Physics Communications}, 176\penalty0 (8):\penalty0
+  501--527, 2007.
+
+\bibitem[Soong(1973)]{Random_Differential_Equations}
+T.~T. Soong.
+\newblock \emph{Random Differential Equations in Science and Engineering},
+  volume 103 of \emph{Mathematics in Science and Engineering}.
+\newblock Academic Press, New York, 1973.
+
+\bibitem[Taylor(1997)]{Precisions_Physical_Measurements}
+John~R. Taylor.
+\newblock \emph{Introduction to Error Analysis: The Study of Output Precisions
+  in Physical Measurements}.
+\newblock University Science Books, 1997.
+
+\bibitem[Vignes(1993)]{Stochastic_Arithmetic}
+J.~Vignes.
+\newblock A stochastic arithmetic for reliable scientific computation.
+\newblock \emph{Mathematics and Computers in Simulation}, 35:\penalty0
+  233--261, 1993.
+
+\bibitem[Wang(2012)]{Prev_Precision_Arithmetic}
+C.~P. Wang.
+\newblock A new uncertainty-bearing floating-point arithmetic.
+\newblock \emph{Reliable Computing}, 16:\penalty0 308--361, 2012.
+
+\bibitem[{Wikipedia}(2024)]{Uncertainty_Propagation}
+{Wikipedia}.
+\newblock Propagation of uncertainty.
+\newblock \url{https://en.wikipedia.org/wiki/Propagation_of_uncertainty}, 2024.
+\newblock Accessed 2024.
+
+\bibitem[Wilkinson(1961)]{Rounding_Error}
+J.~H. Wilkinson.
+\newblock \emph{Rounding Errors in Algebraic Processes}.
+\newblock SIAM, 1961.
 
 \end{thebibliography}
 
