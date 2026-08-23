@@ -1962,7 +1962,7 @@ Formulas \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE
 When $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$, neither solution is statistically stable.
 
 For a damped oscillator, over-damping and under-damping are only two shapes of a decay toward the same rest position, so the exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ has little observable consequence.
-When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation, while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, to cause $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ significantly observable.
+When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation, while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, to cause $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ significantly observable, as well as a separation band of  $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$.
 
 The first such system is the tunneling of a particle of mass $m$ at energy $E \pm \delta E$ through a region of constant potential $V \pm \delta V$, described by the stationary Schrödinger equation, which is Equation \eqref{eqn: homogeneous ODE} under the following substitution:
 \begin{itemize}
@@ -1976,7 +1976,14 @@ Formula \eqref{eqn: homogeneous ODE overdamped} is thus the evanescent solution 
 %The two outcomes differ by orders of magnitude rather than in shape: across a barrier of width $L$, the transmission is suppressed by $e^{-2 |\mu| L}$ in the first case, but is of order unity in the second.
 Correspondingly, $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ is a neighborhood of the classical turning point $E = V$, which is exactly the region in which the conventional WKB approximation breaks down and has to be replaced by an Airy connection formula \citep{Quantum_Mechanics}.
 
-The second such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
+The second such case is a resonant state, in which a particle of imprecise mass $m \pm \delta m$ is quasi-bound in a well of width $L$ between two barriers of width $L_b$, so that $c_2 \pm \delta c_2 = -\frac{\hbar^2}{2 (m \pm \delta m)}$ while $E$ and $V$ are precise.
+Such a structure uses both branches of Equation \eqref{eqn: homogeneous ODE} at once: $\overline{\Delta} < 0$ inside the well, where Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution, and $\overline{\Delta} > 0$ inside the barriers, where Formula \eqref{eqn: homogeneous ODE overdamped} is the evanescent one, with the resonance condition $|\omega_d|\, L = n \pi$ matching them.
+In the first case $E \pm \delta E$ and $V \pm \delta V$ enter only $c_0 \pm \delta c_0$, so they reach the solutions solely through $\Delta \pm \delta \Delta$; here $m \pm \delta m$ instead enters $c_2 \pm \delta c_2$, which is the divisor of $\gamma$, $\mu$ and $\omega_d$ in Formulas \eqref{eqn: homogeneous quadratic}, \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped}, so that the distributional pole additionally requires $\hat{\kappa}_2\, \delta m < \overline{m}$, and it does so on both branches simultaneously.
+The resonance energy then follows $\overline{E_n} - V = \frac{\hbar^2 \pi^2 n^2}{2 \overline{m} L^2}$, so that $\delta E_n / (\overline{E_n} - V) = \delta m / \overline{m}$, while the resonance width, being proportional to the barrier transmission $e^{-2 |\mu| L_b}$, follows $\delta \Gamma_n / \overline{\Gamma_n} \simeq |\mu|\, L_b\, \delta m / \overline{m}$, which is larger by the opacity $|\mu|\, L_b$ of the barrier.
+A resonance can be located only to within its own width, so the imprecision of the mass leaves it locatable only when $\hat{\kappa}\, \delta E_n < \overline{\Gamma_n}$; in the opposite case the level still exists in Equation \eqref{eqn: homogeneous ODE} but has no determinable position, and the two conditions are separated by an exclusion band of the same kind as that of $\Delta$.
+For a free electron $\delta m / \overline{m} = 3.0 \times 10^{-10}$ \citep{CODATA_2018} and every such resonance is sharp, but a resonant tunneling structure is designed with an effective mass $m^*$, an empirically fitted, band- and temperature-dependent parameter whose uncertainty is many orders larger, so that it is the imprecision of the mass, rather than that of the energy or of the potential, that sets the resolution of the resonance.
+
+The third such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
 After eliminating one amplitude from the two coupled-mode equations, the amplitude of the other guide also obeys Equation \eqref{eqn: homogeneous ODE}, under the following substitution:
 \begin{itemize}
 \item The independent variable $t$ becomes the propagation distance, while the dependent variable $x$ becomes the amplitude.
@@ -2005,16 +2012,35 @@ A_\infty &= \frac{A}{\sqrt{\big((c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \o
 \tan\psi &= \frac{(c_1 \pm \delta c_1)\, \omega}{(c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \omega^2}; \\
 \label{eqn: forced ODE resonance}
 \omega_r &= \frac{\sqrt{-\Delta - (c_1 \pm \delta c_1)^2}}{2 (c_2 \pm \delta c_2)}; \\
-\label{eqn: wave packet}
-A\sin\big((\omega\pm\delta\omega)t\big) &\equiv A\int \rho(\tilde{\omega}, \omega, \delta \omega) \sin(\tilde{\omega} t)\, d\tilde{\omega};
+\label{eqn: forced ODE peak}
+A_\infty(\omega_r) &= \frac{2 A\, (c_2 \pm \delta c_2)}{(c_1 \pm \delta c_1)\, \sqrt{-\Delta}}; \\
+\label{eqn: forced ODE resonance condition}
+S &\equiv 2 (c_0 \pm \delta c_0)(c_2 \pm \delta c_2) - (c_1 \pm \delta c_1)^2; \\
+\label{eqn: forced ODE resonance condition variance}
+\delta^2 S &\simeq 4 \overline{c_2}^2\, \delta^2 c_0 + 4 \overline{c_0}^2\, \delta^2 c_2 + 4 \overline{c_1}^2\, \delta^2 c_1;
 \end{align}
 Equation \eqref{eqn: forced ODE} describes a forced oscillation of the displacement over time $x(t)$ \citep{Driven_Damped_Oscillator}, with its steady solution provided in Formula \eqref{eqn: forced ODE steady}, \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase}.
-Formula \eqref{eqn: forced ODE resonance} provides the resonance frequency $\omega_r$ at which $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} is maximized.
-$\omega_r$ is also a distribution due to the uncertainty of $c_0$, $c_1$, and $c_2$.
-If they are precise, the resonance exists only when $c_1^2 < 2c_0 c_2$.
-Because they are imprecise, this clear transition disappears.
+Formula \eqref{eqn: forced ODE resonance} provides the resonance frequency $\omega_r$ at which $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} is maximized, in which $\Delta$ is defined in Formula \eqref{eqn: homogeneous quadratic}, while Formula \eqref{eqn: forced ODE peak} provides the corresponding peak amplitude.
+Both are distributions due to the uncertainty of $c_0$, $c_1$, and $c_2$.
+If they are precise, the resonance exists only when $S > 0$ for $S$ in Formula \eqref{eqn: forced ODE resonance condition}, in which case $-\Delta > c_1^2 > 0$, so that the corresponding homogeneous Equation \eqref{eqn: homogeneous ODE} is always under-damped.
+Because they are imprecise, this clear transition becomes another exclusion band, in the same way as for $\Delta$: with $\delta^2 S$ in Formula \eqref{eqn: forced ODE resonance condition variance}, the resonance is present only when $\overline{S} > \hat{\kappa}\, \delta S$, it is absent only when $\overline{S} < -\hat{\kappa}\, \delta S$, and it is statistically undecidable in between.
 
-In Equation \eqref{eqn: forced ODE}, if $A \sin(\omega\,t)$ is replaced by  $A \sin((\omega \pm \delta \omega)\,t)$ as defined in Formula \eqref{eqn: wave packet}, in which $\rho(\tilde{\omega}, \omega, \delta \omega)$ is a probability density function, then $\omega$ in Formula \eqref{eqn: forced ODE steady} can be replaced by $\omega \pm \delta \omega$ because Equation \eqref{eqn: forced ODE} is linear.
+In the statistical context, the solution space is smaller, as for Equation \eqref{eqn: quadratic}.
+\begin{itemize}
+\item For the variance of $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} to be bounded, its radicand $D$ needs $\hat{\kappa}\, \delta D < \overline{D}$.
+Because $\overline{D}$ is smallest near $\omega_r$, the peak of the resonance is the least computable part of the response.
+
+\item For the variance of $\omega_r$ in Formula \eqref{eqn: forced ODE resonance} to be bounded, $\hat{\kappa}_2\, \delta c_2 < \overline{c_2}$ is needed for the division, and $\hat{\kappa}\, \delta S < \overline{S}$ for the square root.
+
+\item For the variance of $A_\infty(\omega_r)$ in Formula \eqref{eqn: forced ODE peak} to be bounded, $\hat{\kappa}_1\, \delta c_1 < \overline{c_1}$ and $\hat{\kappa}\, \delta \Delta < -\overline{\Delta}$ are needed in addition, which are the same constraints that Equation \eqref{eqn: quadratic} imposes.
+
+\end{itemize}
+
+\begin{equation}
+\label{eqn: wave packet}
+A\sin\big((\omega\pm\delta\omega)t\big)  \equiv A\int \rho(\tilde{\omega}, \omega, \delta \omega) \sin(\tilde{\omega} t)\, d\tilde{\omega};
+\end{equation}
+In Equation \eqref{eqn: forced ODE}, if $A \sin(\omega\,t)$ is replaced by $A \sin((\omega \pm \delta \omega)\,t)$ as defined in Formula \eqref{eqn: wave packet}, in which $\rho(\tilde{\omega}, \omega, \delta \omega)$ is a probability density function, then $\omega$ in Formula \eqref{eqn: forced ODE steady} can be replaced by $\omega \pm \delta \omega$ because Equation \eqref{eqn: forced ODE} is linear.
 Such replacement also seems to apply to Formulas \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase} after applying the same integration over $\rho(\tilde{\omega}, \omega, \delta \omega)$ as in Formula \eqref{eqn: wave packet}.
 While its notation is more concise and powerful, the proposed statistical algebra needs a solid mathematical ground for wider applicability.
 
