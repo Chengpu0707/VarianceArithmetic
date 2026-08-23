@@ -1959,17 +1959,35 @@ The variances for the amplitude and imaginary angle have to be calculated separa
 \end{align}
 Equation \eqref{eqn: homogeneous ODE} describes a natural damping of the displacement over time $x(t)$.
 Formulas \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped} provide the solutions for over-damping and under-damping \citep{Driven_Damped_Oscillator}, in which Formula \eqref{eqn: homogeneous quadratic} connects Equation \eqref{eqn: homogeneous ODE} with Equation \eqref{eqn: quadratic} and all its constraints on $\Delta \pm \delta \Delta$, $c_2 \pm \delta c_2$, and $c_1 \pm \delta c_1$ when $\Delta < 0$.
-When $\overline{\Delta} \in (-5 \delta \Delta, 5 \delta \Delta)$, the solution is not statistically stable as either case. 
+When $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$, neither solution is statistically stable.
 
-Besides measurement, the uncertainty of $c_0$, $c_1$, and $c_2$ can have other causes. 
-For a stationary Schrödinger equation of a one-dimensional potential well:
-\begin{itemize}
-\item $c_2 \pm \delta c_2 = -\frac{\hbar^2}{2(m \pm \delta m)}$ when the particle is unstable (a resonance state).
-\item $c_1 \pm \delta c_1 = 0$.
-\item $c_0 \pm \delta c_0 = V - (E \pm \delta E)$, in which $V$ is a precise constant of the well potential, and $E$ is the energy.
-\end{itemize}
-When $V + E = 0$, $\delta E = 0$, which means that the particle is stable. 
-This is another reason for the exclusion of $\Delta \in (-\hat{\kappa} \delta \Delta, \hat{\kappa} \delta \Delta)$.
+For a damped oscillator, over-damping and under-damping are only two shapes of a decay toward the same rest position, so the exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ has little observable consequence.
+Equation \eqref{eqn: homogeneous ODE} also governs systems in which the sign of $\Delta$ selects between two qualitatively different outcomes, and for them the exclusion band is physically significant.
+
+\begin{align}
+\label{eqn: tunneling}
+0 &= \big((V \pm \delta V) - (E \pm \delta E)\big)\, \psi - \frac{\hbar^2}{2 m} \frac{d^2 \psi}{d x^2}; \\
+\label{eqn: tunneling discriminant}
+\Delta &= \frac{2 \hbar^2}{m} \big((V \pm \delta V) - (E \pm \delta E)\big);
+\end{align}
+The first such system is the tunneling of a particle of mass $m$ at energy $E$ through a region of constant potential $V$, described by the stationary Schrödinger Equation \eqref{eqn: tunneling}, in which the independent variable $t$ of Equation \eqref{eqn: homogeneous ODE} is replaced by the position $x$, and the dependent variable $x$ is replaced by the wave function $\psi$, so that $c_0 \pm \delta c_0 = (V \pm \delta V) - (E \pm \delta E)$, $c_1 \pm \delta c_1 = 0$, and $c_2 = -\frac{\hbar^2}{2 m}$.
+Because $c_1 = 0$, $\gamma = 0$ in Formula \eqref{eqn: homogeneous quadratic}, and the discriminant reduces to Formula \eqref{eqn: tunneling discriminant}, so that $\overline{\Delta} > 0$ when $E < V$, and $\overline{\Delta} < 0$ when $E > V$.
+Formula \eqref{eqn: homogeneous ODE overdamped} is then the evanescent solution of the classically forbidden region, with $|\mu| = \sqrt{2 m (V - E)}\,/\hbar$ as the tunneling decay rate, while Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution of the classically allowed region, with $|\omega_d| = \sqrt{2 m (E - V)}\,/\hbar$ as the de Broglie wave number.
+The two outcomes differ by orders of magnitude rather than in shape: across a barrier of width $L$, the transmission is suppressed by $e^{-2 |\mu| L}$ in the first case, but is of order unity in the second.
+Correspondingly, $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ is a neighborhood of the classical turning point $E = V$, which is exactly the region in which the conventional WKB approximation breaks down and has to be replaced by an Airy connection formula \citep{Quantum_Mechanics}.
+
+\begin{align}
+\label{eqn: PT dimer}
+0 &= \big((J \pm \delta J)^2 - (g \pm \delta g)^2\big)\, a + \frac{d^2 a}{d z^2}, \quad
+	\Delta = 4 \big((g \pm \delta g)^2 - (J \pm \delta J)^2\big);
+\end{align}
+The second such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$, in which the amplitude $a$ in either guide obeys Equation \eqref{eqn: PT dimer} along the propagation distance $z$ \citep{Exceptional_Points}, with $c_1 = 0$ and thus $\gamma = 0$.
+When $J > g$, $\overline{\Delta} < 0$ and Formula \eqref{eqn: homogeneous ODE underdamped} applies: the power oscillates between the two guides indefinitely, and it remains bounded even though one guide amplifies.
+When $g > J$, $\overline{\Delta} > 0$ and Formula \eqref{eqn: homogeneous ODE overdamped} applies: one solution grows exponentially while the other decays, so the light localizes in the gain guide.
+$\Delta = 0$ is the \emph{exceptional point}, at which the two solutions of Formula \eqref{eqn: homogeneous quadratic} coalesce into one, so that Equation \eqref{eqn: homogeneous ODE} no longer has two independent solutions.
+Because the separation between the two solutions is proportional to $\sqrt{\Delta}$, the response $\delta \sqrt{\Delta} \propto \delta \Delta / \sqrt{\Delta}$ diverges as $\Delta \rightarrow 0$.
+Such divergence has been proposed as the basis of ultra-sensitive sensors, but the accompanying noise has been shown to be amplified in the same measure, so that the gain in signal-to-noise ratio is far smaller than the gain in response \citep{Exceptional_Point_Noise}.
+The exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ in variance arithmetic reaches the same conclusion without any reference to the physics of the system.
 \iffalse
 \begin{align}
 \label{eqn: quantum well energy}
