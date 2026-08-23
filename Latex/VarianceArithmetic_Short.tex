@@ -1949,11 +1949,11 @@ The variances for the amplitude and imaginary angle have to be calculated separa
 \gamma &\equiv \frac{c_1 \pm \delta c_1}{2 (c_2 \pm \delta c_2)}, \quad
 	\Delta \equiv (c_1 \pm \delta c_1)^2 - 4 (c_2 \pm \delta c_2)(c_0 \pm \delta c_0); \\
 \label{eqn: homogeneous ODE overdamped}
-5 \delta \Delta < \overline{\Delta}:&\quad 
+\hat{\kappa}\, \delta \Delta < \overline{\Delta}:&\quad
 	x= e^{-\gamma t} \big(A \cosh(\mu\, t) + B \sinh(\mu\, t)\big), \quad
 		\mu \equiv \frac{\sqrt{\Delta}}{2 (c_2 \pm \delta c_2)}; \\
 \label{eqn: homogeneous ODE underdamped}
-5 \delta \Delta < - \overline{\Delta}:&\quad 
+\hat{\kappa}\, \delta \Delta < - \overline{\Delta}:&\quad
 	x = e^{-\gamma t} \big(A \cos(\omega_d\, t) + B \sin(\omega_d\, t)\big), \quad
 		\omega_d \equiv \frac{\sqrt{-\Delta}}{2 (c_2 \pm \delta c_2)};
 \end{align}
@@ -1961,8 +1961,13 @@ Equation \eqref{eqn: homogeneous ODE} is the general second-order constant-coeff
 Formulas \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped} provide the solutions for over-damping and under-damping \citep{Driven_Damped_Oscillator}, in which Formula \eqref{eqn: homogeneous quadratic} connects Equation \eqref{eqn: homogeneous ODE} with Equation \eqref{eqn: quadratic} and all its constraints on $\Delta \pm \delta \Delta$, $c_2 \pm \delta c_2$, and $c_1 \pm \delta c_1$ when $\Delta < 0$.
 When $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$, neither solution is statistically stable.
 
-For a damped oscillator, over-damping and under-damping are only two shapes of a decay toward the same rest position, so the exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ has little observable consequence.
-When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation, while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, to cause $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ significantly observable, as well as a separation band of  $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$.
+When $c_1 \pm \delta c_1 \neq 0$, over-damping and under-damping for a damped oscillator are only two shapes of a decay toward the same rest position, so the exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ has little observable consequence.
+
+When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, which makes $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ significantly observable as a \emph{separation band}.
+Within the separation band, the two outcomes are delayed rather than destroyed.
+With $B' \equiv B\, \mu$ in Formula \eqref{eqn: homogeneous ODE overdamped} and $B' \equiv B\, \omega_d$ in Formula \eqref{eqn: homogeneous ODE underdamped}, both reduce to $x = A + B'\, t$ at $\Delta = 0$, and they stay close to it until $t \simeq t_c \equiv \frac{1}{|\mu|} = \frac{2 |c_2|}{\sqrt{|\Delta|}}$, after which one turns over into a bounded oscillation while the other runs away exponentially.
+Because the separation band is $|\overline{\Delta}| < \hat{\kappa}\, \delta \Delta$, $t_c > \frac{2 |\overline{c_2}|}{\sqrt{\hat{\kappa}\, \delta \Delta}}$, $\delta \Delta$ sets a minimum observation time, below which the two outcomes are indistinguishable rather than merely undecided statistically.
+Several observable phenomena are connected with this separation band of  $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$.
 
 The first such system is the tunneling of a particle of mass $m$ at energy $E \pm \delta E$ through a region of constant potential $V \pm \delta V$, described by the stationary Schrödinger equation, which is Equation \eqref{eqn: homogeneous ODE} under the following substitution:
 \begin{itemize}
@@ -1977,10 +1982,11 @@ Formula \eqref{eqn: homogeneous ODE overdamped} is thus the evanescent solution 
 Correspondingly, $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ is a neighborhood of the classical turning point $E = V$, which is exactly the region in which the conventional WKB approximation breaks down and has to be replaced by an Airy connection formula \citep{Quantum_Mechanics}.
 
 The second such case is a resonant state, in which a particle of imprecise mass $m \pm \delta m$ is quasi-bound in a well of width $L$ between two barriers of width $L_b$, so that $c_2 \pm \delta c_2 = -\frac{\hbar^2}{2 (m \pm \delta m)}$ while $E$ and $V$ are precise.
-Such a structure uses both branches of Equation \eqref{eqn: homogeneous ODE} at once: $\overline{\Delta} < 0$ inside the well, where Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution, and $\overline{\Delta} > 0$ inside the barriers, where Formula \eqref{eqn: homogeneous ODE overdamped} is the evanescent one, with the resonance condition $|\omega_d|\, L = n \pi$ matching them.
-In the first case $E \pm \delta E$ and $V \pm \delta V$ enter only $c_0 \pm \delta c_0$, so they reach the solutions solely through $\Delta \pm \delta \Delta$; here $m \pm \delta m$ instead enters $c_2 \pm \delta c_2$, which is the divisor of $\gamma$, $\mu$ and $\omega_d$ in Formulas \eqref{eqn: homogeneous quadratic}, \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped}, so that the distributional pole additionally requires $\hat{\kappa}_2\, \delta m < \overline{m}$, and it does so on both branches simultaneously.
+Such a structure uses both branches of Equation \eqref{eqn: homogeneous ODE} at once: $\overline{\Delta} < 0$ inside the well, where Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution, and $\overline{\Delta} > 0$ inside the barriers, where Formula \eqref{eqn: homogeneous ODE overdamped} is the evanescent one, with the resonance condition $|\omega_d|\, L \simeq n \pi$ matching them.
+In the first case $E \pm \delta E$ and $V \pm \delta V$ enter only $c_0 \pm \delta c_0$, so they reach the solutions solely through $\Delta \pm \delta \Delta$; here $m \pm \delta m$ instead enters $c_2 \pm \delta c_2$, which appears both inside $\Delta$ and as the divisor of $\mu$ and $\omega_d$ in Formulas \eqref{eqn: homogeneous quadratic}, \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped}.
+The two dependences cancel to leave $|\mu|$ and $|\omega_d|$ proportional to $\sqrt{m}$, whose square root additionally requires $\hat{\kappa}_2\, \delta m < \overline{m}$, and it does so on both branches simultaneously.
 The resonance energy then follows $\overline{E_n} - V = \frac{\hbar^2 \pi^2 n^2}{2 \overline{m} L^2}$, so that $\delta E_n / (\overline{E_n} - V) = \delta m / \overline{m}$, while the resonance width, being proportional to the barrier transmission $e^{-2 |\mu| L_b}$, follows $\delta \Gamma_n / \overline{\Gamma_n} \simeq |\mu|\, L_b\, \delta m / \overline{m}$, which is larger by the opacity $|\mu|\, L_b$ of the barrier.
-A resonance can be located only to within its own width, so the imprecision of the mass leaves it locatable only when $\hat{\kappa}\, \delta E_n < \overline{\Gamma_n}$; in the opposite case the level still exists in Equation \eqref{eqn: homogeneous ODE} but has no determinable position, and the two conditions are separated by an exclusion band of the same kind as that of $\Delta$.
+A resonance can be located only to within its own width, so the imprecision of the mass leaves it locatable only when $\hat{\kappa}\, \delta E_n < \overline{\Gamma_n}$, in which $\Gamma_n$ is the full width at half maximum; in the opposite case the level still exists in Equation \eqref{eqn: homogeneous ODE} but has no determinable position, and the two conditions are separated by an exclusion band of the same kind as that of $\Delta$.
 For a free electron $\delta m / \overline{m} = 3.0 \times 10^{-10}$ \citep{CODATA_2018} and every such resonance is sharp, but a resonant tunneling structure is designed with an effective mass $m^*$, an empirically fitted, band- and temperature-dependent parameter whose uncertainty is many orders larger, so that it is the imprecision of the mass, rather than that of the energy or of the potential, that sets the resolution of the resonance.
 
 The third such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
@@ -1993,8 +1999,8 @@ After eliminating one amplitude from the two coupled-mode equations, the amplitu
 Formula \eqref{eqn: homogeneous quadratic} then gives $\Delta = 4 \big((g \pm \delta g)^2 - (J \pm \delta J)^2\big)$.
 When $J > g$, $\overline{\Delta} < 0$ and Formula \eqref{eqn: homogeneous ODE underdamped} applies: the power oscillates between the two guides indefinitely, and it remains bounded even though one guide amplifies.
 When $g > J$, $\overline{\Delta} > 0$ and Formula \eqref{eqn: homogeneous ODE overdamped} applies: one solution grows exponentially while the other decays, so the light localizes in the gain guide.
-$\Delta = 0$ is the \emph{exceptional point}, at which the two solutions of Formula \eqref{eqn: homogeneous quadratic} coalesce into one, so that Equation \eqref{eqn: homogeneous ODE} no longer has two independent solutions.
-Because the separation between the two solutions is proportional to $\sqrt{\Delta}$, the response $\delta \sqrt{\Delta} \propto \delta \Delta / \sqrt{\Delta}$ diverges as $\Delta \rightarrow 0$.
+$\Delta = 0$ is the \emph{exceptional point}, at which the two exponents $-\gamma \pm \mu$ of Equation \eqref{eqn: homogeneous ODE} coalesce into one, so that Equation \eqref{eqn: homogeneous ODE} no longer has two independent solutions.
+Because the separation between the two exponents is proportional to $\sqrt{\Delta}$, the response $\delta \sqrt{\Delta} \propto \delta \Delta / \sqrt{\Delta}$ diverges as $\Delta \rightarrow 0$.
 Such divergence has been proposed as the basis of ultra-sensitive sensors, but the accompanying noise has been shown to be amplified in the same measure, so that the gain in signal-to-noise ratio is far smaller than the gain in response \citep{Exceptional_Point_Noise}.
 The exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ in statistical algebra reaches the same conclusion without any reference to the physics of the system.
 
