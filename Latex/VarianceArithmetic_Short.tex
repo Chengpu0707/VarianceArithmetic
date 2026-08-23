@@ -1957,46 +1957,40 @@ The variances for the amplitude and imaginary angle have to be calculated separa
 	x = e^{-\gamma t} \big(A \cos(\omega_d\, t) + B \sin(\omega_d\, t)\big), \quad
 		\omega_d \equiv \frac{\sqrt{-\Delta}}{2 (c_2 \pm \delta c_2)};
 \end{align}
-Equation \eqref{eqn: homogeneous ODE} describes a natural damping of the displacement over time $x(t)$.
+Equation \eqref{eqn: homogeneous ODE} is the general second-order constant-coefficient homogeneous ordinary differential equation, whose most familiar application is the natural damping of a displacement $x$ over time $t$.
 Formulas \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped} provide the solutions for over-damping and under-damping \citep{Driven_Damped_Oscillator}, in which Formula \eqref{eqn: homogeneous quadratic} connects Equation \eqref{eqn: homogeneous ODE} with Equation \eqref{eqn: quadratic} and all its constraints on $\Delta \pm \delta \Delta$, $c_2 \pm \delta c_2$, and $c_1 \pm \delta c_1$ when $\Delta < 0$.
 When $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$, neither solution is statistically stable.
 
 For a damped oscillator, over-damping and under-damping are only two shapes of a decay toward the same rest position, so the exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ has little observable consequence.
-Equation \eqref{eqn: homogeneous ODE} also governs systems in which the sign of $\Delta$ selects between two qualitatively different outcomes, and for them the exclusion band is physically significant.
+When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation, while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, to cause $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ significantly observable.
 
-\begin{align}
-\label{eqn: tunneling}
-0 &= \big((V \pm \delta V) - (E \pm \delta E)\big)\, \psi - \frac{\hbar^2}{2 m} \frac{d^2 \psi}{d x^2}; \\
-\label{eqn: tunneling discriminant}
-\Delta &= \frac{2 \hbar^2}{m} \big((V \pm \delta V) - (E \pm \delta E)\big);
-\end{align}
-The first such system is the tunneling of a particle of mass $m$ at energy $E$ through a region of constant potential $V$, described by the stationary Schrödinger Equation \eqref{eqn: tunneling}, in which the independent variable $t$ of Equation \eqref{eqn: homogeneous ODE} is replaced by the position $x$, and the dependent variable $x$ is replaced by the wave function $\psi$, so that $c_0 \pm \delta c_0 = (V \pm \delta V) - (E \pm \delta E)$, $c_1 \pm \delta c_1 = 0$, and $c_2 = -\frac{\hbar^2}{2 m}$.
-Because $c_1 = 0$, $\gamma = 0$ in Formula \eqref{eqn: homogeneous quadratic}, and the discriminant reduces to Formula \eqref{eqn: tunneling discriminant}, so that $\overline{\Delta} > 0$ when $E < V$, and $\overline{\Delta} < 0$ when $E > V$.
-Formula \eqref{eqn: homogeneous ODE overdamped} is then the evanescent solution of the classically forbidden region, with $|\mu| = \sqrt{2 m (V - E)}\,/\hbar$ as the tunneling decay rate, while Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution of the classically allowed region, with $|\omega_d| = \sqrt{2 m (E - V)}\,/\hbar$ as the de Broglie wave number.
-The two outcomes differ by orders of magnitude rather than in shape: across a barrier of width $L$, the transmission is suppressed by $e^{-2 |\mu| L}$ in the first case, but is of order unity in the second.
+The first such system is the tunneling of a particle of mass $m$ at energy $E \pm \delta E$ through a region of constant potential $V \pm \delta V$, described by the stationary Schrödinger equation, which is Equation \eqref{eqn: homogeneous ODE} under the following substitution:
+\begin{itemize}
+\item The independent variable $t$ becomes the position, while the dependent variable $x$ becomes the wave function.
+\item $c_0 \pm \delta c_0 = (V \pm \delta V) - (E \pm \delta E)$.
+\item $c_2 = -\frac{\hbar^2}{2 m}$.
+\end{itemize}
+Formula \eqref{eqn: homogeneous quadratic} then gives $\Delta = \frac{2 \hbar^2}{m} \big((V \pm \delta V) - (E \pm \delta E)\big)$, so that $\overline{\Delta} > 0$ when $E < V$, and $\overline{\Delta} < 0$ when $E > V$.
+Because $c_2 < 0$, both $\mu$ and $\omega_d$ are negative, but their signs are absorbed into $B$, because $\cosh$ is even while $\sinh$ and $\sin$ are odd.
+Formula \eqref{eqn: homogeneous ODE overdamped} is thus the evanescent solution of the classically forbidden region, with $|\mu| = \sqrt{2 m (V - E)}\,/\hbar$ as the tunneling decay rate, while Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution of the classically allowed region, with $|\omega_d| = \sqrt{2 m (E - V)}\,/\hbar$ as the de Broglie wave number.
+%The two outcomes differ by orders of magnitude rather than in shape: across a barrier of width $L$, the transmission is suppressed by $e^{-2 |\mu| L}$ in the first case, but is of order unity in the second.
 Correspondingly, $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ is a neighborhood of the classical turning point $E = V$, which is exactly the region in which the conventional WKB approximation breaks down and has to be replaced by an Airy connection formula \citep{Quantum_Mechanics}.
 
-\begin{align}
-\label{eqn: PT dimer}
-0 &= \big((J \pm \delta J)^2 - (g \pm \delta g)^2\big)\, a + \frac{d^2 a}{d z^2}, \quad
-	\Delta = 4 \big((g \pm \delta g)^2 - (J \pm \delta J)^2\big);
-\end{align}
-The second such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$, in which the amplitude $a$ in either guide obeys Equation \eqref{eqn: PT dimer} along the propagation distance $z$ \citep{Exceptional_Points}, with $c_1 = 0$ and thus $\gamma = 0$.
+The second such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
+After eliminating one amplitude from the two coupled-mode equations, the amplitude of the other guide also obeys Equation \eqref{eqn: homogeneous ODE}, under the following substitution:
+\begin{itemize}
+\item The independent variable $t$ becomes the propagation distance, while the dependent variable $x$ becomes the amplitude.
+\item $c_0 \pm \delta c_0 = (J \pm \delta J)^2 - (g \pm \delta g)^2$.
+\item $c_2 = 1$.
+\end{itemize}
+Formula \eqref{eqn: homogeneous quadratic} then gives $\Delta = 4 \big((g \pm \delta g)^2 - (J \pm \delta J)^2\big)$.
 When $J > g$, $\overline{\Delta} < 0$ and Formula \eqref{eqn: homogeneous ODE underdamped} applies: the power oscillates between the two guides indefinitely, and it remains bounded even though one guide amplifies.
 When $g > J$, $\overline{\Delta} > 0$ and Formula \eqref{eqn: homogeneous ODE overdamped} applies: one solution grows exponentially while the other decays, so the light localizes in the gain guide.
 $\Delta = 0$ is the \emph{exceptional point}, at which the two solutions of Formula \eqref{eqn: homogeneous quadratic} coalesce into one, so that Equation \eqref{eqn: homogeneous ODE} no longer has two independent solutions.
 Because the separation between the two solutions is proportional to $\sqrt{\Delta}$, the response $\delta \sqrt{\Delta} \propto \delta \Delta / \sqrt{\Delta}$ diverges as $\Delta \rightarrow 0$.
 Such divergence has been proposed as the basis of ultra-sensitive sensors, but the accompanying noise has been shown to be amplified in the same measure, so that the gain in signal-to-noise ratio is far smaller than the gain in response \citep{Exceptional_Point_Noise}.
-The exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ in variance arithmetic reaches the same conclusion without any reference to the physics of the system.
-\iffalse
-\begin{align}
-\label{eqn: quantum well energy}
-E_n &= n^2 \frac{\pi^2 \hbar^2}{2 m L^2} + V; \\
-\label{eqn: quantum well lifetime}
-(\delta t)(\delta m) &\simeq \frac{2 m^2 L^2}{n^2 \pi^2 \hbar};
-\end{align}
-When $V < 0$ and the particle is in the well of size $L$, Formula \eqref{eqn: quantum well energy} gives the energy levels, while Formula \eqref{eqn: quantum well lifetime} gives the life time of the unstable resonance particle as a first-order approximation.
-\fi
+The exclusion of $\overline{\Delta} \in (-\hat{\kappa}\, \delta \Delta, +\hat{\kappa}\, \delta \Delta)$ in statistical algebra reaches the same conclusion without any reference to the physics of the system.
+
 
 \subsection{Second Order Constant-Coefficient Ordinary Differential Equation with $\sin(\omega\,t)$ Forcing}
 
@@ -2010,7 +2004,9 @@ A_\infty &= \frac{A}{\sqrt{\big((c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \o
 \label{eqn: forced ODE phase}
 \tan\psi &= \frac{(c_1 \pm \delta c_1)\, \omega}{(c_0 \pm \delta c_0) - (c_2 \pm \delta c_2)\, \omega^2}; \\
 \label{eqn: forced ODE resonance}
-\omega_r &= \frac{\sqrt{-\Delta - (c_1 \pm \delta c_1)^2}}{2 (c_2 \pm \delta c_2)};
+\omega_r &= \frac{\sqrt{-\Delta - (c_1 \pm \delta c_1)^2}}{2 (c_2 \pm \delta c_2)}; \\
+\label{eqn: wave packet}
+A\sin\big((\omega\pm\delta\omega)t\big) &\equiv A\int \rho(\tilde{\omega}, \omega, \delta \omega) \sin(\tilde{\omega} t)\, d\tilde{\omega};
 \end{align}
 Equation \eqref{eqn: forced ODE} describes a forced oscillation of the displacement over time $x(t)$ \citep{Driven_Damped_Oscillator}, with its steady solution provided in Formula \eqref{eqn: forced ODE steady}, \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase}.
 Formula \eqref{eqn: forced ODE resonance} provides the resonance frequency $\omega_r$ at which $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} is maximized.
@@ -2018,10 +2014,6 @@ $\omega_r$ is also a distribution due to the uncertainty of $c_0$, $c_1$, and $c
 If they are precise, the resonance exists only when $c_1^2 < 2c_0 c_2$.
 Because they are imprecise, this clear transition disappears.
 
-\begin{equation}
-\label{eqn: wave packet}
-A\sin\big((\omega\pm\delta\omega)t\big) \equiv A\int \rho(\tilde{\omega}, \omega, \delta \omega) \sin(\tilde{\omega} t)\, d\tilde{\omega};
-\end{equation}
 In Equation \eqref{eqn: forced ODE}, if $A \sin(\omega\,t)$ is replaced by  $A \sin((\omega \pm \delta \omega)\,t)$ as defined in Formula \eqref{eqn: wave packet}, in which $\rho(\tilde{\omega}, \omega, \delta \omega)$ is a probability density function, then $\omega$ in Formula \eqref{eqn: forced ODE steady} can be replaced by $\omega \pm \delta \omega$ because Equation \eqref{eqn: forced ODE} is linear.
 Such replacement also seems to apply to Formulas \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase} after applying the same integration over $\rho(\tilde{\omega}, \omega, \delta \omega)$ as in Formula \eqref{eqn: wave packet}.
 While its notation is more concise and powerful, the proposed statistical algebra needs a solid mathematical ground for wider applicability.
