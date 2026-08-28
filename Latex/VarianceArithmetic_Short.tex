@@ -1762,7 +1762,7 @@ strongest intensity ($10^3$) & 840 & 500 & 32 & 11 \\
 weakest intensity ($10^3$) & 5.6 & 0.70 & 0.09 & 0.80 \\
 intensity weighted $\delta\lambda$ ($10^{-3}$ nm) & 0.53 & 3.05 & 6.63 & 6.15 \\
 intensity weighted $\delta\lambda/\lambda$ ($10^{-6}$) & 5.42 & 5.78 & 6.17 & 2.47 \\
-$S$-state QFT shift ($10^{-6}$) & 2.48 & 1.27 & 0.85 & 0.65 \\
+$S$-state QFT shift ($10^{-6}$) & 2.49 & 1.29 & 0.86 & 0.65 \\
 \hline
 precision ($10^{-6}$) & 4.25 & 3.57 & 3.55 & 3.14 \\
 relative error ($10^{-6}$) & +5.81 & +5.48 & +2.58 & +1.78 \\
@@ -1965,9 +1965,9 @@ $\hat{\kappa}\, \delta \Delta > |\overline{\Delta}|$ defines a \emph{separation 
 
 When $c_1 \pm \delta c_1 \neq 0$, over-damping and under-damping for a damped oscillator are only two shapes of a decay toward the same rest position, so the separation band has little observable consequence.
 
-When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, which makes the separation band significantly observable, as in several cases.
+When $c_1 \pm \delta c_1 = 0$, $\gamma = 0$, such as the stationary Schrödinger equation, Formula \eqref{eqn: homogeneous ODE underdamped} is a bounded oscillation while Formula \eqref{eqn: homogeneous ODE overdamped} contains an unbounded growth, which makes the separation band significantly observable, as in several cases.
 
-The first such system is the tunneling of a particle of mass $m$ at energy $E \pm \delta E$ through a region of constant potential $V \pm \delta V$, described by the stationary Schrödinger equation, which is Equation \eqref{eqn: homogeneous ODE} under the following substitution:
+The first such system is the tunneling of a particle of mass $m$ at energy $E \pm \delta E$ through a region of constant potential $V \pm \delta V$, which is Equation \eqref{eqn: homogeneous ODE} under the following substitution:
 \begin{itemize}
 \item The independent variable $t$ becomes the position, while the dependent variable $x$ becomes the wave function.
 \item $c_0 \pm \delta c_0 = (V \pm \delta V) - (E \pm \delta E)$.
@@ -1999,7 +1999,6 @@ The two cases are separated by an exclusion band of the same kind as that of $\D
 The mass in such a structure is not that of a free particle but an effective mass, a band parameter fitted to the curvature of the band edge, which differs for electrons and for holes and carries no measured uncertainty of the kind a fundamental constant has.
 For the conduction band of GaAs it is $\overline{m} \simeq 0.067$ of the free electron mass, with reported values spreading over a few percent, so that $\delta m / \overline{m} \simeq 10^{-2}$ \citep{Band_Parameters}.
 Taking the mass term of Formula \eqref{eqn: resonance level variance} alone, the level is locatable only when $\frac{\delta m}{\overline{m}} < \frac{1}{\hat{\kappa}} \frac{\overline{\Gamma_n}}{\overline{E_n} - V}$, which for $\hat{\kappa} = 5$ requires a width above $5\%$ of $\overline{E_n} - V$, while $\hat{\kappa}_2\, \delta m < \overline{m}$ remains satisfied by a factor of $20$.
-The imprecision of the structure therefore removes the position of the resonance long before it removes the solution.
 
 The third such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
 After eliminating one amplitude from the two coupled-mode equations, the amplitude of the other guide also obeys Equation \eqref{eqn: homogeneous ODE}, under the following substitution:
@@ -2151,10 +2150,10 @@ In other words, statistical Taylor expansion holds only for limited observations
 When the sample count changes (such as the sample count in Young's interference experiment), or the bounding range changes (such as limitation to space or time parameter changes due to a measurement), the result may be different (The interference pattern in Young's interference experiment becomes stronger, or the convergence range for $\log(x)$ or $x^c$ changes with $\kappa$).
 This property may relate to the understanding of quantum physics.
 
-When solving Equation \eqref{eqn: homogeneous ODE} with $c_1 \pm \delta c_1 = 0$ within the separation band $\hat{\kappa}\, \delta \Delta > |\overline{\Delta}|$, each realization $\tilde\Delta$ gives one definite solution of either Formula \eqref{eqn: homogeneous ODE overdamped} or Formula \eqref{eqn: homogeneous ODE underdamped} both with $\gamma = 0$. 
+When solving Equation \eqref{eqn: homogeneous ODE} with $c_1 \pm \delta c_1 = 0$ thus $\gamma = 0$ within the separation band $\hat{\kappa}\, \delta \Delta > |\overline{\Delta}|$, each realization $\tilde\Delta$ gives one definite solution of either Formula \eqref{eqn: homogeneous ODE overdamped} or Formula \eqref{eqn: homogeneous ODE underdamped}. 
 The ensemble is a mixture weighted by the probability density function $\rho(\tilde\Delta)$.
-The above mathematical description sounds quite like the Born interpretation of Schrodinger Equation, but it also applies to wave equation for the coupled optical guides.
-
+The above mathematical description sounds similar to the Born interpretation of Schrodinger Equation, but it also applies to the wave equation for the coupled optical guides.
+As a mathematics to describe uncertainties in analytic expressions, the correlation between statistical algebra and quantum physics is quite natural, and waits to be investigated. 
 
 
 
