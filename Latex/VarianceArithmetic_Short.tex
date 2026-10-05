@@ -536,7 +536,7 @@ Figure \ref{fig: Bounding_Factor_Leakage} slices Figure \ref{fig: Normal_Boundin
 \label{eqn: product leakage}
 \varepsilon(x y) &= \frac{\omega_x P(x)^2 + \omega_y P(y)^2 +  (\omega_x + \omega_y - \omega_x \omega_y) P(x)^2 P(y)^2}{P(x)^2 + P(y)^2 + P(x)^2 P(y)^2};
 \end{align}
-Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2} f$. 
+Define \emph{ideal leakage} as $\varepsilon \equiv 1 - \delta^2 f/\widehat{\delta^2 f}$. 
 When $f(x)=x$, $\varepsilon = \omega$ because $\delta^2 x = \zeta(2, \kappa) (\delta x)^2$.
 $\varepsilon$ quantifies the reliability of $\delta^2 f(x)$ for the given sample count $N$ and the choice of $\hat{\kappa}$.
 $\varepsilon$ can be calculated from the linear leakages and the input deviations or precision of all inputs, with Formulas \eqref{eqn: sum leakage} and \eqref{eqn: product leakage} as two examples.
@@ -1858,7 +1858,7 @@ Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE varia
 \label{eqn: first-order ODE solution initial}
 f(x) &= \big(x - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
 \label{eqn: first-order ODE variance initial}
-\delta^2 f(x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + \big(\overline{c_0}^2+(\delta c_0)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2;
+\delta^2 f(x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + (\delta f(x_0))^2 + \big(\overline{c_0}^2+(\delta c_0)^2\big)(\delta x_0)^2;
 \end{align}
 When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead, Formula \eqref{eqn: first-order ODE solution initial} shows the solution after replacing $x_0$ with $x_0 \pm \delta x_0$, with the same mean (by replacing $x_0$ with $\overline{x_0}$) as in Formula \eqref{eqn: first-order ODE solution}, but a larger variance as in Formula \eqref{eqn: first-order ODE variance initial}.
 
@@ -1866,7 +1866,8 @@ When the initial condition is $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ instead,
 \label{eqn: first-order ODE solution imprecise}
 f(x \pm \delta x) &= \big((x \pm \delta x) - (x_0 \pm \delta x_0)\big)\,(c_0 \pm \delta c_0) + \big(f(x_0) \pm \delta f(x_0)\big); \\
 \label{eqn: first-order ODE variance imprecise}
-\delta^2 f(x \pm \delta x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + \big(\overline{c_0}^2+(\delta c_0)^2\big) \big((\delta x)^2+(\delta x_0)^2 \big) + (\delta f(x_0))^2;
+\delta^2 f(x \pm \delta x) &= (x - \overline{x_0})^2 (\delta c_0)^2 + (\delta f(x_0))^2
+		 + \big(\overline{c_0}^2+(\delta c_0)^2\big) \big((\delta x)^2+(\delta x_0)^2 \big);
 \end{align}
 Formula \eqref{eqn: first-order ODE solution imprecise} evaluates the solution at the random point $x \pm \delta x$, in contrast to the deterministic evaluation point $x$ in Formula \eqref{eqn: first-order ODE solution initial}, with the same mean but larger variance in Formula \eqref{eqn: first-order ODE variance imprecise} due to the input $\delta x$.
 
@@ -1976,29 +1977,25 @@ The first such system is the tunneling of a particle of mass $m$ at energy $E \p
 Formula \eqref{eqn: homogeneous quadratic} then gives $\Delta = \frac{2 \hbar^2}{m} \big((V \pm \delta V) - (E \pm \delta E)\big)$, so that $\overline{\Delta} > 0$ when $E < V$, and $\overline{\Delta} < 0$ when $E > V$.
 Because $c_2 < 0$, both $\mu$ and $\omega_d$ are negative, but their signs are absorbed into $B$, because $\cosh$ is even while $\sinh$ and $\sin$ are odd.
 Formula \eqref{eqn: homogeneous ODE overdamped} is thus the evanescent solution of the classically forbidden region, with $|\mu| = \sqrt{2 m (V - E)}\,/\hbar$ as the tunneling decay rate, while Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution of the classically allowed region, with $|\omega_d| = \sqrt{2 m (E - V)}\,/\hbar$ as the de Broglie wave number.
-%The two outcomes differ by orders of magnitude rather than in shape: across a barrier of width $L$, the transmission is suppressed by $e^{-2 |\mu| L}$ in the first case, but is of order unity in the second.
 Correspondingly, the separation band is a neighborhood of the classical turning point $E = V$, which is exactly the region in which the conventional WKB approximation breaks down and has to be replaced by an Airy connection formula \citep{Quantum_Mechanics}.
+According to statistical algebra, the separation band no longer has zero width: inside the separation band, it is a mixture of both cases of different probabilities, to transform smoothly from one case to anther.
 
 The second such case is a resonant state, in which a particle of imprecise mass $m \pm \delta m$ is quasi-bound in a well of imprecise width $L \pm \delta L$ between two barriers of width $L_b$ and precise depth $V$, so that $c_2 \pm \delta c_2 = -\frac{\hbar^2}{2 (m \pm \delta m)}$.
-The energy $E$ carries no imprecision of its own here, because the resonance condition determines it rather than receiving it.
+The resonance condition determines the energy $E \pm \delta E$.
 Such a structure uses both branches of Equation \eqref{eqn: homogeneous ODE} at once: $\overline{\Delta} < 0$ inside the well, where Formula \eqref{eqn: homogeneous ODE underdamped} is the propagating solution, and $\overline{\Delta} > 0$ inside the barriers, where Formula \eqref{eqn: homogeneous ODE overdamped} is the evanescent one, with the resonance condition $|\omega_d|\, L \simeq n \pi$ matching them.
 $m \pm \delta m$ appears both inside $\Delta$ and as the divisor of $\mu$ and $\omega_d$ in Formulas \eqref{eqn: homogeneous quadratic}, \eqref{eqn: homogeneous ODE overdamped} and \eqref{eqn: homogeneous ODE underdamped}.
 The two dependences cancel to leave $|\mu|$ and $|\omega_d|$ proportional to $\sqrt{m}$, whose square root additionally requires $\hat{\kappa}_2\, \delta m < \overline{m}$, and it does so on both branches simultaneously.
 Both the position and the width of the resonance then inherit these imprecisions, but not equally.
-The resonance energy follows $\overline{E_n} - V = \frac{\hbar^2 \pi^2 n^2}{2 \overline{m}\, \overline{L}^2}$, so that
+The resonance energy follows $\overline{E_n} - V = \frac{\hbar^2 \pi^2 n^2}{2 \overline{m}\, \overline{L}^2}$, to result in Formula \eqref{eqn: resonance level variance}: 
 \begin{align}
 \label{eqn: resonance level variance}
 \frac{\delta E_n}{\overline{E_n} - V} &\simeq
 	\sqrt{\Big(\frac{\delta m}{\overline{m}}\Big)^2 + 4 \Big(\frac{\delta L}{\overline{L}}\Big)^2};
 \end{align}
-in which $\delta L$ enters twice as strongly as $\delta m$ because $\overline{E_n} - V$ scales as $\overline{L}^{-2}$.
-The resonance width is proportional to the barrier transmission $e^{-2 |\mu| L_b}$, so that the mass alone contributes $\frac{\delta \Gamma_n}{\overline{\Gamma_n}} \simeq |\mu|\, L_b\, \frac{\delta m}{\overline{m}}$, larger than its contribution to the position by the opacity $|\mu|\, L_b$ of the barrier.
-Because a resonance can be located only to within its own width $\Gamma_n$, taken here as the full width at half maximum, the level is locatable only when $\hat{\kappa}\, \delta E_n < \overline{\Gamma_n}$.
-Otherwise it still exists as a solution of Equation \eqref{eqn: homogeneous ODE}, but it has no determinable position.
 The two cases are separated by an exclusion band of the same kind as that of $\Delta$.
 The mass in such a structure is not that of a free particle but an effective mass, a band parameter fitted to the curvature of the band edge, which differs for electrons and for holes and carries no measured uncertainty of the kind a fundamental constant has.
 For the conduction band of GaAs it is $\overline{m} \simeq 0.067$ of the free electron mass, with reported values spreading over a few percent, so that $\delta m / \overline{m} \simeq 10^{-2}$ \citep{Band_Parameters}.
-Taking the mass term of Formula \eqref{eqn: resonance level variance} alone, the level is locatable only when $\frac{\delta m}{\overline{m}} < \frac{1}{\hat{\kappa}} \frac{\overline{\Gamma_n}}{\overline{E_n} - V}$, which for $\hat{\kappa} = 5$ requires a width above $5\%$ of $\overline{E_n} - V$, while $\hat{\kappa}_2\, \delta m < \overline{m}$ remains satisfied by a factor of $20$.
+Taking the mass term of Formula \eqref{eqn: resonance level variance} alone, $\delta E$ is above $5\%$ of $\overline{E_n} - V$.
 
 The third such system is a pair of coupled optical waveguides, one with gain $+g$ and the other with loss $-g$, coupled at rate $J$ \citep{Exceptional_Points}.
 After eliminating one amplitude from the two coupled-mode equations, the amplitude of the other guide also obeys Equation \eqref{eqn: homogeneous ODE}, under the following substitution:
@@ -2042,6 +2039,7 @@ Both are distributions due to the uncertainty of $c_0$, $c_1$, and $c_2$.
 If they are precise, the resonance exists only when $S > 0$ for $S$ in Formula \eqref{eqn: forced ODE resonance condition}, in which case $-\Delta > c_1^2 > 0$, so that the corresponding homogeneous Equation \eqref{eqn: homogeneous ODE} is always under-damped.
 Because they are imprecise, this clear transition becomes another exclusion band, in the same way as for $\Delta$: with $\delta^2 S$ in Formula \eqref{eqn: forced ODE resonance condition variance}, the resonance is present only when $\overline{S} > \hat{\kappa}\, \delta S$, it is absent only when $\overline{S} < -\hat{\kappa}\, \delta S$, and it is statistically undecidable in between.
 
+
 In the statistical context, the solution space is smaller, as for Equation \eqref{eqn: quadratic}.
 \begin{itemize}
 \item For the variance of $A_\infty$ in Formula \eqref{eqn: forced ODE amplitude} to be bounded, its radicand $D$ needs $\hat{\kappa}\, \delta D < \overline{D}$.
@@ -2060,6 +2058,7 @@ A\sin\big((\omega\pm\delta\omega)t\big)  \equiv A\int \rho(\tilde{\omega}, \omeg
 In Equation \eqref{eqn: forced ODE}, if $A \sin(\omega\,t)$ is replaced by $A \sin((\omega \pm \delta \omega)\,t)$ as defined in Formula \eqref{eqn: wave packet}, in which $\rho(\tilde{\omega}, \omega, \delta \omega)$ is a probability density function, then $\omega$ in Formula \eqref{eqn: forced ODE steady} can be replaced by $\omega \pm \delta \omega$ because Equation \eqref{eqn: forced ODE} is linear.
 Such replacement also seems to apply to Formulas \eqref{eqn: forced ODE amplitude} and \eqref{eqn: forced ODE phase} after applying the same integration over $\rho(\tilde{\omega}, \omega, \delta \omega)$ as in Formula \eqref{eqn: wave packet}.
 While its notation is more concise and powerful, the proposed statistical algebra needs a solid mathematical ground for wider applicability.
+For example, such application of $\omega \rightarrow \omega \pm \delta \omega$ is faulty when Equation \eqref{eqn: forced ODE} is a Duffing equation.
 
 
 \subsection{A Comment on Numerical Solution}
