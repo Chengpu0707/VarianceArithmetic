@@ -43,7 +43,7 @@ class TestNormal (unittest.TestCase):
     MIN_COUNT = 10000
 
     header = 'Samples\tKappa\tCount\tMean\tDeviation\tRange\n'
-    boundingPath = f"{OUTDIR}/Python/Output/BoundingLeakage.txt"
+    boundingPath = f"{OUTDIR}/Python/Output/NormalLeakage.txt"
     linearPath = f"{OUTDIR}/Python/Output/NormalSamples.txt"
 
     sSample = None
@@ -130,9 +130,6 @@ class TestNormal (unittest.TestCase):
      
     @unittest.skipIf(SKIP_TEST, 'Ran 1 test in 2329s')
     def test_linearOutput(self):
-        '''
-        extract the sample count from 1/kappa.
-        '''
         TestNormal.initSamples()
         RESOLUTION = 1000
         MIN_KAPPA = 1.5
