@@ -281,7 +281,6 @@ class TestBoundingRange (unittest.TestCase):
                     self.assertEqual(hdr, 'Samples\tCount\tMean\tDeviation\tRange\n')
                     for line in f:
                         n, cnt, leak, std, bounding = map(float, line.split('\t'))
-                        bounding /= TestUniform.SQRT3
                         sBounding[int(n)] = bounding
                         if bounding not in sMoment:
                             sMoment[bounding] = moment.Uniform(bounding=bounding)

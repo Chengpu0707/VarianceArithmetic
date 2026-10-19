@@ -1,0 +1,2027 @@
+\documentclass[twoside]{article}
+%Latex for arxiv needs figures in pdf format.  To convert png to pdf, go to https://pngpdf.com/#google_vignette
+
+\pagestyle{myheadings}
+\setlength{\oddsidemargin}{44pt}
+\setlength{\evensidemargin}{44pt}
+\setcounter{page}{1}
+
+\usepackage{url,intmacros,graphicx}
+\usepackage{amssymb,amsmath}
+\usepackage{capt-of}
+\usepackage{float}
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\numberwithin{equation}{section}
+
+\newcommand{\email}[1]{\\ \small{\url{#1}} \\}
+\newcommand{\institution}[1]{\\ \parbox{3.0in}{\small{#1}}}
+\newcommand{\keywords}[1]{\small\textbf{Keywords: }#1}
+\newcommand{\AMSsubj}[1]{\noindent\textbf{AMS subject classifications: }#1}
+\newcommand\whenaccepted{}
+
+%\newcommand{\Verbose}{}
+\newcommand{\ManualReference}{}
+%\newcommand{\NoAuthor}{}
+
+
+
+%-------------------------------------------------------
+
+
+%  You may add additional packages here.  However, if they
+%  are not available with the usual LaTeX distribution,
+%  they must be supplied with the final, accepted LaTeX.
+
+% Fill in your title here. (Retain the footnote.)
+\title{Supplementary Derivations for ``Statistical Taylor Expansion: A New and Path-Independent Method for Uncertainty Analysis''\footnote{Companion to the main paper \texttt{VarianceArithmetic\_Short.tex}. Section/subsection headers mirror the main paper for navigation; equation/citation references point to the main paper and may render as ``??'' in this standalone build.}}
+
+\ifdefined\NoAuthor
+\markboth{\textit{Statistical Taylor Expansion}}
+         {\textit{https://github.com/Chengpu0707/VarianceArithmetic}}
+\else
+% Delete the "\and" or add more as needed
+\author{Chengpu Wang
+\institution{40 Grossman Street, Melville, NY 11747, USA}
+\email{Chengpu@gmail.com}}
+
+% Put a short running title within the first argument to
+% this command.  Do not alter the second argument
+\markboth{CP Wang, \textit{Statistical Taylor Expansion}}
+         {\textit{https://github.com/Chengpu0707/VarianceArithmetic}}
+\fi
+
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\section{Statistical Taylor Expansion}
+
+\subsection{Uncorrelated Uncertainty Condition}
+
+\subsection{Distributional Zero and Distributional Pole}
+
+To solve for mode:
+\begin{align*}
+& \rho(\tilde{y}, y, \delta y) = \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z});
+\quad \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x}; \\
+& 0 = \frac{d \rho(\tilde{y}, y, \delta y)}{d \tilde{y}} = \frac{d^2 \tilde{z}}{d \tilde{y}^2} N(\tilde{z}) - \frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z}) \tilde{z}; \\
+& \frac{d^2 \tilde{z}}{d \tilde{y}^2} = \frac{d \tilde{z}}{d \tilde{y}} \tilde{z}; \quad \tilde{z} = \frac{f^{-1}(\tilde{y}) - x}{\delta x};
+\end{align*}
+
+The exponential function:
+\begin{align*}
+f(x) = e^x:& \quad 
+\tilde{z} = \frac{\log(\tilde{y}) - x}{\delta x}, \quad 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\tilde{y} \delta x} = \frac{1}{\frac{d}{d \tilde{z}} e^{x + \tilde{z} \delta x}}; \quad \\
+\frac{d \tilde{z}}{d \tilde{y}} N(\tilde{z})
+&= e^{-\log(\tilde{y})} \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2}{2 \delta^2 x}}
+ = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - x)^2 + 2 \log(\tilde{y}) \delta^2 x }{2 \delta^2 x}} \\
+& = \frac{1}{\sqrt{2\pi} \delta x} e^{-\frac{(\log(\tilde{y}) - (x - \delta^2 x))^2 + 2 x \delta^2 x - (\delta^2 x)^2 }{2 \delta^2 x}}
+ = N(\frac{\log(\tilde{y}) - (x - \delta^2 x)}{\delta x}) e^{-x + \frac{\delta^2 x}{2}}; \\
+& 0 = \tilde{z} e^{x + \tilde{z} \delta x} + (\delta x) e^{x + \tilde{z} \delta x}; \quad
+ \tilde{z} = -(\delta x) = \frac{1}{\delta x}(x - (\delta x)^2 - x);
+\end{align*}
+
+The log function $f(x) = \log(x)$:
+\begin{align*}
+& \tilde{z} = \frac{e^{\tilde{y}} - x}{\delta x}; \quad 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} e^{\tilde{y}} = \frac{1}{\delta x} (x + \tilde{z} \delta x)
+ = \frac{1}{\frac{d}{d \tilde{z}} \log(x + \tilde{z} \delta x)}; \\
+& \frac{1}{\delta x} e^{\tilde{y}} = (\frac{1}{\delta x} e^{\tilde{y}})^2 \frac{e^{\tilde{y}} - x}{\delta x}; \quad 
+(e^{\tilde{y}})^2 - x e^{\tilde{y}} - \delta^2 x = 0; \\
+e^{\tilde{y}_m} &= \frac{x + \sqrt{x^2 + 4 \delta^2 x}}{2}; \\
+& \quad 0 = \frac{\tilde{z}}{x + \tilde{z} \delta x} - (\delta x) \frac{1}{(x + \tilde{z} \delta x)^2}; \quad
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} - (\delta x); \\
+& \tilde{z} = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 + 4 (\delta x)^2}}{2} - x);
+\end{align*}
+
+The power mode $f(x) = x^{\frac{1}{p}}$:
+\begin{align*}
+& \tilde{z} = \frac{\tilde{y}^p - x}{\delta x}; \quad 
+\frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} p \tilde{y}^{p-1}; \\
+& \frac{1}{\delta x} p (p - 1) \tilde{y}^{p-2} = (\frac{1}{\delta x} p \tilde{y}^{p-1})^2 \frac{\tilde{y}^p - x}{\delta x}; \\
+& \tilde{y}^{2p} - x \tilde{y}^{p} - \frac{p - 1}{p} \delta^2 x = 0; \\
+\tilde{y}_m^p &= \frac{1}{2} (x + \sqrt{x^2 + 4 \frac{p - 1}{p} \delta^2 x}); \\
+& 0 = c (x + \tilde{z} \delta x)^{c-1} \tilde{z} + c (c-1) \delta x (x + \tilde{z} \delta x)^{c-2}; \quad
+0 = (\delta x) \tilde{z}^2 + x \tilde{z} + (c - 1) (\delta x); \\
+& \tilde{z}_m = \frac{1}{\delta x}(\frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2} - x); \quad 
+f^{-1}(\tilde{y}_m) = \frac{x + \sqrt{x^2 - 4(c-1)(\delta x)^2}}{2}; \\
+p = 2:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 2 \tilde{y}; \quad 
+  \tilde{y}_m^{\frac{1}{2}} = \frac{1}{2} \left( x + \sqrt{x^2 + 2 \delta^2 x} \right); \\
+p = 3:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} 3 \tilde{y}^2; \quad  
+  \tilde{y}_m^{\frac{1}{3}} = \frac{1}{2} \left( x \pm \sqrt{x^2 + \frac{8}{3} \delta^2 x} \right); \\
+p = 1/2:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{2} \tilde{y}^{-\frac{1}{2}}; \quad 
+  \tilde{y}_m^2 = \frac{1}{2} \left( x + \sqrt{x^2 - 4 \delta^2 x} \right); \\
+p = 1/3:& \quad \frac{d \tilde{z}}{d \tilde{y}} = \frac{1}{\delta x} \frac{1}{3} \tilde{y}^{-\frac{2}{3}}; \quad
+  \tilde{y}_m^2 = \frac{1}{2} \left( x \pm \sqrt{x^2 - 8 \delta^2 x} \right); \\
+p = -1:& \quad \frac{d \tilde{z}}{d \tilde{y}} = - \frac{1}{\delta x} \tilde{y}^{-2}; \quad 
+  \tilde{y}_m^{-1} = \frac{1}{2} \left( x + \sqrt{x^2 + 8 \delta^2 x} \right); 
+\end{align*}
+
+
+The distribution difference:
+\begin{align*}
+&\nu = \frac{x - f^{-1}(\tilde{y}_m)}{\delta x}: \quad 
+ N(\frac{f^{-1}(\tilde{y}) - f^{-1}(\tilde{y}_m)}{\delta x} )
+ = N(\tilde{z} + \nu) = N(\tilde{z}) e^{-\tilde{z} \nu} e^{-\frac{1}{2} \nu^2}; \\
+\eta &\equiv \int |\varrho(\tilde{y}, y, \delta y) - \rho(\tilde{y}, y, \delta y)| d \tilde{y}
+ =  \int |\rho(f^{-1}(\tilde{y}), f^{-1}(\tilde{y_m}), \delta x) - \rho(f^{-1}(\tilde{y}), x, \delta x)| d f^{-1}(\tilde{y}) \\
+&= \int |N(\tilde{z} + \nu) - N(\tilde{z})| d \tilde{z} 
+ = \int |e^{-\frac{1}{2} \nu^2} e^{-\tilde{z} \nu} - 1| N(\tilde{z}) d \tilde{z}; \\
+&= | \int |\sum_{m=0}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=0}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n - 1| 
+   N(\tilde{z}) d \tilde{z} | \\
+&= | \int \left(\sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{(-\nu)^n}{n!} \tilde{z}^n
+  - \frac{1}{2} \nu^2 - \nu \tilde{z} \right) N(\tilde{z}) d \tilde{z} | \\
+&= \frac{1}{2} \nu^2 - \sum_{m=1}^{\infty} \frac{(-\nu^2)^m}{2^m m!} \sum_{n=1}^{\infty} \frac{\nu^{2n}}{2^n n!}
+ = \frac{1}{2} \nu^2 - \sum_{m=2}^{\infty} \sum_{n=1}^{m-1} \frac{(-1)^m}{2^m (m - n)! n!} \nu^{2m} \\
+&\simeq \frac{1}{2} \nu^2 - \frac{1}{4} \nu^4 + \frac{1}{8} \nu^6 - \frac{7}{192} \nu^8;
+\end{align*}
+When $f(x)=x^c$:
+\begin{align*}
+\nu &= \frac{x - \frac{1}{2} (x + \sqrt{x^2 + (1 - c) 4 \delta^2 x})}{\delta x} = \frac{1 - \sqrt{1 + (1 - c) 4 P(x)^2}}{2 P(x)} \\
+&= - \sum_{m=1} \frac{(1 - c)^m (2P(x))^{2m - 1}}{m!} \prod_{n=1}^{m} \frac{\frac{3}{2} -n}{n} \\
+&\simeq -(1 - c) P(x) + \frac{1}{4} (1 - c)^2 P(x)^3 - \frac{1}{4} (1 - c)^3 P(x)^5; \\
+\eta &= \frac{1}{2} (1-c)^2 P(x)^2 - \frac{1}{4} (1-c)^3 (2-c) P(x)^4 + 1/8 (1-c)^4 (c^2-4c+7) P(x)^6
+\end{align*}
+
+\begin{align}
+\label{eqn: power distribution}
+&y = x^c: \quad \rho(\tilde{y}, \mu_y, \sigma_y) = c \tilde{y}^{\frac{1}{c}-1} \frac{1}{\sigma} N(\frac{\tilde{y}^\frac{1}{c} - \mu}{\sigma}); 
+\end{align}
+
+
+\subsection{Statistical Taylor Expansion}
+
+\begin{align}
+\label{eqn: Taylor 1d}
+f(x + \tilde{x}) &= f(x + \tilde{z}\, \delta x) = f(x) + \sum_{n=1}^{\infty} \frac{f^{(n)}_x}{n!}\, \tilde{z}^n\, (\delta x)^n; \\
+\label{eqn: Taylor 1d mean}
+\overline{f(x)} &= f(x) + \sum_{n=2}^{\infty} (\delta x)^n\, \frac{f^{(n)}_x}{n!}\, \zeta(n, \kappa);
+\end{align}
+
+\begin{align}
+\label{eqn: Taylor 2d}
+f(x + \tilde{x},\, y + \tilde{y}) &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m + n \geq 1}} \frac{f^{(m,n)}_{(x,y)}}{m!\, n!}\, \tilde{x}^m\, \tilde{y}^n; \\
+\label{eqn: Taylor 2d mean}
+\overline{f(x, y)} &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m + n \geq 2}} (\delta x)^m (\delta y)^n\, \frac{f^{(m,n)}_{(x,y)}}{m!\, n!}\, \zeta_x(m, \kappa_x)\, \zeta_y(n, \kappa_y); \\
+\label{eqn: Taylor 2d variance}
+\delta^2 f(x, y) &= \sum_{\substack{m, n \geq 0 \\ m + n \geq 2}} (\delta x)^m (\delta y)^n \sum_{i=0}^{m} \sum_{j=0}^{n}
+		\frac{f^{(i,j)}_{(x,y)}}{i!\, j!}\, \frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\, (n-j)!} \nonumber \\
+	&\bigl( \zeta_x(m, \kappa_x)\, \zeta_y(n, \kappa_y) - \zeta_x(i, \kappa_x)\, \zeta_x(m-i, \kappa_x)\, \zeta_y(j, \kappa_y)\, \zeta_y(n-j, \kappa_y) \bigr);
+\end{align}
+
+The extension of Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} to three uncorrelated variables $(x, y, z)$ is:
+\begin{align}
+\label{eqn: Taylor 3d}
+f(x + \tilde{x},\, y + \tilde{y},\, z + \tilde{z}) &= f(x, y, z) + \sum_{\substack{l, m, n \geq 0 \\ l + m + n \geq 1}} \frac{f^{(l,m,n)}_{(x,y,z)}}{l!\, m!\, n!}\, \tilde{x}^l\, \tilde{y}^m\, \tilde{z}^n; \\
+\label{eqn: Taylor 3d mean}
+\overline{f(x, y, z)} &= f(x, y, z) + \sum_{\substack{l, m, n \geq 0 \\ l + m + n \geq 2}} (\delta x)^l (\delta y)^m (\delta z)^n\, \frac{f^{(l,m,n)}_{(x,y,z)}}{l!\, m!\, n!}\, \zeta_x(l, \kappa_x)\, \zeta_y(m, \kappa_y)\, \zeta_z(n, \kappa_z); \\
+\label{eqn: Taylor 3d variance}
+\delta^2 f(x, y, z) &= \sum_{\substack{l, m, n \geq 0 \\ l + m + n \geq 2}} (\delta x)^l (\delta y)^m (\delta z)^n \sum_{i=0}^{l} \sum_{j=0}^{m} \sum_{k=0}^{n}
+		\frac{f^{(i,j,k)}_{(x,y,z)}}{i!\, j!\, k!}\, \frac{f^{(l-i, m-j, n-k)}_{(x,y,z)}}{(l-i)!\, (m-j)!\, (n-k)!} \nonumber \\
+	&\quad \times \bigl( \zeta_x(l, \kappa_x)\, \zeta_y(m, \kappa_y)\, \zeta_z(n, \kappa_z) \nonumber \\
+	&\quad\quad - \zeta_x(i, \kappa_x)\, \zeta_x(l-i, \kappa_x)\, \zeta_y(j, \kappa_y)\, \zeta_y(m-j, \kappa_y)\, \zeta_z(k, \kappa_z)\, \zeta_z(n-k, \kappa_z) \bigr);
+\end{align}
+
+\begin{align*}
+\delta^2 f(x) &= \overline{f(x)^2} - \overline{f(x)}^2 =
+		\sum_{m=0}^{\infty} \sum_{n=0}^{\infty} (\delta x)^{m+n} \frac{f^{(m)}_x f^{(n)}_x}{m! n!} \left(\zeta(m+n, \kappa) - \zeta(m, \kappa) \zeta(n, \kappa) \right) \\
+ 	&= \sum_{n=0}^{\infty} (\delta x)^{n} \sum_{j=0}^{n} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) \\
+ 	&= \sum_{n=2}^{\infty} (\delta x)^{n} \sum_{j=0}^{n} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) 
+ 	 	+ f(x)^2 \zeta(0, \kappa) (1 - \zeta(0, \kappa)) \\
+ 	&= \sum_{n=2}^{\infty} (\delta x)^{n} \sum_{j=1}^{n-1} \frac{f^{(j)}_x f^{(n - j)}_x}{j! (n - j)!} \left(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \right) \\
+ 	&\;\; + (1 - \zeta(0, \kappa)) \left(f(x) + 2 \sum_{n=2}^{\infty} (\delta x)^{n} f(x) \frac{f^{(n)}_x}{n!} \zeta(n, \kappa) \right);
+\end{align*}
+
+Thus, $\zeta(n, \kappa)$ needs to be 1.
+
+\begin{align*}
+f(a+\Delta x, b+\Delta y) &=
+f \\
++& f_x\,\Delta x + f_y\,\Delta y \\
++& \tfrac{1}{2!}\bigl(f_{xx}\,\Delta x^{2} + 2 f_{xy}\,\Delta x\,\Delta y + f_{yy}\,\Delta y^{2}\bigr) \\
++& \tfrac{1}{3!}\bigl(f_{xxx}\,\Delta x^{3} + 3 f_{xxy}\,\Delta x^{2}\,\Delta y + 3 f_{xyy}\,\Delta x\,\Delta y^{2} + f_{yyy}\,\Delta y^{3}\bigr) \\
++& \tfrac{1}{4!}\bigl(f_{xxxx}\,\Delta x^{4} + 4 f_{xxxy}\,\Delta x^{3}\,\Delta y + 6 f_{xxyy}\,\Delta x^{2}\,\Delta y^{2} + 4 f_{xyyy}\,\Delta x\,\Delta y^{3} + f_{yyyy}\,\Delta y^{4}\bigr) \\
++& O(|\Delta|^{5}) \\
+&= \sum_{n=0}^{\infty} \frac{1}{n!} \sum_{j=0}^{n} \frac{n!}{j! (n-j)!} f_x^{(j)} f_y^{(n - j)};
+\end{align*}
+
+
+\subsection{One-Dimensional Examples}
+\begin{align}
+\label{eqn: exp Taylor}
+& e^{x + \tilde{x}} = e^x \sum_{n=0}^{\infty} \frac{\tilde{x}^n}{n!}; \\
+\label{eqn: log Taylor}
+& \log(x + \tilde{x}) - \log(x) = \log(1 + \frac{\tilde{x}}{x}) = \sum_{j=1}^{\infty} \frac{(-1)^{j+1}}{j} \frac{\tilde{x}^j}{x^j}; \\
+\label{eqn: sin Taylor}
+\sin(x + \tilde{x}) &= \sum_{n=0}^{\infty} \eta(n, x) \frac{\tilde{x}^{n}}{n!};
+	\quad \eta(n, x) \equiv \begin{cases} 
+		n = 4j: \quad  \sin(x); \\ n = 4j + 1: \quad  \cos(x); \\ n = 4j + 2: \quad  -\sin(x); \\ n = 4j +3: \quad  -\cos(x);
+	\end{cases} \\
+\label{eqn: power Taylor}
+&(x + \tilde{x})^c = x^c (1 + \frac{\tilde{x}}{x})^c = x^c + x^c \sum_{n=1}^{\infty} \frac{\tilde{x}^n}{x^n} \begin{pmatrix} c \\ n \end{pmatrix};
+	\quad \begin{pmatrix} c \\ n \end{pmatrix} \equiv \frac{\prod_{j=0}^{n-1} (c -j)}{n!};
+\end{align}
+
+\begin{align*}
+\frac{x + \tilde{x}}{y + \tilde{y}} &\simeq \frac{x}{y} + \frac{1}{y} \tilde{x} - \frac{x}{y^2} \tilde{y}
+  		 - \frac{1}{y^2} \tilde{x} \tilde{y} + \frac{x}{y^3} \tilde{y}^2
+		 + \frac{1}{y^3} \tilde{x} \tilde{y}^2 - \frac{x}{y^4} \tilde{y}^3; \\
+(x + \tilde{x}) \frac{1}{y + \tilde{y}} &\simeq (x + \tilde{x}) \left( \frac{1}{y} - \frac{1}{y^2} \tilde{y} + \frac{1}{y^3} \tilde{y}^2 - \frac{1}{y^4} \tilde{y}^3 \right) \\
+	&= \frac{x}{y} + \frac{1}{y} \tilde{x} - \frac{x}{y^2} \tilde{y} - \frac{1}{y^2} \tilde{x} \tilde{y} + \frac{x}{y^3} \tilde{y}^2  + \frac{1}{y^3} \tilde{x} \tilde{y}^2
+		 -  \frac{x}{y^4} \tilde{y}^3 - \frac{1}{y^4} \tilde{x} \tilde{y}^3;
+\end{align*}
+
+
+
+\subsection{Convergence of Variance}
+
+\subsubsection{Gaussian}
+
+
+\begin{align*}
+\int_{0}^{\kappa}& \tilde{z}^{2n} e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z}
+		= - \int_{0}^{\kappa} \tilde{z}^{2n - 1} d\; e^{-\frac{1}{2} \tilde{z}^2}
+		= (2n - 1) \int_{0}^{\kappa} \tilde{z}^{2n - 2}  e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z} - \tilde{z}^{2n - 1} e^{-\frac{1}{2} \tilde{z}^2} \Big |_{0}^{\kappa} \\
+		&= (2n - 1) \int_{0}^{\kappa} \tilde{z}^{2n - 2}  e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z} - \kappa^{2n - 1} e^{-\frac{1}{2} \kappa^2} \\
+		&= (2n - 1) (2n - 3) \int_{0}^{\kappa} \tilde{z}^{2n - 4}  e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z} 
+			- (2n - 1) \kappa^{2n - 3} e^{-\frac{1}{2} \kappa^2} - \kappa^{2n - 1} e^{-\frac{1}{2} \kappa^2} \\
+		&= (2n - 1)!! \left( \int_{0}^{\kappa} e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z} - e^{-\frac{1}{2} \kappa^2} \sum_{j=1}^{n} \frac{\kappa^{2n - 2j + 1}}{(2j - 1)!!}  \right) \\
+		&= (2n - 1)!! \left(\sqrt{2} \int_{0}^{\frac{\kappa}{\sqrt{2}}} e^{-(\frac{\tilde{z}}{\sqrt{2}})^2} d \frac{\tilde{z}}{\sqrt{2}} 
+			- e^{-\frac{1}{2} \kappa^2} \sum_{j=0}^{n - 1} \frac{\kappa^{2j + 1}}{(2j + 1)!!} \right) \\
+		& = (2n - 1)!! e^{-\frac{1}{2} \kappa^2} \left( \sqrt{\frac{\pi}{2}} \xi (\frac{\kappa}{\sqrt{2}})  e^{\frac{1}{2} \kappa^2} 
+			- \sum_{j=0}^{n - 1} \frac{\kappa^{2j + 1}}{(2j + 1)!!}  \right)
+\end{align*}
+According to Eq (21) in https://mathworld.wolfram.com/DoubleFactorial.html:
+\begin{align*}
+\sum_{j=0}^{+\infty} \frac{\kappa^{2j + 1}}{(2j + 1)!!} = \sqrt{\frac{\pi}{2}} \xi (\frac{\kappa}{\sqrt{2}}) e^{\frac{1}{2} \kappa^2};
+\end{align*}
+Thus:
+\begin{align*}
+\int_{0}^{\kappa} \tilde{z}^{2n} e^{-\frac{1}{2} \tilde{z}^2} d \tilde{z}
+		=  e^{-\frac{1}{2} \kappa^2} \sum_{j=n}^{+\infty} \frac{(2n - 1)!!}{(2j + 1)!!} \kappa^{2j + 1}
+		= e^{-\frac{1}{2} \kappa^2} \kappa^{2n} \sum_{j=1}^{+\infty} \frac{(2n - 1)!!}{(2n - 1 + 2j)!!} \kappa^{2j - 1};
+\end{align*}
+
+
+\begin{align*}
+\zeta(2n) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \rho(\tilde{z}) d \tilde{z} = 2 N(\kappa) \kappa^{2n} \sum_{j=0}^{\infty} \kappa^{2j+1} \frac{(2n-1)!!}{(2j + 2n+1)!!}; \\
+\zeta(2n) &= 2 N(\kappa) \frac{\kappa^{2n+1}}{2n + 1} + 2 N(\kappa) \frac{\kappa^{2n+2}}{2n+1} \sum_{j=1}^{\infty} \kappa^{2(j-1)+1} \frac{(2(n+1)- 1)!!}{(2(j-1)+2(n+1)+1)!!} \\
+ &= 2 N(\kappa) \frac{\kappa^{2n + 1}}{2n + 1} + \frac{\zeta(\kappa, 2n + 2)}{2n + 1}; \\
+\zeta(\kappa, 2n + 2) &= (2n + 1) \zeta(\kappa, 2n) - 2 N(\kappa) \kappa^{2n + 1};
+\end{align*}
+
+\subsubsection{Uniform}
+
+
+\begin{align*}
+\int_{-\kappa}^{+\kappa} \frac{1}{2 \sqrt{3}} \tilde{z}^{2n} d \tilde{z} = \frac{1}{\sqrt{3}} \frac{\kappa^{2n+1}}{2n + 1};
+\end{align*}
+
+
+\subsubsection{Convergence of Log}
+
+
+\begin{align*}
+\delta^2 \log(x \pm \delta x) &\simeq \sum_{n = 2}^{+\infty} P(x)^{n} (-1)^n \zeta(n, \kappa) \sum_{j=1}^{n-1} \frac{1}{j} \frac{1}{n-j} 
+		\simeq \sum_{n = 2}^{+\infty} P(x)^{n} (-1)^n \frac{k^n}{n} \frac{1}{n} \sum_{j=1}^{n-1} \frac{1}{j}  \nonumber \\
+	&\simeq \sum_{n = 2}^{+\infty} \frac{(-P(x) \kappa)^{n}}{n^2} \sum_{j=1}^{n-1} \frac{1}{j};
+\end{align*}
+
+
+\subsubsection{Convergence of Power}
+
+Chu-Vandermonde
+For any real $c$ and non-negative integer $n$:
+$$\sum_{j=0}^{n} \binom{c}{j}\binom{c}{n-j} = \binom{2c}{n}$$
+
+(Standard Vandermonde for integers; generalizes to all real $c$ since both sides are polynomials in $c$ that agree on infinitely many values.)
+
+\begin{align*}
+\frac{\delta^2 x^c}{(x^c)^2} &\simeq \sum_{n=2}^{\infty} P(x)^{n} \frac{\kappa^n}{n} 
+		\sum_{j=1}^{n - 1} \binom{c}{j} \binom{c}{n - j} \\
+	&= \sum_{n=2}^{\infty} (P(x) \kappa)^n \frac{1}{n} \left( \binom{2c}{n} - 2 c \binom{c}{n} \right);
+\end{align*}
+
+
+\subsubsection{Validate Formula {eqn: symmetric asymptotic moment}}
+
+Validation of eqn: symmetric asymptotic moment (L422):
+$$\rho(-\tilde z) = \rho(\tilde z):\quad \lim_{n\to+\infty}\zeta(2n,\kappa) = \frac{\kappa^{2n}}{2n}$$
+
+Setup
+For any symmetric distribution, the convention $\varrho = -\kappa$ (L309) holds by parity. The bound moment is then
+$$\zeta(2n,\kappa) = \frac{\int_{-\kappa}^{\kappa}\tilde z^{2n},\rho(\tilde z),d\tilde z}{\int_{-\kappa}^{\kappa}\rho(\tilde z),d\tilde z} = \frac{2!\int_0^{\kappa}\tilde z^{2n}\rho(\tilde z),d\tilde z}{D}$$
+where $D \equiv \int_{-\kappa}^{\kappa}\rho,d\tilde z$.
+
+Derivation via boundary-Laplace
+For large $n$, $\tilde z^{2n}$ rises sharply near $\tilde z = \kappa$, concentrating the integrand at the upper endpoint. Substituting $u = \kappa - \tilde z$ and Taylor-expanding the log of the integrand,
+$$\int_0^{\kappa}\tilde z^{2n}\rho(\tilde z),d\tilde z ;=; \rho(\kappa),\kappa^{2n}!\int_0^{\kappa} e^{-(2n/\kappa)u},du\bigl(1 + O(1/n)\bigr) ;\sim; \frac{\rho(\kappa),\kappa^{2n+1}}{2n}$$
+By symmetry, both endpoints contribute equally, so $I_{2n} = 2I_+ \sim 2\rho(\kappa),\kappa^{2n+1}/(2n)$ and
+$$\zeta(2n,\kappa) ;\sim; \frac{2\rho(\kappa)}{D}\cdot\frac{\kappa^{2n+1}}{2n} ;=; \frac{\rho(\kappa),\kappa}{D}\cdot\frac{\kappa^{2n}}{n}$$
+
+Comparison with L422
+L422 states $\zeta(2n,\kappa) \to \kappa^{2n}/(2n)$. Rigorous result is $(\rho(\kappa),\kappa/D)\cdot \kappa^{2n}/n$.
+
+Ratio (rigorous / L422):
+$$\frac{\rho(\kappa),\kappa/D \cdot \kappa^{2n}/n}{\kappa^{2n}/(2n)} ;=; \frac{2\rho(\kappa),\kappa}{D}$$
+
+This is a distribution-specific, $n$-independent prefactor that L422 drops. So L422 captures the growth rate $\kappa^{2n}/(2n)$ correctly but mis-states the actual asymptote of $\zeta(2n,\kappa)$ for general symmetric distributions.
+
+Distribution-by-distribution check
+Distribution	$\rho(\kappa)$	$D$	Rigorous prefactor $2\rho(\kappa)\kappa/D$	L422 prefactor
+Uniform, $\kappa = \sqrt 3$	$1/(2\sqrt 3)$	$1$	$2\cdot\tfrac{1}{2\sqrt 3}\cdot\sqrt 3 = 1$	$1$  exact match
+Uniform, $\kappa < \sqrt 3$	$1/(2\sqrt 3)$	$\kappa/\sqrt 3$	$1$ (same constant)	$1$  exact match
+Gaussian, $\kappa=5$	$N(5)\approx 1.49!\times!10^{-6}$	$\approx 1$	$\approx 1.5!\times!10^{-5}$	$1$ — off by $\sim 10^{4}$
+Gaussian, $\kappa=3$	$N(3)\approx 4.4!\times!10^{-3}$	$\approx 0.997$	$\approx 0.027$	$1$ — off by $\sim 37\times$
+So L422 is exact in leading order for the Uniform (at any $\kappa\le\sqrt 3$, because $\rho$ is constant), and off by a constant prefactor for Gaussian (and other distributions with rapidly-decaying density at $\kappa$).
+
+Cross-check against the exact uniform moment
+eqn: uniform moment (L420): $\zeta(2n,\kappa) = \kappa^{2n}/(2n+1)$ — exact for uniform.
+L422 asymptote: $\zeta(2n,\kappa)\to \kappa^{2n}/(2n)$.
+
+Ratio at large $n$: $\dfrac{\kappa^{2n}/(2n+1)}{\kappa^{2n}/(2n)} = \dfrac{2n}{2n+1} \to 1$.  Consistent — leading orders match, sub-leading $O(1/n^2)$ correction.
+
+Role of eqn: mean-reverting bounding
+For symmetric distributions, $\zeta(1,\kappa)=0$ holds automatically by parity (odd integrand over symmetric range). Mean-reverting does not constrain $\kappa$, and the symmetric asymptote doesn't need it. So unlike eqn: exponential asymptotic moment (where mean-reverting pins $\varrho$ to the lower support edge), L422 doesn't actually invoke mean-reverting bounding. The prose at L429 correctly attributes mean-reverting only to the asymmetric formula at L430.
+
+Notation caveat (unchanged from earlier passes)
+L422 uses $\lim_{n\to\infty}\zeta(2n,\kappa) = \kappa^{2n}/(2n)$. This is loose — a true limit cannot equal a function of $n$. The standard form is
+$$\zeta(2n,\kappa) ;\sim; \frac{\kappa^{2n}}{2n}, \quad n\to\infty$$
+A referee will catch this.
+
+Verdict
+Aspect	Status
+Growth rate $\kappa^{2n}/(2n)$ correct universally
+Exact for Uniform at $\kappa\le\sqrt 3$	 (with sub-leading $O(1/n^2)$ error)
+Exact for Gaussian or other non-uniform symmetric distributions	 off by a distribution-specific constant $2\rho(\kappa)\kappa/D$, but convergence-radius-equivalent
+Mean-reverting bounding needed	No — symmetric case is parity-driven
+Sufficient for convergence analysis at L434–448	 ratio test gives $P<1/\kappa$ either way
+Single recommended fix
+Change L422 from
+$$\rho(-\tilde z)=\rho(\tilde z):\quad \lim_{n\to+\infty}\zeta(2n,\kappa) = \frac{\kappa^{2n}}{2n}$$
+to
+$$\rho(-\tilde z)=\rho(\tilde z):\quad \zeta(2n,\kappa) ,\sim, \frac{\kappa^{2n}}{2n}, ;; n\to+\infty$$
+
+The $\sim$ (asymptotic-equivalence) symbol is the correct one for "leading-order growth rate, up to a multiplicative constant" — which is exactly what the formula provides. Apply the same fix to L424 and L426 for consistency.
+
+If you'd rather keep the rigorous form (with the prefactor), the correct expression is
+$$\zeta(2n,\kappa) ,\sim, \frac{2\rho(\kappa),\kappa}{D}\cdot\frac{\kappa^{2n}}{2n}$$
+but for the paper's convergence-test purpose, this extra precision isn't needed.
+
+Want me to apply the $\sim$ notation fix to L422, L424, L426?
+
+
+\subsection{Statistical Bounding}
+
+Uniform moment:
+
+\begin{align*}
+\zeta(2n, \kappa) &= \frac{\kappa^{2n}}{2n + 1};
+\end{align*}
+
+
+Gaussian moment:
+\begin{align*}
+\xi(\frac{\kappa}{\sqrt{2}}) \zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} N(\tilde{z}) d \tilde{z}
+		= 2 N(\kappa) \kappa^{2n} \sum_{j=1}^{\infty} \kappa^{2j-1} \frac{(2n - 1)!!}{(2n-1 + 2j)!!}; \\
+	& \xi(\frac{\kappa}{\sqrt{2}}) \zeta(2, \kappa) = \xi(\frac{\kappa}{\sqrt{2}}) - 2 N(\kappa) \kappa; \\
+	& \xi(\frac{\kappa}{\sqrt{2}}) (1 - \omega(\kappa)) = \xi(\frac{\kappa}{\sqrt{2}}) - \epsilon(\kappa) - 2 N(\kappa) \kappa; \\
+	\omega(\kappa) &= \frac{2 N(\kappa) \kappa}{1 - \epsilon(\kappa)};
+\end{align*}
+
+\subsection{Dependency Tracing}
+
+\iffalse
+In your paper's notation, Formula eqn: sum variance gives the two-item case:
+$$\delta^2(f+g) = \delta^2 f + \delta^2 g + 2(\overline{fg} - \overline{f},\overline{g}).$$
+
+Three items
+
+$$\boxed{;\delta^2(f+g+h) = \delta^2 f + \delta^2 g + \delta^2 h + 2(\overline{fg}-\overline{f},\overline{g}) + 2(\overline{fh}-\overline{f},\overline{h}) + 2(\overline{gh}-\overline{g},\overline{h});}$$
+
+One self-variance per item, plus a covariance term for each of the three pairs.
+
+Derivation
+
+Let $S=f+g+h$ and use $\delta^2 S = \overline{S^2}-\overline{S}^2$.
+
+$$\overline{S^2} = \overline{f^2}+\overline{g^2}+\overline{h^2} + 2\overline{fg}+2\overline{fh}+2\overline{gh},$$
+$$\overline{S}^2 = \overline{f}^2+\overline{g}^2+\overline{h}^2 + 2\overline{f},\overline{g}+2\overline{f},\overline{h}+2\overline{g},\overline{h}.$$
+
+Subtracting and grouping each $\overline{\cdot^2}-\overline{\cdot}^2$ as a variance and each $\overline{\cdot\cdot}-\overline{\cdot},\overline{\cdot}$ as a covariance:
+$$\delta^2 S = \underbrace{(\overline{f^2}-\overline{f}^2)}{\delta^2 f}+\underbrace{(\overline{g^2}-\overline{g}^2)}{\delta^2 g}+\underbrace{(\overline{h^2}-\overline{h}^2)}_{\delta^2 h} + 2(\overline{fg}-\overline{f},\overline{g})+2(\overline{fh}-\overline{f},\overline{h})+2(\overline{gh}-\overline{g},\overline{h}).$$
+
+General pattern
+
+This is just bilinearity of variance applied to a sum:
+$$\delta^2!\Big(\sum_{i=1}^{n} f_i\Big) = \sum_{i=1}^{n}\delta^2 f_i ;+; 2!!\sum_{1\le i<j\le n}!!\big(\overline{f_i f_j} - \overline{f_i},\overline{f_j}\big).$$
+
+
+Can Formula {eqn: Taylor inner dependency} lead to Formula {eqn: Taylor 1d variance}?
+
+Yes — and it's an exact derivation, not just an analogy. Let me show it.
+
+The two formulas
+
+Target — eqn: Taylor 1d variance:
+$$\delta^2 f(x) = \sum_{N=2}^{\infty} (\delta x)^N \sum_{j=1}^{N-1} \frac{f^{(j)}_x}{j!}\frac{f^{(N-j)}_x}{(N-j)!}\Big(\zeta(N) - \zeta(j),\zeta(N-j)\Big)$$
+(I rename the outer index to $N$ to free up $n$.)
+
+Building block — eqn: Taylor inner dependency (the cross term of eqn: sum variance applied to two Taylor monomials):
+$$+,2,(\delta x)^{m+n}\frac{f^{(m)}_x f^{(n)}_x}{m!,n!}\big(\zeta(m+n) - \zeta(m)\zeta(n)\big)$$
+
+The bridge
+
+From eqn: Taylor 1d, $f$ is a sum of monomial terms in the normalized variable $\tilde z$ (mean 0, deviation 1), with $\overline{\tilde z^k} = \zeta(k)$:
+$$T_m \equiv \frac{f^{(m)}x}{m!}(\delta x)^m,\tilde z^m, \qquad f(x+\tilde z,\delta x) = f(x) + \sum{m\ge 1} T_m .$$
+
+Variance is a bilinear form, so the variance of the whole series is the double sum of covariances of its terms:
+$$\delta^2 f = \delta^2!\Big(\sum_{m\ge1} T_m\Big) = \sum_{m\ge1}\sum_{n\ge1}\operatorname{Cov}(T_m,T_n).$$
+
+Now read off the covariance kernel directly:
+$$\operatorname{Cov}(T_m,T_n) = \frac{f^{(m)}_x}{m!}\frac{f^{(n)}_x}{n!}(\delta x)^{m+n}\big(\overline{\tilde z^{m+n}} - \overline{\tilde z^m},\overline{\tilde z^n}\big) = (\delta x)^{m+n}\frac{f^{(m)}_x f^{(n)}_x}{m!,n!}\big(\zeta(m+n) - \zeta(m)\zeta(n)\big).$$
+
+That is exactly what eqn: Taylor inner dependency provides:
+- the off-diagonal $m\neq n$ piece is the cross term shown in eqn: Taylor inner dependency (the factor 2 there is just the symmetric pair $(m,n)+(n,m)$);
+- the diagonal $m=n$ piece is the self-variance $\delta^2 T_m = (\delta x)^{2m}(f^{(m)}_x/m!)^2(\zeta(2m)-\zeta(m)^2)$ — the two leading terms of eqn: sum variance.
+
+Regrouping reproduces the target
+
+Group the ordered double sum by total order $N = m+n$. For each $N\ge 2$ the admissible ordered pairs are $m = 1,\dots,N-1$ with $n = N-m$:
+$$\delta^2 f = \sum_{N=2}^{\infty}(\delta x)^N \sum_{m=1}^{N-1}\frac{f^{(m)}_x}{m!}\frac{f^{(N-m)}_x}{(N-m)!}\big(\zeta(N) - \zeta(m)\zeta(N-m)\big).$$
+
+With $j \equiv m$ this is character-for-character eqn: Taylor 1d variance. The bookkeeping checks out: the off-diagonal covariances appear twice in $\sum_{m=1}^{N-1}$ (once as $j=m$, once as $j=N-m$), recovering the factor 2; the diagonal $j=N/2$ (even $N$) appears once, as it should for a self-variance.
+
+Conclusion
+
+So eqn: Taylor inner dependency doesn't merely resemble a fragment of eqn: Taylor 1d variance — it is the generic pairwise covariance term, and summing it over all term pairs and regrouping by total order reconstructs eqn: Taylor 1d variance exactly.
+\fi
+
+\subsection{Traditional Execution and Dependency Problem}
+
+\section{Variance Arithmetic}
+
+\subsection{Monotonic}
+
+\subsection{Positive}
+
+\subsection{Floating-Point Rounding Errors}
+
+\subsection{Comparison}
+
+Statistically the less relation between two imprecise values $x \pm \delta x$ and $y \pm (\delta y)^2$ is calculated by Formula \ref{eqn: x < y}:
+\begin{align}
+& z \equiv \frac{\tilde{y} - y}{\delta y}; \quad \tilde{y} = \delta y z + y; \\
+& x - \Delta x < z \delta y + y < x + \Delta x; \\ & x - \Delta x - y < z \delta y < x + \Delta x - y \\
+& - \Delta y < z \delta y < \Delta y; \\
+p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) & = 
+  \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+    \int_{x - \Delta x}^{\tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x} \;d \tilde{y}; \\
+& = \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+  \int_{-\frac{\Delta x}{\delta x}}^{\frac{\tilde{y} - x}{\delta x}} N(z) d z \;d \tilde{y}; \\
+& = \int_{y - \Delta y}^{y + \Delta y} \rho(\tilde{y}, y, \delta y) 
+      \frac{1}{2}(\frac{\tilde{y} - x}{\sqrt{2} \delta x}) - \zeta(\frac{-\Delta x}{\sqrt{2} \delta x})) \;d \tilde{y}; \\
+& = \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x})\right) N(z) d z; \\
+p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) & =     
+   \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x})\right) N(z) d z;
+\end{align}
+Formula \eqref{eqn: x < y} seems correct because it predicts $p(x \le y) = p(y \ge x)$:
+\begin{align}
+& \frac{d}{d \tilde{y}} \int_{-\infty}^{\tilde{y}} \rho(\tilde{x}, x, \delta x) d \tilde{x} = \rho(\tilde{y}, x, \delta x); \\
+p(x< y) & = \int_{-\infty}^{+\infty} \rho(\tilde{y}, y, \delta y) \rho(\tilde{y}, x, \delta x) d \tilde{x} d \tilde{y} \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{y}, y, \delta y) \;d \rho(\tilde{y}, x, \delta x) \\
+& = 0 - \int_{-\infty}^{+\infty} \rho(\tilde{y}, x, \delta x) \;d \rho(\tilde{y}, y, \delta y) \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{y}, x, \delta x) 
+\int_{\tilde{y}}^{+\infty} \rho(\tilde{x}, y, \delta y) 
+d \tilde{x} \;d \tilde{y} \\
+& = \int_{-\infty}^{+\infty} \rho(\tilde{x}, x, \delta x) 
+\int_{\tilde{x}}^{+\infty} \rho(\tilde{y}, y, \delta y) 
+d \tilde{y} \;d \tilde{x}
+\end{align}
+
+Two imprecise values can be compared directly for less or greater relation when their ranges $(x - \Delta x, x + \Delta x)$ and $(y - \Delta y, y + \Delta y)$ do not overlap. 
+Otherwise, statistically, Formulas \eqref{eqn: x < y} and \eqref{eqn: x > y} gives the probability for less or greater relation between $x \pm (\delta x)^2 \le y \pm (\delta y)^2$, in which $\min()$ and $\max()$ are minimal and maximal functions, respectively.
+Formula \eqref{eqn: no =} shows that two imprecise variable can not be equal statistically.
+Let $x = y$, $\delta x = \delta y$ and $\Delta x = \Delta y$, Formulas \eqref{eqn: x < y} and \eqref{eqn: x > y} shows that two conceptually equal imprecise values has $1/2$ chance to be one less than the other, and $1/2$ chance to be one more than the other.
+Thus,
+\begin{align}
+\label{eqn: x < y}
+& p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) = 
+  \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}, \kappa) - \zeta(-\frac{\Delta x}{\sqrt{2} \delta x}, \kappa)\right) N(z) d z; \\
+\label{eqn: x > y}
+& p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) =     
+  \int_{\frac{\max(-\Delta y, x - \Delta x - y)}{\delta y}}^{\frac{\min(+\Delta y, x + \Delta x - y)}{\delta y}} 
+      \frac{1}{2} \left(\zeta(+\frac{\Delta x}{\sqrt{2} \delta x}, \kappa) - \zeta(\frac{z \delta y + y - x}{\sqrt{2} \delta x}, \kappa)\right) N(z) d z; \\
+\label{eqn: no =}
+& p\left( x \pm (\delta x)^2 < y \pm (\delta y)^2 \right) + p\left( x \pm (\delta x)^2 > y \pm (\delta y)^2 \right) = 1;
+\end{align}
+
+
+\section{Validation}
+
+\section{Polynomial}
+
+\subsection{Residual Error}
+
+\subsection{Continuity}
+
+\subsection{Distributional Pole}
+
+\section{Matrix Calculations}
+
+\begin{align}
+|M|^4 \delta^2 \left( \begin{matrix} m_{1,1}, m_{1,2} \\ m_{2,1}, m_{2,2} \end{matrix} \right)^{-1} &\simeq\; 
+	 	\left( \begin{matrix} m_{2,2}^4, &m_{1,2}^2 m_{2,2}^2 \\ m_{2,1}^2 m_{2,2}^2, &m_{1,2}^2 m_{2,1}^2 \end{matrix} \right) \zeta_{m_{1,1}}(2) (\delta m_{1,1})^2 \nonumber \\
+	 &\; +\left( \begin{matrix} m_{2,1}^2 m_{2,2}^2, &m_{1,1}^2 m_{2,2}^2 \\ m_{2,1}^4, &m_{1,1}^2 m_{2,1}^2 \end{matrix} \right)\zeta_{m_{1,2}}(2)  (\delta m_{1,2})^2\nonumber \\
+	&\; + \left( \begin{matrix} m_{1,2}^2 m_{2,2}^2, &m_{1,2}^4 \\ m_{1,1}^2 m_{2,2}^2, &m_{1,1}^2 m_{1,2}^2 \end{matrix} \right) \zeta_{m_{2,1}}(2) (\delta m_{2,1})^2 \nonumber \\
+	&\; +	\left( \begin{matrix} m_{1,2}^2 m_{2,1}^2, &m_{1,1}^2 m_{1,2}^2 \\ m_{1,1}^2 m_{2,1}^2, &m_{1,1}^4 \end{matrix} \right) \zeta_{m_{2,2}}(2) (\delta m_{2,2})^2
+	; 
+\label{eqn: inverse matrix 2 variance}
+\end{align}
+
+For the $3 \times 3$ inverse, the variance pattern is too large to write out as nine $3 \times 3$ coefficient matrices.  As a worked example, the variance of the $(1,1)$ element of the inverse of a $3 \times 3$ matrix $\mathbf{M}$ with elements $m_{i,j}, i,j = 1, 2, 3$ expands into nine contributions, one per input element:
+\begin{align}
+|\mathbf{M}|^4\, \delta^2 (\mathbf{M}^{-1})_{1,1} &\simeq\;
+	(M^{1,1})^4\, \zeta_{m_{1,1}}(2)\, (\delta m_{1,1})^2 \nonumber \\
+&\; +\, (M^{1,1}\, M^{1,2})^2\, \zeta_{m_{1,2}}(2)\, (\delta m_{1,2})^2 \nonumber \\
+&\; +\, (M^{1,1}\, M^{1,3})^2\, \zeta_{m_{1,3}}(2)\, (\delta m_{1,3})^2 \nonumber \\
+&\; +\, (M^{1,1}\, M^{2,1})^2\, \zeta_{m_{2,1}}(2)\, (\delta m_{2,1})^2 \nonumber \\
+&\; +\, (m_{3,3}\, |\mathbf{M}| - M^{1,1}\, M^{2,2})^2\, \zeta_{m_{2,2}}(2)\, (\delta m_{2,2})^2 \nonumber \\
+&\; +\, (m_{3,2}\, |\mathbf{M}| - M^{1,1}\, M^{2,3})^2\, \zeta_{m_{2,3}}(2)\, (\delta m_{2,3})^2 \nonumber \\
+&\; +\, (M^{1,1}\, M^{3,1})^2\, \zeta_{m_{3,1}}(2)\, (\delta m_{3,1})^2 \nonumber \\
+&\; +\, (m_{2,3}\, |\mathbf{M}| - M^{1,1}\, M^{3,2})^2\, \zeta_{m_{3,2}}(2)\, (\delta m_{3,2})^2 \nonumber \\
+&\; +\, (m_{2,2}\, |\mathbf{M}| - M^{1,1}\, M^{3,3})^2\, \zeta_{m_{3,3}}(2)\, (\delta m_{3,3})^2 \,;
+\label{eqn: inverse matrix 3 11 variance}
+\end{align}
+where the $2 \times 2$ cofactors $M^{a,b}$ obtained by deleting row $a$ and column $b$ from $\mathbf{M}$ are
+\begin{align*}
+M^{1,1} &= m_{2,2}\, m_{3,3} - m_{2,3}\, m_{3,2}, &
+M^{1,2} &= m_{2,1}\, m_{3,3} - m_{2,3}\, m_{3,1}, &
+M^{1,3} &= m_{2,1}\, m_{3,2} - m_{2,2}\, m_{3,1}, \\
+M^{2,1} &= m_{1,2}\, m_{3,3} - m_{1,3}\, m_{3,2}, &
+M^{2,2} &= m_{1,1}\, m_{3,3} - m_{1,3}\, m_{3,1}, &
+M^{2,3} &= m_{1,1}\, m_{3,2} - m_{1,2}\, m_{3,1}, \\
+M^{3,1} &= m_{1,2}\, m_{2,3} - m_{1,3}\, m_{2,2}, &
+M^{3,2} &= m_{1,1}\, m_{2,3} - m_{1,3}\, m_{2,1}, &
+M^{3,3} &= m_{1,1}\, m_{2,2} - m_{1,2}\, m_{2,1} \,.
+\end{align*}
+Five of the nine contributions (those with $p = 1$ or $q = 1$, where $\partial M^{1,1}/\partial m_{p,q} = 0$ because $m_{p,q}$ lies outside the cofactor $M^{1,1}$) have the simple form $(M^{1,1}\, M^{p,q})^2$.  The remaining four contributions pick up an additional $\partial M^{1,1}/\partial m_{p,q} \cdot |\mathbf{M}|$ term from the quotient rule.  Variances for the other eight elements of $\mathbf{M}^{-1}$ follow the same pattern with $M^{1,1}$ replaced by $M^{j,i}$ for element $(i,j)$.
+
+
+\section{Mathematical Library Functions}
+
+\section{Moving-Window Linear Regression}
+
+\subsection{Moving-Window Linear Regression Algorithm}
+\begin{align*}
+\alpha_{j} &= \sum_{X=-H}^{H - 1} Y_{j-H+X}; \\
+\beta_{j} &= \beta \; \frac{H (H+1)(2H+1)}{3} = \sum_{X=-H}^{H} X Y_{j-H+X} \\
+ 	&= \sum_{X=-H-1}^{H-1} (X + 1) Y_{j-H+X} + H Y_{j - 2 H - 1} + H Y_{j} - \sum_{X=-H}^{H - 1} Y_{j-H+X} \\
+ 	&= \beta_{j - 1} + H Y_{j - 2 H - 1} + H Y_{j} - \alpha_{j}; \\
+\delta^2 \alpha_{j} &= \sum_{X=-H}^{H - 1} (\delta Y_{j-H+X})^2; \\
+\delta^2 \hat{\beta}_{j} &\equiv \sum_{X=-H}^{H} X (\delta Y_{j-H+X})^2 = \sum_{X=-H-1}^{H-1} (X + 1) Y_{j-H+X} 
+		+ H (\delta Y_{j - 2 H - 1})^2 + H (\delta Y_{j})^2 - \delta^2 \alpha_{j}; \\
+	&= \delta^2 \hat{\beta}_{j -1} + H (\delta Y_{j - 2 H - 1})^2 + H (\delta Y_{j})^2 - \delta^2 \alpha_{j}; \\
+\delta^2 \beta_{j} &= \sum_{X=-H}^{H} X^2 (\delta Y_{j-H+X})^2 \\
+	&= \sum_{X=-H - 1}^{H - 1} (X + 1)^2 (\delta Y_{j-H+X})^2 - H^2 (\delta Y_{j-2H-1})^2 + H^2 (\delta Y_{j})^2 
+		 - \sum_{X=-H}^{H - 1} (2 X + 1) (\delta Y_{j-H+X})^2 \\
+	&= \delta^2 \beta_{j - 1} - H^2 (\delta Y_{j-2H-1})^2 + (H^2 + 2H) (\delta Y_{j})^2
+		 - 2 \sum_{X=-H}^{H} 2 X (\delta Y_{j-H+X})^2 - \delta^2 \alpha_{j} \\
+	&= \delta^2 \beta_{j - 1} - H^2 (\delta Y_{j-2H-1})^2 + (H^2 + 2H) (\delta Y_{j})^2 - 2 \delta^2 \hat{\beta}_{j}  - \delta^2 \alpha_{j};
+\end{align*}
+Formulas \eqref{eqn: linear regression 0} and \eqref{eqn: linear regression 1} provide the least-square line-fit of $Y = \alpha + \beta X$ between two set of data ${Y_j}$ and ${X_j}$, where $j$ is an integer index identifying $(X, Y)$ pairs in the sets \cite{Numerical_Recipes}.
+\begin{align}
+\label{eqn: linear regression 0}
+\alpha &= \alpha \; 2 H = \frac{\sum_{j} Y_{j} }{\sum_{j} 1}; \\
+\label{eqn: linear regression 1}
+\beta &= \beta \; \frac{H (H+1)(2H+1)}{3} = \frac{\sum_{j} X_{j} Y_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} Y_{j}}
+    {\sum_{j} X_{j} X_{j} \; \sum_{j} 1 - \sum_{j} X_{j} \; \sum_{j} X_{j} };
+\end{align}
+
+\subsection{Variance Adjustment} 
+
+\subsection{Unspecified Input Error}
+
+\section{FFT (Fast Fourier Transformation)}
+
+\subsection{DFT (Discrete Fourier Transformation)}
+
+\begin{align*}
+h[k] &= \sin(f \frac{2 \pi}{N} k); \\
+H[n] &= \sum_{k=0}^{N-1} \sin(f \frac{2 \pi}{N} k) \; e^{\frac{i 2\pi}{N} k n}
+		= \sum_{k=0}^{N-1} \frac{1}{2i}\left( e^{(n + f) \frac{i 2\pi}{N} k} - e^{(n - f) \frac{i 2\pi}{N} k} \right)   \\
+	&= \frac{1}{2i} \left( \frac{1 - e^{(n + f) \frac{i 2\pi}{N} N}}{1 - e^{(n + f) \frac{i 2\pi}{N}}}
+		- \frac{1 - e^{(n - f) \frac{i 2\pi}{N} N}}{1 - e^{(n - f) \frac{i 2\pi}{N}}} \right) \\
+&= \begin{cases}
+  i N/2, & f \text{ is integer} \\
+  N/\pi, & f \text{ is integer} + 1/2 \\
+  \frac{1}{2} \frac{\sin(2\pi f - 2\pi \frac{f}{N}) + \sin(2\pi \frac{f}{N})-\sin(2\pi f) e^{-i 2\pi \frac{n}{N}}}{\cos(2\pi \frac{n}{N})-\cos(2\pi \frac{f}{N})} & \text{otherwise}
+\end{cases}
+\end{align*}
+
+
+\subsection{FFT (Fast Fourier Transformation)}
+
+Forward:
+\begin{align*}
+L = 1:\;& o=0: & [0, 1]; \\
+ & o = 1: & F = [0 + 1, 0 - 1]; \\
+L = 2:\;& o=0: & [0, 2, 1, 3]; \\
+ & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
+ & o = 2: & [0 + 1 + 2 + 3, 0 + i 1 - 2 - i 3 , 0 - 1 + 2 - 3, 0 - i 1 - 2 + i 3; \\
+ & [0, 1, 0, -1]:& [0, i 2, 0, - i 2]; \\
+ & [1, 0, -1, 0]:& [0, 2, 0, 2];
+\end{align*}
+
+Reverse:
+\begin{align*}
+L = 1:\;& o=0: & [0, 1]; \\
+ & o = 1: & F = [0 + 1, 0 - 1]; \\
+L = 2:\;& o=0: & [0, 2, 1, 3]; \\
+ & o = 1: & [0 + 2, 0 - 2, 1 + 3, 1 - 3]; \\
+ & o = 2: & [0 + 1 + 2 + 3, 0 - i 1 - 2 + i 3 , 0 - 1 + 2 - 3, 0 + i 1 - 2 - i 3; \\
+ & [0, i 2, 0, - i 2]:& [0, 4, 0, -4]; \\
+ & [0, 2, 0, 2]:& [4, 0, -4, 0];
+\end{align*}
+
+
+\subsection{Testing Signals}
+
+The Fourier transformation of a linear signal $h[n] = n$. 
+Let $y \equiv i 2\pi n /N$:
+\begin{align*}
+& G(y) = \sum_{k=0}^{N-1}  e^{y k} = \sum_{k=0}^{N-1}  (e^y)^k = \frac{e^{N y} - 1}{e^y - 1}
+ = \begin{cases} y = 0: \quad N \\ y \neq 0: \quad 0 \end{cases}; \\
+H[n] &= \sum_{k=0}^{N-1} k e^{\frac{i 2\pi n}{N} k} = \sum_{k=0}^{N-1} k e^{y k} 
+ = \frac{d G}{y} = \frac{N e^{N y}}{e^y - 1} - \frac{e^{N y} - 1}{(e^y - 1)^2} e^y = \frac{N}{e^y - 1} \\
+ &= \frac{N}{\cos(y) - 1 + i \sin(y)} = \frac{N}{2} \frac{\cos(y) - 1 -  i \sin(y)}{1 - \cos(y)} 
+  = - \frac{N}{2}(1 + i \frac{2 \sin(\frac{y}{2}) \cos(\frac{y}{2})}{2 \sin^2(\frac{y}{2})}) \\
+ &= \begin{cases} y = 0: \quad \frac{N^2}{2} \\ y \neq 0: \quad - \frac{N}{2}(1 + i \frac{1}{\tan(\frac{n}{N} \pi)}) \end{cases};
+\end{align*}
+
+
+\subsection{Trigonometric Library Errors}
+
+\subsection{Using Quart Sine for Sin/Cos Signals}
+
+\subsection{Using Library Sine for Sin/Cos Signals}
+
+\subsection{Using Quart Sine for Linear Signals}
+
+\subsection{Using Library Sine for Linear Signals}
+
+\subsection{Ideal Coverage}
+
+\subsection{Comparison to Interval Arithmetic}
+
+\section{Recursive Generation of Sine}
+
+$$\sqrt{1 - \cos^2\big(\tfrac{\alpha+\beta}{2}\big)} = \big|\sin\big(\tfrac{\alpha+\beta}{2}\big)\big| \neq \sin(\alpha + \beta)$$
+
+\section{Regression}
+
+\subsection{Partition and Regression Weight}
+
+\subsubsection{Is there any conflict between the partition analysis of the paper and the literature?}
+
+Yes — there are a few specific points of tension worth flagging. Most aren't outright contradictions, but they're places where the paper's framing diverges from established practice in ways that deserve closer cross-checking.
+
+Where there's genuine conflict
+1. "$\overline{x}$ with smallest $|\varpi|$ is the most likely" — not a standard inference principle.
+
+eqn: set mean approx (L1623–1624) gives an implicit equation in $\overline{x}$ with a correction term $\varpi$:
+$$\overline{x} = \frac{\sum_j \overline{x_j}/(\overline{x_j} - \overline{x})^2}{\sum_j 1/(\overline{x_j} - \overline{x})^2} + \varpi$$
+
+The paper resolves the implicit equation by picking the solution with smallest $|\varpi|$ (L1631). This is not maximum likelihood, not method of moments, not Bayesian, not minimum-variance — it's a heuristic without a clearly stated statistical justification.
+
+Standard approaches to this kind of implicit equation:
+
+MLE: maximize the joint likelihood over $\overline{x}$ and $\sigma^2$ jointly.
+Method of moments (Cochran): solve simultaneously for the pooled mean and the between-subset variance using sample moments.
+DerSimonian-Laird: a specific moment estimator for random-effects meta-analysis with explicit convergence properties.
+The paper's "smallest $|\varpi|$" rule appears to be an ad-hoc fixed-point selection without a population-level optimality property. This would be flagged as non-standard in a peer review.
+
+2. Single $(\overline{x_j} - \overline{x})^2$ as a $1/N_j$ proxy — statistically inefficient.
+
+The paper uses $(\overline{x_j} - \overline{x})^2 \propto 1/N_j$ by CLT. But for a single realization of subset $j$:
+$$(\overline{x_j} - \overline{x})^2 = \frac{\sigma_{\text{pop}}^2}{N_j} \cdot Z_j^2, \quad Z_j \sim \mathcal{N}(0, 1)$$
+
+approximately. So this is a single sample from a chi-squared-like distribution centered at $\sigma_{\text{pop}}^2/N_j$ — with variance $\approx 2(\sigma_{\text{pop}}^2/N_j)^2$ around its mean. That's huge for moderate $J$.
+
+A standard alternative when $N_j$ is unknown is to pool the deviations:
+$$\hat{\sigma}_{\text{between}}^2 = \frac{1}{J-1}\sum_j (\overline{x_j} - \overline{x})^2$$
+
+and use the same value for all $j$ (this is Cochran's $Q$, or DerSimonian-Laird). This produces a single global estimate, not per-subset weights with high noise.
+
+Using per-subset deviations as if they were precise $1/N_j$ estimates is statistically inefficient — the resulting weighted mean has higher variance than alternatives that pool the deviation estimate.
+
+3. The "common practice" framing — partially overstated.
+
+The paper claims $1/(\delta x_j)^2$ is common practice. As discussed in the previous answer:
+
+Form 1 WLS uses $1/\sigma_i^2$ where $\sigma_i$ is per-observation noise, not within-subset sample variance. Standard and correct.
+Form 2 IVW uses $1/\text{Var}(\hat\theta_j) = N_j/\sigma_j^2$, which is exactly what the paper recommends.
+So the "common practice" the paper critiques isn't really common in modern statistics. The cited references (Numerical Recipes, Probability Statistics, Statistical Methods) actually use the correct form. The conflict here is rhetorical, not mathematical.
+
+Where there's no conflict — paper aligns with standard
+1. The Law of Total Variance (eqn: set variance, L1613):
+$$(\delta x)^2 = \sum_j \frac{N_j}{N}\bigl[(\delta x_j)^2 + (\overline{x_j} - \overline{x})^2\bigr]$$
+
+This is exactly:
+$$\text{Var}(X) = \mathbb{E}[\text{Var}(X|J)] + \text{Var}(\mathbb{E}[X|J])$$
+
+Standard.
+
+2. Pooling moments → OLS (eqn: set cov, eqn: set slope):
+
+The paper pools raw moments across subsets and then computes regression coefficients from the pooled moments. This is mathematically equivalent to "OLS on the union of all subsets" — i.e., fixed-effects meta-analysis.  Standard.
+
+3. $N_j$-weighting for combining subset means:
+
+Cochran (1937, 1954) established this.  Standard.
+
+Where there's a missing engagement with the literature
+1. Random-effects vs fixed-effects distinction.
+
+The paper's framework is implicitly fixed-effects — it assumes a common $\sigma_{\text{pop}}^2$ across subsets and combines via pooled moments. Modern meta-analysis (DerSimonian-Laird 1986, Higgins-Thompson 2002) distinguishes:
+
+Fixed-effects: assumes one true population mean across all subsets. Combine via inverse-variance.
+Random-effects: allows subset means to vary, with between-subset variance $\tau^2$. Combine via $1/(\sigma_j^2/N_j + \tau^2)$ weights.
+The paper doesn't engage with this distinction. If subset means come from genuinely different sub-populations (which is what the $(\overline{x_j} - \overline{x})^2$ being non-trivial would suggest), fixed-effects pooling is biased.
+
+2. No explicit convergence conditions.
+
+Cochran's framework has explicit theorems on consistency and asymptotic efficiency. The paper's framework lacks comparable theorems. This isn't a conflict, but it leaves the convergence behavior of the paper's estimators unspecified.
+
+3. No connection to the empirical Bayes / partial-pooling literature.
+
+The trick of "$N_j$ unknown, use $(\overline{x_j} - \overline{x})^2$" is structurally similar to empirical Bayes shrinkage estimators (Efron-Morris 1973, James-Stein). The paper doesn't acknowledge this connection.
+
+If the paper wants to stand against careful peer review on this subsection, three changes would help:
+
+Tone down the "common practice" critique. Acknowledge that standard meta-analysis correctly uses $1/\mathrm{Var}(\hat\theta_j)$, and frame the critique against the specific misapplication of using within-subset variance.
+
+Justify the "smallest $|\varpi|$" rule. Connect it to a known statistical principle (MLE? MoM? minimum-discrepancy?), or acknowledge it's a heuristic and note alternative selection rules.
+
+Cite Cochran (1937, 1954) and Hedges-Olkin (1985) to position the framework relative to established meta-analysis methodology.
+
+The core mathematical content isn't in conflict with the literature — it's structurally fixed-effects meta-analysis recast in variance-arithmetic notation. But the framing and a few specific moves (the $\varpi$ heuristic, the per-subset deviation proxy) need either justification or acknowledgment of their non-standard nature.
+
+
+\subsection{For fitting $y= c_0 + c_1 x$ to a data set $\{(X_n, Y_n), n=1,\dots, N\}$, why $|c_1|$ for the total linear regression is larger than that of ordinary linear regression?}
+
+The two slopes
+Using the paper's notation, with $\nu = \nu(x,y) = \overline{xy} - \overline{x},\overline{y}$, $\sigma_x^2 = (\delta x)^2$, $\sigma_y^2 = (\delta y)^2$:
+
+OLS minimizes vertical residuals $\sum_n (Y_n - c_0 - c_1 X_n)^2$:
+$$c_1^{\text{OLS}} = \frac{\nu}{\sigma_x^2} = r,\frac{\sigma_y}{\sigma_x}, \qquad r \equiv \frac{\nu}{\sigma_x \sigma_y}$$
+
+TLS minimizes perpendicular distances. The slope comes from the principal eigenvector of $\mathbf{M} = \begin{pmatrix}\sigma_x^2 & \nu \ \nu & \sigma_y^2\end{pmatrix}$:
+$$c_1^{\text{TLS}} = \frac{\sigma_y^2 - \sigma_x^2 + \sqrt{(\sigma_y^2 - \sigma_x^2)^2 + 4\nu^2}}{2\nu}$$
+
+Why $|c_1^{\text{TLS}}| \ge |c_1^{\text{OLS}}|$ always
+1. Algebraic. The ratio
+$$\frac{c_1^{\text{TLS}}}{c_1^{\text{OLS}}} = \frac{(t^2 - 1) + \sqrt{(t^2 - 1)^2 + 4 r^2 t^2}}{2 r^2 t^2}, \quad t \equiv \sigma_y/\sigma_x$$
+is $\ge 1$ iff $r^2 \le 1$, which holds always (Cauchy–Schwarz). Equality holds only at $|r| = 1$ — the noise-free case where the data lie exactly on a line.
+
+2. Geometric. Draw the data cloud as an ellipse. The OLS line passes through the centroid such that for each $x$, the height matches the conditional mean of $y$ — this line is flatter than the ellipse's major axis. The TLS line is the major axis. The major axis is always steeper than the conditional-mean line.
+
+Picture the extreme case: a perfectly circular cloud ($\sigma_x = \sigma_y$, $r = 0$).
+
+OLS slope = 0 (no $x$-dependence).
+TLS slope is indeterminate (any direction is principal).
+Now squash the circle into an ellipse along a 45° axis. OLS slope rises slowly with the correlation; TLS slope is the 45° major axis from the start.
+
+3. Statistical (attenuation bias). Suppose the true underlying relation is $y_{\text{true}} = \beta_0 + \beta_1 x_{\text{true}}$ with noise added to both:
+$$X = x_{\text{true}} + \epsilon_x, \qquad Y = y_{\text{true}} + \epsilon_y$$
+
+Then:
+
+$\text{Var}(X) = \text{Var}(x_{\text{true}}) + \text{Var}(\epsilon_x)$ — variance inflated by $x$-noise.
+$\text{Cov}(X, Y) = \beta_1 \text{Var}(x_{\text{true}})$ — covariance untouched.
+So
+$$c_1^{\text{OLS}} = \beta_1 \cdot \frac{\text{Var}(x_{\text{true}})}{\text{Var}(x_{\text{true}}) + \text{Var}(\epsilon_x)} < \beta_1$$
+
+OLS is biased toward zero by the factor $\sigma_x^{\text{true}2}/\sigma_x^2$, because it blames all spread in $x$ on the deterministic relationship even when some of that spread is $x$-noise. TLS accounts for the $x$-noise and recovers $\beta_1$ (under the assumption of equal noise variances in $x$ and $y$).
+
+The fundamental reason is asymmetric vs symmetric treatment of $X$ and $Y$. OLS implicitly assigns all error to $Y$, which deflates the slope toward the horizontal. TLS distributes error orthogonally, recovering a steeper slope that matches the principal axis of the joint $(X, Y)$ scatter.
+
+Connection to the paper
+In the paper's TLS formulation, $c_1^{\text{TLS}}$ comes from the eigenvector of $\begin{pmatrix}\sigma_x^2 & \nu \ \nu & \sigma_y^2\end{pmatrix}$ with the larger eigenvalue (the principal direction). OLS solves a constrained problem on the same matrix where the normal vector is fixed to $(c_1, -1)^T$ rather than free. The constraint flattens the OLS slope, producing the attenuation.
+
+In the paper's "Total Regression is superior" claim (L1655), this is precisely the technical content: TLS does not suffer the regression-dilution bias of OLS. If the design variable $X$ is itself uncertain (which is typical when both axes are measurements), OLS systematically underestimates the slope magnitude — and TLS does not.
+
+\subsection{Ordinary Linear Regression}
+
+\begin{align}
+\label{eqn: set residual}
+R_1 &\equiv \frac{1}{N} \sum_{i=1}^N (Y_i - c_0 - c_1 X_i)^2
+		\Rightarrow R_1 = (\delta y)^2 - \frac{\nu(x, y)^2}{(\delta x)^2}; \\
+\label{eqn: set slope}
+c_1 &= \frac{\nu(x,y)}{(\delta x)^2}; \\
+\label{eqn: set intercept}
+c_0 &= \overline{y} - \overline{x}\, c_1; \\
+\label{eqn: set slope precision}
+P(c_1)^2 &= \frac{1}{N} \frac{R_1 (\delta x)^2}{\nu(x,y)^2}; \\
+\label{eqn: set R2}
+\frac{1}{R^2} &= 1 + \frac{R_1 (\delta x)^2}{\nu(x,y)^2};
+\end{align}
+Formulas \eqref{eqn: set slope} and \eqref{eqn: set intercept} give $c_1$ and $c_0$, respectively, while Formulas \eqref{eqn: set slope variance} and \eqref{eqn: set intercept variance} yield their variances, respectively, which are both determined by $R_1/N$.
+$(\delta c_1)^2$ decreases with larger $(\delta x)^2$ as expected.
+Because $(\delta c_0)^2$ changes with the choice of the coordinate origin for $x$, it has little statistical merit.
+
+\begin{align}
+\label{eqn: set slope variance}
+&(\delta c_1)^2 = \frac{R_1}{N} \frac{1}{(\delta x)^2}; \\
+\label{eqn: set intercept variance}
+&(\delta c_0)^2 = \frac{R_1}{N} \left( 1 + \frac{\overline{x}^2}{(\delta x)^2} \right);
+\end{align}
+
+
+\subsection{Total Multi-Dimensional Linear Regression}
+
+Augment the input vector with a constant first component $X_0 \equiv 1$:
+\begin{align*}
+\mathbf{X} \equiv (1, x_1, x_2, \dots, x_M)^T,
+\qquad
+\mathbf{c} \equiv (c_0, c_1, c_2, \dots, c_M)^T,
+\end{align*}
+so the fit equation becomes $\hat{y} = \mathbf{c}^T \mathbf{X}$, with the intercept $c_0$ appearing as just another coefficient.
+
+\begin{align}
+\label{eqn: multi residual}
+R_M &\equiv \frac{1}{N} \sum_{i=1}^N \bigl( Y_i - \mathbf{c}^T \mathbf{X}_i \bigr)^2
+		\Rightarrow R_M = \overline{y^2} - \boldsymbol{\nu}^T \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi slope}
+\mathbf{c} &= \mathbf{C}^{-1} \boldsymbol{\nu}; \\
+\label{eqn: multi slope cov}
+\nu(c_m,\, c_n) &= \frac{1}{N} R_M\, (\mathbf{C}^{-1})_{m,n}, \quad m, n = 0, 1, \dots, M; \\
+\label{eqn: multi intercept}
+c_0 &= \overline{y} - \sum_{m=1}^{M} \overline{x_m}\, c_m;
+\end{align}
+For the ordinary one-sided least-squares case, $\mathbf{C}$ is the $(M+1) \times (M+1)$ cross-moment matrix with $(\mathbf{C})_{m,n} = \overline{X_m X_n}$, $\boldsymbol{\nu}$ is the $(M+1)$-vector with $(\boldsymbol{\nu})_m = \overline{X_m y}$, and Formulas \eqref{eqn: multi residual}, \eqref{eqn: multi slope}, \eqref{eqn: multi slope cov}, and \eqref{eqn: multi intercept} give the residual, full coefficient vector, coefficient covariance (including the intercept variance $\nu(c_0, c_0) = R_M (\mathbf{C}^{-1})_{0,0}/N$), and the explicit intercept-from-slopes relation, respectively.
+
+\subsubsection{Total least squares (TLS) derivation.}
+
+\textbf{Notation.} For the TLS derivation that follows, the local symbols below differ from the augmented OLS preamble above: $\mathbf{x} \equiv (x_1, \dots, x_M)^T$ is the non-augmented input variable, $\mathbf{X}_i \equiv (X_{1,i}, \dots, X_{M,i})^T$ the corresponding non-augmented sample, $\mathbf{c} \equiv (c_1, \dots, c_M)^T$ the slope sub-vector (with $c_0$ kept as a separate scalar), $\mathbf{C}$ the $M \times M$ centered input covariance with $(\mathbf{C})_{m,n} = \nu(x_m, x_n)$, and $\boldsymbol{\nu}$ the $M$-vector with $(\boldsymbol{\nu})_m = \nu(x_m, y)$. These local definitions apply only to the TLS derivation.
+
+\textbf{Step 1 \& 2.} The $M$-dimensional input space is $(x_1, x_2, \dots, x_M)$, and the fit plane is $y = c_0 + \sum_{m=1}^{M} c_m\, x_m = c_0 + \mathbf{c}^T \mathbf{x}$, where $\mathbf{c} = (c_1, \dots, c_M)^T$ collects the slopes.
+
+\textbf{Step 3.} The data set is $\{(Y_i, X_{1,i}, \dots, X_{M,i}),\ i = 1, 2, \dots, N\}$, written compactly as $\{(Y_i, \mathbf{X}_i)\}$ with $\mathbf{X}_i = (X_{1,i}, \dots, X_{M,i})^T$.
+
+\textbf{Step 4.} The fit plane, written as $y - c_0 - \mathbf{c}^T \mathbf{x} = 0$ in $(M+1)$-dimensional space, has unit normal $\mathbf{n} = (-\mathbf{c},\ 1)^T/\sqrt{1 + \mathbf{c}^T \mathbf{c}}$. The signed perpendicular distance from datum $i$ to the plane is
+\begin{align*}
+d_i &= \frac{Y_i - c_0 - \mathbf{c}^T \mathbf{X}_i}{\sqrt{1 + \mathbf{c}^T \mathbf{c}}}.
+\end{align*}
+
+\textbf{Step 5.} The sum of squared distances is
+\begin{align*}
+\sum_{i=1}^{N} d_i^2 &= \frac{1}{1 + \mathbf{c}^T \mathbf{c}} \sum_{i=1}^{N} \bigl( Y_i - c_0 - \mathbf{c}^T \mathbf{X}_i \bigr)^2 = \frac{N\, S(\mathbf{c}, c_0)}{1 + \mathbf{c}^T \mathbf{c}},
+\end{align*}
+where $S(\mathbf{c}, c_0) \equiv (1/N) \sum_{i=1}^{N} \bigl( Y_i - c_0 - \mathbf{c}^T \mathbf{X}_i \bigr)^2$ is the standard mean-squared residual from Formula \eqref{eqn: multi residual}.
+
+\textbf{Step 6.} Minimize $R \equiv (1/N) \sum_i d_i^2 = S/(1 + \mathbf{c}^T \mathbf{c})$ over $(c_0, \mathbf{c})$.
+
+Setting $\partial R/\partial c_0 = 0$ gives $c_0 = \overline{y} - \sum_{m=1}^{M} \overline{x_m}\, c_m = \overline{y} - \mathbf{c}^T \overline{\mathbf{x}}$, identical to Formula \eqref{eqn: multi intercept}. Substituting yields
+\begin{align*}
+S(\mathbf{c}) &= (\delta y)^2 - 2\, \mathbf{c}^T \boldsymbol{\nu} + \mathbf{c}^T \mathbf{C}\, \mathbf{c},
+\end{align*}
+where $(\delta y)^2 = (1/N)\sum_i (Y_i - \overline{y})^2$, $\boldsymbol{\nu}_m = \nu(x_m, y)$, and $\mathbf{C}_{m,n} = \nu(x_m, x_n)$.
+
+Setting $\partial R/\partial \mathbf{c} = \mathbf{0}$: from $\partial S/\partial \mathbf{c} \cdot (1 + \mathbf{c}^T \mathbf{c}) = 2 S\, \mathbf{c}$ and $S = R (1 + \mathbf{c}^T \mathbf{c})$ at the optimum, the TLS slope equation is
+\begin{align}
+\label{eqn: multi tls slope}
+\bigl( \mathbf{C} - R^*\, \mathbf{I} \bigr)\, \mathbf{c} &= \boldsymbol{\nu};
+\end{align}
+where $R^*$ is the minimum residual. Dot-producting with $\mathbf{c}^T$ and substituting back into $S = (\delta y)^2 - 2\mathbf{c}^T \boldsymbol{\nu} + \mathbf{c}^T \mathbf{C}\, \mathbf{c}$ collapses to
+\begin{align}
+\label{eqn: multi tls residual}
+R^* &= (\delta y)^2 - \mathbf{c}^T \boldsymbol{\nu};
+\end{align}
+Equivalently, with the augmented covariance matrix
+\begin{align*}
+\mathbf{C}_{\mathrm{aug}} &\equiv \begin{pmatrix} \mathbf{C} & \boldsymbol{\nu} \\ \boldsymbol{\nu}^T & (\delta y)^2 \end{pmatrix},
+\end{align*}
+$R^*$ is the smallest eigenvalue of $\mathbf{C}_{\mathrm{aug}}$ with eigenvector $(-\mathbf{c},\ 1)^T$:
+\begin{align*}
+\mathbf{C}_{\mathrm{aug}}\, \begin{pmatrix} -\mathbf{c} \\ 1 \end{pmatrix} = \begin{pmatrix} -\mathbf{C}\mathbf{c} + \boldsymbol{\nu} \\ -\boldsymbol{\nu}^T \mathbf{c} + (\delta y)^2 \end{pmatrix} = R^*\, \begin{pmatrix} -\mathbf{c} \\ 1 \end{pmatrix}.
+\end{align*}
+
+In one dimension ($M = 1$), $\mathbf{C} = (\delta x)^2$ and $\boldsymbol{\nu} = \nu(x, y)$, the $2 \times 2$ eigenproblem gives $R^* = \bigl( (\delta x)^2 + (\delta y)^2 - \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2} \bigr)/2$, recovering Formula \eqref{eqn: tls slope}:
+\begin{align}
+\label{eqn: tls slope}
+c_1 &= \frac{(\delta y)^2 - (\delta x)^2 + \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\, \nu(x,y)^2}}{2\,\nu(x,y)}.
+\end{align}
+
+\textbf{Step 7.} Variances. The slope $\mathbf{c}$ is an implicit function of the sample estimates $\mathbf{C}$, $\boldsymbol{\nu}$, and $(\delta y)^2$ via $\mathbf{F}(\mathbf{c}) \equiv (\mathbf{C} - R^*\mathbf{I})\mathbf{c} - \boldsymbol{\nu} = \mathbf{0}$ with $R^* = (\delta y)^2 - \mathbf{c}^T \boldsymbol{\nu}$. Computing $\partial F_m/\partial c_n = C_{m,n} - R^*\, \delta_{m,n} + c_m\, \nu_n$ gives the Jacobian
+\begin{align}
+\label{eqn: multi tls Jacobian}
+\mathbf{J} &= \mathbf{C} - R^*\, \mathbf{I} + \mathbf{c}\, \boldsymbol{\nu}^T = (\mathbf{I} + \mathbf{c}\mathbf{c}^T)\, (\mathbf{C} - R^*\, \mathbf{I}),
+\end{align}
+using $\boldsymbol{\nu}^T = \mathbf{c}^T(\mathbf{C} - R^*\mathbf{I})$. Implicit differentiation of $\mathbf{F} = \mathbf{0}$ yields
+\begin{align}
+\label{eqn: multi tls slope perturbation}
+\mathbf{J}\, d\mathbf{c} &= -\, d\mathbf{C}\, \mathbf{c} + (\mathbf{I} - \mathbf{c}\mathbf{c}^T)\, d\boldsymbol{\nu} + \mathbf{c}\, d(\delta y)^2;
+\end{align}
+so $d\mathbf{c} = \mathbf{J}^{-1}\bigl[ -d\mathbf{C}\, \mathbf{c} + (\mathbf{I} - \mathbf{c}\mathbf{c}^T)\, d\boldsymbol{\nu} + \mathbf{c}\, d(\delta y)^2 \bigr]$. The slope variances $\delta^2 c_m = \mathrm{Var}(c_m)$ then follow from
+\begin{align}
+\label{eqn: multi tls slope variance}
+\nu(c_m, c_n) &= \bigl( \mathbf{J}^{-1}\, \boldsymbol{\Sigma}_{\mathbf{L}}\, \mathbf{J}^{-T} \bigr)_{m, n}, \quad m, n = 1, \dots, M;
+\end{align}
+where $\boldsymbol{\Sigma}_{\mathbf{L}}$ is the $M \times M$ covariance matrix of the right-hand side of Formula \eqref{eqn: multi tls slope perturbation}, computed from the sample-estimate covariances of $\mathbf{C}$, $\boldsymbol{\nu}$, and $(\delta y)^2$.
+
+For Gaussian-distributed inputs, the relevant sample-estimate covariances are
+\begin{align*}
+\mathrm{Cov}(\hat{C}_{m,n},\, \hat{C}_{p,q}) &= (C_{m,p}\, C_{n,q} + C_{m,q}\, C_{n,p})/N, \\
+\mathrm{Cov}(\hat{\nu}_m,\, \hat{\nu}_n) &= (C_{m,n}\, (\delta y)^2 + \nu_m\, \nu_n)/N, \\
+\mathrm{Cov}(\hat{C}_{m,n},\, \hat{\nu}_p) &= (C_{m,p}\, \nu_n + C_{n,p}\, \nu_m)/N, \\
+\mathrm{Cov}(\hat{C}_{m,n},\, (\widehat{\delta y})^2) &= 2\, \nu_m\, \nu_n/N, \\
+\mathrm{Cov}(\hat{\nu}_m,\, (\widehat{\delta y})^2) &= 2\, \nu_m\, (\delta y)^2/N, \\
+\mathrm{Var}((\widehat{\delta y})^2) &= 2\, (\delta y)^4/N.
+\end{align*}
+Substituting into Formula \eqref{eqn: multi tls slope variance} and specializing to $M = 1$ (where $\mathbf{J} = \Delta \equiv \sqrt{((\delta y)^2 - (\delta x)^2)^2 + 4\,\nu(x,y)^2}$) recovers Formula \eqref{eqn: tls slope variance}:
+\begin{align}
+\label{eqn: tls slope variance}
+\delta c_1 &= \frac{1}{\sqrt{N}} \sqrt{ \frac{(1 + c_1^2)^2 \bigl( (\delta x)^2 (\delta y)^2 - \nu(x,y)^2 \bigr)}{((\delta x)^2 - (\delta y)^2)^2 + 4\, \nu(x,y)^2}}.
+\end{align}
+
+For the intercept variance: $c_0 = \overline{y} - \mathbf{c}^T \overline{\mathbf{x}}$, so
+\begin{align}
+\label{eqn: multi tls intercept variance}
+\delta^2 c_0 &= \mathrm{Var}(\overline{y}) + \overline{\mathbf{x}}^T\, \mathrm{Cov}(\hat{\mathbf{c}})\, \overline{\mathbf{x}} + \mathbf{c}^T\, \mathrm{Cov}(\overline{\mathbf{x}})\, \mathbf{c} \nonumber \\
+	&= \frac{(\delta y)^2 + \mathbf{c}^T \mathbf{C}\, \mathbf{c}}{N} + \overline{\mathbf{x}}^T\, \mathrm{Cov}(\hat{\mathbf{c}})\, \overline{\mathbf{x}};
+\end{align}
+because $\mathrm{Var}(\overline{y}) = (\delta y)^2/N$ and $\mathrm{Cov}(\overline{\mathbf{x}}) = \mathbf{C}/N$, where $\overline{\mathbf{x}} = (\overline{x_1}, \dots, \overline{x_M})^T$ is the sample-mean vector. With the coordinate origin shifted to the sample centroid ($\overline{\mathbf{x}} = \mathbf{0}$), Formula \eqref{eqn: multi tls intercept variance} reduces to $\delta^2 c_0 = ((\delta y)^2 + \mathbf{c}^T \mathbf{C}\,\mathbf{c})/N$.
+
+\subsubsection{Compare current solution with the standard solution}
+
+Comparison of the new Deduct derivation against the standard TLS solution from the literature (Golub–Van Loan 1980, Van Huffel and Vandewalle 1991, Markovsky and Van Huffel 2007).
+
+Slope equation — matches
+Standard form (eigenvalue characterization):
+Given the data matrix $\mathbf{M} = [\mathbf{X}_c, \mathbf{y}c]$ (centered), the TLS solution is the right singular vector of $\mathbf{M}$ corresponding to the smallest singular value $\sigma{\min}$. Equivalently:
+
+$$\big( \mathbf{X}c^T \mathbf{X}c - \sigma{\min}^2 \mathbf{I} \big), \hat{\boldsymbol\beta}{\rm TLS} = \mathbf{X}_c^T \mathbf{y}_c$$
+
+Our derivation (Deduct L754):
+$$(\mathbf{C} - R^* \mathbf{I}), \mathbf{c} = \boldsymbol\nu$$
+
+These are identical up to normalization: $\mathbf{C} = \mathbf{X}_c^T\mathbf{X}_c/N$, $\boldsymbol\nu = \mathbf{X}_c^T\mathbf{y}c/N$, $R^* = \sigma{\min}^2/N$.  Matches.
+
+Residual — matches
+Standard form: $\sigma_{\min}^2/N$ is the smallest eigenvalue of $\mathbf{C}_{\rm aug} = [\mathbf{C}, \boldsymbol\nu; \boldsymbol\nu^T, (\delta Y)^2]$, with eigenvector $(-\mathbf{c}, 1)^T$ (unnormalized).
+
+Our derivation (Deduct L759):
+$$R^* = (\delta Y)^2 - \mathbf{c}^T \boldsymbol\nu$$
+
+The two are equivalent: dotting the eigenvector $(-\mathbf{c}, 1)^T$ with the bottom row of $\mathbf{C}_{\rm aug}$ gives $(\delta Y)^2 - \mathbf{c}^T \boldsymbol\nu = R^*$.  Matches.
+
+(My prior version had an incorrect denominator $1 + \mathbf{c}^T\mathbf{c}$ — that has been removed.)
+
+Intercept — matches
+Standard form: After centering, the intercept is recovered as $\hat{c}_0 = \overline{Y} - \hat{\mathbf{c}}^T \overline{\mathbf{X}}$ (same as OLS).
+
+Our derivation: same.  Matches.
+
+Slope variance — same matrix structure, different model assumption from Van Huffel
+This is where the literature has multiple inequivalent variants depending on noise-model assumptions:
+
+Variant A — Van Huffel / Markovsky (errors-in-variables, homoskedastic)
+Assumes $\mathbf{X}_i = \boldsymbol\xi_i + \boldsymbol\epsilon_i^X$, $Y_i = c_0 + \mathbf{c}^T \boldsymbol\xi_i + \epsilon_i^Y$ with equal noise variance $\sigma_E^2$ on each input and the output:
+
+$$\mathrm{Cov}(\hat{\mathbf{c}})_{\rm VH} = \frac{1 + \mathbf{c}^T \mathbf{c}}{N}, R^, \bigl( \mathbf{C} - R^ \mathbf{I} \bigr)^{-1}$$
+
+This is the formula I had in my prior version. Doesn't reduce to eqn: tls slope variance in 1D — numerically verified at $\sigma_x=1, \sigma_y=2, \nu=1.5$: gives $4.17/N$ vs. eqn: tls slope variance gives $4.53/N$.
+
+Variant B — moments propagation (what eqn: tls slope variance uses)
+Treats the sample moments $(\hat{\mathbf{C}}, \hat{\boldsymbol\nu}, \widehat{(\delta Y)^2})$ as the random quantities and propagates their variance through the implicit relation $(\mathbf{C} - R^*\mathbf{I})\mathbf{c} = \boldsymbol\nu$:
+
+$$\mathrm{Cov}(\hat{\mathbf{c}}){\rm mom} = \mathbf{J}^{-1}, \boldsymbol\Sigma{\mathbf{L}}, \mathbf{J}^{-T}, \quad \mathbf{J} = (\mathbf{I} + \mathbf{c}\mathbf{c}^T)(\mathbf{C} - R^*\mathbf{I})$$
+
+This is our derivation (Deduct L789). For 1D Gaussian samples, substituting the explicit moment covariances yields:
+
+$$(\delta c_1)^2 = \frac{(1 + c_1^2)^2, ((\delta x)^2 (\delta y)^2 - \nu^2)}{N, \Delta^2}$$
+
+— matches eqn: tls slope variance  (numerically verified $4.53/N$ at the same test point).
+
+Why Variant B is the right choice for this paper
+The variance-arithmetic framework is built around sample-moment propagation: every input quantity $x \pm \delta x$ is a Gaussian-bounded sample-mean ± sample-deviation pair. Variant B treats sample moments as the propagated objects, which is exactly the framework's idiom. Variant A assumes an underlying errors-in-variables model with a specific noise structure that's not assumed elsewhere in the paper.
+
+The two variants coincide in special cases (e.g., when $\sigma_x^2 = \sigma_y^2$, both reduce to the same scalar at certain points) but diverge in general.
+
+Intercept variance
+Standard form (after centering, sample-mean propagation):
+$$\mathrm{Var}(\hat{c}_0) = \frac{(\delta Y)^2 + \mathbf{c}^T \mathbf{C}, \mathbf{c}}{N} + \overline{\mathbf{X}}^T, \mathrm{Cov}(\hat{\mathbf{c}}), \overline{\mathbf{X}}$$
+
+Our derivation (Deduct L811): same.  Matches.
+
+Eigenvalue characterization vs. solver
+Standard form: Compute via SVD of $\mathbf{M} = [\mathbf{X}c, \mathbf{y}c]$, take last right singular vector $\mathbf{v}{D+1}$, then $\hat{\mathbf{c}} = -\mathbf{v}{D+1, 1:D}/v_{D+1, D+1}$.
+
+Our derivation: Solve the eigenvalue problem of $\mathbf{C}_{\rm aug}$ (a $(D+1) \times (D+1)$ symmetric matrix) for the smallest eigenvalue $R^*$ and eigenvector $(-\mathbf{c}, 1)^T$.
+
+These two are mathematically equivalent. Numerically, SVD on $\mathbf{M}$ is preferred for stability (avoids squaring the condition number).  Equivalent.
+
+Bottom line
+The slope, residual, intercept, and eigenvalue characterization in the rewritten Deduct subsection match the standard TLS solution exactly. The variance formula differs from the textbook Van Huffel variant because Van Huffel assumes a specific homoskedastic errors-in-variables model, while the paper's framework propagates sample moments — and only the moments-approach variance reduces to eqn: tls slope variance in 1D.
+
+
+
+\subsubsection{Dropping a principal component}
+
+\paragraph{Setup.}
+Let $\mathbf{C}_{\mathrm{aug}}$ have eigenvalues $\lambda_1 \geq \lambda_2 \geq \dots \geq \lambda_{M+1} \geq 0$ with orthonormal eigenvectors $\mathbf{v}_1, \dots, \mathbf{v}_{M+1}$. The TLS fit hyperplane is spanned by the top $M$ eigenvectors $\mathbf{v}_1, \dots, \mathbf{v}_M$; the smallest-eigenvalue direction $\mathbf{v}_{M+1}$ is the fit \emph{normal}, and the perpendicular-variance residual is
+\begin{align*}
+R^* = \lambda_{M+1}.
+\end{align*}
+
+\paragraph{Rule.}
+If the principal coefficient $\tilde{c}_m$ associated with eigenvector $\mathbf{v}_m$ (for some $m \leq M$) has precision $P(\tilde{c}_m) \equiv \delta \tilde{c}_m / |\tilde{c}_m| > 1$, it is statistically indistinguishable from zero. Drop $\mathbf{v}_m$ from the fit subspace. The new fit subspace has $M - 1$ eigenvectors, and the data variance projecting onto $\mathbf{v}_m$ joins the perpendicular residual:
+\begin{align}
+\label{eqn: pcr drop rule}
+R^*_{\mathrm{new}} = R^*_{\mathrm{old}} + \lambda_m.
+\end{align}
+More generally, if a set $\mathcal{S}_{\mathrm{drop}}$ of fit directions is discarded (in addition to the original normal $\mathbf{v}_{M+1}$), the cumulative TLS residual is
+\begin{align*}
+R^*_{\mathrm{drop}} = \lambda_{M+1} + \sum_{m \in \mathcal{S}_{\mathrm{drop}}} \lambda_m.
+\end{align*}
+
+\paragraph{Why this works.}
+The augmented data vector decomposes orthogonally over the eigenbasis: $(\mathbf{x}^T, y)^T - \overline{(\mathbf{x}^T, y)^T} = \sum_k a_k \mathbf{v}_k$ with $\langle a_k a_\ell \rangle = \lambda_k \delta_{k \ell}$. So total variance partitions as $\sum_k \lambda_k = \mathrm{tr}(\mathbf{C}_{\mathrm{aug}})$. Removing $\mathbf{v}_m$ from the fit subspace just reassigns its share $\lambda_m$ from ``captured by the model'' to ``unexplained'' --- no cross-terms enter because the eigenvectors are orthogonal.
+
+\paragraph{Worked example ($M = 2$).}
+Two input dimensions, one output. The augmented covariance $\mathbf{C}_{\mathrm{aug}}$ is $3 \times 3$. Suppose its eigenvalues, sorted, are
+\begin{align*}
+\lambda_1 = 10, \qquad \lambda_2 = 0.5, \qquad \lambda_3 = 0.05,
+\end{align*}
+with sample size $N = 100$.
+
+\textbf{Full-model TLS.} The top two eigenvectors $\mathbf{v}_1, \mathbf{v}_2$ span the fit hyperplane; the smallest direction $\mathbf{v}_3$ is the fit normal. The residual is
+\begin{align*}
+R^*_{\mathrm{old}} = \lambda_3 = 0.05.
+\end{align*}
+Extracting the principal-frame slopes from the components of $\mathbf{v}_3$ and applying Formula \eqref{eqn: multi tls slope variance} yields $(\tilde{c}_1, \delta\tilde{c}_1)$ and $(\tilde{c}_2, \delta\tilde{c}_2)$. Suppose the resulting precisions are
+\begin{align*}
+P(\tilde{c}_1) = 0.08 \quad (\text{passes}),
+\qquad
+P(\tilde{c}_2) = 3.0 \quad (\text{fails: } \delta\tilde{c}_2 \gg |\tilde{c}_2|).
+\end{align*}
+
+\textbf{Drop $\mathbf{v}_2$.} Its slope is consistent with zero. Remove $\mathbf{v}_2$ from the fit subspace, leaving $\mathbf{v}_1$ only.
+
+\textbf{New residual.} Apply Formula \eqref{eqn: pcr drop rule}:
+\begin{align*}
+R^*_{\mathrm{new}} = R^*_{\mathrm{old}} + \lambda_2 = 0.05 + 0.5 = 0.55.
+\end{align*}
+The residual jumped by a factor of $11$ --- the cost of the simpler model. But the slope along $\mathbf{v}_2$, previously a number indistinguishable from zero, is now \emph{declared} zero rather than left as a noisy guess; the model has one fewer free parameter and one less spurious direction.
+
+\textbf{Recheck.} The retained principal coefficient $\tilde{c}_1$ must be re-evaluated with the new (larger) residual: its precision $P(\tilde{c}_1)$ depends on $R^*$ via Formula \eqref{eqn: multi tls slope variance}. If $P(\tilde{c}_1) < 1$ still holds, the fit is final; otherwise drop $\mathbf{v}_1$ too and iterate.
+
+\paragraph{Iterative procedure.}
+\begin{enumerate}
+\item Compute $\mathbf{C}_{\mathrm{aug}}$ and its eigendecomposition $\{\lambda_k, \mathbf{v}_k\}_{k=1}^{M+1}$.
+\item Solve TLS in the full $M$-dim fit subspace: $R^* = \lambda_{M+1}$, $\mathbf{c}$ from $\mathbf{v}_{M+1}$.
+\item Compute the principal-frame slopes $\tilde{c}_k$ and their variances $\delta^2 \tilde{c}_k$ via Formula \eqref{eqn: multi tls slope variance}.
+\item If any $P(\tilde{c}_m) > 1$: identify the worst offender $\mathbf{v}_{m^*}$, drop it from the fit subspace, set $R^* \leftarrow R^* + \lambda_{m^*}$, and re-solve in the reduced subspace.
+\item Repeat until every retained principal coefficient passes $P < 1$.
+\end{enumerate}
+
+\paragraph{Why the test lives in the principal frame.}
+The mapping ``fit parameter $c_m$ in the original $x_m$ frame'' $\leftrightarrow$ ``principal direction $\mathbf{v}_m$'' is not one-to-one --- each $\mathbf{v}_m$ generally mixes several original axes. Testing in the principal frame (where $\tilde{c}_k$ is the slope along $\mathbf{v}_k$) makes the precision test, the drop step, and the eigenvalue-addition rule all align cleanly. Testing in the original frame would mean the dropped quantity is no longer a single $\lambda_k$ but a weighted sum over multiple eigenvalues, breaking Formula \eqref{eqn: pcr drop rule}.
+
+
+\subsection{Polynomial Regression}
+
+\begin{align}
+\label{eqn: poly residual def}
+R_P &\equiv \frac{1}{N} \sum_{i=1}^N \Bigl( Y_i - \sum_{p=0}^{P} c_p\, X_i^p \Bigr)^2; \\
+\label{eqn: poly normal}
+&\sum_{p=0}^{P} c_p\, \overline{x^{p+n}} = \overline{x^n y}, \quad n = 0, 1, \dots, P; \\
+\label{eqn: poly perp foot}
+0 &= (x_i - X_i) + \Bigl( \sum_{p=0}^{P} c_p\, x_i^p - Y_i \Bigr) \sum_{p=1}^{P} c_p\, p\, x_i^{p - 1};
+\end{align}
+Conventional polynomial regression fits $\hat{Y}_j = \sum_{p=0}^{P} c_p\, X_j^p$ to $N$ samples $(X_j, Y_j)$ by minimizing the residual in Formula \eqref{eqn: poly residual def} using least squares directly on $c_p$ \cite{Numerical_Recipes}. Differentiating $R_P$ with respect to each $c_n$ yields Formula \eqref{eqn: poly normal}.
+Alternatively, minimizing the square distance between sample $(X_i, Y_i)$ and the closest point $(x_i, y_i)$ on the polynomial gives the perpendicular-foot Formula \eqref{eqn: poly perp foot}.
+
+\begin{align*}
+\hat{y}(x) &= \sum_{p=0}^{P} c_p\, x^p; \\
+D_i^2 &= (x_i - X_i)^2 + \left( \hat{y}(x_i) - Y_i \right)^2 = (x_i - X_i)^2 \big(1 + \frac{1}{\left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \right)^2} \big); \\
+0 &= \frac{d D_i^2}{d x_i} = (x_i - X_i) + \left( \hat{y}(x_i) - Y_i \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}; \\
+0 &= \frac{\partial \frac{d D_i^2}{d x_i}}{\partial c_j} 
+		=  \frac{\partial x_i}{\partial c_j} + \left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \frac{\partial x_i}{\partial c_j} + x_i^j \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}
+		+ \left( \sum_{p=0}^{P} c_p\, x_i^p - Y_i \right) \left( \sum_{p=2}^{P} c_p p(p - 1)\, x_i^{p - 2} \frac{\partial x_i}{\partial c_j} + c_j j x_i^{j-1} \right); \\
+0 &= \frac{\partial \frac{d D_i^2}{d x_i}}{\partial c_0} 
+		= \frac{\partial x_i}{\partial c_0} + \left( \sum_{p=1}^{P} c_p p\, x_i^{p - 1} \frac{\partial x_i}{\partial c_j} + 1 \right) \sum_{p=1}^{P} c_p p\, x_i^{p - 1}
+		+ \left( \sum_{p=0}^{P} c_p\, x_i^p - Y_i \right) \left( \sum_{p=2}^{P} c_p p(p - 1)\, x_i^{p - 2} \frac{\partial x_i}{\partial c_j} \right); \\
+0 &= \sum_{i=1}^{N} \frac{\partial D_i^2}{\partial c_j} =
+\end{align*}
+Taking $X_p = x^p$ for $p = 0, 1, \dots, P$ in the augmented input vector (so $X_0 = 1$ automatically) makes the multi-dimensional cross-moment matrix and cross-moment vector reduce to polynomial moments:
+\begin{align}
+\label{eqn: poly nu}
+(\mathbf{C})_{m,n} &= \overline{X_m X_n} = \overline{x^{m + n}}, \qquad
+(\boldsymbol{\nu})_n = \overline{X_n y} = \overline{x^n y}.
+\end{align}
+Rearranging the multi-dimensional slope solution Formula \eqref{eqn: multi slope} as $\mathbf{C}\, \mathbf{c} = \boldsymbol{\nu}$ then yields, component by component, $\sum_{p=0}^{P} c_p\, \overline{x^{p + n}} = \overline{x^n y}$ for $n = 0, 1, \dots, P$ — exactly Formula \eqref{eqn: poly normal}. Both the intercept ($n = 0$, using $\overline{x^0} = 1$) and the higher-order coefficients fall out of the same matrix equation, so no separate intercept formula is needed.
+
+
+\subsection{Formula (15.2.2) to (15.2.6) of Numerical Recept seem to contradict with my short tex, right?}
+
+This is more nuanced than a clean "yes" or "no". The formulas don't directly contradict your paper — they address a different problem. The apparent conflict is at the framing level. Let me lay it out precisely.
+
+What NR (15.2.2)–(15.2.6) actually say
+NR §15.2 fits $y = a + bx$ to data ${(x_i, y_i)}_{i=1}^N$, where each $(x_i, y_i)$ has its own known standard deviation $\sigma_i$ (NR's explicit phrasing). The chi-squared:
+
+$$\chi^2(a, b) = \sum_{i=1}^N \left(\frac{y_i - a - bx_i}{\sigma_i}\right)^2 \quad (15.2.1)$$
+
+Setting $\partial\chi^2/\partial a = 0$ and $\partial\chi^2/\partial b = 0$ gives (15.2.2)–(15.2.3), whose closed-form solution (15.2.4)–(15.2.6) uses the sums
+
+$$S = \sum_i \frac{1}{\sigma_i^2}, \quad S_x = \sum_i \frac{x_i}{\sigma_i^2}, \quad S_y = \sum_i \frac{y_i}{\sigma_i^2}, \quad \dots$$
+
+So NR's per-point weight is $w_i = 1/\sigma_i^2$, where $\sigma_i$ is a prior (known from instrument calibration, experimental setup, etc.), not estimated from the data itself.
+
+What your paper's §Partition and Weight says
+You have data partitioned into subsets indexed by $j$, with subset count $N_j$, subset mean $\overline{x_j}$, and subset sample variance $(\delta x_j)^2$. The set covariance Formula \eqref{eqn: set covariance} weights subset $j$ by $N_j/N$ — sample-size fraction, distribution-agnostic.
+
+You then criticize the practice of using $w_j = 1/(\delta x_j)^2$ — the inverse of the subset's sample variance — as the regression weight.
+
+Why these are different problems
+
+If you map your subset to NR's "data point":
+
+The "data point" is $\overline{x_j}$.
+Its standard error is $\sigma_j = \delta x_j / \sqrt{N_j}$ (standard error of the subset mean).
+NR would then weight subset $j$ by $1/\sigma_j^2 = N_j / (\delta x_j)^2$.
+This is the key insight: in NR's framework correctly applied to subsets, the weight is $N_j/(\delta x_j)^2$, not $1/(\delta x_j)^2$. The $N_j$ in the numerator is essential — and is the same $N_j$ your paper uses.
+
+Under i.i.d. (all subsets share the same underlying variance), $(\delta x_j)^2 \to \sigma^2$ is approximately constant, so $N_j/(\delta x_j)^2 \propto N_j$ — and NR's correctly-applied weight reduces to your paper's $N_j/N$ (up to normalization). No contradiction.
+
+Under non-i.i.d., they differ, and which is "right" depends on the estimand:
+
+For the minimum-variance estimator of the population mean (NR's implicit goal), $N_j/(\delta x_j)^2$ is optimal — and is not what your paper's $N_j/N$ rule prescribes.
+For the population mean defined via the law of total variance (your paper's eqn: set covariance), $N_j/N$ is the only consistent choice — and is not what NR prescribes.
+These are different objectives, not contradicting answers to the same question.
+
+What about L1680's citation list?
+The current sentence reads:
+
+"The common practice of using $1/(\delta x_j)^2$ as the subset weight \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} for regression contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance}..."
+
+This citation list attributes the "use $1/(\delta x_j)^2$" practice to Numerical Recipes, but NR (15.2.2)–(15.2.6) actually uses $1/\sigma_i^2$ with $\sigma_i$ as a known per-point prior — not as the subset's sample variance $\delta x_j$. NR does not recommend the practice you're criticizing. The miscited target is real (people genuinely do plug $1/(\delta x_j)^2$ into WLS when their actual subset $\sigma_i$ is unknown), but NR isn't the source of that error — NR explicitly assumes $\sigma_i$ is known a priori.
+
+So I'd say:
+
+The formulas don't contradict your paper — they solve a different problem with explicit prior $\sigma_i$.
+%The citation \cite{Numerical_Recipes} at L1680 is the weakest of the three because NR doesn't prescribe the practice as written. The other two (Statistical_Methods, Probability_Statistics) may or may not --- depends on what those texts actually say, which I haven't checked.
+The deeper claim — that distribution-agnostic partition weighting is sometimes more appropriate than WLS-style inverse-variance weighting — stands. It just needs a target that actually advocates the criticized practice.
+Suggested revisions for L1680
+Three options, increasing precision:
+
+Conservative (keep NR cite but qualify):
+
+"The common practice of using $1/(\delta x_j)^2$ as the subset weight, which results from misapplying inverse-variance weighting \cite{Statistical_Methods}\cite{Probability_Statistics}\cite{Numerical_Recipes} when the subset sample variance is substituted for the per-point prior $\sigma_i$, contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance}..."
+
+Sharper (drop NR, keep the critique):
+
+"The common practice of using $1/(\delta x_j)^2$ as the subset weight contradicts Formulas \eqref{eqn: set mean} and \eqref{eqn: set covariance}, which are derived from the mean and covariance definitions without any assumption on uncertainty distribution. Even the correct inverse-variance weighting $N_j/(\delta x_j)^2$ \cite{Numerical_Recipes} reduces to $N_j/N$ only under the i.i.d. assumption..."
+
+Strongest (acknowledge NR's correctness, contrast objectives):
+
+"Inverse-variance weighting $N_j/(\delta x_j)^2$ \cite{Numerical_Recipes} gives the minimum-variance estimator of the population mean under the i.i.d. assumption, where it reduces to $N_j/N$. When the i.i.d. assumption fails, the two diverge: $N_j/N$ retains the law-of-total-variance interpretation \eqref{eqn: set covariance}, while $N_j/(\delta x_j)^2$ optimizes a different objective. The practice of using $1/(\delta x_j)^2$ without the $N_j$ factor contradicts both."
+
+The third version is the most rigorous: it credits NR with the correct formula, distinguishes objectives, and isolates the criticism to the genuinely incorrect $1/(\delta x_j)^2$ practice.
+
+Bottom line
+NR (15.2.2)–(15.2.6) do not contradict your paper. They solve a different problem (fitting with known per-point priors) using a formula that, properly applied to subsets, gives $N_j/(\delta x_j)^2$ — which agrees with your $N_j/N$ under i.i.d. The conflict at L1680 is real for the misapplication of inverse-variance weighting (using $1/(\delta x_j)^2$ without $N_j$), but the citation to NR for that misapplication is questionable.
+
+Want me to apply one of the three revisions?
+
+
+
+\section{Comments on Solving Equations}
+\label{sec: equations}
+
+\subsection{Random to Deterministic}
+
+An equation $g(f(x \pm \delta x)) = 0$ to solve for $f(x \pm \delta x)$ can be reduced to a deterministic equation using statistical Taylor expansion.
+Applying Formula \eqref{eqn: Taylor 1d} to expand the composite function $g(f(x + \tilde{z} \delta x))$ around $x$:
+\begin{align}
+\label{eqn: random to deterministic}
+0 = g(f(x \pm \delta x)) = g(f(x + \tilde{z} \delta x))
+   &= \sum_{n=0}^{\infty} \frac{\tilde{z}^n (\delta x)^n}{n!} \, \frac{d^n}{d x^n} g(f(x));
+\end{align}
+The $n$-th total derivative of the composite $g(f(x))$ with respect to $x$ is given by Fa\`a di Bruno's formula:
+\begin{align}
+\label{eqn: Faa di Bruno}
+\frac{d^n}{d x^n} g(f(x)) &= \sum_{m_1 + 2 m_2 + \cdots + n m_n = n} \frac{n!}{m_1! \, m_2! \cdots m_n!} \; g^{(m_1 + m_2 + \cdots + m_n)}(f(x)) \prod_{j=1}^{n} \left(\frac{f^{(j)}_x}{j!}\right)^{m_j};
+\end{align}
+where the sum runs over all nonnegative integers $m_1, \dots, m_n$ satisfying $\sum_{j=1}^{n} j \, m_j = n$, and $g^{(k)}(f(x))$ is the $k$-th derivative of $g$ evaluated at $f(x)$.
+Writing $g^{(k)} \equiv g^{(k)}(f(x))$, the first orders are:
+\begin{align}
+\label{eqn: composite derivative 1}
+\frac{d}{d x} g(f(x)) &= g^{(1)} f^{(1)}_x; \\
+\label{eqn: composite derivative 2}
+\frac{d^2}{d x^2} g(f(x)) &= g^{(2)} \big(f^{(1)}_x\big)^2 + g^{(1)} f^{(2)}_x; \\
+\label{eqn: composite derivative 3}
+\frac{d^3}{d x^3} g(f(x)) &= g^{(3)} \big(f^{(1)}_x\big)^3 + 3\, g^{(2)} f^{(1)}_x f^{(2)}_x + g^{(1)} f^{(3)}_x; \\
+\label{eqn: composite derivative 4}
+\frac{d^4}{d x^4} g(f(x)) &= g^{(4)} \big(f^{(1)}_x\big)^4 + 6\, g^{(3)} \big(f^{(1)}_x\big)^2 f^{(2)}_x + g^{(2)} \big(3 \big(f^{(2)}_x\big)^2 + 4 f^{(1)}_x f^{(3)}_x\big) + g^{(1)} f^{(4)}_x;
+\end{align}
+Because Equation \eqref{eqn: random to deterministic} has to hold for the arbitrary random variable $\tilde{z}$, the coefficient of each power $\tilde{z}^n$ has to vanish:
+\begin{align}
+\label{eqn: random to deterministic condition}
+\frac{d^n}{d x^n} g(f(x)) &= 0, \quad n = 0, 1, 2, \dots;
+\end{align}
+The lowest order $n = 0$ recovers the deterministic equation $g(f(x)) = 0$, whereas the higher orders $n \geq 1$ are its successive derivatives, which vanish identically once $g(f(x)) = 0$ holds over the range of $x$.
+Therefore, solving the random equation $g(f(x \pm \delta x)) = 0$ is equivalent to solving the deterministic equation $g(f(x)) = 0$, which justifies treating $f(x \pm \delta x)$ as the deterministic $f(x)$ inside the equation.
+
+
+
+\subsection{Random vs Deterministic}
+
+In the context of statistical Taylor expansion, in an equation $g(f(x \pm \delta x)) = 0$ to solve for $f(x \pm \delta x)$, it seems that $f(x \pm \delta x)$ can be treated as a deterministic function $f(x)$ inside the equation.
+This principle needs to be further generalized by rigorous proofs.
+
+\begin{align}
+\label{eqn: first-order ODE}
+\frac{d}{d x} f(x) &= c_0 \pm \delta c_0; \\
+\label{eqn: first-order ODE solution}
+f(x) &= (x - x_0) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
+\label{eqn: first-order ODE mean}
+\overline{f(x)} &= (x - x_0) c_0 + \overline{f(x_0)}; \\
+\label{eqn: first-order ODE variance}
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + (\delta f(x_0))^2; \\
+\label{eqn: first-order ODE random}
+\frac{d}{d x} f(x \pm \delta x) &= \frac{d}{d x} f(x + \tilde{z} \delta x) = \sum_{n=0}^{\infty} \frac{f^{(n + 1)}_x}{n!} \tilde{z}^n (\delta x)^n = f^{(1)}_x = c_0 \pm \delta c_0;
+\end{align}
+For an example, Equation \eqref{eqn: first-order ODE} shows the simplest ordinary differential equation, with its solution in Formula \eqref{eqn: first-order ODE solution}, whose randomness comes from two different distributions: the coefficient $c_0 \pm \delta c_0$, and the initial condition $f(x_0) \pm \delta f(x_0)$, which are combined linearly in the solution.
+Formulas \eqref{eqn: first-order ODE mean} and \eqref{eqn: first-order ODE variance} give the mean and variance for the solution $f(x)$.
+Alternatively, Equation \eqref{eqn: first-order ODE random} uses $f(x \pm \delta x)$, but also leads to Equation \eqref{eqn: first-order ODE} because after applying Formula \eqref{eqn: Taylor 1d}, all terms containing the arbitrary variable $\tilde{z}$ have to vanish.
+Therefore, Equations \eqref{eqn: first-order ODE} and \eqref{eqn: first-order ODE random} are equivalent.
+
+\begin{align}
+\label{eqn: exponential ODE}
+\frac{d}{d x} f(x) &= (c_0 \pm \delta c_0) f(x); \\
+\label{eqn: exponential ODE random}
+\frac{d}{d x} f(x \pm \delta x) &= \frac{d}{d x} f(x + \tilde{z} \delta x) = (c_0 \pm \delta c_0)\,  f(x + \tilde{z} \delta x); \\
+\label{eqn: exponential ODE series}
+f^{(n)}_x &= (c_0 \pm \delta c_0)\, f^{(n - 1)}_x = (c_0 \pm \delta c_0)^n f(x), \quad n = 1,2, \dots; \\
+\label{eqn: exponential ODE solution}
+f(x + \tilde{z} \delta x) &= f(x) e^{(c_0 \pm \delta c_0) \tilde{z} \delta x};
+\end{align}
+For another example, Equation \eqref{eqn: exponential ODE} can be solved by substituting $y = \ln(f(x))$, resulting in Equation \eqref{eqn: first-order ODE}.
+Alternatively, Equation \eqref{eqn: exponential ODE random} leads to Formula \eqref{eqn: exponential ODE series}, which further leads to Formula \eqref{eqn: exponential ODE solution}.
+Substituting Formula \eqref{eqn: exponential ODE solution} back to Equation \eqref{eqn: exponential ODE random} results in Equation \eqref{eqn: exponential ODE}.
+Again, Equations \eqref{eqn: exponential ODE} and \eqref{eqn: exponential ODE random} are equivalent.
+
+
+\subsection{Are {eqn: first-order ODE mean} and {eqn: first-order ODE variance} the precise STE of {eqn: first-order ODE solution}?}
+
+The solution as a random function
+From eqn: first-order ODE solution:
+$$f(x) = (x - x_0)(c_1 \pm \delta c_1) + (f(x_0) \pm \delta f(x_0))$$
+
+Random variables: $c_1$ and $y_0 \equiv f(x_0)$.
+Deterministic: $x$ (evaluation point) and $x_0$ (anchor position).
+
+Rewrite grouping the random inputs:
+$$f(x) = \underbrace{(x - x_0)}{\text{constant}} \cdot c_1 + \underbrace{1}{\text{constant}} \cdot y_0$$
+
+This is linear in the random inputs $(c_1, y_0)$, with constant coefficients that depend only on the deterministic quantities $x, x_0$.
+
+Why STE is exact here
+For any function $g(u_1, \ldots, u_n)$, statistical Taylor expansion is:
+
+$$g(\mathbf{u}) = g(\overline{\mathbf{u}}) + \sum_i g_{u_i}, \Delta u_i + \tfrac{1}{2}\sum_{i,j} g_{u_i u_j}, \Delta u_i \Delta u_j + \cdots$$
+
+For our linear $f(x) = (x - x_0) c_1 + y_0$:
+
+$f_{c_1} = x - x_0$ (constant)
+$f_{y_0} = 1$ (constant)
+$f_{c_1 c_1} = 0, \quad f_{y_0 y_0} = 0, \quad f_{c_1 y_0} = 0$
+All third and higher derivatives $= 0$
+The Taylor series terminates at first order. Nothing is dropped — this IS the full STE.
+
+Deriving the mean (exact)
+$$\overline{f(x)} = f(\overline{c_1}, \overline{y_0}) + \underbrace{0 + 0 + \cdots}_{\text{all higher-order terms}} = (x - x_0), \overline{c_1} + \overline{y_0}$$
+
+Matching eqn: first-order ODE mean:
+$$\overline{f(x)} = (x - x_0), c_1 + \overline{f(x_0)}$$
+where $c_1$ here denotes $\overline{c_1}$ (the paper's shorthand — see below).
+
+Deriving the variance (exact, under independence)
+$$\delta^2 f(x) = f_{c_1}^2, \delta^2 c_1 + f_{y_0}^2, \delta^2 y_0 + 2 f_{c_1} f_{y_0}, \text{cov}(c_1, y_0) + \underbrace{0}_{\text{higher orders}}$$
+
+$$= (x - x_0)^2, (\delta c_1)^2 + (\delta y_0)^2 + 2(x - x_0), \text{cov}(c_1, y_0)$$
+
+Under the independence assumption $c_1 \perp y_0$, the covariance vanishes and:
+
+$$\delta^2 f(x) = (x - x_0)^2 (\delta c_1)^2 + (\delta f(x_0))^2$$
+
+matching eqn: first-order ODE variance exactly.
+
+What simplifications enter (compared to Case C)
+Simplification	Needed here?
+S1: Parametric-only randomness (deterministic ODE)	Yes — but same as always; this is the modeling assumption at the ODE level
+S2: Deterministic solution structure	Yes — same modeling assumption
+S3: Linearize at the mean (drop higher-order Taylor terms)	Not needed — the solution is already linear; higher-order terms are zero
+S4: Independence of the random inputs	Yes — used to drop the $\text{cov}(c_1, y_0)$ cross-term
+Contrast with the two-anchor Case C, which requires S1, S2, S3, and S4.
+
+Notation nuance at L1738
+The paper writes eqn: first-order ODE mean as:
+$$\overline{f(x)} = (x - x_0), c_1 + \overline{f(x_0)}$$
+
+Strictly, this should read $\overline{c_1}$ (the mean of the random $c_1$). Elsewhere in the paper, $c_1$ inside a "mean expression" is treated as shorthand for $\overline{c_1}$. So this is a minor notation shorthand, not an approximation. The formula is exact.
+
+Direct answer
+Yes, eqn: first-order ODE mean and eqn: first-order ODE variance are the precise (exact) statistical Taylor expansion of eqn: first-order ODE solution. No approximation is involved beyond:
+
+Modeling choice: the ODE has only parametric randomness (S1, S2 — same for all cases).
+Independence assumption: $c_1$ and $f(x_0)$ are independent (S4 — needed for the variance).
+No linearization (S3) is required, because the solution is already linear in $(c_1, f(x_0))$. STE terminates at first order exactly.
+
+\subsection{Is {eqn: first-order ODE variance intg} the precise STE of {eqn: first-order ODE solution intg}?}
+
+Yes — eqn: first-order ODE variance intg is the exact STE result for eqn: first-order ODE solution intg, provided the inputs are mutually independent. But it requires STE through second order, not just first order.
+
+Structure of the solution
+From eqn: first-order ODE solution intg:
+$$f(x) = (x - x_0),c_1 + y_0$$
+
+with random inputs $(x_0, c_1, y_0)$ and deterministic $x$.
+
+Rewriting to expose the interaction structure:
+$$f(x) = \underbrace{x, c_1}{\text{linear in } c_1} - \underbrace{x_0, c_1}{\text{bilinear in } (x_0, c_1)} + \underbrace{y_0}_{\text{linear in } y_0}$$
+
+This is bilinear — linear in each input separately, but with a product term $x_0 \cdot c_1$ that couples two random variables.
+
+Taylor structure
+For $g(x_0, c_1, y_0) = -x_0 c_1 + x c_1 + y_0$:
+
+First derivatives (at the means):
+$$g_{x_0} = -\overline{c_1}, \quad g_{c_1} = x - \overline{x_0}, \quad g_{y_0} = 1$$
+
+Second derivatives:
+$$g_{x_0 x_0} = 0, \quad g_{c_1 c_1} = 0, \quad g_{y_0 y_0} = 0$$
+$$g_{x_0 c_1} = -1 \quad (\text{non-zero!}), \quad g_{x_0 y_0} = 0, \quad g_{c_1 y_0} = 0$$
+
+Third and higher derivatives: all zero.
+
+The Taylor series terminates at second order because of the bilinear product $x_0 \cdot c_1$ (which produces a non-zero mixed second derivative $g_{x_0 c_1}$).
+
+Deriving the variance exactly
+For a bilinear function of independent inputs, the second-order Taylor term contributes to the variance. Direct calculation:
+
+$$\text{Var}[f(x)] = \text{Var}[c_1(x - x_0)] + \text{Var}[y_0]$$
+
+Using the exact variance-of-product formula for independent $c_1$ and $(x - x_0)$:
+$$\text{Var}[c_1 (x - x_0)] = \overline{c_1}^2, \text{Var}[x - x_0] + \overline{(x - x_0)}^2, \text{Var}[c_1] + \text{Var}[c_1], \text{Var}[x - x_0]$$
+
+Since $\text{Var}[x - x_0] = \delta^2 x_0$ (with $x$ deterministic) and $\overline{(x - x_0)} = x - \overline{x_0}$:
+
+$$\text{Var}[c_1 (x - x_0)] = \overline{c_1}^2, \delta^2 x_0 + (x - \overline{x_0})^2, \delta^2 c_1 + \delta^2 c_1 \cdot \delta^2 x_0$$
+
+Adding $\text{Var}[y_0] = \delta^2 y_0$:
+
+$$\delta^2 f(x) = (x - \overline{x_0})^2, (\delta c_1)^2 + \bigl(\overline{c_1}^2 + (\delta c_1)^2\bigr)(\delta x_0)^2 + (\delta y_0)^2$$
+
+Matching eqn: first-order ODE variance intg exactly (with $c_1, x_0$ inside the formula standing for $\overline{c_1}, \overline{x_0}$ by the paper's shorthand):
+
+$$\delta^2 f(x) = (x - x_0)^2, (\delta c_1)^2 + \bigl(c_1^2 + (\delta c_1)^2\bigr)(\delta x_0)^2 + (\delta f(x_0))^2$$
+
+The key term: $(\delta c_1)^2 (\delta x_0)^2$
+This is the product-of-variances term — precisely the contribution from the second-order Taylor term $g_{x_0 c_1}, \Delta x_0, \Delta c_1$.
+
+First-order STE (Jacobian only) would give: $(x - \overline{x_0})^2 (\delta c_1)^2 + \overline{c_1}^2, (\delta x_0)^2 + (\delta y_0)^2$. This drops the $(\delta c_1)^2 (\delta x_0)^2$ term.
+Second-order STE = exact for bilinear functions, and adds precisely the $(\delta c_1)^2 (\delta x_0)^2$ term.
+The paper's formula includes this product term. So it is the second-order (= exact for bilinear) STE result, not the first-order approximation.
+
+What simplifications enter
+Simplification	Needed for intg?
+S1: Parametric-only randomness	Yes (ODE modeling)
+S2: Deterministic solution structure	Yes (ODE modeling)
+S3: Linearize at the mean (drop higher-order Taylor terms)	Not needed — the bilinear function has zero third-and-higher derivatives; second-order STE captures everything
+S4: Independence of the random inputs $c_1, x_0, y_0$	Yes — used to drop covariance cross-terms and to apply the "variance of product" formula
+No linearization is required. The paper's formula is exact under independence.
+
+Direct answer
+Yes, eqn: first-order ODE variance intg is the exact STE of eqn: first-order ODE solution intg, under the independence assumption. The solution is bilinear, so second-order STE terminates the Taylor series. The formula's product-of-variances term $(\delta c_1)^2 (\delta x_0)^2$ is precisely the second-order contribution captured exactly.
+
+Contrast with the two-anchor Case C: that solution is a rational function (nonlinear in denominators), so the Taylor series does not terminate. The paper's Case C formulas keep only first-order terms, making them approximate. intg retains the second-order term ($\delta^2 c_1 \cdot \delta^2 x_0$) and is exact.
+
+The three variants in this section thus illustrate a progression:
+
+Linear function → first-order STE exact (no product-of-variances term).
+Bilinear function → second-order STE exact (one product-of-variances term).
+Rational function (higher-order nonlinearity) → all-orders STE required for exactness; the paper uses first-order approximation.
+
+
+\subsection{Solve Equation {eqn: first-order ODE} again with $c_0 \pm \delta c_0$ unknown, but with two initial condition $f(x_0) \pm \delta f(x_0)$ and $f(x_1) \pm \delta f(x_1)$}
+
+\subsubsection{Setup}
+ODE (same as before):
+$$\frac{df}{dx} = c_0 \pm \delta c_0 \quad \text{(now with $c_0 \pm \delta c_0$ unknown)}$$
+
+Boundary/anchor conditions:
+$$f(x_0) = \overline{f(x_0)} \pm \delta f(x_0), \qquad f(x_1) = \overline{f(x_1)} \pm \delta f(x_1)$$
+
+\subsubsection{Deriving the slope $c_0$}
+The ODE gives $f(x) = c_0(x - x_0) + f(x_0)$. At $x = x_1$:
+$$f(x_1) = c_0(x_1 - x_0) + f(x_0)$$
+
+Solving for $c_0$:
+$$\boxed{c_0 = \frac{f(x_1) - f(x_0)}{x_1 - x_0}}$$
+
+Mean of $c_0$:
+$$\overline{c_0} = \frac{\overline{f(x_1)} - \overline{f(x_0)}}{x_1 - x_0}$$
+
+Variance of $c_0$ (assuming $f(x_0)$ and $f(x_1)$ are independent):
+$$\delta^2 c_0 = \frac{\delta^2 f(x_0) + \delta^2 f(x_1)}{(x_1 - x_0)^2}$$
+
+So the slope is now a derived quantity, not a prior. Its uncertainty comes from the anchors and is inversely proportional to $(x_1 - x_0)^2$ — a wider baseline gives a more precise slope.
+
+\subsubsection{Solution $f(x)$ — linear interpolation}
+Substituting $c_0$ back:
+$$f(x) = \frac{f(x_1) - f(x_0)}{x_1 - x_0}(x - x_0) + f(x_0)$$
+
+Rearranged into standard interpolation form:
+$$\boxed{f(x) = \frac{x_1 - x}{x_1 - x_0}, f(x_0) + \frac{x - x_0}{x_1 - x_0}, f(x_1)}$$
+
+This is the linear-interpolation expression through the two anchor points.
+
+\subsubsection{Mean and variance}
+Let $\alpha \equiv \dfrac{x - x_0}{x_1 - x_0}$ and $\beta \equiv \dfrac{x_1 - x}{x_1 - x_0} = 1 - \alpha$.
+
+Mean:
+$$\overline{f(x)} = \beta, \overline{f(x_0)} + \alpha, \overline{f(x_1)}$$
+
+Variance (assuming independent anchors):
+$$\boxed{\delta^2 f(x) = \beta^2, \delta^2 f(x_0) + \alpha^2, \delta^2 f(x_1) = \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \delta^2 f(x_0) + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \delta^2 f(x_1)}$$
+
+\subsubsection{Key properties}
+1. At the anchors
+$x = x_0$: $\alpha = 0, \beta = 1$ → $\delta^2 f(x_0) = \delta^2 f(x_0)$  (consistent).
+$x = x_1$: $\alpha = 1, \beta = 0$ → $\delta^2 f(x_1) = \delta^2 f(x_1)$  (consistent).
+2. Interpolation region has lower variance than the anchors
+For $x \in (x_0, x_1)$, both $\alpha^2, \beta^2 < 1$, so $\delta^2 f(x) < \max(\delta^2 f(x_0), \delta^2 f(x_1))$.
+
+When $\delta^2 f(x_0) = \delta^2 f(x_1) = \sigma^2$ (equal anchor uncertainties), the minimum variance is at the midpoint $x = (x_0 + x_1)/2$:
+$$\delta^2 f(\text{mid}) = \frac{1}{2}\sigma^2$$
+
+This matches the standard result that averaging two independent measurements halves the variance.
+
+3. Extrapolation ($x \notin [x_0, x_1]$) grows variance quadratically
+For $x \gg x_1$ or $x \ll x_0$, $\alpha^2$ or $\beta^2$ grows unboundedly, and $\delta^2 f(x)$ grows quadratically. This is the well-known fact that extrapolation is much less reliable than interpolation.
+
+\subsubsection{Suggested formulas for the paper}
+If you want to add this variant to the section, three labeled formulas would suffice:
+
+
+\begin{align}
+\label{eqn: first-order ODE two anchors slope}
+c_0 &= \frac{f(x_1) - f(x_0)}{x_1 - x_0}; \\
+\label{eqn: first-order ODE two anchors solution}
+f(x) &= \frac{x_1 - x}{x_1 - x_0}\, f(x_0) + \frac{x - x_0}{x_1 - x_0}\, f(x_1); \\
+\label{eqn: first-order ODE two anchors variance}
+\delta^2 f(x) &= \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \delta^2 f(x_0) + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \delta^2 f(x_1);
+\end{align}
+With a short prose block covering:
+
+$c_0$ is derived, not prior — the ODE has 1 free parameter and 2 anchors, so it's over-determined for the coefficient by construction.
+Variance is minimized inside the interval (with midpoint when equal), and grows quadratically for extrapolation.
+Contrast with the coefficient-prior version: fundamentally different variance geometry (interior-minimum vs monotonic-from-anchor).
+\subsubsection{Interesting takeaway}
+The same ODE yields fundamentally different uncertainty structure depending on what's provided:
+
+Coefficient + one anchor: variance grows linearly with $|x - x_0|$; error accumulates from the anchor outward.
+Two anchors: variance has an interior minimum and grows quadratically with extrapolation; error is minimized between the anchors.
+This illustrates a general point worth highlighting: in the variance-arithmetic framework, the choice of what to specify (prior vs. anchor) shapes the uncertainty geometry of the solution, not just its value.
+
+\subsection{Solve Equation {eqn: first-order ODE} again with $c_0 \pm \delta c_0$ unknow, but with two initial condition $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ and $f(x_1 \pm \delta x_1) \pm \delta f(x_1)$}
+
+\subsubsection{Setup}
+ODE (same as before):
+$$\frac{df}{dx} = c_0 \pm \delta c_0 \quad \text{(with $c_0 \pm \delta c_0$ unknown)}$$
+
+Two anchor points, each with both $x$- and $y$-uncertainty:
+$$\bigl(x_0 \pm \delta x_0,; f(x_0) \pm \delta f(x_0)\bigr), \qquad \bigl(x_1 \pm \delta x_1,; f(x_1) \pm \delta f(x_1)\bigr)$$
+
+For readability, denote:
+$$\Delta x = x_1 - x_0, \qquad \Delta y = f(x_1) - f(x_0)$$
+
+\subsubsection{Deriving the slope $c_0$}
+
+The ODE integrates as before:
+$$c_0 = \frac{f(x_1) - f(x_0)}{x_1 - x_0} = \frac{\Delta y}{\Delta x}$$
+
+Mean:
+$$\overline{c_0} = \frac{\overline{f(x_1)} - \overline{f(x_0)}}{\overline{x_1} - \overline{x_0}}$$
+
+Variance — now propagating through both $\Delta y$ (from $y$-uncertainties) and $\Delta x$ (from $x$-uncertainties). Using statistical Taylor expansion:
+
+$$\frac{\partial c_0}{\partial f(x_0)} = -\frac{1}{\Delta x}, \quad \frac{\partial c_0}{\partial f(x_1)} = \frac{1}{\Delta x}, \quad \frac{\partial c_0}{\partial x_0} = \frac{c_0}{\Delta x}, \quad \frac{\partial c_0}{\partial x_1} = -\frac{c_0}{\Delta x}$$
+
+Assuming the four inputs are mutually independent:
+$$\boxed{\delta^2 c_0 = \frac{\delta^2 f(x_0) + \delta^2 f(x_1) + c_0^2, \bigl(\delta^2 x_0 + \delta^2 x_1\bigr)}{(x_1 - x_0)^2}}$$
+
+The new term $c_0^2 (\delta^2 x_0 + \delta^2 x_1)$ captures the propagation of $x$-uncertainty through the slope.
+
+\subsubsection{Solution $f(x)$}
+
+The linear-interpolation form is unchanged in expression:
+$$f(x) = \frac{x_1 - x}{x_1 - x_0}, f(x_0) + \frac{x - x_0}{x_1 - x_0}, f(x_1)$$
+
+But now $x_0, x_1, f(x_0), f(x_1)$ are all random. Let
+$$\alpha = \frac{x - x_0}{x_1 - x_0}, \qquad \beta = 1 - \alpha = \frac{x_1 - x}{x_1 - x_0}$$
+
+so $f(x) = \beta, f(x_0) + \alpha, f(x_1)$.
+
+Mean:
+$$\overline{f(x)} = \overline{\beta}, \overline{f(x_0)} + \overline{\alpha}, \overline{f(x_1)}$$
+(using mean values of $x_0, x_1$ inside $\overline{\alpha}, \overline{\beta}$).
+
+Variance — the derivatives of $f(x)$ with respect to all four random inputs, using $x$ as the deterministic evaluation point:
+
+$$\frac{\partial f}{\partial f(x_0)} = \beta, \quad \frac{\partial f}{\partial f(x_1)} = \alpha$$
+
+For the $x$-position derivatives (with $x$ fixed):
+$$\frac{\partial f}{\partial x_0} = -\beta, c_0, \qquad \frac{\partial f}{\partial x_1} = -\alpha, c_0$$
+
+(shown by direct differentiation of the interpolation formula; every unit shift of an anchor $x$-position translates $f$ at the fixed evaluation point by $c_0$ times the interpolation weight of that anchor).
+
+Combining with the independence assumption:
+
+$$\boxed{\delta^2 f(x) = \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \Bigl[\delta^2 f(x_0) + c_0^2, \delta^2 x_0\Bigr] + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \Bigl[\delta^2 f(x_1) + c_0^2, \delta^2 x_1\Bigr]}$$
+
+\subsubsection{Effective anchor uncertainty}
+The variance simplifies naturally with a single per-anchor quantity:
+
+$$\sigma_i^2 \equiv \delta^2 f(x_i) + c_0^2, \delta^2 x_i \qquad (i = 0, 1)$$
+
+giving:
+$$\delta^2 f(x) = \beta^2, \sigma_0^2 + \alpha^2, \sigma_1^2, \qquad \delta^2 c_0 = \frac{\sigma_0^2 + \sigma_1^2}{(x_1 - x_0)^2}$$
+
+$\sigma_i^2$ is the effective y-uncertainty of anchor $i$: it combines the direct y-variance with the x-variance propagated through the slope. This is exactly the form used in errors-in-variables regression (NR §15.3, TLS on two points).
+
+\subsubsection{Key properties}
+1. Reduces to the previous case when $\delta x_0 = \delta x_1 = 0$
+Then $\sigma_i^2 = \delta^2 f(x_i)$ and the formulas reduce to the two-anchor result from the previous derivation.
+
+2. At an anchor's mean position $x = \overline{x_0}$
+$\overline{\alpha} = 0, \overline{\beta} = 1$, so:
+$$\delta^2 f(\overline{x_0}) = \sigma_0^2 = \delta^2 f(x_0) + c_0^2, \delta^2 x_0$$
+
+Not just $\delta^2 f(x_0)$! The extra term captures that if the anchor was actually at $x_0 = \overline{x_0} + \Delta$, then $f(\overline{x_0}) = f(x_0) - c_0 \Delta$, adding $c_0^2 \delta^2 x_0$ to the variance.
+
+This is a distinctive feature of the both-axes-uncertain case: even at an anchor's mean position, the variance exceeds the anchor's $y$-uncertainty alone.
+
+3. Effective slope-uncertainty increases
+Compared to the y-only case, $\delta c_0$ increases by the factor
+$$\sqrt{1 + \frac{c_0^2 (\delta^2 x_0 + \delta^2 x_1)}{\delta^2 f(x_0) + \delta^2 f(x_1)}}$$
+
+For steep slopes ($|c_0|$ large) or large $x$-uncertainties, this factor can be substantial.
+
+4. Recovers TLS in structure
+The formula $\sigma_i^2 = \delta^2 y_i + c_0^2, \delta^2 x_i$ is the same "effective y-variance" as in errors-in-variables (Deming/TLS) regression. So this two-anchor problem with both-axis uncertainty is the minimal (2-point) instance of what NR §15.3 addresses in the many-point regression setting.
+
+\subsubsection{Suggested formulas for the paper}
+Three labeled equations analogous to the previous two-anchor set:
+
+
+\begin{align}
+\label{eqn: first-order ODE two anchors slope xy}
+c_0 &= \frac{f(x_1) - f(x_0)}{x_1 - x_0}; \\
+\label{eqn: first-order ODE two anchors delta c xy}
+\delta^2 c_0 &= \frac{\delta^2 f(x_0) + \delta^2 f(x_1) + c_0^2\,(\delta^2 x_0 + \delta^2 x_1)}{(x_1 - x_0)^2}; \\
+\label{eqn: first-order ODE two anchors variance xy}
+\delta^2 f(x) &= \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \bigl[\delta^2 f(x_0) + c_0^2\,\delta^2 x_0\bigr]
+             + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \bigl[\delta^2 f(x_1) + c_0^2\,\delta^2 x_1\bigr];
+\end{align}
+With prose noting:
+
+Each anchor contributes an effective y-variance $\sigma_i^2 = \delta^2 f(x_i) + c_0^2 \delta^2 x_i$.
+This is the two-point analogue of errors-in-variables (Deming/TLS) regression.
+Variance at the anchor's mean position exceeds $\delta^2 f(x_i)$ — a distinctive feature of both-axes uncertainty.
+Overall observation
+The three cases progressively enrich the uncertainty structure:
+
+Case A (coefficient prior): variance grows linearly from a single anchor, with the anchor's own uncertainty as the floor.
+Case B (2 anchors, y-only): interior minimum between anchors, quadratic extrapolation growth.
+Case C (2 anchors, both axes): same interior/exterior shape, but each anchor contributes an effective y-variance that couples $x$- and $y$-uncertainty through the slope.
+Case C is the fully symmetric formulation and connects directly to TLS/EIV regression — this is where the paper's variance-arithmetic framework meets classical measurement-error models.
+
+
+\begin{align}
+\label{eqn: first-order ODE two anchors slope xy}
+c_0 &= \frac{f(x_1) - f(x_0)}{x_1 - x_0}; \\
+\label{eqn: first-order ODE two anchors delta c xy}
+\delta^2 c_0 &= \frac{\delta^2 f(x_0) + \delta^2 f(x_1) + c_0^2\,(\delta^2 x_0 + \delta^2 x_1)}{(x_1 - x_0)^2}; \\
+\label{eqn: first-order ODE two anchors variance xy}
+\delta^2 f(x) &= \left(\frac{x_1 - x}{x_1 - x_0}\right)^2 \bigl[\delta^2 f(x_0) + c_0^2\,\delta^2 x_0\bigr]
+             + \left(\frac{x - x_0}{x_1 - x_0}\right)^2 \bigl[\delta^2 f(x_1) + c_0^2\,\delta^2 x_1\bigr];
+\end{align}
+With prose noting:
+
+Each anchor contributes an effective y-variance $\sigma_i^2 = \delta^2 f(x_i) + c_0^2 \delta^2 x_i$.
+This is the two-point analogue of errors-in-variables (Deming/TLS) regression.
+Variance at the anchor's mean position exceeds $\delta^2 f(x_i)$ — a distinctive feature of both-axes uncertainty.
+Overall observation
+The three cases progressively enrich the uncertainty structure:
+
+Case A (coefficient prior): variance grows linearly from a single anchor, with the anchor's own uncertainty as the floor.
+Case B (2 anchors, y-only): interior minimum between anchors, quadratic extrapolation growth.
+Case C (2 anchors, both axes): same interior/exterior shape, but each anchor contributes an effective y-variance that couples $x$- and $y$-uncertainty through the slope.
+Case C is the fully symmetric formulation and connects directly to TLS/EIV regression — this is where the paper's variance-arithmetic framework meets classical measurement-error models.
+
+\subsection{{eqn: exponential ODE series} is reached by assume all $\tilde{z}^n$ terms have to vanish.  Why it leads to {eqn: exponential ODE solution}?}
+
+Good question — it exposes exactly what "the $\tilde{z}^n$-terms vanish" does and does not mean. The short answer: what vanishes is the equation's residual, not the solution f. Let me make it precise.
+
+What actually vanishes
+Write the exponential random equation as a residual $R(x, tilde{z}) = 0$:
+$$R(x,\tilde z) ;=; \frac{d}{dx}f(x+\tilde z,\delta x) ;-; (c_0\pm\delta c_0),f(x+\tilde z,\delta x).$$
+
+Expand both terms in powers of $\tilde{z}$ (using $d/dx f(x+\tilde{z} \delta x) = \sum f^{(n+1)}_x/n!\,(\tilde{z} \delta x)^n$):
+$$R(x,\tilde z) ;=; \sum_{n=0}^{\infty}\frac{(\tilde z,\delta x)^n}{n!}\Big[,f^{(n+1)}_x - (c_0\pm\delta c_0),f^{(n)}_x,\Big].$$
+
+Requiring R = 0 for arbitrary $\tilde{z}$ means every $\tilde{z}^n$ coefficient of R vanishes:
+$$f^{(n+1)}_x - (c_0\pm\delta c_0),f^{(n)}_x = 0 \quad\Longrightarrow\quad f^{(n)}_x = (c_0\pm\delta c_0)^n f(x).$$
+
+That is [eqn: exponential ODE series]. So the series is precisely "all $\tilde{z}$-terms of the residual vanish" — you're right about the mechanism.
+
+Why that gives a $\tilde{z}$-dependent solution
+The vanishing conditions constrain the derivatives $f^{(n)}_x$; they do not force f(x+$\tilde{z}$ $\delta x$) itself to lose its $\tilde{z}$-dependence. Substituting those derivative values back into f's own Taylor series:
+$$f(x+\tilde z,\delta x) = \sum_{n=0}^{\infty}\frac{f^{(n)}x}{n!}(\tilde z,\delta x)^n = f(x)\sum{n=0}^{\infty}\frac{[(c_0\pm\delta c_0)\tilde z,\delta x]^n}{n!} = f(x),e^{(c_0\pm\delta c_0)\tilde z,\delta x}.$$
+
+No contradiction: making the residual vanish order-by-order fixes the recursion among derivatives, and those (all non-zero) derivatives resum into the $\tilde{z}$-dependent exponential. The solution keeps every order of $\tilde{z}$; only the equation is forced to hold at every order.
+
+Why this differs from the linear case — and confirms the [:1733] nuance
+For the linear ODE $f' = c_1 \pm \delta c_1$, the right-hand side is $\tilde{z}$-independent, so its residual is
+$$R = \big[f^{(1)}x-(c_1\pm\delta c_1)\big] + \sum{n\ge 1}\frac{(\tilde z,\delta x)^n}{n!},f^{(n+1)}_x.$$
+Vanishing order-by-order gives $f^{(1)} = c_1\pm\delta c_1$ and $f^{(n+1)} = 0$ for $n \geq 1$ --- the higher derivatives are killed, so $f(x+\tilde{z} \delta x) = f(x) + (c_1\pm\delta c_1) \tilde{z} \delta x$ truncates to first order in $\tilde{z}$.
+
+That is the difference: in the linear case the vanishing residual annihilates the higher derivatives (solution truncates); in the exponential case it merely relates them (solution keeps all orders). So :1733's phrase "resulting in only lowest order of each expression staying" is accurate only for the linear ODE — it does not describe the exponential, where nothing in the solution truncates. That's the prose over-generalization I flagged: the vanishing-residual requirement is general, but "only lowest order stays" is a linear-case consequence, not a universal one.
+
+\subsection{What is meaning of a complex variance?}
+
+A real variance can never be complex
+By definition, for a real random variable $\text{Var}(x) = E[(x-\overline{x})^2] \ge 0$ — always real and non-negative. So if a formula returns a complex (or negative) "variance," it is telling you that the object it describes is no longer a real random variable, and the ordinary variance formula has been pushed outside its domain.
+
+That is exactly what happens when $\overline{\Delta}<0$: $\sqrt{\overline{\Delta}}$ is imaginary, the two roots become a complex-conjugate pair, so $x$ is a complex random variable.
+
+What the formula is actually computing
+eqn: quadratic variance propagates $E[(x-\overline{x})^2]$ using $\big(\partial x/\partial c_i\big)^2$ — an ordinary square, not a modulus. For a complex $x = X + iY$, that quantity is the pseudo-variance (a.k.a. the relation or complementary variance):
+
+$$E[(x-\overline{x})^2] = \underbrace{\text{Var}(X) - \text{Var}(Y)}{\text{real part}} ;+; i,\underbrace{2,\text{Cov}(X,Y)}{\text{imag part}}.$$
+
+So the complex value is meaningful, but it is not a spread:
+
+Real part = how much more the real part scatters than the imaginary part.
+Imaginary part = the correlation between the real and imaginary parts (the tilt/orientation of the scatter ellipse in the complex plane).
+A complex "variance" of zero would mean the scatter is circularly symmetric (a "proper" complex random variable); a nonzero one measures its ellipticity and orientation.
+
+The quantity that is still a real spread
+The physical spread of a complex variable is the Hermitian second moment,
+
+$$E\big[,|x-\overline{x}|^2,\big] = \text{Var}(X) + \text{Var}(Y) ;\ge; 0,$$
+
+which you get by replacing every $\big(\partial x/\partial c_i\big)^2$ with $\big|\partial x/\partial c_i\big|^2$ (and $1/\overline{\Delta}\to 1/|\overline{\Delta}|$). That is always real and non-negative — a genuine variance — but it collapses two real degrees of freedom (the spreads of $X$ and $Y$) into one number and discards their correlation.
+
+Bottom line for the paper
+A complex $\delta^2 x$ is best read as a flag: the root has gone complex, and a single real scalar can no longer describe its uncertainty. To handle it properly you'd promote the variance to either
+
+the $2\times2$ real covariance matrix of $(X,Y)=(\text{Re},x,\text{Im},x)$, or equivalently
+the pair $\big(E[|x-\overline{x}|^2],, E[(x-\overline{x})^2]\big)$ — the Hermitian variance plus the complex pseudo-variance.
+
+\subsection{Can quadratic solution fit into a Hermitian matrix?}
+
+
+Yes — and it's actually the natural home for it. The complete second-order uncertainty of the complex root packages exactly into a 2×2 augmented covariance matrix, which is Hermitian by construction.
+
+The construction
+Write the first-order perturbation of the root as
+$$dx = \sum_i \frac{\partial x}{\partial c_i},\delta c_i,\tilde{c_i},$$
+where the partials $\partial x/\partial c_i$ are complex once $\overline{\Delta}<0$. Two real second moments survive:
+
+$$\underbrace{\lVert\delta x\rVert^2 \equiv E[,|dx|^2,] = \sum_i \Big|\tfrac{\partial x}{\partial c_i}\Big|^2 \delta^2 c_i}{\text{Hermitian variance, real},\ge 0}, \qquad \underbrace{\delta^2 x \equiv E[(dx)^2] = \sum_i \Big(\tfrac{\partial x}{\partial c_i}\Big)^2 \delta^2 c_i}{\text{pseudo-variance, complex}}.$$
+
+The second one is exactly the complex eqn: quadratic variance you already have. Assemble them:
+
+$$\Sigma \;=\; \begin{pmatrix} \lVert\delta x\rVert^2 & \delta^2 x \\[2pt] (\delta^2 x)^{*} & \lVert\delta x\rVert^2 \end{pmatrix}.$$
+
+This is Hermitian ($\Sigma^H=\Sigma$: real diagonal, conjugate off-diagonals) and positive semidefinite, because
+$$\lVert\delta x\rVert^2 = \sum_i \big|\tfrac{\partial x}{\partial c_i}\big|^2\delta^2 c_i ;\ge; \Big|\sum_i \big(\tfrac{\partial x}{\partial c_i}\big)^2\delta^2 c_i\Big| = |\delta^2 x|,$$
+so its eigenvalues $\lVert\delta x\rVert^2 \pm |\delta^2 x|$ are both $\ge 0$.
+
+Why the matrix is the right object here
+When $\overline{\Delta}<0$ the two roots are a conjugate pair, $x_- = x_+^{}$. The augmented vector is literally the root pair:
+$$\underline{x} = \begin{pmatrix} x_+ \ x_+^{}\end{pmatrix} = \begin{pmatrix} x_+ \ x_- \end{pmatrix}, \qquad \Sigma = E\big[,\underline{dx},\underline{dx}^H\big].$$
+So $\Sigma$ is nothing but the covariance of the two roots — the diagonal is each root's spread, the off-diagonal $\delta^2 x$ couples $x_+$ to $x_-$. The complex "variance" that looked meaningless as a scalar is precisely the off-diagonal coupling of the conjugate pair.
+
+Equivalent real form
+The same information sits in the real symmetric $2\times2$ covariance of $(\text{Re},x,\text{Im},x)$,
+$$\Sigma_{\mathbb R} = \begin{pmatrix}\mathrm{Var}(\mathrm{Re},x) & \mathrm{Cov} \ \mathrm{Cov} & \mathrm{Var}(\mathrm{Im},x)\end{pmatrix},$$
+related to $\Sigma$ by a fixed unitary transform. Reading off: $\mathrm{Var}(\mathrm{Re})+\mathrm{Var}(\mathrm{Im}) = \lVert\delta x\rVert^2$, $\mathrm{Var}(\mathrm{Re})-\mathrm{Var}(\mathrm{Im}) = \mathrm{Re},\delta^2 x$, $2,\mathrm{Cov} = \mathrm{Im},\delta^2 x$.
+
+Caveats for the paper
+Degenerate cases: $\Sigma$ becomes rank-1 (singular) when all $(\partial x/\partial c_i)^2$ share a phase — e.g. only one coefficient is uncertain. Then the scatter collapses to a line in the complex plane; $\lVert\delta x\rVert^2 = |\delta^2 x|$. That's physical, not a breakdown.
+Scope creep: adopting this means every value in the arithmetic would carry a Hermitian $2\times2$ (or a real variance plus a complex pseudo-variance) instead of one real scalar — a genuine generalization of the whole framework, not a local patch. That's exactly why the current text defers it ("not discussed further").
+So the honest one-line answer for the paper: the complex root's uncertainty is a rank-$\leq$2 positive-semidefinite Hermitian matrix whose real diagonal is $E[|x-\overline{x}|^2]$ and whose off-diagonal is the complex $\delta^2 x$ — the real-scalar variance arithmetic is just the special case where that matrix collapses to its (real) diagonal.
+
+
+\subsection{For a given E, solve $\delta E$ {eqn: stationary Schrödinger}. Then uses $\delta E$ $\delta t$ = $\hbar$, solve the life of $\delta t$}
+
+Step 1 — $\delta E$ from stability
+From before (with $c_1=0$):
+$$\overline{\Delta}=-\frac{2\hbar^2}{m}(E-V),\qquad \delta^2\Delta=\Big(\frac{2\hbar^2}{m}\Big)^2\delta^2 E+\Big(\frac{2\hbar^2(E-V)}{m^2}\Big)^2\delta^2 m .$$
+The state is statistically well-defined only up to the threshold $|\overline{\Delta}|=\hat\kappa,\delta\Delta$ (with $\hat\kappa=5$ Gaussian). Squaring and dividing by $(2\hbar^2/m)^2$:
+$$\hat\kappa^2\Big[\delta^2 E+\tfrac{(E-V)^2}{m^2}\delta^2 m\Big]=(E-V)^2
+;\Longrightarrow;
+\boxed{;\delta E=|E-V|\sqrt{\tfrac{1}{\hat\kappa^2}-\tfrac{\delta^2 m}{m^2}};}$$
+
+For a precise mass ($\delta m\to0$) this is simply
+$$\delta E=\frac{|E-V|}{\hat\kappa}=\frac{|E-V|}{5}=\frac{T}{5},$$
+where $T=E-V$ is the kinetic energy in the flat region.
+
+Step 2 — lifetime from $\delta E,\delta t=\hbar$
+$$\boxed{;\delta t=\frac{\hbar}{\delta E}=\frac{\hat\kappa,\hbar}{|E-V|}=\frac{5\hbar}{E-V}=\frac{5\hbar}{T};}$$
+(general mass: $\delta t=\dfrac{\hbar}{|E-V|\sqrt{1/\hat\kappa^2-\delta^2m/m^2}}$).
+
+Reading it
+$\delta t=5\hbar/(E-V)$ is the critical (minimum) lifetime for the state to be a statistically well-defined propagating/tunneling state: a particle at kinetic energy $T$ must persist at least $\sim\hbar/(T/5)=5\hbar/T$ for its character to be sharp. Shorter-lived than that: $\delta E>T/5 \longrightarrow\overline{\Delta}$ falls in the unstable band.
+Limits are consistent with the $E=V$ case: as $E\to V$ ($T\to0$), $\delta E\to0$ and $\delta t\to\infty$ — you need an infinitely sharp energy (infinitely long life) to sit exactly at the turning point, matching the earlier result.
+The mass width has a ceiling: stability needs $\delta m/m<1/\hat\kappa=1/5$; if the mass is that uncertain, $\delta E$ has no real solution — the mass uncertainty alone destabilizes the state, independent of $\delta t$.
+So, order-of-magnitude: a resonance sitting an energy $T=E-V$ above a flat well is "statistically stable" only if it lives longer than $\tau\sim 5\hbar/T$; equivalently its energy width must be below $T/5$. This is the STE-flavored version of the familiar $\Gamma\tau\sim\hbar$ resonance relation, with the $5$ ($=\hat\kappa$) coming from your bounded-moment (5-$\sigma$) stability criterion.
+
+Want me to add this $\delta E=|E-V|/\hat\kappa$, $\delta t=\hat\kappa\hbar/|E-V|$ result as a short remark after eqn: stationary Schrödinger?
+
+
+\subsection{Solve $\delta E$ {eqn: stationary Schrödinger} when E=V}
+
+The computation
+With $c_1=0$, the discriminant is
+$$\Delta = -4c_2c_0 = -\frac{2\hbar^2}{m}(E-V).$$
+Propagating the input uncertainties ($V$ precise, $m$ and $E$ uncertain):
+$$\delta^2\Delta = \Big(\underbrace{\tfrac{\partial\Delta}{\partial E}}{-2\hbar^2/m}\Big)^2\delta^2 E + \Big(\underbrace{\tfrac{\partial\Delta}{\partial m}}{2\hbar^2(E-V)/m^2}\Big)^2\delta^2 m .$$
+
+At $E=V$: $\overline{\Delta}=0$, and the $\partial\Delta/\partial m$ coefficient $\propto (E-V)$ vanishes, so
+$$\boxed{;\delta\Delta\big|_{E=V} = \frac{2\hbar^2}{m},\delta E;}\qquad(\delta m\ \text{drops out}).$$
+
+Solving $\delta E$ from the stability condition
+The state stays out of the unstable band only if $|\overline{\Delta}| \ge 5,\delta\Delta$. At $E=V$:
+$$0 = |\overline{\Delta}| ;\ge; 5,\delta\Delta = 5\cdot\frac{2\hbar^2}{m},\delta E ;;\Longrightarrow;; \boxed{\delta E = 0}.$$
+Any $\delta E>0$ puts $\overline{\Delta}=0$ inside $(-5\delta\Delta,,5\delta\Delta)$ → statistically unstable.
+
+What it means
+The mass uncertainty is irrelevant at the turning point. Because the kinetic energy $E-V\to0$, the coefficient of $\delta m$ in $\Delta$ vanishes --- only $\delta E$ controls the spread. So you cannot trade $\delta m$ against $\delta E$ here.
+$E=V$ is the propagating $\leftrightarrow$ tunneling boundary. A nonzero $\delta E$ straddles it, so the state is neither definitely oscillatory nor evanescent — genuinely indeterminate, which is the physical content of "statistically unstable."
+For your unstable-particle example this is decisive: such a particle has an intrinsic energy width $\delta E\sim\Gamma>0$, so $\delta E$ can never be $0$. Hence the configuration "particle energy exactly at the barrier top ($E=V$)" is always in the unstable band — the framework says a finite-width state cannot be sharply placed at a turning point. Only a perfectly sharp ($\delta E=0$, i.e. stable/infinitely-long-lived) particle can sit exactly at $E=V$.
+So: $\delta E=0$ is the only stable solution at $E=V$, and it's unreachable for a particle with a finite lifetime — a clean illustration of your $\Delta\approx0$ instability having real physical meaning.
+
+
+\subsection{Solve a one dimensional quantum well}
+
+\subsubsection{Setup}
+
+Finite square well of width $L$, depth $|V|$ (your convention $V<0$ inside):
+$$V(x)=\begin{cases} V=-|V|, &|x|<L/2 \\ 0, &|x|>L/2\end{cases}\qquad -\frac{\hbar^2}{2m}\psi''+V(x)\psi=E\psi .$$
+
+\subsubsection{Part A — Bound states $;(V<E<0)$}
+
+Define the two wavenumbers
+$$k=\frac{\sqrt{2m(E-V)}}{\hbar}=\frac{\sqrt{2m(E+|V|)}}{\hbar}\ \text{(inside, oscillatory)},\quad \kappa=\frac{\sqrt{-2mE}}{\hbar}\ \text{(outside, decaying)} .$$
+The potential is even, so eigenstates have definite parity:
+$$\psi_{\text{even}}=\begin{cases} A\cos kx, &|x|<L/2\\ Ce^{-\kappa|x|}, &|x|>L/2\end{cases}\quad 
+    \psi_{\text{odd}}=\begin{cases}A\sin kx, &|x|<L/2\\ \operatorname{sgn}(x),Ce^{-\kappa|x|}, &|x|>L/2\end{cases}$$
+Matching $\psi$ and $\psi'$ (equivalently $\psi'/\psi$) at $x=L/2$ gives the quantization conditions
+$$\boxed{;k\tan!\frac{kL}{2}=\kappa\ \text{(even)},\qquad -k\cot!\frac{kL}{2}=\kappa\ \text{(odd)};}$$
+
+Dimensionless form. With $u=kL/2,\ v=\kappa L/2$,
+$$u^2+v^2=R^2,\qquad R\equiv\frac{L}{2\hbar}\sqrt{2m|V|},$$
+so the levels are the intersections of the circle of radius $R$ with $v=u\tan u$ (even) and $v=-u\cot u$ (odd). The number of bound states is
+$$N=1+\left\lfloor \frac{2R}{\pi}\right\rfloor\quad(\ge1\ \text{always: the well always binds}).$$
+
+\subsubsection{Part B — Infinite-well limit recovers (eqn: quantum well energy)}
+
+As $|V|\to\infty$, $R\to\infty$, $\kappa\to\infty$: the wavefunction is forced to zero at the walls, $\tan(kL/2)\to\infty$ and $\cot(kL/2)\to0$, i.e. $kL=n\pi$. Then
+$$E_n-V=\frac{\hbar^2k_n^2}{2m}=\frac{n^2\pi^2\hbar^2}{2mL^2};\Longrightarrow;\boxed{,E_n=\frac{n^2\pi^2\hbar^2}{2mL^2}+V,}$$
+which is exactly your (eqn: quantum well energy) with the $L^2$ correction flagged earlier. A finite well sits below these values (wavefunction penetration widens the effective box, lowering $k$), with the deviation growing for the shallow, near-top levels:
+
+$n$	$E$ finite well	$E$ infinite-well formula	shift
+1	$-46.59$	$-45.07$	$-1.52$
+2	$-36.52$	$-30.26$	$-6.26$
+3	$-20.55$	$-5.59$	$-14.96$
+4	$-1.86$	$+28.96$ (unbound)	—
+(units $\hbar=m=L=1$, $|V|=50$; $R=5\Rightarrow N=4$.)
+
+\subsubsection{Part C — $E>0$: resonances, width, and lifetime}
+
+Above the well ($E>0$) the spectrum is continuous — these are scattering states, and the well shows up as transmission resonances. With inside wavenumber $k'=\sqrt{2m(E+|V|)}/\hbar$,
+$$T(E)=\left[1+\frac{|V|^2}{4E(E+|V|)}\sin^2(k'L)\right]^{-1},\qquad T=1\ \text{when}\ k'L=n\pi .$$
+The resonances therefore sit at
+$$E_n^{\text{res}}=\frac{n^2\pi^2\hbar^2}{2mL^2}+V\ (>0),$$
+i.e. the same level formula, now for the "would-be" states pushed above the continuum edge (numerically $n=4,5,6,\dots$ at $E=28.96,,73.37,,127.65,\dots$). These are the quasi-bound / metastable states — your "unstable resonance particle." Each has a Breit–Wigner width $\Gamma_n$ (from $dT/dE$ near the peak) and a lifetime
+$$\tau_n=\frac{\hbar}{\Gamma_n},$$
+which is exactly the $\Gamma\tau=\hbar$ / $\delta E,\delta t=\hbar$ relation behind (eqn: quantum well lifetime). A plain single well gives broad resonances (short-lived); sharp, long-lived quasi-bound states require confining barriers (a double-barrier / resonant-tunneling structure), which is where the $\tau=\hbar/\Gamma$ resonant-tunneling literature lives.
+
+\subsubsection{How it ties back to the paper}
+
+The bound branch (Part A/B) is where your $\Delta<0$ / stable-solution discussion applies: precise mass, sharp levels, no lifetime.
+The resonance branch (Part C) is the "$\Delta\in(-\hat\kappa\delta\Delta,\hat\kappa\delta\Delta)$ excluded" / unstable regime: finite width $\Gamma=\delta E$, finite lifetime $\delta t=\hbar/\delta E$, and — through $\partial E_n/\partial m=(E_n-V)/m$ — your $\delta t,\delta m\simeq 2m^2L^2/(n^2\pi^2\hbar)$.
+Want me to add this finite-well derivation (bound states + resonance condition) to the deduct tex, and apply the $L\to L^2$ fix to (eqn: quantum well energy) and (eqn: quantum well lifetime)?
+
+
+\subsection{Second Order Constant-Coefficient Homogeneous Ordinary Differential Equation}
+
+With "At $\Delta = 0$ and $\delta \Delta = 0$, $x =  A + B\, \omega_d\, t$ in Formula \eqref{eqn: homogeneous ODE overdamped}, and $x =  A + B\, \mu\, t$ in Formula \eqref{eqn: homogeneous ODE overdamped}.", what is the solution when $\delta \Delta > 0$?
+
+Take $\overline{\Delta} = 0$ with $\delta\Delta > 0$, and let
+
+$$t_\delta \equiv \frac{2|c_2|}{\sqrt{\delta\Delta}}$$
+
+which is $t_c$ built from $\delta\Delta$ instead of $\Delta$. Then the answer is that there is no single solution — the straight line becomes a fan opening around it.
+
+The result
+
+Write $s \equiv \Delta/4c_2^2$, so $\mu^2 = s$, $\omega_d^2 = -s$, $\overline{s} = 0$, $\delta s = 1/t_\delta^2$. Both branches are one expression in $s$:
+
+$$x = A,C(s) + B',t,S(s), \qquad C = \sum_n \frac{s^n t^{2n}}{(2n)!}, \quad S = \sum_n \frac{s^n t^{2n}}{(2n+1)!}$$
+
+Applying statistical Taylor expansion about $\overline{s} = 0$:
+
+$$\overline{x} \simeq A + B',t ;+; \frac{A}{24}\Big(\frac{t}{t_\delta}\Big)^{4} + \frac{B',t}{120}\Big(\frac{t}{t_\delta}\Big)^{4}$$
+
+$$\delta x \simeq \frac{A}{2}\Big(\frac{t}{t_\delta}\Big)^{2} + \frac{B',t}{6}\Big(\frac{t}{t_\delta}\Big)^{2}$$
+
+Note $C$ and $S$ depend on the same $s$, so they are fully correlated — the two contributions to $\delta x$ add linearly, not in quadrature.
+
+Reading it
+
+- $t \ll t_\delta$: $x = A + B't$, the $\delta\Delta = 0$ answer, with negligible spread.
+- $t \sim t_\delta$: $\delta x \sim A/2$. The spread is order unity and the solution has stopped meaning anything, even though its variance is still finite.
+- Throughout: the spread ($\propto t^2$) dominates the mean's departure from the straight line ($\propto t^4$) until $t \simeq 3.5,t_\delta$. The uncertainty is the leading effect, not a correction to it.
+
+So $\delta\Delta > 0$ does not perturb critical damping — it abolishes it as a case. What you have instead is a mixture: part of the ensemble oscillates, part runs away, and at long times the runaway realizations dominate $\overline{x}$.
+
+Consistency with what's already in the text
+
+$t_\delta = \sqrt{\hat\kappa};T^{}$, where $T^{} = 2|\overline{c_2}|/\sqrt{\hat\kappa,\delta\Delta}$ is the threshold in line 1970. So the fan reaches order-unity width at the same scale the separation band already identifies — the two statements agree, and this one supplies the quantitative content of "the two outcomes are delayed rather than destroyed": what actually happens during the delay is a quadratically widening fan.
+
+Also worth noting for the paper's own criteria: $\delta x$ stays finite at every $t$, because $C$ and $S$ are entire. What fails is the precision $\delta x/\overline{x} \sim (t/t_\delta)^2/2$. So variance arithmetic rejects this by unreliability, not by divergence.
+
+One caveat carried over: the formulas above use $B'$, the rescaled coefficient. Your sentence as written still has $\mu$ and $\omega_d$ swapped between the two branches, and both eqrefs pointing at overdamped, so plugging in its $B\omega_d$ and $B\mu$ literally would give zero at $\Delta = 0$.
+
+
+
+\section{Conclusion and Discussion}
+
+\subsection{Summary}
+
+\subsection{Improvements Needed}
+
+\subsection{Possible Connections to Quantum Physics}
+
+\begin{align}
+\label{eqn: Taylor 1d variance}
+\delta^2 f(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \bigl( \zeta(n, \kappa) - \zeta(j, \kappa)\, \zeta(n-j, \kappa) \bigr);
+\end{align}
+
+For input distribution without bounding, Formula \eqref{eqn: Taylor 1d variance} may not converge at all, for example, when the input uncertainty is Laplace \cite{Probability_Statistics}, $\zeta(2n, \infty) = (2n)!$.
+Formula \eqref{eqn: Taylor 1d variance} converges in all cases only when the input uncertainty is bounded because of sampling, which resembles the need for re-normalization in quantum field theory \cite{Quantum Field}.
+Furthermore, the quantitative dependency of convergence on the choice of ideal bounding range $\hat{\kappa}$ is similar to the principle of quantum physics: What it is depends on how it is measured.
+For example, it is possible that an experimental measurement reduces $\hat{\kappa}$ for a wave function, to cause the wave function to collapse when the uncertainty deviation reduces from infinite to finite.
+Both resemblances are worthy of further investigation.
+
+The substitution, step by step
+The parasitic solution is $f(x+\tilde z\delta x)=f(x),\beta$. Substitute it into the equation you substituted into — the random-argument ODE eqn: first-order ODE random (1738), whose RHS is $c\cdot f$:
+
+$$\underbrace{\frac{d}{dx}\big[f(x),\beta\big]}{\text{LHS}}=f'(x),\beta \qquad;\qquad \underbrace{c,f(x+\tilde z\delta x)}{\text{RHS}}=c,f(x),\beta.$$
+
+Equate and cancel $\beta\neq0$:
+$$\boxed{,f'(x)=c,f(x)=(c_0\pm\delta c_0),f(x),}$$
+
+So after the exponential cancels, the surviving equation for $f(x)$ is the multiplicative ODE — RHS still has the factor $f(x)$.
+
+Why that is not eqn: first-order ODE
+Line them up:
+
+label	equation	RHS
+eqn: first-order ODE (1728)	$f'(x)=c_0\pm\delta c_0$	constant $c$ — no $f$
+result of cancellation	$f'(x)=(c_0\pm\delta c_0),f(x)$	$c\cdot f$ — has $f$
+These are equal only if $f(x)\equiv 1$. In general they are different equations. The cancellation gives back the multiplicative ODE (the deterministic-argument form of eqn: first-order ODE random), not the additive eqn: first-order ODE. That is the whole of my "not."
+
+The source of the confusion
+I think the mental model is "(1738) is just the random-argument version of the simplest ODE (1728)." But they are not the same equation — (1738) has RHS $c\cdot f$, while (1728) has RHS $c$. Where does that extra factor $f$ come from? It's exactly what the series (1740), $f^{(n)}=c,f^{(n-1)}=c^n f$, requires — that recursion is the multiplicative ODE. The additive ODE has $f^{(1)}=c_0$, $f^{(2)}=0$, so it can never produce the geometric $c^n$ that sums to the exponential.
+
+The clean way to see it — do it for the additive ODE and no exponential appears
+If instead you use the additive random-argument ODE
+$$\frac{d}{dx}f(x+\tilde z\delta x)=c_0\pm\delta c_0,$$
+its solution is just
+$$f(x+\tilde z\delta x)=(x+\tilde z\delta x-x_0)(c_0\pm\delta c_0)+f_0=\underbrace{f(x)}_{\text{(1730)}}+;\tilde z,\delta x,(c_0\pm\delta c_0),$$
+which is linear in $\tilde z$ — no exponential at all. Substituting this back:
+$$\frac{d}{dx}\big[f(x)+\tilde z\delta x,c\big]=f'(x)=c_0\pm\delta c_0,$$
+and you do recover eqn: first-order ODE.
+
+The punchline
+You can have one of these, not both:
+
+Recover eqn: first-order ODE (additive) on substitution → then there is no parasitic exponential; the argument-uncertainty enters only as a benign linear term $\tilde z\delta x,c$.
+Produce the parasitic exponential → then the equation is the multiplicative one, and substituting back reproduces the multiplicative ODE, not eqn: first-order ODE.
+The current text tries to do both with a single equation, and that's why line 1747 ("…results in Equation eqn: first-order ODE") reads as inconsistent: the exponential and the additive equation cannot coexist. If the intended message is "smearing the argument injects a parasitic exponential," the honest statement is that it reproduces the multiplicative ODE eqn: first-order ODE random and the exponential never cancels out of the solution — it only cancels when checking the ODE, precisely because $f'=cf$ is what generated it.
+
+
+Assuming the IC as written has a typo and means $f(x_0\pm\delta x_0)\pm\delta f(x_0\pm\delta x_0)$ — i.e. the solution is now anchored at an uncertain initial position $x_0\pm\delta x_0$ (in addition to the uncertain value $\delta f(x_0)$ and uncertain slope $\delta c_0$). Here is the extension.
+
+Setup
+The general solution of $f'=c$ passing through the anchor $(x_0',v)$ is $f(x)=v+c,(x-x_0')$. Now all three inputs are random and mutually independent:
+
+slope $c=c_0\pm\delta c_0$,
+initial position $x_0'=x_0\pm\delta x_0$,
+initial value $v=f(x_0)\pm\delta f(x_0)$.
+So the run becomes $x-x_0'=\big(x-(x_0\pm\delta x_0)\big)$, a random variable with mean $x-x_0$ and deviation $\delta x_0$.
+
+Extended formulas
+$$f(x) = \big(x-(x_0\pm\delta x_0)\big),(c_0\pm\delta c_0) + \big(f(x_0)\pm\delta f(x_0)\big)$$
+
+$$\overline{f(x)} = (x-x_0),c_0 + \overline{f(x_0)}\qquad\text{(unchanged)}$$
+
+$$\delta^2 f(x) = (x-x_0)^2(\delta c_0)^2 + \big(c_0^2+(\delta c_0)^2\big)(\delta x_0)^2 + (\delta f(x_0))^2$$
+
+Ready to paste in the paper's style:
+
+
+\begin{align}
+\label{eqn: first-order ODE}
+\frac{d}{d x} f(x) &= c_0 \pm \delta c_0; \\
+\label{eqn: first-order ODE solution}
+f(x) &= \big(x - (x_0 \pm \delta x_0)\big) (c_0 \pm \delta c_0) + (f(x_0) \pm \delta f(x_0)); \\
+\label{eqn: first-order ODE mean}
+\overline{f(x)} &= (x - x_0) c_0 + \overline{f(x_0)}; \\
+\label{eqn: first-order ODE variance}
+\delta^2 f(x) &= (x - x_0)^2 (\delta c_0)^2 + \big(c_0^2 + (\delta c_0)^2\big) (\delta x_0)^2 + (\delta f(x_0))^2;
+\end{align}
+Why these are correct
+Mean — unchanged. The solution is a product of independent factors plus an independent term; the mean of a product of independent variables is the product of means. Since $x-(x_0\pm\delta x_0)$ has mean $x-x_0$ and $c_0\pm\delta c_0$ has mean $c_0$, and the IC value has mean $\overline{f(x_0)}$:
+$$\overline{f(x)}=(x-x_0)c_0+\overline{f(x_0)}.$$
+The position uncertainty contributes nothing to the mean because $f$ is linear (no $f''$ bias) and the position shift is zero-mean.
+
+Variance — one new term. For the product of two independent variables $U=x-(x_0\pm\delta x_0)$ (mean $x-x_0$, variance $\delta x_0^2$) and $W=c_0\pm\delta c_0$ (mean $c_0$, variance $\delta c_0^2$), the variance is exact and distribution-free:
+$$\delta^2(UW)=\mu_U^2\sigma_W^2+\mu_W^2\sigma_U^2+\sigma_U^2\sigma_W^2=(x-x_0)^2(\delta c_0)^2+c_0^2(\delta x_0)^2+(\delta c_0)^2(\delta x_0)^2.$$
+Adding the independent IC-value variance $(\delta f(x_0))^2$ and grouping the two $\delta x_0^2$ terms gives $\big(c_0^2+(\delta c_0)^2\big)(\delta x_0)^2$. So relative to the previous section the only addition is
+$$\underbrace{\big(c_0^2+(\delta c_0)^2\big)(\delta x_0)^2}_{\text{initial-position uncertainty, coupled through the slope}},$$
+whose leading part $c_0^2\delta x_0^2$ is "slope × position error" and whose $\delta c_0^2\delta x_0^2$ part is the exact product correction when both slope and position are uncertain.
+
+Assumptions worth stating in the text
+The slope $c_0\pm\delta c_0$, initial position $x_0\pm\delta x_0$, and initial value $f(x_0)\pm\delta f(x_0)$ are mutually independent.
+$\delta f(x_0\pm\delta x_0)$ is taken as $\delta f(x_0)$ to leading order (the extra argument-uncertainty inside $\delta f$ is second order and drops for the linear solution).
+Want me to write this block into the section and add the independence clause, or leave it for you to paste?
+
+\subsection{For a given $E_n$, use $\delta E \delta t = \hbar$, express $\delta t$ vs $\delta m$ in {eqn: quantum well energy}}
+
+Setup
+From Equation (eqn: quantum well energy),
+$$E_n = n^2\frac{\pi^2\hbar^2}{2mL} + V,$$
+only the mass $m$ carries uncertainty ($V$, $L$, $n$ are precise). Write the confinement (kinetic) energy as
+$$E_n - V = n^2\frac{\pi^2\hbar^2}{2mL} ;\equiv; \frac{C}{m},\qquad C \equiv \frac{n^2\pi^2\hbar^2}{2L}>0 .$$
+
+Propagate $\delta m \to \delta E$
+For a given level $E_n$ (fixed $n$), differentiate with respect to $m$:
+$$\frac{\partial E_n}{\partial m} = -,n^2\frac{\pi^2\hbar^2}{2m^2L} = -\frac{E_n-V}{m}.$$
+So the first-order STE width is
+$$\delta E = \left|\frac{\partial E_n}{\partial m}\right|\delta m = (E_n-V),\frac{\delta m}{m}.$$
+i.e. the fractional energy width equals the fractional mass uncertainty: $\dfrac{\delta E}{E_n-V}=\dfrac{\delta m}{m}$.
+
+Impose $\delta E,\delta t=\hbar$
+$$\boxed{;\delta t ;=; \frac{\hbar}{\delta E} ;=; \frac{\hbar}{E_n-V},\frac{m}{\delta m};}$$
+
+Eliminating $E_n-V=C/m$ gives it purely in terms of the well parameters and $\delta m$:
+$$\delta t ;=; \frac{\hbar,m}{(C/m),\delta m} ;=; \frac{\hbar,m^2}{C,\delta m} ;=; \frac{2,m^2 L}{n^2\pi^2\hbar},\frac{1}{\delta m}.$$
+
+Reading
+$\delta t \propto 1/\delta m$: a sharply defined mass ($\delta m\to0$) gives $\delta t\to\infty$ — a stable (bound) state. Mass uncertainty broadens the level and shortens the lifetime — a resonance. This is exactly the $\Gamma\tau=\hbar$ picture, with $\delta E$ playing the role of the width $\Gamma$ and the confinement energy $E_n-V$ setting the scale.
+$\delta t \propto 1/n^2$ and $\propto m^2 L$: higher levels are shorter-lived (wider) for the same $\delta m$; heavier particles / wider wells live longer.
+The result is dual to the earlier turning-point one ($\delta t = \hat\kappa\hbar/|E-V|$): there the width came from the STE stability threshold, here it comes directly from the mass uncertainty $\delta m$ through the level formula.
+Want me to add this derivation to the deduct tex (or a short version to the short tex) alongside (eqn: quantum well energy)?
+
+\section{Statements and Declarations}
+
+\subsection{Acknowledgments}
+
+\subsection{Data  Availability Statement}
+
+\subsection{Competing Interests}
+
+\subsection{Funding}
+
+\end{document}
