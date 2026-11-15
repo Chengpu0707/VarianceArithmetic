@@ -28,7 +28,7 @@ extremely slow unoptimized — build with -O3 -march=native (~3 hours full).
 using namespace var_dbl;
 
 namespace {
-constexpr double SQRT3 = 1.7320508075688772;
+const double SQRT3 = 1.7320508075688772;
 
 // Half-width of the input interval centered on the clean value.
 //   Gaussian: 5*dev (5-sigma rule)
@@ -42,6 +42,17 @@ inline double intervalBound(int noiseType, double noise, double cleanValue)
     }
     // FFT_Order::Gaussian == 0, White == 1
     return (noiseType == 0) ? 5.0 * noise : SQRT3 * noise;
+}
+
+// Write count, mean, deviation, minimum, minimum at, maximum, maximum at of {s}.
+void dumpStat(std::ofstream& ofs, const Stat<double, size_t>& s)
+{
+    ofs << '\t' << s.count() << '\t' << s.mean() << '\t' << s.std() << '\t' << s.min() << '\t';
+    if (s.minAt().has_value())
+        ofs << s.minAt().value();
+    ofs << '\t' << s.max() << '\t';
+    if (s.maxAt().has_value())
+        ofs << s.maxAt().value();
 }
 
 }  // anonymous namespace
@@ -165,7 +176,7 @@ void testBitReversion()
  */
 
 FFT_Signal::FFT_Signal(SignalType signalType, unsigned order, int freq, IndexSin::SinSource sinSource) :
-	order(order), size(1 << order), freq(freq), signalType(signalType), sinSource(sinSource), FFT(sinSource)
+	FFT(sinSource), sinSource(sinSource), order(order), size(1 << order), freq(freq), signalType(signalType)
 {
 	std::ostringstream oss;
 	if (freq * 2 >= size) {
@@ -407,55 +418,23 @@ FFT_Order::FFT_Order(const FFT_Signal& signal, NoiseType noiseType, double noise
 
 void FFT_Order::dump(std::ofstream& ofs, SignalType signalType, const Measure& measure) const
 {
-    auto dumpStat = [&ofs](const Stat<double, size_t>& s) {
-        ofs << '\t' << s.count() << '\t' << s.mean() << '\t' << s.std()
-            << '\t' << s.min() << '\t' << (s.minAt().has_value()? std::to_string(s.minAt().value()) : "")
-            << '\t' << s.max() << '\t' << (s.maxAt().has_value()? std::to_string(s.maxAt().value()) : "");
-    };
     for (unsigned testType = 0; testType < (sizeof(FFT_Order::sTestType)/sizeof(FFT_Order::sTestType[0])); ++testType) {
         const Stat<double, size_t>& uncStat( measure.sUncStat[testType] );
-        const Stat<double, size_t>& errStat( measure.sUncStat[testType] );
+        const Stat<double, size_t>& errStat( measure.sErrStat[testType] );
         const Stat<double, size_t>& rangeStat( measure.sRangeStat[testType] );
         const Stat<double, size_t>& uncRatioStat( measure.sUncRatioStat[testType] );
         const Stat<double, size_t>& rangeRatioStat( measure.sRangeRatioStat[testType] );
         const Histogram<double, size_t>& histo( measure.sHisto[testType] );
-#if __cplusplus >= 201103L
         ofs << IndexSin::sinSourceName(sinSource) << '\t' << FFT_Order::noiseTypeName(noiseType) << '\t' << noise
             << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType];
-        dumpStat(uncStat);          // header "Uncertainty"
-        dumpStat(errStat);          // header "Value" (aliased to uncStat — pre-existing)
-        // header "Error" — original code emitted histo stats here
-        ofs << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
-            << '\t' << histo.min() << '\t' << (histo.minAt().has_value()? std::to_string(histo.minAt().value()) : "")
-            << '\t' << histo.max() << '\t' << (histo.maxAt().has_value()? std::to_string(histo.maxAt().value()) : "");
-        dumpStat(rangeStat);        // header "Range"
-        dumpStat(uncRatioStat);     // header "Uncertainty Ratio"
-        dumpStat(rangeRatioStat);   // header "Range Ratio"
+        dumpStat(ofs, uncStat);          // header "Uncertainty"
+        dumpStat(ofs, errStat);          // header "Value"
+        dumpStat(ofs, histo);            // header "Error": stats of the normalized-error histogram
+        dumpStat(ofs, rangeStat);        // header "Range"
+        dumpStat(ofs, uncRatioStat);     // header "Uncertainty Ratio"
+        dumpStat(ofs, rangeRatioStat);   // header "Range Ratio"
         ofs << '\t' << histo.lowers() << '\t' << histo.uppers()
             << histo.formatted() << "\n";
-#else
-        std::ostringstream _o;
-        std::string _unc_min, _unc_max, _err_min, _err_max, _h_min, _h_max;
-        if (uncStat.minAt().has_value()) { _o << uncStat.minAt().value(); _unc_min = _o.str(); _o.str(""); }
-        if (uncStat.maxAt().has_value()) { _o << uncStat.maxAt().value(); _unc_max = _o.str(); _o.str(""); }
-        if (errStat.minAt().has_value()) { _o << errStat.minAt().value(); _err_min = _o.str(); _o.str(""); }
-        if (errStat.maxAt().has_value()) { _o << errStat.maxAt().value(); _err_max = _o.str(); _o.str(""); }
-        if (histo.minAt().has_value()) { _o << histo.minAt().value(); _h_min = _o.str(); _o.str(""); }
-        if (histo.maxAt().has_value()) { _o << histo.maxAt().value(); _h_max = _o.str(); _o.str(""); }
-        ofs << IndexSin::sinSourceName(sinSource) << '\t' << FFT_Order::noiseTypeName(noiseType) << '\t' << noise
-            << '\t' << FFT_Signal::signalTypeName(signalType) << '\t' << order << '\t' << freq << '\t' << FFT_Order::sTestType[testType]
-            << '\t' << uncStat.count()<< '\t' << uncStat.mean() << '\t' << uncStat.std()
-                << '\t' << uncStat.min() << '\t' << _unc_min
-                << '\t' << uncStat.max() << '\t' << _unc_max
-            << '\t' << errStat.count()<< '\t' << errStat.mean() << '\t' << errStat.std()
-                << '\t' << errStat.min() << '\t' << _err_min
-                << '\t' << errStat.max() << '\t' << _err_max
-            << '\t' << histo.count() << '\t' << histo.mean() << '\t' << histo.std()
-                << '\t' << histo.min() << '\t' << _h_min
-                << '\t' << histo.max() << '\t' << _h_max
-            << '\t' << histo.lowers() << '\t' << histo.uppers()
-            << histo.formatted() << "\n";
-#endif
     }
 }
 

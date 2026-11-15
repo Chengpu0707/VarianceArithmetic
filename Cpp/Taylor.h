@@ -60,7 +60,7 @@ struct TaylorIdException : public std::runtime_error
                 const VarDbl& value, const VarDbl& variance,
                 size_t n, size_t monotonics, const VarDbl& newValue, const VarDbl& newVariance) :
             runtime_error(what), input(input),
-            s1dTaylor(s1dTaylor), inPrec(inPrec), outPrec(outPrec),
+            inPrec(inPrec), outPrec(outPrec), s1dTaylor(s1dTaylor),
             value(value), variance(variance), n(n), monotonics(monotonics),
             newValue(newValue), newVariance(newVariance) {
     }
@@ -746,7 +746,7 @@ inline VarDbl Taylor::pow(const VarDbl& in, double exp,
 }
 
 template <>
-inline VarDbl VarDbl::operator/=(const VarDbl& other)
+inline VarDbl& VarDbl::operator/=(const VarDbl& other)
 {
     return *this *=  Taylor::pow(other, -1);
 }

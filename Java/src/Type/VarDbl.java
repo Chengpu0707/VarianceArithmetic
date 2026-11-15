@@ -5,6 +5,7 @@ package Type;
  * with arithmetic operator equivalents, ULP-aware initialization, and Taylor
  * expansion entry points. Mirrors Python varDbl.py and C++ VarDbl.h.
  */
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import Type.VarDbl;
@@ -250,16 +251,25 @@ public class VarDbl implements Comparable<VarDbl> {
         return var.minusInPlace(other);
     }
 
+    static private boolean isInteger(double value) {
+        return Double.isFinite(value) && (value == Math.rint(value));
+    }
+
     /*
      * this *= other
      */
     public VarDbl multiplyInPlace(final VarDbl other) throws InitException {
         final double value = this.value() * other.value();
         double uncertainty;
-        if ((other.uncertainty() == 0) && (this.uncertainty() == 0)) {  
-            final BigInteger op1 = BigInteger.valueOf((long) this.value());
-            final BigInteger op2 = BigInteger.valueOf((long) other.value());
-            uncertainty = ulp(op1.multiply(op2));
+        if ((other.uncertainty() == 0) && (this.uncertainty() == 0)) {
+            // Both are precise: only an integer product can be computed exactly,
+            // whose rounding into double is then its only uncertainty.
+            if (isInteger(this.value()) && isInteger(other.value())) {
+                final BigInteger op1 = new BigDecimal(this.value()).toBigIntegerExact();
+                final BigInteger op2 = new BigDecimal(other.value()).toBigIntegerExact();
+                uncertainty = Math.abs(ulp(op1.multiply(op2)));
+            } else
+                uncertainty = 0;
         } else if (other.uncertainty() == 0) {
             uncertainty = this.uncertainty() *  Math.abs(other.value());
         } else if (this.uncertainty() == 0) {

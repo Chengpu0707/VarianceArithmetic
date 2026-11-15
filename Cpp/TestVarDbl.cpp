@@ -8,12 +8,36 @@ overflow/initialization exception handling.
 #include "Test.h"
 #include "ulp.h"
 
-#include <functional>
+#include <limits>
 
 using namespace var_dbl;
 
 
-void assertValueError(std::function<void()> func, std::string what ) 
+// One VarDbl construction or operation expected to throw InitException.
+// A functor rather than a lambda, so this file also builds under C++03.
+struct VarDblCase {
+    enum Op { FLOAT, DOUBLE, PAIR, ADD, SUB, MUL };
+    Op op;
+    double v1, u1, v2, u2;
+
+    VarDblCase(Op op, double v1, double u1 = 0, double v2 = 0, double u2 = 0) :
+        op(op), v1(v1), u1(u1), v2(v2), u2(u2)
+    {}
+
+    void operator()() const {
+        switch (op) {
+        case FLOAT:  { VarDbl x(static_cast<float>(v1)); (void)x; break; }
+        case DOUBLE: { VarDbl x(v1); (void)x; break; }
+        case PAIR:   { VarDbl x(v1, u1); (void)x; break; }
+        case ADD:    { VarDbl x = VarDbl(v1, u1) + VarDbl(v2, u2); (void)x; break; }
+        case SUB:    { VarDbl x = VarDbl(v1, u1) - VarDbl(v2, u2); (void)x; break; }
+        case MUL:    { VarDbl x = VarDbl(v1, u1) * VarDbl(v2, u2); (void)x; break; }
+        }
+    }
+};
+
+
+void assertValueError(const VarDblCase& func, std::string what )
 {
     try {
         func();
@@ -26,13 +50,13 @@ void assertValueError(std::function<void()> func, std::string what )
     }
 }
 
-void assertUncertaintyError(std::function<void()> func, std::string what ) 
+void assertUncertaintyError(const VarDblCase& func, std::string what )
 {
     try {
         func();
         test::fail(what + std::string(" uncertainty overflow "));
-    } catch(InitException ex) {
-    } catch (std::exception ex) {
+    } catch(const InitException& ex) {
+    } catch (const std::exception& ex) {
         test::fail(what + std::string(" catch not InitException but exception ") + ex.what());
     } catch (...) {
         test::fail(what + std::string(" catch unknown exception other than InitException"));
@@ -67,7 +91,7 @@ void testInitInt() {
 void testInitFloat() {
     VarDbl::assertEqual( VarDbl(0.0f), 0, 0 );
     VarDbl::assertEqual( VarDbl(1.0f), 1, 0 );
-    assertValueError([](){ VarDbl(std::numeric_limits<float>::infinity()); }, "VarDbl(float inf)");
+    assertValueError(VarDblCase(VarDblCase::FLOAT, std::numeric_limits<float>::infinity()), "VarDbl(float inf)");
 }
 
 void testInitDouble() {
@@ -85,17 +109,17 @@ void testInitUncertainty() {
 }
 
 void testInitException() {
-    assertValueError([](){ VarDbl(1.0 / 0.0); }, "VarDbl(1.0 / 0.0)");
-    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity()); }, "VarDbl(double inf)");
-    assertValueError([](){ VarDbl(std::numeric_limits<double>::quiet_NaN()); }, "VarDbl(double nan)");
+    assertValueError(VarDblCase(VarDblCase::DOUBLE, 1.0 / 0.0), "VarDbl(1.0 / 0.0)");
+    assertValueError(VarDblCase(VarDblCase::DOUBLE, std::numeric_limits<double>::infinity()), "VarDbl(double inf)");
+    assertValueError(VarDblCase(VarDblCase::DOUBLE, std::numeric_limits<double>::quiet_NaN()), "VarDbl(double nan)");
 
     // InitException has precedence
-    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()); },
+    assertValueError(VarDblCase(VarDblCase::PAIR, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()),
                     "VarDbl(double inf, double inf)");
-    assertValueError([](){ VarDbl(std::numeric_limits<double>::infinity(), 0); },
+    assertValueError(VarDblCase(VarDblCase::PAIR, std::numeric_limits<double>::infinity(), 0),
                     "VarDbl(double inf, double 0)");
 
-    assertUncertaintyError([](){ VarDbl(0, std::numeric_limits<double>::quiet_NaN()); }, 
+    assertUncertaintyError(VarDblCase(VarDblCase::PAIR, 0, std::numeric_limits<double>::quiet_NaN()),
                         "VarDbl(double 0, double nan)");
 }
 
@@ -204,8 +228,8 @@ void testAddSubException()
 {
     const double maxV = std::numeric_limits<double>::max();
     const double maxU = sqrt(maxV);
-    assertValueError([maxV, maxU](){VarDbl(maxV, maxU) + VarDbl(maxV, maxU);}, "testAddSubException()");
-    assertUncertaintyError([maxV, maxU](){VarDbl(maxV, maxU) - VarDbl(maxV, maxU);}, "testAddSubException()");
+    assertValueError(VarDblCase(VarDblCase::ADD, maxV, maxU, maxV, maxU), "testAddSubException()");
+    assertUncertaintyError(VarDblCase(VarDblCase::SUB, maxV, maxU, maxV, maxU), "testAddSubException()");
 }
 
 void testMultiplyZero() 
@@ -253,8 +277,8 @@ void testMultiplyException()
 {
     const double maxV = sqrt(std::numeric_limits<double>::max()) * 1.001;
     const double maxU = sqrt(std::numeric_limits<double>::max()) * 0.5;
-    assertValueError([maxV, maxU](){VarDbl(maxV, maxU) * VarDbl(maxV, maxU);}, "testMultiplyException()");
-    assertUncertaintyError([maxU](){VarDbl(1, maxU) * VarDbl(1, maxU);}, "testMultiplyException()");
+    assertValueError(VarDblCase(VarDblCase::MUL, maxV, maxU, maxV, maxU), "testMultiplyException()");
+    assertUncertaintyError(VarDblCase(VarDblCase::MUL, 1, maxU, 1, maxU), "testMultiplyException()");
 }
 
 

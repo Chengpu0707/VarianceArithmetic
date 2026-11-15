@@ -15,6 +15,12 @@ With explicit args:
 using namespace var_dbl;
 
 int main(int argc, char** argv) {
+#if __cplusplus < 201103L
+    // runMatrixAnalysis runs cells on threads, which need C++11.
+    (void) argc; (void) argv;
+    std::cerr << "RunMatrixAnalysis requires -std=c++11 or later\n";
+    return 1;
+#else
     const size_t minSize     = (argc > 1) ? std::atoi(argv[1]) : 4;
     const size_t maxSize     = (argc > 2) ? std::atoi(argv[2]) : 10;
     const size_t targetCells = (argc > 3) ? std::atoi(argv[3]) : 1000;
@@ -26,4 +32,5 @@ int main(int argc, char** argv) {
                               Matrix::defaultNoises(), outDir);
     std::cout << "done\n";
     return 0;
+#endif
 }

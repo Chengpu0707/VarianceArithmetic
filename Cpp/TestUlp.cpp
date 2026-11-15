@@ -58,7 +58,8 @@ void dumpUlp()
                         (1LL<<53)+7LL, (1LL<<53)+15LL,
                         (1LL<<54)+1LL, (1LL<<55)+5LL,
                         7LL*(1LL<<50), 127LL*(1LL<<50)};
-    for (long long v : vals) {
+    for (size_t i = 0; i < sizeof(vals) / sizeof(vals[0]); ++i) {
+        const long long v = vals[i];
         VarDbl x(v);
         printf("C++  ulp(0x%016llX) = %g\n", v, std::sqrt(x.variance()));
     }

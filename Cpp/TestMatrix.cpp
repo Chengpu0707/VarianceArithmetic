@@ -156,6 +156,7 @@ void testRandomMatrix() {
 // per cell, and writes MatrixCondition_4_10.txt and AdjMatrix_4_10.txt under
 // Cpp/Output. The conversion lives in Matrix::runMatrixAnalysis (Matrix.h);
 // this entry point matches the Python driver's defaults.
+#if __cplusplus >= 201103L
 void dumpMatrix() {
     const size_t minSize     = 4;
     const size_t maxSize     = 10;   // exclusive
@@ -169,6 +170,7 @@ void dumpMatrix() {
                               Matrix::defaultNoises(), outDir);
     std::cout << "Matrix analysis complete\n";
 }
+#endif
 
 
 int main(int argc, char* argv[]) {
@@ -188,7 +190,10 @@ int main(int argc, char* argv[]) {
         testDetermPropagatesVariance();
         testRandomMatrix();
         std::cout << "All Matrix tests are successful";
-    } else if ((argc == 2) && (std::string(argv[1]) == "Test"))
+    }
+#if __cplusplus >= 201103L
+    else if ((argc == 2) && (std::string(argv[1]) == "Test"))
         dumpMatrix();
+#endif
     return 0;
 }

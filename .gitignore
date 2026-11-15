@@ -160,10 +160,7 @@ cython_debug/
 #.idea/
 
 .metadata/*
-Cpp/*.exe
-Cpp/*.gcov
-Cpp/*.gcda
-Cpp/&.gcno
+Cpp/bin/*
 Cpp/Output/*
 IPyNb/.ipynb_checkpoints/*
 Java/bin/*
@@ -193,3 +190,12 @@ Latex/VarianceArithmetic.pdf
 Latex/VarianceArithmetic.zip
 Latex/VarianceArithmetic_Short/*
 Latex/VarianceArithmetic.bib.bak
+
+# FitNesse runtime-generated files
+Fitnesse/FitnesseRoot/FitNesse/
+Fitnesse/FitnesseRoot/files/
+Fitnesse/FitnesseRoot/FrontPage/
+Fitnesse/FitnesseRoot/PageFooter/
+Fitnesse/FitnesseRoot/TemplateLibraries/
+Fitnesse/FitnesseRoot/RecentChanges.wiki
+Fitnesse/FitnesseRoot/**/*.zip

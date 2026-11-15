@@ -2862,3 +2862,272 @@ given:
 Please let me know your affiliation so that I can acknowledge you properly in my paper.
 
 
+Because Formula \eqref{eqn: bound moment asymptote} is not proven rigorously, it is a conjectures.
+Empirically, Formula \eqref{eqn: symmetric bound moment asymptote} is confirmed by Formula \eqref{eqn: Gaussian moment}, \eqref{eqn: uniform moment},  and \eqref{eqn: Laplace moment}, while Formula \eqref{eqn: bound moment asymptote} is confirmed by Formula \eqref{eqn: exponential asymptotic moment} and \eqref{eqn: Gamma asymptotic moment}.
+
+\subsubsection{Laplace Input Uncertainty}
+
+\iffalse
+
+\begin{align*}
+\rho(\tilde{z}) &= \frac{1}{\sqrt[4]{2}} e^{-\sqrt[4]{2}|\tilde{z}|}; \\
+\zeta(2) &= \frac{1}{\sqrt[4]{2}} \int_{0}^{+\infty} \tilde{z}^2 e^{-\sqrt[4]{2}\tilde{z}} d \tilde{z} 
+	= \frac{1}{2} \int_{0}^{+\infty} \tilde{z}^2 e^{-\tilde{z}} d \tilde{z} = \int_{0}^{+\infty} \tilde{z} e^{-\tilde{z}} d \tilde{z} = 1; \\
+\zeta(2n, \kappa) &= \frac{2}{\sqrt[4]{2}} \int_{0}^{\kappa} \tilde{z}^{2n}  e^{-\sqrt[4]{2} \tilde{z}} d \tilde{z} 
+		= \frac{2}{\sqrt{2^{n+1}}} \int_{0}^{\sqrt[4]{2} \kappa} \tilde{z}^{2n}  e^{-\tilde{z}} d \tilde{z} = \frac{2}{\sqrt{2^{n+1}}} \eta(n); \\
+\eta(2n) &\equiv \int_{0}^{\sqrt[4]{2} \kappa} \tilde{z}^{2n}  e^{-\tilde{z}} d \tilde{z} = 2n \eta(2n -1) - (\sqrt[4]{2} \kappa)^{2n}  e^{-\sqrt[4]{2} \kappa} \\
+	&= 2n (2n-1) \zeta(2n-2) -  e^{-\sqrt[4]{2} \kappa} (2n (\sqrt[4]{2} \kappa)^{2n -1} + (\sqrt[4]{2} \kappa)^{2n}) \\
+	& = (2n)!(1 - e^{-\sqrt[4]{2} \kappa}) - e^{-\sqrt[4]{2} \kappa} \sum_{j = 1}^{2n} \frac{(2n)!}{j!} (\sqrt[4]{2} \kappa)^j \\
+	&= (2n)! \left( 1 - e^{-\sqrt[4]{2} \kappa} (e^{\sqrt[4]{2}\kappa} - (\sqrt[4]{2} \kappa)^{2n} \sum_{j=1}^{+\infty} (\sqrt[4]{2} \kappa)^j \frac{1}{(2n + j)!}) \right) \\
+	&= e^{-\sqrt[4]{2} \kappa} \sqrt{2^n} \kappa^{2n} \sum_{j = 1}^{\infty} (\sqrt[4]{2} \kappa)^{j} \frac{(2n)!}{(2n + j)!}; \\
+\zeta(2n, \kappa) &= \frac{2}{\sqrt{2}} e^{-\sqrt[4]{2} \kappa} \kappa^{2n} \sum_{j = 1}^{\infty} (\sqrt[4]{2} \kappa)^{j} \frac{(2n)!}{(2n + j)!}; \\
+\kappa^2 \ll 2n:&\eqspace \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+\end{align*}
+
+\fi
+
+For Laplace distribution \cite{Probability_Statistics}, Formula \eqref{eqn: Laplace moment} provides $\zeta(2n, \kappa)$ while $\zeta(2n + 1, \kappa) = 0$, and Formula \eqref{eqn: Laplace asymptotic moment} demonstrates its asymptotic behavior.
+\begin{align}
+\label{eqn: Laplace moment} 
+\zeta(2n, \kappa) &= \int_{-\kappa}^{+\kappa} \tilde{z}^{2n} \frac{1}{\sqrt[4]{2}} e^{-\sqrt[4]{2} |\tilde{z}|} d \tilde{z}
+		= \frac{2}{\sqrt{2}} e^{-\sqrt[4]{2} \kappa} \kappa^{2n} \sum_{j = 1}^{\infty} (\sqrt[4]{2} \kappa)^{j} \frac{(2n)!}{(2n + j)!}; \\
+\label{eqn: Laplace asymptotic moment} 
+\lim_{n \rightarrow +\infty}& \zeta(2n, \kappa) = 2 \rho(\kappa) \frac{\kappa^{2n+1}}{2n+1};
+\end{align}
+
+
+
+\subsubsection{Exponential Input Uncertainty}
+
+\iffalse
+
+\begin{align*}
+\mu &= \int_{0}^{\infty} \tilde{x} e^{-\tilde{x}} d \tilde{x} = - \int_{0}^{\infty} \tilde{x} d e^{-\tilde{x}} = \int_{0}^{\infty} e^{-\tilde{x}} d \tilde{x} = 1; \\
+\sigma^2 &= \int_{0}^{\infty} \tilde{x}^2 e^{-\tilde{x}} d \tilde{x} - 1 = 2 \int_{0}^{\infty} \tilde{x} d e^{-\tilde{x}} - 1 = 1; \\
+\rho(\tilde{z}) &= e^{-\tilde{z} - 1}, \tilde{z} \in [-1, +\infty); \\
+e \zeta(1, \kappa) &= \int_{-\varrho}^{\kappa} \tilde{z} e^{-\tilde{z}} d\tilde{z}
+		= e^{-\kappa} - e^{+\varrho} + e^{+\varrho} \varrho - e^{-\kappa} \kappa = 0; \Longrightarrow |\varrho| \ll \kappa;   \\
+e \zeta(n, \kappa) &\simeq \int_{0}^{\kappa} \tilde{z}^{n} e^{-\tilde{z}} d\tilde{z} 
+		=  n \zeta(n - 1) - \kappa^{n} e^{-\kappa} 
+		=  n (n - 1) \zeta(n - 2) - n \kappa^{n - 1} e^{-\kappa} - \kappa^{n} e^{-\kappa} \\
+	&= n! -  e^{-\kappa} \sum_{j=0}^{n} \kappa^j \frac{(n)!}{j!}
+		= e^{-\kappa} \kappa^{n} \sum_{j = 1}^{\infty} \kappa^j \frac{(n)!}{(n + j)!}; \\
+\end{align*}
+
+\fi
+
+Formula \eqref{eqn: exponential moment} provides $\zeta(2n, \kappa)$, Formula \eqref{eqn: exponential mean preserving} shows the equation for the mean preserving condition, and Formula \eqref{eqn: exponential asymptotic moment} demonstrates its asymptotic behavior.
+\begin{align}
+\label{eqn: exponential moment} 
+e \zeta(n, \kappa) &= \int_{\varrho}^{\kappa} \tilde{x}^{n} e^{-\tilde{x}} d \tilde{x} 
+	= e^{-\kappa} \kappa^{n} \sum_{j = 1}^{\infty} (\kappa - 1)^j \frac{n!}{(n + j)!} 
+		- e^{+\varrho} (-\varrho)^{n} \sum_{j = 1}^{\infty} (-\varrho)^j \frac{n!}{(n + j)!}; \\
+\label{eqn: exponential mean preserving}
+& (1 - \varrho) e^{-(1 - \varrho)} = (\kappa - 1) e^{-(\kappa - 1)} \Longrightarrow 0 < \varrho < 1 < \kappa; \\
+\label{eqn: exponential asymptotic moment} 
+\lim_{n \rightarrow +\infty}& \zeta(n, \kappa) = \frac{1}{e} e^{-\kappa} \frac{\kappa^{n + 1}}{n + 1}; 
+\end{align}
+
+
+
+\subsubsection{Simplified Gamma Input Uncertainty}
+
+\iffalse
+
+\begin{align*}
+\rho(\tilde{x}) &\equiv \frac{1}{m!} \tilde{x}^{m} e^{-\tilde{x}},\eqspace x \in [0, +\infty); \\
+	&\int_{0}^{+\infty} \rho(\tilde{x}) d \tilde{x} = 1; \\
+	&\int_{0}^{+\infty} \tilde{x} \rho(\tilde{x}) d \tilde{x} = m + 1; \\
+	&\int_{0}^{+\infty} \tilde{x}^2 \rho(\tilde{x}) d \tilde{x} - \left(\int_{0}^{+\infty} \tilde{x} \rho(\tilde{x}) d \tilde{x} \right)^2 = (m + 2)(m+1) - (m + 1)^2 = m + 1; \\
+\tilde{z} &= \frac{\tilde{x} - (m + 1)}{\sqrt{m + 1}}, \tilde{z} \in [-\sqrt{m + 1}, +\infty); 
+\end{align*}
+
+\begin{align*}
+\eta(m) &\equiv \int_{\varrho}^{\kappa} \tilde{z}^{m} e^{-\tilde{z}} d \tilde{z} = m \eta(m - 1) + e^{-\varrho} \varrho^{m} - e^{-\kappa} \kappa^{m} \\
+	&= m (m - 1) \eta(m - 2) + e^{-\varrho} m \varrho^{m - 1} - e^{-\kappa} m \kappa^{m - 1} + e^{-\varrho} \varrho^{m} - e^{-\kappa} \kappa^{m} \\
+	&= m! \left( e^{-\varrho} \sum_{j=0}^{m} \frac{\varrho^j}{j!} - e^{-\kappa} \sum_{j=0}^{m} \frac{\kappa^j}{j!} \right) 
+		= m! \left( e^{-\kappa} \sum_{j=m+1}^{+\infty} \frac{\kappa^j}{j!} - e^{-\varrho} \sum_{j=m+1}^{+\infty} \frac{\varrho^j}{j!} \right) \\
+	&=  e^{-\kappa} \kappa^{m} \sum_{j=1}^{+\infty} \frac{m!}{(m+j)!} \kappa^j
+		- e^{-\varrho} \varrho^{m} \sum_{j=1}^{+\infty} \frac{m!}{(m+j)!} \varrho^j;
+\end{align*}
+
+\begin{align*}
+\zeta(n)_m &= \int_{\varrho}^{\kappa} \frac{1}{m!} \left( \frac{\tilde{x} - (m+1)}{\sqrt{m+1}} \right)^n \tilde{x}^{m} e^{-\tilde{x}} d \tilde{x} \\
+	&= \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \int_{\varrho}^{\kappa} \tilde{x}^{m + i} e^{-\tilde{x}} d \tilde{x} \\
+	&= e^{-\varrho} \sum_{i = 0}^{n} \frac{(-1)^i n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \frac{(m + i)!}{m!} \sum_{j=0}^{m+i} \frac{\varrho^j}{j!} 
+	 	- e^{-\kappa} \sum_{i = 0}^{n} \frac{(-1)^i n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \frac{(m + i)!}{m!} \sum_{j=0}^{m+i} \frac{\kappa^j}{j!}; \\
+& 0 = \zeta(1)_m = e^{-\varrho} \sqrt{m + 1} \sum_{j=0}^{m} \frac{\varrho^j}{j!} - e^{-\varrho} \sqrt{m + 1} \sum_{j=0}^{m + 1} \frac{\varrho^j}{j!} 
+		- e^{-\kappa} \sqrt{m + 1} \sum_{j=0}^{m} \frac{\kappa^j}{j!} + e^{-\kappa} \sqrt{m + 1} \sum_{j=0}^{m + 1} \frac{\kappa^j}{j!} \\
+	&\eqspace = \sqrt{m + 1} e^{-\kappa} \frac{\kappa^{m+1}}{(m+1)!} - \sqrt{m + 1} e^{-\varrho} \frac{\varrho^{m+1}}{(m+1)!};
+		\Longrightarrow e^{-\varrho} \varrho^{m+1} = e^{-\kappa} \kappa^{m+1}; \Longrightarrow 0 < \varrho < m+ 1 < \kappa; \\
+\zeta(n)_m &= \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} e^{-\kappa} \kappa^{m+i} \sum_{j=1}^{+\infty} \frac{(m+i)!}{(m+i+j)!} \kappa^j \\
+	&\eqspace - \frac{1}{m!} \sum_{i = 0}^{n} \frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} e^{-\varrho} \varrho^{m+i} \sum_{j=1}^{+\infty} \frac{(m+i)!}{(m+i+j)!} \varrho^j\\
+& \lim_{n \rightarrow +\infty} \zeta(n)_m = e^{-\kappa} \frac{1}{m!} \sum_{i = 0}^{n} 
+		\frac{n!}{i! (n-i)!} \sqrt{(m+1)^{n - 2i}} \kappa^{m+i} \frac{(m+i)!}{(m+n+1)!} \kappa^{n + 1 - i} \\
+&\eqspace = \frac{1}{m!} e^{-\kappa} \frac{\kappa^{m+n+1}}{(m+n+1)} \frac{1}{\sqrt{(m+1)^n}};
+\end{align*}
+
+\fi
+
+The gamma distribution \cite{Probability_Statistics} $\rho(\tilde{x}) = x^{\alpha - 1} e^{- x /\lambda} \lambda^{\alpha} /\Gamma(\alpha), \tilde{x}, \alpha, \lambda > 0$ is simplified as Formula \eqref{eqn: Gamma probability density}, whose mean and deviation are $m + 1$ and $\sqrt{m + 1}$, respectively.
+Formula \eqref{eqn: Gamma moment} provides $\zeta(2n, \kappa)$, Formula \eqref{eqn: Gamma mean preserving} shows the equation for the mean preserving condition, and Formula \eqref{eqn: Gamma asymptotic moment} demonstrates its asymptotic behavior.
+\begin{align}
+\label{eqn: Gamma probability density}
+\rho(\tilde{x}) &= \frac{1}{m!} \tilde{x}^m e^{-\tilde{x}}, x \in [0, +\infty), m = 0,1,...; \\
+\label{eqn: Gamma moment} 
+\zeta(n, \kappa) &= \int_{\varrho}^{\kappa} \left(\frac{\tilde{x} - (m+1)}{\sqrt{m+1}} \right)^n \rho(\tilde{x}) d \tilde{x} \\
+\label{eqn: Gamma mean preserving}
+& e^{-\varrho} \varrho^{m+1} = e^{-\kappa} \kappa^{m+1}; \Longrightarrow 0 < \varrho < m+1 < \kappa; \\
+\label{eqn: Gamma asymptotic moment} 
+\lim_{n \rightarrow +\infty}& \zeta(n, \kappa) \simeq \frac{1}{m!} e^{-\kappa} \frac{\kappa^{m+n+1}}{m+n+1}; 
+\end{align}
+
+
+
+The moment matrix of Formula \eqref{eqn: poly normal}, $\mathbf{H} = \frac{1}{N}\mathbf{V}^T\mathbf{V}$ where $\mathbf{V}$ is the $N \times (P+1)$ Vandermonde matrix $V_{jp} = X_j^p$, is positive semi-definite with rank equal to the number of distinct sample values $D \leq N$.
+The system has a unique solution if and only if $P + 1 \leq D$; the maximum solvable order is therefore $P = D - 1 \leq N - 1$.
+At this upper bound the polynomial interpolates all data points exactly and $R_P = 0$ trivially, so meaningful regression requires $P \ll N$.
+
+\subsection{Uncorrelated Uncertainty Condition}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.5in]{Signal_and_Noise.pdf}
+\captionof{figure}{
+Effect of noise on bit values of a measured value.  
+The triangular wave signal and the added white noise are shown at the top using the thin black line and the grey area, respectively.  
+The values are measured by a theoretical 4-bit Analog-to-Digital Converter in ideal condition, assuming the LSB is the 0th bit.  
+The measured 3rd and 2nd bits without the added noise are shown using thin black lines, while the mean values of the measured 3rd and 2nd bits with the added noise are shown using thin grey lines.
+This figure is a reproduction of Figure 1 in \cite{Prev_Precision_Arithmetic}.
+}
+\label{fig: Signal_and_Noise}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.25in]{Independent_Uncertainty_Assumption.pdf} 
+\captionof{figure}{
+$\gamma$ versus $P$ for different $\gamma_P$ in Formula \eqref{eqn: uncertainty correlation}.
+If $\gamma_P$ is the maximal allowed correlation at the uncertainty level for the uncorrelated uncertainty assumption to hold, then $\gamma$ is the maximal allowed correlation for the two signals.
+For a given $\gamma_P$, $\gamma$ increases with finer $P$.
+This figure is a reproduction of Figure 2 in \cite{Prev_Precision_Arithmetic}.
+}
+\label{fig: Independent_Uncertainty_Assumption}
+\end{figure}
+
+A signal consists of many signal values, each carrying uncertainty.
+The uncorrelated uncertainty condition \cite{Prev_Precision_Arithmetic} states that the uncertainty-level correlation is less than the signal-level correlation when the precision is less than $1$.
+It is the statistical foundation for statistical Taylor expansion \footnote{In the following quotation from \cite{Prev_Precision_Arithmetic}, minor spelling and grammar mistakes have been corrected, and axis labels and title for Figure \ref{fig: Independent_Uncertainty_Assumption} have been changed.}:
+\begin{quotation}
+
+Let $X$, $Y$, and $Z$ denote three mutually independent random variables \cite{Probability_Statistics} with variances $V(X)$, $V(Y)$ and $V(Z)$, respectively.  
+Let $\alpha$ denote a constant.
+Let $C()$ denote the covariance function.  
+Let $\gamma$ denote the correlation between $(X + Y)$ and $(\alpha X + Z)$. 
+\begin{align}
+\label{eqn: uncertainty ratio}
+& \eta _{1} ^{2} \equiv \frac{V(Y)}{V(X)}; \quad
+ \eta _{2} ^{2} \equiv \frac{V(Z)}{V(\alpha X)} =\frac{V(Z)}{\alpha ^{2} V(X)};  \\
+\label{eqn: uncertainty correlation}
+& \gamma =\frac{C(X+Y,\alpha X+Z)}{\sqrt{V(X+Y)} \sqrt{V(\alpha X+Z)}}  =\frac{\alpha /|\alpha |}{\sqrt{1+\eta _{1} ^{2} } \sqrt{1+\eta _{2} ^{2}}} \equiv \frac{\alpha /|\alpha |}{1+\eta ^{2}};
+\end{align}
+Formula \eqref{eqn: uncertainty correlation} gives the correlation $\gamma$ between two random variables, each of which contains a completely uncorrelated part and a completely correlated part $X$, with $\eta$ being defined as the average ratio between these two parts.  
+Formula \eqref{eqn: uncertainty correlation} can also be interpreted conversely: if two random variables are correlated by $\gamma$, each of them can be viewed hypothetically as containing a completely uncorrelated part and a completely correlated part, with $\eta$ being the average ratio between these two parts.
+The correlated parts common to different measurements are regarded as signals, which can either be desired or unwanted.
+
+One special application of Formula \eqref{eqn: uncertainty correlation} is the correlation between a measured signal and its true signal, in which noise is the uncorrelated part between the two.  
+Figure \ref{fig: Signal_and_Noise} shows the effect of noise on the most significant two bits of a 4-bit measured signal.  
+Its top chart shows a triangular waveform between 0 and 16 as a black line, and white noise between $-2$ and $+2$, using the grey area.  
+The measured signal is the sum of the triangle waveform and the noise.  
+The middle chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 3rd bit of the true signal as a black line, and the mean values of the 3rd bit of the measurement as a grey line.  
+The 3rd bit is affected by the noise during its transition between 0 and 1.  
+For example, when the signal is slightly below 8, only a small positive noise can turn the 3rd bit from 0 to 1.  
+The bottom chart of Figure \ref{fig: Signal_and_Noise} shows the values of the 2nd bit of the signal and the measurement as a black line and a grey line, respectively.  
+Figure \ref{fig: Signal_and_Noise} clearly shows that the correlation between the measurement and the true signal is less at the 2nd bit than at the 3rd bit.  
+Quantitatively:
+\begin{itemize}
+\item  The overall measurement is 98.0\% correlated to the signal with $\eta=1/7$;
+\item  The 3rd bit of the measurement is 94.1\% correlated to the signal with $\eta=1/4$;
+\item  The 2nd bit of the measurement is 80.0\% correlated to the signal with $\eta=1/2$;
+\item  The 1st bit of the measurement is 50.0\% correlated to the signal with $\eta=1$;
+\item  The 0th bit of the measurement is 20.0\% correlated to the signal with $\eta=2$.
+\end{itemize}
+The above conclusion agrees with the common experience that, below the noise level of measured signals, noise rather than true signals dominates each bit.  
+
+Similarly, while the correlated portion between two values has the same magnitude at every bit position, the ratio of the uncorrelated portion to the correlated portion doubles for each bit position below the MSB. 
+Quantitatively, let $P$ denote the precision of an imprecise value, and let $\eta_{P}$ denote the ratio of the uncorrelated portion to the correlated portion at the level of uncertainty; then $\eta_{P}$ increases as $P$ decreases according to Formula \eqref{eqn: uncertainty level}. 
+According to Formula \eqref{eqn: uncertainty correlation}, if two signals are overall correlated with $\gamma$, at the level of uncertainty, the correlation between the two values decreases to $\gamma_P$ according to Formula \eqref{eqn: precision correlation}.
+\begin{align}
+\label{eqn: uncertainty level}
+& \eta_{P} = \frac{\eta}{P}, \quad P < 1; \\
+\label{eqn: precision correlation}
+& \frac{1}{\gamma_{P}} - 1 = \left(\frac{1}{\gamma} -1\right) \frac{1}{P^2}, \quad P < 1;
+\end{align}
+
+Figure \ref{fig: Independent_Uncertainty_Assumption} plots the relation of $\gamma$ vs. $P$ for each given $\gamma_{P}$ in Formula \eqref{eqn: precision correlation}.  
+When $\gamma_{P}$ is less than a predefined threshold (e.g., 2\%, 5\%, or 10\%), the two values can be deemed uncorrelated at the level of uncertainty.  
+For each independence standard $\gamma_{P}$, there is a maximal allowed correlation between two values below which the uncorrelated uncertainty assumption of statistical Taylor expansion holds.  
+The maximal allowed correlation is a function of the coarser precision of the two values according to Formula \eqref{eqn: precision correlation}.  
+Figure \ref{fig: Independent_Uncertainty_Assumption} shows that for two precisely measured values, their correlation $\gamma$ is allowed to approach 1.  
+
+\end{quotation}
+
+\section{Solving Equations}
+\label{sec: equations}
+
+A $g(f(x), \dots) = 0$ equation provides the solution $f(x)$ at a precise point $x$.
+If $g(f(x, dots)$ is analytic, $g(f(x), \dots)_x^{(j)} = 0, j = 0,1\dots$, which means $\forall \tilde{x}: 0 = g(f(x + \tilde{x}, dots) =  g(f(x + \delta x, dots)$.
+Thus, 
+
+
+Its analytic solution $f(x)$ is random if any of the coefficients, initial conditions, and boundary conditions is random.
+
+\begin{align}
+\label{eqn: random to deterministic}
+\forall \tilde{z}: 0 = g(f(x \pm \delta x)) = g(f(x + \tilde{z} \delta x))
+   = \sum_{n=0}^{\infty} \frac{\tilde{z}^n (\delta x)^n}{n!} \, \frac{d^n}{d x^n} g(f(x));
+\end{align}
+A $g(f(x \pm \delta x), \dots) = 0$ equation provides the solution $f(x \pm \delta x)$ at an imprecise point $x \pm \delta x$.
+Applying Formula \eqref{eqn: Taylor 1d} to expand the composite function $g(f(x + \tilde{z} \delta x))$ around $x$ results in Equation \eqref{eqn: random to deterministic}.
+When $g(f(x))$ is analytic, the lowest order $n = 0$ recovers the deterministic equation $g(f(x)) = 0$, whereas the higher orders $n \geq 1$ vanish once $g(f(x)) = 0$ holds over the range around $x$.
+Therefore, solving $g(f(x \pm \delta x)) = 0$ is equivalent to solving $g(f(x)) = 0$, then replacing $x$ with $x \pm \delta x$.
+\begin{align}
+\label{eqn: exponential ODE}
+\frac{d}{d x} f(x) &= (c_0 \pm \delta c_0) f(x); \\
+\label{eqn: exponential ODE random}
+\frac{d}{d x} f(x \pm \delta x) &= \frac{d}{d x} f(x + \tilde{z} \delta x) = (c_0 \pm \delta c_0)\,  f(x + \tilde{z} \delta x); \\
+\label{eqn: exponential ODE series}
+f^{(n)}_x &= (c_0 \pm \delta c_0)\, f^{(n - 1)}_x = (c_0 \pm \delta c_0)^n f(x), \quad n = 1,2, \dots; \\
+\label{eqn: exponential ODE solution}
+f(x + \tilde{z} \delta x) &= f(x)\, e^{(c_0 \pm \delta c_0) \tilde{z} \delta x}; \\
+\label{eqn: exponential ODE result}
+f(x \pm \delta x) &= A\, e^{(c_0 \pm \delta c_0) (x \pm \delta x)};
+\end{align}
+As a special example of Equation \eqref{eqn: random to deterministic}, Equation \eqref{eqn: exponential ODE random} has its counterpart in 
+Equation \eqref{eqn: exponential ODE}.
+Equation \eqref{eqn: exponential ODE random} leads to Formula \eqref{eqn: exponential ODE series}, which further leads to Formula \eqref{eqn: exponential ODE solution}.
+Substituting Formula \eqref{eqn: exponential ODE solution} back to Equation \eqref{eqn: exponential ODE random} results in Equation \eqref{eqn: exponential ODE}.
+Formula \eqref{eqn: exponential ODE result} is the solution for both Equation \eqref{eqn: exponential ODE} (via $x \rightarrow x \pm \delta x$) and Equation \eqref{eqn: exponential ODE random}, in which $A$ is determined by the initial condition.
+
+Statistical Taylor expansion provides the statistical interpretation of $f(x)$ or $f(x \pm \delta x)$. 
+The method to extend the conventional analytic solution \cite{Mathematical_Methods} directly to random equations can perhaps be the foundation for a new branch of mathematics called statistical algebra.
+However, some crucial fundamental questions remain for this extension.
+
+
+\begin{align}
+\label{eqn: first-order ODE two anchors solution}
+f(x) &= \frac{x_1 - x}{x_1 - x_0} f(x_0) + \frac{x - x_0}{x_1 - x_0} f(x_1); \\
+\label{eqn: first-order ODE two imprecise anchors solution}
+f(x) &= \frac{(x_1 \pm \delta x_1) - x}{(x_1 \pm \delta x_1) - (x_0 \pm \delta x_0)} (f(x_0) \pm \delta f(x_0)) \\
+		&+ \frac{x - (x_0 \pm \delta x_0)}{(x_1 \pm \delta x_1) - (x_0 \pm \delta x_0)} (f(x_1) \pm \delta f(x_1)); \nonumber \\
+\label{eqn: first-order ODE two imprecise anchors mean}
+\overline{f(x)} &\simeq \frac{\overline{x_1} - x}{\overline{x_1} - \overline{x_0}} \overline{f(x_0)} + \frac{x - \overline{x_0}}{\overline{x_1} - \overline{x_0}} \overline{f(x_1)}; \\
+\label{eqn: first-order ODE two imprecise anchors variance}
+\delta^2 f(x) &\simeq \left(\frac{\overline{x_1} - x}{\overline{x_1} - \overline{x_0}}\right)^2 \left(\delta^2 f(x_0) + \frac{\big(\overline{f(x_1)} - \overline{f(x_0)}\big)^2}{(\overline{x_1} - \overline{x_0})^2} \, \delta^2 x_0\right) \\
+	&+ \left(\frac{x - \overline{x_0}}{\overline{x_1} - \overline{x_0}}\right)^2 \left(\delta^2 f(x_1) + \frac{\big(\overline{f(x_1)} - \overline{f(x_0)}\big)^2}{(\overline{x_1} - \overline{x_0})^2} \, \delta^2 x_1\right); \nonumber
+\end{align}
+Formula \eqref{eqn: first-order ODE two anchors solution} shows the precision solution with two initial conditions $f(x_0)$ and $f(x_1)$.
+It can be enhanced as Formula \eqref{eqn: first-order ODE two imprecise anchors solution} when both initial conditions becomes imprecise, as  $f(x_0 \pm \delta x_0) \pm \delta f(x_0)$ and $f(x_1 \pm \delta x_1) \pm \delta f(x_1)$.
+Formulas \eqref{eqn: first-order ODE two imprecise anchors mean} and \eqref{eqn: first-order ODE two imprecise anchors variance} show the first-order approximation of mean and variance using statistical Taylor expansion, respectively.
+
+

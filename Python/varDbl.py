@@ -174,7 +174,9 @@ class VarDbl (numbers.Number):
             raise InitException(value, None, f"{self} * {other}")
         if (not math.isfinite(value)) or (not math.isfinite(variance)):
             raise InitException(value, variance, f"{self} * {other} = {value}~{variance}")
-        if (not variance) and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
+        if (not variance) and float(self.value()).is_integer() \
+                          and float(other.value()).is_integer() \
+                          and (abs(self.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
                           and (abs(other.value()) < VarDbl.DOUBLE_MAX_SIGNIFICAND) \
                           and (VarDbl.DOUBLE_MAX_SIGNIFICAND <= abs(value)):
             return VarDbl(int(self.value()) * int(other.value()))

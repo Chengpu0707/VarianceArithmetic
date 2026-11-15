@@ -13,6 +13,7 @@ cd "$(dirname "$0")"
 
 CXX=g++
 CXXFLAGS="-std=c++23 -O3 -march=native -I . -Wno-reorder"
+LDLIBS="-lstdc++exp"    # std::stacktrace in Test.h under C++23
 
 pass=0
 fail=0
@@ -22,7 +23,9 @@ for src in Test*.cpp; do
     name="${src%.cpp}"
     exe="${name}.exe"
     echo "=== building $src ==="
-    if ! $CXX $CXXFLAGS -o "$exe" "$src" 2>&1 | tail -20; then
+    rm -f "$exe"    # never run a stale executable after a failed build
+    $CXX $CXXFLAGS -o "$exe" "$src" $LDLIBS 2>&1 | tail -20
+    if [ "${PIPESTATUS[0]}" -ne 0 ]; then
         echo "BUILD FAIL: $src"
         sFail+=("$name (build)")
         ((fail++))
@@ -37,7 +40,7 @@ for src in Test*.cpp; do
     echo "=== running $exe ==="
     start=$(date +%s)
     "./$exe" 2>&1 | tail -10
-    rc=$?
+    rc=${PIPESTATUS[0]}
     dt=$(( $(date +%s) - start ))
     if [ $rc -eq 0 ]; then
         echo "PASS: $name (${dt}s)"

@@ -29,8 +29,7 @@ struct AssertException : public std::runtime_error
     {
         std::cout << what() << '\n';
 #if __cplusplus >= 202302L
-        std::stacktrace st;
-        std::cout << st << '\n';
+        std::cout << std::stacktrace::current() << '\n';
 #endif
     }
 };

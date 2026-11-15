@@ -1,22 +1,26 @@
 #ifndef __Matrix_h__
 #define __Matrix_h__
 
-#include <chrono>
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <fstream>
-#include <future>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <random>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <utility>
 #include <vector>
+#if __cplusplus >= 201103L
+#include <chrono>
+#include <future>
+#include <random>
+#include <thread>
+#endif
 #if __cplusplus >= 201703L
 #include <filesystem>
 #endif
@@ -36,7 +40,8 @@ namespace var_dbl
  * across (size, noise) cells and writes MatrixCondition_*.txt and
  * AdjMatrix_*.txt under the given output directory. Cells are processed in
  * parallel via `std::async`; results are drained in submission order so the
- * output stays deterministic.
+ * output stays deterministic. The driver and the std::mt19937-based factories
+ * need C++11; the matrix algebra itself builds under C++03.
  */
 class Matrix {
     const size_t        _size;
@@ -63,21 +68,31 @@ public:
     Matrix multiply(const Matrix& other) const;
 
     // Static factories
+    static Matrix asMatrix    (const std::vector<std::vector<int> >& sInt);
+    static Matrix randomMatrix(size_t size, double dev);
+#if __cplusplus >= 201103L
     static std::vector<std::vector<int> >
         createIntMatrix(size_t size, std::mt19937& rng, int range);
-    static Matrix asMatrix    (const std::vector<std::vector<int> >& sInt);
     static Matrix addNoise    (const std::vector<std::vector<int> >& sInt, double dev, std::mt19937& rng);
     static Matrix hilbertMatrix(size_t size, double dev, std::mt19937& rng);
-    static Matrix randomMatrix(size_t size, double dev);
 
     // Analysis driver
     static std::vector<double> defaultNoises();
     static void runMatrixAnalysis(size_t minSize, size_t maxSize, size_t targetCells,
                                   const std::vector<double>& noises,
                                   const std::string& outDir);
+#endif
 
 private:
+    typedef unsigned long long Mask;
+
     void calc();
+    // Formula (6.9) over a (containerRowMask x containerColMask) submatrix.
+    double formula69(Mask cRow, Mask cCol,
+                     const std::vector<std::vector<Mask> >& masksAtCount,
+                     const std::vector<size_t>& maskIdx,
+                     const std::vector<std::vector<double> >& sub,
+                     const std::vector<double>& cellVar) const;
 };
 
 
@@ -129,7 +144,6 @@ inline void Matrix::calc() {
     _sAdjugate.clear();
     if (_size == 0) { _determ = VarDbl(0); return; }
 
-    using Mask = unsigned long long;
     const size_t nm = (_size >= 8 * sizeof(Mask)) ? size_t(-1) : (size_t(1) << _size);
 
     // (1) Group masks by popcount and build the mask→index lookup.
@@ -186,37 +200,12 @@ inline void Matrix::calc() {
         }
     }
 
-    // Formula (6.9) over a (containerRowMask × containerColMask) submatrix.
-    auto formula69 = [&](Mask cRow, Mask cCol) {
-        const size_t nC = _popcountll(cRow);
-        double variance = 0.0;
-        for (size_t m = 1; m <= nC; ++m) {
-            const std::vector<Mask>& masks = masksAtCount[m];
-            const size_t compLevel = nC - m;
-            const size_t cnt = masksAtCount[compLevel].size();
-            const std::vector<double>& subC = sub[compLevel];
-            for (Mask posR : masks) {
-                if ((posR & ~cRow) != 0) continue;
-                const size_t rmIdx = maskIdx[cRow ^ posR];
-                for (Mask posC : masks) {
-                    if ((posC & ~cCol) != 0) continue;
-                    const double sv = subC[rmIdx * cnt + maskIdx[cCol ^ posC]];
-                    const double sv2 = sv * sv;
-                    if (sv2 == 0.0) continue;
-                    const double perm = _permanent(posR, posC, cellVar, _size);
-                    if (perm > 0.0) variance += sv2 * perm;
-                }
-            }
-        }
-        return variance;
-    };
-
     // (4) Determinant value (Formula 6.1) + variance via Formula (6.9).
     const Mask fullMask  = nm - 1;
     const size_t fullIdx = maskIdx[fullMask];
     const size_t cntN    = masksAtCount[_size].size();
     _determ = VarDbl(sub[_size][fullIdx * cntN + fullIdx],
-                     std::sqrt(formula69(fullMask, fullMask)));
+                     std::sqrt(formula69(fullMask, fullMask, masksAtCount, maskIdx, sub, cellVar)));
 
     // (5) Adjugate: value = ±(N−1)×(N−1) sub-det; variance from Formula (6.9).
     _sAdjugate.assign(_size * _size, VarDbl(0));
@@ -228,9 +217,40 @@ inline void Matrix::calc() {
             const Mask cmAdj = fullMask & ~(Mask(1) << i);
             const double minor = subKm1Final[maskIdx[rmAdj] * cntKm1 + maskIdx[cmAdj]];
             const double adjVal = ((i + j) & 1) == 0 ? minor : -minor;
-            _sAdjugate[i * _size + j] = VarDbl(adjVal, std::sqrt(formula69(rmAdj, cmAdj)));
+            _sAdjugate[i * _size + j] = VarDbl(adjVal,
+                    std::sqrt(formula69(rmAdj, cmAdj, masksAtCount, maskIdx, sub, cellVar)));
         }
     }
+}
+
+inline double Matrix::formula69(Mask cRow, Mask cCol,
+                                const std::vector<std::vector<Mask> >& masksAtCount,
+                                const std::vector<size_t>& maskIdx,
+                                const std::vector<std::vector<double> >& sub,
+                                const std::vector<double>& cellVar) const {
+    const size_t nC = _popcountll(cRow);
+    double variance = 0.0;
+    for (size_t m = 1; m <= nC; ++m) {
+        const std::vector<Mask>& masks = masksAtCount[m];
+        const size_t compLevel = nC - m;
+        const size_t cnt = masksAtCount[compLevel].size();
+        const std::vector<double>& subC = sub[compLevel];
+        for (size_t r = 0; r < masks.size(); ++r) {
+            const Mask posR = masks[r];
+            if ((posR & ~cRow) != 0) continue;
+            const size_t rmIdx = maskIdx[cRow ^ posR];
+            for (size_t c = 0; c < masks.size(); ++c) {
+                const Mask posC = masks[c];
+                if ((posC & ~cCol) != 0) continue;
+                const double sv = subC[rmIdx * cnt + maskIdx[cCol ^ posC]];
+                const double sv2 = sv * sv;
+                if (sv2 == 0.0) continue;
+                const double perm = _permanent(posR, posC, cellVar, _size);
+                if (perm > 0.0) variance += sv2 * perm;
+            }
+        }
+    }
+    return variance;
 }
 
 
@@ -260,15 +280,6 @@ inline Matrix Matrix::multiply(const Matrix& other) const {
     return Matrix(_size, out);
 }
 
-inline std::vector<std::vector<int> >
-Matrix::createIntMatrix(size_t size, std::mt19937& rng, int range) {
-    std::uniform_int_distribution<int> dist(-range, +range);
-    std::vector<std::vector<int> > out(size, std::vector<int>(size));
-    for (size_t r = 0; r < size; ++r)
-        for (size_t c = 0; c < size; ++c) out[r][c] = dist(rng);
-    return out;
-}
-
 inline Matrix Matrix::asMatrix(const std::vector<std::vector<int> >& sInt) {
     const size_t n = sInt.size();
     std::vector<VarDbl> sv(n * n, VarDbl(0));
@@ -276,6 +287,41 @@ inline Matrix Matrix::asMatrix(const std::vector<std::vector<int> >& sInt) {
         for (size_t c = 0; c < n; ++c)
             sv[r * n + c] = VarDbl(static_cast<long long>(sInt[r][c]));
     return Matrix(n, sv);
+}
+
+#if __cplusplus >= 201103L
+inline Matrix Matrix::randomMatrix(size_t size, double dev) {
+    std::mt19937 rng(std::random_device{}());
+    const double sigma = 256.0 * dev;
+    std::uniform_int_distribution<int>  ui(-128, 128);
+    std::normal_distribution<double>   gn(0.0, sigma);
+    std::vector<VarDbl> sv(size * size, VarDbl(0));
+    for (size_t idx = 0; idx < size * size; ++idx) {
+        sv[idx] = VarDbl(ui(rng) + gn(rng), sigma);
+    }
+    return Matrix(size, sv);
+}
+#else
+inline Matrix Matrix::randomMatrix(size_t size, double dev) {
+    const double sigma = 256.0 * dev;
+    Random gn(0.0, sigma);
+    std::vector<VarDbl> sv(size * size, VarDbl(0));
+    for (size_t idx = 0; idx < size * size; ++idx) {
+        sv[idx] = VarDbl((std::rand() % 257 - 128) + gn.gauss(), sigma);
+    }
+    return Matrix(size, sv);
+}
+#endif
+
+
+#if __cplusplus >= 201103L
+inline std::vector<std::vector<int> >
+Matrix::createIntMatrix(size_t size, std::mt19937& rng, int range) {
+    std::uniform_int_distribution<int> dist(-range, +range);
+    std::vector<std::vector<int> > out(size, std::vector<int>(size));
+    for (size_t r = 0; r < size; ++r)
+        for (size_t c = 0; c < size; ++c) out[r][c] = dist(rng);
+    return out;
 }
 
 inline Matrix Matrix::addNoise(const std::vector<std::vector<int> >& sInt,
@@ -303,17 +349,6 @@ inline Matrix Matrix::hilbertMatrix(size_t size, double dev, std::mt19937& rng) 
     return Matrix(size, sv);
 }
 
-inline Matrix Matrix::randomMatrix(size_t size, double dev) {
-    std::mt19937 rng(std::random_device{}());
-    const double sigma = 256.0 * dev;
-    std::uniform_int_distribution<int>  ui(-128, 128);
-    std::normal_distribution<double>   gn(0.0, sigma);
-    std::vector<VarDbl> sv(size * size, VarDbl(0));
-    for (size_t idx = 0; idx < size * size; ++idx) {
-        sv[idx] = VarDbl(ui(rng) + gn(rng), sigma);
-    }
-    return Matrix(size, sv);
-}
 
 
 // ----------------------------------------------------------------------------
@@ -582,6 +617,7 @@ inline void Matrix::runMatrixAnalysis(size_t minSize, size_t maxSize, size_t tar
         }
     }
 }
+#endif  // __cplusplus >= 201103L
 
 }  // namespace var_dbl
 

@@ -289,10 +289,11 @@ inline double Stat<T, HINT>::std() const
 
 HISTO_TMPL
 inline Histogram<T, HINT>::Histogram(T range, unsigned divids) :
-        Stat<T, HINT>(), range(range), divids(divids), _center(divids * range)
+        Stat<T, HINT>(), _center(divids * range),
 #if __cplusplus < 201103L
-        , _lowers(0), _uppers(0)
+        _lowers(0), _uppers(0),
 #endif
+        range(range), divids(divids)
 {
     const unsigned size = 1 + (_center * 2);
     _sHistogram.reserve(size);

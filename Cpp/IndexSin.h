@@ -71,10 +71,10 @@ public:
         throw std::invalid_argument(oss.str());
     }
 #else
-    static const char* const sSinSource[5];
+    static const char* const sSinSource[3];
     static std::string sinSourceName(SinSource sinSouce) { return sSinSource[static_cast<int>(sinSouce)]; }
     static SinSource toSinSource(const std::string & name) {
-        for (size_t i = 0; i < 5; ++i) {
+        for (size_t i = 0; i < sizeof(sSinSource) / sizeof(sSinSource[0]); ++i) {
             if (name == sSinSource[i])
                 return static_cast<SinSource>(i);
         }
@@ -127,7 +127,7 @@ std::vector<VarDbl> IndexSin::_sSinLib;
 std::vector<VarDbl> IndexSin::_sSinPrec;
 
 #if __cplusplus < 202002L
-const char* const IndexSin::sSinSource[5] = {"Prec", "Quart", "Lib"};
+const char* const IndexSin::sSinSource[3] = {"Prec", "Quart", "Lib"};
 #endif
 #if __cplusplus < 201103L
 const unsigned char IndexSin::MIN_ORDER = 1;

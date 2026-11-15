@@ -122,7 +122,7 @@ void test_neg_rem()
 
 void test_Quart_index()
 {
-    IndexSin idxSin(IndexSin::SinSource::Quart);
+    IndexSin idxSin(IndexSin::Quart);
 
     test::assertEqual(idxSin.getIndex(1, 3),    1);
     test::assertEqual(idxSin.getIndex(5, 3),    3);
@@ -186,9 +186,9 @@ void test_Quart_cos()
 
 void dump_Quart_indexSin()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Quart);
+    const IndexSin indexSin(IndexSin::Quart);
     test::assertTrue(indexSin.dump(18, "./Output/IndexSin_Quart_18.txt"));
-    const IndexSin readback(IndexSin::SinSource::Quart, "./Output");
+    const IndexSin readback(IndexSin::Quart, "./Output");
     const unsigned order = 6;
     for (size_t n = 0; n <= (1 << order); ++n) {
         test::assertAlmostEqual(indexSin.sin(n, order).value(), readback.sin(n, order).value());
@@ -196,7 +196,7 @@ void dump_Quart_indexSin()
         test::assertAlmostEqual(indexSin.cos(n, order).value(), readback.cos(n, order).value());
         test::assertAlmostEqual(indexSin.cos(n, order).uncertainty(), readback.cos(n, order).uncertainty());
     }
-    const IndexSin python(IndexSin::SinSource::Quart, "../Python/Output");
+    const IndexSin python(IndexSin::Quart, "../Python/Output");
     for (size_t n = 0; n <= (1 << order); ++n) {
         test::assertAlmostEqual(indexSin.sin(n, order).value(), python.sin(n, order).value());
         test::assertAlmostEqual(indexSin.sin(n, order).uncertainty(), python.sin(n, order).uncertainty());
@@ -207,7 +207,7 @@ void dump_Quart_indexSin()
 
 void test_Lib_sin()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Lib);
+    const IndexSin indexSin(IndexSin::Lib);
 
     test::assertAlmostEqual(indexSin.sin(0, 3).value(), 0.);
     test::assertAlmostEqual(indexSin.sin(1, 3).value(), q1);
@@ -238,7 +238,7 @@ void test_Lib_sin()
 
 void test_Lib_cos()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Lib);
+    const IndexSin indexSin(IndexSin::Lib);
 
     test::assertAlmostEqual(indexSin.cos(0, 3).value(), 1.);
     test::assertAlmostEqual(indexSin.cos(1, 3).value(), q3);
@@ -258,7 +258,7 @@ void test_Lib_cos()
 
 void test_Prec_index()
 {
-    IndexSin idxSin(IndexSin::SinSource::Prec);
+    IndexSin idxSin(IndexSin::Prec);
 
     test::assertEqual(idxSin.getIndex(1, 3),    1);
     test::assertEqual(idxSin.getIndex(5, 3),    3);
@@ -275,7 +275,7 @@ void test_Prec_index()
 
 void test_Prec_sin()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Prec);
+    const IndexSin indexSin(IndexSin::Prec);
 
     test::assertAlmostEqual(indexSin.sin(0, 3).value(), 0.);
     test::assertAlmostEqual(indexSin.sin(1, 3).value(), q1);
@@ -301,7 +301,7 @@ void test_Prec_sin()
 
 void test_Prec_cos()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Prec);
+    const IndexSin indexSin(IndexSin::Prec);
 
     test::assertAlmostEqual(indexSin.cos(0, 3).value(), 1.);
     test::assertAlmostEqual(indexSin.cos(1, 3).value(), q3);
@@ -320,7 +320,7 @@ void test_Prec_cos()
 
 void dump_prec_indexSin()
 {
-    const IndexSin indexSin(IndexSin::SinSource::Prec);
+    const IndexSin indexSin(IndexSin::Prec);
     indexSin.dump(IndexSin::MAX_ORDER, "./Output/IndexSin_Prec_18.txt");
 
     std::ofstream ofs("./Output/IndexSin_Prec_Error.txt");

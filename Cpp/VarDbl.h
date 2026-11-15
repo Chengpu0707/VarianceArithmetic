@@ -4,18 +4,30 @@ T is constrained to a floating-point type and is used for both the value
 and the standard uncertainty (sqrt of variance) of each instance. VarDbl is
 provided as a typedef for ImPrecise<double> to preserve the existing API.
 
-VarDbl.h is intended to be fully inline and deplored along without any
-making system. It relies only on Moment.h, which is also in the var_dbl
-namespace.
+VarDbl.h is header-only and needs no build system. It relies only on ulp.h
+and Test.h (for assertEqual()), both also in the var_dbl namespace.
+Division (operator/=) is defined in Taylor.h, as the expansion of 1/x.
 */
+#ifndef __VarDbl_h__
+#define __VarDbl_h__
+
+#include <algorithm>
 #include <cmath>
+#include <istream>
 #include <limits>
+#include <ostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#if __cplusplus >= 201103L
+#include <type_traits>
+#endif
+#if __cplusplus >= 202002L
+#include <concepts>
+#endif
 
 #include "Test.h"
 #include "ulp.h"
-
-#ifndef __ValDbl_h__
-#define __ValDbl_h__
 
 // Class template constraint: T must be a floating-point type.
 #if __cplusplus >= 202002L
@@ -41,7 +53,7 @@ struct InitException : public std::runtime_error
     const double value;
     const double uncertainty;
 
-    explicit InitException(double value, double uncertainty, const std::string what) :
+    explicit InitException(double value, double uncertainty, const std::string& what) :
         runtime_error(what), value(value), uncertainty(uncertainty)
     {}
 };
@@ -80,7 +92,11 @@ class ImPrecise {
     T _uncertainty;
 #endif
 
-    void init(T value, T uncertainty, const std::string what);
+    // Store (value, |uncertainty|), or throw InitException if either is not finite.
+    void init(T value, T uncertainty, const char* what);
+    // Throw InitException with the message "<prefix><value>[, <uncertainty>])".
+    // Building the message only on failure keeps the constructors cheap.
+    static void throwInit(const char* prefix, T value, T uncertainty, bool withUncertainty);
 
 public:
     // ulp helper — returns T-typed standard uncertainty for value.
@@ -100,7 +116,6 @@ public:
 
     // constructors
     ImPrecise();
-    ImPrecise(const ImPrecise& other);
     ImPrecise(T value, T uncertainty);
 
     // conversion constructors
@@ -128,44 +143,44 @@ public:
         return out;
     }
     friend std::istream& operator>>(std::istream& in, ImPrecise& v) {
-        T value, uncertainty;
-        char sep;
-        in >> value >> sep >> uncertainty;
+        T value = T(0), uncertainty = T(0);
+        char sep = '\0';
+        if (!(in >> value >> sep >> uncertainty))
+            return in;
         if (sep != '~') {
             std::ostringstream ss;
             ss << "Invalid separator for " << value << sep << uncertainty;
             throw std::invalid_argument(ss.str());
         }
-        v._value = value;
-        v._uncertainty = uncertainty;
+        v.init(value, uncertainty, "operator>>");
         return in;
     }
 
     // +
     ImPrecise operator+(const ImPrecise& other) const;
-    ImPrecise operator+=(const ImPrecise& other);
+    ImPrecise& operator+=(const ImPrecise& other);
     IMP_SCALAR_TMPL ImPrecise operator+(const U& other) const;
-    IMP_SCALAR_TMPL ImPrecise operator+=(const U& other);
+    IMP_SCALAR_TMPL ImPrecise& operator+=(const U& other);
 
     // -
     void negate() { _value = -_value; }
     ImPrecise operator-() const;
     ImPrecise operator-(const ImPrecise& other) const;
-    ImPrecise operator-=(const ImPrecise& other);
+    ImPrecise& operator-=(const ImPrecise& other);
     IMP_SCALAR_TMPL ImPrecise operator-(const U& other) const;
-    IMP_SCALAR_TMPL ImPrecise operator-=(const U& other);
+    IMP_SCALAR_TMPL ImPrecise& operator-=(const U& other);
 
     // *
     ImPrecise operator*(const ImPrecise& other) const;
-    ImPrecise operator*=(const ImPrecise& other);
+    ImPrecise& operator*=(const ImPrecise& other);
     IMP_SCALAR_TMPL ImPrecise operator*(const U& other) const;
-    IMP_SCALAR_TMPL ImPrecise operator*=(const U& other);
+    IMP_SCALAR_TMPL ImPrecise& operator*=(const U& other);
 
     // /
     ImPrecise operator/(const ImPrecise& other) const;
-    ImPrecise operator/=(const ImPrecise& other);
+    ImPrecise& operator/=(const ImPrecise& other);
     IMP_SCALAR_TMPL ImPrecise operator/(const U& other) const;
-    IMP_SCALAR_TMPL ImPrecise operator/=(const U& other);
+    IMP_SCALAR_TMPL ImPrecise& operator/=(const U& other);
 
     // Symmetric inline-friend scalar operators (scalar on the left).
     IMP_SCALAR_TMPL friend ImPrecise operator+(const U& first, const ImPrecise& second) {
@@ -224,32 +239,35 @@ public:
 // ---------- Inline implementations ----------
 
 IMP_CLASS_TMPL
-inline void ImPrecise<T>::init(T value, T uncertainty, const std::string what) {
+inline void ImPrecise<T>::init(T value, T uncertainty, const char* what) {
     if (!std::isfinite(value) || !std::isfinite(uncertainty))
         throw InitException(static_cast<double>(value), static_cast<double>(uncertainty), what);
     _value = value;
     _uncertainty = std::abs(uncertainty);
 }
 
-
 IMP_CLASS_TMPL
-inline ImPrecise<T>::ImPrecise() {
-    _value = T(0);
-    _uncertainty = T(0);
+inline void ImPrecise<T>::throwInit(const char* prefix, T value, T uncertainty, bool withUncertainty) {
+    std::ostringstream ss;
+    ss << prefix << value;
+    if (withUncertainty)
+        ss << ", " << uncertainty;
+    ss << ")";
+    throw InitException(static_cast<double>(value), static_cast<double>(uncertainty), ss.str());
 }
 
+
 IMP_CLASS_TMPL
-inline ImPrecise<T>::ImPrecise(const ImPrecise& other) {
-    _value = other._value;
-    _uncertainty = other._uncertainty;
+inline ImPrecise<T>::ImPrecise() : _value(T(0)), _uncertainty(T(0)) {
 }
 
 IMP_CLASS_TMPL
 inline ImPrecise<T>::ImPrecise(T value, T uncertainty)
 {
-    std::ostringstream ss;
-    ss << "ImPrecise( " << value << ", " << uncertainty << ")";
-    init(value, uncertainty, ss.str());
+    if (!std::isfinite(value) || !std::isfinite(uncertainty))
+        throwInit("ImPrecise( ", value, uncertainty, true);
+    _value = value;
+    _uncertainty = std::abs(uncertainty);
 }
 
 
@@ -285,11 +303,11 @@ template <typename T>
 template <typename U>
 inline ImPrecise<T>::ImPrecise(U value, typename _enable_if_c03<_is_floating_point_c03<U>::value, _C03FloatTag>::type) {
 #endif
-    std::ostringstream ss;
-    ss << "ImPrecise(fp " << value << ")";
     const T v = static_cast<T>(value);
-    const T u = ImPrecise<T>::ulp(v);
-    init(v, u, ss.str());
+    if (!std::isfinite(v))
+        throwInit("ImPrecise(fp ", v, T(0), false);
+    _value = v;
+    _uncertainty = std::abs(ImPrecise<T>::ulp(v));
 }
 
 
@@ -306,11 +324,11 @@ template <typename T>
 template <typename U>
 inline ImPrecise<T>::ImPrecise(U value, typename _enable_if_c03<_is_integral_c03<U>::value, _C03IntTag>::type) {
 #endif
-    std::ostringstream ss;
-    ss << "ImPrecise(i " << value << ")";
     const T v = static_cast<T>(value);
-    const T u = static_cast<T>(std::abs(var_dbl::ulp(value)));
-    init(v, u, ss.str());
+    if (!std::isfinite(v))
+        throwInit("ImPrecise(i ", v, T(0), false);
+    _value = v;
+    _uncertainty = static_cast<T>(std::abs(var_dbl::ulp(value)));
 }
 
 
@@ -330,7 +348,7 @@ inline ImPrecise<T> ImPrecise<T>::operator-() const {
 }
 
 IMP_CLASS_TMPL
-inline ImPrecise<T> ImPrecise<T>::operator+=(const ImPrecise& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator+=(const ImPrecise& other) {
     const T u = (this->_uncertainty == T(0)) ? other._uncertainty :
                 (other._uncertainty == T(0)) ? this->_uncertainty :
                 std::sqrt(variance() + other.variance());
@@ -339,7 +357,7 @@ inline ImPrecise<T> ImPrecise<T>::operator+=(const ImPrecise& other) {
 }
 
 IMP_CLASS_TMPL
-inline ImPrecise<T> ImPrecise<T>::operator-=(const ImPrecise& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator-=(const ImPrecise& other) {
     const T u = (this->_uncertainty == T(0)) ? other._uncertainty :
                 (other._uncertainty == T(0)) ? this->_uncertainty :
                 std::sqrt(variance() + other.variance());
@@ -348,27 +366,32 @@ inline ImPrecise<T> ImPrecise<T>::operator-=(const ImPrecise& other) {
 }
 
 IMP_CLASS_TMPL
-inline ImPrecise<T> ImPrecise<T>::operator*=(const ImPrecise& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator*=(const ImPrecise& other) {
     const T u = std::sqrt(
             this->variance() * other.value() * other.value() +
             other.variance() * value() * value() +
             this->variance() * other.variance());
+    const T product = value() * other.value();
     if (u <= T(0)) {
-        const long long val = static_cast<long long>(value()) * static_cast<long long>(other.value());
-        const long long maxSig = ImPrecise<T>::MAX_SIGNIFICAND();
-        if (maxSig < std::abs(val) &&
-            value() < static_cast<T>(maxSig) && other.value() < static_cast<T>(maxSig)) {
-            const ImPrecise<T> v(val);
-            this->_value = v._value;
-            this->_uncertainty = v._uncertainty;
-        } else
-            init(value() * other.value(), u, "*=");
-    } else
-        init(value() * other.value(), u, "*=");
+        // Both operands are precise. If they are integers whose exact product
+        // exceeds the significand of T, the rounding of the product is its only
+        // uncertainty, so multiply exactly as integers. The checks keep every
+        // cast to long long exact and the integer product from overflowing.
+        const T maxSig = static_cast<T>(ImPrecise<T>::MAX_SIGNIFICAND());
+        const T a = value(), b = other.value();
+        if (std::abs(a) <= maxSig && std::floor(a) == a &&
+            std::abs(b) <= maxSig && std::floor(b) == b &&
+            maxSig < std::abs(product) &&
+            std::abs(product) < static_cast<T>(std::numeric_limits<long long>::max())) {
+            *this = ImPrecise<T>(static_cast<long long>(a) * static_cast<long long>(b));
+            return *this;
+        }
+    }
+    init(product, u, "*=");
     return *this;
 }
 
-// ImPrecise<T> ImPrecise<T>::operator/=(const ImPrecise& other) in Taylor.h
+// ImPrecise<T>& ImPrecise<T>::operator/=(const ImPrecise& other) in Taylor.h
 
 
 IMP_CLASS_TMPL
@@ -452,11 +475,11 @@ inline ImPrecise<T> ImPrecise<T>::operator/(const U& other) const {
 #if __cplusplus >= 202002L
 template <typename T> requires std::floating_point<T>
 template <typename U> requires std::floating_point<U> || std::integral<U>
-inline ImPrecise<T> ImPrecise<T>::operator+=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator+=(const U& other) {
 #else
 template <typename T>
 template <typename U>
-inline ImPrecise<T> ImPrecise<T>::operator+=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator+=(const U& other) {
 #endif
     return *this += ImPrecise<T>(other);
 }
@@ -464,11 +487,11 @@ inline ImPrecise<T> ImPrecise<T>::operator+=(const U& other) {
 #if __cplusplus >= 202002L
 template <typename T> requires std::floating_point<T>
 template <typename U> requires std::floating_point<U> || std::integral<U>
-inline ImPrecise<T> ImPrecise<T>::operator-=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator-=(const U& other) {
 #else
 template <typename T>
 template <typename U>
-inline ImPrecise<T> ImPrecise<T>::operator-=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator-=(const U& other) {
 #endif
     return *this -= ImPrecise<T>(other);
 }
@@ -476,11 +499,11 @@ inline ImPrecise<T> ImPrecise<T>::operator-=(const U& other) {
 #if __cplusplus >= 202002L
 template <typename T> requires std::floating_point<T>
 template <typename U> requires std::floating_point<U> || std::integral<U>
-inline ImPrecise<T> ImPrecise<T>::operator*=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator*=(const U& other) {
 #else
 template <typename T>
 template <typename U>
-inline ImPrecise<T> ImPrecise<T>::operator*=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator*=(const U& other) {
 #endif
     return *this *= ImPrecise<T>(other);
 }
@@ -488,11 +511,11 @@ inline ImPrecise<T> ImPrecise<T>::operator*=(const U& other) {
 #if __cplusplus >= 202002L
 template <typename T> requires std::floating_point<T>
 template <typename U> requires std::floating_point<U> || std::integral<U>
-inline ImPrecise<T> ImPrecise<T>::operator/=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator/=(const U& other) {
 #else
 template <typename T>
 template <typename U>
-inline ImPrecise<T> ImPrecise<T>::operator/=(const U& other) {
+inline ImPrecise<T>& ImPrecise<T>::operator/=(const U& other) {
 #endif
     return *this /= ImPrecise<T>(other);
 }
