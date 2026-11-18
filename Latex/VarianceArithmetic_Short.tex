@@ -318,7 +318,7 @@ The value of moment  $\zeta(2n)$ for a Uniform distribution is also provided as 
 \rho(\tilde{z}) = \frac{1}{2\sqrt{3}}, \tilde{z} \in [-\sqrt{3}, \sqrt{3}] &: \zeta(2n, \kappa) = \frac{\kappa^{2n}}{2n + 1}; \\
 \label{eqn: symmetric asymptotic moment}
 \rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) 
-		= \frac{\kappa \rho(\kappa)}{\int_{0}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{2n}}{2n}; \\
+		= \frac{\kappa \rho(\kappa)}{2 \int_{0}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{2n}}{n}; \\
 \label{eqn: asymptotic moment}
 |\varrho| < \infty&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) 
 		= \frac{\kappa \rho(\kappa)}{\int_{\varrho}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{n}}{n}; \\
@@ -438,7 +438,7 @@ Formula \eqref{eqn: bound moment 2d} extends the bound moment to 2-dimensional u
 Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} compute the mean and variance of the Taylor expansion given in Formula \eqref{eqn: Taylor 2d}.
 Although Formula \eqref{eqn: Taylor 2d variance} covers only the 2-dimensional case, it extends readily to any number of dimensions.
 
-When $x \pm \delta x$ and $y \pm \delta y$ are independent of each other, $\zeta(m, \kappa_x, n, \kappa_y) = \zeta_{x}(m, \kappa_x) \zeta_{y}(n, \kappa_y)$, $\zeta(m, \kappa_x, 0, \kappa_y) = \zeta_{x}(m, \kappa_x)$, and $\zeta(0, \kappa_x, n, \kappa_y) = \zeta_{y}(n, \kappa_y)$:
+When $x \pm \delta x$ and $y \pm \delta y$ are independent of each other, $\zeta(m, \kappa_x, n, \kappa_y) = \zeta_{x}(m, \kappa_x) \zeta_{y}(n, \kappa_y)$:
 \begin{align}
 \label{eqn: addition mean}
 \overline{x \pm y} &= x \pm y; \\
@@ -464,9 +464,8 @@ a_{m,n} &\equiv \frac{x^m}{m!\,n!\,x^y}\,\frac{\partial^{m+n}x^y}{\partial x^m\,
 \frac{\overline{x^y}}{x^y} &= 1 + \sum_{0 \le m,n}^{2 \le m+n} a_{m,n}\,P(x)^m(\delta y)^n\,\zeta_x(m,\kappa_x)\,\zeta_y(n,\kappa_y); \\
 \label{eqn: x^y variance}
 \frac{\delta^2 x^y}{(x^y)^2} &= \sum_{0 \le m,n}^{2 \le m+n} P(x)^m (\delta y)^n 
-	\sum_{0 \le i \le m,\, 0 \le j \le n}^{1 \le i+j \le m+n-1} a_{i,j}\,a_{m-i,n-j} \nonumber \\
-	&\quad\quad \big(\zeta_x(m,\kappa_x) \zeta_y(n,\kappa_y)
-		 - \zeta_x(i,\kappa_x)\zeta_y(j,\kappa_y)\,\zeta_x(m-i,\kappa_x)\zeta_y(n-j,\kappa_y)\big);
+	\sum_{0 \le i \le m,\, 0 \le j \le n}^{1 \le i+j \le m+n-1} a_{i,j}\,a_{m-i,n-j} \\
+	&\quad\quad \zeta_x(m, \kappa_x) \zeta_y(n, \kappa_y) - \zeta_x(i, \kappa_x) \zeta_y(j, \kappa_y) \zeta_x(m-i, \kappa_x) \zeta_y(n-j, \kappa_y); \nonumber
 \end{align}
 Formulas \eqref{eqn: x^y mean} and \eqref{eqn: x^y variance} display the mean, and variance of $x^y$, whose convergence range is $P(x)\,\kappa_x \lesssim 1$, with no limit on $\delta y$.
 
