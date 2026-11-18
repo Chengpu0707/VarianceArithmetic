@@ -252,12 +252,14 @@ f(x + \tilde{x}) &= f(x + \tilde{z} \delta x) = f(x) + \sum_{n=1}^{\infty} \frac
 \label{eqn: Taylor 1d mean}
 \overline{f(x)} &= f(x) + \sum_{n=2}^{\infty}(\delta x)^n \frac{f^{(n)}_x}{n!} \zeta(n, \kappa); \\
 \label{eqn: Taylor 1d variance}
-\delta^2 f(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \big(\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \big);
+\delta^2 f(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{f^{(j)}_x}{j!} \frac{f^{(n-j)}_x}{(n-j)!} \nu(j, n - j); \\
+\label{eqn: Taylor 1d covariance}
+\nu(j, n - j) &\equiv \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa); 
 \end{align}
 An analytic function $f(x)$ can be accurately evaluated near $x$ using the Taylor series as shown in Formula \eqref{eqn: Taylor 1d}.
 Formulas \eqref{eqn: Taylor 1d mean} and \eqref{eqn: Taylor 1d variance} yield the mean $\overline{f(x)}$ and variance $\delta^2 f(x)$ of $f(x)$, respectively.
 The difference $\overline{f(x)} - f(x)$ is defined as the \emph{uncertainty bias}, representing the effect of input uncertainty on the resulting value.
-$\delta^2 f$ at the $(\delta x)^n$ order is calculated as the sum of all convolution between $\frac{f^{(j)}_x}{j!} \tilde{z}^j$ and $\frac{f^{(n - j)}_x}{(n - j)!} \tilde{z}^{n -j}$ with $\eta(j, n -j) \equiv \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa)$ as the co-variance between $\tilde{z}^j$ and $\tilde{z}^{n -j}$.
+$\delta^2 f$ at the $(\delta x)^n$ order is calculated as the sum of all convolution between $\frac{f^{(j)}_x}{j!} \tilde{z}^j$ and $\frac{f^{(n - j)}_x}{(n - j)!} \tilde{z}^{n -j}$ with $\nu(j, n -j)$ in Formula \eqref{eqn: Taylor 1d covariance} as the co-variance between $\tilde{z}^j$ and $\tilde{z}^{n -j}$.
 
 
 Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and precision for $e^x$, respectively:
@@ -265,7 +267,7 @@ Formulas \eqref{eqn: exp mean} and \eqref{eqn: exp precision} give the mean and 
 \label{eqn: exp mean}
 \frac{\overline{e^x}}{e^x}  &= 1 + \sum_{n=2}^{\infty} (\delta x)^n \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: exp precision}
-\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j!\;(n - j)!};
+\frac{\delta^2 e^x}{(e^x)^2} &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \frac{\nu(j, n -j)}{j!\;(n - j)!};
 \end{align}
 
 Formulas \eqref{eqn: log mean} and \eqref{eqn: log precision} give the mean and variance for $\log(x)$, respectively:
@@ -273,7 +275,7 @@ Formulas \eqref{eqn: log mean} and \eqref{eqn: log precision} give the mean and 
 \label{eqn: log mean}
 \overline{\log(x)}  &= \log(x) + \sum_{n=2}^{+\infty} P(x)^{n} \frac{(-1)^{n+1} \zeta(n, \kappa)}{n}; \\
 \label{eqn: log precision}
-\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} (-1)^n \sum_{j=1}^{n-1} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j (n-j)};
+\delta^2 \log(x) &= \sum_{n=2}^{+\infty} P(x)^{n} (-1)^n \sum_{j=1}^{n-1} \frac{\nu(j, n -j)}{j (n-j)};
 \end{align}
 
 Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and variance for $\sin(x)$, respectively:
@@ -281,16 +283,15 @@ Formulas \eqref{eqn: sin mean} and \eqref{eqn: sin precision} give the mean and 
 \label{eqn: sin mean}
 \overline{\sin(x)} &= \sin(x) + \sum_{n=2}^{\infty} (\delta x)^n \sin(x)^{(n)} \frac{\zeta(n, \kappa)}{n!}; \\
 \label{eqn: sin precision}
-\delta^2 \sin(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)^{(j)}\sin(x)^{(n-j)} \frac{\zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa)}{j! (n-j)!};
+\delta^2 \sin(x) &= \sum_{n=2}^{\infty} (\delta x)^n \sum_{j=1}^{n-1} \sin(x)^{(j)}\sin(x)^{(n-j)} \frac{\nu(j, n -j)}{j! (n-j)!};
 \end{align}
 
 Formulas \eqref{eqn: power mean} and \eqref{eqn: power precision} give the mean and precision for $x^c$, respectively:
 \begin{align}
 \label{eqn: power mean}
-\frac{\overline{x^c}}{x^c}  &= 1 + \sum_{n=2}^{\infty} P(x)^{n} \zeta(n, \kappa) \begin{pmatrix} c \\ n \end{pmatrix}; \\
+\frac{\overline{x^c}}{x^c}  &= 1 + \sum_{n=2}^{\infty} P(x)^{n} \zeta(n, \kappa) \binom{c}{n}; \\
 \label{eqn: power precision}
-\frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=2}^{\infty} P(x)^{n} \sum_{j=1}^{n-1}
-  \begin{pmatrix} c \\ j \end{pmatrix} \begin{pmatrix} c \\ n - j \end{pmatrix} \big( \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n - j, \kappa) \big);
+\frac{\delta^2 x^c}{(x^c)^2} &= \sum_{n=2}^{\infty} P(x)^{n} \sum_{j=1}^{n-1} \binom{c}{j} \binom{c}{n - j} \nu(j, n -j);
 \end{align}
 
 The input and output in statistical Taylor expansion reflect the inherent characteristics of the calculation, such as $\delta x \rightarrow P(e^x)$, $P(x) \rightarrow \delta \log(x)$, $\delta x \rightarrow \delta \sin(x)$, and $P(x) \rightarrow P(x^c)$.
@@ -322,7 +323,7 @@ The value of moment  $\zeta(2n)$ for a Uniform distribution is also provided as 
 |\varrho| < \infty&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) 
 		= \frac{\kappa \rho(\kappa)}{\int_{\varrho}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{n}}{n}; \\
 \label{eqn: variance asymptotic}
-0 < j < n&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) - \zeta(j, \kappa) \zeta(n-j, \kappa) \simeq \frac{\kappa^{n}}{n};
+0 < j < n&: \lim_{n \rightarrow +\infty} \nu(j, n - j) \simeq \frac{\kappa^{n}}{n};
 \end{align}
 Formula \eqref{eqn: uniform moment} gives the closed form of $\zeta(2n, \kappa)$ for the Uniform distribution.
 Formula \eqref{eqn: symmetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$.
@@ -415,7 +416,7 @@ The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_
 
 \begin{align}
 \label{eqn: bound moment 2d}
-\zeta (m, \kappa_x, n, \kappa_y) &\equiv
+\zeta&(m, \kappa_x, n, \kappa_y) \equiv
 	\frac{\int_{\varrho_x \sigma_x + \mu_x}^{\kappa_x \sigma_x + \mu_x} 
 			\int_{\varrho_y \sigma_y + \mu_y}^{\kappa_y \sigma_y + \mu_y} 
 			\rho(\tilde{x}, \tilde{y}) \big(\frac{\tilde{x} - \mu_x}{\sigma_x}\big)^m \big(\frac{\tilde{y} - \mu_y}{\sigma_y}\big)^n d \tilde{x} d \tilde{y}}
@@ -423,49 +424,52 @@ The difference between Figures \ref{fig: Normal_Function} and \ref{fig: Uniform_
 			\int_{\varrho_y \sigma_y + \mu_y}^{\kappa_y \sigma_y + \mu_y}
 			\rho(\tilde{x}, \tilde{y}) d \tilde{x} d \tilde{y}};\\
 \label{eqn: mean reverting moment 2d}
-\zeta(1,\kappa_x,0,\kappa_y) &= \zeta(0,\kappa_x,1,\kappa_y) = 0; \\
+\zeta&(1,\kappa_x,0,\kappa_y) = \zeta(0,\kappa_x,1,\kappa_y) = 0; \\
 \label{eqn: Taylor 2d}
-f(x + \tilde{x}, y + \tilde{y}) &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m+n \geq 1}} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
+f&(x + \tilde{x}, y + \tilde{y}) = f(x, y) + \sum_{m, n \geq 0}^{m+n \geq 1} \frac{f^{(m,n)}_{(x,y)}}{m! n!} \tilde{x}^m \tilde{y}^n; \\
 \label{eqn: Taylor 2d mean}
-\overline{f(x,y)} &= f(x, y) + \sum_{\substack{m, n \geq 0 \\ m+n \geq 2}} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta(m, \kappa_x, n, \kappa_y);  \\
+\overline{f(x,y)} &= f(x, y) + \sum_{m, n \geq 0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \frac{f^{(m,n)}_{(x,y)}}{m!\;n!} \zeta(m, \kappa_x, n, \kappa_y);  \\
 \label{eqn: Taylor 2d variance}
-\delta^2 f(x, y) &= \sum_{\substack{m, n \geq 0 \\ m+n \geq 2}} (\delta x)^m (\delta y)^n \sum_{\substack{0 \leq i \leq m,\; 0 \leq j \leq n \\ 1 \leq i + j \leq m + n - 1}}
-		\frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \nonumber \\
-	&\big( \zeta(m, \kappa_x, n, \kappa_y) - \zeta(i, \kappa_x, j, \kappa_y) \zeta(m-i, \kappa_x, n-j, \kappa_y) \big);
+\delta^2 f(x, y) &= \sum_{m, n \geq 0}^{m+n \geq 2} (\delta x)^m (\delta y)^n \sum_{0 \leq i \leq m,\; 0 \leq j \leq n}^{1 \leq i + j \leq m + n - 1}
+		\frac{f^{(i,j)}_{(x,y)}}{i!\;j!}\frac{f^{(m-i, n-j)}_{(x,y)}}{(m-i)!\;(n-j)!} \nu_{x,y}(i, m - i, j, n  -j); \\
+\label{eqn: Taylor 2d covariance}
+\nu_{x,y}&(i, m - i, j, n - j) \equiv \zeta(m, \kappa_x, n, \kappa_y) - \zeta(i, \kappa_x, j, \kappa_y) \zeta(m-i, \kappa_x, n-j, \kappa_y);
 \end{align}
 Formula \eqref{eqn: bound moment 2d} extends the bound moment to 2-dimensional using the compound normalized probability density function $\rho(\tilde{x}, \tilde{y})$, while Formula \eqref{eqn: mean reverting moment 2d} is the mean-reverting condition.
 Formulas \eqref{eqn: Taylor 2d mean} and \eqref{eqn: Taylor 2d variance} compute the mean and variance of the Taylor expansion given in Formula \eqref{eqn: Taylor 2d}.
 Although Formula \eqref{eqn: Taylor 2d variance} covers only the 2-dimensional case, it extends readily to any number of dimensions.
 
-\begin{align}
-\label{eqn: covariance 2d}
-\mathrm{Cov}(m, \kappa_x, n, \kappa_y) &\equiv \zeta(m, \kappa_x, n, \kappa_y) - \zeta(m, \kappa_x, 0, \kappa_y) \zeta(0, \kappa_x, n, \kappa_y);
-\end{align}
-When $x$ and $y$ are independent of each other, $\zeta(m, \kappa_x, n, \kappa_y) = \zeta_{x}(m, \kappa_x) \zeta_{y}(n, \kappa_y)$, $\zeta(m, \kappa_x, 0, \kappa_y) = \zeta_{x}(m, \kappa_x)$, and $\zeta(0, \kappa_x, n, \kappa_y) = \zeta_{y}(n, \kappa_y)$.
-Using covariance as defined in Formula \eqref{eqn: covariance 2d}, the covariance term between $\tilde{x}^i \tilde{y}^j$ and $\tilde{x}^{m - i} \tilde{y}^{n - j}$ in Formula \eqref{eqn: Taylor 2d variance} can be decomposed into independent part and dependent part between $x$ and $y$.
-
+When $x \pm \delta x$ and $y \pm \delta y$ are independent of each other, $\zeta(m, \kappa_x, n, \kappa_y) = \zeta_{x}(m, \kappa_x) \zeta_{y}(n, \kappa_y)$, $\zeta(m, \kappa_x, 0, \kappa_y) = \zeta_{x}(m, \kappa_x)$, and $\zeta(0, \kappa_x, n, \kappa_y) = \zeta_{y}(n, \kappa_y)$:
 \begin{align}
 \label{eqn: addition mean}
 \overline{x \pm y} &= x \pm y; \\
 \label{eqn: addition variance}
 \delta^2 (x \pm y) &= \zeta_x(2, \kappa_x) (\delta x)^2 + \zeta_y(2, \kappa_y) (\delta y)^2; \\
 \label{eqn: sum leakage}
-\varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2}; \\
+\varepsilon(x \pm y) &= \frac{\omega_x (\delta x)^2 + \omega_y (\delta y)^2}{(\delta x)^2 + (\delta y)^2};
+\end{align}
+Formulas \eqref{eqn: addition mean}, \eqref{eqn: addition variance}, and \eqref{eqn: sum leakage} show the mean, variance, and ideal leakage of $x \pm y$.
+They become the convolution results for $x \pm y$ \cite{Probability_Statistics} when $N \rightarrow \infty$.
+\begin{align}
 \label{eqn: multiplication mean}
 \overline{x y} &= xy; \\
 \label{eqn: multiplication variance}
 P(x y)^2 &= \zeta_x(2, \kappa_x) P(x)^2 + \zeta_y(2, \kappa_y) P(y)^2 + \zeta_x(2, \kappa_x) \zeta_y(2, \kappa_y) P(x)^2 P(y)^2; \\
 \label{eqn: product leakage}
-\varepsilon(x y) &= \frac{\omega_x P(x)^2 + \omega_y P(y)^2 +  (\omega_x + \omega_y - \omega_x \omega_y) P(x)^2 P(y)^2}{P(x)^2 + P(y)^2 + P(x)^2 P(y)^2};
+\varepsilon(x y) &= \frac{\omega_x P(x)^2 + \omega_y P(y)^2 +  (\omega_x + \omega_y - \omega_x \omega_y) P(x)^2 P(y)^2}{P(x)^2 + P(y)^2 + P(x)^2 P(y)^2}; 
 \end{align}
-When $x$ and $y$ are independent of each other:
-\begin{itemize}
-\item Formulas \eqref{eqn: addition mean}, \eqref{eqn: addition variance}, and \eqref{eqn: sum leakage} show the mean, variance, and ideal leakage of $x \pm y$.
-They become the convolution results for $x \pm y$ \cite{Probability_Statistics} when $N \rightarrow \infty$.
-
-\item Formulas \eqref{eqn: multiplication mean}, \eqref{eqn: multiplication variance}, and \eqref{eqn: product leakage} display the mean, variance, and ideal leakage of $x y$.
-\end{itemize}
-
+Formulas \eqref{eqn: multiplication mean}, \eqref{eqn: multiplication variance}, and \eqref{eqn: product leakage} display the mean, variance, and ideal leakage of $x y$.
+\begin{align}
+a_{m,n} &\equiv \frac{x^m}{m!\,n!\,x^y}\,\frac{\partial^{m+n}x^y}{\partial x^m\,\partial y^n}; \\
+\label{eqn: x^y mean}
+\frac{\overline{x^y}}{x^y} &= 1 + \sum_{0 \le m,n}^{2 \le m+n} a_{m,n}\,P(x)^m(\delta y)^n\,\zeta_x(m,\kappa_x)\,\zeta_y(n,\kappa_y); \\
+\label{eqn: x^y variance}
+\frac{\delta^2 x^y}{(x^y)^2} &= \sum_{0 \le m,n}^{2 \le m+n} P(x)^m (\delta y)^n 
+	\sum_{0 \le i \le m,\, 0 \le j \le n}^{1 \le i+j \le m+n-1} a_{i,j}\,a_{m-i,n-j} \nonumber \\
+	&\quad\quad \big(\zeta_x(m,\kappa_x) \zeta_y(n,\kappa_y)
+		 - \zeta_x(i,\kappa_x)\zeta_y(j,\kappa_y)\,\zeta_x(m-i,\kappa_x)\zeta_y(n-j,\kappa_y)\big);
+\end{align}
+Formulas \eqref{eqn: x^y mean} and \eqref{eqn: x^y variance} display the mean, and variance of $x^y$, whose convergence range is $P(x)\,\kappa_x \lesssim 1$, with no limit on $\delta y$.
 
 
 \subsection{Uncorrelated Uncertainty Condition}
@@ -522,7 +526,7 @@ For simplicity, let $\sigma_y = \sigma_z$, and let $\eta \equiv \sigma_y / \sigm
 \label{eqn: uncertainty correlation (3,1)}
 \gamma_P^{3,1} &= \frac{3}{\zeta_x(4)} \gamma_P^{1,1} + \Big(1 - \frac{3}{\zeta_x(4)}\Big) (\gamma_P^{1,1})^2;
 \end{align}
-Formula \eqref{eqn: overal correlation} calculates the normalized covariance $\gamma^{m,n}$ between $(x + y)^m$ and $(x + z)^n$, which is $1$ when $\eta = 0$.
+Formula \eqref{eqn: overal correlation} calculates the correlation $\gamma^{m,n}$ between $(x + y)^m$ and $(x + z)^n$, which is $1$ when $\eta = 0$.
 Formula \eqref{eqn: overal correlation (1,1)} shows that $\gamma^{1,1}$ is the correlation coefficient between the two inputs, so that $\eta^2 = 1/\gamma^{1,1} - 1$.
 At the level of uncertainty with precision $P$, the deviation of the common part $x$ reduces to $P \sigma_x$ while those of $y$ and $z$ remain, so that $\eta$ becomes $\eta_P = \eta / P$, which results in Formula \eqref{eqn: uncertainty correlation (1,1)} for the correlation $\gamma_P^{1,1}$ at the level of uncertainty.
 Substituting $\eta_P^2 = 1/\gamma_P^{1,1} - 1$ into Formula \eqref{eqn: overal correlation} turns each term into $(\gamma_P^{1,1})^{\frac{m+n-j-k}{2}} (1 - \gamma_P^{1,1})^{\frac{j+k}{2}}$, which results in Formula \eqref{eqn: uncertainty correlation}.
@@ -533,7 +537,7 @@ When $\sigma_y \neq \sigma_z$, $\gamma^{1,1} = 1/\sqrt{(1 + (\sigma_y/\sigma_x)^
 
 Figure \ref{fig: Independent_Uncertainty_Assumption} shows that $\gamma_P^{1,1}$ decreases from $\gamma^{1,1}$ at $P = 1$, and approaches $P^2 \gamma^{1,1}/(1 - \gamma^{1,1})$ when $P \ll 1$.
 When $\gamma_P^{1,1}$ is below a threshold, the two inputs can be regarded as independent of each other.
-For example, if such threshold is $10^{-2}$, $P \leq 0.3$ when $\gamma^{1,1} = 0.1$, or $P \leq 0.1$ when $\gamma^{1,1} = 0.5$.
+For example, if such threshold is $10^{-2}$, $P \leq 0.3$ when $\gamma^{1,1} = 0.1$, or $P \leq 0.01$ when $\gamma^{1,1} = 0.5$.
 Because digitization at the level of uncertainty further attenuates the correlation, as shown in Figure \ref{fig: Signal_and_Noise}, Figure \ref{fig: Independent_Uncertainty_Assumption} serves as an upper bound for the uncorrelated uncertainty condition.
 
 
