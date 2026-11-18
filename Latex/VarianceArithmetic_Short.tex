@@ -365,7 +365,6 @@ Measured linear leakage $\omega(\kappa_s, N)$ (y-axis) for varying measuring bou
 \includegraphics[height=2.5in]{Normal_Function.pdf} 
 \captionof{figure}{
 Ideal leakage $\varepsilon$ (y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) when $\hat{\kappa} = 5$ for Gaussian input uncertainties.
-When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 }
 \label{fig: Normal_Function}
 \end{figure}
@@ -375,7 +374,6 @@ When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 \includegraphics[height=2.5in]{Uniform_Function.pdf} 
 \captionof{figure}{
 Ideal leakage $\varepsilon$ (y-axis) for varying sample count $N$ (x-axis) for the selected function $f(x=1 \pm 0.1)$ (legend) for Uniform input uncertainties.
-When $f(x)=x$, ideal leakage equals linear leakage $\omega$.
 }
 \label{fig: Uniform_Function}
 \end{figure}
@@ -387,7 +385,8 @@ The ideal bounding range limit the range of the distribution to where the sampli
 \item Define \emph{ideal leakage} as $\varepsilon(\hat{\kappa}) \equiv 1 - \delta^2 f/\hat{\delta^2} f$. 
 
 \item Define \emph{linear leakage} $\omega(\hat{\kappa}) \equiv 1 - \zeta(2, \hat{\kappa})$. 
-$\omega(\hat{\kappa})$ is either the precise $\varepsilon(\hat{\kappa})$ for $f(x)=x$, or the first order approximation of $\varepsilon(\hat{\kappa})$ according to Formula \eqref{eqn: Taylor 1d variance}.
+$\omega(\hat{\kappa})$ the first order approximation of $\varepsilon(\hat{\kappa})$ according to Formula \eqref{eqn: Taylor 1d variance}.
+For example, when $f(x)=x$, $\varepsilon = \frac{\omega(\hat\kappa,N) - \omega(\hat\kappa)}{1 - \omega(\hat\kappa)}$.
 \end{itemize}
 
 When sampling from a distribution, the sample mean $\overline{x}$ and sample deviation $\delta x$ approach the distribution mean $\mu$ and distribution deviation $\sigma$ respectively as the sample count $N$ increases \cite{Probability_Statistics}.
