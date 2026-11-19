@@ -313,21 +313,15 @@ The value of moment  $\zeta(2n)$ for a Uniform distribution is also provided as 
 \label{fig: Gaussian_5_Moment}
 \end{figure}
 
+Under the condition $\rho(-\tilde{z}) =\rho(\tilde{z})$ and $\rho(\kappa) \neq 0$:
 \begin{align}
-\label{eqn: uniform moment}
-\rho(\tilde{z}) = \frac{1}{2\sqrt{3}}, \tilde{z} \in [-\sqrt{3}, \sqrt{3}] &: \zeta(2n, \kappa) = \frac{\kappa^{2n}}{2n + 1}; \\
 \label{eqn: symmetric asymptotic moment}
-\rho(-\tilde{z}) =\rho(\tilde{z})&: \lim_{n \rightarrow +\infty} \zeta(2n, \kappa) 
-		= \frac{\kappa \rho(\kappa)}{2 \int_{0}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{2n}}{n}; \\
-\label{eqn: asymptotic moment}
-|\varrho| < \infty&: \lim_{n \rightarrow +\infty} \zeta(n, \kappa) 
-		= \frac{\kappa \rho(\kappa)}{\int_{\varrho}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{n}}{n}; \\
+\lim_{n \rightarrow +\infty} \zeta(2n, \kappa) 
+		&= \frac{\kappa \rho(\kappa)}{ \int_{0}^{\kappa} \rho(\tilde{z}) \;d \tilde{z}} \frac{\kappa^{2n}}{2n}; \\
 \label{eqn: variance asymptotic}
-0 < j < n&: \lim_{n \rightarrow +\infty} \nu(j, n - j) \simeq \frac{\kappa^{n}}{n};
+0 < j < n&: \lim_{n \rightarrow +\infty} \nu(j, n - j) \simeq \zeta(n);
 \end{align}
-Formula \eqref{eqn: uniform moment} gives the closed form of $\zeta(2n, \kappa)$ for the Uniform distribution.
 Formula \eqref{eqn: symmetric asymptotic moment} states the large-$n$ asymptote for any symmetric $\rho(\tilde{z})$.
-Formula \eqref{eqn: asymptotic moment} states the corresponding asymptote for any asymmetric $\rho(\tilde{z})$ under the mean-reverting bounding condition of Formula \eqref{eqn: mean-reverting bounding} when both $\varrho$ and $\zeta(2, \kappa)$ are bounded.
 Figure \ref{fig: Gaussian_5_Moment} shows $\zeta(2n, \kappa)$ for the Uniform distribution, $\zeta(2n, 5)$ for the Normal distribution, and the corresponding asymptote for the Normal distribution.
 Formula \eqref{eqn: variance asymptotic} shows that the general asymptotic behavior of $\zeta(n, \kappa)$ determines whether Formula \eqref{eqn: Taylor 1d variance} converges:
 \begin{itemize}
